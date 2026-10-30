@@ -717,7 +717,9 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                         (if (tab == MapsTab.Search) results else onMap?.second.orEmpty()).minByOrNull { metresBetween(g.latitude(), g.longitude(), it.lat, it.lng) } } }
                     val addedHit = map.queryRenderedFeatures(box, "added-dot").firstOrNull()?.let { f -> (f.geometry() as? Point)?.let { g ->
                         added.minByOrNull { metresBetween(g.latitude(), g.longitude(), it.lat, it.lng) } } }
-                    val mapHit = map.queryRenderedFeatures(box, "pois").firstOrNull { it.geometry() is Point && it.hasProperty("name") }
+                    // every map's places: the first map's layer is "pois", the others' "pois__<id>" (mapStyle)
+                    val poiLayers = map.style?.layers.orEmpty().map { it.id }.filter { it == "pois" || it.startsWith("pois__") }.toTypedArray()
+                    val mapHit = map.queryRenderedFeatures(box, *poiLayers).firstOrNull { it.geometry() is Point && it.hasProperty("name") }
                     when {
                         mineHit != null -> { selected = mineHit; detail = MapsSearch.near(all, mineHit.lat, mineHit.lng, mineHit.name, 25.0) }
                         resultHit != null -> { detail = resultHit; selected = resultHit.place(context) }
