@@ -59,4 +59,9 @@
     <string name="assistant_default_make">AI Assist als Assistenten festlegen</string>
     <string name="assistant_default_hint">Tippe auf der Seite, die sich öffnet, auf App für digitalen Assistenten und wähle Tetra. Danach öffnet langes Drücken der Ein-/Aus-Taste AI Assist.</string>
     <string name="assistant_default_xiaomi">Auf Xiaomi außerdem: Einstellungen › Weitere Einstellungen › Gestenverknüpfungen › Ein-/Aus-Taste gedrückt halten › Assistent.</string>
+    <string name="assistant_relations_note">Wer wer für Sie ist, damit Sie „ruf meine Schwester an“ sagen können. Gespeichert auf Ihrer eigenen Karte in Kontakte (Verwandte Personen), sodass Kontakte und der Computer sie auch zeigen.</string>
+    <string name="assistant_me">Sie sind</string>
+    <string name="assistant_me_none">Noch nicht gewählt: der Assistent fragt beim ersten Mal</string>
+    <string name="assistant_me_pick">Welcher Kontakt sind Sie?</string>
+    <string name="assistant_relation_own">Oder Ihr eigenes Wort</string>
 </resources>

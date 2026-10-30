@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Déan do chúntóir de AI Assist</string>
     <string name="assistant_default_hint">Ar an leathanach a osclaíonn, tapáil Aip chúntóra dhigitigh agus roghnaigh Tetra. Ansin osclaíonn brú fada ar an gcnaipe cumhachta AI Assist.</string>
     <string name="assistant_default_xiaomi">Ar Xiaomi freisin: Socruithe › Socruithe breise › Aicearraí gotha › Brúigh agus coinnigh an cnaipe cumhachta › Cúntóir.</string>
+    <string name="assistant_relations_note">Cé hé gach duine duit, ionas gur féidir leat “glaoigh ar mo dheirfiúr” a rá. Sábháiltear iad ar do chárta féin i dTeagmhálaithe (Daoine gaolmhara), mar sin taispeánann Teagmhálaithe agus an ríomhaire iad freisin.</string>
+    <string name="assistant_me">Is tusa</string>
+    <string name="assistant_me_none">Gan roghnú fós: fiafróidh an cúntóir an chéad uair</string>
+    <string name="assistant_me_pick">Cén teagmhálaí thú féin?</string>
+    <string name="assistant_relation_own">Nó d’fhocal féin</string>
 </resources>

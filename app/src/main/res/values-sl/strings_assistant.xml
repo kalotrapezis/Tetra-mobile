@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Naj bo AI Assist tvoj pomočnik</string>
     <string name="assistant_default_hint">Na strani, ki se odpre, tapni Aplikacija digitalnega pomočnika in izberi Tetra. Nato držanje gumba za vklop odpre AI Assist.</string>
     <string name="assistant_default_xiaomi">Na Xiaomiju tudi: Nastavitve › Dodatne nastavitve › Bližnjice s potezami › Držanje gumba za vklop › Pomočnik.</string>
+    <string name="assistant_relations_note">Kdo vam je kdo, da lahko rečete »pokliči sestro«. Shranijo se na vašo kartico v Stikih (Povezane osebe), zato jih prikazujejo tudi Stiki in računalnik.</string>
+    <string name="assistant_me">Vi ste</string>
+    <string name="assistant_me_none">Še ni izbrano: pomočnik vpraša prvič</string>
+    <string name="assistant_me_pick">Kateri stik ste vi?</string>
+    <string name="assistant_relation_own">Ali vaša beseda</string>
 </resources>

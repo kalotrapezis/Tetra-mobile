@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Legyen az AI Assist az asszisztensed</string>
     <string name="assistant_default_hint">A megnyíló oldalon koppints a Digitális asszisztens alkalmazásra, és válaszd a Tetrát. Ezután a bekapcsológomb nyomva tartása megnyitja az AI Assistet.</string>
     <string name="assistant_default_xiaomi">Xiaomin még: Beállítások › További beállítások › Kézmozdulat-parancsikonok › Bekapcsológomb nyomva tartása › Asszisztens.</string>
+    <string name="assistant_relations_note">Ki kicsoda Önnek, hogy mondhassa: „hívd fel a húgomat”. A saját névjegyén tárolódnak a Névjegyekben (Kapcsolódó személyek), így a Névjegyek és a számítógép is mutatja őket.</string>
+    <string name="assistant_me">Ön</string>
+    <string name="assistant_me_none">Még nincs kiválasztva: az asszisztens az első alkalommal megkérdezi</string>
+    <string name="assistant_me_pick">Melyik névjegy Ön?</string>
+    <string name="assistant_relation_own">Vagy saját szó</string>
 </resources>

@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Gør AI Assist til din assistent</string>
     <string name="assistant_default_hint">På siden, der åbner, tryk på App til digital assistent og vælg Tetra. Så åbner et langt tryk på afbryderknappen AI Assist.</string>
     <string name="assistant_default_xiaomi">På Xiaomi også: Indstillinger › Yderligere indstillinger › Bevægelsesgenveje › Tryk og hold afbryderknappen › Assistent.</string>
+    <string name="assistant_relations_note">Hvem folk er for dig, så du kan sige “ring til min søster”. De gemmes på dit eget kort i Kontakter (Relaterede personer), så Kontakter og computeren også viser dem.</string>
+    <string name="assistant_me">Du er</string>
+    <string name="assistant_me_none">Ikke valgt endnu: assistenten spørger første gang</string>
+    <string name="assistant_me_pick">Hvilken kontakt er dig?</string>
+    <string name="assistant_relation_own">Eller dit eget ord</string>
 </resources>

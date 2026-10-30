@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Направи AI Assist свой асистент</string>
     <string name="assistant_default_hint">На страницата, която се отваря, докосни Приложение за дигитален асистент и избери Tetra. После задържането на бутона за захранване отваря AI Assist.</string>
     <string name="assistant_default_xiaomi">На Xiaomi също: Настройки › Допълнителни настройки › Преки пътища с жестове › Задържане на бутона за захранване › Асистент.</string>
+    <string name="assistant_relations_note">Кои са хората за вас, за да казвате „обади се на сестра ми“. Записват се във вашата карта в Контакти (Свързани лица), така че Контакти и компютърът ги показват също.</string>
+    <string name="assistant_me">Вие сте</string>
+    <string name="assistant_me_none">Не е избрано: асистентът ще попита първия път</string>
+    <string name="assistant_me_pick">Кой контакт сте вие?</string>
+    <string name="assistant_relation_own">Или ваша дума</string>
 </resources>

@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Maak AI Assist je assistent</string>
     <string name="assistant_default_hint">Tik op de pagina die opent op App voor digitale assistent en kies Tetra. Daarna opent lang drukken op de aan/uit-knop AI Assist.</string>
     <string name="assistant_default_xiaomi">Op Xiaomi ook: Instellingen › Extra instellingen › Snelkoppelingen voor gebaren › Aan/uit-knop ingedrukt houden › Assistent.</string>
+    <string name="assistant_relations_note">Wie wie is voor jou, zodat je kunt zeggen “bel mijn zus”. Ze worden op je eigen kaart in Contacten bewaard (Gerelateerde personen), dus Contacten en de computer tonen ze ook.</string>
+    <string name="assistant_me">Jij bent</string>
+    <string name="assistant_me_none">Nog niet gekozen: de assistent vraagt het de eerste keer</string>
+    <string name="assistant_me_pick">Welk contact ben jij?</string>
+    <string name="assistant_relation_own">Of je eigen woord</string>
 </resources>

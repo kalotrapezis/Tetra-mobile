@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Nastav AI Assist jako asistenta</string>
     <string name="assistant_default_hint">Na stránce, která se otevře, klepni na Aplikace digitálního asistenta a vyber Tetra. Pak podržení vypínače otevře AI Assist.</string>
     <string name="assistant_default_xiaomi">Na Xiaomi také: Nastavení › Další nastavení › Zkratky gest › Podržení vypínače › Asistent.</string>
+    <string name="assistant_relations_note">Kdo je pro vás kdo, abyste mohli říct „zavolej sestře“. Ukládají se na vaši vlastní kartu v Kontaktech (Související osoby), takže je ukazují i Kontakty a počítač.</string>
+    <string name="assistant_me">Vy jste</string>
+    <string name="assistant_me_none">Zatím nevybráno: asistent se zeptá poprvé</string>
+    <string name="assistant_me_pick">Který kontakt jste vy?</string>
+    <string name="assistant_relation_own">Nebo vlastní slovo</string>
 </resources>

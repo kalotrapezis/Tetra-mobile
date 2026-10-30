@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Fais d\'AI Assist ton assistant</string>
     <string name="assistant_default_hint">Sur la page qui s\'ouvre, touche Application d\'assistant numérique et choisis Tetra. Ensuite, un appui long sur le bouton marche ouvre AI Assist.</string>
     <string name="assistant_default_xiaomi">Sur Xiaomi aussi : Paramètres › Paramètres supplémentaires › Raccourcis gestuels › Appui long sur le bouton marche › Assistant.</string>
+    <string name="assistant_relations_note">Qui est qui pour vous, pour pouvoir dire « appelle ma sœur ». Enregistrés sur votre propre fiche dans Contacts (Personnes liées), donc Contacts et l’ordinateur les affichent aussi.</string>
+    <string name="assistant_me">Vous êtes</string>
+    <string name="assistant_me_none">Pas encore choisi : l’assistant le demande la première fois</string>
+    <string name="assistant_me_pick">Quel contact êtes-vous ?</string>
+    <string name="assistant_relation_own">Ou votre propre mot</string>
 </resources>

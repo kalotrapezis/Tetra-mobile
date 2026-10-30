@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Padari AI Assist par savu asistentu</string>
     <string name="assistant_default_hint">Atvērtajā lapā pieskaries Digitālā asistenta lietotne un izvēlies Tetra. Pēc tam barošanas pogas turēšana atver AI Assist.</string>
     <string name="assistant_default_xiaomi">Xiaomi arī: Iestatījumi › Papildu iestatījumi › Žestu īsceļi › Barošanas pogas turēšana › Asistents.</string>
+    <string name="assistant_relations_note">Kas jums ir kas, lai varētu teikt “piezvani manai māsai”. Tie tiek saglabāti jūsu kartē Kontaktos (Saistītās personas), tāpēc tos rāda arī Kontakti un dators.</string>
+    <string name="assistant_me">Jūs esat</string>
+    <string name="assistant_me_none">Vēl nav izvēlēts: asistents pajautās pirmajā reizē</string>
+    <string name="assistant_me_pick">Kurš kontakts esat jūs?</string>
+    <string name="assistant_relation_own">Vai jūsu vārds</string>
 </resources>

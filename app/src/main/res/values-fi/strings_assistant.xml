@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Tee AI Assistista avustajasi</string>
     <string name="assistant_default_hint">Avautuvalla sivulla napauta Digitaalisen avustajan sovellus ja valitse Tetra. Sen jälkeen virtapainikkeen painaminen pitkään avaa AI Assistin.</string>
     <string name="assistant_default_xiaomi">Xiaomilla myös: Asetukset › Lisäasetukset › Elepikakuvakkeet › Virtapainikkeen pitkä painallus › Avustaja.</string>
+    <string name="assistant_relations_note">Keitä ihmiset ovat sinulle, jotta voit sanoa ”soita siskolleni”. Ne tallennetaan omaan korttiisi Yhteystiedoissa (Liittyvät henkilöt), joten Yhteystiedot ja tietokone näyttävät ne myös.</string>
+    <string name="assistant_me">Sinä olet</string>
+    <string name="assistant_me_none">Ei vielä valittu: avustaja kysyy ensimmäisellä kerralla</string>
+    <string name="assistant_me_pick">Mikä yhteystieto olet sinä?</string>
+    <string name="assistant_relation_own">Tai oma sanasi</string>
 </resources>

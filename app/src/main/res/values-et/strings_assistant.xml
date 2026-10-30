@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Tee AI Assist oma assistendiks</string>
     <string name="assistant_default_hint">Avanevas lehel puuduta Digitaalse assistendi rakendus ja vali Tetra. Siis avab toitenupu all hoidmine AI Assisti.</string>
     <string name="assistant_default_xiaomi">Xiaomil ka: Seaded › Lisaseaded › Žestide otseteed › Toitenupu all hoidmine › Assistent.</string>
+    <string name="assistant_relations_note">Kes on sulle kes, et saaksid öelda „helista mu õele“. Need salvestatakse sinu enda kaardile Kontaktides (Seotud isikud), nii et Kontaktid ja arvuti näitavad neid samuti.</string>
+    <string name="assistant_me">Sina oled</string>
+    <string name="assistant_me_none">Veel valimata: assistent küsib esimesel korral</string>
+    <string name="assistant_me_pick">Milline kontakt oled sina?</string>
+    <string name="assistant_relation_own">Või oma sõna</string>
 </resources>

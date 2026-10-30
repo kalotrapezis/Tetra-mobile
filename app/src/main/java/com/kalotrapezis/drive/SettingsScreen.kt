@@ -183,6 +183,65 @@ internal fun SettingsTab(
 
 /** Secondary text: the content colour, quieter (the dark theme's onSurfaceVariant is as bright as onSurface). */
 @Composable private fun quiet() = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.66f)
+/**
+ * Related people (the user, 30 Oct: "add relationships in the Assistant's settings so I can edit them"): which contact is
+ * the user, and who is who to them. They live where the assistant writes them, on the user's own card (X-ABRELATEDNAMES),
+ * so Contacts, Google and the computer show the same; which card is the user's is the assistant's "me" on this phone.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable private fun AssistantRelations() {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("assistant", android.content.Context.MODE_PRIVATE) }
+    var meId by remember { mutableStateOf(prefs.getString("me", null)) }
+    var cards by remember { mutableStateOf(ContactsFiles.all(contactsRoot())) }
+    val me = cards.firstOrNull { it.info.uid == meId }
+    var pickingMe by remember { mutableStateOf(false) }
+    var adding by remember { mutableStateOf(false) }
+    fun saveRelated(related: List<VField>) = me?.let {
+        runCatching { ContactsFiles.save(contactsRoot(), it, it.info.copy(related = related)) }.onFailure { e -> WriterLog.e("Assistant: related people", e) }
+        cards = ContactsFiles.all(contactsRoot())
+        ScopedSync.soon(context, "contacts", 0, orWhole = true); ContactsAccount.soon(context)
+    }
+    SettingsSection(stringResource(R.string.contacts_related_people), stringResource(R.string.assistant_relations_note)) {
+        SettingRow(stringResource(R.string.assistant_me), me?.info?.name ?: stringResource(R.string.assistant_me_none), onClick = { pickingMe = true }) { Chevron() }
+        me?.info?.related?.forEach { f ->
+            SettingRow(contactLabel(context, f.label), f.value) {
+                IconButton(onClick = { saveRelated(me.info.related - f) }) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_remove)) }
+            }
+        }
+        if (me != null) SettingRow(stringResource(R.string.contacts_add_person), onClick = { adding = true }) { Icon(painterResource(R.drawable.ic_add), contentDescription = null) }
+    }
+    /** Contacts whose name has every word typed, a few: what a name field offers. */
+    @Composable fun Matches(q: String, pick: (ContactInfo) -> Unit) {
+        val words = ContactsFiles.plain(q).split(' ').filter { it.isNotBlank() }
+        cards.map { it.info }.filter { i -> words.isNotEmpty() && words.all { w -> ContactsFiles.matches(i, w) } }.take(6).forEach { i ->
+            Text(i.name, Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).clickable { pick(i) }.padding(vertical = 10.dp, horizontal = 4.dp))
+        }
+    }
+    if (pickingMe) {
+        var q by remember { mutableStateOf("") }
+        AlertDialog(onDismissRequest = { pickingMe = false }, title = { Text(stringResource(R.string.assistant_me_pick)) },
+            text = { Column { OutlinedTextField(q, { q = it }, singleLine = true, modifier = Modifier.fillMaxWidth()); Matches(q) { i -> prefs.edit().putString("me", i.uid).apply(); meId = i.uid; pickingMe = false } } },
+            confirmButton = {}, dismissButton = { TextButton(onClick = { pickingMe = false }) { Text(stringResource(R.string.common_cancel)) } })
+    }
+    if (adding && me != null) {
+        var label by remember { mutableStateOf("Sister") }
+        var name by remember { mutableStateOf("") }
+        AlertDialog(onDismissRequest = { adding = false }, title = { Text(stringResource(R.string.contacts_add_person)) },
+            text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    VCard.RELATIONS.forEach { r -> FilterChip(selected = label == r, onClick = { label = r }, label = { Text(contactLabel(context, r)) }) }
+                }
+                // or the user's own word (κουμπάρος), as on the card in Contacts
+                OutlinedTextField(if (label in VCard.RELATIONS) "" else label, { label = it }, singleLine = true, label = { Text(stringResource(R.string.assistant_relation_own)) }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(name, { name = it }, singleLine = true, label = { Text(stringResource(R.string.common_name)) }, modifier = Modifier.fillMaxWidth())
+                if (cards.none { it.info.name == name }) Matches(name) { name = it.name }
+            } },
+            confirmButton = { TextButton(enabled = name.isNotBlank() && label.isNotBlank(), onClick = { saveRelated(me.info.related + VField(label.trim(), name.trim())); adding = false }) { Text(stringResource(R.string.common_save)) } },
+            dismissButton = { TextButton(onClick = { adding = false }) { Text(stringResource(R.string.common_cancel)) } })
+    }
+}
+
 /** A row's own ground, a step off the page's; the gaps between rows show the page. */
 @Composable private fun rowColor() = lookTint(Color(0xFF1C2221), Color(0xFFEAEFED))
 
@@ -424,6 +483,7 @@ internal fun SettingsTab(
         SettingRow(stringResource(R.string.assistant_voice), voiceName ?: stringResource(R.string.assistant_voice_first), onClick = { picking = true }) { Chevron() }
     }
     if (picking) VoicePicker({ picking = false }) { id, name -> AssistantVoices.set(context, id, name); voiceName = name }
+    AssistantRelations()
     // the money counter (the user: like a car's trip meter beside its odometer); Reset keeps the total and the past trips
     var meter by remember(version.intValue) { mutableStateOf(AssistantMeter.read(context)) }
     var resetting by remember { mutableStateOf(false) }

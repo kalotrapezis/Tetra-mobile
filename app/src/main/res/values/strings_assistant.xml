@@ -62,4 +62,9 @@
     <string name="assistant_default_make">Make AI Assist your assistant</string>
     <string name="assistant_default_hint">On the page that opens, tap Digital assistant app (or Default assistant) and choose Tetra. Then holding the power button opens AI Assist.</string>
     <string name="assistant_default_xiaomi">On Xiaomi also: Settings › Additional settings › Gesture shortcuts › Press and hold the power button › Assistant.</string>
+    <string name="assistant_relations_note">Who people are to you, so you can say “call my sister”. They are saved on your own card in Contacts (Related people), so Contacts and the computer show them too.</string>
+    <string name="assistant_me">You are</string>
+    <string name="assistant_me_none">Not chosen yet: the assistant asks the first time</string>
+    <string name="assistant_me_pick">Which contact is you?</string>
+    <string name="assistant_relation_own">Or your own word</string>
 </resources>

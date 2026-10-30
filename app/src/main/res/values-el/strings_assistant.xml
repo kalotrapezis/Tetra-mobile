@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Κάνε το AI Assist βοηθό σου</string>
     <string name="assistant_default_hint">Στη σελίδα που ανοίγει, πάτα Εφαρμογή ψηφιακού βοηθού (ή Προεπιλεγμένος βοηθός) και διάλεξε Tetra. Μετά το κράτημα του κουμπιού λειτουργίας ανοίγει το AI Assist.</string>
     <string name="assistant_default_xiaomi">Στα Xiaomi επίσης: Ρυθμίσεις › Πρόσθετες ρυθμίσεις › Συντομεύσεις χειρονομιών › Πάτημα και κράτημα κουμπιού λειτουργίας › Βοηθός.</string>
+    <string name="assistant_relations_note">Ποιοι είναι οι δικοί σας, για να λέτε «πάρε την αδερφή μου». Αποθηκεύονται στη δική σας κάρτα στις Επαφές (Σχετικά άτομα), οπότε τα δείχνουν και οι Επαφές και ο υπολογιστής.</string>
+    <string name="assistant_me">Εσείς είστε</string>
+    <string name="assistant_me_none">Δεν έχει οριστεί: ο βοηθός θα ρωτήσει την πρώτη φορά</string>
+    <string name="assistant_me_pick">Ποια επαφή είστε εσείς;</string>
+    <string name="assistant_relation_own">Ή δική σας λέξη</string>
 </resources>

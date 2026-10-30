@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Fă din AI Assist asistentul tău</string>
     <string name="assistant_default_hint">Pe pagina care se deschide, atinge Aplicația de asistent digital și alege Tetra. Apoi apăsarea lungă a butonului de pornire deschide AI Assist.</string>
     <string name="assistant_default_xiaomi">Pe Xiaomi și: Setări › Setări suplimentare › Comenzi rapide prin gesturi › Apăsare lungă pe butonul de pornire › Asistent.</string>
+    <string name="assistant_relations_note">Cine este cine pentru tine, ca să poți spune „sună-mi sora”. Se salvează pe propria ta fișă în Contacte (Persoane asociate), deci Contactele și computerul le arată și ele.</string>
+    <string name="assistant_me">Tu ești</string>
+    <string name="assistant_me_none">Încă neales: asistentul întreabă prima dată</string>
+    <string name="assistant_me_pick">Care contact ești tu?</string>
+    <string name="assistant_relation_own">Sau propriul cuvânt</string>
 </resources>

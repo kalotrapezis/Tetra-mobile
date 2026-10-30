@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Padaryk AI Assist savo asistentu</string>
     <string name="assistant_default_hint">Atsivėrusiame puslapyje bakstelėk Skaitmeninio asistento programa ir pasirink Tetra. Tada laikant įjungimo mygtuką atsidaro AI Assist.</string>
     <string name="assistant_default_xiaomi">Xiaomi taip pat: Nustatymai › Papildomi nustatymai › Gestų nuorodos › Įjungimo mygtuko laikymas › Asistentas.</string>
+    <string name="assistant_relations_note">Kas jums yra kas, kad galėtumėte sakyti „paskambink mano seseriai“. Jie išsaugomi jūsų kortelėje Kontaktuose (Susiję asmenys), todėl juos rodo ir Kontaktai, ir kompiuteris.</string>
+    <string name="assistant_me">Jūs esate</string>
+    <string name="assistant_me_none">Dar nepasirinkta: asistentas paklaus pirmą kartą</string>
+    <string name="assistant_me_pick">Kuris kontaktas esate jūs?</string>
+    <string name="assistant_relation_own">Arba jūsų žodis</string>
 </resources>

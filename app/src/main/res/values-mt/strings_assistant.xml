@@ -59,4 +59,9 @@
     <string name="assistant_default_make">Agħmel AI Assist l-assistent tiegħek</string>
     <string name="assistant_default_hint">Fil-paġna li tiftaħ, agħfas App tal-assistent diġitali u agħżel Tetra. Imbagħad iż-żamma tal-buttuna tal-qawwa tiftaħ AI Assist.</string>
     <string name="assistant_default_xiaomi">Fuq Xiaomi ukoll: Settings › Settings addizzjonali › Shortcuts tal-ġesti › Żomm il-buttuna tal-qawwa › Assistent.</string>
+    <string name="assistant_relations_note">Min hu min għalik, biex tkun tista’ tgħid “ċempel lil oħti”. Jinħażnu fuq il-kard tiegħek f’Kuntatti (Persuni relatati), għalhekk Kuntatti u l-kompjuter jurihom ukoll.</string>
+    <string name="assistant_me">Int</string>
+    <string name="assistant_me_none">Għadu mhux magħżul: l-assistent jistaqsi l-ewwel darba</string>
+    <string name="assistant_me_pick">Liema kuntatt int?</string>
+    <string name="assistant_relation_own">Jew kelma tiegħek</string>
 </resources>
