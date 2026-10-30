@@ -468,7 +468,16 @@ internal class AssistantTools(
         }
     }
 
-    private fun myCard(a: JSONObject) = one(a.getString("name")) { i -> setMe(i.uid); ToolResult("Saved: the user's own card is ${i.name}.") }
+    private fun myCard(a: JSONObject): ToolResult {
+        val name = a.getString("name").trim().ifEmpty { return ToolResult("Ask the user's own name.") }
+        // no card of their own (the user, 30 Oct: "I don't have a contact"): one with just the name, for the relations
+        if (named(name).isEmpty()) {
+            val c = ContactsFiles.save(ContactsFiles.root(tetra), null, ContactInfo(formatted = name, given = name.substringBefore(' '), family = name.substringAfter(' ', "")))
+            setMe(c.info.uid); changed("contacts")
+            return ToolResult("Made the user's own card in Contacts, with just their name: $name.")
+        }
+        return one(name) { i -> setMe(i.uid); ToolResult("Saved: the user's own card is ${i.name}.") }
+    }
 
     private fun relationRemember(a: JSONObject): ToolResult {
         val relation = a.getString("relation").trim().ifEmpty { return ToolResult("Say the relation.") }
@@ -552,7 +561,7 @@ internal class AssistantTools(
             fn("relation_remember", "Save who someone is to the user (\"Maria K. is my sister\") on the user's own card in Contacts. No need to ask first.", listOf("relation", "name"),
                 "relation" to p("string", RELATION), "name" to p("string", "The contact's name.")),
             fn("relation_forget", "Forget a saved relation.", listOf("relation"), "relation" to p("string", RELATION), "name" to p("string", "Only this person, when several have the relation.")),
-            fn("my_card", "Say which contact is the user themself, once, when a relation tool asks for it.", listOf("name"), "name" to p("string", "The user's own name as in Contacts.")),
+            fn("my_card", "Say which contact is the user themself, once, when a relation tool asks for it.", listOf("name"), "name" to p("string", "The user's own name as in Contacts; a card with just that name is made if they have none.")),
             fn("contact_call", "Ask to call a contact from the last contacts_find list. The phone asks the user to confirm; it does not call by itself.", listOf("choice"), CHOICE),
             fn("navigate", "Start driving directions in Tetra Maps (offline map), to a place or to a contact's saved address.", emptyList(),
                 "place" to p("string", "A place, a town or an address (\"Ερμού 10, Αθήνα\")."), "contact" to p("string", "A contact's name, to go to their address.")),

@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Pas encore choisi : l’assistant le demande la première fois</string>
     <string name="assistant_me_pick">Quel contact êtes-vous ?</string>
     <string name="assistant_relation_own">Ou votre propre mot</string>
+    <string name="assistant_me_new">Créer ma fiche : %1$s</string>
 </resources>

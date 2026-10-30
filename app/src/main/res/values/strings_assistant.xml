@@ -67,4 +67,5 @@
     <string name="assistant_me_none">Not chosen yet: the assistant asks the first time</string>
     <string name="assistant_me_pick">Which contact is you?</string>
     <string name="assistant_relation_own">Or your own word</string>
+    <string name="assistant_me_new">Make my card: %1$s</string>
 </resources>

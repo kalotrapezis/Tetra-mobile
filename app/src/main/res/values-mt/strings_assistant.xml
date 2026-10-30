@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Għadu mhux magħżul: l-assistent jistaqsi l-ewwel darba</string>
     <string name="assistant_me_pick">Liema kuntatt int?</string>
     <string name="assistant_relation_own">Jew kelma tiegħek</string>
+    <string name="assistant_me_new">Agħmel il-kard tiegħi: %1$s</string>
 </resources>

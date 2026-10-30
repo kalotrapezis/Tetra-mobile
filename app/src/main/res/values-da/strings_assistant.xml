@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Ikke valgt endnu: assistenten spørger første gang</string>
     <string name="assistant_me_pick">Hvilken kontakt er dig?</string>
     <string name="assistant_relation_own">Eller dit eget ord</string>
+    <string name="assistant_me_new">Opret mit kort: %1$s</string>
 </resources>

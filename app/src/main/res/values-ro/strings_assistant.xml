@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Încă neales: asistentul întreabă prima dată</string>
     <string name="assistant_me_pick">Care contact ești tu?</string>
     <string name="assistant_relation_own">Sau propriul cuvânt</string>
+    <string name="assistant_me_new">Creează fișa mea: %1$s</string>
 </resources>

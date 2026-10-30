@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Még nincs kiválasztva: az asszisztens az első alkalommal megkérdezi</string>
     <string name="assistant_me_pick">Melyik névjegy Ön?</string>
     <string name="assistant_relation_own">Vagy saját szó</string>
+    <string name="assistant_me_new">Saját névjegy létrehozása: %1$s</string>
 </resources>

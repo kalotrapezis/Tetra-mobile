@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Dar nepasirinkta: asistentas paklaus pirmą kartą</string>
     <string name="assistant_me_pick">Kuris kontaktas esate jūs?</string>
     <string name="assistant_relation_own">Arba jūsų žodis</string>
+    <string name="assistant_me_new">Sukurti mano kortelę: %1$s</string>
 </resources>

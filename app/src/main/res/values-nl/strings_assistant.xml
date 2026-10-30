@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Nog niet gekozen: de assistent vraagt het de eerste keer</string>
     <string name="assistant_me_pick">Welk contact ben jij?</string>
     <string name="assistant_relation_own">Of je eigen woord</string>
+    <string name="assistant_me_new">Mijn kaart maken: %1$s</string>
 </resources>

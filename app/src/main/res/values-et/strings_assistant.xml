@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Veel valimata: assistent küsib esimesel korral</string>
     <string name="assistant_me_pick">Milline kontakt oled sina?</string>
     <string name="assistant_relation_own">Või oma sõna</string>
+    <string name="assistant_me_new">Loo minu kaart: %1$s</string>
 </resources>

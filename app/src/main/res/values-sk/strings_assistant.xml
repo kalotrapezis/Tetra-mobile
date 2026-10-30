@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Zatiaľ nevybraté: asistent sa opýta prvýkrát</string>
     <string name="assistant_me_pick">Ktorý kontakt ste vy?</string>
     <string name="assistant_relation_own">Alebo vlastné slovo</string>
+    <string name="assistant_me_new">Vytvoriť moju kartu: %1$s</string>
 </resources>

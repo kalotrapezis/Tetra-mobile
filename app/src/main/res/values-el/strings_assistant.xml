@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Δεν έχει οριστεί: ο βοηθός θα ρωτήσει την πρώτη φορά</string>
     <string name="assistant_me_pick">Ποια επαφή είστε εσείς;</string>
     <string name="assistant_relation_own">Ή δική σας λέξη</string>
+    <string name="assistant_me_new">Νέα κάρτα για μένα: %1$s</string>
 </resources>

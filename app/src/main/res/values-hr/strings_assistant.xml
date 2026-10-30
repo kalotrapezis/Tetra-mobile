@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Još nije odabrano: asistent pita prvi put</string>
     <string name="assistant_me_pick">Koji ste kontakt vi?</string>
     <string name="assistant_relation_own">Ili vaša riječ</string>
+    <string name="assistant_me_new">Napravi moju karticu: %1$s</string>
 </resources>

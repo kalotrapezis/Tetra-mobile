@@ -221,7 +221,18 @@ internal fun SettingsTab(
     if (pickingMe) {
         var q by remember { mutableStateOf("") }
         AlertDialog(onDismissRequest = { pickingMe = false }, title = { Text(stringResource(R.string.assistant_me_pick)) },
-            text = { Column { OutlinedTextField(q, { q = it }, singleLine = true, modifier = Modifier.fillMaxWidth()); Matches(q) { i -> prefs.edit().putString("me", i.uid).apply(); meId = i.uid; pickingMe = false } } },
+            text = { Column {
+                fun choose(uid: String) { prefs.edit().putString("me", uid).apply(); meId = uid; pickingMe = false }
+                OutlinedTextField(q, { q = it }, singleLine = true, label = { Text(stringResource(R.string.common_name)) }, modifier = Modifier.fillMaxWidth())
+                Matches(q) { i -> choose(i.uid) }
+                // no card of one's own (the user, 30 Oct: "I don't have a contact"): one with just the name typed
+                val name = q.trim()
+                if (name.isNotEmpty() && cards.none { ContactsFiles.plain(it.info.name) == ContactsFiles.plain(name) }) TextButton(onClick = {
+                    runCatching { ContactsFiles.save(contactsRoot(), null, ContactInfo(formatted = name, given = name.substringBefore(' '), family = name.substringAfter(' ', ""))) }
+                        .onSuccess { c -> cards = ContactsFiles.all(contactsRoot()); ScopedSync.soon(context, "contacts", 0, orWhole = true); ContactsAccount.soon(context); choose(c.info.uid) }
+                        .onFailure { e -> WriterLog.e("Assistant: my card", e) }
+                }) { Text(stringResource(R.string.assistant_me_new, name)) }
+            } },
             confirmButton = {}, dismissButton = { TextButton(onClick = { pickingMe = false }) { Text(stringResource(R.string.common_cancel)) } })
     }
     if (adding && me != null) {

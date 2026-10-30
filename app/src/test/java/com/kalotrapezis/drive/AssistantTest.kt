@@ -204,6 +204,9 @@ class AssistantTest {
         assertEquals("Forgot: Ελένη Δημητρίου as the user's Spouse.", run("relation_forget", "relation" to "Spouse"))
         assertTrue(run("contacts_find", "relation" to "Spouse").startsWith("No Spouse is saved"))
         assertEquals("1. Μαρία Κωστοπούλου", run("contacts_find", "relation" to "Sister")) // the sister stayed
+        // no card of one's own: one is made with just the name, and is the user's
+        assertEquals("Made the user's own card in Contacts, with just their name: Αλέξης Νικολάου.", run("my_card", "name" to "Αλέξης Νικολάου"))
+        assertEquals("Αλέξης Νικολάου", ContactsFiles.all(dir).single { it.info.uid == mine }.info.name)
     }
 
     @Test fun aRoleFindsTheContactAndTheDefaultNumberIsTheOneCalled() {

@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Non ancora scelto: l’assistente lo chiede la prima volta</string>
     <string name="assistant_me_pick">Quale contatto sei tu?</string>
     <string name="assistant_relation_own">O una tua parola</string>
+    <string name="assistant_me_new">Crea la mia scheda: %1$s</string>
 </resources>

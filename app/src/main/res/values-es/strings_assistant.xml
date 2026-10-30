@@ -64,4 +64,5 @@
     <string name="assistant_me_none">Aún sin elegir: el asistente lo pregunta la primera vez</string>
     <string name="assistant_me_pick">¿Qué contacto eres tú?</string>
     <string name="assistant_relation_own">O tu propia palabra</string>
+    <string name="assistant_me_new">Crear mi tarjeta: %1$s</string>
 </resources>
