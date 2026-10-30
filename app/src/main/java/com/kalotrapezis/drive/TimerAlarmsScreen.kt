@@ -164,7 +164,7 @@ internal val BOTTOM = 96.dp
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(label, { label = it }, label = { Text(stringResource(R.string.alarm_label)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Surface(onClick = { dial = true }, shape = CircleShape, color = TIMER_COLOR.copy(alpha = 0.18f)) {
                         Text("%02d:%02d".format(time.hour, time.minute), Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
                             style = MaterialTheme.typography.displaySmall, fontFamily = FontFamily.Monospace, maxLines = 1)

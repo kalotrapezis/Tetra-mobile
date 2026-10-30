@@ -461,7 +461,8 @@ internal object AlarmPlan {
             .setCategory(NotificationCompat.CATEGORY_REMINDER).setPriority(if (ask) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_LOW)
             .setOngoing(true).setSilent(!pop).setOnlyAlertOnce(true)
         buttons.forEach { (_, label, pi) -> b.addAction(0, label, pi) }
-        if (HyperIsland.isSupported(app)) HyperIsland.timer(b, title, a.label, null, time, pop, buttons, HyperIsland.ALARM)
+        // the notice is a plain one: HyperOS's card draws one button of the two (seen on the Xiaomi 15, 30 Oct)
+        if (!ask && HyperIsland.isSupported(app)) HyperIsland.timer(b, title, a.label, null, time, false, buttons, HyperIsland.ALARM)
         runCatching { nm.notify(NEXT_ID, b.build()) }
     }
 }
