@@ -1476,7 +1476,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Les minuteurs sont de petits fichiers dans le dossier de Tetra : chaque appareil synchronisé démarre, s’arrête et se met en pause avec celui-ci. Autorisez l’accès à tous les fichiers pour utiliser Minuteur.</string>
     <string name="timer_allow_access">Autoriser l’accès</string>
-    <string name="timer_too_many">Neuf minuteurs au maximum : arrêtez-en ou supprimez-en un d’abord.</string>
     <string name="timer_could_not_start">Le minuteur n’a pas pu démarrer</string>
     <string name="timer_pin">Épingler</string>
     <string name="timer_unpin">Désépingler</string>

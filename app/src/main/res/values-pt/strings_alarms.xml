@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Alarme em breve</string>
     <string name="alarm_channel_soon_about">30 minutos antes de um alarme, para o ignorar ou adiar</string>
     <string name="stand_mode">Relógio de cabeceira</string>
-    <string name="stand_about">Um relógio ténue sobre preto enquanto carrega, suave para ecrãs AMOLED; move-se um pouco a cada minuto. Escolha Relógio de cabeceira como proteção de ecrã do Android, para começar ao carregar.</string>
+    <string name="stand_about">Um relógio ténue sobre preto enquanto carrega, suave para ecrãs AMOLED; move-se um pouco a cada minuto. Escolha Relógio de cabeceira como proteção de ecrã do Android, para começar ao carregar. Antes de um alarme acende como um nascer do sol, de vermelho profundo a amarelo quente, ao longo de 20 minutos.</string>
     <string name="stand_settings">Definições da proteção de ecrã</string>
 </resources>

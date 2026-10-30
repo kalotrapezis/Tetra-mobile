@@ -1519,7 +1519,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Časovniki so majhne datoteke v mapi Tetre, zato vsaka naprava, s katero sinhronizirate, začne, zaustavi in ustavi skupaj s to. Za uporabo Časovnika dovolite dostop do vseh datotek.</string>
     <string name="timer_allow_access">Dovoli dostop</string>
-    <string name="timer_too_many">Največ devet časovnikov: najprej enega ustavite ali izbrišite.</string>
     <string name="timer_could_not_start">Časovnika ni bilo mogoče zagnati</string>
     <string name="timer_pin">Pripni</string>
     <string name="timer_unpin">Odpni</string>

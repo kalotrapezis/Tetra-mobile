@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Ébresztő hamarosan</string>
     <string name="alarm_channel_soon_about">30 perccel ébresztő előtt, a kihagyásához vagy halasztásához</string>
     <string name="stand_mode">Éjjeli óra</string>
-    <string name="stand_about">Halvány óra feketén töltés közben, kíméli az AMOLED kijelzőt; percenként kicsit arrébb lép. Válaszd az Éjjeli órát az Android képernyővédőjének, hogy töltéskor induljon.</string>
+    <string name="stand_about">Halvány óra feketén töltés közben, kíméli az AMOLED kijelzőt; percenként kicsit arrébb lép. Válaszd az Éjjeli órát az Android képernyővédőjének, hogy töltéskor induljon. Ébresztő előtt napfelkelteként világosodik ki, mélyvöröstől meleg sárgáig, 20 perc alatt.</string>
     <string name="stand_settings">Képernyővédő beállításai</string>
 </resources>

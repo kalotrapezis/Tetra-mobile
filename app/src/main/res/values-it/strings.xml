@@ -1433,7 +1433,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">I timer sono piccoli file nella cartella di Tetra, così ogni dispositivo con cui sincronizzi si avvia, si mette in pausa e si ferma insieme a questo. Consenti l\'accesso a tutti i file per usare il Timer.</string>
     <string name="timer_allow_access">Consenti accesso</string>
-    <string name="timer_too_many">Al massimo nove timer: prima fermane o eliminane uno.</string>
     <string name="timer_could_not_start">Impossibile avviare il timer</string>
     <string name="timer_pin">Fissa</string>
     <string name="timer_unpin">Sblocca</string>

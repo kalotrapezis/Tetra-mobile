@@ -1433,7 +1433,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Таймерите са малки файлове в папката на Tetra, така че всяко устройство, с което синхронизирате, стартира, спира на пауза и спира заедно с това. Разрешете достъп до всички файлове, за да ползвате Таймер.</string>
     <string name="timer_allow_access">Разреши достъп</string>
-    <string name="timer_too_many">Най-много девет таймера: първо спрете или изтрийте един.</string>
     <string name="timer_could_not_start">Таймерът не можа да стартира</string>
     <string name="timer_pin">Закачи</string>
     <string name="timer_unpin">Откачи</string>

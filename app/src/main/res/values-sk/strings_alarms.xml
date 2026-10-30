@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Budík čoskoro</string>
     <string name="alarm_channel_soon_about">30 minút pred budíkom, na preskočenie alebo odloženie</string>
     <string name="stand_mode">Nočné hodiny</string>
-    <string name="stand_about">Tlmené hodiny na čiernom pri nabíjaní, šetrné k AMOLED displejom; každú minútu sa trochu posunú. Zvoľ Nočné hodiny ako šetrič obrazovky Androidu, aby sa spustili pri nabíjaní.</string>
+    <string name="stand_about">Tlmené hodiny na čiernom pri nabíjaní, šetrné k AMOLED displejom; každú minútu sa trochu posunú. Zvoľ Nočné hodiny ako šetrič obrazovky Androidu, aby sa spustili pri nabíjaní. Pred budíkom sa rozsvieti ako východ slnka, od tmavočervenej po teplú žltú, počas 20 minút.</string>
     <string name="stand_settings">Nastavenia šetriča obrazovky</string>
 </resources>

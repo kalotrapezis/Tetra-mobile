@@ -132,10 +132,9 @@ class TimerTest {
         assertTrue(TimerFiles.cards(tablet, t0.plusSeconds(20)).none { it.id == card.id })
     }
 
-    @Test fun nineTimersAtMost() {
-        repeat(TimerFiles.MAX) { TimerFiles.start(tablet, 60L + it, "Tablet", t0) }
-        assertTrue(runCatching { TimerFiles.start(tablet, 30, "Tablet", t0) }.isFailure)
-        assertEquals(TimerFiles.MAX, TimerFiles.cards(tablet, t0).size)
+    @Test fun moreThanNineTimers() { // the limit of nine went on 30 Oct
+        repeat(12) { TimerFiles.start(tablet, 60L + it, "Tablet", t0) }
+        assertEquals(12, TimerFiles.cards(tablet, t0).size)
     }
 
     @Test fun aTimerClaudeWritesByHandIsRead() {

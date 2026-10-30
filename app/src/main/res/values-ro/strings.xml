@@ -1476,7 +1476,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Temporizatoarele sunt fișiere mici în dosarul Tetra, astfel că fiecare dispozitiv sincronizat pornește, întrerupe și oprește odată cu acesta. Permite accesul la toate fișierele pentru a folosi Temporizator.</string>
     <string name="timer_allow_access">Permite accesul</string>
-    <string name="timer_too_many">Cel mult nouă temporizatoare: oprește sau șterge unul mai întâi.</string>
     <string name="timer_could_not_start">Temporizatorul nu a putut porni</string>
     <string name="timer_pin">Fixează</string>
     <string name="timer_unpin">Anulează fixarea</string>

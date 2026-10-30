@@ -31,6 +31,6 @@
     <string name="alarm_channel_soon">Alarm soon</string>
     <string name="alarm_channel_soon_about">30 minutes before an alarm, to skip or snooze it</string>
     <string name="stand_mode">Stand mode</string>
-    <string name="stand_about">A dim clock on black while charging, kind to AMOLED screens; it moves a little every minute. Choose Stand mode as Android\'s screen saver, to start while charging.</string>
+    <string name="stand_about">A dim clock on black while charging, kind to AMOLED screens; it moves a little every minute. Choose Stand mode as Android\'s screen saver, to start while charging. Before an alarm it lights up like a sunrise, deep red to warm yellow, over 20 minutes.</string>
     <string name="stand_settings">Screen saver settings</string>
 </resources>

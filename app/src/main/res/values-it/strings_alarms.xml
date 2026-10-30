@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Sveglia a breve</string>
     <string name="alarm_channel_soon_about">30 minuti prima di una sveglia, per saltarla o posticiparla</string>
     <string name="stand_mode">Orologio da comodino</string>
-    <string name="stand_about">Un orologio tenue sul nero durante la ricarica, delicato con gli schermi AMOLED; si sposta un po\' ogni minuto. Scegli Orologio da comodino come salvaschermo di Android, perché parta in ricarica.</string>
+    <string name="stand_about">Un orologio tenue sul nero durante la ricarica, delicato con gli schermi AMOLED; si sposta un po\' ogni minuto. Scegli Orologio da comodino come salvaschermo di Android, perché parta in ricarica. Prima di una sveglia si illumina come un\'alba, dal rosso intenso al giallo caldo, in 20 minuti.</string>
     <string name="stand_settings">Impostazioni salvaschermo</string>
 </resources>

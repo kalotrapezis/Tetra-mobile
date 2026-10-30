@@ -1433,7 +1433,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Timer sind kleine Dateien im Ordner von Tetra, damit jedes synchronisierte Gerät mit diesem startet, pausiert und stoppt. Erlaube den Zugriff auf alle Dateien, um den Timer zu nutzen.</string>
     <string name="timer_allow_access">Zugriff erlauben</string>
-    <string name="timer_too_many">Höchstens neun Timer: stoppe oder lösche zuerst einen.</string>
     <string name="timer_could_not_start">Der Timer konnte nicht starten</string>
     <string name="timer_pin">Anheften</string>
     <string name="timer_unpin">Loslösen</string>

@@ -96,14 +96,9 @@ internal object TimerFiles {
     fun active(dir: File, now: Instant = Instant.now()): List<TimerRecord> =
         read(dir).filterNot { it.over(now) }.sortedBy { it.leftMs(now) }
 
-    /** The cards on the screen: the active ones, then the pinned ones ready to start, at most [MAX]. */
+    /** The cards on the screen: the active ones, then the pinned ones ready to start (no limit since 30 Oct). */
     fun cards(dir: File, now: Instant = Instant.now()): List<TimerRecord> =
-        read(dir).filter { it.card(now) }.sortedWith(compareBy({ it.over(now) }, { it.leftMs(now) }, { it.seconds })).take(MAX)
-
-    /** The screen holds nine (the user, 18 Oct: "The UI will fit 9 timers"). */
-    const val MAX = 9
-    /** The tenth timer refused; the screen says it in the language (its message is for the log). */
-    class TooMany : IllegalStateException("Nine timers at most: stop or delete one first.")
+        read(dir).filter { it.card(now) }.sortedWith(compareBy({ it.over(now) }, { it.leftMs(now) }, { it.seconds }))
 
     /**
      * Written beside, then renamed over: a sync or another device never reads half a timer. Each device writes only its
@@ -131,7 +126,6 @@ internal object TimerFiles {
      */
     fun start(dir: File, seconds: Long, by: String, now: Instant = Instant.now(), label: String = ""): TimerRecord {
         val all = read(dir)
-        if (all.count { it.card(now) } >= MAX) throw TooMany()
         val free = all.filter { it.free(now) }.minByOrNull { it.file?.name ?: "" }
         val r = TimerRecord(free?.id ?: newId(), seconds, TimerRecord.RUNNING, now.plusSeconds(seconds), 0.0, (free?.rev ?: 0) + 1, label, by)
         return write(dir, r)

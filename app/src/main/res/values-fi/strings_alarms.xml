@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Herätys pian</string>
     <string name="alarm_channel_soon_about">30 minuuttia ennen herätystä, sen ohittamiseen tai torkuttamiseen</string>
     <string name="stand_mode">Yökello</string>
-    <string name="stand_about">Himmeä kello mustalla latauksen aikana, AMOLED-näytöille hellävarainen; se siirtyy vähän joka minuutti. Valitse Yökello Androidin näytönsäästäjäksi, niin se käynnistyy latauksessa.</string>
+    <string name="stand_about">Himmeä kello mustalla latauksen aikana, AMOLED-näytöille hellävarainen; se siirtyy vähän joka minuutti. Valitse Yökello Androidin näytönsäästäjäksi, niin se käynnistyy latauksessa. Ennen herätystä se kirkastuu kuin auringonnousu, syvänpunaisesta lämpimään keltaiseen, 20 minuutin aikana.</string>
     <string name="stand_settings">Näytönsäästäjän asetukset</string>
 </resources>

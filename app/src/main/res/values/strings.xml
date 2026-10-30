@@ -1434,7 +1434,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Timers are small files in Tetra\'s folder, so every device you sync with starts, pauses and stops with this one. Allow access to all files to use the Timer.</string>
     <string name="timer_allow_access">Allow access</string>
-    <string name="timer_too_many">Nine timers at most: stop or delete one first.</string>
     <string name="timer_could_not_start">The timer could not start</string>
     <string name="timer_pin">Pin</string>
     <string name="timer_unpin">Unpin</string>

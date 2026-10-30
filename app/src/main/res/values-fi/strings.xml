@@ -1433,7 +1433,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Ajastimet ovat pieniä tiedostoja Tetran kansiossa, joten jokainen synkronoitu laitteesi käynnistää, keskeyttää ja pysäyttää ne tämän kanssa. Salli pääsy kaikkiin tiedostoihin, niin voit käyttää Ajastinta.</string>
     <string name="timer_allow_access">Salli pääsy</string>
-    <string name="timer_too_many">Enintään yhdeksän ajastinta: pysäytä tai poista ensin yksi.</string>
     <string name="timer_could_not_start">Ajastinta ei voitu käynnistää</string>
     <string name="timer_pin">Kiinnitä</string>
     <string name="timer_unpin">Irrota</string>

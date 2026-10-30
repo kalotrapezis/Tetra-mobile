@@ -2,6 +2,9 @@ package com.kalotrapezis.drive
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -23,7 +26,6 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -60,6 +62,8 @@ internal var lastTab = 0
 internal val TOP = 84.dp
 /** Above the island at the bottom. */
 internal val BOTTOM = 96.dp
+/** The actions' row over the island ([TimerBar]). */
+internal val ACTIONS = 68.dp
 
 /** Timers · Alarms · Stopwatch, an island under the header. */
 /** Countdown, Alarms and Stopwatch: the bottom island, as the other applets' (no handle: the Timer has no drawer). */
@@ -72,8 +76,8 @@ internal val BOTTOM = 96.dp
     }
 }
 
-/** The alarms, one card each: the time, its days and label, a switch and the trash; a tap edits it; New alarm on top. */
-@Composable internal fun AlarmsPane(wide: Boolean) {
+/** The alarms, one card each ([AlarmCard]); a tap edits it; New alarm over the island. */
+@Composable internal fun AlarmsPane(wide: Boolean, side: Boolean, choose: (Int) -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val zone = ZoneId.systemDefault()
@@ -90,50 +94,18 @@ internal val BOTTOM = 96.dp
     }
     fun io(work: () -> Unit) = scope.launch(Dispatchers.IO) { runCatching(work).onFailure { WriterLog.e("Alarms: change failed", it) } }
     val w = rememberUiWords()
-    Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = TOP),
-        horizontalAlignment = Alignment.CenterHorizontally) {
-        Column(Modifier.widthIn(max = if (wide) 640.dp else 520.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = TOP),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(Modifier.widthIn(max = if (wide) 640.dp else 520.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 val next = alarms.mapNotNull { it.next(now, zone) }.minOrNull()
-                Text(next?.let { stringResource(R.string.alarm_in, durationText(w, (it.epochSecond - now.epochSecond + 59) / 60 * 60)) } ?: "",
-                    Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                FilledTonalButton(onClick = { adding = true }) {
-                    Icon(painterResource(R.drawable.ic_add), contentDescription = null); Text(" " + stringResource(R.string.alarm_new), maxLines = 1)
-                }
+                if (next != null) Text(stringResource(R.string.alarm_in, durationText(w, (next.epochSecond - now.epochSecond + 59) / 60 * 60)), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (alarms.isEmpty()) Text(stringResource(R.string.alarm_none), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                alarms.forEach { a -> AlarmCard(a, now, zone, edit = { editing = a }) { action -> io { TimerControl.alarmChange(context, a.id, action) } } }
+                Spacer(Modifier.navigationBarsPadding().height(listEnd(side)))
             }
-            if (alarms.isEmpty()) Text(stringResource(R.string.alarm_none), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            alarms.forEach { a ->
-                val ringing = a.ringing(now, zone)
-                Surface(onClick = { editing = a }, shape = MaterialTheme.shapes.extraLarge, color = if (ringing != null) TIMER_COLOR else MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxWidth()) {
-                    Row(Modifier.padding(start = 20.dp, end = 8.dp, top = 12.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text("%02d:%02d".format(a.time.hour, a.time.minute), style = MaterialTheme.typography.headlineMedium, fontFamily = FontFamily.Monospace,
-                                color = if (a.on(now, zone)) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
-                            // skipped: the next ring already answered (Skip here, in the 30-minute notice or on another device)
-                            val skipped = a.repeats && a.state == AlarmRecord.ON && ringing == null && a.snooze == null && a.answered?.isAfter(now) == true
-                            Text(listOf(daysText(a), a.label, if (skipped) stringResource(R.string.alarm_skipped) else "").filter { it.isNotBlank() }.joinToString(" · "),
-                                style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            if (a.repeats && a.state == AlarmRecord.ON && ringing == null)
-                                TextButton(onClick = { io { TimerControl.alarmChange(context, a.id, if (skipped) TimerService.ALARM_ON else TimerService.ALARM_SKIP) } },
-                                    contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
-                                    Icon(painterResource(R.drawable.ic_skip_next), contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Text(" " + stringResource(if (skipped) R.string.alarm_unskip else R.string.alarm_skip_next), maxLines = 1)
-                                }
-                        }
-                        if (ringing != null) {
-                            TextButton(onClick = { io { TimerControl.alarmChange(context, a.id, TimerService.ALARM_SNOOZE) } }) { Text(stringResource(R.string.alarm_snooze)) }
-                            Button(onClick = { io { TimerControl.alarmChange(context, a.id, TimerService.ALARM_DISMISS) } }) { Text(stringResource(R.string.alarm_dismiss)) }
-                        } else {
-                            Switch(checked = a.on(now, zone), onCheckedChange = { on -> io { TimerControl.alarmChange(context, a.id, if (on) TimerService.ALARM_ON else TimerService.ALARM_OFF) } })
-                            IconButton(onClick = { io { TimerControl.alarmChange(context, a.id, TimerService.ALARM_DELETE) } }) {
-                                Icon(painterResource(R.drawable.ic_delete), contentDescription = stringResource(R.string.common_delete), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
-                            }
-                        }
-                    }
-                }
-            }
-            Spacer(Modifier.navigationBarsPadding().height(BOTTOM))
         }
+        TimerBar(1, choose, side) { IslandAction(R.drawable.ic_add, stringResource(R.string.alarm_new)) { adding = true } }
     }
     if (adding || editing != null) AlarmDialog(editing, close = { adding = false; editing = null }) { time, days, label ->
         val e = editing
@@ -141,6 +113,66 @@ internal val BOTTOM = 96.dp
         adding = false; editing = null
     }
 }
+
+/**
+ * An alarm's card: its name on top (the user, 30 Oct: so Skip next has room), the time with the switch and the trash, then
+ * its days with Skip next / Undo skip; Snooze and Dismiss while it rings.
+ */
+@Composable private fun AlarmCard(a: AlarmRecord, now: Instant, zone: ZoneId, edit: () -> Unit, act: (String) -> Unit) {
+    val ringing = a.ringing(now, zone)
+    // skipped: the next ring already answered (Skip here, in the 30-minute notice or on another device)
+    val skipped = a.repeats && a.state == AlarmRecord.ON && ringing == null && a.snooze == null && a.answered?.isAfter(now) == true
+    Surface(onClick = edit, shape = MaterialTheme.shapes.extraLarge, color = if (ringing != null) TIMER_COLOR else MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(start = 20.dp, end = 8.dp, top = 12.dp, bottom = 8.dp)) {
+            if (a.label.isNotBlank()) Text(a.label, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("%02d:%02d".format(a.time.hour, a.time.minute), Modifier.weight(1f), style = MaterialTheme.typography.headlineMedium, fontFamily = FontFamily.Monospace,
+                    color = if (a.on(now, zone)) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                if (ringing != null) {
+                    TextButton(onClick = { act(TimerService.ALARM_SNOOZE) }) { Text(stringResource(R.string.alarm_snooze)) }
+                    Button(onClick = { act(TimerService.ALARM_DISMISS) }) { Text(stringResource(R.string.alarm_dismiss)) }
+                } else {
+                    Switch(checked = a.on(now, zone), onCheckedChange = { on -> act(if (on) TimerService.ALARM_ON else TimerService.ALARM_OFF) })
+                    IconButton(onClick = { act(TimerService.ALARM_DELETE) }) {
+                        Icon(painterResource(R.drawable.ic_delete), contentDescription = stringResource(R.string.common_delete), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                    }
+                }
+            }
+            Row(Modifier.heightIn(min = 40.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(listOf(daysText(a), if (skipped) stringResource(R.string.alarm_skipped) else "").filter { it.isNotBlank() }.joinToString(" · "),
+                    Modifier.weight(1f), style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                if (a.repeats && a.state == AlarmRecord.ON && ringing == null)
+                    TextButton(onClick = { act(if (skipped) TimerService.ALARM_ON else TimerService.ALARM_SKIP) }) {
+                        Icon(painterResource(R.drawable.ic_skip_next), contentDescription = null, modifier = Modifier.size(18.dp))
+                        Text(" " + stringResource(if (skipped) R.string.alarm_unskip else R.string.alarm_skip_next), maxLines = 1)
+                    }
+            }
+        }
+    }
+}
+
+/** A pane's action: a round icon, no words (the user, 30 Oct), in the island's colours. */
+@Composable internal fun IslandAction(icon: Int, label: String, enabled: Boolean = true, onClick: () -> Unit) =
+    Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape) {
+        IconButton(onClick = onClick, enabled = enabled, modifier = Modifier.size(56.dp)) { Icon(painterResource(icon), contentDescription = label) }
+    }
+
+/**
+ * The island and the pane's actions (the user, 30 Oct): beside it in landscape and on a tablet, as Contacts' +; over it
+ * on a phone held upright, where the thumb reaches. Lists and words stay at the top.
+ */
+@Composable internal fun BoxScope.TimerBar(tab: Int, choose: (Int) -> Unit, side: Boolean, actions: @Composable RowScope.() -> Unit) {
+    if (side) Row(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically) { TimerTabs(tab, choose); actions() }
+    else {
+        Row(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = BOTTOM), horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically, content = actions)
+        TimerTabs(tab, choose, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp))
+    }
+}
+
+/** Under a pane's list: room for the island, and for the actions over it on an upright phone. */
+internal fun listEnd(side: Boolean) = if (side) BOTTOM else BOTTOM + ACTIONS
 
 /** "Once", "Every day", or the days: "Mon, Wed, Fri" in the phone's language. */
 @Composable private fun daysText(a: AlarmRecord): String = when {
@@ -158,9 +190,7 @@ internal val BOTTOM = 96.dp
     var dial by remember { mutableStateOf(false) }
     var days by remember { mutableStateOf(a?.days ?: emptySet()) }
     var label by remember { mutableStateOf(a?.label ?: "") }
-    AlertDialog(onDismissRequest = close,
-        confirmButton = { Button(onClick = { save(time, days, label.trim()) }) { Text(stringResource(R.string.common_save)) } },
-        dismissButton = { TextButton(onClick = close) { Text(stringResource(R.string.common_cancel)) } },
+    AlertDialog(onDismissRequest = close, confirmButton = {}, // × and ✓ in the middle, as the clock's
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(label, { label = it }, label = { Text(stringResource(R.string.alarm_label)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
@@ -184,13 +214,14 @@ internal val BOTTOM = 96.dp
                 }
                 Text(if (days.isEmpty()) stringResource(R.string.alarm_once) else if (days.size == 7) stringResource(R.string.alarm_every_day) else "",
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                CrossCheck(close) { save(time, days, label.trim()) }
             }
         })
     if (dial) DialDialog(time.hour, time.minute, close = { dial = false }) { h, m -> time = LocalTime.of(h, m); dial = false }
 }
 
 /** The stopwatch, the same on every device: the time to a tenth, Start/Pause, Lap, Reset, the laps under them. */
-@Composable internal fun StopwatchPane() {
+@Composable internal fun StopwatchPane(side: Boolean, choose: (Int) -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var watch by remember { mutableStateOf(StopwatchRecord()) }
@@ -208,29 +239,27 @@ internal val BOTTOM = 96.dp
         watch = runCatching { TimerAlarmFiles.stopwatch(TimerControl.dir()) }.getOrDefault(watch)
     }
     val counting = watch.state == StopwatchRecord.COUNTING
-    Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = TOP + 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(stopwatchText(watch.elapsedMs(now)), style = MaterialTheme.typography.displayLarge, fontFamily = FontFamily.Monospace, maxLines = 1)
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (counting) Button(onClick = { act(TimerService.WATCH_HOLD) }, modifier = Modifier.widthIn(min = 120.dp)) {
-                Icon(painterResource(R.drawable.ic_pause), contentDescription = null); Text("  " + stringResource(R.string.common_pause), maxLines = 1)
-            } else Button(onClick = { act(TimerService.WATCH_START) }, modifier = Modifier.widthIn(min = 120.dp)) {
-                Icon(painterResource(R.drawable.ic_play), contentDescription = null)
-                Text("  " + stringResource(if (watch.state == StopwatchRecord.HELD) R.string.common_resume else R.string.common_start), maxLines = 1)
-            }
-            OutlinedButton(onClick = { act(TimerService.WATCH_LAP) }, enabled = counting) { Text(stringResource(R.string.stopwatch_lap), maxLines = 1) }
-            OutlinedButton(onClick = { act(TimerService.WATCH_RESET) }, enabled = watch.state == StopwatchRecord.HELD) { Text(stringResource(R.string.stopwatch_reset), maxLines = 1) }
-        }
-        Column(Modifier.widthIn(max = 420.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            watch.laps.withIndex().reversed().forEach { (i, t) ->
-                val split = t - (watch.laps.getOrNull(i - 1) ?: 0.0)
-                Row(Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.stopwatch_lap_n, i + 1), Modifier.weight(1f))
-                    Text(stopwatchText((split * 1000).toLong()), Modifier.weight(1f), fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(stopwatchText((t * 1000).toLong()), fontFamily = FontFamily.Monospace)
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = TOP + 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            Text(stopwatchText(watch.elapsedMs(now)), style = MaterialTheme.typography.displayLarge, fontFamily = FontFamily.Monospace, maxLines = 1)
+            Column(Modifier.widthIn(max = 420.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                watch.laps.withIndex().reversed().forEach { (i, t) ->
+                    val split = t - (watch.laps.getOrNull(i - 1) ?: 0.0)
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(stringResource(R.string.stopwatch_lap_n, i + 1), Modifier.weight(1f))
+                        Text(stopwatchText((split * 1000).toLong()), Modifier.weight(1f), fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stopwatchText((t * 1000).toLong()), fontFamily = FontFamily.Monospace)
+                    }
                 }
             }
+            Spacer(Modifier.navigationBarsPadding().height(listEnd(side)))
         }
-        Spacer(Modifier.navigationBarsPadding().height(BOTTOM))
+        TimerBar(2, choose, side) {
+            if (counting) IslandAction(R.drawable.ic_pause, stringResource(R.string.common_pause)) { act(TimerService.WATCH_HOLD) }
+            else IslandAction(R.drawable.ic_play, stringResource(if (watch.state == StopwatchRecord.HELD) R.string.common_resume else R.string.common_start)) { act(TimerService.WATCH_START) }
+            IslandAction(R.drawable.ic_flag, stringResource(R.string.stopwatch_lap), enabled = counting) { act(TimerService.WATCH_LAP) }
+            IslandAction(R.drawable.ic_refresh, stringResource(R.string.stopwatch_reset), enabled = watch.state == StopwatchRecord.HELD) { act(TimerService.WATCH_RESET) }
+        }
     }
 }

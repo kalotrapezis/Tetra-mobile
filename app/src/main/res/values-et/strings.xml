@@ -1433,7 +1433,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Taimerid on väikesed failid Tetra kaustas, nii et iga seade, millega sünkroonite, käivitab, peatab ja lõpetab koos selle seadmega. Taimeri kasutamiseks lubage juurdepääs kõigile failidele.</string>
     <string name="timer_allow_access">Luba juurdepääs</string>
-    <string name="timer_too_many">Kõige rohkem üheksa taimerit: peatage või kustutage esmalt üks.</string>
     <string name="timer_could_not_start">Taimerit ei õnnestunud käivitada</string>
     <string name="timer_pin">Kinnita</string>
     <string name="timer_unpin">Vabasta</string>

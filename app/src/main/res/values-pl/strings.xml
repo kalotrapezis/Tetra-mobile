@@ -1519,7 +1519,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Minutniki to małe pliki w folderze Tetry, więc każde synchronizowane urządzenie uruchamia, wstrzymuje i zatrzymuje je razem z tym. Zezwól na dostęp do wszystkich plików, by używać Minutnika.</string>
     <string name="timer_allow_access">Zezwól na dostęp</string>
-    <string name="timer_too_many">Najwyżej dziewięć minutników: najpierw zatrzymaj lub usuń jeden.</string>
     <string name="timer_could_not_start">Nie udało się uruchomić minutnika</string>
     <string name="timer_pin">Przypnij</string>
     <string name="timer_unpin">Odepnij</string>

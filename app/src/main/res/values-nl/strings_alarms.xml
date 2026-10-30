@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Wekker binnenkort</string>
     <string name="alarm_channel_soon_about">30 minuten voor een wekker, om hem over te slaan of uit te stellen</string>
     <string name="stand_mode">Nachtklok</string>
-    <string name="stand_about">Een zwakke klok op zwart tijdens het opladen, zacht voor AMOLED-schermen; hij schuift elke minuut een beetje op. Kies Nachtklok als screensaver van Android, zodat hij start tijdens het opladen.</string>
+    <string name="stand_about">Een zwakke klok op zwart tijdens het opladen, zacht voor AMOLED-schermen; hij schuift elke minuut een beetje op. Kies Nachtklok als screensaver van Android, zodat hij start tijdens het opladen. Voor een wekker licht hij op als een zonsopgang, van diep rood naar warm geel, in 20 minuten.</string>
     <string name="stand_settings">Instellingen screensaver</string>
 </resources>

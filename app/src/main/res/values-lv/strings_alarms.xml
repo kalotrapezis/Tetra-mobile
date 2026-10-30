@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Modinātājs drīz</string>
     <string name="alarm_channel_soon_about">30 minūtes pirms modinātāja, lai to izlaistu vai atliktu</string>
     <string name="stand_mode">Nakts pulkstenis</string>
-    <string name="stand_about">Blāvs pulkstenis uz melna uzlādes laikā, saudzīgs pret AMOLED ekrāniem; ik minūti tas nedaudz pārvietojas. Izvēlies Nakts pulksteni kā Android ekrānsaudzētāju, lai tas sāktos uzlādes laikā.</string>
+    <string name="stand_about">Blāvs pulkstenis uz melna uzlādes laikā, saudzīgs pret AMOLED ekrāniem; ik minūti tas nedaudz pārvietojas. Izvēlies Nakts pulksteni kā Android ekrānsaudzētāju, lai tas sāktos uzlādes laikā. Pirms modinātāja tas iedegas kā saullēkts, no tumši sarkana līdz silti dzeltenam, 20 minūšu laikā.</string>
     <string name="stand_settings">Ekrānsaudzētāja iestatījumi</string>
 </resources>

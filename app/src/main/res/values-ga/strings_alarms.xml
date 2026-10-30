@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Aláram go luath</string>
     <string name="alarm_channel_soon_about">30 nóiméad roimh aláram, chun é a scipeáil nó a chur siar</string>
     <string name="stand_mode">Clog cois leapa</string>
-    <string name="stand_about">Clog lag ar dhubh le linn luchtaithe, cineálta do scáileáin AMOLED; bogann sé beagán gach nóiméad. Roghnaigh Clog cois leapa mar spárálaí scáileáin Android, chun tosú le linn luchtaithe.</string>
+    <string name="stand_about">Clog lag ar dhubh le linn luchtaithe, cineálta do scáileáin AMOLED; bogann sé beagán gach nóiméad. Roghnaigh Clog cois leapa mar spárálaí scáileáin Android, chun tosú le linn luchtaithe. Roimh aláram lasann sé mar éirí gréine, ó dhearg domhain go buí te, thar 20 nóiméad.</string>
     <string name="stand_settings">Socruithe an spárálaí scáileáin</string>
 </resources>

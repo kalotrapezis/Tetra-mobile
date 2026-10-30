@@ -1476,7 +1476,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Taimeri ir mazi faili Tetra mapē, tāpēc katra sinhronizētā ierīce palaiž, pauzē un aptur tos kopā ar šo. Atļaujiet piekļuvi visiem failiem, lai izmantotu Taimeri.</string>
     <string name="timer_allow_access">Atļaut piekļuvi</string>
-    <string name="timer_too_many">Ne vairāk kā deviņi taimeri: vispirms apturiet vai izdzēsiet kādu.</string>
     <string name="timer_could_not_start">Taimeri neizdevās palaist</string>
     <string name="timer_pin">Piespraust</string>
     <string name="timer_unpin">Atspraust</string>

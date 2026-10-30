@@ -1519,7 +1519,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">It-tajmers huma fajls żgħar fil-kartella ta’ Tetra, għalhekk kull apparat li tisinkronizza miegħu jibda u jieqaf flimkien ma’ dan wieħed. Ippermetti aċċess għall-fajls kollha biex tuża t-Tajmer.</string>
     <string name="timer_allow_access">Ippermetti l-aċċess</string>
-    <string name="timer_too_many">Disa’ tajmers biss: waqqaf jew ħassar wieħed l-ewwel.</string>
     <string name="timer_could_not_start">It-tajmer ma setax jibda</string>
     <string name="timer_pin">Waħħal</string>
     <string name="timer_unpin">Neħħi l-waħħal</string>

@@ -1519,7 +1519,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Laikmačiai yra maži failai Tetra aplanke, todėl kiekvienas sinchronizuojamas įrenginys paleidžia, pristabdo ir sustabdo juos kartu su šiuo. Norėdami naudoti Laikmatį, leiskite prieigą prie visų failų.</string>
     <string name="timer_allow_access">Leisti prieigą</string>
-    <string name="timer_too_many">Daugiausia devyni laikmačiai: pirmiau sustabdykite arba ištrinkite vieną.</string>
     <string name="timer_could_not_start">Laikmačio paleisti nepavyko</string>
     <string name="timer_pin">Prisegti</string>
     <string name="timer_unpin">Atsegti</string>

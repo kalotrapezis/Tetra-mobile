@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Budík brzy</string>
     <string name="alarm_channel_soon_about">30 minut před budíkem, k přeskočení nebo odložení</string>
     <string name="stand_mode">Noční hodiny</string>
-    <string name="stand_about">Tlumené hodiny na černém při nabíjení, šetrné k AMOLED displejům; každou minutu se trochu posunou. Zvol Noční hodiny jako spořič obrazovky Androidu, ať se spustí při nabíjení.</string>
+    <string name="stand_about">Tlumené hodiny na černém při nabíjení, šetrné k AMOLED displejům; každou minutu se trochu posunou. Zvol Noční hodiny jako spořič obrazovky Androidu, ať se spustí při nabíjení. Před budíkem se rozsvítí jako východ slunce, od tmavě červené po teplou žlutou, během 20 minut.</string>
     <string name="stand_settings">Nastavení spořiče obrazovky</string>
 </resources>

@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Alarm uskoro</string>
     <string name="alarm_channel_soon_about">30 minuta prije alarma, za preskakanje ili odgodu</string>
     <string name="stand_mode">Noćni sat</string>
-    <string name="stand_about">Prigušeni sat na crnom tijekom punjenja, blag prema AMOLED zaslonima; svake se minute malo pomakne. Odaberi Noćni sat kao Androidov čuvar zaslona, da se pokrene tijekom punjenja.</string>
+    <string name="stand_about">Prigušeni sat na crnom tijekom punjenja, blag prema AMOLED zaslonima; svake se minute malo pomakne. Odaberi Noćni sat kao Androidov čuvar zaslona, da se pokrene tijekom punjenja. Prije alarma zasvijetli poput izlaska sunca, od tamnocrvene do tople žute, kroz 20 minuta.</string>
     <string name="stand_settings">Postavke čuvara zaslona</string>
 </resources>

@@ -1433,7 +1433,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Timers zijn kleine bestanden in de map van Tetra, zodat elk apparaat waarmee je synchroniseert tegelijk start, pauzeert en stopt. Sta toegang tot alle bestanden toe om Timer te gebruiken.</string>
     <string name="timer_allow_access">Toegang toestaan</string>
-    <string name="timer_too_many">Maximaal negen timers: stop of verwijder er eerst een.</string>
     <string name="timer_could_not_start">De timer kan niet starten</string>
     <string name="timer_pin">Vastzetten</string>
     <string name="timer_unpin">Losmaken</string>

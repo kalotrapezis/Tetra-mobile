@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Žadintuvas netrukus</string>
     <string name="alarm_channel_soon_about">Likus 30 minučių iki žadintuvo, kad jį praleistum ar atidėtum</string>
     <string name="stand_mode">Naktinis laikrodis</string>
-    <string name="stand_about">Blankus laikrodis juodame fone kraunant, tausojantis AMOLED ekranus; kas minutę šiek tiek pasislenka. Pasirink Naktinį laikrodį kaip Android ekrano užsklandą, kad įsijungtų kraunant.</string>
+    <string name="stand_about">Blankus laikrodis juodame fone kraunant, tausojantis AMOLED ekranus; kas minutę šiek tiek pasislenka. Pasirink Naktinį laikrodį kaip Android ekrano užsklandą, kad įsijungtų kraunant. Prieš žadintuvą jis nušvinta kaip saulėtekis – nuo tamsiai raudonos iki šiltai geltonos – per 20 minučių.</string>
     <string name="stand_settings">Ekrano užsklandos nustatymai</string>
 </resources>

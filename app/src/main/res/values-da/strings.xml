@@ -1433,7 +1433,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Timere er små filer i Tetras mappe, så alle enheder, du synkroniserer med, starter, sætter på pause og stopper sammen med denne. Tillad adgang til alle filer for at bruge Timer.</string>
     <string name="timer_allow_access">Tillad adgang</string>
-    <string name="timer_too_many">Højst ni timere: stop eller slet en først.</string>
     <string name="timer_could_not_start">Timeren kunne ikke starte</string>
     <string name="timer_pin">Fastgør</string>
     <string name="timer_unpin">Frigør</string>

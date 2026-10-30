@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Alarme bientôt</string>
     <string name="alarm_channel_soon_about">30 minutes avant une alarme, pour l\'ignorer ou la répéter</string>
     <string name="stand_mode">Horloge de chevet</string>
-    <string name="stand_about">Une horloge pâle sur fond noir pendant la charge, douce pour les écrans AMOLED ; elle se déplace un peu chaque minute. Choisissez Horloge de chevet comme économiseur d\'écran d\'Android, pour qu\'elle démarre pendant la charge.</string>
+    <string name="stand_about">Une horloge pâle sur fond noir pendant la charge, douce pour les écrans AMOLED ; elle se déplace un peu chaque minute. Choisissez Horloge de chevet comme économiseur d\'écran d\'Android, pour qu\'elle démarre pendant la charge. Avant une alarme, il s\'éclaire comme un lever de soleil, du rouge profond au jaune chaud, en 20 minutes.</string>
     <string name="stand_settings">Réglages de l\'économiseur d\'écran</string>
 </resources>

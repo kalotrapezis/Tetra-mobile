@@ -1433,7 +1433,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Az időzítők kis fájlok a Tetra mappájában, így minden szinkronizált eszközöd ezzel együtt indítja, szünetelteti és állítja le őket. Az Időzítő használatához engedélyezd a hozzáférést az összes fájlhoz.</string>
     <string name="timer_allow_access">Hozzáférés engedélyezése</string>
-    <string name="timer_too_many">Legfeljebb kilenc időzítő lehet: előbb állíts le vagy törölj egyet.</string>
     <string name="timer_could_not_start">Az időzítő nem indult el</string>
     <string name="timer_pin">Kitűzés</string>
     <string name="timer_unpin">Kitűzés megszüntetése</string>

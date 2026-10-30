@@ -1432,7 +1432,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Τα χρονόμετρα είναι μικρά αρχεία στον φάκελο του Tetra, ώστε κάθε συσκευή με την οποία συγχρονίζεστε να ξεκινά, να σταματά προσωρινά και να σταματά μαζί με αυτή. Επιτρέψτε την πρόσβαση σε όλα τα αρχεία για να χρησιμοποιήσετε το Χρονόμετρο.</string>
     <string name="timer_allow_access">Επιτρέψτε την πρόσβαση</string>
-    <string name="timer_too_many">Έως εννέα χρονόμετρα: σταματήστε ή διαγράψτε πρώτα ένα.</string>
     <string name="timer_could_not_start">Το χρονόμετρο δεν ξεκίνησε</string>
     <string name="timer_pin">Καρφίτσωμα</string>
     <string name="timer_unpin">Ξεκαρφίτσωμα</string>

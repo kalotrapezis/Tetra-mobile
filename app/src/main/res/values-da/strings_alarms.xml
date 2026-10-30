@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Alarm snart</string>
     <string name="alarm_channel_soon_about">30 minutter før en alarm, for at springe den over eller udsætte den</string>
     <string name="stand_mode">Natbordsur</string>
-    <string name="stand_about">Et svagt ur på sort under opladning, skånsomt for AMOLED-skærme; det flytter sig lidt hvert minut. Vælg Natbordsur som Androids pauseskærm, så det starter under opladning.</string>
+    <string name="stand_about">Et svagt ur på sort under opladning, skånsomt for AMOLED-skærme; det flytter sig lidt hvert minut. Vælg Natbordsur som Androids pauseskærm, så det starter under opladning. Før en alarm lyser det op som en solopgang, fra dyb rød til varm gul, over 20 minutter.</string>
     <string name="stand_settings">Indstillinger for pauseskærm</string>
 </resources>

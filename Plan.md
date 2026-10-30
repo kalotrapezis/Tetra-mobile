@@ -2434,6 +2434,13 @@ the timers so they reach the tablet and PC; the skill and its helper; AI Assist 
       before the ring: that ring answered, rings 10 min later); all in the file, so it syncs and outlives a reboot.
       Stand mode: StandDream, Android's screen saver (dim grey clock on black, the screen at its lowest, a step every
       minute); the Clock's moon button explains it and opens Android's Screen saver page, where the user picks it.
+      Then (the user, same evening): "an Add new card … remove the limit of … 9 timers" (TimerFiles.MAX gone; the desktop's
+      timer.js still has MAX = 9); the alarm's name on top of its card so Skip next fits; "Add new … and the buttons for the
+      stop watch … above the island"; "on landscape and tablet make it a + next to the island like the contacts"; "dont use
+      words add svgs" (round icons: +, play/pause, flag for Lap, refresh for Reset); stand mode's **sunrise**: 20 minutes
+      before the next alarm (snoozes counted, a skip not) the screen goes deep red → orange → warm yellow and its brightness
+      rises to full at the ring. Checked on the phone (portrait and landscape); stand mode seen running (dim clock); the
+      sunrise itself not seen; the tablet not checked (not on USB).
 
 ### Left
 - [ ] The real pair: start on the tablet, pause on the PC, OK on the phone — on the user's tablet (971f6b37) once the main

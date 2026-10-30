@@ -1476,7 +1476,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Tajmeri su male datoteke u mapi Tetre, pa se svaki uređaj s kojim se sinkronizirate pokreće, pauzira i zaustavlja zajedno s ovim. Dopustite pristup svim datotekama da biste koristili Tajmer.</string>
     <string name="timer_allow_access">Dopusti pristup</string>
-    <string name="timer_too_many">Najviše devet tajmera: najprije zaustavite ili izbrišite jedan.</string>
     <string name="timer_could_not_start">Tajmer se nije mogao pokrenuti</string>
     <string name="timer_pin">Prikvači</string>
     <string name="timer_unpin">Otkvači</string>

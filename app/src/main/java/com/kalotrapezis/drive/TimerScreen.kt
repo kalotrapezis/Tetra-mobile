@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -63,6 +64,7 @@ internal val TIMER_COLOR = Color(0xFF26A69A)
 internal fun TimerScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit) {
     val context = LocalContext.current
     val wide = LocalConfiguration.current.screenWidthDp >= 700
+    val side = wide || LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp // landscape or a tablet: the actions beside the island
     val scope = rememberCoroutineScope()
     BackHandler { back() }
 
@@ -99,42 +101,40 @@ internal fun TimerScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit
     fun start(seconds: Long) = scope.launch {
         if (seconds <= 0) return@launch
         val done = withContext(Dispatchers.IO) { runCatching { TimerControl.start(context, seconds) }.onFailure { WriterLog.e("Timer: could not start", it) } }
-        done.exceptionOrNull()?.let { android.widget.Toast.makeText(context, if (it is TimerFiles.TooMany) context.getString(R.string.timer_too_many) else it.message ?: context.getString(R.string.timer_could_not_start), android.widget.Toast.LENGTH_SHORT).show() }
+        done.exceptionOrNull()?.let { android.widget.Toast.makeText(context, it.message ?: context.getString(R.string.timer_could_not_start), android.widget.Toast.LENGTH_SHORT).show() }
     }
     fun change(r: TimerRecord, action: String) = scope.launch(Dispatchers.IO) { runCatching { TimerControl.change(context, r.id, action) }.onFailure { WriterLog.e("Timer: $action failed", it) } }
 
-    // the cards, three to a row on a big screen, two on a phone (the user, 18 Oct: "The UI will fit 9 timers")
+    var tab by remember { mutableStateOf(lastTab) }
+    val choose = { t: Int -> tab = t; lastTab = t }
+    // the cards, three to a row on a big screen, two on a phone, as many as there are
     val per = if (wide) 3 else 2
     val timersPane: @Composable () -> Unit = {
-        Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = TOP),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            Column(Modifier.widthIn(max = if (wide) 900.dp else 520.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    FilledTonalButton(onClick = { adding = true }) {
-                        Icon(painterResource(R.drawable.ic_add), contentDescription = null); Text(" " + stringResource(R.string.timer_add_new), maxLines = 1)
+        Box(Modifier.fillMaxSize()) {
+            Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = TOP),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(Modifier.widthIn(max = if (wide) 900.dp else 520.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (timers.isEmpty()) Text(stringResource(R.string.timer_list_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    timers.chunked(per).forEach { row ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            row.forEach { r -> Box(Modifier.weight(1f)) { TimerCard(r, now, ::change) } }
+                            repeat(per - row.size) { Spacer(Modifier.weight(1f)) }
+                        }
                     }
+                    Spacer(Modifier.navigationBarsPadding().height(listEnd(side)))
                 }
-                if (timers.isEmpty()) Text(stringResource(R.string.timer_list_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                timers.chunked(per).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        row.forEach { r -> Box(Modifier.weight(1f)) { TimerCard(r, now, ::change) } }
-                        repeat(per - row.size) { Spacer(Modifier.weight(1f)) }
-                    }
-                }
-                Spacer(Modifier.navigationBarsPadding().height(BOTTOM))
             }
+            TimerBar(0, choose, side) { IslandAction(R.drawable.ic_add, stringResource(R.string.timer_add_new)) { adding = true } }
         }
     }
 
-    var tab by remember { mutableStateOf(lastTab) }
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(Modifier.fillMaxSize()) {
-            if (tab == 1) AlarmsPane(wide)
-            else if (tab == 2) StopwatchPane()
+            if (tab == 1) AlarmsPane(wide, side, choose)
+            else if (tab == 2) StopwatchPane(side, choose)
             else timersPane()
             FilesPageHeader(title = stringResource(R.string.app_timer), icon = R.drawable.ic_timer, back = back, island = true, trailing = { StandButton() },
                 modifier = Modifier.align(Alignment.TopCenter).padding(horizontal = 16.dp))
-            TimerTabs(tab, { tab = it; lastTab = it }, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp))
         }
     }
     if (adding) {
@@ -150,11 +150,22 @@ internal fun TimerScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable internal fun DialDialog(hour: Int, minute: Int, close: () -> Unit, done: (Int, Int) -> Unit) {
     val clock = rememberTimePickerState(hour, minute, is24Hour = true)
-    AlertDialog(onDismissRequest = close,
-        confirmButton = { FilledIconButton(onClick = { done(clock.hour, clock.minute) }) { Icon(painterResource(R.drawable.ic_check), contentDescription = stringResource(R.string.common_ok)) } },
-        dismissButton = { IconButton(onClick = close) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_cancel)) } },
-        text = { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { TimePicker(clock) } })
+    // × and ✓ in the middle, for either hand (the user, 30 Oct), so not in AlertDialog's own buttons at the end
+    AlertDialog(onDismissRequest = close, confirmButton = {},
+        text = {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                TimePicker(clock)
+                CrossCheck(close) { done(clock.hour, clock.minute) }
+            }
+        })
 }
+
+/** × and ✓ side by side in the middle of a Clock dialog, icons without words (the user, 30 Oct). */
+@Composable internal fun CrossCheck(close: () -> Unit, done: () -> Unit) =
+    Row(horizontalArrangement = Arrangement.spacedBy(32.dp), verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = close, modifier = Modifier.size(56.dp)) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_cancel)) }
+        FilledIconButton(onClick = done, modifier = Modifier.size(56.dp)) { Icon(painterResource(R.drawable.ic_check), contentDescription = stringResource(R.string.common_save)) }
+    }
 
 /**
  * A timer's card: the time left, its buttons under it; the pin at the top left keeps the card when it is stopped or done

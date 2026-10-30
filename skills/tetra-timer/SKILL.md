@@ -47,7 +47,7 @@ A file:
 - `rev`: goes up by one at every change. **All the files with the same `id` are one timer; the one with the highest
   `rev` is it** (equal: stopped beats paused beats running).
 - `pinned`: the card stays when the timer is stopped or done, ready to start again.
-- Nine timers on screen at most (running, paused, ringing or pinned).
+- Any number of timers (the limit of nine went on 30 Oct 2026; an older desktop Tetra still shows nine).
 
 ## Rules
 

@@ -1476,7 +1476,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Los temporizadores son pequeños archivos en la carpeta de Tetra, así que todos los dispositivos con los que sincronizas los inician, pausan y detienen junto con este. Permite el acceso a todos los archivos para usar el Temporizador.</string>
     <string name="timer_allow_access">Permitir acceso</string>
-    <string name="timer_too_many">Nueve temporizadores como máximo: detén o elimina uno antes.</string>
     <string name="timer_could_not_start">No se ha podido iniciar el temporizador</string>
     <string name="timer_pin">Fijar</string>
     <string name="timer_unpin">No fijar</string>

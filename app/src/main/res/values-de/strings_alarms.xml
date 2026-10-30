@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Wecker bald</string>
     <string name="alarm_channel_soon_about">30 Minuten vor einem Wecker, um ihn zu überspringen oder zu verschieben</string>
     <string name="stand_mode">Nachttischuhr</string>
-    <string name="stand_about">Eine schwache Uhr auf Schwarz beim Laden, schonend für AMOLED-Bildschirme; sie wandert jede Minute ein wenig. Wähle Nachttischuhr als Bildschirmschoner von Android, damit sie beim Laden startet.</string>
+    <string name="stand_about">Eine schwache Uhr auf Schwarz beim Laden, schonend für AMOLED-Bildschirme; sie wandert jede Minute ein wenig. Wähle Nachttischuhr als Bildschirmschoner von Android, damit sie beim Laden startet. Vor einem Wecker wird es hell wie ein Sonnenaufgang, von tiefem Rot zu warmem Gelb, über 20 Minuten.</string>
     <string name="stand_settings">Bildschirmschoner-Einstellungen</string>
 </resources>

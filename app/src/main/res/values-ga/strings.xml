@@ -1562,7 +1562,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Is comhaid bheaga iad amadóirí i bhfillteán Tetra, mar sin tosaíonn, sosann agus stopann gach gléas ar a bhfuil tú sioncrónaithe leis an gceann seo. Ceadaigh rochtain ar gach comhad chun an t-amadóir a úsáid.</string>
     <string name="timer_allow_access">Ceadaigh rochtain</string>
-    <string name="timer_too_many">Naoi n-amadóir ar a mhéad: stop nó scrios ceann amháin ar dtús.</string>
     <string name="timer_could_not_start">Níorbh fhéidir an t-amadóir a thosú</string>
     <string name="timer_pin">Greamaigh</string>
     <string name="timer_unpin">Díghreamaigh</string>

@@ -1433,7 +1433,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Timrar är små filer i Tetras mapp, så alla enheter du synkar med startar, pausar och stoppar samtidigt som den här. Tillåt åtkomst till alla filer för att använda Timer.</string>
     <string name="timer_allow_access">Tillåt åtkomst</string>
-    <string name="timer_too_many">Högst nio timrar: stoppa eller ta bort en först.</string>
     <string name="timer_could_not_start">Timern kunde inte starta</string>
     <string name="timer_pin">Fäst</string>
     <string name="timer_unpin">Lossa</string>

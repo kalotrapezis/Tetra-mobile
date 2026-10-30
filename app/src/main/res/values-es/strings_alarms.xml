@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Alarma pronto</string>
     <string name="alarm_channel_soon_about">30 minutos antes de una alarma, para omitirla o posponerla</string>
     <string name="stand_mode">Reloj de mesilla</string>
-    <string name="stand_about">Un reloj tenue sobre negro mientras carga, amable con las pantallas AMOLED; se mueve un poco cada minuto. Elige Reloj de mesilla como salvapantallas de Android, para que empiece al cargar.</string>
+    <string name="stand_about">Un reloj tenue sobre negro mientras carga, amable con las pantallas AMOLED; se mueve un poco cada minuto. Elige Reloj de mesilla como salvapantallas de Android, para que empiece al cargar. Antes de una alarma se ilumina como un amanecer, de rojo intenso a amarillo cálido, durante 20 minutos.</string>
     <string name="stand_settings">Ajustes del salvapantallas</string>
 </resources>

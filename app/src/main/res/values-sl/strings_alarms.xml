@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Budilka kmalu</string>
     <string name="alarm_channel_soon_about">30 minut pred budilko, da jo preskočiš ali odložiš</string>
     <string name="stand_mode">Nočna ura</string>
-    <string name="stand_about">Zatemnjena ura na črnem med polnjenjem, prizanesljiva do zaslonov AMOLED; vsako minuto se malo premakne. Izberi Nočno uro za Androidov ohranjevalnik zaslona, da se zažene med polnjenjem.</string>
+    <string name="stand_about">Zatemnjena ura na črnem med polnjenjem, prizanesljiva do zaslonov AMOLED; vsako minuto se malo premakne. Izberi Nočno uro za Androidov ohranjevalnik zaslona, da se zažene med polnjenjem. Pred budilko zasveti kot sončni vzhod, od temno rdeče do tople rumene, v 20 minutah.</string>
     <string name="stand_settings">Nastavitve ohranjevalnika zaslona</string>
 </resources>

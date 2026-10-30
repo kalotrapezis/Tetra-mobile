@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Alarmă în curând</string>
     <string name="alarm_channel_soon_about">Cu 30 de minute înaintea unei alarme, pentru a o omite sau amâna</string>
     <string name="stand_mode">Ceas de noptieră</string>
-    <string name="stand_about">Un ceas estompat pe negru în timpul încărcării, blând cu ecranele AMOLED; se mută puțin în fiecare minut. Alege Ceas de noptieră ca economizor de ecran Android, ca să pornească la încărcare.</string>
+    <string name="stand_about">Un ceas estompat pe negru în timpul încărcării, blând cu ecranele AMOLED; se mută puțin în fiecare minut. Alege Ceas de noptieră ca economizor de ecran Android, ca să pornească la încărcare. Înaintea unei alarme se luminează ca un răsărit, de la roșu închis la galben cald, în 20 de minute.</string>
     <string name="stand_settings">Setări economizor de ecran</string>
 </resources>

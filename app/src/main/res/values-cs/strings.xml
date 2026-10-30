@@ -1519,7 +1519,6 @@
     <!-- Timer -->
     <string name="timer_access_needed">Časovače jsou malé soubory ve složce Tetry, takže každé synchronizované zařízení se s tímto spouští, pozastavuje a zastavuje. Pro použití Časovače povolte přístup ke všem souborům.</string>
     <string name="timer_allow_access">Povolit přístup</string>
-    <string name="timer_too_many">Nejvýše devět časovačů: nejdřív jeden zastavte nebo smažte.</string>
     <string name="timer_could_not_start">Časovač se nepodařilo spustit</string>
     <string name="timer_pin">Připnout</string>
     <string name="timer_unpin">Odepnout</string>

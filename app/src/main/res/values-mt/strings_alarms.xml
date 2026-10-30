@@ -30,6 +30,6 @@
     <string name="alarm_channel_soon">Allarm dalwaqt</string>
     <string name="alarm_channel_soon_about">30 minuta qabel allarm, biex taqbżu jew tipposponih</string>
     <string name="stand_mode">Arloġġ tal-lejl</string>
-    <string name="stand_about">Arloġġ baħħ fuq iswed waqt l-iċċarġjar, ġentili mal-iskrins AMOLED; jiċċaqlaq ftit kull minuta. Agħżel Arloġġ tal-lejl bħala s-screen saver ta\' Android, biex jibda waqt l-iċċarġjar.</string>
+    <string name="stand_about">Arloġġ baħħ fuq iswed waqt l-iċċarġjar, ġentili mal-iskrins AMOLED; jiċċaqlaq ftit kull minuta. Agħżel Arloġġ tal-lejl bħala s-screen saver ta\' Android, biex jibda waqt l-iċċarġjar. Qabel allarm jixgħel bħal tlugħ ix-xemx, minn aħmar skur għal isfar sħun, f\'20 minuta.</string>
     <string name="stand_settings">Settings tas-screen saver</string>
 </resources>
