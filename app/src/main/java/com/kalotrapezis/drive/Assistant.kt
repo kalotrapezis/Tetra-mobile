@@ -364,6 +364,11 @@ internal class AssistantTools(
     // shortcut: ranks matches from the middle of Greece, not from where the phone is; pass the fix when "the nearest Lidl" matters
     private fun locate(text: String): Place? {
         val root = MapsFiles.root(tetra)
+        // the user's own places first (the user, 30 Oct: "Άγιος Θωμάς, Σπίτι" found nothing): every word in its name or
+        // label, commas and the like aside
+        val words = MapsSearch.fold(text).split(Regex("[^\\p{L}\\p{N}]+")).filter { it.isNotEmpty() }
+        if (words.isNotEmpty()) MapsFiles.places(root).firstOrNull { p -> MapsSearch.fold("${p.name} ${p.label}").let { n -> words.all { it in n } } }
+            ?.let { return Place("", it.name, it.lat, it.lng) }
         val pois = runCatching { MapsSearch.load(root) }.getOrDefault(emptyList())
         runCatching { MapsAddresses.locate(root, text, pois) }.getOrNull()?.let { (lat, lng) -> return Place("", text, lat, lng) }
         return MapsSearch.search(pois, text, 38.4, 23.8, limit = 1).firstOrNull()?.let { Place("", it.name, it.lat, it.lng) }

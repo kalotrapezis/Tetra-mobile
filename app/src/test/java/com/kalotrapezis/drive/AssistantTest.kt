@@ -230,6 +230,9 @@ class AssistantTest {
         assertEquals("maps-search:Ερμού 10, Αθήνα", t.run("navigate", JSONObject().put("place", "Ερμού 10, Αθήνα")).go)
         ContactsFiles.save(ContactsFiles.root(tetra), null, ContactInfo(formatted = "Άννα Λουκά"))
         assertEquals("No address is saved for Άννα Λουκά.", t.run("navigate", JSONObject().put("contact", "Άννα Λουκά")).forModel)
+        // a saved place, said with a comma and its label: directions start, not a search
+        MapsFiles.save(MapsFiles.root(tetra), Place("home", "Άγιος Θωμάς", 38.27, 23.58, label = "Σπίτι"))
+        assertEquals("maps-go:38.27,23.58,Άγιος Θωμάς", t.run("navigate", JSONObject().put("place", "Άγιος Θωμάς, Σπίτι")).go)
     }
 
     @Test fun vadEndsAPhraseAtAPauseAndWavIsWellFormed() {
