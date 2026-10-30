@@ -173,6 +173,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.FileProvider
 import androidx.core.view.WindowCompat
@@ -1222,11 +1223,13 @@ private fun Home(
             icon?.let { Image(it, contentDescription = null, modifier = Modifier.size(36.dp)) }
             Text(
                 if (editing) stringResource(R.string.home_edit) else stringResource(R.string.app_name),
-                // a size down while editing, so "Edit Home" breaks between its words, not inside one
-                style = (if (editing) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineLarge).copy(
+                style = MaterialTheme.typography.headlineLarge.copy(
                     shadow = Shadow(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.24f), Offset(2f, 3f), 2f),
                 ),
                 modifier = Modifier.weight(1f),
+                // while editing, "Edit Home" shrinks to fit one line in any language (the user, 30 Oct)
+                maxLines = if (editing) 1 else Int.MAX_VALUE,
+                autoSize = if (editing) androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 16.sp, maxFontSize = MaterialTheme.typography.headlineMedium.fontSize) else null,
             )
             if (editing) {
                 // ✓ and × (the user, 30 Oct: the two text buttons left the title no room)
