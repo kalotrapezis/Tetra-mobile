@@ -934,7 +934,13 @@ private fun ContactPage(c: Contact, all: List<Contact>, wide: Boolean, close: ()
     }
 
 @Composable private fun DetailRow(label: String, value: String, action: String? = null, onClick: (() -> Unit)? = null, trailing: @Composable () -> Unit = {}) {
-    Row(Modifier.fillMaxWidth().then(if (onClick != null && action == null) Modifier.clickable(onClick = onClick) else Modifier).padding(horizontal = 16.dp, vertical = 10.dp),
+    val context = LocalContext.current
+    // a long press copies the value (the user, 30 Oct: "when I long press a number copy it"); Android 13+ shows its own "Copied"
+    val copy = {
+        context.getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(android.content.ClipData.newPlainText(label, value))
+        if (android.os.Build.VERSION.SDK_INT < 33) android.widget.Toast.makeText(context, R.string.photos_copied, android.widget.Toast.LENGTH_SHORT).show()
+    }
+    Row(Modifier.fillMaxWidth().combinedClickable(onLongClick = copy, onClick = if (onClick != null && action == null) onClick else ({})).padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
