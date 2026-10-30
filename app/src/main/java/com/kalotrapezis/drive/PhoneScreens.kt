@@ -255,7 +255,8 @@ private fun CallNoteDialog(call: Call, done: () -> Unit) {
     var text by remember { mutableStateOf(parts.firstNotNullOfOrNull { PhoneNotes.of(context, PhoneCalls.number(it).orEmpty(), it.details.creationTimeMillis) }.orEmpty()) }
     AlertDialog(onDismissRequest = done, title = { Text(stringResource(R.string.phone_note_title)) },
         text = { OutlinedTextField(text, { text = it }, minLines = 3, modifier = Modifier.fillMaxWidth()) },
-        confirmButton = { TextButton(onClick = { parts.forEach { p -> PhoneNotes.save(context, PhoneCalls.number(p).orEmpty(), p.details.creationTimeMillis, text.trim()) }; done() }) { Text(stringResource(R.string.common_save), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
+        confirmButton = { TextButton(onClick = { parts.forEach { p -> PhoneNotes.save(context, PhoneCalls.number(p).orEmpty(), p.details.creationTimeMillis, text.trim()) }
+            PhoneNotes.toNotes(context, PhoneCalls.title(context, call), call.details.creationTimeMillis, text.trim()); done() }) { Text(stringResource(R.string.common_save), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
         dismissButton = { TextButton(onClick = done) { Text(stringResource(R.string.common_cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } })
 }
 

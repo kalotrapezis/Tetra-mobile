@@ -314,6 +314,20 @@ internal object PhoneNotes {
         file().apply { parentFile?.mkdirs() }.appendText(org.json.JSONObject().put("at", at).put("number", number).put("note", note).toString() + "\n")
         c.applicationContext.let { app -> Thread { PhoneHistory.write(app) }.start() } // the note into the computer's copy too
     }.onFailure { WriterLog.w("Phone: the note was not saved (${it.message})") }
+
+    /**
+     * The call's note in Notes too, tagged with the person's name (the user, 30 Oct: "a note button that tags that note, in
+     * the notes applet with the name of the person"): one note per call, found again by its title when written again.
+     */
+    fun toNotes(c: Context, who: String, at: Long, note: String) = runCatching {
+        if (note.isBlank() || who.isBlank()) return@runCatching
+        val title = "$who · " + java.time.Instant.ofEpochMilli(at).atZone(java.time.ZoneId.systemDefault())
+            .format(java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy HH:mm", c.resources.configuration.locales[0]))
+        val store = notesStore()
+        val n = store.list().firstOrNull { it.title == title && it.trashedAt == null } ?: store.create(checklist = false, labels = listOf(who))
+        store.setText(n.id, title, note, null)
+        NotesSync.soon(c)
+    }.onFailure { WriterLog.w("Phone: the note did not reach Notes (${it.message})") }
 }
 
 /** Decline and Hang up from the call's notification. */
