@@ -129,6 +129,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -1209,6 +1210,9 @@ private fun Home(
     var layout by remember(wide) { mutableStateOf(HomeLayout.load(context, wide)) }
     var editing by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     fun change(items: List<HomeItem>) { layout = items; HomeLayout.save(context, wide, items) }
+    // what × goes back to: the layout as it was when editing began (pencil or a long press)
+    var before by remember(wide) { mutableStateOf(layout) }
+    LaunchedEffect(editing) { if (editing) before = layout }
     BackHandler(editing) { editing = false }
     val scroll = rememberScrollState()
     Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(scroll).padding(start = 10.dp, top = 16.dp, end = 10.dp, bottom = 22.dp)) {
@@ -1224,12 +1228,16 @@ private fun Home(
                 modifier = Modifier.weight(1f),
             )
             if (editing) {
-                TextButton(onClick = { HomeLayout.reset(context, wide); layout = HomeLayout.load(context, wide) }) { Text(stringResource(R.string.home_reset), maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                Button(onClick = { editing = false }) { Text(stringResource(R.string.common_done), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                // ✓ and × (the user, 30 Oct: the two text buttons left the title no room)
+                IconButton(onClick = { change(before); editing = false }) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_cancel)) }
+                FilledIconButton(onClick = { editing = false }) { Icon(painterResource(R.drawable.ic_check), contentDescription = stringResource(R.string.common_done)) }
             } else IconButton(onClick = { editing = true }) { Icon(painterResource(R.drawable.ic_edit), contentDescription = stringResource(R.string.home_edit)) }
         }
-        if (editing) Text(stringResource(R.string.home_edit_hint),
-            style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 6.dp, end = 6.dp, bottom = 6.dp))
+        if (editing) {
+            Text(stringResource(R.string.home_edit_hint),
+                style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 6.dp, end = 6.dp))
+            TextButton(onClick = { HomeLayout.reset(context, wide); layout = HomeLayout.load(context, wide) }) { Text(stringResource(R.string.home_reset)) }
+        }
         HomeGrid(layout, cols, editing, { editing = true }, ::change, scroll, large, ::icons)
         if (editing) {
             val hidden = layout.filter { it.hidden }
