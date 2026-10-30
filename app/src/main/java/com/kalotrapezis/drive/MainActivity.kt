@@ -1222,7 +1222,8 @@ private fun Home(
             icon?.let { Image(it, contentDescription = null, modifier = Modifier.size(36.dp)) }
             Text(
                 if (editing) stringResource(R.string.home_edit) else stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineLarge.copy(
+                // a size down while editing, so "Edit Home" breaks between its words, not inside one
+                style = (if (editing) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineLarge).copy(
                     shadow = Shadow(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.24f), Offset(2f, 3f), 2f),
                 ),
                 modifier = Modifier.weight(1f),
