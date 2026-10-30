@@ -20,4 +20,16 @@
     <string name="alarm_every_day">Vsak dan</string>
     <string name="alarm_in">Naslednja budilka čez %1$s</string>
     <string name="alarm_none">Budilk še ni. Budilka zvoni v tej napravi in v vsaki napravi, s katero sinhronizirate; izklopite jo v eni in preneha zvoniti v vseh.</string>
+    <string name="timer_add_new">Dodaj</string>
+    <string name="timer_list_hint">Še ni časovnikov. Dodaj odpre uro: nastavi ure, nato minute, in ✓ ga zažene. Pripni časovnik, da ostane tukaj, pripravljen na ponoven zagon.</string>
+    <string name="alarm_set_time">Nastavi čas</string>
+    <string name="alarm_skip_next">Preskoči naslednjega</string>
+    <string name="alarm_unskip">Razveljavi preskok</string>
+    <string name="alarm_skipped">naslednji preskočen</string>
+    <string name="alarm_soon">Budilka ob %1$s · preskočiš ali dremež?</string>
+    <string name="alarm_channel_soon">Budilka kmalu</string>
+    <string name="alarm_channel_soon_about">30 minut pred budilko, da jo preskočiš ali odložiš</string>
+    <string name="stand_mode">Nočna ura</string>
+    <string name="stand_about">Zatemnjena ura na črnem med polnjenjem, prizanesljiva do zaslonov AMOLED; vsako minuto se malo premakne. Izberi Nočno uro za Androidov ohranjevalnik zaslona, da se zažene med polnjenjem.</string>
+    <string name="stand_settings">Nastavitve ohranjevalnika zaslona</string>
 </resources>

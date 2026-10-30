@@ -20,4 +20,16 @@
     <string name="alarm_every_day">Katru dienu</string>
     <string name="alarm_in">Nākamais modinātājs pēc %1$s</string>
     <string name="alarm_none">Modinātāju vēl nav. Modinātājs zvana šajā ierīcē un katrā ierīcē, ar kuru sinhronizējat; izslēdziet to vienā, un tas apstājas visās.</string>
+    <string name="timer_add_new">Pievienot</string>
+    <string name="timer_list_hint">Taimeru vēl nav. Pievienot atver pulksteni: iestati stundas, tad minūtes, un ✓ to sāk. Piesprauž taimeri, lai tas paliktu šeit, gatavs atkal sākt.</string>
+    <string name="alarm_set_time">Iestatīt laiku</string>
+    <string name="alarm_skip_next">Izlaist nākamo</string>
+    <string name="alarm_unskip">Atsaukt izlaišanu</string>
+    <string name="alarm_skipped">nākamais izlaists</string>
+    <string name="alarm_soon">Modinātājs %1$s · izlaist vai atlikt?</string>
+    <string name="alarm_channel_soon">Modinātājs drīz</string>
+    <string name="alarm_channel_soon_about">30 minūtes pirms modinātāja, lai to izlaistu vai atliktu</string>
+    <string name="stand_mode">Nakts pulkstenis</string>
+    <string name="stand_about">Blāvs pulkstenis uz melna uzlādes laikā, saudzīgs pret AMOLED ekrāniem; ik minūti tas nedaudz pārvietojas. Izvēlies Nakts pulksteni kā Android ekrānsaudzētāju, lai tas sāktos uzlādes laikā.</string>
+    <string name="stand_settings">Ekrānsaudzētāja iestatījumi</string>
 </resources>

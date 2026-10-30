@@ -20,4 +20,16 @@
     <string name="alarm_every_day">Každý den</string>
     <string name="alarm_in">Další budík za %1$s</string>
     <string name="alarm_none">Zatím žádné budíky. Budík zazvoní na tomto zařízení i na každém zařízení, se kterým synchronizujete; vypnete-li ho na jednom, přestane zvonit na všech.</string>
+    <string name="timer_add_new">Přidat</string>
+    <string name="timer_list_hint">Zatím žádné časovače. Přidat otevře hodiny: nastav hodiny, pak minuty, a ✓ ho spustí. Připni časovač, aby tu zůstal připravený k dalšímu spuštění.</string>
+    <string name="alarm_set_time">Nastavit čas</string>
+    <string name="alarm_skip_next">Přeskočit příští</string>
+    <string name="alarm_unskip">Zrušit přeskočení</string>
+    <string name="alarm_skipped">příští přeskočen</string>
+    <string name="alarm_soon">Budík v %1$s · přeskočit, nebo odložit?</string>
+    <string name="alarm_channel_soon">Budík brzy</string>
+    <string name="alarm_channel_soon_about">30 minut před budíkem, k přeskočení nebo odložení</string>
+    <string name="stand_mode">Noční hodiny</string>
+    <string name="stand_about">Tlumené hodiny na černém při nabíjení, šetrné k AMOLED displejům; každou minutu se trochu posunou. Zvol Noční hodiny jako spořič obrazovky Androidu, ať se spustí při nabíjení.</string>
+    <string name="stand_settings">Nastavení spořiče obrazovky</string>
 </resources>

@@ -1435,7 +1435,6 @@
     <string name="timer_allow_access">Toegang toestaan</string>
     <string name="timer_too_many">Maximaal negen timers: stop of verwijder er eerst een.</string>
     <string name="timer_could_not_start">De timer kan niet starten</string>
-    <string name="timer_hint">Stel op de klok eerst de uren en dan de minuten in: de timer start als je je vinger van de minuten haalt. Zet een timer vast om hem hier klaar te houden voor een nieuwe start.</string>
     <string name="timer_pin">Vastzetten</string>
     <string name="timer_unpin">Losmaken</string>
     <string name="timer_times_up">Tijd is om</string>

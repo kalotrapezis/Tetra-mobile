@@ -1478,7 +1478,6 @@
     <string name="timer_allow_access">Dopusti pristup</string>
     <string name="timer_too_many">Najviše devet tajmera: najprije zaustavite ili izbrišite jedan.</string>
     <string name="timer_could_not_start">Tajmer se nije mogao pokrenuti</string>
-    <string name="timer_hint">Na satu postavite sate, zatim minute: tajmer počinje kad podignete prst s minuta. Prikvačite tajmer da ostane ovdje, spreman za ponovno pokretanje.</string>
     <string name="timer_pin">Prikvači</string>
     <string name="timer_unpin">Otkvači</string>
     <string name="timer_times_up">Vrijeme je isteklo</string>

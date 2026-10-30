@@ -115,6 +115,9 @@ An alarm, `alarm-<6 hex>.<device>.json`:
 - `answered`: the instant of the last ring stopped — Dismiss, Snooze or Skip, on any device. A ring at or before it does
   not sound; a new or switched-on alarm sets it to now, so nothing from before rings. `snooze`: one more ring at that
   instant (Snooze: the ring answered, `snooze` = now + 10 min).
+- **Skip next** (a repeating alarm): `answered` = the next ring's instant, so it is later than now; the ones after ring
+  as ever. Undo: switch it on again (`answered` = now). **Snooze before it rings** (the phone's notice 30 minutes
+  ahead): `answered` = the next ring, `snooze` = that ring + 10 min.
 - A ring nobody answers sounds for 10 minutes, then stops.
 - Every device rings it; Dismiss on one stops it on all (as a timer's OK).
 

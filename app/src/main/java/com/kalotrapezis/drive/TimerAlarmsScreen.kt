@@ -3,6 +3,7 @@ package com.kalotrapezis.drive
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,8 +29,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -111,7 +109,16 @@ internal val BOTTOM = 96.dp
                         Column(Modifier.weight(1f)) {
                             Text("%02d:%02d".format(a.time.hour, a.time.minute), style = MaterialTheme.typography.headlineMedium, fontFamily = FontFamily.Monospace,
                                 color = if (a.on(now, zone)) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
-                            Text(listOf(daysText(a), a.label).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            // skipped: the next ring already answered (Skip here, in the 30-minute notice or on another device)
+                            val skipped = a.repeats && a.state == AlarmRecord.ON && ringing == null && a.snooze == null && a.answered?.isAfter(now) == true
+                            Text(listOf(daysText(a), a.label, if (skipped) stringResource(R.string.alarm_skipped) else "").filter { it.isNotBlank() }.joinToString(" · "),
+                                style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            if (a.repeats && a.state == AlarmRecord.ON && ringing == null)
+                                TextButton(onClick = { io { TimerControl.alarmChange(context, a.id, if (skipped) TimerService.ALARM_ON else TimerService.ALARM_SKIP) } },
+                                    contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
+                                    Icon(painterResource(R.drawable.ic_skip_next), contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Text(" " + stringResource(if (skipped) R.string.alarm_unskip else R.string.alarm_skip_next), maxLines = 1)
+                                }
                         }
                         if (ringing != null) {
                             TextButton(onClick = { io { TimerControl.alarmChange(context, a.id, TimerService.ALARM_SNOOZE) } }) { Text(stringResource(R.string.alarm_snooze)) }
@@ -142,18 +149,30 @@ internal val BOTTOM = 96.dp
     else -> LocalContext.current.uiLocale().let { l -> AlarmRecord.WEEK.filter { it in a.days }.joinToString(", ") { it.getDisplayName(TextStyle.SHORT, l) } }
 }
 
-/** A new alarm or an edit: the clock, the days (none: once), the label. Many fields, so a dialog. */
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * A new alarm or an edit: the label on top, the time in a bubble with Set time (the clock in its modal, as a timer's), the
+ * days (none: once). Many fields, so a dialog.
+ */
 @Composable private fun AlarmDialog(a: AlarmRecord?, close: () -> Unit, save: (LocalTime, Set<DayOfWeek>, String) -> Unit) {
-    val clock = rememberTimePickerState(a?.time?.hour ?: 7, a?.time?.minute ?: 0, is24Hour = true)
+    var time by remember { mutableStateOf(a?.time ?: LocalTime.of(7, 0)) }
+    var dial by remember { mutableStateOf(false) }
     var days by remember { mutableStateOf(a?.days ?: emptySet()) }
     var label by remember { mutableStateOf(a?.label ?: "") }
     AlertDialog(onDismissRequest = close,
-        confirmButton = { Button(onClick = { save(LocalTime.of(clock.hour, clock.minute), days, label.trim()) }) { Text(stringResource(R.string.common_save)) } },
+        confirmButton = { Button(onClick = { save(time, days, label.trim()) }) { Text(stringResource(R.string.common_save)) } },
         dismissButton = { TextButton(onClick = close) { Text(stringResource(R.string.common_cancel)) } },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                TimePicker(clock)
+                OutlinedTextField(label, { label = it }, label = { Text(stringResource(R.string.alarm_label)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Surface(onClick = { dial = true }, shape = CircleShape, color = TIMER_COLOR.copy(alpha = 0.18f)) {
+                        Text("%02d:%02d".format(time.hour, time.minute), Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
+                            style = MaterialTheme.typography.displaySmall, fontFamily = FontFamily.Monospace, maxLines = 1)
+                    }
+                    FilledTonalButton(onClick = { dial = true }) {
+                        Icon(painterResource(R.drawable.ic_schedule), contentDescription = null); Text(" " + stringResource(R.string.alarm_set_time), maxLines = 1)
+                    }
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     AlarmRecord.WEEK.forEach { d ->
                         val on = d in days
@@ -165,9 +184,9 @@ internal val BOTTOM = 96.dp
                 }
                 Text(if (days.isEmpty()) stringResource(R.string.alarm_once) else if (days.size == 7) stringResource(R.string.alarm_every_day) else "",
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                OutlinedTextField(label, { label = it }, label = { Text(stringResource(R.string.alarm_label)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
             }
         })
+    if (dial) DialDialog(time.hour, time.minute, close = { dial = false }) { h, m -> time = LocalTime.of(h, m); dial = false }
 }
 
 /** The stopwatch, the same on every device: the time to a tenth, Start/Pause, Lap, Reset, the laps under them. */

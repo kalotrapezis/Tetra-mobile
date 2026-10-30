@@ -1435,7 +1435,6 @@
     <string name="timer_allow_access">Luba juurdepääs</string>
     <string name="timer_too_many">Kõige rohkem üheksa taimerit: peatage või kustutage esmalt üks.</string>
     <string name="timer_could_not_start">Taimerit ei õnnestunud käivitada</string>
-    <string name="timer_hint">Määrake kellal tunnid, seejärel minutid: taimer käivitub, kui tõstate sõrme minutitelt. Kinnitage taimer, et see jääks siia uuesti käivitamiseks valmis.</string>
     <string name="timer_pin">Kinnita</string>
     <string name="timer_unpin">Vabasta</string>
     <string name="timer_times_up">Aeg on täis</string>

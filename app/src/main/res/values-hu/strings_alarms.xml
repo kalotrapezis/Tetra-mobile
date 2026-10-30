@@ -20,4 +20,16 @@
     <string name="alarm_every_day">Minden nap</string>
     <string name="alarm_in">Következő ébresztő %1$s múlva</string>
     <string name="alarm_none">Még nincs ébresztő. Az ébresztő ezen az eszközön és minden szinkronizált eszközön csenget; állítsa le az egyiken, és mindenhol leáll.</string>
+    <string name="timer_add_new">Új</string>
+    <string name="timer_list_hint">Még nincs időzítő. Az Új megnyitja az órát: állítsd be az órát, majd a percet, és a ✓ elindítja. Tűzz ki egy időzítőt, hogy itt maradjon újraindításra készen.</string>
+    <string name="alarm_set_time">Idő beállítása</string>
+    <string name="alarm_skip_next">Következő kihagyása</string>
+    <string name="alarm_unskip">Kihagyás visszavonása</string>
+    <string name="alarm_skipped">a következő kimarad</string>
+    <string name="alarm_soon">Ébresztő %1$s-kor · kihagyod vagy szundi?</string>
+    <string name="alarm_channel_soon">Ébresztő hamarosan</string>
+    <string name="alarm_channel_soon_about">30 perccel ébresztő előtt, a kihagyásához vagy halasztásához</string>
+    <string name="stand_mode">Éjjeli óra</string>
+    <string name="stand_about">Halvány óra feketén töltés közben, kíméli az AMOLED kijelzőt; percenként kicsit arrébb lép. Válaszd az Éjjeli órát az Android képernyővédőjének, hogy töltéskor induljon.</string>
+    <string name="stand_settings">Képernyővédő beállításai</string>
 </resources>

@@ -1521,7 +1521,6 @@
     <string name="timer_allow_access">Ippermetti l-aċċess</string>
     <string name="timer_too_many">Disa’ tajmers biss: waqqaf jew ħassar wieħed l-ewwel.</string>
     <string name="timer_could_not_start">It-tajmer ma setax jibda</string>
-    <string name="timer_hint">Issettja s-sigħat, imbagħad il-minuti, fuq l-arloġġ: it-tajmer jibda meta titlaq subgħek mill-minuti. Waħħal tajmer biex iżżommu hawn, lest biex jerġa’ jibda.</string>
     <string name="timer_pin">Waħħal</string>
     <string name="timer_unpin">Neħħi l-waħħal</string>
     <string name="timer_times_up">Il-ħin spiċċa</string>

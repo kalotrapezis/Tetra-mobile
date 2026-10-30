@@ -56,6 +56,27 @@ class TimerAlarmsTest {
         assertTrue(skipped.on(t0, zone))
     }
 
+    /** The 30-minute notice's Snooze and the Skip next button (TimerControl.alarmChange), carried in the file to the tablet. */
+    @Test fun snoozeBeforeTheRingAndSkipNextReachTheOtherDeviceAndUndo() {
+        val a = TimerAlarmFiles.add(phone, LocalTime.of(7, 0), setOf(DayOfWeek.FRIDAY, DayOfWeek.SATURDAY), "", "Phone", t0, zone)
+        val notice = at("2026-10-30T06:35")
+        val next = a.next(notice, zone)!!
+        TimerAlarmFiles.write(phone, a.snoozed(next, next, "Phone")) // Snooze, 25 minutes before
+        carry(phone, tablet)
+        val there = TimerAlarmFiles.alarms(tablet).single()
+        assertNull(there.ringing(at("2026-10-30T07:01"), zone)) // 07:00 does not ring
+        assertEquals(at("2026-10-30T07:10"), there.next(notice, zone))
+        assertEquals(at("2026-10-30T07:10"), there.ringing(at("2026-10-30T07:11"), zone))
+
+        val skip = there.dismiss(there.next(notice, zone)!!, "Tablet") // Skip next: only the snoozed 07:10 goes
+        TimerAlarmFiles.write(tablet, skip)
+        carry(tablet, phone)
+        val back = TimerAlarmFiles.alarms(phone).single()
+        assertNull(back.ringing(at("2026-10-30T07:11"), zone))
+        assertEquals(at("2026-10-31T07:00"), back.next(notice, zone)) // Saturday rings as ever
+        assertEquals(at("2026-10-30T07:00"), back.switchOn(notice, zone, "Phone").next(notice, zone)) // Undo skip
+    }
+
     @Test fun offOnAndDeleteGoByRevAndADeletedFileIsUsedAgain() {
         val a = TimerAlarmFiles.add(phone, LocalTime.of(6, 0), emptySet(), "", "Phone", t0, zone)
         TimerAlarmFiles.write(phone, a.switchOff("Phone"))

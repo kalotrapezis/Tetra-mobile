@@ -196,6 +196,7 @@ class CalendarAlarmReceiver : BroadcastReceiver() {
         Thread {
             when (intent.action) {
                 AlarmPlan.SKIP -> runCatching { TimerControl.alarmChange(app, intent.getStringExtra("id").orEmpty(), TimerService.ALARM_SKIP) }
+                AlarmPlan.SNOOZE -> runCatching { TimerControl.alarmChange(app, intent.getStringExtra("id").orEmpty(), TimerService.ALARM_SNOOZE) }
                 AlarmPlan.LOOK -> Unit
                 else -> runCatching { CalendarAlarms.handle(app, intent) }.onFailure { WriterLog.e("Calendar reminders: ${intent.action} failed", it) }
             }

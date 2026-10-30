@@ -1521,7 +1521,6 @@
     <string name="timer_allow_access">Zezwól na dostęp</string>
     <string name="timer_too_many">Najwyżej dziewięć minutników: najpierw zatrzymaj lub usuń jeden.</string>
     <string name="timer_could_not_start">Nie udało się uruchomić minutnika</string>
-    <string name="timer_hint">Ustaw na tarczy godziny, potem minuty: minutnik startuje, gdy oderwiesz palec od minut. Przypnij minutnik, by został tutaj, gotowy do ponownego startu.</string>
     <string name="timer_pin">Przypnij</string>
     <string name="timer_unpin">Odepnij</string>
     <string name="timer_times_up">Czas minął</string>

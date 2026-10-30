@@ -1435,7 +1435,6 @@
     <string name="timer_allow_access">Salli pääsy</string>
     <string name="timer_too_many">Enintään yhdeksän ajastinta: pysäytä tai poista ensin yksi.</string>
     <string name="timer_could_not_start">Ajastinta ei voitu käynnistää</string>
-    <string name="timer_hint">Aseta kellosta ensin tunnit, sitten minuutit: ajastin käynnistyy, kun nostat sormen minuuteista. Kiinnitä ajastin, niin se pysyy täällä valmiina uudelleen käynnistettäväksi.</string>
     <string name="timer_pin">Kiinnitä</string>
     <string name="timer_unpin">Irrota</string>
     <string name="timer_times_up">Aika loppui</string>

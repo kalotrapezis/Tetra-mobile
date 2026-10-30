@@ -111,6 +111,13 @@
         <service android:name=".TimerService" android:exported="false" android:foregroundServiceType="specialUse">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Countdown timer, alarm or stopwatch the user started, kept in step with their other devices" />
         </service>
+        <!-- Stand mode: a dim clock on black while charging, chosen as Android's screen saver -->
+        <service android:name=".StandDream" android:exported="true" android:label="@string/stand_mode" android:permission="android.permission.BIND_DREAM_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
         <!-- Data's live speed in the status bar, while the user has it on (Plan.md § Data) -->
         <service android:name=".DataSpeedService" android:exported="false" android:foregroundServiceType="specialUse">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Shows the network speed in the status bar, which the user switched on" />

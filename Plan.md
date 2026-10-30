@@ -2424,6 +2424,16 @@ the timers so they reach the tablet and PC; the skill and its helper; AI Assist 
       is posted again when Tetra leaves the front. AI Assist: alarm_add/list/delete, stopwatch. Tests: TimerAlarmsTest (6).
 - [ ] Desktop (Drive desktop/): timer.js to read `kind` alarm/stopwatch, ring alarms, a stopwatch; its AI Assist the same tools.
 - [ ] Seen on the phone: the island for a timer, the stopwatch and the next alarm (not checked: the phone was not on USB).
+- [~] (clock-modal session, 30 Oct; main) The user, 30 Oct: "the clock takes too much space now with the island … the clock
+      … opens in modal … a tick or an x"; "stand mode, for amoled, super low light clock … when charging"; "a notification when
+      the alarm gets close 30 min before and ask if I want to skip or snooze"; "a skip next alarm button to alarms"; "when
+      editing an alarm, add a set time button, show the clock on a modal … the time in a babble digitaly … the label at the
+      top". Timers: the cards and Add new, the clock in DialDialog (✓ starts); the alarm editor: label, the time's bubble +
+      Set time (the same DialDialog), the days. Alarms' cards: Skip next / Undo skip on a repeating one (`answered` ahead).
+      AlarmPlan: from 30 min before, the notice pops up once (channel alarm_soon, no sound) with Skip and Snooze (Snooze
+      before the ring: that ring answered, rings 10 min later); all in the file, so it syncs and outlives a reboot.
+      Stand mode: StandDream, Android's screen saver (dim grey clock on black, the screen at its lowest, a step every
+      minute); the Clock's moon button explains it and opens Android's Screen saver page, where the user picks it.
 
 ### Left
 - [ ] The real pair: start on the tablet, pause on the PC, OK on the phone — on the user's tablet (971f6b37) once the main

@@ -1435,7 +1435,6 @@
     <string name="timer_allow_access">Zugriff erlauben</string>
     <string name="timer_too_many">Höchstens neun Timer: stoppe oder lösche zuerst einen.</string>
     <string name="timer_could_not_start">Der Timer konnte nicht starten</string>
-    <string name="timer_hint">Stelle auf der Uhr Stunden, dann Minuten ein: der Timer startet, wenn du den Finger von den Minuten hebst. Hefte einen Timer an, um ihn hier startbereit zu behalten.</string>
     <string name="timer_pin">Anheften</string>
     <string name="timer_unpin">Loslösen</string>
     <string name="timer_times_up">Zeit ist um</string>

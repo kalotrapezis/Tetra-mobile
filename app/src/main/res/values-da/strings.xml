@@ -1435,7 +1435,6 @@
     <string name="timer_allow_access">Tillad adgang</string>
     <string name="timer_too_many">Højst ni timere: stop eller slet en først.</string>
     <string name="timer_could_not_start">Timeren kunne ikke starte</string>
-    <string name="timer_hint">Indstil timer og derefter minutter på uret: timeren starter, når du løfter fingeren fra minutterne. Fastgør en timer for at beholde den her, klar til at starte igen.</string>
     <string name="timer_pin">Fastgør</string>
     <string name="timer_unpin">Frigør</string>
     <string name="timer_times_up">Tiden er gået</string>

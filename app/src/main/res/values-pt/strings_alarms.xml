@@ -20,4 +20,16 @@
     <string name="alarm_every_day">Todos os dias</string>
     <string name="alarm_in">Próximo alarme dentro de %1$s</string>
     <string name="alarm_none">Ainda sem alarmes. Um alarme toca neste dispositivo e em todos os dispositivos com que sincroniza; dispense-o num e pára em todos.</string>
+    <string name="timer_add_new">Adicionar</string>
+    <string name="timer_list_hint">Ainda não há temporizadores. Adicionar abre o relógio: defina as horas, depois os minutos, e ✓ inicia-o. Fixe um temporizador para o manter aqui, pronto a recomeçar.</string>
+    <string name="alarm_set_time">Definir hora</string>
+    <string name="alarm_skip_next">Ignorar o próximo</string>
+    <string name="alarm_unskip">Anular ignorar</string>
+    <string name="alarm_skipped">o próximo ignorado</string>
+    <string name="alarm_soon">Alarme às %1$s · ignorar ou adiar?</string>
+    <string name="alarm_channel_soon">Alarme em breve</string>
+    <string name="alarm_channel_soon_about">30 minutos antes de um alarme, para o ignorar ou adiar</string>
+    <string name="stand_mode">Relógio de cabeceira</string>
+    <string name="stand_about">Um relógio ténue sobre preto enquanto carrega, suave para ecrãs AMOLED; move-se um pouco a cada minuto. Escolha Relógio de cabeceira como proteção de ecrã do Android, para começar ao carregar.</string>
+    <string name="stand_settings">Definições da proteção de ecrã</string>
 </resources>

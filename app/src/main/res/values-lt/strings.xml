@@ -1521,7 +1521,6 @@
     <string name="timer_allow_access">Leisti prieigą</string>
     <string name="timer_too_many">Daugiausia devyni laikmačiai: pirmiau sustabdykite arba ištrinkite vieną.</string>
     <string name="timer_could_not_start">Laikmačio paleisti nepavyko</string>
-    <string name="timer_hint">Laikrodyje nustatykite valandas, tada minutes: laikmatis pasileidžia, kai atitraukiate pirštą nuo minučių. Prisekite laikmatį, kad jis liktų čia, paruoštas vėl paleisti.</string>
     <string name="timer_pin">Prisegti</string>
     <string name="timer_unpin">Atsegti</string>
     <string name="timer_times_up">Laikas baigėsi</string>

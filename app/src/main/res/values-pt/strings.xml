@@ -1478,7 +1478,6 @@
     <string name="timer_allow_access">Permitir acesso</string>
     <string name="timer_too_many">No máximo nove temporizadores: pare ou elimine um primeiro.</string>
     <string name="timer_could_not_start">Não foi possível iniciar o temporizador</string>
-    <string name="timer_hint">Defina as horas e depois os minutos no relógio: o temporizador começa quando levanta o dedo dos minutos. Afixe um temporizador para o manter aqui, pronto a recomeçar.</string>
     <string name="timer_pin">Afixar</string>
     <string name="timer_unpin">Desafixar</string>
     <string name="timer_times_up">Acabou o tempo</string>

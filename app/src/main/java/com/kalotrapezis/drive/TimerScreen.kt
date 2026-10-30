@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -49,22 +51,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Instant
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.TimePickerSelectionMode
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.background
 
 internal val TIMER_COLOR = Color(0xFF26A69A)
 
 /**
- * The Timer (Plan.md § Timer), as the user drew it (18 Oct): the Calendar's clock (hours on the outer and inner ring, then
- * minutes), Pause and Stop under it, the timers' cards beside it on a big screen, above it on a phone; Countdown, Alarms and Stopwatch in the island at the bottom. "Play is
- * not needed as soon as I set a timer starts": the finger lifted from the minutes starts it.
+ * The Timer (Plan.md § Timer): the timers' cards and Add new (the user, 30 Oct: the clock went into a modal, ✓ starts the
+ * timer, to save the room the island takes); Countdown, Alarms and Stopwatch in the island at the bottom.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +64,6 @@ internal fun TimerScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit
     val context = LocalContext.current
     val wide = LocalConfiguration.current.screenWidthDp >= 700
     val scope = rememberCoroutineScope()
-    var lastId by remember { mutableStateOf<String?>(null) } // Pause and Stop under the clock: the timer last started here
     BackHandler { back() }
 
     if (!hasAccess) {
@@ -104,53 +95,33 @@ internal fun TimerScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit
             delay(500)
         }
     }
-    val last = remember { TimerControl.last(context) }
-    val clock = rememberTimePickerState((last / 3600).toInt().coerceAtMost(23), (last % 3600 / 60).toInt(), is24Hour = true)
-    val chosen = clock.hour * 3600L + clock.minute * 60L
+    var adding by remember { mutableStateOf(false) }
     fun start(seconds: Long) = scope.launch {
         if (seconds <= 0) return@launch
         val done = withContext(Dispatchers.IO) { runCatching { TimerControl.start(context, seconds) }.onFailure { WriterLog.e("Timer: could not start", it) } }
-        done.getOrNull()?.let { lastId = it.id }
         done.exceptionOrNull()?.let { android.widget.Toast.makeText(context, if (it is TimerFiles.TooMany) context.getString(R.string.timer_too_many) else it.message ?: context.getString(R.string.timer_could_not_start), android.widget.Toast.LENGTH_SHORT).show() }
     }
     fun change(r: TimerRecord, action: String) = scope.launch(Dispatchers.IO) { runCatching { TimerControl.change(context, r.id, action) }.onFailure { WriterLog.e("Timer: $action failed", it) } }
 
     // the cards, three to a row on a big screen, two on a phone (the user, 18 Oct: "The UI will fit 9 timers")
-    val cards: @Composable () -> Unit = {
-        val per = if (wide) 3 else 2
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            if (timers.isEmpty() && wide) Text(stringResource(R.string.timer_hint),
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
-            timers.chunked(per).forEach { row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    row.forEach { r -> Box(Modifier.weight(1f)) { TimerCard(r, now, ::change) } }
-                    repeat(per - row.size) { Spacer(Modifier.weight(1f)) }
+    val per = if (wide) 3 else 2
+    val timersPane: @Composable () -> Unit = {
+        Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = TOP),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(Modifier.widthIn(max = if (wide) 900.dp else 520.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    FilledTonalButton(onClick = { adding = true }) {
+                        Icon(painterResource(R.drawable.ic_add), contentDescription = null); Text(" " + stringResource(R.string.timer_add_new), maxLines = 1)
+                    }
                 }
-            }
-        }
-    }
-    val live = timers.filter { !it.over(now) && !it.ringing(now) }
-    val current = live.firstOrNull { it.id == lastId } ?: live.firstOrNull() // else the one ending first
-    val picker: @Composable () -> Unit = {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            // a finger lifted from the minutes starts the timer (watched, not taken: the picker works as ever)
-            Box(Modifier.pointerInput(Unit) {
-                awaitEachGesture {
-                    awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-                    val minutes = clock.selection == TimePickerSelectionMode.Minute
-                    do { val e = awaitPointerEvent(PointerEventPass.Initial) } while (e.changes.any { it.pressed })
-                    if (minutes) scope.launch { delay(150); start(clock.hour * 3600L + clock.minute * 60L); clock.selection = TimePickerSelectionMode.Hour }
+                if (timers.isEmpty()) Text(stringResource(R.string.timer_list_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                timers.chunked(per).forEach { row ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        row.forEach { r -> Box(Modifier.weight(1f)) { TimerCard(r, now, ::change) } }
+                        repeat(per - row.size) { Spacer(Modifier.weight(1f)) }
+                    }
                 }
-            }) { TimePicker(clock) }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (current?.state == TimerRecord.PAUSED) Button(onClick = { change(current, TimerService.RESUME) }, modifier = Modifier.widthIn(min = 130.dp)) {
-                    Icon(painterResource(R.drawable.ic_play), contentDescription = null); Text("  " + stringResource(R.string.common_resume), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                } else Button(onClick = { current?.let { change(it, TimerService.PAUSE) } }, enabled = current != null, modifier = Modifier.widthIn(min = 130.dp)) {
-                    Icon(painterResource(R.drawable.ic_pause), contentDescription = null); Text("  " + stringResource(R.string.common_pause), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                OutlinedButton(onClick = { current?.let { change(it, TimerService.STOP) } }, enabled = current != null, modifier = Modifier.widthIn(min = 130.dp)) {
-                    Icon(painterResource(R.drawable.ic_close), contentDescription = null); Text("  " + stringResource(R.string.common_stop), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
+                Spacer(Modifier.navigationBarsPadding().height(BOTTOM))
             }
         }
     }
@@ -160,21 +131,29 @@ internal fun TimerScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit
         Box(Modifier.fillMaxSize()) {
             if (tab == 1) AlarmsPane(wide)
             else if (tab == 2) StopwatchPane()
-            else if (wide) Row(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(start = 24.dp, end = 24.dp, top = TOP, bottom = BOTTOM),
-                horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) { picker() }
-                Box(Modifier.width(2.dp).fillMaxHeight(0.6f).background(MaterialTheme.colorScheme.surfaceVariant)) // the sketch's line
-                Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) { cards() }
-            } else Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = TOP),
-                verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                cards(); picker()
-                Spacer(Modifier.navigationBarsPadding().height(BOTTOM))
-            }
-            FilesPageHeader(title = stringResource(R.string.app_timer), icon = R.drawable.ic_timer, back = back, island = true,
+            else timersPane()
+            FilesPageHeader(title = stringResource(R.string.app_timer), icon = R.drawable.ic_timer, back = back, island = true, trailing = { StandButton() },
                 modifier = Modifier.align(Alignment.TopCenter).padding(horizontal = 16.dp))
             TimerTabs(tab, { tab = it; lastTab = it }, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp))
         }
     }
+    if (adding) {
+        val last = TimerControl.last(context)
+        DialDialog((last / 3600).toInt().coerceAtMost(23), (last % 3600 / 60).toInt(), close = { adding = false }) { h, m -> adding = false; start(h * 3600L + m * 60L) }
+    }
+}
+
+/**
+ * The clock in a modal, ✓ takes the time and × closes (the user, 30 Oct: "the clock takes too much space now with the
+ * island"): a new timer's length, an alarm's time.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable internal fun DialDialog(hour: Int, minute: Int, close: () -> Unit, done: (Int, Int) -> Unit) {
+    val clock = rememberTimePickerState(hour, minute, is24Hour = true)
+    AlertDialog(onDismissRequest = close,
+        confirmButton = { FilledIconButton(onClick = { done(clock.hour, clock.minute) }) { Icon(painterResource(R.drawable.ic_check), contentDescription = stringResource(R.string.common_ok)) } },
+        dismissButton = { IconButton(onClick = close) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_cancel)) } },
+        text = { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { TimePicker(clock) } })
 }
 
 /**

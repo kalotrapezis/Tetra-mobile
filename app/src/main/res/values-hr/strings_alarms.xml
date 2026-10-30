@@ -20,4 +20,16 @@
     <string name="alarm_every_day">Svaki dan</string>
     <string name="alarm_in">Sljedeći alarm za %1$s</string>
     <string name="alarm_none">Još nema alarma. Alarm zvoni na ovom uređaju i na svakom uređaju s kojim sinkronizirate; isključite ga na jednom i prestaje na svima.</string>
+    <string name="timer_add_new">Dodaj</string>
+    <string name="timer_list_hint">Još nema mjerača. Dodaj otvara sat: postavi sate, zatim minute, i ✓ ga pokreće. Prikvači mjerač da ostane ovdje, spreman za ponovno pokretanje.</string>
+    <string name="alarm_set_time">Postavi vrijeme</string>
+    <string name="alarm_skip_next">Preskoči sljedeći</string>
+    <string name="alarm_unskip">Poništi preskakanje</string>
+    <string name="alarm_skipped">sljedeći preskočen</string>
+    <string name="alarm_soon">Alarm u %1$s · preskočiti ili odgoditi?</string>
+    <string name="alarm_channel_soon">Alarm uskoro</string>
+    <string name="alarm_channel_soon_about">30 minuta prije alarma, za preskakanje ili odgodu</string>
+    <string name="stand_mode">Noćni sat</string>
+    <string name="stand_about">Prigušeni sat na crnom tijekom punjenja, blag prema AMOLED zaslonima; svake se minute malo pomakne. Odaberi Noćni sat kao Androidov čuvar zaslona, da se pokrene tijekom punjenja.</string>
+    <string name="stand_settings">Postavke čuvara zaslona</string>
 </resources>

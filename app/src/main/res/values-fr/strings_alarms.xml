@@ -20,4 +20,16 @@
     <string name="alarm_every_day">Tous les jours</string>
     <string name="alarm_in">Prochaine alarme dans %1$s</string>
     <string name="alarm_none">Aucune alarme pour l\'instant. Une alarme sonne sur cet appareil et sur chaque appareil que vous synchronisez ; arrêtez-la sur l\'un, elle s\'arrête sur tous.</string>
+    <string name="timer_add_new">Ajouter</string>
+    <string name="timer_list_hint">Aucun minuteur pour l\'instant. Ajouter ouvre l\'horloge : réglez les heures, puis les minutes, et ✓ le lance. Épinglez un minuteur pour le garder ici, prêt à repartir.</string>
+    <string name="alarm_set_time">Régler l\'heure</string>
+    <string name="alarm_skip_next">Ignorer la prochaine</string>
+    <string name="alarm_unskip">Annuler l\'ignorance</string>
+    <string name="alarm_skipped">la prochaine ignorée</string>
+    <string name="alarm_soon">Alarme à %1$s · ignorer ou répéter ?</string>
+    <string name="alarm_channel_soon">Alarme bientôt</string>
+    <string name="alarm_channel_soon_about">30 minutes avant une alarme, pour l\'ignorer ou la répéter</string>
+    <string name="stand_mode">Horloge de chevet</string>
+    <string name="stand_about">Une horloge pâle sur fond noir pendant la charge, douce pour les écrans AMOLED ; elle se déplace un peu chaque minute. Choisissez Horloge de chevet comme économiseur d\'écran d\'Android, pour qu\'elle démarre pendant la charge.</string>
+    <string name="stand_settings">Réglages de l\'économiseur d\'écran</string>
 </resources>

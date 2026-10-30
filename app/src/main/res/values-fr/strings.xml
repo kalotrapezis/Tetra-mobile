@@ -1478,7 +1478,6 @@
     <string name="timer_allow_access">Autoriser l’accès</string>
     <string name="timer_too_many">Neuf minuteurs au maximum : arrêtez-en ou supprimez-en un d’abord.</string>
     <string name="timer_could_not_start">Le minuteur n’a pas pu démarrer</string>
-    <string name="timer_hint">Réglez les heures, puis les minutes, sur le cadran : le minuteur démarre quand vous levez le doigt des minutes. Épinglez un minuteur pour le garder ici, prêt à relancer.</string>
     <string name="timer_pin">Épingler</string>
     <string name="timer_unpin">Désépingler</string>
     <string name="timer_times_up">Temps écoulé</string>

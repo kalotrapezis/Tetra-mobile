@@ -20,4 +20,16 @@
     <string name="alarm_every_day">Ogni giorno</string>
     <string name="alarm_in">Prossima sveglia tra %1$s</string>
     <string name="alarm_none">Nessuna sveglia per ora. Una sveglia suona su questo dispositivo e su ogni dispositivo che sincronizzi; spegnila su uno e si ferma su tutti.</string>
+    <string name="timer_add_new">Aggiungi</string>
+    <string name="timer_list_hint">Ancora nessun timer. Aggiungi apre l\'orologio: imposta le ore, poi i minuti, e ✓ lo avvia. Fissa un timer per tenerlo qui, pronto a ripartire.</string>
+    <string name="alarm_set_time">Imposta ora</string>
+    <string name="alarm_skip_next">Salta la prossima</string>
+    <string name="alarm_unskip">Annulla salto</string>
+    <string name="alarm_skipped">la prossima saltata</string>
+    <string name="alarm_soon">Sveglia alle %1$s · saltare o posticipare?</string>
+    <string name="alarm_channel_soon">Sveglia a breve</string>
+    <string name="alarm_channel_soon_about">30 minuti prima di una sveglia, per saltarla o posticiparla</string>
+    <string name="stand_mode">Orologio da comodino</string>
+    <string name="stand_about">Un orologio tenue sul nero durante la ricarica, delicato con gli schermi AMOLED; si sposta un po\' ogni minuto. Scegli Orologio da comodino come salvaschermo di Android, perché parta in ricarica.</string>
+    <string name="stand_settings">Impostazioni salvaschermo</string>
 </resources>

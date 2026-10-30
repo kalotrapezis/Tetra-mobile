@@ -1435,7 +1435,6 @@
     <string name="timer_allow_access">Разреши достъп</string>
     <string name="timer_too_many">Най-много девет таймера: първо спрете или изтрийте един.</string>
     <string name="timer_could_not_start">Таймерът не можа да стартира</string>
-    <string name="timer_hint">Задайте часовете, после минутите на часовника: таймерът стартира, когато вдигнете пръст от минутите. Закачете таймер, за да остане тук, готов за ново стартиране.</string>
     <string name="timer_pin">Закачи</string>
     <string name="timer_unpin">Откачи</string>
     <string name="timer_times_up">Времето изтече</string>

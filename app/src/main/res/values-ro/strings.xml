@@ -1478,7 +1478,6 @@
     <string name="timer_allow_access">Permite accesul</string>
     <string name="timer_too_many">Cel mult nouă temporizatoare: oprește sau șterge unul mai întâi.</string>
     <string name="timer_could_not_start">Temporizatorul nu a putut porni</string>
-    <string name="timer_hint">Setează orele, apoi minutele, pe cadran: temporizatorul pornește când ridici degetul de pe minute. Fixează un temporizator pentru a-l păstra aici, gata să pornească din nou.</string>
     <string name="timer_pin">Fixează</string>
     <string name="timer_unpin">Anulează fixarea</string>
     <string name="timer_times_up">Timpul a expirat</string>

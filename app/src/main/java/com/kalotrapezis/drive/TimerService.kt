@@ -79,7 +79,8 @@ internal object TimerControl {
         val now = Instant.now(); val zone = ZoneId.systemDefault()
         val next = when (action) {
             TimerService.ALARM_DISMISS -> r.ringing(now, zone)?.let { r.dismiss(it, device()) }
-            TimerService.ALARM_SNOOZE -> r.ringing(now, zone)?.let { r.snoozed(it, now, device()) }
+            // not ringing yet (the 30-minute notice): the next ring answered, ten minutes later instead
+            TimerService.ALARM_SNOOZE -> r.ringing(now, zone)?.let { r.snoozed(it, now, device()) } ?: r.next(now, zone)?.let { r.snoozed(it, it, device()) }
             TimerService.ALARM_SKIP -> r.next(now, zone)?.let { r.dismiss(it, device()) }
             TimerService.ALARM_ON -> r.switchOn(now, zone, device())
             TimerService.ALARM_OFF -> r.switchOff(device())
@@ -355,6 +356,7 @@ class TimerService : Service() {
         const val SCREEN = "Timer"
         const val CHANNEL = "timer"
         private const val CHANNEL_DONE = "timer_done"
+        const val CHANNEL_SOON = "alarm_soon"
         private const val PLACEHOLDER = 7999
         private const val LOOK_MS = 30_000L
         const val COLOR = 0xFF26A69A.toInt()
@@ -365,6 +367,10 @@ class TimerService : Service() {
         fun channels(c: Context) {
             val nm = c.getSystemService(NotificationManager::class.java) ?: return
             if (nm.getNotificationChannel(CHANNEL) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.app_timer), NotificationManager.IMPORTANCE_LOW).apply { description = c.getString(R.string.timer_channel_about) })
+            // the 30-minute notice pops up without a sound: it may come while the user still sleeps
+            if (nm.getNotificationChannel(CHANNEL_SOON) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL_SOON, c.getString(R.string.alarm_channel_soon), NotificationManager.IMPORTANCE_HIGH).apply {
+                description = c.getString(R.string.alarm_channel_soon_about); setSound(null, null)
+            })
             if (nm.getNotificationChannel(CHANNEL_DONE) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL_DONE, c.getString(R.string.timer_channel_done), NotificationManager.IMPORTANCE_HIGH).apply {
                 description = c.getString(R.string.timer_channel_done_about); setSound(null, null) // the alarm plays its own sound
             })
@@ -408,12 +414,16 @@ internal fun stopwatchText(ms: Long, tenths: Boolean = true): String {
 /**
  * The next alarm, whether or not the Timer runs (Plan.md § Timer › Alarms): its alarm clock (on time in Doze, the screen
  * off; it starts [TimerService], which rings it), and from [SOON_MS] before it a quiet notification — the island on a
- * Xiaomi — with the time and Skip. Made again at each change, sync, boot, clock or zone change, and at each ring.
+ * Xiaomi — with the time and Skip; from [ASK_MS] before, the same popping up once with Skip and Snooze (the user, 30 Oct:
+ * "30 min before and ask if I want to skip or snooze"). Both answers are written in the alarm's file, so they sync and
+ * outlive a reboot. Made again at each change, sync, boot, clock or zone change, and at each ring.
  */
 internal object AlarmPlan {
     const val LOOK = "com.kalotrapezis.drive.ALARM_LOOK"
     const val SKIP = "com.kalotrapezis.drive.ALARM_PLAN_SKIP"
+    const val SNOOZE = "com.kalotrapezis.drive.ALARM_PLAN_SNOOZE"
     private const val SOON_MS = 12 * 3600_000L
+    private const val ASK_MS = 30 * 60_000L
     private const val NEXT_ID = 7991
 
     @Synchronized fun plan(c: Context) {
@@ -434,16 +444,24 @@ internal object AlarmPlan {
             runCatching { am.set(AlarmManager.RTC, at.toEpochMilli() - SOON_MS, look) }
             return
         }
+        val ask = at.toEpochMilli() - now.toEpochMilli() <= ASK_MS
+        if (!ask) runCatching { am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at.toEpochMilli() - ASK_MS, look) }
         TimerService.channels(app)
         val time = hhmm(app, at)
-        val title = app.getString(R.string.alarm_next, time)
-        val skip = PendingIntent.getBroadcast(app, a.id.hashCode(), Intent(app, CalendarAlarmReceiver::class.java).setAction(SKIP).putExtra("id", a.id), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val buttons = listOf(Triple("skip", app.getString(R.string.alarm_skip), skip))
-        val b = NotificationCompat.Builder(app, TimerService.CHANNEL).setSmallIcon(R.drawable.ic_timer).setColor(TimerService.COLOR)
+        val title = app.getString(if (ask) R.string.alarm_soon else R.string.alarm_next, time)
+        fun answer(what: String) = PendingIntent.getBroadcast(app, (a.id + what).hashCode(), Intent(app, CalendarAlarmReceiver::class.java).setAction(what).putExtra("id", a.id), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val buttons = listOfNotNull(Triple("skip", app.getString(R.string.alarm_skip), answer(SKIP)), if (ask) Triple("snooze", app.getString(R.string.alarm_snooze), answer(SNOOZE)) else null)
+        // pops up once per ring: not again when planned anew (a sync, a reboot) for the same one
+        val prefs = app.getSharedPreferences("timer", Context.MODE_PRIVATE)
+        val asked = "${a.id}|$at"
+        val pop = ask && prefs.getString("asked", null) != asked
+        if (pop) prefs.edit().putString("asked", asked).apply()
+        val b = NotificationCompat.Builder(app, if (ask) TimerService.CHANNEL_SOON else TimerService.CHANNEL).setSmallIcon(R.drawable.ic_timer).setColor(TimerService.COLOR)
             .setContentTitle(title).setContentText(a.label.ifEmpty { app.getString(R.string.alarm_named) }).setContentIntent(show)
-            .setCategory(NotificationCompat.CATEGORY_REMINDER).setPriority(NotificationCompat.PRIORITY_LOW).setOngoing(true).setSilent(true).setOnlyAlertOnce(true)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER).setPriority(if (ask) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true).setSilent(!pop).setOnlyAlertOnce(true)
         buttons.forEach { (_, label, pi) -> b.addAction(0, label, pi) }
-        if (HyperIsland.isSupported(app)) HyperIsland.timer(b, title, a.label, null, time, false, buttons, HyperIsland.ALARM)
+        if (HyperIsland.isSupported(app)) HyperIsland.timer(b, title, a.label, null, time, pop, buttons, HyperIsland.ALARM)
         runCatching { nm.notify(NEXT_ID, b.build()) }
     }
 }

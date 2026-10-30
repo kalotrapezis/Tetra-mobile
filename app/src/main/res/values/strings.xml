@@ -1436,7 +1436,6 @@
     <string name="timer_allow_access">Allow access</string>
     <string name="timer_too_many">Nine timers at most: stop or delete one first.</string>
     <string name="timer_could_not_start">The timer could not start</string>
-    <string name="timer_hint">Set hours, then minutes, on the clock: the timer starts when you lift your finger from the minutes. Pin a timer to keep it here, ready to start again.</string>
     <string name="timer_pin">Pin</string>
     <string name="timer_unpin">Unpin</string>
     <string name="timer_times_up">Time\'s up</string>

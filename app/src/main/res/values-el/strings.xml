@@ -1434,7 +1434,6 @@
     <string name="timer_allow_access">Επιτρέψτε την πρόσβαση</string>
     <string name="timer_too_many">Έως εννέα χρονόμετρα: σταματήστε ή διαγράψτε πρώτα ένα.</string>
     <string name="timer_could_not_start">Το χρονόμετρο δεν ξεκίνησε</string>
-    <string name="timer_hint">Ορίστε ώρες και μετά λεπτά στο ρολόι: το χρονόμετρο ξεκινά μόλις σηκώσετε το δάχτυλο από τα λεπτά. Καρφιτσώστε ένα χρονόμετρο για να μένει εδώ, έτοιμο να ξεκινήσει ξανά.</string>
     <string name="timer_pin">Καρφίτσωμα</string>
     <string name="timer_unpin">Ξεκαρφίτσωμα</string>
     <string name="timer_times_up">Ο χρόνος έληξε</string>

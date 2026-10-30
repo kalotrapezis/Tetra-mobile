@@ -20,4 +20,16 @@
     <string name="alarm_every_day">Iga päev</string>
     <string name="alarm_in">Järgmine äratus %1$s pärast</string>
     <string name="alarm_none">Äratusi veel pole. Äratus heliseb sellel seadmel ja igal seadmel, millega sünkroonid; lülita see ühel välja ja see jääb vait kõigil.</string>
+    <string name="timer_add_new">Lisa</string>
+    <string name="timer_list_hint">Taimereid veel pole. Lisa avab kella: vali tunnid, siis minutid, ja ✓ käivitab selle. Kinnita taimer, et see jääks siia uueks käivituseks valmis.</string>
+    <string name="alarm_set_time">Määra aeg</string>
+    <string name="alarm_skip_next">Jäta järgmine vahele</string>
+    <string name="alarm_unskip">Võta vahelejätmine tagasi</string>
+    <string name="alarm_skipped">järgmine jäetakse vahele</string>
+    <string name="alarm_soon">Äratus kell %1$s · jätta vahele või lükata edasi?</string>
+    <string name="alarm_channel_soon">Äratus peagi</string>
+    <string name="alarm_channel_soon_about">30 minutit enne äratust, et see vahele jätta või edasi lükata</string>
+    <string name="stand_mode">Öökell</string>
+    <string name="stand_about">Tuhm kell mustal laadimise ajal, säästlik AMOLED-ekraanidele; see liigub iga minut veidi. Vali Öökell Androidi ekraanisäästjaks, et see käivituks laadimisel.</string>
+    <string name="stand_settings">Ekraanisäästja seaded</string>
 </resources>

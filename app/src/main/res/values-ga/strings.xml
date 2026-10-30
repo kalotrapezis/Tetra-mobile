@@ -1564,7 +1564,6 @@
     <string name="timer_allow_access">Ceadaigh rochtain</string>
     <string name="timer_too_many">Naoi n-amadóir ar a mhéad: stop nó scrios ceann amháin ar dtús.</string>
     <string name="timer_could_not_start">Níorbh fhéidir an t-amadóir a thosú</string>
-    <string name="timer_hint">Socraigh uaireanta, agus ansin nóiméid, ar an gclog: tosaíonn an t-amadóir nuair a thógann tú do mhéar ó na nóiméid. Greamaigh amadóir chun é a choinneáil anseo, réidh chun tosú arís.</string>
     <string name="timer_pin">Greamaigh</string>
     <string name="timer_unpin">Díghreamaigh</string>
     <string name="timer_times_up">Tá an t-am istigh</string>

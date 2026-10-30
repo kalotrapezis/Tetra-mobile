@@ -1435,7 +1435,6 @@
     <string name="timer_allow_access">Consenti accesso</string>
     <string name="timer_too_many">Al massimo nove timer: prima fermane o eliminane uno.</string>
     <string name="timer_could_not_start">Impossibile avviare il timer</string>
-    <string name="timer_hint">Imposta le ore, poi i minuti, sull\'orologio: il timer parte quando sollevi il dito dai minuti. Fissa un timer per tenerlo qui, pronto a ripartire.</string>
     <string name="timer_pin">Fissa</string>
     <string name="timer_unpin">Sblocca</string>
     <string name="timer_times_up">Tempo scaduto</string>

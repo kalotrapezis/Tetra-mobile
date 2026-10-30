@@ -1521,7 +1521,6 @@
     <string name="timer_allow_access">Povolit přístup</string>
     <string name="timer_too_many">Nejvýše devět časovačů: nejdřív jeden zastavte nebo smažte.</string>
     <string name="timer_could_not_start">Časovač se nepodařilo spustit</string>
-    <string name="timer_hint">Na ciferníku nastavte hodiny, pak minuty: časovač se spustí, když zvednete prst z minut. Připnutý časovač tu zůstane připravený ke znovuspuštění.</string>
     <string name="timer_pin">Připnout</string>
     <string name="timer_unpin">Odepnout</string>
     <string name="timer_times_up">Čas vypršel</string>

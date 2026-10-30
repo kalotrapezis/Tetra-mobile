@@ -1521,7 +1521,6 @@
     <string name="timer_allow_access">Dovoli dostop</string>
     <string name="timer_too_many">Največ devet časovnikov: najprej enega ustavite ali izbrišite.</string>
     <string name="timer_could_not_start">Časovnika ni bilo mogoče zagnati</string>
-    <string name="timer_hint">Na uri nastavite ure, nato minute: časovnik se začne, ko dvignete prst z minut. Pripnite časovnik, da ostane tukaj, pripravljen za ponovni zagon.</string>
     <string name="timer_pin">Pripni</string>
     <string name="timer_unpin">Odpni</string>
     <string name="timer_times_up">Čas je potekel</string>
