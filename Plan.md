@@ -2439,8 +2439,10 @@ the timers so they reach the tablet and PC; the skill and its helper; AI Assist 
       stop watch … above the island"; "on landscape and tablet make it a + next to the island like the contacts"; "dont use
       words add svgs" (round icons: +, play/pause, flag for Lap, refresh for Reset); stand mode's **sunrise**: 20 minutes
       before the next alarm (snoozes counted, a skip not) the screen goes deep red → orange → warm yellow and its brightness
-      rises to full at the ring. Checked on the phone (portrait and landscape); stand mode seen running (dim clock); the
-      sunrise itself not seen; the tablet not checked (not on USB).
+      rises to full at the ring. Checked on the phone (portrait and landscape); the tablet not checked (not on USB).
+      **Stand mode does not start by itself on the Xiaomi 15**: HyperOS never starts Android's screen saver on a timeout
+      while charging (Always-on display on: its own doze screen; off: the screen goes dark); only Settings' preview shows
+      it. Offered: the moon button starting the night clock itself; the user: "let it be" (30 Oct).
 
 ### Left
 - [ ] The real pair: start on the tablet, pause on the PC, OK on the phone — on the user's tablet (971f6b37) once the main
