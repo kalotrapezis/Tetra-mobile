@@ -749,6 +749,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
             Applet.Phone -> openPhone(context)
             Applet.Data -> openData(context)
             Applet.Assistant -> openAssistant(context)
+            Applet.Mail -> screen = Screen.Mail
         }
     }
     // a file another app opened here: in Words, Tables, Slides or the PDF viewer, its back to Office
@@ -820,6 +821,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                 Screen.Timer -> Unit
                 Screen.Maps -> Unit
                 Screen.Contacts -> Unit
+                Screen.Mail -> Unit
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -876,6 +878,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                     openTimer = { screen = Screen.Timer },
                     openMaps = { place -> mapsGo = place; mapsSearch = null; mapsBack = Screen.Home; screen = Screen.Maps },
                     openContacts = { uid -> contactsOpen = uid; screen = Screen.Contacts },
+                    openMail = { screen = Screen.Mail },
                 )
                 Screen.Drive -> DriveTab(
                     home = { screen = Screen.Home },
@@ -934,6 +937,10 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                     context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                 }, startKind = calendarNew, openContact = { uid -> contactsOpen = uid; screen = Screen.Contacts })
                 Screen.Maps -> MapsScreen(MapsFiles.root(driveRoot()), mapsGo, back = { mapsGo = null; mapsSearch = null; screen = mapsBack }, search = mapsSearch)
+                Screen.Mail -> MailScreen(back = { screen = Screen.Home }, hasAccess = hasAllFilesAccess(), grant = {
+                    context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
+                }, openFile = { f -> openDriveFile(DriveRules.relative(driveRoot(), f), false)?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() } },
+                    openSettings = { settingsStart = SettingsPage.Mail; screen = Screen.Settings })
                 Screen.Contacts -> androidx.compose.runtime.key(contactsOpen, contactsNew) { ContactsScreen(back = { screen = Screen.Home }, hasAccess = hasAllFilesAccess(), grant = {
                     context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                 }, start = contactsOpen, newNumber = contactsNew, openMaps = { q -> mapsGo = null; mapsSearch = q; mapsBack = Screen.Contacts; screen = Screen.Maps }) }
@@ -1020,6 +1027,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                         "contacts" -> { contactsOpen = null; screen = Screen.Contacts }
                         "phone" -> openPhone(context)
                         "data" -> openData(context)
+                        "mail" -> screen = Screen.Mail
                     } },
                     openGuide = { guideAt = 0; screen = Screen.Guide },
                 )
@@ -1029,7 +1037,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
     }
 }
 
-private enum class Screen { Guide, Home, Drive, Photos, Sync, Settings, Scanner, ScanDocument, Codes, Notes, TextEditor, Office, Writer, Sheet, Slides, Pdf, Calendar, Timer, Maps, Contacts }
+private enum class Screen { Guide, Home, Drive, Photos, Sync, Settings, Scanner, ScanDocument, Codes, Notes, TextEditor, Office, Writer, Sheet, Slides, Pdf, Calendar, Timer, Maps, Contacts, Mail }
 private enum class DrivePane { Home, Favorites, Files }
 private enum class DriveSort { Name, Modified }
 private enum class PhotosPane { Timeline, Collections }
@@ -1072,6 +1080,7 @@ private fun Home(
     openTimer: () -> Unit,
     openMaps: (Place?) -> Unit,
     openContacts: (String?) -> Unit,
+    openMail: () -> Unit,
 ) {
     // A tablet shows the groups two by two (asked 2026-09-26); a phone one under another.
     val wide = LocalConfiguration.current.screenWidthDp >= 700
@@ -1184,6 +1193,7 @@ private fun Home(
         "phone" -> HomePhoneGroup()
         "data" -> HomeDataGroup()
         "assistant" -> HomeWideCard(stringResource(R.string.app_assistant), stringResource(R.string.assistant_home_detail), R.drawable.assistant_art, { openAssistant(context) })
+        "mail" -> HomeWideCard(stringResource(R.string.app_mail), stringResource(R.string.mail_home_detail), R.drawable.mail_art, openMail)
         "maps" -> HomeMapsGroup(wide, openMaps)
     } }
     // each part small: just its icon, as a launcher's (Scanner and Codes are two apps, so two icons)
@@ -1202,6 +1212,7 @@ private fun Home(
         "phone" -> listOf(HomeIcon(R.string.app_phone, R.drawable.phone_art, { openPhone(context) }))
         "data" -> listOf(HomeIcon(R.string.app_data, R.drawable.data_art, { openData(context) }))
         "assistant" -> listOf(HomeIcon(R.string.app_assistant, R.drawable.assistant_art, { openAssistant(context) }))
+        "mail" -> listOf(HomeIcon(R.string.app_mail, R.drawable.mail_art, openMail))
         "maps" -> listOf(HomeIcon(R.string.app_maps, R.drawable.maps_art, { openMaps(null) }))
         else -> emptyList()
     }
@@ -2140,6 +2151,7 @@ internal enum class Category(val color: Color, val icon: Int) {
     Contacts(CONTACTS_COLOR, R.drawable.ic_contacts),
     Phone(PHONE_COLOR, R.drawable.ic_call),
     Data(DATA_COLOR, R.drawable.ic_data_usage),
+    Mail(MAIL_COLOR, R.drawable.ic_mail),
 }
 
 @Composable

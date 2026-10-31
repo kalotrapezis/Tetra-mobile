@@ -182,6 +182,9 @@
         <activity-alias android:name=".AppMaps" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_maps" android:icon="@mipmap/applet_maps" android:roundIcon="@mipmap/applet_maps">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
+        <activity-alias android:name=".AppMail" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_mail" android:icon="@mipmap/applet_mail" android:roundIcon="@mipmap/applet_mail">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
         <activity-alias android:name=".AppContacts" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_contacts" android:icon="@mipmap/applet_contacts" android:roundIcon="@mipmap/applet_contacts">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>

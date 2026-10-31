@@ -51,6 +51,8 @@ import kotlinx.coroutines.withContext
 internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, val icon: Int, val tint: Color?, @androidx.annotation.StringRes val summary: Int, val items: List<Int>) {
     Sync(R.string.app_sync, R.drawable.ic_sync, null, R.string.settings_sync_summary, listOf(R.string.settings_computer, R.string.settings_open_sync, R.string.settings_sync_auto, R.string.settings_listen)),
     Appearance(R.string.settings_appearance, R.drawable.ic_palette, null, R.string.settings_appearance_summary, listOf(R.string.settings_theme, R.string.settings_language, R.string.settings_photo_on_home, R.string.settings_hidden_from_home, R.string.settings_app_icons)),
+    Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_security,
+        R.string.mail_remote, R.string.mail_allowed, R.string.mail_tracking, R.string.mail_link_warning, R.string.mail_risky, R.string.mail_real_address, R.string.mail_receipts)),
     Gallery(R.string.app_gallery, Category.Gallery.icon, Category.Gallery.color, R.string.settings_gallery_summary, listOf(R.string.settings_photos_videos, R.string.settings_search_quality, R.string.settings_folders)),
     Files(R.string.app_files, Category.Files.icon, Category.Files.color, R.string.settings_files_summary, listOf(R.string.settings_drive_workspace, R.string.settings_all_files)),
     Scanner(R.string.settings_pdf_scanner, Category.Scanner.icon, Category.Scanner.color, R.string.settings_resolution, listOf(R.string.settings_resolution)),
@@ -164,6 +166,7 @@ internal fun SettingsTab(
                     SettingsPage.Timer -> SettingsSection("Claude") { SkillRows("tetra-timer", "Timer", stringResource(R.string.settings_timer_skill)) }
                     SettingsPage.Maps -> MapsPage()
                     SettingsPage.Contacts -> ContactsPage()
+                    SettingsPage.Mail -> MailPage()
                     SettingsPage.Phone -> PhonePage()
                     SettingsPage.Data -> DataPage()
                     SettingsPage.Assistant -> AssistantPage()
@@ -758,6 +761,61 @@ internal fun SettingsTab(
         ChoiceRow(stringResource(R.string.settings_birthdays_into), if (cals.isEmpty()) stringResource(R.string.settings_no_calendars) else stringResource(R.string.settings_birthdays_summary),
             cals.map { it to it.name }, chosen) { c -> c?.let { ContactsPrefs.setBirthdays(context, it.dir.name) }; version.intValue++ }
     }
+}
+
+/**
+ * Settings › Αλληλογραφία (MAIL_PLAN §9c): the accounts as the computer has them, each green when all its mail is here and
+ * orange while some is only on the server; and Ασφάλεια και απόρρητο. Accounts are added on the computer for now (step 2).
+ */
+@Composable private fun MailPage() {
+    val context = LocalContext.current
+    val data by produceState<Pair<List<MailAccount>, List<MailEntry>>?>(null) {
+        value = withContext(Dispatchers.IO) { runCatching { mailRoot().let { MailFiles.accounts(it) to MailFiles.index(it) } }.getOrNull() }
+    }
+    var adding by remember { mutableStateOf(false) }
+    SettingsSection(stringResource(R.string.mail_accounts)) {
+        data?.first?.forEach { a ->
+            val orange = data!!.second.count { it.account == a.id && !it.saved }
+            SettingRow(a.name, listOfNotNull(a.address, stringResource(R.string.mail_via_pc).takeIf { a.shadow },
+                if (orange == 0) "● " + stringResource(R.string.mail_all_local) else "● " + pluralStringResource(R.plurals.mail_n_server_only, orange, orange)).joinToString(" · "),
+                warn = orange > 0, leading = { Box(Modifier.size(12.dp).clip(CircleShape).background(Color(a.color))) })
+        }
+        SettingRow(stringResource(R.string.mail_add_account), onClick = { adding = true }) { Icon(painterResource(R.drawable.ic_add), contentDescription = null) }
+    }
+    SettingsSection(stringResource(R.string.mail_security)) {
+        var remote by remember { mutableStateOf(MailPrefs.remote(context)) }
+        SwitchRow(stringResource(R.string.mail_remote), stringResource(R.string.mail_remote_summary), remote) { remote = it; MailPrefs.setRemote(context, it) }
+        var allowed by remember { mutableStateOf(MailPrefs.allowed(context)) }
+        var listing by remember { mutableStateOf(false) }
+        SettingRow(stringResource(R.string.mail_allowed), allowed.sorted().joinToString(", ").ifEmpty { stringResource(R.string.common_none) }, onClick = { listing = true }) { Chevron() }
+        @Composable fun Switched(key: String, title: Int, summary: Int?) {
+            var on by remember { mutableStateOf(MailPrefs.switch(context, key)) }
+            SwitchRow(stringResource(title), summary?.let { stringResource(it) }, on) { on = it; MailPrefs.setSwitch(context, key, it) }
+        }
+        Switched("tracking", R.string.mail_tracking, R.string.mail_tracking_summary)
+        if (listing) AlertDialog(onDismissRequest = { listing = false }, title = { Text(stringResource(R.string.mail_allowed)) },
+            text = { Column {
+                if (allowed.isEmpty()) Text(stringResource(R.string.mail_allowed_none))
+                allowed.sorted().forEach { who -> Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(who, Modifier.weight(1f))
+                    IconButton(onClick = { MailPrefs.allow(context, who, false); allowed = MailPrefs.allowed(context) }) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_remove)) }
+                } }
+            } }, confirmButton = { TextButton(onClick = { listing = false }) { Text(stringResource(R.string.common_ok)) } })
+    }
+    SettingsSection(stringResource(R.string.mail_warnings)) {
+        @Composable fun Switched(key: String, title: Int, summary: Int?) {
+            var on by remember { mutableStateOf(MailPrefs.switch(context, key)) }
+            SwitchRow(stringResource(title), summary?.let { stringResource(it) }, on) { on = it; MailPrefs.setSwitch(context, key, it) }
+        }
+        Switched("links", R.string.mail_link_warning, R.string.mail_link_warning_summary)
+        Switched("risky", R.string.mail_risky, R.string.mail_risky_summary)
+        Switched("realAddress", R.string.mail_real_address, null)
+        var receipts by remember { mutableStateOf(MailPrefs.receipts(context)) }
+        ChoiceRow(stringResource(R.string.mail_receipts), null, listOf(0 to stringResource(R.string.mail_receipts_never), 1 to stringResource(R.string.mail_receipts_ask), 2 to stringResource(R.string.mail_receipts_always)),
+            receipts) { receipts = it; MailPrefs.setReceipts(context, it) }
+    }
+    if (adding) AlertDialog(onDismissRequest = { adding = false }, title = { Text(stringResource(R.string.mail_add_account)) }, text = { Text(stringResource(R.string.mail_add_on_pc)) },
+        confirmButton = { TextButton(onClick = { adding = false }) { Text(stringResource(R.string.common_ok)) } })
 }
 
 /** Settings › Data (Plan.md § Data): the plan is set up in Data's own Setup; here its state and the switches. */

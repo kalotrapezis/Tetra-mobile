@@ -1,0 +1,23 @@
+[
+  {
+    "id": "kalotrapezis@gmail.com",
+    "address": "kalotrapezis@gmail.com",
+    "name": "Gmail",
+    "color": "#e5534b",
+    "addedOn": "desktop"
+  },
+  {
+    "id": "goodtable@sch.gr",
+    "address": "goodtable@sch.gr",
+    "name": "sch.gr",
+    "color": "#4f8ff7",
+    "addedOn": "desktop"
+  },
+  {
+    "id": "t.kalotrapezis@nup.ac.cy",
+    "address": "t.kalotrapezis@nup.ac.cy",
+    "name": "nup.ac.cy",
+    "color": "#e0a43a",
+    "addedOn": "desktop"
+  }
+]

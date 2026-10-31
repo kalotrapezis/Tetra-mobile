@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mail (MAIL_PLAN.md, step 2: read only on the phone and tablet). -->
+<resources>
+    <string name="app_mail">Mail</string>
+    <string name="home_label_mail">Tetra Mail</string>
+    <string name="mail_home_detail">Your mail, fetched by the computer</string>
+    <string name="settings_mail_summary">Accounts, security and privacy</string>
+    <string name="mail_access_why">Mail reads the mail your computer saved in the Tetra folder. Allow Tetra to manage all files to see it.</string>
+
+    <string name="mail_inbox">Inbox</string>
+    <string name="mail_drafts">Drafts</string>
+    <string name="mail_sent">Sent</string>
+    <string name="mail_archive">Archive</string>
+    <string name="mail_spam">Spam</string>
+    <string name="mail_trash">Trash</string>
+    <string name="mail_mailboxes">Mailboxes</string>
+    <string name="mail_show_accounts">Show the accounts</string>
+    <string name="mail_local">saved here</string>
+    <string name="mail_server_only">only on the server</string>
+    <string name="mail_via_pc">⇄ through the PC</string>
+    <string name="mail_all_local">all saved here</string>
+    <plurals name="mail_n_server_only">
+        <item quantity="one">%1$d only on the server</item>
+        <item quantity="other">%1$d only on the server</item>
+    </plurals>
+
+    <string name="mail_search">Search mail</string>
+    <string name="mail_reading">Reading the mail…</string>
+    <string name="mail_no_accounts">No mail here yet. Add your accounts on the computer (Tetra › Mail): their mail comes here with sync.</string>
+    <string name="mail_no_match">No mail matches.</string>
+    <string name="mail_none_filtered">No mail with these filters.</string>
+    <string name="mail_none_here">No mail in this folder.</string>
+    <string name="mail_choose">Choose a mail to read it.</string>
+    <string name="mail_today">Today</string>
+    <string name="mail_yesterday">Yesterday</string>
+    <string name="mail_no_subject">(no subject)</string>
+    <string name="mail_has_attachments">Has attachments</string>
+    <string name="mail_favourite">Favourite</string>
+    <plurals name="mail_n_selected">
+        <item quantity="one">%1$d selected</item>
+        <item quantity="other">%1$d selected</item>
+    </plurals>
+
+    <string name="mail_sync">Sync</string>
+    <string name="mail_syncing">Syncing with the computer…</string>
+    <string name="mail_filter">Filter</string>
+    <string name="mail_do_archive">Archive</string>
+    <string name="mail_mark_read">Read</string>
+    <string name="mail_mark_unread">Unread</string>
+    <string name="mail_later">Coming soon: the computer will make this change on the server.</string>
+    <string name="mail_write_later">Writing mail comes in a later step.</string>
+    <string name="mail_read_only_note">For now Mail here reads what the computer fetched. Changes on the server (archive, delete, read, ♥) and writing come next.</string>
+
+    <string name="mail_reply">Reply</string>
+    <string name="mail_reply_all">Reply all</string>
+    <string name="mail_forward">Forward</string>
+    <string name="mail_spam_one">Spam</string>
+    <string name="mail_move">Move</string>
+    <string name="mail_tag">Tag</string>
+    <string name="mail_print">Print</string>
+    <string name="mail_source">Source</string>
+    <string name="mail_to_favourites">Add to favourites</string>
+    <string name="mail_forward_attached">Forward as attachments</string>
+    <string name="mail_fetch_local">Fetch here (those only on the server)</string>
+    <string name="mail_summarise">Summarise with the assistant</string>
+    <string name="mail_spam_or_not">Spam / Not spam</string>
+    <string name="mail_clean_now">Clean up now</string>
+    <string name="mail_rules">Filters (rules)</string>
+    <string name="mail_accounts">Accounts</string>
+
+    <string name="mail_to">to %1$s</string>
+    <string name="mail_cc">Cc: %1$s</string>
+    <string name="mail_not_here">This mail is still only on the server. It comes here once the computer downloads it and syncs.</string>
+    <string name="mail_images_blocked">This mail\'s pictures were not loaded.</string>
+    <string name="mail_show_images">Show</string>
+    <string name="mail_always_sender">Always from them</string>
+    <string name="mail_risky_title">Open this attachment?</string>
+    <string name="mail_risky_text">%1$s can run a program or macros on the device. Open it only if you were expecting it.</string>
+    <string name="mail_open_anyway">Open anyway</string>
+    <plurals name="mail_n_messages">
+        <item quantity="one">%1$d message</item>
+        <item quantity="other">%1$d messages</item>
+    </plurals>
+    <plurals name="mail_n_accounts">
+        <item quantity="one">%1$d account</item>
+        <item quantity="other">%1$d accounts</item>
+    </plurals>
+    <string name="mail_selection_summary">%1$s · %2$s · %3$d only on the server</string>
+    <string name="mail_summarise_n">✦ Summarise all %1$d</string>
+
+    <string name="mail_unread">Unread</string>
+    <string name="mail_favourites">Favourites</string>
+    <string name="mail_attachments">Attachments</string>
+    <string name="mail_sort">Sort</string>
+    <string name="mail_sort_date">Date</string>
+    <string name="mail_sort_from">Sender</string>
+    <string name="mail_sort_subject">Subject</string>
+    <string name="mail_sort_size">Size</string>
+    <string name="mail_sort_account">Account</string>
+    <string name="mail_descending">↓ Newest first</string>
+    <string name="mail_ascending">↑ Oldest first</string>
+    <string name="mail_group">Group</string>
+    <string name="mail_group_day">Day</string>
+    <string name="mail_group_none">None</string>
+    <string name="mail_unread_first">Unread first</string>
+    <string name="mail_favourites_first">Favourites first</string>
+    <string name="mail_attachments_first">With attachments first</string>
+    <string name="mail_keep_for_folder">Keep for this folder</string>
+
+    <string name="mail_add_account">Add account</string>
+    <string name="mail_add_on_pc">For now, add accounts on the computer: Tetra › Mail › Add account. They come here by themselves, with their mail.</string>
+    <string name="mail_security">Security and privacy</string>
+    <string name="mail_remote">Load external content</string>
+    <string name="mail_remote_summary">Pictures and fonts from the internet. Off: each mail asks.</string>
+    <string name="mail_allowed">Allowed senders</string>
+    <string name="mail_allowed_none">None yet: «Always from them» on a mail adds its sender here.</string>
+    <string name="mail_tracking">Block hidden tracking pictures</string>
+    <string name="mail_tracking_summary">Even when pictures load</string>
+    <string name="mail_warnings">Warnings</string>
+    <string name="mail_link_warning">A link that points elsewhere</string>
+    <string name="mail_link_warning_summary">When a link\'s text and its real address differ</string>
+    <string name="mail_risky">Risky attachments</string>
+    <string name="mail_risky_summary">.exe, .js, .bat, macros in Office files</string>
+    <string name="mail_real_address">The real address next to the name</string>
+    <string name="mail_receipts">Read receipts</string>
+    <string name="mail_receipts_never">Never</string>
+    <string name="mail_receipts_ask">Ask</string>
+    <string name="mail_receipts_always">Always</string>
+</resources>

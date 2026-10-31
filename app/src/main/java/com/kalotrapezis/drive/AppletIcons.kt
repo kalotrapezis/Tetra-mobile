@@ -26,7 +26,8 @@ internal enum class Applet(@androidx.annotation.StringRes val label: Int, val ar
     Contacts(R.string.app_contacts, R.drawable.contacts_art),
     Phone(R.string.app_phone, R.drawable.phone_art),
     Data(R.string.app_data, R.drawable.data_art),
-    Assistant(R.string.app_assistant, R.drawable.assistant_art);
+    Assistant(R.string.app_assistant, R.drawable.assistant_art),
+    Mail(R.string.app_mail, R.drawable.mail_art);
 
     private fun component(context: Context) = ComponentName(context.packageName, "${Applet::class.java.packageName}.App$name")
 
