@@ -204,4 +204,8 @@
     <string name="mail_use_here_summary">Seda kontot toob arvuti. Kasutage seda ka siin: arvuti annab selle parooli edasi seotud krüptitud ühenduse kaudu, see salvestatakse selle seadme turvalisse hoidlasse ja seade toob kirjad ise, ka arvutist eemal.</string>
     <string name="mail_use_here_microsoft">Microsofti konto: logige sellel seadmel uuesti sisse ja seade toob kirjad ise, ka arvutist eemal.</string>
     <string name="mail_use_here_busy">Küsin arvutilt…</string>
+    <string name="mail_storage">Salvestusruum</string>
+    <string name="mail_storage_has">%1$s · kirju: %2$s</string>
+    <string name="mail_storage_total">Kokku: %1$s · kirju: %2$s</string>
+    <string name="mail_open_folder">Ava kaust</string>
 </resources>

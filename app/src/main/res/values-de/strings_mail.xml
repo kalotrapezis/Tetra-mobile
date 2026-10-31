@@ -204,4 +204,8 @@
     <string name="mail_use_here_summary">Der PC ruft dieses Konto ab. Verwende es auch hier: Der PC gibt sein Passwort über die gekoppelte, verschlüsselte Verbindung weiter, es wird im sicheren Speicher dieses Geräts abgelegt, und dieses Gerät ruft die E-Mails selbst ab, auch fern vom PC.</string>
     <string name="mail_use_here_microsoft">Ein Microsoft-Konto: Melde dich auf diesem Gerät erneut an, dann ruft dieses Gerät die E-Mails selbst ab, auch fern vom PC.</string>
     <string name="mail_use_here_busy">Frage den PC…</string>
+    <string name="mail_storage">Speicher</string>
+    <string name="mail_storage_has">%1$s · E-Mails: %2$s</string>
+    <string name="mail_storage_total">Insgesamt: %1$s · E-Mails: %2$s</string>
+    <string name="mail_open_folder">Ordner öffnen</string>
 </resources>

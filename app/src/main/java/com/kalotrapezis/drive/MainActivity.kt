@@ -283,6 +283,8 @@ class MainActivity : ComponentActivity() {
             Thread { android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND); if (Environment.isExternalStorageManager()) runCatching { notesStore().list() } }.start()
         } }
         Thread { runCatching { TimerService.check(this) } }.start() // a timer running (here or started elsewhere): its notification
+        // transfers cut off earlier leave hidden .part files; none is running at start but a sync's own
+        Thread { runCatching { if (Environment.isExternalStorageManager() && !SyncService.isRunning) SyncRules.sweepParts(TetraFolder.root(Environment.getExternalStorageDirectory())) } }.start()
         Thread { runCatching { if (Environment.isExternalStorageManager()) MapsAge.check(this) } }.start() // a map turned old: said once
         // Compose's new text menu bypasses LocalTextToolbar; the old path lets Writer show its Selection tab instead (14 Oct).
         @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class) androidx.compose.foundation.ComposeFoundationFlags.isNewContextMenuEnabled = false
@@ -599,6 +601,11 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
     )
     fun openDriveFile(relative: String, forceChooser: Boolean): String? = runCatching {
         val file = DriveRules.file(driveRoot(), relative)
+        // a mail of Mail's folder opens in Mail (reached by «Αποθήκευση» › «Άνοιγμα φακέλου»)
+        if (!forceChooser && relative.startsWith(MailSync.PART) && file.extension.equals("eml", true)) {
+            MailFiles.index(MailFiles.root(driveRoot()), MailEngine.device()).firstOrNull { it.file == relative.removePrefix(MailSync.PART) }
+                ?.let { mailStart = "mail:${it.id}"; screen = Screen.Mail; return@runCatching }
+        }
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", file)
         val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension.lowercase(Locale.ROOT)) ?: "application/octet-stream"
         val viewIntent = Intent(Intent.ACTION_VIEW).setDataAndType(uri, mime)
@@ -943,7 +950,8 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                 Screen.Mail -> androidx.compose.runtime.key(mailStart) { MailScreen(start = mailStart, back = { mailStart = null; screen = Screen.Home }, hasAccess = hasAllFilesAccess(), grant = {
                     context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                 }, openFile = { f -> openDriveFile(DriveRules.relative(driveRoot(), f), false)?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() } },
-                    openSettings = { settingsStart = SettingsPage.Mail; screen = Screen.Settings }) }
+                    openSettings = { settingsStart = SettingsPage.Mail; screen = Screen.Settings },
+                    openFolder = { rel -> screen = Screen.Drive; drivePane = DrivePane.Files; driveFolder = rel; loadDrive(rel) }) }
                 Screen.Contacts -> androidx.compose.runtime.key(contactsOpen, contactsNew) { ContactsScreen(back = { screen = Screen.Home }, hasAccess = hasAllFilesAccess(), grant = {
                     context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                 }, start = contactsOpen, newNumber = contactsNew, openMaps = { q -> mapsGo = null; mapsSearch = q; mapsBack = Screen.Contacts; screen = Screen.Maps }) }
@@ -1031,6 +1039,8 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                         "phone" -> openPhone(context)
                         "data" -> openData(context)
                         "mail" -> screen = Screen.Mail
+                        // «Αποθήκευση» › «Άνοιγμα φακέλου»: Mail's folder in Files, though it is under .System
+                        else -> if (id == MailFiles.FOLDER || id.startsWith(MailFiles.FOLDER + "/")) { screen = Screen.Drive; drivePane = DrivePane.Files; driveFolder = id; loadDrive(id) }
                     } },
                     openGuide = { guideAt = 0; screen = Screen.Guide },
                 )

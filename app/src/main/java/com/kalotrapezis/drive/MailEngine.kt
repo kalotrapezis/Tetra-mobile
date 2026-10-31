@@ -362,7 +362,8 @@ internal object MailEngine {
         val pseudo = waiting.associateBy { "x/${mailName(it.date, "x", "x")} ${it.id.hashCode()}.eml" }
         // ... and with no PC paired to take them (Tetra on the phone alone), what fits too: the rest stays on the server, opened from there
         val keepsAll = !pcToo && SyncStore(c).pairing() != null
-        val fits = if (keepsAll) pseudo.keys else MailSync.plan(pseudo.mapValues { it.value.size } + localMail(root), MailStorage.read(root, device()).limit)
+        val rule = MailStorage.read(root, device()) // the PC's card: the last year or month, Automatic (all), or N GB — one rule for all mail here
+        val fits = if (keepsAll) pseudo.keys else MailSync.plan(pseudo.mapValues { it.value.size } + localMail(root), rule.budget(), rule.since())
         val todo = pseudo.filterKeys { it in fits }.values.sortedByDescending { it.date }
         for ((role, list) in todo.groupBy { it.folder }) {
             val f = store.getFolder(boxes[role] ?: continue) as IMAPFolder

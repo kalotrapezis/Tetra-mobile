@@ -216,4 +216,8 @@
     <string name="mail_use_here_summary">Faigheann an ríomhaire an cuntas seo. Úsáid anseo freisin é: seolann an ríomhaire a phasfhocal thar an gceangal péireáilte, criptithe, stóráiltear é i stóras slán an ghléis seo, agus faigheann an gléas an post é féin, fiú i bhfad ón ríomhaire.</string>
     <string name="mail_use_here_microsoft">Cuntas Microsoft: sínigh isteach arís ar an ngléas seo, agus gheobhaidh an gléas an post é féin, fiú i bhfad ón ríomhaire.</string>
     <string name="mail_use_here_busy">Ag fiafraí den ríomhaire…</string>
+    <string name="mail_storage">Stóras</string>
+    <string name="mail_storage_has">%1$s · ríomhphost: %2$s</string>
+    <string name="mail_storage_total">Iomlán: %1$s · ríomhphost: %2$s</string>
+    <string name="mail_open_folder">Oscail fillteán</string>
 </resources>

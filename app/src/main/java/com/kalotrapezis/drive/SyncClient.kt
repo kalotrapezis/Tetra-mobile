@@ -88,6 +88,14 @@ internal data class SyncConnection(val content: String, val direction: String, v
 internal object SyncRules {
     private val hex64 = Regex("^[0-9a-f]{64}$")
 
+    /**
+     * Hidden ".….part" files a transfer left when it was cut off (the app stopped mid-file; 31 Oct: three in Documents and
+     * From phone, one from the 25th). A day old, none is being written: they go, at app start and before a whole sync.
+     */
+    fun staleParts(root: File, now: Long = System.currentTimeMillis()): List<File> = root.walkTopDown()
+        .filter { it.isFile && it.name.startsWith(".") && it.name.endsWith(".part") && it.lastModified() < now - 86_400_000L }.toList()
+    fun sweepParts(root: File) = staleParts(root).forEach { if (it.delete()) WriterLog.i("Sync: a transfer's leftover gone: ${it.name}") }
+
     /** How many times a sync that died on a lost network is started again, once a network is back. */
     const val NETWORK_RETRIES = 3
 
@@ -1055,6 +1063,7 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         // each path by its own row; the part sync runs while any of files, mail and other is on
         val row = { rel: String -> SyncConnection.of(rel).let { rows[it] ?: SyncConnection.defaults.first { d -> d.content == it } } }
         if (rows.values.none { it.content != "photos" && (it.sends || it.receives) }) return 0
+        if (scope == null) runCatching { SyncRules.sweepParts(root) }
         val entries = if (scope == null) driveManifest.entries(root) else driveManifest.entries(root) { DriveScope.contains(scope, it) }
         val me = MailEngine.device()
         val manifest = JSONArray(entries.map { JSONObject().put("path", it.relativePath).put("sha256", it.sha256).put("size", it.sizeBytes).put("modified", it.modified) })
@@ -1224,9 +1233,11 @@ internal class SyncClient(private val context: Context, private val store: SyncS
             target.parentFile?.mkdirs()
             val part = File(target.parentFile, ".${target.name}.part")
             val digest = MessageDigest.getInstance("SHA-256")
-            c.inputStream.use { input -> part.outputStream().use { out -> java.security.DigestInputStream(input, digest).copyTo(out) } }
-            if (sha != null && SyncRules.hex(digest.digest()) != sha) { part.delete(); throw SyncException(context.getString(R.string.sync_changed_on_way)) }
-            if (!part.renameTo(target)) { part.delete(); throw SyncException(context.getString(R.string.sync_not_in_place)) }
+            try {
+                c.inputStream.use { input -> part.outputStream().use { out -> java.security.DigestInputStream(input, digest).copyTo(out) } }
+                if (sha != null && SyncRules.hex(digest.digest()) != sha) throw SyncException(context.getString(R.string.sync_changed_on_way))
+                if (!part.renameTo(target)) throw SyncException(context.getString(R.string.sync_not_in_place))
+            } finally { part.delete() } // cut off or refused: no leftover (after the rename there is nothing to delete)
         } finally { c.disconnect() }
         return target
     }

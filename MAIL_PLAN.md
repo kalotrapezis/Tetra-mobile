@@ -475,6 +475,22 @@ Formats are the desktop's (step 1's sync.js/mail.js of the same day); the phone 
   keystore, and the account written to `accounts.<device>.json` with the same id and colour: the phone fetches it itself
   from then on, its mail still one list.
 
+## 17. Αποθήκευση, and what the user's phone showed (31 Oct, over USB)
+
+- **«Αποθήκευση»** (folder icon): in Mail's pulled-up panel, and in each account's dialog in Settings › Αλληλογραφία.
+  Per account: name, address, "size · N mails", the folder's path, «Άνοιγμα φακέλου»; then the total and the whole
+  folder. The folder opens in Tetra's own Files (Mail/<address>, though it is under .System), and a .eml opened there
+  opens in Mail. The same words as the desktop's (its translations).
+- **The limit was applied**: the Xiaomi's card says the last year (keepDays 365, no byte limit), and the phone held mail
+  from 2025-10 on, 1.6 GB. But the phone's own fetching read only the byte limit: it now follows the same rule (last
+  year/month, Automatic = all, Off, N GB) over all mail on the device, the PC's and its own together.
+- **One mail, one file**: the phone fetching kalotrapezis@gmail.com itself gave 13,048 of 13,050 mails the PC's very
+  name and bytes (it takes the PC's name when the PC saved the mail first). The 2 others were subjects cut inside an
+  emoji ("?" on the phone, half a surrogate on the PC): names are now cut between characters only (the PC to do the same).
+  The 23 "(2).eml" on the phone are different mails of the same minute and subject; each index points at the right one.
+- **Leftover .part files** of transfers cut off go after a day, at app start and before a whole sync; a mail fetched by
+  path leaves none when it fails.
+
 ## Open questions for the user
 
 - Away from home, does the phone sync with the desktop over the internet, or only on the same Wi-Fi?

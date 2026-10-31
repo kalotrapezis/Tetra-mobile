@@ -112,6 +112,14 @@ internal object MailFiles {
         }
     }
 
+    /** «Αποθήκευση»: what one account's folder ([id]), or the whole of Mail (null), takes here — bytes, and how many mails. */
+    fun held(root: File, id: String?): Pair<Long, Int> {
+        var bytes = 0L; var mails = 0
+        (if (id == null) root else File(root, id)).walkTopDown().filter { it.isFile && !it.name.startsWith(".") }
+            .forEach { bytes += it.length(); if (it.name.endsWith(".eml")) mails++ }
+        return bytes to mails
+    }
+
     /** The mail's file and its attachments' folder, or null when it is not on this device yet. */
     fun eml(root: File, e: MailEntry) = e.file?.let { File(root, it) }?.takeIf { it.isFile && inside(root, it) }
     fun attachments(root: File, e: MailEntry): List<File> = eml(root, e)?.let { File(it.path.removeSuffix(".eml") + ".files") }
@@ -495,7 +503,8 @@ internal object Mime {
     /** The computer's clean(): a name every file system takes, at most [bytes] bytes of UTF-8 (its desktop/mail.js). */
     fun clean(s: String?, bytes: Int): String {
         var out = (s ?: "").replace(Regex("[/\\\\\u0000:*?\"<>|\r\n\t]"), " ").replace(Regex("\\s+"), " ").trim().replace(Regex("^\\.+"), "")
-        while (out.toByteArray().size > bytes) out = out.dropLast(1)
+        // whole characters only: half an emoji became "?" here and a broken one on the PC, two names for one mail (31 Oct)
+        while (out.toByteArray().size > bytes) out = out.dropLast(if (out.length >= 2 && out.last().isLowSurrogate()) 2 else 1)
         return out.trim()
     }
 

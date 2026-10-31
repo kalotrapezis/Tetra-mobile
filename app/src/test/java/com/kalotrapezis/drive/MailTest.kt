@@ -321,4 +321,27 @@ class MailTest {
         assertFalse(MailSync.pcMail("Mail/index.Pixel.jsonl", "Pixel", setOf("me@x.gr")))
         dir.deleteRecursively()
     }
+
+    @Test fun aNameIsCutBetweenCharactersNeverInsideAnEmoji() {
+        val subject = "Lenovo Laptop 10ης Γενιάς μόνο 199€ + 🎇🎇"
+        for (bytes in 40..60) {
+            val cut = Mime.clean(subject, bytes)
+            assertTrue(cut, cut.toByteArray().size <= bytes)
+            assertFalse(cut, cut.isNotEmpty() && cut.last().isHighSurrogate()) // half an emoji: "?" here, a broken name on the PC
+        }
+    }
+
+    @Test fun storageCountsAnAccountsMailAndAllOfIt() {
+        val dir = java.nio.file.Files.createTempDirectory("mail").toFile()
+        File(dir, "a@b.gr/Inbox/2026").mkdirs()
+        File(dir, "a@b.gr/Inbox/2026/2026-01-02 0800 X - y.eml").writeText("12345")
+        File(dir, "a@b.gr/Inbox/2026/2026-01-02 0800 X - y.files").mkdirs()
+        File(dir, "a@b.gr/Inbox/2026/2026-01-02 0800 X - y.files/p.pdf").writeText("123")
+        File(dir, "a@b.gr/Inbox/2026/.z.eml.part").writeText("1234567") // a leftover: not counted
+        File(dir, "index.jsonl").writeText("12")
+        assertEquals(8L to 1, MailFiles.held(dir, "a@b.gr"))
+        assertEquals(10L to 1, MailFiles.held(dir, null))
+        dir.deleteRecursively()
+    }
 }
+

@@ -204,4 +204,8 @@
     <string name="mail_use_here_summary">De pc haalt dit account op. Gebruik het ook hier: de pc geeft het wachtwoord door via de gekoppelde, versleutelde verbinding, het wordt bewaard in de beveiligde opslag van dit apparaat, en dit apparaat haalt de mail zelf op, ook als je niet bij de pc bent.</string>
     <string name="mail_use_here_microsoft">Een Microsoft-account: log opnieuw in op dit apparaat, en dit apparaat haalt de mail zelf op, ook als je niet bij de pc bent.</string>
     <string name="mail_use_here_busy">De pc vragen…</string>
+    <string name="mail_storage">Opslag</string>
+    <string name="mail_storage_has">%1$s · mails: %2$s</string>
+    <string name="mail_storage_total">In totaal: %1$s · mails: %2$s</string>
+    <string name="mail_open_folder">Map openen</string>
 </resources>

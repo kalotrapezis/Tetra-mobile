@@ -212,4 +212,8 @@
     <string name="mail_use_here_summary">PC tento účet stahuje. Používejte ho i tady: PC předá jeho heslo přes spárované šifrované spojení, uloží se do zabezpečeného úložiště tohoto zařízení a zařízení si poštu stahuje samo, i když jste mimo PC.</string>
     <string name="mail_use_here_microsoft">Účet Microsoft: přihlaste se znovu na tomto zařízení a zařízení si poštu bude stahovat samo, i když jste mimo PC.</string>
     <string name="mail_use_here_busy">Ptám se PC…</string>
+    <string name="mail_storage">Úložiště</string>
+    <string name="mail_storage_has">%1$s · e-maily: %2$s</string>
+    <string name="mail_storage_total">Celkem: %1$s · e-maily: %2$s</string>
+    <string name="mail_open_folder">Otevřít složku</string>
 </resources>

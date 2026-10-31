@@ -212,4 +212,8 @@
     <string name="mail_use_here_summary">Šią paskyrą parsiunčia kompiuteris. Naudokite ją ir čia: kompiuteris perduoda jos slaptažodį suporuotu, šifruotu ryšiu, jis saugomas šio įrenginio saugioje saugykloje, o įrenginys laiškus parsiunčia pats, net toli nuo kompiuterio.</string>
     <string name="mail_use_here_microsoft">Microsoft paskyra: prisijunkite iš naujo šiame įrenginyje, ir jis laiškus parsiųs pats, net toli nuo kompiuterio.</string>
     <string name="mail_use_here_busy">Klausiu kompiuterio…</string>
+    <string name="mail_storage">Saugykla</string>
+    <string name="mail_storage_has">%1$s · laiškų: %2$s</string>
+    <string name="mail_storage_total">Iš viso: %1$s · laiškų: %2$s</string>
+    <string name="mail_open_folder">Atidaryti aplanką</string>
 </resources>

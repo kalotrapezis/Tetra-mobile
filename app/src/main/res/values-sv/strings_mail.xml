@@ -204,4 +204,8 @@
     <string name="mail_use_here_summary">Datorn hämtar det här kontot. Använd det även här: datorn för över lösenordet via den parkopplade, krypterade anslutningen, det sparas i den här enhetens säkra lagring, och enheten hämtar e-posten själv, även när du är borta från datorn.</string>
     <string name="mail_use_here_microsoft">Ett Microsoft-konto: logga in igen på den här enheten, så hämtar enheten e-posten själv, även när du är borta från datorn.</string>
     <string name="mail_use_here_busy">Frågar datorn…</string>
+    <string name="mail_storage">Lagring</string>
+    <string name="mail_storage_has">%1$s · mejl: %2$s</string>
+    <string name="mail_storage_total">Totalt: %1$s · mejl: %2$s</string>
+    <string name="mail_open_folder">Öppna mapp</string>
 </resources>

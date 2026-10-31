@@ -215,4 +215,8 @@
     <string name="mail_use_here_summary">The PC fetches this account. Use it here too: the PC passes its password over the paired, encrypted connection, it is kept in this device\'s secure storage, and this device fetches the mail itself, even away from the PC.</string>
     <string name="mail_use_here_microsoft">A Microsoft account: sign in again on this device, and this device fetches the mail itself, even away from the PC.</string>
     <string name="mail_use_here_busy">Asking the PC…</string>
+    <string name="mail_storage">Storage</string>
+    <string name="mail_storage_has">%1$s · %2$s mails</string>
+    <string name="mail_storage_total">In all: %1$s · %2$s mails</string>
+    <string name="mail_open_folder">Open folder</string>
 </resources>

@@ -122,7 +122,8 @@ private val ROLE_ICONS = mapOf("Inbox" to R.drawable.ic_mail, "Drafts" to R.draw
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Boolean, grant: () -> Unit, openFile: (File) -> Unit, openSettings: () -> Unit) {
+internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Boolean, grant: () -> Unit, openFile: (File) -> Unit, openSettings: () -> Unit,
+    openFolder: (String) -> Unit = {}) {
     val context = LocalContext.current
     val width = LocalConfiguration.current.screenWidthDp
     val three = width >= 1000 // folders · list · mail
@@ -137,6 +138,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     }
     val root = remember { mailRoot() }
     var version by remember { mutableIntStateOf(0) }
+    var storage by remember { mutableStateOf(false) } // «Αποθήκευση»
     // the computer's index and accounts arriving by sync: read again
     val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current
     DisposableEffect(root, lifecycle) {
@@ -435,6 +437,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
         }
     }
 
+    if (storage) MailStorageDialog(null, openFolder) { storage = false }
     if (filterOpen) FilterSheet(view, accounts, keep, set = { v -> view = v; if (keep) MailPrefs.setView(context, folderKey, v) },
         setKeep = { k -> keep = k; MailPrefs.setView(context, folderKey, if (k) view else null) }) { filterOpen = false }
     if (listDrawer) ModalBottomSheet(onDismissRequest = { listDrawer = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
@@ -464,8 +467,9 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
                 HorizontalDivider(color = islandContentColor().copy(alpha = 0.15f))
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     DrawerButton(R.drawable.ic_person, stringResource(R.string.mail_accounts), false, Modifier.weight(1f)) { listDrawer = false; openSettings() }
-                    DrawerButton(R.drawable.ic_tune, stringResource(R.string.common_settings), false, Modifier.weight(1f)) { listDrawer = false; openSettings() }
+                    DrawerButton(R.drawable.ic_folder, stringResource(R.string.mail_storage), false, Modifier.weight(1f)) { listDrawer = false; storage = true }
                 }
+                DrawerButton(R.drawable.ic_tune, stringResource(R.string.common_settings), false, Modifier.fillMaxWidth()) { listDrawer = false; openSettings() }
             }
             Text(stringResource(R.string.mail_read_only_note), style = MaterialTheme.typography.bodySmall, color = islandContentColor().copy(alpha = 0.7f))
         }
@@ -877,3 +881,48 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
     Row(Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.08f)).clickable { set(!on) }.padding(horizontal = 16.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(text, Modifier.weight(1f)); Switch(checked = on, onCheckedChange = set)
     }
+
+/**
+ * «Αποθήκευση» (the user, 31 Oct: "how can I access my mails if the folder is hidden in the system folder?"): where each
+ * account's mail is kept on this device, how much it takes and how many mails, and «Άνοιγμα φακέλου» in Tetra's Files
+ * (which shows Mail's folder, though it is under .System). The desktop's Mail says the same in the same words. [only]: one account.
+ */
+@Composable internal fun MailStorageDialog(only: String?, openFolder: (String) -> Unit, dismiss: () -> Unit) {
+    val context = LocalContext.current
+    val root = remember { mailRoot() }
+    val info by produceState<Pair<List<Triple<MailAccount, Long, Int>>, Pair<Long, Int>>?>(null) {
+        value = withContext(Dispatchers.IO) {
+            MailFiles.accounts(root, MailSecret.ids(context)).filter { only == null || it.id == only }
+                .map { a -> MailFiles.held(root, a.id).let { (b, n) -> Triple(a, b, n) } } to MailFiles.held(root, null)
+        }
+    }
+    val number = java.text.NumberFormat.getInstance()
+    // as the desktop shows sizes: GB with one decimal from a gigabyte, else whole MB
+    fun size(n: Long) = if (n >= 1_000_000_000) "${java.text.DecimalFormat("#,##0.#").format(n / 1e9)} GB" else "${number.format(Math.round(n / 1e6))} MB"
+    AlertDialog(onDismissRequest = dismiss, icon = { Icon(painterResource(R.drawable.ic_folder), contentDescription = null) }, title = { Text(stringResource(R.string.mail_storage)) },
+        text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            val got = info
+            if (got == null) androidx.compose.material3.CircularProgressIndicator()
+            else {
+                got.first.forEach { (a, bytes, mails) -> Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Box(Modifier.size(10.dp).clip(CircleShape).background(Color(a.color)))
+                        Text(a.name, fontWeight = FontWeight.Bold)
+                        Text(a.address, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Text(stringResource(R.string.mail_storage_has, size(bytes), number.format(mails)))
+                    Text(File(root, a.id).path, style = MaterialTheme.typography.bodySmall, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
+                    androidx.compose.material3.OutlinedButton(onClick = { dismiss(); openFolder(MailFiles.FOLDER + "/" + a.id) }) {
+                        Icon(painterResource(R.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.mail_open_folder))
+                    }
+                } }
+                if (only == null) Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.mail_storage_total, size(got.second.first), number.format(got.second.second)), Modifier.weight(1f), fontWeight = FontWeight.Medium)
+                    TextButton(onClick = { dismiss(); openFolder(MailFiles.FOLDER) }) { Text(stringResource(R.string.mail_open_folder)) }
+                }
+            }
+        } },
+        confirmButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.common_close)) } })
+}
+

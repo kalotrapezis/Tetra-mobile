@@ -166,7 +166,7 @@ internal fun SettingsTab(
                     SettingsPage.Timer -> SettingsSection("Claude") { SkillRows("tetra-timer", "Timer", stringResource(R.string.settings_timer_skill)) }
                     SettingsPage.Maps -> MapsPage()
                     SettingsPage.Contacts -> ContactsPage()
-                    SettingsPage.Mail -> MailPage()
+                    SettingsPage.Mail -> MailPage(openPart)
                     SettingsPage.Phone -> PhonePage()
                     SettingsPage.Data -> DataPage()
                     SettingsPage.Assistant -> AssistantPage()
@@ -780,7 +780,7 @@ internal fun SettingsTab(
  * Settings › Αλληλογραφία (MAIL_PLAN §9c): the accounts as the computer has them, each green when all its mail is here and
  * orange while some is only on the server; and Ασφάλεια και απόρρητο. Accounts are added on the computer for now (step 2).
  */
-@Composable private fun MailPage() {
+@Composable private fun MailPage(openPart: (String) -> Unit) {
     val context = LocalContext.current
     var version by remember { mutableIntStateOf(0) }
     val data by produceState<Pair<List<MailAccount>, List<MailEntry>>?>(null, version) {
@@ -789,6 +789,8 @@ internal fun SettingsTab(
     var adding by remember { mutableStateOf(false) }
     var managing by remember { mutableStateOf<MailAccount?>(null) }
     var using by remember { mutableStateOf<MailAccount?>(null) }
+    var storing by remember { mutableStateOf<String?>(null) } // «Αποθήκευση» for one account
+    storing?.let { id -> MailStorageDialog(id, openPart) { storing = null } }
     SettingsSection(stringResource(R.string.mail_accounts)) {
         data?.first?.forEach { a ->
             val orange = data!!.second.count { it.account == a.id && !it.saved }
@@ -874,6 +876,7 @@ internal fun SettingsTab(
             text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(a.address)
                 Text(stringResource(if (microsoft) R.string.mail_use_here_microsoft else R.string.mail_use_here_summary), style = MaterialTheme.typography.bodySmall)
+                TextButton(onClick = { using = null; storing = a.id }) { Icon(painterResource(R.drawable.ic_folder), contentDescription = null); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.mail_storage)) }
                 problem?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             } },
             confirmButton = { TextButton(enabled = !busy, onClick = {
@@ -908,6 +911,7 @@ internal fun SettingsTab(
                 OutlinedTextField(name, { name = it }, singleLine = true, label = { Text(stringResource(R.string.common_name)) }, modifier = Modifier.fillMaxWidth())
                 if (!microsoft) OutlinedTextField(pass, { pass = it }, singleLine = true, label = { Text(stringResource(R.string.mail_new_password)) },
                     visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
+                TextButton(onClick = { managing = null; storing = a.id }) { Icon(painterResource(R.drawable.ic_folder), contentDescription = null); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.mail_storage)) }
                 TextButton(onClick = { MailEngine.remove(context.applicationContext, mailRoot(), a.id); MailEngine.schedule(context.applicationContext); managing = null; version++ }) {
                     Text(stringResource(R.string.mail_remove_here), color = MaterialTheme.colorScheme.error)
                 }

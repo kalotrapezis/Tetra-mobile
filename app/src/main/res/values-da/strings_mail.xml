@@ -204,4 +204,8 @@
     <string name="mail_use_here_summary">Pc’en henter denne konto. Brug den også her: pc’en videregiver adgangskoden over den parrede, krypterede forbindelse, den gemmes i denne enheds sikre lager, og enheden henter selv mailen, også væk fra pc’en.</string>
     <string name="mail_use_here_microsoft">En Microsoft-konto: log ind igen på denne enhed, så henter enheden selv mailen, også væk fra pc’en.</string>
     <string name="mail_use_here_busy">Spørger pc’en…</string>
+    <string name="mail_storage">Lager</string>
+    <string name="mail_storage_has">%1$s · mails: %2$s</string>
+    <string name="mail_storage_total">I alt: %1$s · mails: %2$s</string>
+    <string name="mail_open_folder">Åbn mappe</string>
 </resources>

@@ -212,4 +212,8 @@
     <string name="mail_use_here_summary">To konto pobiera komputer. Używaj go także tutaj: komputer przekazuje jego hasło przez sparowane, szyfrowane połączenie, jest ono przechowywane w bezpiecznym magazynie tego urządzenia, a urządzenie pobiera pocztę samo, także z dala od komputera.</string>
     <string name="mail_use_here_microsoft">Konto Microsoft: zaloguj się ponownie na tym urządzeniu, a ono samo będzie pobierać pocztę, także z dala od komputera.</string>
     <string name="mail_use_here_busy">Pytam komputer…</string>
+    <string name="mail_storage">Magazyn</string>
+    <string name="mail_storage_has">%1$s · e-maili: %2$s</string>
+    <string name="mail_storage_total">Razem: %1$s · e-maili: %2$s</string>
+    <string name="mail_open_folder">Otwórz folder</string>
 </resources>

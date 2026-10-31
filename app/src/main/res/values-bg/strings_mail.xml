@@ -204,4 +204,8 @@
     <string name="mail_use_here_summary">Компютърът изтегля този акаунт. Използвайте го и тук: компютърът предава паролата му по сдвоената, шифрована връзка, тя се пази в защитеното хранилище на това устройство, а устройството изтегля пощата само, дори далеч от компютъра.</string>
     <string name="mail_use_here_microsoft">Акаунт на Microsoft: влезте отново на това устройство и то ще изтегля пощата само, дори далеч от компютъра.</string>
     <string name="mail_use_here_busy">Питам компютъра…</string>
+    <string name="mail_storage">Хранилище</string>
+    <string name="mail_storage_has">%1$s · писма: %2$s</string>
+    <string name="mail_storage_total">Общо: %1$s · писма: %2$s</string>
+    <string name="mail_open_folder">Отвори папката</string>
 </resources>

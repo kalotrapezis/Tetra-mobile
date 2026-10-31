@@ -208,4 +208,8 @@
     <string name="mail_use_here_summary">El PC descarga esta cuenta. Úsala también aquí: el PC pasa su contraseña por la conexión emparejada y cifrada, se guarda en el almacenamiento seguro de este dispositivo y este dispositivo descarga el correo por sí mismo, incluso lejos del PC.</string>
     <string name="mail_use_here_microsoft">Una cuenta de Microsoft: vuelve a iniciar sesión en este dispositivo y este descargará el correo por sí mismo, incluso lejos del PC.</string>
     <string name="mail_use_here_busy">Preguntando al PC…</string>
+    <string name="mail_storage">Almacenamiento</string>
+    <string name="mail_storage_has">%1$s · correos: %2$s</string>
+    <string name="mail_storage_total">En total: %1$s · correos: %2$s</string>
+    <string name="mail_open_folder">Abrir carpeta</string>
 </resources>

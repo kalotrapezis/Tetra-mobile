@@ -208,4 +208,8 @@
     <string name="mail_use_here_summary">Le PC récupère ce compte. Utilisez-le aussi ici : le PC transmet son mot de passe par la connexion jumelée et chiffrée, il est conservé dans le stockage sécurisé de cet appareil, et cet appareil récupère lui-même les e-mails, même loin du PC.</string>
     <string name="mail_use_here_microsoft">Un compte Microsoft : reconnectez-vous sur cet appareil, et il récupérera lui-même les e-mails, même loin du PC.</string>
     <string name="mail_use_here_busy">Interrogation du PC…</string>
+    <string name="mail_storage">Stockage</string>
+    <string name="mail_storage_has">%1$s · e-mails: %2$s</string>
+    <string name="mail_storage_total">Au total: %1$s · e-mails: %2$s</string>
+    <string name="mail_open_folder">Ouvrir le dossier</string>
 </resources>

@@ -204,4 +204,8 @@
     <string name="mail_use_here_summary">Tietokone hakee tämän tilin. Käytä sitä myös täällä: tietokone välittää sen salasanan paritetun, salatun yhteyden kautta, se tallennetaan tämän laitteen suojattuun tallennustilaan, ja laite hakee viestit itse, myös kaukana tietokoneesta.</string>
     <string name="mail_use_here_microsoft">Microsoft-tili: kirjaudu uudelleen sisään tällä laitteella, niin laite hakee viestit itse, myös kaukana tietokoneesta.</string>
     <string name="mail_use_here_busy">Kysytään tietokoneelta…</string>
+    <string name="mail_storage">Tallennustila</string>
+    <string name="mail_storage_has">%1$s · viestejä: %2$s</string>
+    <string name="mail_storage_total">Yhteensä: %1$s · viestejä: %2$s</string>
+    <string name="mail_open_folder">Avaa kansio</string>
 </resources>

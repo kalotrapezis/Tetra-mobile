@@ -204,4 +204,8 @@
     <string name="mail_use_here_summary">Ezt a fiókot a számítógép tölti le. Használd itt is: a számítógép a párosított, titkosított kapcsolaton adja át a jelszavát, az eszköz biztonságos tárolójában őrződik, és az eszköz maga tölti le a leveleket, a számítógéptől távol is.</string>
     <string name="mail_use_here_microsoft">Microsoft-fiók: jelentkezz be újra ezen az eszközön, és az eszköz maga tölti le a leveleket, a számítógéptől távol is.</string>
     <string name="mail_use_here_busy">Megkérdezem a számítógépet…</string>
+    <string name="mail_storage">Tárhely</string>
+    <string name="mail_storage_has">%1$s · levél: %2$s</string>
+    <string name="mail_storage_total">Összesen: %1$s · levél: %2$s</string>
+    <string name="mail_open_folder">Mappa megnyitása</string>
 </resources>

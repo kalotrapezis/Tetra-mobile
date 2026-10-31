@@ -208,4 +208,8 @@
     <string name="mail_use_here_summary">PC-ul aduce acest cont. Folosește-l și aici: PC-ul transmite parola prin conexiunea asociată și criptată, aceasta este păstrată în stocarea securizată a acestui dispozitiv, iar dispozitivul aduce singur e-mailurile, chiar și departe de PC.</string>
     <string name="mail_use_here_microsoft">Un cont Microsoft: conectează-te din nou pe acest dispozitiv, iar acesta va aduce singur e-mailurile, chiar și departe de PC.</string>
     <string name="mail_use_here_busy">Întreb PC-ul…</string>
+    <string name="mail_storage">Stocare</string>
+    <string name="mail_storage_has">%1$s · e-mailuri: %2$s</string>
+    <string name="mail_storage_total">În total: %1$s · e-mailuri: %2$s</string>
+    <string name="mail_open_folder">Deschide dosarul</string>
 </resources>

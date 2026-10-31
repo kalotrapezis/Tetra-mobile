@@ -179,5 +179,16 @@ class SyncConnectionOffTest {
         assertFalse(SyncConnection("photos", "send", "nothing", keepAuto = true).moves) // nothing goes by itself
         assertTrue(SyncConnection("photos", "send", "nothing", 730).moves) // the PC's suggested Move, once confirmed
     }
+
+    @Test fun aTransfersLeftoverGoesAfterADay() {
+        val root = java.nio.file.Files.createTempDirectory("tetra").toFile()
+        val old = java.io.File(root, "Documents/From other apps/.WIHSF.pdf.0b1c.part").apply { parentFile!!.mkdirs(); writeText("x"); setLastModified(System.currentTimeMillis() - 2 * 86_400_000L) }
+        val fresh = java.io.File(root, "From phone/.Screenshot.jpg.9f.part").apply { parentFile!!.mkdirs(); writeText("x") } // being written now
+        val system = java.io.File(root, ".System/Mail/Shared/.index.jsonl.part").apply { parentFile!!.mkdirs(); writeText("x"); setLastModified(0) }
+        java.io.File(root, "Documents/a.part").apply { writeText("x"); setLastModified(0) } // a file of the user's, not hidden
+        assertEquals(setOf(old, system), SyncRules.staleParts(root).toSet())
+        assertTrue(fresh.exists())
+        root.deleteRecursively()
+    }
 }
 
