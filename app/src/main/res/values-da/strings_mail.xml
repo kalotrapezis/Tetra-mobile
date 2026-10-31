@@ -43,9 +43,9 @@
     <string name="mail_do_archive">Arkivér</string>
     <string name="mail_mark_read">Læst</string>
     <string name="mail_mark_unread">Ulæst</string>
-    <string name="mail_later">Kommer snart: computeren foretager denne ændring på serveren.</string>
+    <string name="mail_later">Kommer snart.</string>
     <string name="mail_write_later">Skrivning af mail kommer i et senere trin.</string>
-    <string name="mail_read_only_note">Indtil videre læser Mail her det, computeren har hentet. Ændringer på serveren (arkivér, slet, læst, ♥) og skrivning kommer næste gang.</string>
+    <string name="mail_read_only_note">Ændringer, du laver her (læst, ♥, arkivér, slet, flyt, spam), udføres på serveren af computeren. Skrivning af mail kommer næste gang.</string>
     <string name="mail_reply">Svar</string>
     <string name="mail_reply_all">Svar alle</string>
     <string name="mail_forward">Videresend</string>
@@ -118,4 +118,21 @@
     <string name="mail_receipts_never">Aldrig</string>
     <string name="mail_receipts_ask">Spørg</string>
     <string name="mail_receipts_always">Altid</string>
+    <string name="mail_done_on_pc">Gjort her; computeren foretager ændringen på serveren.</string>
+    <string name="mail_not_spam">Ikke spam</string>
+    <string name="mail_move_to">Flyt til</string>
+    <string name="mail_from_favourites">Fjern fra favoritter</string>
+    <string name="mail_on_pc">på computeren</string>
+    <string name="mail_fetching">Henter fra computeren…</string>
+    <string name="mail_fetch_failed">Kunne ikke hente den fra computeren: %1$s</string>
+    <string name="mail_on_device">På denne enhed</string>
+    <string name="mail_on_device_note">Ældre mail og vedhæftninger bliver på computeren og kommer hertil, når du åbner dem.</string>
+    <string name="mail_keep_bodies">Mail</string>
+    <string name="mail_keep_attachments">Vedhæftninger</string>
+    <string name="mail_month_1">1 måned</string>
+    <string name="mail_months_6">6 måneder</string>
+    <string name="mail_months_12">12 måneder</string>
+    <string name="mail_year_1">1 år</string>
+    <string name="mail_keep_all">Alle</string>
+    <string name="mail_keep_none">Ingen</string>
 </resources>

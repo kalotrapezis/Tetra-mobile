@@ -43,9 +43,9 @@
     <string name="mail_do_archive">Archivia</string>
     <string name="mail_mark_read">Letta</string>
     <string name="mail_mark_unread">Non letta</string>
-    <string name="mail_later">Presto: il computer farà questa modifica sul server.</string>
+    <string name="mail_later">Presto disponibile.</string>
     <string name="mail_write_later">La scrittura delle mail arriva in un passo successivo.</string>
-    <string name="mail_read_only_note">Per ora Posta qui legge ciò che il computer ha scaricato. Le modifiche sul server (archivia, elimina, letta, ♥) e la scrittura arrivano dopo.</string>
+    <string name="mail_read_only_note">Le modifiche che fai qui (letta, ♥, archivia, elimina, sposta, spam) le esegue il computer sul server. La scrittura delle mail arriva dopo.</string>
     <string name="mail_reply">Rispondi</string>
     <string name="mail_reply_all">Rispondi a tutti</string>
     <string name="mail_forward">Inoltra</string>
@@ -118,4 +118,21 @@
     <string name="mail_receipts_never">Mai</string>
     <string name="mail_receipts_ask">Chiedi</string>
     <string name="mail_receipts_always">Sempre</string>
+    <string name="mail_done_on_pc">Fatto qui; il computer applica la modifica sul server.</string>
+    <string name="mail_not_spam">Non spam</string>
+    <string name="mail_move_to">Sposta in</string>
+    <string name="mail_from_favourites">Rimuovi dai preferiti</string>
+    <string name="mail_on_pc">sul computer</string>
+    <string name="mail_fetching">Scaricamento dal computer…</string>
+    <string name="mail_fetch_failed">Impossibile scaricarla dal computer: %1$s</string>
+    <string name="mail_on_device">Su questo dispositivo</string>
+    <string name="mail_on_device_note">La posta e gli allegati più vecchi restano sul computer e arrivano qui quando li apri.</string>
+    <string name="mail_keep_bodies">Posta</string>
+    <string name="mail_keep_attachments">Allegati</string>
+    <string name="mail_month_1">1 mese</string>
+    <string name="mail_months_6">6 mesi</string>
+    <string name="mail_months_12">12 mesi</string>
+    <string name="mail_year_1">1 anno</string>
+    <string name="mail_keep_all">Tutta</string>
+    <string name="mail_keep_none">Nessuno</string>
 </resources>

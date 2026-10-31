@@ -43,9 +43,9 @@
     <string name="mail_do_archive">Arkivera</string>
     <string name="mail_mark_read">Läst</string>
     <string name="mail_mark_unread">Oläst</string>
-    <string name="mail_later">Kommer snart: datorn gör den här ändringen på servern.</string>
+    <string name="mail_later">Kommer snart.</string>
     <string name="mail_write_later">Att skriva e-post kommer i ett senare steg.</string>
-    <string name="mail_read_only_note">Tills vidare läser E-post här det som datorn hämtat. Ändringar på servern (arkivera, radera, läst, ♥) och skrivande kommer härnäst.</string>
+    <string name="mail_read_only_note">Ändringar du gör här (läst, ♥, arkivera, radera, flytta, skräppost) görs på servern av datorn. Att skriva e-post kommer härnäst.</string>
     <string name="mail_reply">Svara</string>
     <string name="mail_reply_all">Svara alla</string>
     <string name="mail_forward">Vidarebefordra</string>
@@ -118,4 +118,21 @@
     <string name="mail_receipts_never">Aldrig</string>
     <string name="mail_receipts_ask">Fråga</string>
     <string name="mail_receipts_always">Alltid</string>
+    <string name="mail_done_on_pc">Klart här; datorn gör ändringen på servern.</string>
+    <string name="mail_not_spam">Inte skräppost</string>
+    <string name="mail_move_to">Flytta till</string>
+    <string name="mail_from_favourites">Ta bort från favoriter</string>
+    <string name="mail_on_pc">på datorn</string>
+    <string name="mail_fetching">Hämtar från datorn…</string>
+    <string name="mail_fetch_failed">Kunde inte hämta det från datorn: %1$s</string>
+    <string name="mail_on_device">På den här enheten</string>
+    <string name="mail_on_device_note">Äldre e-post och bilagor stannar på datorn och kommer hit när du öppnar dem.</string>
+    <string name="mail_keep_bodies">E-post</string>
+    <string name="mail_keep_attachments">Bilagor</string>
+    <string name="mail_month_1">1 månad</string>
+    <string name="mail_months_6">6 månader</string>
+    <string name="mail_months_12">12 månader</string>
+    <string name="mail_year_1">1 år</string>
+    <string name="mail_keep_all">Allt</string>
+    <string name="mail_keep_none">Inga</string>
 </resources>

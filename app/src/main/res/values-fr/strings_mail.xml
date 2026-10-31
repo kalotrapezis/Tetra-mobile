@@ -45,9 +45,9 @@
     <string name="mail_do_archive">Archiver</string>
     <string name="mail_mark_read">Lu</string>
     <string name="mail_mark_unread">Non lu</string>
-    <string name="mail_later">Bientôt : l’ordinateur fera ce changement sur le serveur.</string>
+    <string name="mail_later">Bientôt disponible.</string>
     <string name="mail_write_later">L’écriture d’e-mails arrive dans une prochaine étape.</string>
-    <string name="mail_read_only_note">Pour l’instant, Mail ici lit ce que l’ordinateur a récupéré. Les changements sur le serveur (archiver, supprimer, lu, ♥) et l’écriture arrivent ensuite.</string>
+    <string name="mail_read_only_note">Les changements que vous faites ici (lu, ♥, archiver, supprimer, déplacer, indésirable) sont appliqués sur le serveur par l’ordinateur. L’écriture d’e-mails arrive ensuite.</string>
     <string name="mail_reply">Répondre</string>
     <string name="mail_reply_all">Répondre à tous</string>
     <string name="mail_forward">Transférer</string>
@@ -122,4 +122,21 @@
     <string name="mail_receipts_never">Jamais</string>
     <string name="mail_receipts_ask">Demander</string>
     <string name="mail_receipts_always">Toujours</string>
+    <string name="mail_done_on_pc">Fait ici ; l’ordinateur applique le changement sur le serveur.</string>
+    <string name="mail_not_spam">Pas indésirable</string>
+    <string name="mail_move_to">Déplacer vers</string>
+    <string name="mail_from_favourites">Retirer des favoris</string>
+    <string name="mail_on_pc">sur l’ordinateur</string>
+    <string name="mail_fetching">Récupération depuis l’ordinateur…</string>
+    <string name="mail_fetch_failed">Impossible de le récupérer depuis l’ordinateur : %1$s</string>
+    <string name="mail_on_device">Sur cet appareil</string>
+    <string name="mail_on_device_note">Les e-mails et pièces jointes plus anciens restent sur l’ordinateur et arrivent ici quand vous les ouvrez.</string>
+    <string name="mail_keep_bodies">E-mails</string>
+    <string name="mail_keep_attachments">Pièces jointes</string>
+    <string name="mail_month_1">1 mois</string>
+    <string name="mail_months_6">6 mois</string>
+    <string name="mail_months_12">12 mois</string>
+    <string name="mail_year_1">1 an</string>
+    <string name="mail_keep_all">Tous</string>
+    <string name="mail_keep_none">Aucune</string>
 </resources>

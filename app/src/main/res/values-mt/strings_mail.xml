@@ -47,9 +47,9 @@
     <string name="mail_do_archive">Arkivja</string>
     <string name="mail_mark_read">Moqri</string>
     <string name="mail_mark_unread">Mhux moqri</string>
-    <string name="mail_later">Dalwaqt: il-kompjuter se jagħmel din il-bidla fuq is-server.</string>
+    <string name="mail_later">Dalwaqt.</string>
     <string name="mail_write_later">Il-kitba tal-posta tiġi f’pass aktar tard.</string>
-    <string name="mail_read_only_note">Għalissa Posta hawn taqra dak li ġab il-kompjuter. Il-bidliet fuq is-server (arkivja, ħassar, moqri, ♥) u l-kitba jiġu wara.</string>
+    <string name="mail_read_only_note">Il-bidliet li tagħmel hawn (moqri, ♥, arkivja, ħassar, mexxi, spam) jagħmilhom il-kompjuter fuq is-server. Il-kitba tal-posta tiġi wara.</string>
     <string name="mail_reply">Wieġeb</string>
     <string name="mail_reply_all">Wieġeb lil kulħadd</string>
     <string name="mail_forward">Għaddi</string>
@@ -126,4 +126,21 @@
     <string name="mail_receipts_never">Qatt</string>
     <string name="mail_receipts_ask">Staqsi</string>
     <string name="mail_receipts_always">Dejjem</string>
+    <string name="mail_done_on_pc">Sar hawn; il-kompjuter jagħmel il-bidla fuq is-server.</string>
+    <string name="mail_not_spam">Mhux spam</string>
+    <string name="mail_move_to">Mexxi għal</string>
+    <string name="mail_from_favourites">Neħħi mill-favoriti</string>
+    <string name="mail_on_pc">fuq il-kompjuter</string>
+    <string name="mail_fetching">Qed inġib mill-kompjuter…</string>
+    <string name="mail_fetch_failed">Ma setax jinġieb mill-kompjuter: %1$s</string>
+    <string name="mail_on_device">Fuq dan l-apparat</string>
+    <string name="mail_on_device_note">Il-posta u l-annessi eqdem jibqgħu fuq il-kompjuter u jaslu hawn meta tiftaħhom.</string>
+    <string name="mail_keep_bodies">Posta</string>
+    <string name="mail_keep_attachments">Annessi</string>
+    <string name="mail_month_1">1 xahar</string>
+    <string name="mail_months_6">6 xhur</string>
+    <string name="mail_months_12">12-il xahar</string>
+    <string name="mail_year_1">1 sena</string>
+    <string name="mail_keep_all">Kollha</string>
+    <string name="mail_keep_none">Xejn</string>
 </resources>

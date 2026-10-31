@@ -3,6 +3,7 @@ package com.kalotrapezis.drive
 import android.content.Context
 import java.io.File
 import java.nio.charset.Charset
+import java.time.LocalDate
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -94,6 +95,58 @@ internal object MailFiles {
     private fun inside(root: File, f: File) = f.canonicalPath.startsWith(root.canonicalPath + File.separator) // never a path out of the archive
 }
 
+/**
+ * What of the Mail part this device keeps (MAIL_PLAN §2: the index always, recent mail, older on demand): a body for
+ * [bodies] months, an attachment for [attachments] (-1 all, 0 none), by the date in its path ("yyyy-mm-dd hhmm …"). The
+ * computer offers every Mail file each sync; the rest comes by [SyncClient.mailFile] when opened. Requests are this
+ * device's own to send, never taken back.
+ */
+internal object MailSync {
+    const val PART = "Mail/"
+    const val REQUESTS = "Mail/requests/"
+    private val DATED = Regex("(?:^|/)(\\d{4})-(\\d{2})-(\\d{2}) \\d{4} ")
+
+    fun keep(rel: String, today: LocalDate, bodies: Int, attachments: Int): Boolean {
+        if (!rel.startsWith(PART)) return true
+        if (rel.startsWith(REQUESTS)) return false
+        val m = DATED.find(rel) ?: return true // index.jsonl, accounts.json
+        val date = runCatching { LocalDate.of(m.groupValues[1].toInt(), m.groupValues[2].toInt(), m.groupValues[3].toInt()) }.getOrNull() ?: return true
+        val months = if (".files/" in rel) attachments else bodies
+        return months < 0 || (months > 0 && !date.isBefore(today.minusMonths(months.toLong())))
+    }
+
+    fun keep(c: Context, rel: String) = keep(rel, LocalDate.now(), MailPrefs.bodies(c), MailPrefs.attachments(c))
+
+    /** A Mail file this device may let go of: older than it keeps, and not opened here in the last week. */
+    fun drop(c: Context, rel: String, file: File) = rel.startsWith(PART) && !rel.startsWith(REQUESTS) && !keep(c, rel) &&
+        file.lastModified() < System.currentTimeMillis() - 7 * 86_400_000L
+}
+
+/**
+ * The phone's changes, carried out by the computer on the server (step 1's format, MAIL_PLAN §11): one file per action,
+ * Mail/requests/<device>-<ms>.json = { op, ids, to (a move's role), at, device }. Sync takes it there and drops it here.
+ */
+internal object MailRequests {
+    val OPS = setOf("read", "unread", "favorite", "unfavorite", "archive", "delete", "move", "spam", "notSpam")
+
+    fun write(root: File, device: String, op: String, ids: Collection<String>, to: String? = null, now: Long = System.currentTimeMillis()): File {
+        require(op in OPS && ids.isNotEmpty() && (op != "move" || to in MailFiles.ROLES))
+        val dir = File(root, "requests").apply { mkdirs() }
+        var at = now
+        while (File(dir, "$device-$at.json").exists()) at++
+        val json = JSONObject().put("op", op).put("ids", JSONArray(ids.toList())).put("at", at).put("device", device).apply { if (op == "move") put("to", to) }
+        val part = File(dir, ".$device-$at.json.part").apply { writeText(json.toString()) } // a dot file: sync never takes it half written
+        return File(dir, "$device-$at.json").also { check(part.renameTo(it)) }
+    }
+
+    /** The mail as it will be once the computer has done [op]; null: it leaves this folder. */
+    fun applied(e: MailEntry, op: String): MailEntry? = when (op) {
+        "read" -> e.copy(seen = true); "unread" -> e.copy(seen = false)
+        "favorite" -> e.copy(flagged = true); "unfavorite" -> e.copy(flagged = false)
+        else -> null
+    }
+}
+
 /** The Filter modal's choices (MAIL_PLAN §9), the computer's mailView.ts: quick filters on top, sorting and grouping below. */
 internal data class MailView(
     val unread: Boolean = false, val favorites: Boolean = false, val attachments: Boolean = false, val orange: Boolean = false,
@@ -155,6 +208,11 @@ internal object MailPrefs {
     fun switch(c: Context, name: String) = p(c).getBoolean(name, true) // tracking, links, risky, realAddress: on by default
     fun setSwitch(c: Context, name: String, on: Boolean) = p(c).edit().putBoolean(name, on).apply()
     fun receipts(c: Context) = p(c).getInt("receipts", 1) // 0 never, 1 ask, 2 always
+    /** Months of mail (-1 all) and of attachments (0 none, -1 all) kept on this device (MAIL_PLAN §2). */
+    fun bodies(c: Context) = p(c).getInt("bodies", 6)
+    fun attachments(c: Context) = p(c).getInt("attachments", 1)
+    fun setBodies(c: Context, months: Int) = p(c).edit().putInt("bodies", months).apply()
+    fun setAttachments(c: Context, months: Int) = p(c).edit().putInt("attachments", months).apply()
     fun setReceipts(c: Context, v: Int) = p(c).edit().putInt("receipts", v).apply()
     /** A folder's kept view ("Κράτησε για αυτόν τον φάκελο"), or null. */
     fun view(c: Context, folder: String) = p(c).getString("view.$folder", null)?.let(MailView::of)
@@ -166,7 +224,8 @@ internal object MailPrefs {
  * Its attachments are not decoded here: the computer wrote them beside it as ordinary files.
  */
 internal object Mime {
-    class Message(val html: String?, val text: String?, val to: String, val cc: String, val headers: Map<String, String>)
+    /** [attachments]: the names the computer gave them on disk (its .files folder), in order. */
+    class Message(val html: String?, val text: String?, val to: String, val cc: String, val headers: Map<String, String>, val attachments: List<String> = emptyList())
 
     private class Part(val headers: Map<String, String>, val body: ByteArray) {
         val type = headers["content-type"].orEmpty().substringBefore(';').trim().lowercase().ifEmpty { "text/plain" }
@@ -178,6 +237,8 @@ internal object Mime {
             else -> body
         }
         fun text() = String(bytes(), charset(param("charset")))
+        val filename get() = extended(headers["content-disposition"].orEmpty(), "filename") ?: param(headers["content-disposition"].orEmpty(), "filename")?.let(::words)
+            ?: extended(headers["content-type"].orEmpty(), "name") ?: param(headers["content-type"].orEmpty(), "name")?.let(::words)
     }
 
     fun read(raw: ByteArray): Message {
@@ -185,15 +246,20 @@ internal object Mime {
         val leaves = mutableListOf<Part>()
         fun walk(p: Part) { if (p.type.startsWith("multipart/")) p.param("boundary")?.let { b -> split(p.body, b).forEach { walk(part(it)) } } else leaves += p }
         walk(top)
-        val html = leaves.firstOrNull { it.type == "text/html" && !it.attachment }?.text()?.let { h ->
+        val htmlPart = leaves.firstOrNull { it.type == "text/html" && !it.attachment }
+        val textPart = leaves.firstOrNull { it.type == "text/plain" && !it.attachment }
+        val html = htmlPart?.text()?.let { h ->
             // pictures inside the mail (cid:) as data: URLs, so nothing is fetched for them
             leaves.filter { it.type.startsWith("image/") && it.headers["content-id"] != null }.fold(h) { acc, img ->
                 val cid = img.headers["content-id"]!!.trim().removePrefix("<").removeSuffix(">")
                 acc.replace("cid:$cid", "data:${img.type};base64,${java.util.Base64.getEncoder().encodeToString(img.bytes())}")
             }
         }
-        val text = leaves.firstOrNull { it.type == "text/plain" && !it.attachment }?.text()
-        return Message(html, text, words(top.headers["to"].orEmpty()), words(top.headers["cc"].orEmpty()), top.headers)
+        val text = textPart?.text()
+        // what is not the text, nor a picture the HTML shows (mailparser's "related", which the computer leaves out)
+        val files = leaves.filter { p -> p !== htmlPart && p !== textPart && (p.attachment || p.filename != null) &&
+            p.headers["content-id"]?.let { html?.contains("cid:" + it.trim().removePrefix("<").removeSuffix(">")) } != true }
+        return Message(html, text, words(top.headers["to"].orEmpty()), words(top.headers["cc"].orEmpty()), top.headers, diskNames(files.map { it.filename }))
     }
 
     /** Headers (unfolded, names in lower case, the first of each) and the body after the empty line. */
@@ -219,6 +285,42 @@ internal object Mime {
 
     fun param(header: String, name: String): String? = Regex(";\\s*" + Regex.escape(name) + "\\s*=\\s*(\"([^\"]*)\"|[^;\\s]+)", RegexOption.IGNORE_CASE)
         .find(header)?.let { m -> m.groups[2]?.value ?: m.groupValues[1] }
+
+    /** RFC 2231's name*=utf-8''%CE%91… (and its name*0*=, name*1*= pieces), as mail programs send non-English names. */
+    private fun extended(header: String, name: String): String? {
+        val pieces = Regex(";\\s*" + Regex.escape(name) + "\\*(\\d+)?\\*?\\s*=\\s*(\"([^\"]*)\"|[^;\\s]+)", RegexOption.IGNORE_CASE).findAll(header)
+            .sortedBy { it.groupValues[1].toIntOrNull() ?: 0 }.map { it.groups[3]?.value ?: it.groupValues[2] }.toList()
+        if (pieces.isEmpty()) return null
+        val all = pieces.joinToString("")
+        val m = Regex("^([^']*)'[^']*'(.*)$", RegexOption.DOT_MATCHES_ALL).find(all) ?: return all
+        val out = java.io.ByteArrayOutputStream()
+        val v = m.groupValues[2]; var i = 0
+        while (i < v.length) {
+            val hex = if (v[i] == '%' && i + 2 < v.length) v.substring(i + 1, i + 3).toIntOrNull(16) else null
+            if (hex != null) { out.write(hex); i += 3 }
+            else { out.write(v[i].code); i++ }
+        }
+        return String(out.toByteArray(), charset(m.groupValues[1].ifEmpty { null }))
+    }
+
+    /** The computer's clean(): a name every file system takes, at most [bytes] bytes of UTF-8 (its desktop/mail.js). */
+    fun clean(s: String?, bytes: Int): String {
+        var out = (s ?: "").replace(Regex("[/\\\\\u0000:*?\"<>|\r\n\t]"), " ").replace(Regex("\\s+"), " ").trim().replace(Regex("^\\.+"), "")
+        while (out.toByteArray().size > bytes) out = out.dropLast(1)
+        return out.trim()
+    }
+
+    /** The attachments' names on disk as the computer's store() makes them: cleaned, "attachment" when nameless, " (2)" for a repeat. */
+    fun diskNames(names: List<String?>): List<String> {
+        val taken = HashSet<String>()
+        return names.map { name ->
+            val raw = clean(name, 150).ifEmpty { "attachment" }
+            val dot = raw.lastIndexOf('.')
+            var n = raw; var i = 2
+            while (n.lowercase() in taken) { n = if (dot > 0) "${raw.substring(0, dot)} ($i)${raw.substring(dot)}" else "$raw ($i)"; i++ }
+            taken += n.lowercase(); n
+        }
+    }
 
     private fun charset(name: String?): Charset = name?.let { runCatching { Charset.forName(it.trim()) }.getOrNull() } ?: Charsets.UTF_8
 

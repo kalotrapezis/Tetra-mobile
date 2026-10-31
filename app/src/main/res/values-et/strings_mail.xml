@@ -43,9 +43,9 @@
     <string name="mail_do_archive">Arhiveeri</string>
     <string name="mail_mark_read">Loetud</string>
     <string name="mail_mark_unread">Lugemata</string>
-    <string name="mail_later">Varsti: arvuti teeb selle muudatuse serveris.</string>
+    <string name="mail_later">Varsti tulemas.</string>
     <string name="mail_write_later">Kirjade kirjutamine tuleb hilisemas etapis.</string>
-    <string name="mail_read_only_note">Praegu loeb E-post siin seda, mille arvuti tõi. Muudatused serveris (arhiveerimine, kustutamine, loetud, ♥) ja kirjutamine tulevad järgmisena.</string>
+    <string name="mail_read_only_note">Muudatused, mida siin teete (loetud, ♥, arhiveerimine, kustutamine, teisaldamine, rämpspost), teeb arvuti serveris. Kirjade kirjutamine tuleb järgmisena.</string>
     <string name="mail_reply">Vasta</string>
     <string name="mail_reply_all">Vasta kõigile</string>
     <string name="mail_forward">Edasta</string>
@@ -118,4 +118,21 @@
     <string name="mail_receipts_never">Mitte kunagi</string>
     <string name="mail_receipts_ask">Küsi</string>
     <string name="mail_receipts_always">Alati</string>
+    <string name="mail_done_on_pc">Siin tehtud; arvuti teeb muudatuse serveris.</string>
+    <string name="mail_not_spam">Pole rämpspost</string>
+    <string name="mail_move_to">Teisalda kausta</string>
+    <string name="mail_from_favourites">Eemalda lemmikutest</string>
+    <string name="mail_on_pc">arvutis</string>
+    <string name="mail_fetching">Toomine arvutist…</string>
+    <string name="mail_fetch_failed">Arvutist ei õnnestunud tuua: %1$s</string>
+    <string name="mail_on_device">Selles seadmes</string>
+    <string name="mail_on_device_note">Vanemad kirjad ja manused jäävad arvutisse ning tulevad siia, kui need avate.</string>
+    <string name="mail_keep_bodies">Kirjad</string>
+    <string name="mail_keep_attachments">Manused</string>
+    <string name="mail_month_1">1 kuu</string>
+    <string name="mail_months_6">6 kuud</string>
+    <string name="mail_months_12">12 kuud</string>
+    <string name="mail_year_1">1 aasta</string>
+    <string name="mail_keep_all">Kõik</string>
+    <string name="mail_keep_none">Mitte ühtegi</string>
 </resources>

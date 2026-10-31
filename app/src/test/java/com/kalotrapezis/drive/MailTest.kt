@@ -79,4 +79,44 @@ class MailTest {
         assertTrue(Mime.risky("invoice.pdf.exe")); assertTrue(Mime.risky("Report.DOCM")); assertFalse(Mime.risky("Rubric.docx"))
         assertNotNull(Mime.textAsHtml("a <b> & c").takeIf { it.contains("a &lt;b&gt; &amp; c") })
     }
+
+    @Test fun theDeviceKeepsRecentMailAndTheIndexAlways() {
+        val today = java.time.LocalDate.of(2026, 10, 31)
+        val eml = "Mail/a@b.gr/Inbox/2026/2026-05-02 0912 X - Y.eml"
+        val old = "Mail/a@b.gr/Archive/2025/2025-10-30 0800 X - Y.eml"
+        val att = "Mail/a@b.gr/Inbox/2026/2026-10-15 0912 X - Y.files/a.pdf"
+        assertTrue(MailSync.keep("Mail/index.jsonl", today, 1, 0)); assertTrue(MailSync.keep("Mail/accounts.json", today, 1, 0))
+        assertTrue(MailSync.keep(eml, today, 6, 1)); assertFalse(MailSync.keep(eml, today, 1, 1))
+        assertFalse(MailSync.keep(old, today, 12, 1)); assertTrue(MailSync.keep(old, today, -1, 1))
+        assertTrue(MailSync.keep(att, today, 6, 1)); assertFalse(MailSync.keep(att, today, 6, 0)); assertTrue(MailSync.keep(att, today, 6, -1))
+        assertFalse(MailSync.keep("Mail/requests/Pixel-1.json", today, -1, -1)) // never taken back from the computer
+        assertTrue(MailSync.keep("Documents/2020-01-01 0000 x .pdf", today, 1, 0)) // not Mail
+    }
+
+    @Test fun aRequestIsOneFileInStep1sFormat() {
+        val dir = java.nio.file.Files.createTempDirectory("mail").toFile()
+        val f = MailRequests.write(dir, "Pixel", "move", listOf("a@b/Inbox/1/2"), "Archive", now = 1000)
+        assertEquals("requests/Pixel-1000.json", f.relativeTo(dir).path)
+        val o = org.json.JSONObject(f.readText())
+        assertEquals("move", o.getString("op")); assertEquals("Archive", o.getString("to")); assertEquals(1000, o.getLong("at")); assertEquals("Pixel", o.getString("device"))
+        assertEquals("a@b/Inbox/1/2", o.getJSONArray("ids").getString(0))
+        assertEquals("Pixel-1001.json", MailRequests.write(dir, "Pixel", "read", listOf("x"), now = 1000).name) // the same moment: the next
+        assertFalse(org.json.JSONObject(File(dir, "requests/Pixel-1001.json").readText()).has("to"))
+        assertEquals(listOf("Pixel-1000.json", "Pixel-1001.json"), File(dir, "requests").list()!!.sorted()) // no .part left
+        assertTrue(runCatching { MailRequests.write(dir, "Pixel", "move", listOf("x"), "Nowhere") }.isFailure)
+        val e = mail("Η παραγγελία σου στάλθηκε")
+        assertTrue(MailRequests.applied(e, "favorite")!!.flagged); assertFalse(MailRequests.applied(e, "unread")!!.seen); assertNull(MailRequests.applied(e, "archive"))
+        dir.deleteRecursively()
+    }
+
+    @Test fun attachmentNamesAsTheComputerWritesThem() {
+        val deadline = Mime.read(MailFiles.eml(root, mail("Προθεσμία εργασίας: 15 Νοεμβρίου"))!!.readBytes())
+        assertEquals(listOf("Οδηγίες_εργασίας.pdf", "Rubric.docx"), deadline.attachments)
+        assertEquals(emptyList<String>(), Mime.read(MailFiles.eml(root, mail("Η σύνοψη του λογαριασμού σας"))!!.readBytes()).attachments) // its picture is in the text
+        val raw = ("Content-Type: multipart/mixed; boundary=\"b\"\r\n\r\n--b\r\nContent-Type: text/plain\r\n\r\nhi\r\n" +
+            "--b\r\nContent-Disposition: attachment; filename*=utf-8''%CE%B1%3A%CE%B2.pdf\r\n\r\nx\r\n" +
+            "--b\r\nContent-Disposition: attachment; filename=\"α:β.pdf\"\r\n\r\nx\r\n--b\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\nx\r\n--b--\r\n").toByteArray()
+        assertEquals(listOf("α β.pdf", "α β (2).pdf", "attachment"), Mime.read(raw).attachments)
+        assertEquals("a b", Mime.clean("..a/ \t b", 150))
+    }
 }

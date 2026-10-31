@@ -43,9 +43,9 @@
     <string name="mail_do_archive">Arkistoi</string>
     <string name="mail_mark_read">Luettu</string>
     <string name="mail_mark_unread">Lukematon</string>
-    <string name="mail_later">Tulossa pian: tietokone tekee tämän muutoksen palvelimella.</string>
+    <string name="mail_later">Tulossa pian.</string>
     <string name="mail_write_later">Viestien kirjoittaminen tulee myöhemmässä vaiheessa.</string>
-    <string name="mail_read_only_note">Toistaiseksi Sähköposti lukee täällä sen, mitä tietokone haki. Muutokset palvelimella (arkistointi, poisto, luettu, ♥) ja kirjoittaminen tulevat seuraavaksi.</string>
+    <string name="mail_read_only_note">Täällä tekemäsi muutokset (luettu, ♥, arkistointi, poisto, siirto, roskaposti) tietokone tekee palvelimella. Viestien kirjoittaminen tulee seuraavaksi.</string>
     <string name="mail_reply">Vastaa</string>
     <string name="mail_reply_all">Vastaa kaikille</string>
     <string name="mail_forward">Välitä</string>
@@ -118,4 +118,21 @@
     <string name="mail_receipts_never">Ei koskaan</string>
     <string name="mail_receipts_ask">Kysy</string>
     <string name="mail_receipts_always">Aina</string>
+    <string name="mail_done_on_pc">Tehty täällä; tietokone tekee muutoksen palvelimella.</string>
+    <string name="mail_not_spam">Ei roskapostia</string>
+    <string name="mail_move_to">Siirrä kansioon</string>
+    <string name="mail_from_favourites">Poista suosikeista</string>
+    <string name="mail_on_pc">tietokoneella</string>
+    <string name="mail_fetching">Haetaan tietokoneelta…</string>
+    <string name="mail_fetch_failed">Haku tietokoneelta ei onnistunut: %1$s</string>
+    <string name="mail_on_device">Tällä laitteella</string>
+    <string name="mail_on_device_note">Vanhemmat viestit ja liitteet pysyvät tietokoneella ja tulevat tänne, kun avaat ne.</string>
+    <string name="mail_keep_bodies">Viestit</string>
+    <string name="mail_keep_attachments">Liitteet</string>
+    <string name="mail_month_1">1 kuukausi</string>
+    <string name="mail_months_6">6 kuukautta</string>
+    <string name="mail_months_12">12 kuukautta</string>
+    <string name="mail_year_1">1 vuosi</string>
+    <string name="mail_keep_all">Kaikki</string>
+    <string name="mail_keep_none">Ei mitään</string>
 </resources>

@@ -6,6 +6,7 @@ import android.os.Environment
 import android.os.FileObserver
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
@@ -128,9 +129,11 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
         value = withContext(Dispatchers.IO) { runCatching { MailFiles.accounts(root) to MailFiles.index(root) }.onFailure { WriterLog.e("Mail: reading the archive", it) }.getOrDefault(emptyList<MailAccount>() to emptyList()) }
     }
     val accounts = data?.first.orEmpty()
-    val mails = data?.second.orEmpty()
+    // what was asked here and the computer has not done yet, shown as done (step 1: show it, then trust index.jsonl)
+    var changed by remember { mutableStateOf(mapOf<String, MailEntry?>()) }
+    val mails = remember(data, changed) { data?.second.orEmpty().mapNotNull { e -> if (e.id in changed) changed[e.id] else e } }
     OpenTiming("Mail", data != null)
-    val counts = remember(data) { MailFiles.counts(mails, accounts) }
+    val counts = remember(mails, accounts) { MailFiles.counts(mails, accounts) }
     val accountOf = remember(accounts) { accounts.associateBy { it.id } }
 
     var role by remember { mutableStateOf("Inbox") }
@@ -151,13 +154,30 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
     LaunchedEffect(message) { if (message != null) { delay(3500); message = null } }
     val later = { message = context.getString(R.string.mail_later) }
     val writeLater = { message = context.getString(R.string.mail_write_later) }
+    var moving by remember { mutableStateOf<Collection<String>?>(null) }
+    var autoOpened by remember { mutableStateOf(false) }
+    /** [op] on these mails: a request for the computer, sent at once; shown done here meanwhile. */
+    fun act(op: String, ids: Collection<String>, to: String? = null) {
+        if (ids.isEmpty()) return
+        val now = mails.filter { it.id in ids }
+        changed = changed + now.associate { it.id to MailRequests.applied(it, op) }
+        if (MailRequests.applied(now.first(), op) == null) { selected = emptySet(); if (openId in ids) openId = null }
+        Thread {
+            runCatching { MailRequests.write(root, DataFiles.device(), op, ids, to) }.onFailure { WriterLog.e("Mail: a request", it) }
+            ScopedSync.soon(context.applicationContext, "mail", 0, orWhole = true)
+        }.start()
+        if (op in setOf("archive", "delete", "move", "spam", "notSpam")) message = context.getString(R.string.mail_done_on_pc)
+    }
+    val spamOp = if (role == "Spam") "notSpam" else "spam"
 
     val inFolder = remember(mails, role, account) { mails.filter { it.folder == role && it.account in accountOf && (account == null || it.account == account) } }
     val groups = remember(inFolder, view, query) { view.arrange(inFolder, query) }
     val shown = remember(groups) { groups.flatMap { it.second } }
     val open = mails.firstOrNull { it.id == openId }
     // a wide screen always shows a mail: the newest, until one is chosen
-    LaunchedEffect(three, shown) { if (three && (open == null || open !in shown) && shown.isNotEmpty()) openId = shown.first().id }
+    LaunchedEffect(three, shown) { if (three && (open == null || open !in shown) && shown.isNotEmpty()) { openId = shown.first().id; autoOpened = true } }
+    // a mail the person opened is read (Thunderbird's way); not the one a wide screen showed by itself
+    LaunchedEffect(openId) { open?.takeIf { !it.seen && !autoOpened }?.let { act("read", listOf(it.id)) } }
     fun choose(r: String, a: String?) { role = r; account = a; openId = null; selected = emptySet(); mailboxes = false }
 
     BackHandler { when {
@@ -212,8 +232,9 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
                     }
                 }
                 if (accounts.isNotEmpty()) item {
-                    Row(Modifier.padding(start = 16.dp, top = 16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Legend(GREEN, stringResource(R.string.mail_local)); Legend(ORANGE, stringResource(R.string.mail_server_only))
+                    @OptIn(ExperimentalLayoutApi::class)
+                    FlowRow(Modifier.padding(start = 16.dp, top = 16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Legend(GREEN, stringResource(R.string.mail_local)); Legend(GREEN, stringResource(R.string.mail_on_pc), ring = true); Legend(ORANGE, stringResource(R.string.mail_server_only))
                     }
                 }
             }
@@ -238,8 +259,10 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
                     }
                     items(ms, key = { it.id }) { e ->
                         MailRow(e, accountOf[e.account], picked = e.id in selected, choosing = selected.isNotEmpty(), chosen = wide && selected.isEmpty() && e.id == openId,
-                            click = { if (selected.isNotEmpty()) selected = if (e.id in selected) selected - e.id else selected + e.id else openId = e.id },
-                            long = { selected = if (e.id in selected) selected - e.id else selected + e.id }, heart = later)
+                            click = { if (selected.isNotEmpty()) selected = if (e.id in selected) selected - e.id else selected + e.id else { autoOpened = false; openId = e.id } },
+                            long = { selected = if (e.id in selected) selected - e.id else selected + e.id },
+                            here = remember(e.file, version) { e.file != null && File(root, e.file).isFile },
+                            heart = { act(if (e.flagged) "unfavorite" else "favorite", listOf(e.id)) })
                     }
                 }
             }
@@ -279,10 +302,10 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
             Box(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp)) {
                 IslandBottomBar(expand = { listDrawer = true }, visible = !listDrawer && !filterOpen) {
                     if (selected.isNotEmpty()) {
-                        MailIslandItem(R.drawable.ic_archive, stringResource(R.string.mail_do_archive), enabled = false, click = later)
-                        MailIslandItem(R.drawable.ic_delete, stringResource(R.string.common_delete), enabled = false, click = later)
+                        MailIslandItem(R.drawable.ic_archive, stringResource(R.string.mail_do_archive)) { act("archive", selected) }
+                        MailIslandItem(R.drawable.ic_delete, stringResource(R.string.common_delete)) { act("delete", selected) }
                         val allRead = mails.filter { it.id in selected }.all { it.seen }
-                        MailIslandItem(R.drawable.ic_done_all, stringResource(if (allRead) R.string.mail_mark_unread else R.string.mail_mark_read), enabled = false, click = later)
+                        MailIslandItem(R.drawable.ic_done_all, stringResource(if (allRead) R.string.mail_mark_unread else R.string.mail_mark_read)) { act(if (allRead) "unread" else "read", selected); selected = emptySet() }
                     } else {
                         MailIslandItem(R.drawable.ic_add, stringResource(R.string.common_new), enabled = false, click = writeLater)
                         MailIslandItem(R.drawable.ic_sync, stringResource(R.string.mail_sync)) {
@@ -291,7 +314,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
                             message = context.getString(R.string.mail_syncing)
                         }
                         MailIslandItem(R.drawable.ic_filter, stringResource(R.string.mail_filter), on = view != MailView()) { filterOpen = true }
-                        MailIslandItem(R.drawable.ic_archive, stringResource(R.string.mail_do_archive), enabled = false, click = later)
+                        MailIslandItem(R.drawable.ic_archive, stringResource(R.string.mail_do_archive), enabled = open != null) { open?.let { act("archive", listOf(it.id)) } }
                     }
                 }
             }
@@ -303,7 +326,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
         Box(m) {
             val many = mails.filter { it.id in selected }
             if (wide && many.size > 1) SelectionPane(many, accountOf, Modifier.statusBarsPadding().padding(16.dp), later)
-            else if (open != null) MailPage(open, accountOf[open.account], root, showBack = !three, back = { openId = null }, openFile = openFile, say = { message = it })
+            else if (open != null) MailPage(open, accountOf[open.account], root, showBack = !three, back = { openId = null }, openFile = openFile, say = { message = it }, fetched = { version++ })
             else if (wide) MailHint(stringResource(R.string.mail_choose), Modifier.align(Alignment.Center))
             // the mail's island: one big Απάντηση; the rest pulled up from it
             if (open != null && !(wide && many.size > 1)) Box(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp)) {
@@ -339,17 +362,19 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
     if (listDrawer) ModalBottomSheet(onDismissRequest = { listDrawer = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             if (selected.isNotEmpty()) {
-                DrawerRow(R.drawable.ic_favorite, stringResource(R.string.mail_to_favourites), false, later)
-                DrawerRow(R.drawable.ic_move, stringResource(R.string.mail_move), false, later)
-                DrawerRow(R.drawable.ic_report, stringResource(R.string.mail_spam), false, later)
+                val allFav = mails.filter { it.id in selected }.all { it.flagged }
+                DrawerRow(R.drawable.ic_favorite, stringResource(if (allFav) R.string.mail_from_favourites else R.string.mail_to_favourites), true) { listDrawer = false; act(if (allFav) "unfavorite" else "favorite", selected) }
+                DrawerRow(R.drawable.ic_move, stringResource(R.string.mail_move), true) { listDrawer = false; moving = selected }
+                DrawerRow(R.drawable.ic_report, stringResource(if (role == "Spam") R.string.mail_not_spam else R.string.mail_spam), true) { listDrawer = false; act(spamOp, selected) }
                 DrawerRow(R.drawable.ic_label, stringResource(R.string.mail_tag), false, later)
                 DrawerRow(R.drawable.ic_arrow_forward, stringResource(R.string.mail_forward_attached), false, writeLater)
                 DrawerRow(R.drawable.ic_file_download, stringResource(R.string.mail_fetch_local), false, later)
                 DrawerRow(R.drawable.ic_auto_fix, stringResource(R.string.mail_summarise), false, later)
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    DrawerButton(R.drawable.ic_report, stringResource(R.string.mail_spam_or_not), false, Modifier.weight(1f).alpha(0.45f)) { later() }
-                    DrawerButton(R.drawable.ic_move, stringResource(R.string.mail_move), false, Modifier.weight(1f).alpha(0.45f)) { later() }
+                    // on the open mail
+                    DrawerButton(R.drawable.ic_report, stringResource(if (role == "Spam") R.string.mail_not_spam else R.string.mail_spam_one), false, Modifier.weight(1f).alpha(if (open != null) 1f else 0.45f)) { open?.let { listDrawer = false; act(spamOp, listOf(it.id)) } }
+                    DrawerButton(R.drawable.ic_move, stringResource(R.string.mail_move), false, Modifier.weight(1f).alpha(if (open != null) 1f else 0.45f)) { open?.let { listDrawer = false; moving = listOf(it.id) } }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     DrawerButton(R.drawable.ic_label, stringResource(R.string.mail_tag), false, Modifier.weight(1f).alpha(0.45f)) { later() }
@@ -369,10 +394,11 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             DrawerRow(R.drawable.ic_reply_all, stringResource(R.string.mail_reply_all), false, writeLater)
             DrawerRow(R.drawable.ic_arrow_forward, stringResource(R.string.mail_forward), false, writeLater)
-            DrawerRow(R.drawable.ic_archive, stringResource(R.string.mail_do_archive), false, later)
-            DrawerRow(R.drawable.ic_delete, stringResource(R.string.common_delete), false, later)
-            DrawerRow(R.drawable.ic_report, stringResource(R.string.mail_spam_one), false, later)
-            DrawerRow(R.drawable.ic_move, stringResource(R.string.mail_move), false, later)
+            DrawerRow(R.drawable.ic_archive, stringResource(R.string.mail_do_archive), true) { mailDrawer = false; act("archive", listOf(open.id)) }
+            DrawerRow(R.drawable.ic_delete, stringResource(R.string.common_delete), true) { mailDrawer = false; act("delete", listOf(open.id)) }
+            DrawerRow(R.drawable.ic_report, stringResource(if (role == "Spam") R.string.mail_not_spam else R.string.mail_spam_one), true) { mailDrawer = false; act(spamOp, listOf(open.id)) }
+            DrawerRow(R.drawable.ic_move, stringResource(R.string.mail_move), true) { mailDrawer = false; moving = listOf(open.id) }
+            DrawerRow(R.drawable.ic_done_all, stringResource(R.string.mail_mark_unread), true) { mailDrawer = false; act("unread", listOf(open.id)); openId = null }
             DrawerRow(R.drawable.ic_label, stringResource(R.string.mail_tag), false, later)
             DrawerRow(R.drawable.ic_print, stringResource(R.string.mail_print), false, later)
             DrawerRow(R.drawable.ic_code, stringResource(R.string.mail_source), MailFiles.eml(root, open) != null) {
@@ -381,6 +407,16 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
             }
             Text(stringResource(R.string.mail_read_only_note), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodySmall, color = islandContentColor().copy(alpha = 0.7f))
         }
+    }
+    moving?.let { ids ->
+        AlertDialog(onDismissRequest = { moving = null }, title = { Text(stringResource(R.string.mail_move_to)) },
+            text = { Column { MailFiles.ROLES.filter { it != role }.forEach { r ->
+                Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).clickable { moving = null; act("move", ids, r) }.padding(vertical = 12.dp, horizontal = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(painterResource(ROLE_ICONS.getValue(r)), null); Text(stringResource(ROLE_NAMES.getValue(r)))
+                }
+            } } },
+            confirmButton = {}, dismissButton = { TextButton(onClick = { moving = null }) { Text(stringResource(R.string.common_cancel)) } })
     }
     source?.let { s ->
         AlertDialog(onDismissRequest = { source = null }, title = { Text(stringResource(R.string.mail_source)) },
@@ -405,8 +441,8 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
     Text("⇄ PC", Modifier.padding(horizontal = 6.dp), style = MaterialTheme.typography.labelSmall)
 }
 
-@Composable private fun Legend(color: Color, text: String) = Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-    Box(Modifier.size(8.dp).clip(CircleShape).background(color)); Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+@Composable private fun Legend(color: Color, text: String, ring: Boolean = false) = Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+    StateDot(color, ring); Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 @Composable private fun folderName(role: String, account: String?, accounts: Map<String, MailAccount>) =
@@ -429,8 +465,12 @@ private fun shortTime(ms: Long): String {
     return t.format(DateTimeFormatter.ofPattern(if (days == 0L) "HH:mm" else if (days < 7) "EEE" else "d MMM", java.util.Locale.getDefault()))
 }
 
-/** One mail in the list (MAIL_PLAN §9): the account's colour as a bar, ♥ at the right, its dot green (saved here) or orange. */
-@Composable private fun MailRow(e: MailEntry, account: MailAccount?, picked: Boolean, choosing: Boolean, chosen: Boolean, click: () -> Unit, long: () -> Unit, heart: () -> Unit) {
+/** A mail's state: green saved here, a green ring saved on the PC (this device keeps it there), orange only on the server. */
+@Composable private fun StateDot(color: Color, ring: Boolean = false) =
+    Box(Modifier.size(8.dp).clip(CircleShape).then(if (ring) Modifier.border(1.5.dp, color, CircleShape) else Modifier.background(color)))
+
+/** One mail in the list (MAIL_PLAN §9): the account's colour as a bar, ♥ at the right, its state's dot. */
+@Composable private fun MailRow(e: MailEntry, account: MailAccount?, picked: Boolean, choosing: Boolean, chosen: Boolean, click: () -> Unit, long: () -> Unit, here: Boolean, heart: () -> Unit) {
     Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large)
         .background(if (picked) MAIL_COLOR.copy(alpha = 0.32f) else if (chosen) MAIL_COLOR.copy(alpha = 0.16f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
         .combinedClickable(onLongClick = long, onClick = click).heightIn(min = 72.dp)) {
@@ -444,7 +484,7 @@ private fun shortTime(ms: Long): String {
                 Text(e.from.ifEmpty { e.fromAddress }, Modifier.weight(1f), fontWeight = if (e.seen) null else FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(shortTime(e.date), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (e.attachments > 0) Icon(painterResource(R.drawable.ic_attach), stringResource(R.string.mail_has_attachments), Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                Box(Modifier.size(8.dp).clip(CircleShape).background(if (e.saved) GREEN else ORANGE))
+                StateDot(if (e.saved) GREEN else ORANGE, ring = e.saved && !here)
             }
             Text(e.subject.ifEmpty { stringResource(R.string.mail_no_subject) }, fontWeight = if (e.seen) null else FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (e.snippet.isNotEmpty()) Text(e.snippet, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -500,17 +540,40 @@ private fun shortTime(ms: Long): String {
  * text. Pictures and anything else from the web load only when allowed (MAIL_PLAN §9c): once, always from this sender,
  * or always (Settings).
  */
-@Composable private fun MailPage(e: MailEntry, account: MailAccount?, root: File, showBack: Boolean, back: () -> Unit, openFile: (File) -> Unit, say: (String) -> Unit) {
+@Composable private fun MailPage(e: MailEntry, account: MailAccount?, root: File, showBack: Boolean, back: () -> Unit, openFile: (File) -> Unit, say: (String) -> Unit, fetched: () -> Unit) {
     val context = LocalContext.current
+    var failed by remember(e.id) { mutableStateOf<String?>(null) }
+    var got by remember(e.id) { mutableIntStateOf(0) } // an attachment fetched: the cards again
+    /** A Mail file this device does not keep, from the computer (MAIL_PLAN §2: older mail on demand). */
+    fun fetch(rel: String): File = SyncClient(context.applicationContext, SyncStore(context.applicationContext)).mailFile(rel)
     val message by produceState<Mime.Message?>(null, e.id, e.file) {
-        value = withContext(Dispatchers.IO) { MailFiles.eml(root, e)?.let { f -> runCatching { Mime.read(f.readBytes()) }.onFailure { WriterLog.e("Mail: reading a mail", it) }.getOrNull() } }
+        value = withContext(Dispatchers.IO) {
+            val f = MailFiles.eml(root, e) ?: e.file?.takeIf { e.saved }?.let { rel ->
+                runCatching { fetch(MailSync.PART + rel) }.onSuccess { fetched() }.onFailure { failed = it.shownMessage(context) ?: it.message; WriterLog.w("Mail: fetching a mail (${it.message})") }.getOrNull()
+            }
+            f?.let { runCatching { Mime.read(it.readBytes()) }.onFailure { WriterLog.e("Mail: reading a mail", it) }.getOrNull() }
+        }
     }
-    val files = remember(e.id, e.file) { MailFiles.attachments(root, e) }
+    // the attachments here, and those the mail names that this device left on the PC (fetched when tapped)
+    val files = remember(e.id, e.file, message, got) {
+        val here = MailFiles.attachments(root, e)
+        here.map { it.name to it } + message?.attachments.orEmpty().filter { n -> here.none { it.name == n } }.map { it to null }
+    }
+    fun open(name: String, f: File?) {
+        if (f != null) return openFile(f)
+        say(context.getString(R.string.mail_fetching))
+        Thread {
+            val r = runCatching { fetch(MailSync.PART + e.file!!.removeSuffix(".eml") + ".files/" + name) }
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                r.onSuccess { got++; openFile(it) }.onFailure { say(context.getString(R.string.mail_fetch_failed, it.shownMessage(context) ?: it.message.orEmpty())) }
+            }
+        }.start()
+    }
     var once by remember(e.id) { mutableStateOf(false) }
     var allowedVersion by remember { mutableIntStateOf(0) }
     val sender = e.fromAddress.lowercase()
     val allowed = remember(allowedVersion, sender) { MailPrefs.remote(context) || sender in MailPrefs.allowed(context) || sender.substringAfter('@') in MailPrefs.allowed(context) }
-    var risky by remember { mutableStateOf<File?>(null) }
+    var risky by remember { mutableStateOf<Pair<String, File?>?>(null) }
     val html = message?.let { it.html ?: it.text?.let(Mime::textAsHtml) }
     val blocked = html != null && !(once || allowed) && Mime.remote(html)
     Column(Modifier.fillMaxSize().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
@@ -535,12 +598,12 @@ private fun shortTime(ms: Long): String {
             }
         }
         if (files.isNotEmpty()) Row(Modifier.horizontalScroll(rememberScrollState()).padding(bottom = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            files.forEach { f ->
+            files.forEach { (name, f) ->
                 Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.medium,
-                    modifier = Modifier.clickable { if (Mime.risky(f.name) && MailPrefs.switch(context, "risky")) risky = f else openFile(f) }) {
+                    modifier = Modifier.clickable { if (Mime.risky(name) && MailPrefs.switch(context, "risky")) risky = name to f else open(name, f) }) {
                     Row(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(painterResource(R.drawable.ic_attach), null, Modifier.size(16.dp))
-                        Text("${f.name} · ${android.text.format.Formatter.formatShortFileSize(context, f.length())}", style = MaterialTheme.typography.labelLarge, maxLines = 1)
+                        Text(if (f != null) "$name · ${android.text.format.Formatter.formatShortFileSize(context, f.length())}" else "$name · ⇄ PC", style = MaterialTheme.typography.labelLarge, maxLines = 1)
                     }
                 }
             }
@@ -553,11 +616,11 @@ private fun shortTime(ms: Long): String {
             }
         }
         when {
-            e.file == null || MailFiles.eml(root, e) == null -> {
-                MailHint(stringResource(R.string.mail_not_here))
+            e.file == null || !e.saved || failed != null -> {
+                MailHint(failed?.let { stringResource(R.string.mail_fetch_failed, it) } ?: stringResource(R.string.mail_not_here))
                 if (e.snippet.isNotEmpty()) Text(e.snippet, Modifier.padding(horizontal = 24.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            message == null -> MailHint(stringResource(R.string.mail_reading))
+            message == null -> MailHint(stringResource(if (MailFiles.eml(root, e) == null) R.string.mail_fetching else R.string.mail_reading))
             message!!.html == null -> SelectionContainer(Modifier.weight(1f)) {
                 Text(message!!.text.orEmpty(), Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 110.dp), style = MaterialTheme.typography.bodyLarge)
             }
@@ -565,9 +628,9 @@ private fun shortTime(ms: Long): String {
                 Modifier.weight(1f).fillMaxWidth().padding(bottom = 96.dp).clip(MaterialTheme.shapes.large))
         }
     }
-    risky?.let { f ->
-        AlertDialog(onDismissRequest = { risky = null }, title = { Text(stringResource(R.string.mail_risky_title)) }, text = { Text(stringResource(R.string.mail_risky_text, f.name)) },
-            confirmButton = { TextButton(onClick = { risky = null; openFile(f) }) { Text(stringResource(R.string.mail_open_anyway)) } },
+    risky?.let { (name, f) ->
+        AlertDialog(onDismissRequest = { risky = null }, title = { Text(stringResource(R.string.mail_risky_title)) }, text = { Text(stringResource(R.string.mail_risky_text, name)) },
+            confirmButton = { TextButton(onClick = { risky = null; open(name, f) }) { Text(stringResource(R.string.mail_open_anyway)) } },
             dismissButton = { TextButton(onClick = { risky = null }) { Text(stringResource(R.string.common_cancel)) } })
     }
 }

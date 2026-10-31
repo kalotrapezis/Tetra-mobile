@@ -43,9 +43,9 @@
     <string name="mail_do_archive">Archivieren</string>
     <string name="mail_mark_read">Gelesen</string>
     <string name="mail_mark_unread">Ungelesen</string>
-    <string name="mail_later">Bald: Der Computer nimmt diese Änderung auf dem Server vor.</string>
+    <string name="mail_later">Bald verfügbar.</string>
     <string name="mail_write_later">E-Mails schreiben kommt in einem späteren Schritt.</string>
-    <string name="mail_read_only_note">Vorerst liest E-Mail hier, was der Computer abgerufen hat. Änderungen auf dem Server (archivieren, löschen, gelesen, ♥) und das Schreiben kommen als Nächstes.</string>
+    <string name="mail_read_only_note">Änderungen, die du hier machst (gelesen, ♥, archivieren, löschen, verschieben, Spam), führt der Computer auf dem Server aus. E-Mails schreiben kommt als Nächstes.</string>
     <string name="mail_reply">Antworten</string>
     <string name="mail_reply_all">Allen antworten</string>
     <string name="mail_forward">Weiterleiten</string>
@@ -118,4 +118,21 @@
     <string name="mail_receipts_never">Nie</string>
     <string name="mail_receipts_ask">Fragen</string>
     <string name="mail_receipts_always">Immer</string>
+    <string name="mail_done_on_pc">Hier erledigt; der Computer nimmt die Änderung auf dem Server vor.</string>
+    <string name="mail_not_spam">Kein Spam</string>
+    <string name="mail_move_to">Verschieben nach</string>
+    <string name="mail_from_favourites">Aus Favoriten entfernen</string>
+    <string name="mail_on_pc">auf dem Computer</string>
+    <string name="mail_fetching">Wird vom Computer abgerufen…</string>
+    <string name="mail_fetch_failed">Konnte nicht vom Computer abgerufen werden: %1$s</string>
+    <string name="mail_on_device">Auf diesem Gerät</string>
+    <string name="mail_on_device_note">Ältere E-Mails und Anhänge bleiben auf dem Computer und kommen hierher, wenn du sie öffnest.</string>
+    <string name="mail_keep_bodies">E-Mails</string>
+    <string name="mail_keep_attachments">Anhänge</string>
+    <string name="mail_month_1">1 Monat</string>
+    <string name="mail_months_6">6 Monate</string>
+    <string name="mail_months_12">12 Monate</string>
+    <string name="mail_year_1">1 Jahr</string>
+    <string name="mail_keep_all">Alle</string>
+    <string name="mail_keep_none">Keine</string>
 </resources>

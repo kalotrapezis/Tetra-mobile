@@ -45,9 +45,9 @@
     <string name="mail_do_archive">Arhivează</string>
     <string name="mail_mark_read">Citit</string>
     <string name="mail_mark_unread">Necitit</string>
-    <string name="mail_later">În curând: computerul va face această schimbare pe server.</string>
+    <string name="mail_later">În curând.</string>
     <string name="mail_write_later">Scrierea e-mailurilor vine într-un pas următor.</string>
-    <string name="mail_read_only_note">Deocamdată, E-mail citește aici ce a adus computerul. Schimbările pe server (arhivare, ștergere, citit, ♥) și scrierea vin în curând.</string>
+    <string name="mail_read_only_note">Schimbările pe care le faci aici (citit, ♥, arhivare, ștergere, mutare, spam) sunt făcute pe server de computer. Scrierea e-mailurilor vine în curând.</string>
     <string name="mail_reply">Răspunde</string>
     <string name="mail_reply_all">Răspunde tuturor</string>
     <string name="mail_forward">Redirecționează</string>
@@ -122,4 +122,21 @@
     <string name="mail_receipts_never">Niciodată</string>
     <string name="mail_receipts_ask">Întreabă</string>
     <string name="mail_receipts_always">Mereu</string>
+    <string name="mail_done_on_pc">Gata aici; computerul face schimbarea pe server.</string>
+    <string name="mail_not_spam">Nu e spam</string>
+    <string name="mail_move_to">Mută în</string>
+    <string name="mail_from_favourites">Elimină din preferate</string>
+    <string name="mail_on_pc">pe computer</string>
+    <string name="mail_fetching">Se aduce de pe computer…</string>
+    <string name="mail_fetch_failed">Nu s-a putut aduce de pe computer: %1$s</string>
+    <string name="mail_on_device">Pe acest dispozitiv</string>
+    <string name="mail_on_device_note">E-mailurile și atașamentele mai vechi rămân pe computer și vin aici când le deschizi.</string>
+    <string name="mail_keep_bodies">E-mailuri</string>
+    <string name="mail_keep_attachments">Atașamente</string>
+    <string name="mail_month_1">1 lună</string>
+    <string name="mail_months_6">6 luni</string>
+    <string name="mail_months_12">12 luni</string>
+    <string name="mail_year_1">1 an</string>
+    <string name="mail_keep_all">Toate</string>
+    <string name="mail_keep_none">Niciunul</string>
 </resources>

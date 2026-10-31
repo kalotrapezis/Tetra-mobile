@@ -1034,8 +1034,10 @@ internal class SyncClient(private val context: Context, private val store: SyncS
             val mine = (0 until want.length()).mapNotNull { byPath[want.getString(it)] }
             val sent = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
             eachInParallel(mine, context.getString(R.string.sync_stage_sending_files), checkpoint, progress, failed, { it.relativePath }) { entry ->
-                uploadFile(host, p, entry, File(root, TetraSystem.onDisk(entry.relativePath)))
+                val file = File(root, TetraSystem.onDisk(entry.relativePath))
+                uploadFile(host, p, entry, file)
                 sent += entry.relativePath
+                if (entry.relativePath.startsWith(MailSync.REQUESTS)) file.delete() // a Mail request is the computer's to carry out now (step 1's rule)
             }
             counts?.let { it[0] += sent.size + (answer.optJSONArray("moved")?.length() ?: 0) }
             // A Move keeps a window of files here and deletes the older ones — files only; system folders stay,
@@ -1065,7 +1067,12 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         }.onFailure { failed += fail(R.string.sync_fail_moving, it.message) }
 
         val have = answer.optJSONArray("have") ?: JSONArray()
-        val incoming = (0 until have.length()).map(have::getJSONObject)
+        // Mail: only what this device keeps (MAIL_PLAN §2); the older mail it has let go, and comes on demand
+        val incoming = (0 until have.length()).map(have::getJSONObject).filter { MailSync.keep(context, it.optString("path")) }
+        if (scope == null) entries.filter { it.relativePath.startsWith(MailSync.PART) }.forEach { e ->
+            val f = File(root, TetraSystem.onDisk(e.relativePath))
+            if (MailSync.drop(context, e.relativePath, f)) f.delete() // the computer keeps its copy: a Mail file let go is never deleted there
+        }
         return eachInParallel(incoming, context.getString(R.string.sync_stage_receiving_files), checkpoint, progress, failed, { it.optString("path") }) { file ->
             receiveFile(host, p, root, file)
         }
@@ -1129,6 +1136,27 @@ internal class SyncClient(private val context: Context, private val store: SyncS
             }
         }
         return uuids.mapNotNull { u -> File(dir, "$u.webp").takeIf { it.isFile }?.let { u to it } }.toMap()
+    }
+
+    /**
+     * One Mail file this device does not keep (an older mail, an attachment), from the computer's archive by its sync path
+     * ("Mail/<address>/…"; step 1's GET /mail/file). Written beside the others; let go again at a sync a week after.
+     */
+    fun mailFile(rel: String): File {
+        require(rel.startsWith(MailSync.PART) && !rel.startsWith(MailSync.REQUESTS) && rel.split('/').none { it == ".." || it.isEmpty() })
+        val p = reach(store.pairing() ?: throw SyncException(context.getString(R.string.sync_not_paired)))
+        val root = TetraFolder.root(android.os.Environment.getExternalStorageDirectory())
+        val target = File(root, TetraSystem.onDisk(rel))
+        require(DriveRules.inside(root, target))
+        val c = open(p.hosts.first(), p.port, p.fingerprint, "/mail/file?path=${URLEncoder.encode(rel, "UTF-8")}", "GET", p.token)
+        try {
+            if (c.responseCode != 200) throw SyncException(c.errorStream?.bufferedReader()?.readText()?.let { runCatching { JSONObject(it).optString("error") }.getOrNull() } ?: "HTTP ${c.responseCode}")
+            target.parentFile?.mkdirs()
+            val part = File(target.parentFile, ".${target.name}.part")
+            c.inputStream.use { input -> part.outputStream().use { input.copyTo(it) } }
+            if (!part.renameTo(target)) { part.delete(); throw SyncException(context.getString(R.string.sync_not_in_place)) }
+        } finally { c.disconnect() }
+        return target
     }
 
     private suspend fun sha256(f: File): String = SyncRules.hex(MessageDigest.getInstance("SHA-256").also { d -> f.inputStream().use { pump(it, java.io.OutputStream.nullOutputStream(), d) } }.digest())

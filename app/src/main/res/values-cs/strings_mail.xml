@@ -47,9 +47,9 @@
     <string name="mail_do_archive">Archivovat</string>
     <string name="mail_mark_read">Přečtené</string>
     <string name="mail_mark_unread">Nepřečtené</string>
-    <string name="mail_later">Brzy: počítač tuto změnu provede na serveru.</string>
+    <string name="mail_later">Již brzy.</string>
     <string name="mail_write_later">Psaní zpráv přijde v dalším kroku.</string>
-    <string name="mail_read_only_note">Zatím zde Pošta čte, co stáhl počítač. Změny na serveru (archivace, mazání, přečtení, ♥) a psaní přijdou příště.</string>
+    <string name="mail_read_only_note">Změny, které zde provedete (přečtení, ♥, archivace, mazání, přesun, spam), provede počítač na serveru. Psaní zpráv přijde příště.</string>
     <string name="mail_reply">Odpovědět</string>
     <string name="mail_reply_all">Odpovědět všem</string>
     <string name="mail_forward">Přeposlat</string>
@@ -126,4 +126,21 @@
     <string name="mail_receipts_never">Nikdy</string>
     <string name="mail_receipts_ask">Zeptat se</string>
     <string name="mail_receipts_always">Vždy</string>
+    <string name="mail_done_on_pc">Hotovo zde; počítač provede změnu na serveru.</string>
+    <string name="mail_not_spam">Není spam</string>
+    <string name="mail_move_to">Přesunout do</string>
+    <string name="mail_from_favourites">Odebrat z oblíbených</string>
+    <string name="mail_on_pc">v počítači</string>
+    <string name="mail_fetching">Stahování z počítače…</string>
+    <string name="mail_fetch_failed">Nepodařilo se stáhnout z počítače: %1$s</string>
+    <string name="mail_on_device">V tomto zařízení</string>
+    <string name="mail_on_device_note">Starší zprávy a přílohy zůstávají v počítači a přijdou sem, když je otevřete.</string>
+    <string name="mail_keep_bodies">Zprávy</string>
+    <string name="mail_keep_attachments">Přílohy</string>
+    <string name="mail_month_1">1 měsíc</string>
+    <string name="mail_months_6">6 měsíců</string>
+    <string name="mail_months_12">12 měsíců</string>
+    <string name="mail_year_1">1 rok</string>
+    <string name="mail_keep_all">Vše</string>
+    <string name="mail_keep_none">Žádné</string>
 </resources>

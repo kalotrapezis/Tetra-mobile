@@ -47,9 +47,9 @@
     <string name="mail_do_archive">Archyvuoti</string>
     <string name="mail_mark_read">Perskaityta</string>
     <string name="mail_mark_unread">Neperskaityta</string>
-    <string name="mail_later">Netrukus: kompiuteris atliks šį pakeitimą serveryje.</string>
+    <string name="mail_later">Jau netrukus.</string>
     <string name="mail_write_later">Laiškų rašymas bus vėlesniame žingsnyje.</string>
-    <string name="mail_read_only_note">Kol kas Paštas čia skaito tai, ką parsiuntė kompiuteris. Pakeitimai serveryje (archyvavimas, trynimas, perskaityta, ♥) ir rašymas bus vėliau.</string>
+    <string name="mail_read_only_note">Čia atliktus pakeitimus (perskaityta, ♥, archyvavimas, trynimas, perkėlimas, šlamštas) serveryje atlieka kompiuteris. Laiškų rašymas bus vėliau.</string>
     <string name="mail_reply">Atsakyti</string>
     <string name="mail_reply_all">Atsakyti visiems</string>
     <string name="mail_forward">Persiųsti</string>
@@ -126,4 +126,21 @@
     <string name="mail_receipts_never">Niekada</string>
     <string name="mail_receipts_ask">Klausti</string>
     <string name="mail_receipts_always">Visada</string>
+    <string name="mail_done_on_pc">Atlikta čia; kompiuteris atliks pakeitimą serveryje.</string>
+    <string name="mail_not_spam">Ne šlamštas</string>
+    <string name="mail_move_to">Perkelti į</string>
+    <string name="mail_from_favourites">Pašalinti iš mėgstamų</string>
+    <string name="mail_on_pc">kompiuteryje</string>
+    <string name="mail_fetching">Parsiunčiama iš kompiuterio…</string>
+    <string name="mail_fetch_failed">Nepavyko parsiųsti iš kompiuterio: %1$s</string>
+    <string name="mail_on_device">Šiame įrenginyje</string>
+    <string name="mail_on_device_note">Senesni laiškai ir priedai lieka kompiuteryje ir atkeliauja čia, kai juos atidarote.</string>
+    <string name="mail_keep_bodies">Laiškai</string>
+    <string name="mail_keep_attachments">Priedai</string>
+    <string name="mail_month_1">1 mėnuo</string>
+    <string name="mail_months_6">6 mėnesiai</string>
+    <string name="mail_months_12">12 mėnesių</string>
+    <string name="mail_year_1">1 metai</string>
+    <string name="mail_keep_all">Visi</string>
+    <string name="mail_keep_none">Jokių</string>
 </resources>

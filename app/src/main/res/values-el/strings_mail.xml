@@ -46,9 +46,9 @@
     <string name="mail_do_archive">Αρχειοθέτηση</string>
     <string name="mail_mark_read">Αναγνωσμένα</string>
     <string name="mail_mark_unread">Αδιάβαστα</string>
-    <string name="mail_later">Σύντομα: ο υπολογιστής θα κάνει αυτή την αλλαγή στον server.</string>
+    <string name="mail_later">Σύντομα.</string>
     <string name="mail_write_later">Το γράψιμο μηνυμάτων έρχεται σε επόμενο βήμα.</string>
-    <string name="mail_read_only_note">Προς το παρόν η Αλληλογραφία εδώ διαβάζει ό,τι έφερε ο υπολογιστής. Οι αλλαγές στον server (αρχειοθέτηση, διαγραφή, αναγνωσμένα, ♥) και το γράψιμο έρχονται μετά.</string>
+    <string name="mail_read_only_note">Οι αλλαγές που κάνεις εδώ (αναγνωσμένα, ♥, αρχειοθέτηση, διαγραφή, μετακίνηση, ανεπιθύμητα) γίνονται στον server από τον υπολογιστή. Το γράψιμο μηνυμάτων έρχεται μετά.</string>
 
     <string name="mail_reply">Απάντηση</string>
     <string name="mail_reply_all">Απάντηση σε όλους</string>
@@ -125,4 +125,22 @@
     <string name="mail_receipts_never">Ποτέ</string>
     <string name="mail_receipts_ask">Ερώτηση</string>
     <string name="mail_receipts_always">Πάντα</string>
+
+    <string name="mail_done_on_pc">Έγινε εδώ· ο υπολογιστής κάνει την αλλαγή στον server.</string>
+    <string name="mail_not_spam">Όχι ανεπιθύμητο</string>
+    <string name="mail_move_to">Μετακίνηση σε</string>
+    <string name="mail_from_favourites">Αφαίρεση από τα αγαπημένα</string>
+    <string name="mail_on_pc">στον υπολογιστή</string>
+    <string name="mail_fetching">Λήψη από τον υπολογιστή…</string>
+    <string name="mail_fetch_failed">Δεν ήταν δυνατή η λήψη από τον υπολογιστή: %1$s</string>
+    <string name="mail_on_device">Σε αυτή τη συσκευή</string>
+    <string name="mail_on_device_note">Τα παλαιότερα μηνύματα και συνημμένα μένουν στον υπολογιστή και έρχονται εδώ όταν τα ανοίξεις.</string>
+    <string name="mail_keep_bodies">Μηνύματα</string>
+    <string name="mail_keep_attachments">Συνημμένα</string>
+    <string name="mail_month_1">1 μήνας</string>
+    <string name="mail_months_6">6 μήνες</string>
+    <string name="mail_months_12">12 μήνες</string>
+    <string name="mail_year_1">1 χρόνος</string>
+    <string name="mail_keep_all">Όλα</string>
+    <string name="mail_keep_none">Κανένα</string>
 </resources>

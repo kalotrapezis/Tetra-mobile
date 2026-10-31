@@ -43,9 +43,9 @@
     <string name="mail_do_archive">Archiveren</string>
     <string name="mail_mark_read">Gelezen</string>
     <string name="mail_mark_unread">Ongelezen</string>
-    <string name="mail_later">Binnenkort: de computer voert deze wijziging uit op de server.</string>
+    <string name="mail_later">Binnenkort.</string>
     <string name="mail_write_later">Mail schrijven komt in een volgende stap.</string>
-    <string name="mail_read_only_note">Voorlopig leest Mail hier wat de computer heeft opgehaald. Wijzigingen op de server (archiveren, verwijderen, gelezen, ♥) en schrijven komen hierna.</string>
+    <string name="mail_read_only_note">Wijzigingen die je hier maakt (gelezen, ♥, archiveren, verwijderen, verplaatsen, spam) voert de computer uit op de server. Mail schrijven komt hierna.</string>
     <string name="mail_reply">Beantwoorden</string>
     <string name="mail_reply_all">Allen beantwoorden</string>
     <string name="mail_forward">Doorsturen</string>
@@ -118,4 +118,21 @@
     <string name="mail_receipts_never">Nooit</string>
     <string name="mail_receipts_ask">Vragen</string>
     <string name="mail_receipts_always">Altijd</string>
+    <string name="mail_done_on_pc">Hier gedaan; de computer voert de wijziging uit op de server.</string>
+    <string name="mail_not_spam">Geen spam</string>
+    <string name="mail_move_to">Verplaatsen naar</string>
+    <string name="mail_from_favourites">Uit favorieten verwijderen</string>
+    <string name="mail_on_pc">op de computer</string>
+    <string name="mail_fetching">Ophalen van de computer…</string>
+    <string name="mail_fetch_failed">Kon het niet ophalen van de computer: %1$s</string>
+    <string name="mail_on_device">Op dit apparaat</string>
+    <string name="mail_on_device_note">Oudere mail en bijlagen blijven op de computer en komen hierheen als je ze opent.</string>
+    <string name="mail_keep_bodies">Mail</string>
+    <string name="mail_keep_attachments">Bijlagen</string>
+    <string name="mail_month_1">1 maand</string>
+    <string name="mail_months_6">6 maanden</string>
+    <string name="mail_months_12">12 maanden</string>
+    <string name="mail_year_1">1 jaar</string>
+    <string name="mail_keep_all">Alles</string>
+    <string name="mail_keep_none">Geen</string>
 </resources>

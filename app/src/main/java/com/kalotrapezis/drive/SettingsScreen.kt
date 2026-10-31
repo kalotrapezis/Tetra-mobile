@@ -51,7 +51,7 @@ import kotlinx.coroutines.withContext
 internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, val icon: Int, val tint: Color?, @androidx.annotation.StringRes val summary: Int, val items: List<Int>) {
     Sync(R.string.app_sync, R.drawable.ic_sync, null, R.string.settings_sync_summary, listOf(R.string.settings_computer, R.string.settings_open_sync, R.string.settings_sync_auto, R.string.settings_listen)),
     Appearance(R.string.settings_appearance, R.drawable.ic_palette, null, R.string.settings_appearance_summary, listOf(R.string.settings_theme, R.string.settings_language, R.string.settings_photo_on_home, R.string.settings_hidden_from_home, R.string.settings_app_icons)),
-    Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_security,
+    Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_keep_bodies, R.string.mail_keep_attachments, R.string.mail_security,
         R.string.mail_remote, R.string.mail_allowed, R.string.mail_tracking, R.string.mail_link_warning, R.string.mail_risky, R.string.mail_real_address, R.string.mail_receipts)),
     Gallery(R.string.app_gallery, Category.Gallery.icon, Category.Gallery.color, R.string.settings_gallery_summary, listOf(R.string.settings_photos_videos, R.string.settings_search_quality, R.string.settings_folders)),
     Files(R.string.app_files, Category.Files.icon, Category.Files.color, R.string.settings_files_summary, listOf(R.string.settings_drive_workspace, R.string.settings_all_files)),
@@ -781,6 +781,15 @@ internal fun SettingsTab(
                 warn = orange > 0, leading = { Box(Modifier.size(12.dp).clip(CircleShape).background(Color(a.color))) })
         }
         SettingRow(stringResource(R.string.mail_add_account), onClick = { adding = true }) { Icon(painterResource(R.drawable.ic_add), contentDescription = null) }
+    }
+    // MAIL_PLAN §2: recent mail on the device, the rest on the PC until opened
+    SettingsSection(stringResource(R.string.mail_on_device), stringResource(R.string.mail_on_device_note)) {
+        var bodies by remember { mutableStateOf(MailPrefs.bodies(context)) }
+        ChoiceRow(stringResource(R.string.mail_keep_bodies), null, listOf(1 to stringResource(R.string.mail_month_1), 6 to stringResource(R.string.mail_months_6),
+            12 to stringResource(R.string.mail_months_12), -1 to stringResource(R.string.mail_keep_all)), bodies) { bodies = it; MailPrefs.setBodies(context, it) }
+        var attachments by remember { mutableStateOf(MailPrefs.attachments(context)) }
+        ChoiceRow(stringResource(R.string.mail_keep_attachments), null, listOf(0 to stringResource(R.string.mail_keep_none), 1 to stringResource(R.string.mail_month_1),
+            12 to stringResource(R.string.mail_year_1), -1 to stringResource(R.string.mail_keep_all)), attachments) { attachments = it; MailPrefs.setAttachments(context, it) }
     }
     SettingsSection(stringResource(R.string.mail_security)) {
         var remote by remember { mutableStateOf(MailPrefs.remote(context)) }

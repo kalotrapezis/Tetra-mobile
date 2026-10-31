@@ -45,9 +45,9 @@
     <string name="mail_do_archive">Arhivēt</string>
     <string name="mail_mark_read">Izlasīts</string>
     <string name="mail_mark_unread">Neizlasīts</string>
-    <string name="mail_later">Drīzumā: dators veiks šo izmaiņu serverī.</string>
+    <string name="mail_later">Drīzumā.</string>
     <string name="mail_write_later">Vēstuļu rakstīšana būs kādā nākamajā solī.</string>
-    <string name="mail_read_only_note">Pagaidām Pasts šeit lasa to, ko saņēma dators. Izmaiņas serverī (arhivēšana, dzēšana, izlasīts, ♥) un rakstīšana būs pēc tam.</string>
+    <string name="mail_read_only_note">Izmaiņas, ko veicat šeit (izlasīts, ♥, arhivēšana, dzēšana, pārvietošana, mēstules), serverī veic dators. Vēstuļu rakstīšana būs pēc tam.</string>
     <string name="mail_reply">Atbildēt</string>
     <string name="mail_reply_all">Atbildēt visiem</string>
     <string name="mail_forward">Pārsūtīt</string>
@@ -122,4 +122,21 @@
     <string name="mail_receipts_never">Nekad</string>
     <string name="mail_receipts_ask">Jautāt</string>
     <string name="mail_receipts_always">Vienmēr</string>
+    <string name="mail_done_on_pc">Izdarīts šeit; dators veiks izmaiņu serverī.</string>
+    <string name="mail_not_spam">Nav mēstule</string>
+    <string name="mail_move_to">Pārvietot uz</string>
+    <string name="mail_from_favourites">Noņemt no izlases</string>
+    <string name="mail_on_pc">datorā</string>
+    <string name="mail_fetching">Notiek ielāde no datora…</string>
+    <string name="mail_fetch_failed">Neizdevās ielādēt no datora: %1$s</string>
+    <string name="mail_on_device">Šajā ierīcē</string>
+    <string name="mail_on_device_note">Vecākas vēstules un pielikumi paliek datorā un nonāk šeit, kad tos atverat.</string>
+    <string name="mail_keep_bodies">Vēstules</string>
+    <string name="mail_keep_attachments">Pielikumi</string>
+    <string name="mail_month_1">1 mēnesis</string>
+    <string name="mail_months_6">6 mēneši</string>
+    <string name="mail_months_12">12 mēneši</string>
+    <string name="mail_year_1">1 gads</string>
+    <string name="mail_keep_all">Visas</string>
+    <string name="mail_keep_none">Nevienu</string>
 </resources>

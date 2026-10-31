@@ -43,9 +43,9 @@
     <string name="mail_do_archive">Archiválás</string>
     <string name="mail_mark_read">Olvasott</string>
     <string name="mail_mark_unread">Olvasatlan</string>
-    <string name="mail_later">Hamarosan: a számítógép elvégzi ezt a módosítást a szerveren.</string>
+    <string name="mail_later">Hamarosan.</string>
     <string name="mail_write_later">A levélírás egy későbbi lépésben jön.</string>
-    <string name="mail_read_only_note">Egyelőre az E-mail itt azt olvassa, amit a számítógép letöltött. A szerveren végzett módosítások (archiválás, törlés, olvasott, ♥) és az írás ezután jönnek.</string>
+    <string name="mail_read_only_note">Az itt végzett módosításokat (olvasott, ♥, archiválás, törlés, áthelyezés, spam) a számítógép végzi el a szerveren. A levélírás ezután jön.</string>
     <string name="mail_reply">Válasz</string>
     <string name="mail_reply_all">Válasz mindenkinek</string>
     <string name="mail_forward">Továbbítás</string>
@@ -118,4 +118,21 @@
     <string name="mail_receipts_never">Soha</string>
     <string name="mail_receipts_ask">Kérdezzen</string>
     <string name="mail_receipts_always">Mindig</string>
+    <string name="mail_done_on_pc">Itt kész; a számítógép elvégzi a módosítást a szerveren.</string>
+    <string name="mail_not_spam">Nem spam</string>
+    <string name="mail_move_to">Áthelyezés ide</string>
+    <string name="mail_from_favourites">Eltávolítás a kedvencekből</string>
+    <string name="mail_on_pc">a számítógépen</string>
+    <string name="mail_fetching">Letöltés a számítógépről…</string>
+    <string name="mail_fetch_failed">Nem sikerült letölteni a számítógépről: %1$s</string>
+    <string name="mail_on_device">Ezen az eszközön</string>
+    <string name="mail_on_device_note">A régebbi levelek és mellékletek a számítógépen maradnak, és akkor érkeznek ide, amikor megnyitod őket.</string>
+    <string name="mail_keep_bodies">Levelek</string>
+    <string name="mail_keep_attachments">Mellékletek</string>
+    <string name="mail_month_1">1 hónap</string>
+    <string name="mail_months_6">6 hónap</string>
+    <string name="mail_months_12">12 hónap</string>
+    <string name="mail_year_1">1 év</string>
+    <string name="mail_keep_all">Mind</string>
+    <string name="mail_keep_none">Egyik sem</string>
 </resources>

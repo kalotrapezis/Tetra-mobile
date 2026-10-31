@@ -47,9 +47,9 @@
     <string name="mail_do_archive">Archive</string>
     <string name="mail_mark_read">Read</string>
     <string name="mail_mark_unread">Unread</string>
-    <string name="mail_later">Coming soon: the computer will make this change on the server.</string>
+    <string name="mail_later">Coming soon.</string>
     <string name="mail_write_later">Writing mail comes in a later step.</string>
-    <string name="mail_read_only_note">For now Mail here reads what the computer fetched. Changes on the server (archive, delete, read, ♥) and writing come next.</string>
+    <string name="mail_read_only_note">Changes you make here (read, ♥, archive, delete, move, spam) are done on the server by the computer. Writing mail comes next.</string>
 
     <string name="mail_reply">Reply</string>
     <string name="mail_reply_all">Reply all</string>
@@ -126,4 +126,22 @@
     <string name="mail_receipts_never">Never</string>
     <string name="mail_receipts_ask">Ask</string>
     <string name="mail_receipts_always">Always</string>
+
+    <string name="mail_done_on_pc">Done here; the computer makes the change on the server.</string>
+    <string name="mail_not_spam">Not spam</string>
+    <string name="mail_move_to">Move to</string>
+    <string name="mail_from_favourites">Remove from favourites</string>
+    <string name="mail_on_pc">on the PC</string>
+    <string name="mail_fetching">Fetching from the computer…</string>
+    <string name="mail_fetch_failed">Could not fetch it from the computer: %1$s</string>
+    <string name="mail_on_device">On this device</string>
+    <string name="mail_on_device_note">Older mail and attachments stay on the computer and come here when you open them.</string>
+    <string name="mail_keep_bodies">Mail</string>
+    <string name="mail_keep_attachments">Attachments</string>
+    <string name="mail_month_1">1 month</string>
+    <string name="mail_months_6">6 months</string>
+    <string name="mail_months_12">12 months</string>
+    <string name="mail_year_1">1 year</string>
+    <string name="mail_keep_all">All</string>
+    <string name="mail_keep_none">None</string>
 </resources>

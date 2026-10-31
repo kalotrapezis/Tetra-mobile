@@ -233,6 +233,55 @@ tablet; one at a time on a phone). Its page lists sub-pages, each a row with ›
 6. **Clean-up rules, filters, local spam filter.**
 7. **Assistant mail tools and the mail report.**
 
+## 11. The shared folder and the phone's requests (as built, desktop `mail.js`, 31 Oct)
+
+**Sync.** `Mail` is one of the apps' shared folders (`system.SHARED` on the desktop, `TetraSystem.SHARED` on Android):
+sync names its files `Mail/…`, on disk `.System/Mail/Shared/…`, hidden from Files. Every file is in the desktop's `have`
+list on every sync; the phone downloads what it wants (`index.jsonl`, `accounts.json`, recent `.eml` and `.files/`)
+and leaves the rest. An older one is fetched when opened with **`GET /mail/file?path=Mail/<address>/…`** (same auth as
+`/file/<sha>`; any file under `Mail/`, no hash needed), which also serves one the phone let go to free space (sync no
+longer offers a file the device held and dropped). A phone dropping a Mail file never deletes it on the desktop.
+The desktop writes its own temporary files as dotfiles (`.<name>.part`), which sync never lists.
+
+**index.jsonl** (one JSON per line, the last line per `id` wins): `id` (opaque), `account`, `folder` (Inbox, Drafts,
+Sent, Archive, Spam, Trash), `box` (the server folder, e.g. `Archive/2026`), `uidValidity`, `uid`, `date` (ms),
+`from`, `fromAddress`, `to[]`, `subject`, `messageId`, `seen`, `flagged` (♥), `size`, `attachments` (count),
+`snippet`, `saved` (green), `file` (path under `Mail/`, absent until downloaded, null once moved), `gone` (not on
+the server in that folder any more: hide it), `movedTo` (the id it became after a move).
+
+**Requests (phone → desktop).** One action per file, written by the phone into the synced folder:
+
+```
+Mail/requests/<device>-<ms>.json
+{ "op": "read" | "unread" | "favorite" | "unfavorite" | "archive" | "delete" | "move" | "spam" | "notSpam",
+  "ids": ["<index id>", …],          // any accounts, any folders; at most 5000
+  "to": "Inbox" | "Archive" | …,      // only with "move": one of the six folder roles
+  "at": 1793439266004,                // ms; requests are carried out oldest first
+  "device": "<device name>" }         // for the log only
+```
+
+- The desktop sees it as soon as sync writes it (it watches the folder; and every minute), carries it out on the
+  server, writes the result into `index.jsonl` (flags at once; a moved mail is `gone` at once and appears in its new
+  folder after the next sync, with its file moved there, not downloaded again), then **deletes the request file**.
+- It cannot be done now (no connection, a password to fix): the file stays and is tried again. It can never be done
+  (an unknown `op`, a bad `to`): the file is deleted and the desktop's log says why. Ids no longer in the index, or
+  already `gone`, are skipped.
+- The phone shows its own action at once (optimistically) and then trusts `index.jsonl`; it deletes its copy of the
+  request once the upload is done (the desktop removed it; sync does not bring it back).
+- `delete`: to the account's Trash; from the Trash, deleted on the server for good. `archive`: to the account's
+  Archive (made as `Archive` if the server has none — a label on Gmail), in a folder per year, per month or none
+  (`archiveBy` in `accounts.json`, default year, as Thunderbird). `spam` → Spam, `notSpam` → Inbox. **The copy on
+  the desktop is never deleted** by any action.
+
+**The phone's side (step 2, Tetra-mobile `Mail.kt`).** It keeps the index and accounts always, mail for 6 months and
+attachments for 1 month by default (Settings › Αλληλογραφία › Σε αυτή τη συσκευή: mail 1/6/12 months/all, attachments
+none/1 month/1 year/all), judged by the date in the file's path; older ones show a green ring ("on the PC") and come by
+`/mail/file` when opened or tapped. A file outside the window is let go at a whole sync once it has not been opened
+for a week. It never downloads `Mail/requests/` (another device's request must not travel back) and deletes its own
+once uploaded. A request is sent at once by the scoped sync `mail` (desktop `SCOPES.mail = Mail/requests`), or by a
+whole sync where the desktop has no such scope. An attachment it does not hold is named as the desktop's `store()`
+names it (clean(filename, 150), " (2)" for repeats, "attachment" when nameless), read from the `.eml`.
+
 ## Open questions for the user
 
 - Away from home, does the phone sync with the desktop over the internet, or only on the same Wi-Fi?

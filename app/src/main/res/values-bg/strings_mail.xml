@@ -43,9 +43,9 @@
     <string name="mail_do_archive">Архивирай</string>
     <string name="mail_mark_read">Прочетено</string>
     <string name="mail_mark_unread">Непрочетено</string>
-    <string name="mail_later">Скоро: компютърът ще направи тази промяна на сървъра.</string>
+    <string name="mail_later">Очаквайте скоро.</string>
     <string name="mail_write_later">Писането на писма идва в следваща стъпка.</string>
-    <string name="mail_read_only_note">Засега Поща тук чете това, което е изтеглил компютърът. Промените на сървъра (архивиране, изтриване, прочетено, ♥) и писането идват след това.</string>
+    <string name="mail_read_only_note">Промените, които правите тук (прочетено, ♥, архивиране, изтриване, преместване, спам), се правят на сървъра от компютъра. Писането на писма идва след това.</string>
     <string name="mail_reply">Отговори</string>
     <string name="mail_reply_all">Отговори на всички</string>
     <string name="mail_forward">Препрати</string>
@@ -118,4 +118,21 @@
     <string name="mail_receipts_never">Никога</string>
     <string name="mail_receipts_ask">Питай</string>
     <string name="mail_receipts_always">Винаги</string>
+    <string name="mail_done_on_pc">Готово тук; компютърът прави промяната на сървъра.</string>
+    <string name="mail_not_spam">Не е спам</string>
+    <string name="mail_move_to">Премести в</string>
+    <string name="mail_from_favourites">Премахни от любими</string>
+    <string name="mail_on_pc">на компютъра</string>
+    <string name="mail_fetching">Изтегляне от компютъра…</string>
+    <string name="mail_fetch_failed">Не можа да се изтегли от компютъра: %1$s</string>
+    <string name="mail_on_device">На това устройство</string>
+    <string name="mail_on_device_note">По-старите писма и прикачени файлове остават на компютъра и идват тук, когато ги отворите.</string>
+    <string name="mail_keep_bodies">Писма</string>
+    <string name="mail_keep_attachments">Прикачени файлове</string>
+    <string name="mail_month_1">1 месец</string>
+    <string name="mail_months_6">6 месеца</string>
+    <string name="mail_months_12">12 месеца</string>
+    <string name="mail_year_1">1 година</string>
+    <string name="mail_keep_all">Всички</string>
+    <string name="mail_keep_none">Няма</string>
 </resources>

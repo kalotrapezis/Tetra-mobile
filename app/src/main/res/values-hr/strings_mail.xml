@@ -45,9 +45,9 @@
     <string name="mail_do_archive">Arhiviraj</string>
     <string name="mail_mark_read">Pročitano</string>
     <string name="mail_mark_unread">Nepročitano</string>
-    <string name="mail_later">Uskoro: računalo će napraviti ovu promjenu na serveru.</string>
+    <string name="mail_later">Uskoro.</string>
     <string name="mail_write_later">Pisanje poruka dolazi u sljedećem koraku.</string>
-    <string name="mail_read_only_note">Za sada Pošta ovdje čita ono što je računalo preuzelo. Promjene na serveru (arhiviranje, brisanje, pročitano, ♥) i pisanje dolaze sljedeće.</string>
+    <string name="mail_read_only_note">Promjene koje ovdje napravite (pročitano, ♥, arhiviranje, brisanje, premještanje, neželjeno) računalo provodi na serveru. Pisanje poruka dolazi sljedeće.</string>
     <string name="mail_reply">Odgovori</string>
     <string name="mail_reply_all">Odgovori svima</string>
     <string name="mail_forward">Proslijedi</string>
@@ -122,4 +122,21 @@
     <string name="mail_receipts_never">Nikad</string>
     <string name="mail_receipts_ask">Pitaj</string>
     <string name="mail_receipts_always">Uvijek</string>
+    <string name="mail_done_on_pc">Gotovo ovdje; računalo provodi promjenu na serveru.</string>
+    <string name="mail_not_spam">Nije neželjeno</string>
+    <string name="mail_move_to">Premjesti u</string>
+    <string name="mail_from_favourites">Ukloni iz favorita</string>
+    <string name="mail_on_pc">na računalu</string>
+    <string name="mail_fetching">Preuzimanje s računala…</string>
+    <string name="mail_fetch_failed">Preuzimanje s računala nije uspjelo: %1$s</string>
+    <string name="mail_on_device">Na ovom uređaju</string>
+    <string name="mail_on_device_note">Starije poruke i privici ostaju na računalu i stižu ovamo kad ih otvorite.</string>
+    <string name="mail_keep_bodies">Poruke</string>
+    <string name="mail_keep_attachments">Privici</string>
+    <string name="mail_month_1">1 mjesec</string>
+    <string name="mail_months_6">6 mjeseci</string>
+    <string name="mail_months_12">12 mjeseci</string>
+    <string name="mail_year_1">1 godina</string>
+    <string name="mail_keep_all">Sve</string>
+    <string name="mail_keep_none">Ništa</string>
 </resources>

@@ -47,9 +47,9 @@
     <string name="mail_do_archive">Arhiviraj</string>
     <string name="mail_mark_read">Prebrano</string>
     <string name="mail_mark_unread">Neprebrano</string>
-    <string name="mail_later">Kmalu: računalnik bo to spremembo naredil na strežniku.</string>
+    <string name="mail_later">Kmalu.</string>
     <string name="mail_write_later">Pisanje sporočil pride v enem od naslednjih korakov.</string>
-    <string name="mail_read_only_note">Za zdaj Pošta tukaj bere, kar je prenesel računalnik. Spremembe na strežniku (arhiviranje, brisanje, prebrano, ♥) in pisanje pridejo pozneje.</string>
+    <string name="mail_read_only_note">Spremembe, ki jih naredite tukaj (prebrano, ♥, arhiviranje, brisanje, premikanje, neželeno), računalnik izvede na strežniku. Pisanje sporočil pride pozneje.</string>
     <string name="mail_reply">Odgovori</string>
     <string name="mail_reply_all">Odgovori vsem</string>
     <string name="mail_forward">Posreduj</string>
@@ -126,4 +126,21 @@
     <string name="mail_receipts_never">Nikoli</string>
     <string name="mail_receipts_ask">Vprašaj</string>
     <string name="mail_receipts_always">Vedno</string>
+    <string name="mail_done_on_pc">Narejeno tukaj; računalnik izvede spremembo na strežniku.</string>
+    <string name="mail_not_spam">Ni neželeno</string>
+    <string name="mail_move_to">Premakni v</string>
+    <string name="mail_from_favourites">Odstrani iz priljubljenih</string>
+    <string name="mail_on_pc">v računalniku</string>
+    <string name="mail_fetching">Prenašanje iz računalnika…</string>
+    <string name="mail_fetch_failed">Prenos iz računalnika ni uspel: %1$s</string>
+    <string name="mail_on_device">V tej napravi</string>
+    <string name="mail_on_device_note">Starejša sporočila in priloge ostanejo v računalniku in pridejo sem, ko jih odprete.</string>
+    <string name="mail_keep_bodies">Sporočila</string>
+    <string name="mail_keep_attachments">Priloge</string>
+    <string name="mail_month_1">1 mesec</string>
+    <string name="mail_months_6">6 mesecev</string>
+    <string name="mail_months_12">12 mesecev</string>
+    <string name="mail_year_1">1 leto</string>
+    <string name="mail_keep_all">Vse</string>
+    <string name="mail_keep_none">Brez</string>
 </resources>

@@ -49,9 +49,9 @@
     <string name="mail_do_archive">Cartlannaigh</string>
     <string name="mail_mark_read">Léite</string>
     <string name="mail_mark_unread">Gan léamh</string>
-    <string name="mail_later">Go luath: déanfaidh an ríomhaire an t-athrú seo ar an bhfreastalaí.</string>
+    <string name="mail_later">Ag teacht go luath.</string>
     <string name="mail_write_later">Tiocfaidh scríobh poist i gcéim níos déanaí.</string>
-    <string name="mail_read_only_note">Faoi láthair, léann Ríomhphost anseo an méid a fuair an ríomhaire. Tiocfaidh athruithe ar an bhfreastalaí (cartlannú, scriosadh, léite, ♥) agus scríobh ina dhiaidh seo.</string>
+    <string name="mail_read_only_note">Déanann an ríomhaire na hathruithe a dhéanann tú anseo (léite, ♥, cartlannú, scriosadh, bogadh, turscar) ar an bhfreastalaí. Tiocfaidh scríobh poist ina dhiaidh seo.</string>
     <string name="mail_reply">Freagair</string>
     <string name="mail_reply_all">Freagair cách</string>
     <string name="mail_forward">Seol ar aghaidh</string>
@@ -130,4 +130,21 @@
     <string name="mail_receipts_never">Riamh</string>
     <string name="mail_receipts_ask">Fiafraigh</string>
     <string name="mail_receipts_always">I gcónaí</string>
+    <string name="mail_done_on_pc">Déanta anseo; déanann an ríomhaire an t-athrú ar an bhfreastalaí.</string>
+    <string name="mail_not_spam">Ní turscar</string>
+    <string name="mail_move_to">Bog go</string>
+    <string name="mail_from_favourites">Bain de na ceanáin</string>
+    <string name="mail_on_pc">ar an ríomhaire</string>
+    <string name="mail_fetching">Á fháil ón ríomhaire…</string>
+    <string name="mail_fetch_failed">Níorbh fhéidir é a fháil ón ríomhaire: %1$s</string>
+    <string name="mail_on_device">Ar an ngléas seo</string>
+    <string name="mail_on_device_note">Fanann post agus ceangaltáin níos sine ar an ríomhaire agus tagann siad anseo nuair a osclaíonn tú iad.</string>
+    <string name="mail_keep_bodies">Post</string>
+    <string name="mail_keep_attachments">Ceangaltáin</string>
+    <string name="mail_month_1">1 mhí</string>
+    <string name="mail_months_6">6 mhí</string>
+    <string name="mail_months_12">12 mhí</string>
+    <string name="mail_year_1">1 bhliain</string>
+    <string name="mail_keep_all">Gach rud</string>
+    <string name="mail_keep_none">Gan cheann</string>
 </resources>
