@@ -117,7 +117,7 @@ internal object MailFiles {
         }
     }
 
-    /** «Αποθήκευση»: what one account's folder ([id]), or the whole of Mail (null), takes here — bytes, and how many mails. */
+    /** «Αποθήκη»: what one account's folder ([id]), or the whole of Mail (null), takes here — bytes, and how many mails. */
     fun held(root: File, id: String?): Pair<Long, Int> {
         var bytes = 0L; var mails = 0
         (if (id == null) root else File(root, id)).walkTopDown().filter { it.isFile && !it.name.startsWith(".") }
@@ -133,7 +133,7 @@ internal object MailFiles {
 }
 
 /**
- * «Αποθήκευση» (the user, 31 Oct: "the mail app to be the file manager … my local backups, to find an important mail I
+ * «Αποθήκη» (the user, 31 Oct: "the mail app to be the file manager … my local backups, to find an important mail I
  * deleted by mistake"): every mail kept on this device, from its files — the PC's accounts' and this device's own. Each
  * as the index describes it where a line names its file; one the server no longer has (gone), or no line names at all,
  * is local only ([MailEntry.gone]). Read only: nothing here goes to a server.

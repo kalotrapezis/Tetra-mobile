@@ -214,7 +214,7 @@
     <string name="mail_use_here_summary">Αυτόν τον λογαριασμό τον φέρνει ο υπολογιστής. Χρησιμοποίησέ τον και εδώ: ο υπολογιστής δίνει τον κωδικό του μέσα από τη συνδεδεμένη, κρυπτογραφημένη σύνδεση, φυλάγεται στον ασφαλή χώρο της συσκευής, και η συσκευή φέρνει μόνη της την αλληλογραφία, και μακριά από τον υπολογιστή.</string>
     <string name="mail_use_here_microsoft">Λογαριασμός Microsoft: συνδέσου ξανά σε αυτή τη συσκευή, και θα φέρνει μόνη της την αλληλογραφία, και μακριά από τον υπολογιστή.</string>
     <string name="mail_use_here_busy">Ρωτάω τον υπολογιστή…</string>
-    <string name="mail_storage">Αποθήκευση</string>
+    <string name="mail_storage">Αποθήκη</string>
     <string name="mail_storage_has">%1$s · %2$s μηνύματα</string>
     <string name="mail_storage_total">Σύνολο: %1$s · %2$s μηνύματα</string>
     <string name="mail_open_folder">Άνοιγμα φακέλου</string>
@@ -231,6 +231,6 @@
     <string name="mail_exported">Αντιγράφηκε: %1$s</string>
     <string name="mail_show">Εμφάνιση</string>
     <string name="mail_stored_hint">Η αλληλογραφία που φυλάσσεται σε αυτή τη συσκευή, και όση έχει σβηστεί από τον διακομιστή</string>
-    <string name="mail_stored_read_only">Η Αποθήκευση είναι μόνο για ανάγνωση: τίποτα από εδώ δεν αλλάζει στον διακομιστή.</string>
+    <string name="mail_stored_read_only">Η Αποθήκη είναι μόνο για ανάγνωση: τίποτα από εδώ δεν αλλάζει στον διακομιστή.</string>
     <string name="mail_saved">Αποθηκεύτηκε</string>
 </resources>

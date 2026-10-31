@@ -138,7 +138,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     }
     val root = remember { mailRoot() }
     var version by remember { mutableIntStateOf(0) }
-    var storage by remember { mutableStateOf(false) } // «Αποθήκευση»
+    var storage by remember { mutableStateOf(false) } // «Αποθήκη»
     // the computer's index and accounts arriving by sync: read again
     val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current
     DisposableEffect(root, lifecycle) {
@@ -167,7 +167,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     val accounts = data?.first.orEmpty()
     // what was asked here and the computer has not done yet, shown as done (step 1: show it, then trust index.jsonl)
     var changed by remember { mutableStateOf(mapOf<String, MailEntry?>()) }
-    // «Αποθήκευση»: the same folders, list and pages over every mail kept here, deleted ones too (MailArchive); read only
+    // «Αποθήκη»: the same folders, list and pages over every mail kept here, deleted ones too (MailArchive); read only
     var stored by remember { mutableStateOf(false) }
     val archive by produceState<List<MailEntry>?>(null, stored, version) {
         if (stored) value = withContext(Dispatchers.IO) { runCatching { MailArchive.entries(root, MailEngine.device()) }.onFailure { WriterLog.e("Mail: reading the stored mail", it) }.getOrDefault(emptyList()) }
@@ -311,7 +311,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
                         }
                     }
                 }
-                // «Αποθήκευση» at the bottom: the mail kept on this device, the same folders over it; again, back to the mail
+                // «Αποθήκη» at the bottom: the mail kept on this device, the same folders over it; again, back to the mail
                 if (accounts.isNotEmpty()) item(key = "stored") {
                     Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(MaterialTheme.shapes.large).background(if (stored) MAIL_COLOR.copy(alpha = 0.22f) else Color.Transparent)
                         .clickable { stored = !stored; openId = null; selected = emptySet(); mailboxes = false }.padding(start = 14.dp, end = 10.dp).heightIn(min = 48.dp),
@@ -636,7 +636,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
                 if (e.attachments > 0) Icon(painterResource(R.drawable.ic_attach), stringResource(R.string.mail_has_attachments), Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 StateDot(if (e.saved) GREEN else ORANGE, ring = e.saved && !here)
             }
-            if (e.gone) Text(stringResource(R.string.mail_local_only), style = MaterialTheme.typography.labelSmall, color = MAIL_TEXT) // in «Αποθήκευση»: no longer on the server
+            if (e.gone) Text(stringResource(R.string.mail_local_only), style = MaterialTheme.typography.labelSmall, color = MAIL_TEXT) // in «Αποθήκη»: no longer on the server
             Text(e.subject.ifEmpty { stringResource(R.string.mail_no_subject) }, fontWeight = if (e.seen) null else FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (e.snippet.isNotEmpty()) Text(e.snippet, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
@@ -952,7 +952,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
     }
 
 /**
- * «Αποθήκευση» (the user, 31 Oct: "how can I access my mails if the folder is hidden in the system folder?"): where each
+ * «Αποθήκη» (the user, 31 Oct: "how can I access my mails if the folder is hidden in the system folder?"): where each
  * account's mail is kept on this device, how much it takes and how many mails, and «Άνοιγμα φακέλου» in Tetra's Files
  * (which shows Mail's folder, though it is under .System). The desktop's Mail says the same in the same words. [only]: one account.
  */

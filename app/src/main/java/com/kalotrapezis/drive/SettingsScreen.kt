@@ -789,7 +789,7 @@ internal fun SettingsTab(
     var adding by remember { mutableStateOf(false) }
     var managing by remember { mutableStateOf<MailAccount?>(null) }
     var using by remember { mutableStateOf<MailAccount?>(null) }
-    var storing by remember { mutableStateOf<String?>(null) } // «Αποθήκευση» for one account
+    var storing by remember { mutableStateOf<String?>(null) } // «Αποθήκη» for one account
     storing?.let { id -> MailStorageDialog(id, openPart) { storing = null } }
     SettingsSection(stringResource(R.string.mail_accounts)) {
         data?.first?.forEach { a ->

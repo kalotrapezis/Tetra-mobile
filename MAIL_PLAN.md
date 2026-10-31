@@ -475,9 +475,9 @@ Formats are the desktop's (step 1's sync.js/mail.js of the same day); the phone 
   keystore, and the account written to `accounts.<device>.json` with the same id and colour: the phone fetches it itself
   from then on, its mail still one list.
 
-## 17. Αποθήκευση, and what the user's phone showed (31 Oct, over USB)
+## 17. Αποθήκη, and what the user's phone showed (31 Oct, over USB)
 
-- **«Αποθήκευση»** (folder icon): in Mail's pulled-up panel, and in each account's dialog in Settings › Αλληλογραφία.
+- **«Αποθήκη»** (folder icon): in Mail's pulled-up panel, and in each account's dialog in Settings › Αλληλογραφία.
   Per account: name, address, "size · N mails", the folder's path, «Άνοιγμα φακέλου»; then the total and the whole
   folder. The folder opens in Tetra's own Files (Mail/<address>, though it is under .System), and a .eml opened there
   opens in Mail. The same words as the desktop's (its translations).
@@ -505,7 +505,7 @@ Formats are the desktop's (step 1's sync.js/mail.js of the same day); the phone 
 
 ## 19. Storage as the mail's own file manager (the user, 31 Oct: "the mail app to be the file manager … find an important mail I deleted by mistake")
 
-- **«Αποθήκευση» at the bottom of the folder list**: the same folders, list, search, filter and pages over every mail
+- **«Αποθήκη» at the bottom of the folder list**: the same folders, list, search, filter and pages over every mail
   kept on this device (MailArchive), the PC's accounts' and this device's own; one the server no longer has, or that no
   index line names, is marked «μόνο τοπικά». Read only: no action there reaches a server.
 - **Attachments** (⋮ on each card): «Εξαγωγή στα Έγγραφα» (Tetra/Documents, synced to the PC's; never over a file,

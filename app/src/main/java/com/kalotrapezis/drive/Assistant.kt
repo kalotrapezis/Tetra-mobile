@@ -441,7 +441,7 @@ internal class AssistantTools(
     }
 
     /**
-     * The mail kept on this device («Αποθήκευση», the user, 31 Oct: "search the local storage and find files"): every
+     * The mail kept on this device («Αποθήκη», the user, 31 Oct: "search the local storage and find files"): every
      * account's, deleted ones too, by sender, words (subject, recipients, attachments' names) and dates.
      */
     private fun mailStoredFind(a: JSONObject): ToolResult {
@@ -675,7 +675,7 @@ internal class AssistantTools(
             fn("mail_find", "Find mail from someone (a contact's name, a name or an address) and/or with some words; a numbered list, newest first.", emptyList(),
                 "from" to p("string", "Who it is from, as said."), "query" to p("string", "Words in the subject or the text.")),
             fn("mail_open", "Open a mail from the last mail list in Tetra's Mail.", listOf("choice"), CHOICE),
-            fn("mail_stored_find", "Search the mail kept on this device (Mail › Αποθήκευση): every account, mail deleted from the server too, with their attachments' names; a numbered list.", emptyList(),
+            fn("mail_stored_find", "Search the mail kept on this device (Mail › Αποθήκη, Storage): every account, mail deleted from the server too, with their attachments' names; a numbered list.", emptyList(),
                 "from" to p("string", "Who it is from, as said."), "query" to p("string", "Words in the subject, the recipients or an attachment's name."),
                 "from_date" to p("string", "Earliest day, YYYY-MM-DD."), "to_date" to p("string", "Latest day, YYYY-MM-DD.")),
             fn("mail_export", "Only when the user asks: copy a mail from the last mail list, or one of its attachments, into Tetra/Documents.", listOf("choice"),

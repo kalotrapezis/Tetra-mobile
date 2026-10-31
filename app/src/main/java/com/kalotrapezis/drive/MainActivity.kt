@@ -632,7 +632,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
     )
     fun openDriveFile(relative: String, forceChooser: Boolean): String? = runCatching {
         val file = DriveRules.file(driveRoot(), relative)
-        // a mail of Mail's folder opens in Mail (reached by «Αποθήκευση» › «Άνοιγμα φακέλου»)
+        // a mail of Mail's folder opens in Mail (reached by «Αποθήκη» › «Άνοιγμα φακέλου»)
         if (!forceChooser && relative.startsWith(MailSync.PART) && file.extension.equals("eml", true)) {
             MailFiles.index(MailFiles.root(driveRoot()), MailEngine.device()).firstOrNull { it.file == relative.removePrefix(MailSync.PART) }
                 ?.let { mailStart = "mail:${it.id}"; screen = Screen.Mail; return@runCatching }
@@ -1070,7 +1070,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                         "phone" -> openPhone(context)
                         "data" -> openData(context)
                         "mail" -> screen = Screen.Mail
-                        // «Αποθήκευση» › «Άνοιγμα φακέλου»: Mail's folder in Files, though it is under .System
+                        // «Αποθήκη» › «Άνοιγμα φακέλου»: Mail's folder in Files, though it is under .System
                         else -> if (id == MailFiles.FOLDER || id.startsWith(MailFiles.FOLDER + "/")) { screen = Screen.Drive; drivePane = DrivePane.Files; driveFolder = id; loadDrive(id) }
                     } },
                     openGuide = { guideAt = 0; screen = Screen.Guide },
