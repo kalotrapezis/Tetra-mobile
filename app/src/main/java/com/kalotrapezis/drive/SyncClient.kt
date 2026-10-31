@@ -1033,11 +1033,14 @@ internal class SyncClient(private val context: Context, private val store: SyncS
             val byPath = entries.associateBy { it.relativePath }
             val mine = (0 until want.length()).mapNotNull { byPath[want.getString(it)] }
             val sent = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
-            eachInParallel(mine, context.getString(R.string.sync_stage_sending_files), checkpoint, progress, failed, { it.relativePath }) { entry ->
+            // Mail's outbox: a .json starts the sending, so it goes after its attachments (MAIL_PLAN §12)
+            val (starts, rest) = mine.partition { it.relativePath.startsWith(MailSync.OUTBOX) && it.relativePath.endsWith(".json") }
+            for (batch in listOf(rest, starts)) eachInParallel(batch, context.getString(R.string.sync_stage_sending_files), checkpoint, progress, failed, { it.relativePath }) { entry ->
                 val file = File(root, TetraSystem.onDisk(entry.relativePath))
                 uploadFile(host, p, entry, file)
                 sent += entry.relativePath
-                if (entry.relativePath.startsWith(MailSync.REQUESTS)) file.delete() // a Mail request is the computer's to carry out now (step 1's rule)
+                // a Mail request or outbox file is the computer's to carry out now (step 1's rule): never sent twice
+                if (MailSync.outgoing(entry.relativePath)) { file.delete(); file.parentFile?.takeIf { it.name.endsWith(".files") }?.delete() }
             }
             counts?.let { it[0] += sent.size + (answer.optJSONArray("moved")?.length() ?: 0) }
             // A Move keeps a window of files here and deletes the older ones — files only; system folders stay,

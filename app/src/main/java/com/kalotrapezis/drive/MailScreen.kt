@@ -159,6 +159,10 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
     val later = { message = context.getString(R.string.mail_later) }
     val writeLater = { message = context.getString(R.string.mail_write_later) }
     var moving by remember { mutableStateOf<Collection<String>?>(null) }
+    var writing by remember { mutableStateOf<MailDraft?>(null) } // the compose page, over the mail (MailCompose)
+    // what the PC could not send from the outbox: said once, then gone (MAIL_PLAN §12)
+    val failedSends by produceState(emptyList<Triple<String, String, File>>(), version) { value = withContext(Dispatchers.IO) { MailOutbox.failed(root) } }
+    var failedSeen by remember { mutableStateOf(emptySet<File>()) }
     var autoOpened by remember { mutableStateOf(false) }
     /** [op] on these mails: a request for the computer, sent at once; shown done here meanwhile. */
     fun act(op: String, ids: Collection<String>, to: String? = null) {
@@ -320,7 +324,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
                         val allRead = mails.filter { it.id in selected }.all { it.seen }
                         MailIslandItem(R.drawable.ic_done_all, stringResource(if (allRead) R.string.mail_mark_unread else R.string.mail_mark_read)) { act(if (allRead) "unread" else "read", selected); selected = emptySet() }
                     } else {
-                        MailIslandItem(R.drawable.ic_add, stringResource(R.string.common_new), enabled = false, click = writeLater)
+                        MailIslandItem(R.drawable.ic_add, stringResource(R.string.common_new)) { writing = MailDraft("new") }
                         MailIslandItem(R.drawable.ic_sync, stringResource(R.string.mail_sync)) {
                             Thread { MailEngine.syncAll(context.applicationContext, root) }.start()
                             runCatching { androidx.core.content.ContextCompat.startForegroundService(context, Intent(context, SyncService::class.java).setAction(SyncService.ACTION_START)) }
@@ -345,7 +349,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
             // the mail's island: one big Απάντηση; the rest pulled up from it
             if (open != null && !(wide && many.size > 1)) Box(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp)) {
                 IslandBottomBar(expand = { mailDrawer = true }, visible = !mailDrawer) {
-                    Surface(color = MAIL_COLOR, contentColor = Color.White, shape = CircleShape, modifier = Modifier.alpha(0.5f).clickable(onClick = writeLater)) {
+                    Surface(color = MAIL_COLOR, contentColor = Color.White, shape = CircleShape, modifier = Modifier.clickable { writing = MailDraft("reply", open) }) {
                         Row(Modifier.padding(horizontal = 26.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(painterResource(R.drawable.ic_reply), null); Text(stringResource(R.string.mail_reply), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         }
@@ -357,7 +361,10 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
 
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(Modifier.fillMaxSize()) {
+            val compose: @Composable (Modifier) -> Unit = { m -> Box(m) { MailCompose(writing!!, accounts, root) { said -> writing = null; said?.let { message = it } } } }
             when {
+                writing != null && three -> Row(Modifier.fillMaxSize()) { folders(Modifier.width(270.dp).fillMaxHeight()); list(Modifier.width(400.dp).fillMaxHeight()); compose(Modifier.weight(1f).fillMaxHeight()) }
+                writing != null -> compose(Modifier.fillMaxSize())
                 three -> Row(Modifier.fillMaxSize()) { folders(Modifier.width(270.dp).fillMaxHeight()); list(Modifier.width(400.dp).fillMaxHeight()); page(Modifier.weight(1f).fillMaxHeight()) }
                 wide -> Row(Modifier.fillMaxSize()) { folders(Modifier.width(260.dp).fillMaxHeight()); if (open != null || selected.size > 1) page(Modifier.weight(1f).fillMaxHeight()) else list(Modifier.weight(1f).fillMaxHeight()) }
                 open != null -> page(Modifier.fillMaxSize())
@@ -406,8 +413,8 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
     }
     if (mailDrawer && open != null) ModalBottomSheet(onDismissRequest = { mailDrawer = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            DrawerRow(R.drawable.ic_reply_all, stringResource(R.string.mail_reply_all), false, writeLater)
-            DrawerRow(R.drawable.ic_arrow_forward, stringResource(R.string.mail_forward), false, writeLater)
+            DrawerRow(R.drawable.ic_reply_all, stringResource(R.string.mail_reply_all), true) { mailDrawer = false; writing = MailDraft("replyAll", open) }
+            DrawerRow(R.drawable.ic_arrow_forward, stringResource(R.string.mail_forward), true) { mailDrawer = false; writing = MailDraft("forward", open) }
             DrawerRow(R.drawable.ic_archive, stringResource(R.string.mail_do_archive), true) { mailDrawer = false; act("archive", listOf(open.id)) }
             DrawerRow(R.drawable.ic_delete, stringResource(R.string.common_delete), true) { mailDrawer = false; act("delete", listOf(open.id)) }
             DrawerRow(R.drawable.ic_report, stringResource(if (role == "Spam") R.string.mail_not_spam else R.string.mail_spam_one), true) { mailDrawer = false; act(spamOp, listOf(open.id)) }
@@ -421,6 +428,11 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
             }
             Text(stringResource(R.string.mail_read_only_note), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodySmall, color = islandContentColor().copy(alpha = 0.7f))
         }
+    }
+    failedSends.filter { it.third !in failedSeen }.takeIf { it.isNotEmpty() }?.let { list ->
+        AlertDialog(onDismissRequest = {}, title = { Text(stringResource(R.string.mail_outbox_failed)) },
+            text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { list.forEach { (subject, why, _) -> Text("«${subject.ifEmpty { "—" }}»: $why") } } },
+            confirmButton = { TextButton(onClick = { list.forEach { it.third.delete() }; failedSeen = failedSeen + list.map { it.third } }) { Text(stringResource(R.string.common_ok)) } })
     }
     moving?.let { ids ->
         AlertDialog(onDismissRequest = { moving = null }, title = { Text(stringResource(R.string.mail_move_to)) },

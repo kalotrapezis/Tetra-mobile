@@ -129,11 +129,14 @@ internal object MailFiles {
 internal object MailSync {
     const val PART = "Mail/"
     const val REQUESTS = "Mail/requests/"
+    const val OUTBOX = "Mail/outbox/"
+    /** This device's own to send, never taken back: requests and the outbox (but a send the PC gave up on comes back as .failed.json). */
+    fun outgoing(rel: String) = rel.startsWith(REQUESTS) || (rel.startsWith(OUTBOX) && !rel.endsWith(".failed.json"))
     private val DATED = Regex("(?:^|/)(\\d{4})-(\\d{2})-(\\d{2}) \\d{4} ")
 
     fun keep(rel: String, today: LocalDate, bodies: Int, attachments: Int): Boolean {
         if (!rel.startsWith(PART)) return true
-        if (rel.startsWith(REQUESTS)) return false
+        if (outgoing(rel)) return false
         val m = DATED.find(rel) ?: return true // index.jsonl, accounts.json, a device's own index and accounts
         val date = runCatching { LocalDate.of(m.groupValues[1].toInt(), m.groupValues[2].toInt(), m.groupValues[3].toInt()) }.getOrNull() ?: return true
         return recent(date, today, if (".files/" in rel) attachments else bodies)
@@ -144,7 +147,7 @@ internal object MailSync {
     fun keep(c: Context, rel: String) = keep(rel, LocalDate.now(), MailPrefs.bodies(c), MailPrefs.attachments(c))
 
     /** A Mail file this device may let go of: older than it keeps, and not opened here in the last week. */
-    fun drop(c: Context, rel: String, file: File) = rel.startsWith(PART) && !rel.startsWith(REQUESTS) && !keep(c, rel) &&
+    fun drop(c: Context, rel: String, file: File) = rel.startsWith(PART) && !outgoing(rel) && !rel.startsWith(OUTBOX) && !keep(c, rel) &&
         file.lastModified() < System.currentTimeMillis() - 7 * 86_400_000L
 }
 
@@ -171,6 +174,28 @@ internal object MailRequests {
         "favorite" -> e.copy(flagged = true); "unfavorite" -> e.copy(flagged = false)
         else -> null
     }
+}
+
+/**
+ * Signatures, shared by every device (step 1's Mail/signatures.json, MAIL_PLAN §12): { "<address>": { html, newMail,
+ * replies, position } }. Edited here as plain text; the HTML the PC wrote is shown as its text.
+ */
+internal object MailSignatures {
+    private fun file(root: File) = File(root, "signatures.json")
+    private fun all(root: File) = runCatching { JSONObject(file(root).readText()) }.getOrDefault(JSONObject())
+    fun text(root: File, address: String): String = all(root).optJSONObject(address.lowercase())?.optString("html")?.let { html ->
+        html.replace(Regex("<br\\s*/?>|</p>|</div>", RegexOption.IGNORE_CASE), "\n").replace(Regex("<[^>]+>"), "")
+            .replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&nbsp;", " ").replace("&amp;", "&").trim()
+    }.orEmpty()
+    fun set(root: File, address: String, text: String) {
+        val all = all(root)
+        val was = all.optJSONObject(address.lowercase()) ?: JSONObject().put("newMail", true).put("replies", true).put("position", "above")
+        all.put(address.lowercase(), was.put("html", html(text)))
+        val part = File(root, ".signatures.json.part").apply { parentFile?.mkdirs(); writeText(all.toString(2)) }
+        check(part.renameTo(file(root)))
+    }
+    /** Plain text as the HTML of a mail's body: escaped, its lines kept. */
+    fun html(text: String) = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
 }
 
 /** The Filter modal's choices (MAIL_PLAN §9), the computer's mailView.ts: quick filters on top, sorting and grouping below. */
@@ -233,9 +258,6 @@ internal object MailPrefs {
     fun allow(c: Context, sender: String, on: Boolean = true) = p(c).edit().putStringSet("allowed", if (on) allowed(c) + sender.lowercase() else allowed(c) - sender).apply()
     fun switch(c: Context, name: String) = p(c).getBoolean(name, true) // tracking, links, risky, realAddress: on by default
     fun setSwitch(c: Context, name: String, on: Boolean) = p(c).edit().putBoolean(name, on).apply()
-    /** The signature for [address] (Settings › Αλληλογραφία › Υπογραφές), plain text, added to new mail and replies. */
-    fun signature(c: Context, address: String) = p(c).getString("signature.${address.lowercase()}", "")!!
-    fun setSignature(c: Context, address: String, text: String) = p(c).edit().putString("signature.${address.lowercase()}", text).apply()
     /** An account's trouble on this device's last look (auth, appPassword, unreachable, other), or null. */
     fun state(c: Context, id: String): String? = p(c).getString("state.$id", null)
     fun setState(c: Context, id: String, reason: String?) = p(c).edit().apply { if (reason == null) remove("state.$id") else putString("state.$id", reason) }.apply()

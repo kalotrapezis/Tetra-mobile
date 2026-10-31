@@ -172,4 +172,32 @@
     <string name="mail_remove_here">Αφαίρεση από αυτή τη συσκευή</string>
     <string name="mail_new_password">Νέος κωδικός</string>
 
+    <string name="mail_new_message">Νέο μήνυμα</string>
+    <string name="mail_from">Από</string>
+    <string name="mail_to_field">Προς</string>
+    <string name="mail_cc_field">Κοιν.</string>
+    <string name="mail_bcc_field">Κρυφή κοιν.</string>
+    <string name="mail_subject">Θέμα</string>
+    <string name="mail_body">Μήνυμα</string>
+    <string name="mail_send">Αποστολή</string>
+    <string name="mail_save_draft">Αποθήκευση πρόχειρου</string>
+    <string name="mail_attach">Συνημμένο</string>
+    <string name="mail_cc_bcc">Κοιν./Κρυφή κοιν.</string>
+    <string name="mail_signature_on">Με την υπογραφή</string>
+    <string name="mail_signature_off">Χωρίς την υπογραφή</string>
+    <string name="mail_send_later">Αποστολή αργότερα</string>
+    <string name="mail_discard">Απόρριψη</string>
+    <string name="mail_sending">Αποστολή…</string>
+    <string name="mail_sent_ok">Στάλθηκε.</string>
+    <string name="mail_draft_saved">Το πρόχειρο αποθηκεύτηκε.</string>
+    <string name="mail_not_sent">Δεν στάλθηκε: %1$s</string>
+    <string name="mail_no_recipient">Γράψε σε ποιον πηγαίνει.</string>
+    <string name="mail_wrote">Στις %1$s, ο/η %2$s έγραψε:</string>
+    <string name="mail_forwarded">---------- Προωθημένο μήνυμα ----------</string>
+    <string name="mail_signatures">Υπογραφές</string>
+    <string name="mail_signature_for">Υπογραφή για %1$s</string>
+    <string name="mail_discard_ask">Απόρριψη αυτού του μηνύματος;</string>
+    <string name="mail_outbox_send">Ο υπολογιστής θα το στείλει μόλις συγχρονιστεί.</string>
+    <string name="mail_outbox_draft">Ο υπολογιστής θα κρατήσει το πρόχειρο μόλις συγχρονιστεί.</string>
+    <string name="mail_outbox_failed">Ο υπολογιστής δεν μπόρεσε να στείλει αυτά</string>
 </resources>

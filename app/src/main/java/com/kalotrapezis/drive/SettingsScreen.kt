@@ -787,6 +787,20 @@ internal fun SettingsTab(
         }
         SettingRow(stringResource(R.string.mail_add_account), onClick = { adding = true }) { Icon(painterResource(R.drawable.ic_add), contentDescription = null) }
     }
+    // Υπογραφές (MAIL_PLAN §9c): one per address; plain text for now
+    var signing by remember { mutableStateOf<MailAccount?>(null) }
+    if (!data?.first.isNullOrEmpty()) SettingsSection(stringResource(R.string.mail_signatures)) {
+        data!!.first.forEach { a ->
+            SettingRow(a.address, MailSignatures.text(mailRoot(), a.address).lineSequence().firstOrNull()?.ifBlank { null } ?: stringResource(R.string.common_none), onClick = { signing = a }) { Chevron() }
+        }
+    }
+    signing?.let { a ->
+        var text by remember { mutableStateOf(MailSignatures.text(mailRoot(), a.address)) }
+        AlertDialog(onDismissRequest = { signing = null }, title = { Text(stringResource(R.string.mail_signature_for, a.address)) },
+            text = { OutlinedTextField(text, { text = it }, minLines = 4, modifier = Modifier.fillMaxWidth()) },
+            confirmButton = { TextButton(onClick = { runCatching { MailSignatures.set(mailRoot(), a.address, text.trimEnd()) }.onFailure { WriterLog.e("Mail: a signature", it) }; signing = null; version++ }) { Text(stringResource(R.string.common_save)) } },
+            dismissButton = { TextButton(onClick = { signing = null }) { Text(stringResource(R.string.common_cancel)) } })
+    }
     // MAIL_PLAN §2: recent mail on the device, the rest on the PC until opened
     SettingsSection(stringResource(R.string.mail_on_device), stringResource(R.string.mail_on_device_note)) {
         var bodies by remember { mutableStateOf(MailPrefs.bodies(context)) }

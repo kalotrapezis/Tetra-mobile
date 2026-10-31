@@ -154,4 +154,26 @@ class MailTest {
         assertTrue(MailDetect.known("x@hotmail.com")!!.microsoft); assertEquals("goodtable", MailDetect.known("goodtable@sch.gr")!!.imap.user)
         assertEquals(null, MailDetect.parse("<html>no</html>", "a@b.c"))
     }
+
+    @Test fun aReplysSubjectAndQuote() {
+        assertEquals("Re: Θέμα", MailSend.subject("reply", "Θέμα")); assertEquals("Re: Θέμα", MailSend.subject("replyAll", "Re: Θέμα"))
+        assertEquals("ΑΠ: Θέμα", MailSend.subject("reply", "ΑΠ: Θέμα")); assertEquals("Fwd: Re: x", MailSend.subject("forward", "Re: x"))
+        assertEquals("Fwd: x", MailSend.subject("forward", "Fwd: x")); assertEquals("x", MailSend.subject("new", "x"))
+        assertEquals("> a\n> \n> b", MailSend.quote("a\n\nb\n"))
+    }
+
+    @Test fun theOutboxAndSignaturesAreStep1s() {
+        val today = java.time.LocalDate.of(2026, 10, 31)
+        assertFalse(MailSync.keep("Mail/outbox/Pixel-1.json", today, -1, -1)); assertFalse(MailSync.keep("Mail/outbox/Pixel-1.files/a.pdf", today, -1, -1))
+        assertTrue(MailSync.keep("Mail/outbox/Pixel-1.failed.json", today, 1, 0)) // what the PC gave up on comes back to be said
+        assertTrue(MailSync.outgoing("Mail/outbox/Pixel-1.json")); assertFalse(MailSync.outgoing("Mail/outbox/Pixel-1.failed.json"))
+        val dir = java.nio.file.Files.createTempDirectory("mail").toFile()
+        MailSignatures.set(dir, "A@B.gr", "Θεολόγος <K>\nNUP & co")
+        val o = org.json.JSONObject(File(dir, "signatures.json").readText()).getJSONObject("a@b.gr")
+        assertEquals("Θεολόγος &lt;K&gt;<br>NUP &amp; co", o.getString("html")); assertEquals("above", o.getString("position"))
+        assertEquals("Θεολόγος <K>\nNUP & co", MailSignatures.text(dir, "a@b.gr"))
+        File(dir, "outbox").mkdirs(); File(dir, "outbox/Pixel-5.failed.json").writeText("""{"draft":{"subject":"Θέμα"},"error":"noRecipients","detail":"No address"}""")
+        assertEquals(listOf("Θέμα" to "No address"), MailOutbox.failed(dir).map { it.first to it.second })
+        dir.deleteRecursively()
+    }
 }

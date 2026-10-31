@@ -282,6 +282,22 @@ once uploaded. A request is sent at once by the scoped sync `mail` (desktop `SCO
 whole sync where the desktop has no such scope. An attachment it does not hold is named as the desktop's `store()`
 names it (clean(filename, 150), " (2)" for repeats, "attachment" when nameless), read from the `.eml`.
 
+**A device's own accounts (step 2 continued).** An account added on the phone or tablet is fetched there by its own
+IMAP engine (Angus Mail): the password in that device's keystore, the account (no secret) in `Mail/accounts.<device>.json`
+(the desktop's entry format plus `smtp`, `server.starttls`, `addedOn: "phone"`, `device`), its index lines in
+`Mail/index.<device>.jsonl`, its mail in the same paths with the same names and ids as the desktop's. Nobody writes
+another's file. Readers take `accounts.json` then every `accounts.*.json`, `index.jsonl` then every `index.*.jsonl` (the
+reading device's last); a line without a file never hides the file another line has. An account both fetch: the same
+ids, and a body already saved by either is adopted, not fetched again. A mail moved on the server moves its file
+(matched by Message-ID, else date + sender + subject + size). Actions on a device's own accounts go to the server at
+once; on the PC's accounts, as requests. `<device>` is Build.MODEL with only [A-Za-z0-9_-].
+Writing: own accounts send by SMTP (a copy into Sent, except Gmail, which files its own) and save drafts into Drafts;
+their Sent/Drafts copies reach `index.<device>.jsonl` by the look at the account that follows. The PC's accounts go
+through the outbox (§12): the phone writes `outbox/<device>-<ms>.json` (+ `.files/` for its own attachments; the
+archive's by path), the body as HTML with the signature in `<div class="tetra-signature">`; its sync uploads the
+`.json` files after everything else and deletes its copies once uploaded; it takes back only `*.failed.json`, says
+them once and deletes them. Signatures are `signatures.json`'s, edited on the phone as plain text.
+
 ## Open questions for the user
 
 - Away from home, does the phone sync with the desktop over the internet, or only on the same Wi-Fi?

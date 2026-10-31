@@ -762,7 +762,7 @@ data class DriveFileEntry(val relativePath: String, val sizeBytes: Long, val mod
 internal object DriveScope {
     private val scopes = mapOf("calendar" to (listOf("Calendar") to listOf(".ics")), "timer" to (listOf(TimerFiles.FOLDER) to emptyList<String>()),
         "contacts" to (listOf(ContactsFiles.FOLDER) to listOf(".vcf")), "phone" to (listOf(PhoneHistory.FOLDER) to emptyList<String>()), "data" to (listOf(DataFiles.FOLDER) to emptyList<String>()),
-        "mail" to (listOf("Mail/requests") to emptyList<String>()))
+        "mail" to (listOf("Mail/requests", "Mail/outbox") to emptyList<String>()))
     fun contains(scope: String, relative: String): Boolean {
         val (dirs, trashExts) = scopes[scope] ?: return false
         return dirs.any { relative.startsWith("$it/") } || (relative.startsWith("Trash/") && trashExts.any { relative.lowercase().endsWith(it) })

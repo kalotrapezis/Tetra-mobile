@@ -173,4 +173,32 @@
     <string name="mail_remove_here">Remove from this device</string>
     <string name="mail_new_password">New password</string>
 
+    <string name="mail_new_message">New message</string>
+    <string name="mail_from">From</string>
+    <string name="mail_to_field">To</string>
+    <string name="mail_cc_field">Cc</string>
+    <string name="mail_bcc_field">Bcc</string>
+    <string name="mail_subject">Subject</string>
+    <string name="mail_body">Message</string>
+    <string name="mail_send">Send</string>
+    <string name="mail_save_draft">Save draft</string>
+    <string name="mail_attach">Attachment</string>
+    <string name="mail_cc_bcc">Cc/Bcc</string>
+    <string name="mail_signature_on">Add the signature</string>
+    <string name="mail_signature_off">Without the signature</string>
+    <string name="mail_send_later">Send later</string>
+    <string name="mail_discard">Discard</string>
+    <string name="mail_sending">Sending…</string>
+    <string name="mail_sent_ok">Sent.</string>
+    <string name="mail_draft_saved">The draft is saved.</string>
+    <string name="mail_not_sent">Not sent: %1$s</string>
+    <string name="mail_no_recipient">Write who it goes to.</string>
+    <string name="mail_wrote">On %1$s, %2$s wrote:</string>
+    <string name="mail_forwarded">---------- Forwarded message ----------</string>
+    <string name="mail_signatures">Signatures</string>
+    <string name="mail_signature_for">Signature for %1$s</string>
+    <string name="mail_discard_ask">Discard this message?</string>
+    <string name="mail_outbox_send">The PC sends it as soon as it syncs.</string>
+    <string name="mail_outbox_draft">The PC keeps the draft as soon as it syncs.</string>
+    <string name="mail_outbox_failed">The PC could not send these</string>
 </resources>
