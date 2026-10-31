@@ -184,4 +184,6 @@
     <string name="mail_signature_hint">Напишете текст или поставете HTML на подпис (от Thunderbird, от уеб страница): запазва се както е.</string>
     <string name="mail_islands">Бутоните</string>
     <string name="mail_islands_summary">Къде стоят. Автоматично: горе с мишка, долу с пръст.</string>
+    <string name="mail_threads">Разговори</string>
+    <string name="mail_threads_summary">Писмата от един разговор заедно, едно под друго, като в чат</string>
 </resources>

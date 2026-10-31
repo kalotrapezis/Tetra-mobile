@@ -196,4 +196,6 @@
     <string name="mail_signature_hint">Scríobh téacs, nó greamaigh HTML sínithe (ó Thunderbird, ó leathanach gréasáin): coinnítear mar atá sé.</string>
     <string name="mail_islands">Na cnaipí</string>
     <string name="mail_islands_summary">Cá seasann siad. Uathoibríoch: thuas le luch, thíos le méar.</string>
+    <string name="mail_threads">Comhráite</string>
+    <string name="mail_threads_summary">Teachtaireachtaí comhrá amháin le chéile, ceann faoi cheann, mar a bheadh i gcomhrá beo</string>
 </resources>

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -99,8 +100,11 @@ internal object MailLook {
     /** At the top only on a tablet or a big screen: on a phone they stay at the bottom (the user, 31 Oct: "that breaks the UI"). */
     val top: Boolean @Composable get() = LocalConfiguration.current.screenWidthDp >= 700 && (place == "top" || (place == "auto" && OfficeUi.mouse))
     private fun p(c: android.content.Context) = c.getSharedPreferences("mail", android.content.Context.MODE_PRIVATE)
-    fun load(c: android.content.Context) { place = p(c).getString("islands", "auto") ?: "auto" }
+    /** Conversations: the list one row per conversation, its mails stacked like a chat (Settings › Εμφάνιση › Συζητήσεις). */
+    var threads by mutableStateOf(false); private set
+    fun load(c: android.content.Context) { place = p(c).getString("islands", "auto") ?: "auto"; threads = p(c).getBoolean("threads", false) }
     fun set(c: android.content.Context, where: String) { place = where; p(c).edit().putString("islands", where).apply() }
+    fun setThreads(c: android.content.Context, on: Boolean) { threads = on; p(c).edit().putBoolean("threads", on).apply() }
 }
 
 internal fun mailRoot() = MailFiles.root(TetraFolder.root(Environment.getExternalStorageDirectory()))
@@ -205,13 +209,20 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
     val spamOp = if (role == "Spam") "notSpam" else "spam"
 
     val inFolder = remember(mails, role, account) { mails.filter { it.folder == role && it.account in accountOf && (account == null || it.account == account) } }
-    val groups = remember(inFolder, view, query) { view.arrange(inFolder, query) }
+    val conversations = remember(mails, accountOf) { MailThreads.of(mails.filter { it.account in accountOf }) }
+    // conversations on: each one once, where its first mail in this order stands
+    val groups = remember(inFolder, view, query, MailLook.threads) { view.arrange(inFolder, query).let { gs ->
+        if (!MailLook.threads) gs else { val seen = HashSet<String>(); gs.map { (k, ms) -> k to ms.filter { seen.add(MailThreads.key(it)) } }.filter { it.second.isNotEmpty() } }
+    } }
     val shown = remember(groups) { groups.flatMap { it.second } }
     val open = mails.firstOrNull { it.id == openId }
     // a wide screen always shows a mail: the newest, until one is chosen
     LaunchedEffect(three, shown) { if (three && (open == null || open !in shown) && shown.isNotEmpty()) { openId = shown.first().id; autoOpened = true } }
     // a mail the person opened is read (Thunderbird's way); not the one a wide screen showed by itself
-    LaunchedEffect(openId) { open?.takeIf { !it.seen && !autoOpened }?.let { act("read", listOf(it.id)) } }
+    // the open mail, or with conversations on all of its conversation (oldest first): what the island and the panel act on
+    val current = open?.let { o -> conversations[MailThreads.key(o)]?.takeIf { MailLook.threads && it.size > 1 } ?: listOf(o) }.orEmpty()
+    val newest = current.lastOrNull()
+    LaunchedEffect(openId) { if (!autoOpened) current.filter { !it.seen }.map { it.id }.takeIf { it.isNotEmpty() }?.let { act("read", it) } }
     fun choose(r: String, a: String?) { role = r; account = a; openId = null; selected = emptySet(); mailboxes = false }
 
     BackHandler { when {
@@ -293,7 +304,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
                         Text(groupName(view.group, key, accountOf), Modifier.padding(start = 12.dp, top = 8.dp), color = MAIL_TEXT, style = MaterialTheme.typography.labelLarge)
                     }
                     items(ms, key = { it.id }) { e ->
-                        MailRow(e, accountOf[e.account], picked = e.id in selected, choosing = selected.isNotEmpty(), chosen = wide && selected.isEmpty() && e.id == openId,
+                        MailRow(e, accountOf[e.account], count = if (MailLook.threads) conversations[MailThreads.key(e)]?.size ?: 1 else 1, picked = e.id in selected, choosing = selected.isNotEmpty(), chosen = wide && selected.isEmpty() && e.id == openId,
                             click = { if (selected.isNotEmpty()) selected = if (e.id in selected) selected - e.id else selected + e.id else { autoOpened = false; openId = e.id } },
                             long = { selected = if (e.id in selected) selected - e.id else selected + e.id },
                             here = remember(e.file, version) { e.file != null && File(root, e.file).isFile },
@@ -362,12 +373,13 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
         Box(m) {
             val many = mails.filter { it.id in selected }
             if (wide && many.size > 1) SelectionPane(many, accountOf, Modifier.statusBarsPadding().padding(16.dp), later)
+            else if (current.size > 1) MailThreadPage(current, accounts.map { it.address.lowercase() }.toSet(), accountOf, root, MailLook.top, showBack = !three, back = { openId = null }, openFile = openFile)
             else if (open != null) MailPage(open, accountOf[open.account], root, islandTop = MailLook.top, showBack = !three, back = { openId = null }, openFile = openFile, say = { message = it }, fetched = { version++ })
             else if (wide) MailHint(stringResource(R.string.mail_choose), Modifier.align(Alignment.Center))
             // the mail's island: one big Απάντηση; the rest pulled up from it
             if (open != null && !(wide && many.size > 1)) Box(if (MailLook.top) Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 8.dp, end = 16.dp) else Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp)) {
                 IslandBottomBar(expand = { mailDrawer = true }, visible = !mailDrawer) {
-                    Surface(color = MAIL_ACCENT, contentColor = Color.White, shape = CircleShape, modifier = Modifier.clickable { writing = MailDraft("reply", open) }) {
+                    Surface(color = MAIL_ACCENT, contentColor = Color.White, shape = CircleShape, modifier = Modifier.clickable { writing = MailDraft("reply", newest) }) {
                         Row(Modifier.padding(horizontal = 26.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(painterResource(R.drawable.ic_reply), null); Text(stringResource(R.string.mail_reply), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         }
@@ -435,13 +447,13 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
     if (mailDrawer && open != null) ModalBottomSheet(onDismissRequest = { mailDrawer = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             ChoiceGroup {
-            DrawerRow(R.drawable.ic_reply_all, stringResource(R.string.mail_reply_all), true) { mailDrawer = false; writing = MailDraft("replyAll", open) }
-            DrawerRow(R.drawable.ic_arrow_forward, stringResource(R.string.mail_forward), true) { mailDrawer = false; writing = MailDraft("forward", open) }
-            DrawerRow(R.drawable.ic_archive, stringResource(R.string.mail_do_archive), true) { mailDrawer = false; act("archive", listOf(open.id)) }
-            DrawerRow(R.drawable.ic_delete, stringResource(R.string.common_delete), true) { mailDrawer = false; act("delete", listOf(open.id)) }
-            DrawerRow(R.drawable.ic_report, stringResource(if (role == "Spam") R.string.mail_not_spam else R.string.mail_spam_one), true) { mailDrawer = false; act(spamOp, listOf(open.id)) }
-            DrawerRow(R.drawable.ic_move, stringResource(R.string.mail_move), true) { mailDrawer = false; moving = listOf(open.id) }
-            DrawerRow(R.drawable.ic_done_all, stringResource(R.string.mail_mark_unread), true) { mailDrawer = false; act("unread", listOf(open.id)); openId = null }
+            DrawerRow(R.drawable.ic_reply_all, stringResource(R.string.mail_reply_all), true) { mailDrawer = false; writing = MailDraft("replyAll", newest) }
+            DrawerRow(R.drawable.ic_arrow_forward, stringResource(R.string.mail_forward), true) { mailDrawer = false; writing = MailDraft("forward", newest) }
+            DrawerRow(R.drawable.ic_archive, stringResource(R.string.mail_do_archive), true) { mailDrawer = false; act("archive", current.map { it.id }) }
+            DrawerRow(R.drawable.ic_delete, stringResource(R.string.common_delete), true) { mailDrawer = false; act("delete", current.map { it.id }) }
+            DrawerRow(R.drawable.ic_report, stringResource(if (role == "Spam") R.string.mail_not_spam else R.string.mail_spam_one), true) { mailDrawer = false; act(spamOp, current.map { it.id }) }
+            DrawerRow(R.drawable.ic_move, stringResource(R.string.mail_move), true) { mailDrawer = false; moving = current.map { it.id } }
+            DrawerRow(R.drawable.ic_done_all, stringResource(R.string.mail_mark_unread), true) { mailDrawer = false; act("unread", current.map { it.id }); openId = null }
             DrawerRow(R.drawable.ic_label, stringResource(R.string.mail_tag), false, later)
             DrawerRow(R.drawable.ic_print, stringResource(R.string.mail_print), false, later)
             DrawerRow(R.drawable.ic_code, stringResource(R.string.mail_source), MailFiles.eml(root, open) != null) {
@@ -524,7 +536,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
     Box(Modifier.size(8.dp).clip(CircleShape).then(if (ring) Modifier.border(1.5.dp, color, CircleShape) else Modifier.background(color)))
 
 /** One mail in the list (MAIL_PLAN §9): the account's colour as a bar, ♥ at the right, its state's dot. */
-@Composable private fun MailRow(e: MailEntry, account: MailAccount?, picked: Boolean, choosing: Boolean, chosen: Boolean, click: () -> Unit, long: () -> Unit, here: Boolean, heart: () -> Unit) {
+@Composable private fun MailRow(e: MailEntry, account: MailAccount?, count: Int = 1, picked: Boolean, choosing: Boolean, chosen: Boolean, click: () -> Unit, long: () -> Unit, here: Boolean, heart: () -> Unit) {
     Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large)
         .background(if (picked) MAIL_COLOR.copy(alpha = 0.32f) else if (chosen) MAIL_COLOR.copy(alpha = 0.16f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
         .combinedClickable(onLongClick = long, onClick = click).heightIn(min = 72.dp)) {
@@ -535,7 +547,8 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
                     .then(if (picked) Modifier else Modifier.background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f), CircleShape)), contentAlignment = Alignment.Center) {
                     if (picked) Icon(painterResource(R.drawable.ic_check), stringResource(R.string.contacts_selected), Modifier.size(14.dp), tint = Color.White)
                 }
-                Text(e.from.ifEmpty { e.fromAddress }, Modifier.weight(1f), fontWeight = if (e.seen) null else FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(e.from.ifEmpty { e.fromAddress } + if (count > 1) "  ($count)" else "", Modifier.weight(1f), // (3): a conversation of three
+                    fontWeight = if (e.seen) null else FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(shortTime(e.date), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (e.attachments > 0) Icon(painterResource(R.drawable.ic_attach), stringResource(R.string.mail_has_attachments), Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 StateDot(if (e.saved) GREEN else ORANGE, ring = e.saved && !here)
@@ -693,6 +706,53 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
         AlertDialog(onDismissRequest = { risky = null }, title = { Text(stringResource(R.string.mail_risky_title)) }, text = { Text(stringResource(R.string.mail_risky_text, name)) },
             confirmButton = { TextButton(onClick = { risky = null; open(name, f) }) { Text(stringResource(R.string.mail_open_anyway)) } },
             dismissButton = { TextButton(onClick = { risky = null }) { Text(stringResource(R.string.common_cancel)) } })
+    }
+}
+
+/**
+ * A conversation (MailLook.threads): its mails one under another, oldest first, as a chat — this device's accounts'
+ * own at the right on the dark pink, the others' at the left — each with only what it says itself (MailThreads.own).
+ */
+@Composable private fun MailThreadPage(thread: List<MailEntry>, mine: Set<String>, accounts: Map<String, MailAccount>, root: File, islandTop: Boolean, showBack: Boolean,
+    back: () -> Unit, openFile: (File) -> Unit) {
+    val state = androidx.compose.foundation.lazy.rememberLazyListState()
+    LaunchedEffect(thread.size) { state.scrollToItem(thread.size) } // the newest in view, as a chat opens
+    LazyColumn(Modifier.fillMaxSize().statusBarsPadding(), state = state, contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = if (islandTop) 84.dp else 12.dp, bottom = 110.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (showBack) Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape) {
+                    IconButton(onClick = back) { Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.common_back)) }
+                }
+                Text(thread.last().subject.ifEmpty { stringResource(R.string.mail_no_subject) }, Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            }
+        }
+        items(thread, key = { it.id }) { e ->
+            val me = e.fromAddress.lowercase() in mine
+            val text by produceState<String?>(null, e.id, e.file) {
+                value = withContext(Dispatchers.IO) { MailFiles.eml(root, e)?.let { f -> runCatching { Mime.read(f.readBytes()) }.getOrNull() }
+                    ?.let { m -> MailThreads.own(m.text ?: MailSignatures.plain(m.html.orEmpty())) } ?: e.snippet }
+            }
+            val files = remember(e.id, e.file) { MailFiles.attachments(root, e) }
+            Box(Modifier.fillMaxWidth(), contentAlignment = if (me) Alignment.CenterEnd else Alignment.CenterStart) {
+                Surface(color = if (me) MAIL_ACCENT else MaterialTheme.colorScheme.surfaceVariant, contentColor = if (me) Color.White else MaterialTheme.colorScheme.onSurface,
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth(0.86f)) {
+                    Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (!me) Box(Modifier.size(8.dp).clip(CircleShape).background(Color(accounts[e.account]?.color ?: 0xFF9E9E9E)))
+                            Text(e.from.ifEmpty { e.fromAddress }, Modifier.weight(1f), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(shortTime(e.date), style = MaterialTheme.typography.labelSmall)
+                        }
+                        SelectionContainer { Text(text ?: "…", style = MaterialTheme.typography.bodyLarge) }
+                        files.forEach { f ->
+                            Row(Modifier.clip(MaterialTheme.shapes.small).clickable { openFile(f) }.padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(painterResource(R.drawable.ic_attach), null, Modifier.size(14.dp)); Text(" " + f.name, style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

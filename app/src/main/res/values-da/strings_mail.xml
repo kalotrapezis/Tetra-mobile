@@ -184,4 +184,6 @@
     <string name="mail_signature_hint">Skriv tekst, eller indsæt en signaturs HTML (fra Thunderbird, fra en webside): den bevares, som den er.</string>
     <string name="mail_islands">Knapperne</string>
     <string name="mail_islands_summary">Hvor de står. Automatisk: øverst med mus, nederst med fingeren.</string>
+    <string name="mail_threads">Samtaler</string>
+    <string name="mail_threads_summary">Mails fra én samtale samlet, under hinanden, som i en chat</string>
 </resources>

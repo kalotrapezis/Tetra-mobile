@@ -188,4 +188,6 @@
     <string name="mail_signature_hint">Écrivez du texte, ou collez le HTML d’une signature (de Thunderbird, d’une page web) : il est gardé tel quel.</string>
     <string name="mail_islands">Les boutons</string>
     <string name="mail_islands_summary">Où ils se placent. Automatique : en haut avec une souris, en bas avec le doigt.</string>
+    <string name="mail_threads">Conversations</string>
+    <string name="mail_threads_summary">Les e-mails d’une conversation regroupés, les uns sous les autres, comme dans un chat</string>
 </resources>

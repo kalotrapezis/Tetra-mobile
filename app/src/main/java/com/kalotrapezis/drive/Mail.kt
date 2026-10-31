@@ -262,6 +262,26 @@ internal object MailSignatures {
     fun escaped(text: String) = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
 }
 
+/**
+ * Conversations (the user, 31 Oct: "every email stacks below the other like chat threads"): the mails of one account with
+ * the same subject once Re:/Fwd: are taken off, from every folder but Spam and Trash.
+ */
+internal object MailThreads {
+    // shortcut: by subject, as Gmail's own grouping; In-Reply-To/References would be exact but the index does not carry them
+    fun key(e: MailEntry) = e.account + "\n" + MailView.bare(e.subject)
+    fun of(mails: List<MailEntry>): Map<String, List<MailEntry>> = mails.filter { it.folder != "Spam" && it.folder != "Trash" }.groupBy(::key)
+        .mapValues { (_, l) -> l.distinctBy { it.messageId ?: it.id }.sortedBy { it.date } } // the same mail in Inbox and Archive once
+
+    private val QUOTE_HEAD = Regex("^(On .+ wrote:|Στις .+ έγραψε:|Am .+ schrieb .+:|Le .+ a écrit :|-{2,} ?(Original Message|Forwarded message|Προωθημένο μήνυμα).*|-- ?)$", RegexOption.IGNORE_CASE)
+    /** What one message says itself: its text up to what it quotes ("Στις … έγραψε:", "> " lines) or its signature. */
+    fun own(text: String): String {
+        val lines = text.replace("\r", "").lines()
+        val cut = lines.indexOfFirst { QUOTE_HEAD.matches(it.trim()) || it.startsWith(">") }
+        val kept = (if (cut > 0) lines.take(cut) else lines).joinToString("\n").trim()
+        return kept.ifEmpty { text.trim() }
+    }
+}
+
 /** The Filter modal's choices (MAIL_PLAN §9), the computer's mailView.ts: quick filters on top, sorting and grouping below. */
 internal data class MailView(
     val unread: Boolean = false, val favorites: Boolean = false, val attachments: Boolean = false, val orange: Boolean = false,
@@ -282,7 +302,7 @@ internal data class MailView(
 
         /** "Re: Fwd: Θέμα" sorts as "Θέμα". */
         private val PREFIX = Regex("^\\s*((re|fwd?|aw|απ|σχετ|προωθ)\\s*:\\s*)+", RegexOption.IGNORE_CASE)
-        private fun bare(s: String) = s.replace(PREFIX, "").lowercase()
+        fun bare(s: String) = s.replace(PREFIX, "").trim().lowercase()
         fun dayKey(ms: Long): String = java.time.Instant.ofEpochMilli(ms).atZone(java.time.ZoneId.systemDefault()).toLocalDate().toString()
     }
 

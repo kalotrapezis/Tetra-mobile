@@ -51,7 +51,7 @@ import kotlinx.coroutines.withContext
 internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, val icon: Int, val tint: Color?, @androidx.annotation.StringRes val summary: Int, val items: List<Int>) {
     Sync(R.string.app_sync, R.drawable.ic_sync, null, R.string.settings_sync_summary, listOf(R.string.settings_computer, R.string.settings_open_sync, R.string.settings_sync_auto, R.string.settings_listen)),
     Appearance(R.string.settings_appearance, R.drawable.ic_palette, null, R.string.settings_appearance_summary, listOf(R.string.settings_theme, R.string.settings_language, R.string.settings_photo_on_home, R.string.settings_hidden_from_home, R.string.settings_app_icons)),
-    Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_islands, R.string.mail_security,
+    Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_threads, R.string.mail_islands, R.string.mail_security,
         R.string.mail_remote, R.string.mail_allowed, R.string.mail_tracking, R.string.mail_link_warning, R.string.mail_risky, R.string.mail_real_address, R.string.mail_receipts)),
     Gallery(R.string.app_gallery, Category.Gallery.icon, Category.Gallery.color, R.string.settings_gallery_summary, listOf(R.string.settings_photos_videos, R.string.settings_search_quality, R.string.settings_folders)),
     Files(R.string.app_files, Category.Files.icon, Category.Files.color, R.string.settings_files_summary, listOf(R.string.settings_drive_workspace, R.string.settings_all_files)),
@@ -805,10 +805,12 @@ internal fun SettingsTab(
             confirmButton = { TextButton(onClick = { runCatching { MailSignatures.set(mailRoot(), a.address, text.trimEnd()) }.onFailure { WriterLog.e("Mail: a signature", it) }; signing = null; version++ }) { Text(stringResource(R.string.common_save)) } },
             dismissButton = { TextButton(onClick = { signing = null }) { Text(stringResource(R.string.common_cancel)) } })
     }
-    // where the islands stand, as Office's ribbon (the user, 31 Oct)
-    if (LocalConfiguration.current.screenWidthDp >= 700) SettingsSection(stringResource(R.string.settings_appearance)) { // a tablet's or a big screen's choice only
+    // conversations, and where the islands stand as Office's ribbon (the user, 31 Oct)
+    SettingsSection(stringResource(R.string.settings_appearance)) {
         LaunchedEffect(Unit) { MailLook.load(context) }
-        ChoiceRow(stringResource(R.string.mail_islands), stringResource(R.string.mail_islands_summary), listOf("auto" to stringResource(R.string.settings_by_itself),
+        SwitchRow(stringResource(R.string.mail_threads), stringResource(R.string.mail_threads_summary), MailLook.threads) { MailLook.setThreads(context, it) }
+        // the islands' place: a tablet's or a big screen's choice only
+        if (LocalConfiguration.current.screenWidthDp >= 700) ChoiceRow(stringResource(R.string.mail_islands), stringResource(R.string.mail_islands_summary), listOf("auto" to stringResource(R.string.settings_by_itself),
             "bottom" to stringResource(R.string.settings_bottom), "top" to stringResource(R.string.settings_top)), MailLook.place) { MailLook.set(context, it) }
     }
     SettingsSection(stringResource(R.string.mail_security)) {

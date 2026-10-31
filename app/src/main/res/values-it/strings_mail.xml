@@ -184,4 +184,6 @@
     <string name="mail_signature_hint">Scrivi del testo o incolla l\'HTML di una firma (di Thunderbird, di una pagina web): resta così com\'è.</string>
     <string name="mail_islands">I pulsanti</string>
     <string name="mail_islands_summary">Dove stanno. In automatico: in alto con il mouse, in basso con il dito.</string>
+    <string name="mail_threads">Conversazioni</string>
+    <string name="mail_threads_summary">Le mail di una conversazione insieme, una sotto l\'altra, come in una chat</string>
 </resources>

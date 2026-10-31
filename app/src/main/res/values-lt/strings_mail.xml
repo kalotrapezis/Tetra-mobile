@@ -192,4 +192,6 @@
     <string name="mail_signature_hint">Parašykite tekstą arba įklijuokite parašo HTML (iš Thunderbird, iš tinklalapio): jis išlieka toks, koks yra.</string>
     <string name="mail_islands">Mygtukai</string>
     <string name="mail_islands_summary">Kur jie yra. Automatiškai: viršuje su pele, apačioje su pirštu.</string>
+    <string name="mail_threads">Pokalbiai</string>
+    <string name="mail_threads_summary">Vieno pokalbio laiškai kartu, vienas po kito, kaip pokalbyje</string>
 </resources>

@@ -184,4 +184,6 @@
     <string name="mail_signature_hint">Skriv text eller klistra in en signaturs HTML (från Thunderbird, från en webbsida): den behålls som den är.</string>
     <string name="mail_islands">Knapparna</string>
     <string name="mail_islands_summary">Var de står. Automatiskt: överst med mus, nederst med fingret.</string>
+    <string name="mail_threads">Konversationer</string>
+    <string name="mail_threads_summary">Mejlen i en konversation samlade, under varandra, som i en chatt</string>
 </resources>

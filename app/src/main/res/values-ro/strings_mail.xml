@@ -188,4 +188,6 @@
     <string name="mail_signature_hint">Scrie text sau lipește HTML-ul unei semnături (din Thunderbird, de pe o pagină web): este păstrat așa cum este.</string>
     <string name="mail_islands">Butoanele</string>
     <string name="mail_islands_summary">Unde stau. Automat: sus cu mouse-ul, jos cu degetul.</string>
+    <string name="mail_threads">Conversații</string>
+    <string name="mail_threads_summary">E-mailurile unei conversații împreună, unul sub altul, ca într-un chat</string>
 </resources>

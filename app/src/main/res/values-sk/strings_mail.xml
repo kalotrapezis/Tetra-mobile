@@ -192,4 +192,6 @@
     <string name="mail_signature_hint">Napíšte text alebo vložte HTML podpisu (z Thunderbirdu, z webovej stránky): zostane tak, ako je.</string>
     <string name="mail_islands">Tlačidlá</string>
     <string name="mail_islands_summary">Kde sú. Automaticky: hore s myšou, dole s prstom.</string>
+    <string name="mail_threads">Konverzácie</string>
+    <string name="mail_threads_summary">Správy jednej konverzácie spolu, pod sebou, ako v chate</string>
 </resources>

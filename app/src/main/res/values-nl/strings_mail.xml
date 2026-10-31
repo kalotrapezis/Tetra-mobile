@@ -184,4 +184,6 @@
     <string name="mail_signature_hint">Schrijf tekst of plak de HTML van een handtekening (uit Thunderbird, van een webpagina): die blijft zoals hij is.</string>
     <string name="mail_islands">De knoppen</string>
     <string name="mail_islands_summary">Waar ze staan. Vanzelf: boven met een muis, onder met een vinger.</string>
+    <string name="mail_threads">Gesprekken</string>
+    <string name="mail_threads_summary">De mails van één gesprek bij elkaar, onder elkaar, zoals in een chat</string>
 </resources>

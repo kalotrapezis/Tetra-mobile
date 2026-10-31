@@ -188,4 +188,6 @@
     <string name="mail_signature_hint">Napišite tekst ili zalijepite HTML potpisa (iz Thunderbirda, s web-stranice): zadržava se kakav jest.</string>
     <string name="mail_islands">Gumbi</string>
     <string name="mail_islands_summary">Gdje stoje. Automatski: gore s mišem, dolje s prstom.</string>
+    <string name="mail_threads">Razgovori</string>
+    <string name="mail_threads_summary">Poruke jednog razgovora zajedno, jedna ispod druge, kao u chatu</string>
 </resources>

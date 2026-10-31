@@ -188,4 +188,6 @@
     <string name="mail_signature_hint">Ierakstiet tekstu vai ielīmējiet paraksta HTML (no Thunderbird, no tīmekļa lapas): tas tiek saglabāts, kā ir.</string>
     <string name="mail_islands">Pogas</string>
     <string name="mail_islands_summary">Kur tās atrodas. Automātiski: augšā ar peli, apakšā ar pirkstu.</string>
+    <string name="mail_threads">Sarunas</string>
+    <string name="mail_threads_summary">Vienas sarunas vēstules kopā, cita zem citas, kā tērzēšanā</string>
 </resources>

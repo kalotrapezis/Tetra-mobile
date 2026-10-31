@@ -192,4 +192,6 @@
     <string name="mail_signature_hint">Wpisz tekst albo wklej HTML podpisu (z Thunderbirda, ze strony internetowej): zostanie zachowany bez zmian.</string>
     <string name="mail_islands">Przyciski</string>
     <string name="mail_islands_summary">Gdzie stoją. Samo: na górze z myszą, na dole z palcem.</string>
+    <string name="mail_threads">Wątki</string>
+    <string name="mail_threads_summary">Wiadomości z jednej rozmowy razem, jedna pod drugą, jak w czacie</string>
 </resources>

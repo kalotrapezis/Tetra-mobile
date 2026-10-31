@@ -184,4 +184,6 @@
     <string name="mail_signature_hint">Kirjoita tekstiä tai liitä allekirjoituksen HTML (Thunderbirdistä, verkkosivulta): se säilyy sellaisenaan.</string>
     <string name="mail_islands">Painikkeet</string>
     <string name="mail_islands_summary">Missä ne ovat. Automaattisesti: hiirellä ylhäällä, sormella alhaalla.</string>
+    <string name="mail_threads">Keskustelut</string>
+    <string name="mail_threads_summary">Yhden keskustelun viestit yhdessä, allekkain, kuin chatissa</string>
 </resources>

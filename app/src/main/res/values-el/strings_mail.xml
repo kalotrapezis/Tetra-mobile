@@ -194,4 +194,6 @@
     <string name="mail_signature_hint">Γράψε κείμενο ή επικόλλησε το HTML μιας υπογραφής (του Thunderbird, μιας σελίδας): κρατιέται όπως είναι.</string>
     <string name="mail_islands">Τα κουμπιά</string>
     <string name="mail_islands_summary">Πού στέκονται. Μόνο του: πάνω με ποντίκι, κάτω με το δάχτυλο.</string>
+    <string name="mail_threads">Συζητήσεις</string>
+    <string name="mail_threads_summary">Τα μηνύματα μιας συζήτησης μαζί, το ένα κάτω από το άλλο, όπως σε συνομιλία</string>
 </resources>

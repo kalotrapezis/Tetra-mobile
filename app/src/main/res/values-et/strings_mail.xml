@@ -184,4 +184,6 @@
     <string name="mail_signature_hint">Kirjutage tekst või kleepige allkirja HTML (Thunderbirdist, veebilehelt): see jääb nii, nagu on.</string>
     <string name="mail_islands">Nupud</string>
     <string name="mail_islands_summary">Kus need asuvad. Automaatselt: hiirega üleval, sõrmega all.</string>
+    <string name="mail_threads">Vestlused</string>
+    <string name="mail_threads_summary">Ühe vestluse kirjad koos, üksteise all, nagu vestlusaknas</string>
 </resources>

@@ -188,4 +188,6 @@
     <string name="mail_signature_hint">Escribe texto o pega el HTML de una firma (de Thunderbird, de una página web): se mantiene tal cual.</string>
     <string name="mail_islands">Los botones</string>
     <string name="mail_islands_summary">Dónde se colocan. Automático: arriba con ratón, abajo con el dedo.</string>
+    <string name="mail_threads">Conversaciones</string>
+    <string name="mail_threads_summary">Los correos de una conversación juntos, uno debajo de otro, como en un chat</string>
 </resources>

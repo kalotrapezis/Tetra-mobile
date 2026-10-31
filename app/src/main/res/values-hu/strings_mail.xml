@@ -184,4 +184,6 @@
     <string name="mail_signature_hint">Írj szöveget, vagy illeszd be egy aláírás HTML-kódját (a Thunderbirdből, egy weboldalról): úgy marad, ahogy van.</string>
     <string name="mail_islands">A gombok</string>
     <string name="mail_islands_summary">Hol állnak. Automatikusan: egérrel felül, ujjal alul.</string>
+    <string name="mail_threads">Beszélgetések</string>
+    <string name="mail_threads_summary">Egy beszélgetés levelei együtt, egymás alatt, mint egy csevegésben</string>
 </resources>

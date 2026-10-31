@@ -192,4 +192,6 @@
     <string name="mail_signature_hint">Napišite besedilo ali prilepite HTML podpisa (iz Thunderbirda, s spletne strani): ohrani se tak, kot je.</string>
     <string name="mail_islands">Gumbi</string>
     <string name="mail_islands_summary">Kje stojijo. Samodejno: zgoraj z miško, spodaj s prstom.</string>
+    <string name="mail_threads">Pogovori</string>
+    <string name="mail_threads_summary">Sporočila enega pogovora skupaj, eno pod drugim, kot v klepetu</string>
 </resources>

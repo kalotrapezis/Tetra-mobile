@@ -211,4 +211,17 @@ class MailTest {
         assertEquals("Θεολόγος<br>NUP &amp; co", MailSignatures.stored("Θεολόγος\nNUP & co")) // text stays text
         assertFalse(MailSignatures.designed("Θεολόγος<br>NUP"))
     }
+
+    @Test fun conversationsGroupBySubjectAndShowWhatEachSays() {
+        fun e(id: String, folder: String, subject: String, date: Long, mid: String? = null) = MailEntry(id, "a@b.gr", folder, date, "x", "x@y", emptyList(), subject,
+            true, false, 1, 0, "", true, null, false, mid)
+        val t = MailThreads.of(listOf(e("1", "Inbox", "Σύλλογος", 1), e("2", "Sent", "Re: Σύλλογος", 2), e("3", "Inbox", "ΑΠ: σύλλογος", 3),
+            e("4", "Trash", "Re: Σύλλογος", 4), e("5", "Archive", "Σύλλογος", 1, "<m@x>"), e("6", "Inbox", "Σύλλογος", 1, "<m@x>"), e("7", "Inbox", "Άλλο", 5)))
+        assertEquals(listOf("1", "5", "2", "3"), t.getValue("a@b.gr\nσύλλογος").map { it.id }) // oldest first; no Trash; the same mail in two folders once
+        assertEquals(2, t.size)
+        assertEquals("Ευχαριστώ, το πήρα.", MailThreads.own("Ευχαριστώ, το πήρα.\n\nΣτις 31 Οκτ 2026, 12:13, ο/η Γραμματεία έγραψε:\n> Ήρθε μόλις τώρα."))
+        assertEquals("Ok", MailThreads.own("Ok\n> quoted\n> more"))
+        assertEquals("Hi\nthere", MailThreads.own("Hi\nthere\n-- \nTheo\nNUP"))
+        assertEquals("> only a quote", MailThreads.own("> only a quote")) // nothing of its own: shown as it is
+    }
 }

@@ -192,4 +192,6 @@
     <string name="mail_signature_hint">Ikteb test, jew waħħal l-HTML ta’ firma (minn Thunderbird, minn paġna web): tinżamm kif inhi.</string>
     <string name="mail_islands">Il-buttuni</string>
     <string name="mail_islands_summary">Fejn joqogħdu. Waħedhom: fuq bil-maws, isfel bis-saba’.</string>
+    <string name="mail_threads">Konversazzjonijiet</string>
+    <string name="mail_threads_summary">Il-messaġġi ta’ konversazzjoni waħda flimkien, wieħed taħt l-ieħor, bħal f’chat</string>
 </resources>

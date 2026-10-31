@@ -184,4 +184,6 @@
     <string name="mail_signature_hint">Schreib Text oder füge das HTML einer Signatur ein (aus Thunderbird, von einer Webseite): Es bleibt, wie es ist.</string>
     <string name="mail_islands">Die Schaltflächen</string>
     <string name="mail_islands_summary">Wo sie stehen. Automatisch: oben mit Maus, unten mit dem Finger.</string>
+    <string name="mail_threads">Unterhaltungen</string>
+    <string name="mail_threads_summary">Die E-Mails einer Unterhaltung zusammen, untereinander, wie in einem Chat</string>
 </resources>

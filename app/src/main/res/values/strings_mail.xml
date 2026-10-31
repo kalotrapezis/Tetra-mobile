@@ -195,4 +195,6 @@
     <string name="mail_signature_hint">Write text, or paste a signature\'s HTML (Thunderbird\'s, a web page\'s): it is kept as it is.</string>
     <string name="mail_islands">The buttons</string>
     <string name="mail_islands_summary">Where they stand. By itself: at the top with a mouse, at the bottom with a finger.</string>
+    <string name="mail_threads">Conversations</string>
+    <string name="mail_threads_summary">The mails of one conversation together, one under the other, as in a chat</string>
 </resources>
