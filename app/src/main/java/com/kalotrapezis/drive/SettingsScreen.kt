@@ -51,7 +51,7 @@ import kotlinx.coroutines.withContext
 internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, val icon: Int, val tint: Color?, @androidx.annotation.StringRes val summary: Int, val items: List<Int>) {
     Sync(R.string.app_sync, R.drawable.ic_sync, null, R.string.settings_sync_summary, listOf(R.string.settings_computer, R.string.settings_open_sync, R.string.settings_sync_auto, R.string.settings_listen)),
     Appearance(R.string.settings_appearance, R.drawable.ic_palette, null, R.string.settings_appearance_summary, listOf(R.string.settings_theme, R.string.settings_language, R.string.settings_photo_on_home, R.string.settings_hidden_from_home, R.string.settings_app_icons)),
-    Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_check, R.string.mail_threads, R.string.mail_islands, R.string.mail_security,
+    Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_check, R.string.mail_default_app, R.string.mail_threads, R.string.mail_islands, R.string.mail_security,
         R.string.mail_remote, R.string.mail_allowed, R.string.mail_tracking, R.string.mail_link_warning, R.string.mail_risky, R.string.mail_real_address, R.string.mail_receipts)),
     Gallery(R.string.app_gallery, Category.Gallery.icon, Category.Gallery.color, R.string.settings_gallery_summary, listOf(R.string.settings_photos_videos, R.string.settings_search_quality, R.string.settings_folders)),
     Files(R.string.app_files, Category.Files.icon, Category.Files.color, R.string.settings_files_summary, listOf(R.string.settings_drive_workspace, R.string.settings_all_files)),
@@ -806,6 +806,14 @@ internal fun SettingsTab(
         ChoiceRow(stringResource(R.string.mail_check), stringResource(R.string.mail_check_summary), MailPrefs.EVERY.map { it to when (it) {
             MailPrefs.NOW -> stringResource(R.string.mail_check_now); MailPrefs.MANUAL -> stringResource(R.string.mail_check_manual)
             else -> stringResource(R.string.mail_check_every, it) } }, every) { every = it; MailPrefs.setEvery(it); MailEngine.schedule(context.applicationContext) }
+        // Tetra as the email app (the user, 31 Oct): which one opens mailto: links now; Android's default apps to change it
+        val resumed = resumes()
+        val mailApp = remember(resumed.intValue) { context.packageManager.resolveActivity(android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("mailto:")),
+            android.content.pm.PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.takeIf { it.packageName != "android" && "Resolver" !in it.name }?.loadLabel(context.packageManager)?.toString() }
+        SettingRow(stringResource(R.string.mail_default_app), mailApp?.let { stringResource(R.string.mail_default_is, it) } ?: stringResource(R.string.mail_default_none), onClick = {
+            runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)) }
+                .onFailure { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_SETTINGS)) }
+        }) { Chevron() }
     }
     // Υπογραφές (MAIL_PLAN §9c): one per address; plain text for now
     var signing by remember { mutableStateOf<MailAccount?>(null) }

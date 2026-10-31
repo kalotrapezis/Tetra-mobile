@@ -212,4 +212,10 @@
     <string name="mail_storage_has">%1$s · e-mailuri: %2$s</string>
     <string name="mail_storage_total">În total: %1$s · e-mailuri: %2$s</string>
     <string name="mail_open_folder">Deschide dosarul</string>
+    <string name="mail_share">E-mail (Tetra)</string>
+    <string name="mail_default_app">Aplicația de e-mail implicită</string>
+    <string name="mail_default_is">Acum: %1$s. Alege Tetra în aplicațiile implicite ale Android sau apasă «Întotdeauna» data viitoare când un link de e-mail te întreabă.</string>
+    <string name="mail_default_none">Android întreabă de fiecare dată. Alege Tetra în aplicațiile implicite ale Android sau apasă «Întotdeauna» data viitoare când un link de e-mail te întreabă.</string>
+    <string name="mail_no_sender">Niciun cont nu poate trimite de aici</string>
+    <string name="mail_no_sender_how">Adaugă un cont pe acest dispozitiv sau pe PC: atunci mesajul pleacă prin PC (⇄), din căsuța lui de ieșire, la următoarea sincronizare.</string>
 </resources>

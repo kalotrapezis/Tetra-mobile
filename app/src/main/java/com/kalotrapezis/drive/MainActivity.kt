@@ -251,8 +251,38 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        mailWrite(intent)
         intent.getStringExtra(Applet.EXTRA)?.let { applet.value = it }
         calendarFile(intent)?.let { CalendarInbox.pending.value = it; applet.value = Applet.Calendar.name }
+    }
+
+    /**
+     * Tetra as the email app (the user, 31 Oct): a mailto: link (SENDTO, VIEW) or «Email (Tetra)» in the share menu (SEND,
+     * SEND_MULTIPLE, through the MailShare alias) opens Mail's compose page with what it brings. Shared files are copied
+     * in at once, off the screen's thread: another app's content:// address stops working once it is done with us.
+     */
+    private fun mailWrite(i: Intent): Boolean {
+        val mailto = i.data?.takeIf { it.scheme.equals("mailto", true) && (i.action == Intent.ACTION_SENDTO || i.action == Intent.ACTION_VIEW) }
+        val share = (i.action == Intent.ACTION_SEND || i.action == Intent.ACTION_SEND_MULTIPLE) && i.component?.className?.endsWith(".MailShare") == true
+        if (mailto == null && !share) return false
+        Thread {
+            val base = mailto?.let { MailTo.draft(it.toString()) } ?: MailDraft("new")
+            fun list(key: String) = i.getStringArrayExtra(key)?.filter { it.isNotBlank() }.orEmpty()
+            val streams = @Suppress("DEPRECATION") (i.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM) ?: listOfNotNull(i.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)))
+            val dir = File(cacheDir, "mail-share/${System.currentTimeMillis()}")
+            val files = streams.mapNotNull { u -> runCatching {
+                val name = contentResolver.query(u, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
+                    ?: u.lastPathSegment ?: "attachment"
+                File(dir, name.replace('/', '_')).also { f -> dir.mkdirs(); contentResolver.openInputStream(u)!!.use { input -> f.outputStream().use { input.copyTo(it) } } }
+            }.onFailure { WriterLog.w("Mail: a shared file not copied (${it.message})") }.getOrNull() }
+            val draft = base.copy(to = (listOf(base.to) + list(Intent.EXTRA_EMAIL)).filter { it.isNotBlank() }.joinToString(", "),
+                cc = (listOf(base.cc) + list(Intent.EXTRA_CC)).filter { it.isNotBlank() }.joinToString(", "),
+                bcc = (listOf(base.bcc) + list(Intent.EXTRA_BCC)).filter { it.isNotBlank() }.joinToString(", "),
+                subject = base.subject.ifEmpty { i.getStringExtra(Intent.EXTRA_SUBJECT).orEmpty() },
+                body = base.body.ifEmpty { i.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString().orEmpty() }, files = files)
+            runOnUiThread { applet.value = "mail-write:" + draft.json() }
+        }.start()
+        return true
     }
 
     /** An .ics another app opened with Tetra (Open with › Tetra Calendar): the Calendar imports it. */
@@ -293,12 +323,13 @@ class MainActivity : ComponentActivity() {
         val office = intent.takeIf { it.action == Intent.ACTION_VIEW || it.action == Intent.ACTION_EDIT }?.data
             ?.takeIf { OfficeOpen.extensionOf(type) != null || OfficeOpen.isOffice(it.lastPathSegment.orEmpty()) }?.let { ExternalMedia(it, type) }
         val calendar = calendarFile(intent)?.also { CalendarInbox.pending.value = it }
-        val external = intent.takeIf { office == null && calendar == null && it.action in EXTERNAL_VIEW_ACTIONS }?.data?.let { ExternalMedia(it, type) }
+        val mail = savedInstanceState == null && mailWrite(intent)
+        val external = intent.takeIf { !mail && it.data?.scheme?.equals("mailto", true) != true && office == null && calendar == null && it.action in EXTERNAL_VIEW_ACTIONS }?.data?.let { ExternalMedia(it, type) }
         OfficeUi.load(this)
         TetraLook.load(this)
         SystemFolderChoice.load(this)
         // a mouse or a finger noticed anywhere, for Office's ribbon (at the top with a mouse)
-        if (savedInstanceState == null) applet.value = intent.getStringExtra(Applet.EXTRA) ?: calendar?.let { Applet.Calendar.name }
+        if (savedInstanceState == null) applet.value = intent.getStringExtra(Applet.EXTRA) ?: calendar?.let { Applet.Calendar.name } ?: applet.value // a mail to write may be there already
         setContent { androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.noticePointer()) { LocalDriveApp(external, office, applet) } }
     }
 }

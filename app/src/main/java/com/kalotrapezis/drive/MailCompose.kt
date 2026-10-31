@@ -68,7 +68,48 @@ import kotlinx.coroutines.withContext
 
 /** What is being written: new, a reply (to all), a forward, of [of]; what MailScreen hands the compose page. */
 internal data class MailDraft(val kind: String, val of: MailEntry? = null, val thread: List<MailEntry> = emptyList(),
-    val to: String = "", val subject: String = "", val body: String = "") // a new one's start (AI Assist's mail_write)
+    val to: String = "", val subject: String = "", val body: String = "", // a new one's start (AI Assist's mail_write, a mailto:, a share)
+    val cc: String = "", val bcc: String = "", val files: List<File> = emptyList()) {
+    /** As MailScreen's hand-over carries it ("mail-write:<json>"). */
+    fun json(): org.json.JSONObject = org.json.JSONObject().put("to", to).put("cc", cc).put("bcc", bcc).put("subject", subject).put("body", body)
+        .put("files", org.json.JSONArray(files.map { it.path }))
+    companion object {
+        fun of(o: org.json.JSONObject) = MailDraft("new", to = o.optString("to"), subject = o.optString("subject"), body = o.optString("body"),
+            cc = o.optString("cc"), bcc = o.optString("bcc"), files = o.optJSONArray("files")?.let { a -> (0 until a.length()).map { File(a.getString(it)) } }.orEmpty())
+    }
+}
+
+/**
+ * A mailto: address (RFC 6068; the user, 31 Oct: Tetra as the default email app): the recipients before "?", then to, cc,
+ * bcc, subject and body; percent-encoded UTF-8 ("+" stays a plus), several addresses split by commas, line breaks as \n.
+ * Other header fields are left out.
+ */
+internal object MailTo {
+    fun draft(uri: String): MailDraft {
+        val rest = uri.substringAfter(':', "")
+        val to = list(decode(rest.substringBefore('?'))).toMutableList()
+        val cc = mutableListOf<String>(); val bcc = mutableListOf<String>()
+        var subject = ""; var body = ""
+        for (field in rest.substringAfter('?', "").split('&').filter { it.isNotEmpty() }) {
+            val v = decode(field.substringAfter('=', ""))
+            when (decode(field.substringBefore('=')).lowercase()) {
+                "to" -> to += list(v); "cc" -> cc += list(v); "bcc" -> bcc += list(v)
+                "subject" -> subject = v; "body" -> body = v.replace("\r\n", "\n")
+            }
+        }
+        return MailDraft("new", to = to.joinToString(", "), subject = subject, body = body, cc = cc.joinToString(", "), bcc = bcc.joinToString(", "))
+    }
+    private fun list(s: String) = s.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+    private fun decode(s: String): String {
+        val out = java.io.ByteArrayOutputStream()
+        var i = 0
+        while (i < s.length) {
+            val hex = if (s[i] == '%' && i + 2 < s.length) s.substring(i + 1, i + 3).toIntOrNull(16) else null
+            if (hex != null) { out.write(hex); i += 3 } else { out.write(s[i].toString().toByteArray()); i++ }
+        }
+        return String(out.toByteArray(), Charsets.UTF_8)
+    }
+}
 
 /**
  * AI Assist's help with a reply (the user, 31 Oct: "AI assist on the writing when there is a thread going on"): Mistral, as
@@ -237,9 +278,9 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
         "replyAll" -> (listOfNotNull(of?.fromAddress) + of?.to.orEmpty()).filter { !it.equals(me?.address, true) }.distinct().joinToString(", ")
         else -> draft.to
     }) }
-    var cc by remember { mutableStateOf(if (draft.kind == "replyAll" || isDraft) original?.cc.orEmpty() else "") }
-    var bcc by remember { mutableStateOf("") }
-    var showCc by remember { mutableStateOf(cc.isNotEmpty()) }
+    var cc by remember { mutableStateOf(if (draft.kind == "replyAll" || isDraft) original?.cc.orEmpty() else draft.cc) }
+    var bcc by remember { mutableStateOf(draft.bcc) }
+    var showCc by remember { mutableStateOf(cc.isNotEmpty() || bcc.isNotEmpty()) }
     var subject by remember { mutableStateOf(of?.let { MailSend.subject(draft.kind, it.subject) } ?: draft.subject) }
     var signed by remember { mutableStateOf(!isDraft) } // a draft has its signature in it already
     val signatureHtml = remember(me) { MailSignatures.html(root, me?.address.orEmpty()) }
@@ -284,7 +325,8 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
                 .onFailure { WriterLog.w("Mail: the assistant's draft (${it.message})"); problem = it.shownMessage(context) ?: it.message }
         }
     }
-    var attachments by remember { mutableStateOf(if (draft.kind == "forward" && of != null) MailFiles.attachments(root, of).map { MailAttachment(it.name, file = it) } else emptyList()) }
+    var attachments by remember { mutableStateOf(if (draft.kind == "forward" && of != null) MailFiles.attachments(root, of).map { MailAttachment(it.name, file = it) }
+        else draft.files.filter { it.isFile }.map { MailAttachment(it.name, file = it) }) } // a share's files, copied in when they came
     var panel by remember { mutableStateOf(false) }
     var asking by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }

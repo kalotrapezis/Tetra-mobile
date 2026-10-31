@@ -216,4 +216,10 @@
     <string name="mail_storage_has">%1$s · laiškų: %2$s</string>
     <string name="mail_storage_total">Iš viso: %1$s · laiškų: %2$s</string>
     <string name="mail_open_folder">Atidaryti aplanką</string>
+    <string name="mail_share">El. paštas (Tetra)</string>
+    <string name="mail_default_app">Numatytoji el. pašto programėlė</string>
+    <string name="mail_default_is">Dabar: %1$s. Pasirinkite Tetra Android numatytosiose programėlėse arba paspauskite «Visada», kai kitą kartą el. pašto nuoroda paklaus.</string>
+    <string name="mail_default_none">Android klausia kaskart. Pasirinkite Tetra Android numatytosiose programėlėse arba paspauskite «Visada», kai kitą kartą el. pašto nuoroda paklaus.</string>
+    <string name="mail_no_sender">Iš čia nė viena paskyra negali siųsti</string>
+    <string name="mail_no_sender_how">Pridėkite paskyrą šiame įrenginyje arba kompiuteryje: tada laiškas eis per kompiuterį (⇄), iš jo siunčiamų laiškų aplanko, per kitą sinchronizavimą.</string>
 </resources>

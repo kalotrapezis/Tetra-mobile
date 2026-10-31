@@ -212,4 +212,10 @@
     <string name="mail_storage_has">%1$s · correos: %2$s</string>
     <string name="mail_storage_total">En total: %1$s · correos: %2$s</string>
     <string name="mail_open_folder">Abrir carpeta</string>
+    <string name="mail_share">Correo (Tetra)</string>
+    <string name="mail_default_app">App de correo predeterminada</string>
+    <string name="mail_default_is">Ahora: %1$s. Elige Tetra en las aplicaciones predeterminadas de Android, o pulsa «Siempre» la próxima vez que un enlace de correo pregunte.</string>
+    <string name="mail_default_none">Android pregunta cada vez. Elige Tetra en las aplicaciones predeterminadas de Android, o pulsa «Siempre» la próxima vez que un enlace de correo pregunte.</string>
+    <string name="mail_no_sender">Ninguna cuenta puede enviar desde aquí</string>
+    <string name="mail_no_sender_how">Añade una cuenta en este dispositivo, o añádela en el PC: entonces el correo sale a través del PC (⇄), desde su bandeja de salida, en la próxima sincronización.</string>
 </resources>

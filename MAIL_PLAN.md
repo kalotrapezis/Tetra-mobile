@@ -491,6 +491,18 @@ Formats are the desktop's (step 1's sync.js/mail.js of the same day); the phone 
 - **Leftover .part files** of transfers cut off go after a day, at app start and before a whole sync; a mail fetched by
   path leaves none when it fails.
 
+## 18. Tetra as the email app (the user, 31 Oct: "can I set as the default email client?" — "Yes, add it")
+
+- The MailShare alias of MainActivity: SENDTO and VIEW for mailto: (so Android offers Tetra as the email app), and SEND /
+  SEND_MULTIPLE for any file as «Email (Tetra)» in the share menu, beside «Send to computer».
+- Each opens Mail's compose page with what it brings: the mailto: fields (to, cc, bcc, subject, body; RFC 6068,
+  percent-decoded UTF-8, "+" kept), EXTRA_EMAIL/CC/BCC/SUBJECT/TEXT, and EXTRA_STREAM files as attachments, copied into
+  the app's cache at once (another app's content:// address stops working once it is done with us).
+- No account at all: «Κανένας λογαριασμός δεν μπορεί να στείλει από εδώ», with add account; a ⇄ PC account sends
+  through the PC's outbox as before.
+- A mailto: link inside a mail opens compose here, not Android's chooser.
+- Settings › Αλληλογραφία › «Προεπιλεγμένη εφαρμογή email»: which app opens email links now; opens Android's default apps.
+
 ## Open questions for the user
 
 - Away from home, does the phone sync with the desktop over the internet, or only on the same Wi-Fi?

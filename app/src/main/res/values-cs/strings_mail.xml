@@ -216,4 +216,10 @@
     <string name="mail_storage_has">%1$s · e-maily: %2$s</string>
     <string name="mail_storage_total">Celkem: %1$s · e-maily: %2$s</string>
     <string name="mail_open_folder">Otevřít složku</string>
+    <string name="mail_share">E-mail (Tetra)</string>
+    <string name="mail_default_app">Výchozí e-mailová aplikace</string>
+    <string name="mail_default_is">Nyní: %1$s. Vyberte Tetra ve výchozích aplikacích Androidu, nebo příště, až se odkaz na e-mail zeptá, stiskněte «Vždy».</string>
+    <string name="mail_default_none">Android se ptá pokaždé. Vyberte Tetra ve výchozích aplikacích Androidu, nebo příště, až se odkaz na e-mail zeptá, stiskněte «Vždy».</string>
+    <string name="mail_no_sender">Odtud nemůže odesílat žádný účet</string>
+    <string name="mail_no_sender_how">Přidejte účet na tomto zařízení, nebo ho přidejte na PC: pošta pak odejde přes PC (⇄), z jeho odchozí pošty, při další synchronizaci.</string>
 </resources>

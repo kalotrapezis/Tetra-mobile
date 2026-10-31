@@ -47,6 +47,11 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent>
+        <!-- Settings › Αλληλογραφία names the email app that opens mailto: links now -->
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
+        </intent>
     </queries>
     <application android:allowBackup="false" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:largeHeap="true" android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/Theme.LocalDrive">
         <provider
@@ -256,6 +261,24 @@
                 <data android:mimeType="application/xml" />
             </intent-filter>
         </activity>
+        <!-- Tetra as the email app (31 Oct): mailto: links, and «Email (Tetra)» in the share menu, open Mail's compose page
+             (MainActivity.mailWrite). An alias, so the share menu shows its own name beside «Send to computer». -->
+        <activity-alias android:name=".MailShare" android:targetActivity=".MainActivity" android:exported="true"
+            android:label="@string/mail_share" android:icon="@mipmap/applet_mail" android:roundIcon="@mipmap/applet_mail">
+            <intent-filter>
+                <action android:name="android.intent.action.SENDTO" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="mailto" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity-alias>
         <!-- Send to computer: Tetra in the share menu; shared files go to the paired computer (SendToComputer.kt) -->
         <activity android:name=".SendToComputer" android:exported="true" android:label="@string/home_label_send"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" android:excludeFromRecents="true">

@@ -208,4 +208,10 @@
     <string name="mail_storage_has">%1$s · levél: %2$s</string>
     <string name="mail_storage_total">Összesen: %1$s · levél: %2$s</string>
     <string name="mail_open_folder">Mappa megnyitása</string>
+    <string name="mail_share">E-mail (Tetra)</string>
+    <string name="mail_default_app">Alapértelmezett e-mail-alkalmazás</string>
+    <string name="mail_default_is">Most: %1$s. Válaszd a Tetrát az Android alapértelmezett alkalmazásai között, vagy koppints a «Mindig» gombra, amikor legközelebb egy e-mail-hivatkozás rákérdez.</string>
+    <string name="mail_default_none">Az Android minden alkalommal rákérdez. Válaszd a Tetrát az Android alapértelmezett alkalmazásai között, vagy koppints a «Mindig» gombra, amikor legközelebb egy e-mail-hivatkozás rákérdez.</string>
+    <string name="mail_no_sender">Innen egyetlen fiók sem tud küldeni</string>
+    <string name="mail_no_sender_how">Adj hozzá egy fiókot ezen az eszközön, vagy a számítógépen: ekkor a levél a számítógépen keresztül megy (⇄), a kimenő levelei közül, a következő szinkronizáláskor.</string>
 </resources>

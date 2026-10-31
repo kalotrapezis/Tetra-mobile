@@ -218,4 +218,10 @@
     <string name="mail_storage_has">%1$s · %2$s μηνύματα</string>
     <string name="mail_storage_total">Σύνολο: %1$s · %2$s μηνύματα</string>
     <string name="mail_open_folder">Άνοιγμα φακέλου</string>
+    <string name="mail_share">Email (Tetra)</string>
+    <string name="mail_default_app">Προεπιλεγμένη εφαρμογή email</string>
+    <string name="mail_default_is">Τώρα: %1$s. Διάλεξε το Tetra στις προεπιλεγμένες εφαρμογές του Android, ή πάτα «Πάντα» την επόμενη φορά που ένας σύνδεσμος email ρωτήσει.</string>
+    <string name="mail_default_none">Το Android ρωτάει κάθε φορά. Διάλεξε το Tetra στις προεπιλεγμένες εφαρμογές του Android, ή πάτα «Πάντα» την επόμενη φορά που ένας σύνδεσμος email ρωτήσει.</string>
+    <string name="mail_no_sender">Κανένας λογαριασμός δεν μπορεί να στείλει από εδώ</string>
+    <string name="mail_no_sender_how">Πρόσθεσε έναν λογαριασμό σε αυτή τη συσκευή, ή στον υπολογιστή: τότε το μήνυμα φεύγει μέσω του υπολογιστή (⇄), από τα εξερχόμενά του, στον επόμενο συγχρονισμό.</string>
 </resources>

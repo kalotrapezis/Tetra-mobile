@@ -208,4 +208,10 @@
     <string name="mail_storage_has">%1$s · mails: %2$s</string>
     <string name="mail_storage_total">In totaal: %1$s · mails: %2$s</string>
     <string name="mail_open_folder">Map openen</string>
+    <string name="mail_share">E-mail (Tetra)</string>
+    <string name="mail_default_app">Standaard e-mailapp</string>
+    <string name="mail_default_is">Nu: %1$s. Kies Tetra in de standaard-apps van Android, of tik op «Altijd» wanneer een e-maillink de volgende keer vraagt.</string>
+    <string name="mail_default_none">Android vraagt het elke keer. Kies Tetra in de standaard-apps van Android, of tik op «Altijd» wanneer een e-maillink de volgende keer vraagt.</string>
+    <string name="mail_no_sender">Geen enkel account kan vanaf hier versturen</string>
+    <string name="mail_no_sender_how">Voeg een account toe op dit apparaat, of voeg het toe op de pc: dan gaat de mail via de pc (⇄), uit zijn map met uitgaande mail, bij de volgende synchronisatie.</string>
 </resources>

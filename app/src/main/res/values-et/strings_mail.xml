@@ -208,4 +208,10 @@
     <string name="mail_storage_has">%1$s · kirju: %2$s</string>
     <string name="mail_storage_total">Kokku: %1$s · kirju: %2$s</string>
     <string name="mail_open_folder">Ava kaust</string>
+    <string name="mail_share">E-post (Tetra)</string>
+    <string name="mail_default_app">Vaikimisi e-posti rakendus</string>
+    <string name="mail_default_is">Praegu: %1$s. Valige Tetra Androidi vaikerakenduste seast või vajutage «Alati», kui e-posti link järgmine kord küsib.</string>
+    <string name="mail_default_none">Android küsib iga kord. Valige Tetra Androidi vaikerakenduste seast või vajutage «Alati», kui e-posti link järgmine kord küsib.</string>
+    <string name="mail_no_sender">Ükski konto ei saa siit saata</string>
+    <string name="mail_no_sender_how">Lisage konto sellesse seadmesse või lisage see arvutis: siis läheb kiri arvuti kaudu (⇄), selle väljuvate kirjade kaustast, järgmisel sünkroonimisel.</string>
 </resources>

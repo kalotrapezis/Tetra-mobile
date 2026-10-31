@@ -208,4 +208,10 @@
     <string name="mail_storage_has">%1$s · viestejä: %2$s</string>
     <string name="mail_storage_total">Yhteensä: %1$s · viestejä: %2$s</string>
     <string name="mail_open_folder">Avaa kansio</string>
+    <string name="mail_share">Sähköposti (Tetra)</string>
+    <string name="mail_default_app">Oletussähköpostisovellus</string>
+    <string name="mail_default_is">Nyt: %1$s. Valitse Tetra Androidin oletussovelluksista tai paina «Aina», kun sähköpostilinkki seuraavan kerran kysyy.</string>
+    <string name="mail_default_none">Android kysyy joka kerta. Valitse Tetra Androidin oletussovelluksista tai paina «Aina», kun sähköpostilinkki seuraavan kerran kysyy.</string>
+    <string name="mail_no_sender">Mikään tili ei voi lähettää täältä</string>
+    <string name="mail_no_sender_how">Lisää tili tälle laitteelle tai lisää se tietokoneella: silloin viesti lähtee tietokoneen kautta (⇄), sen lähtevien kansiosta, seuraavassa synkronoinnissa.</string>
 </resources>

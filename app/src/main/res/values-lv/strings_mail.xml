@@ -212,4 +212,10 @@
     <string name="mail_storage_has">%1$s · vēstuļu: %2$s</string>
     <string name="mail_storage_total">Kopā: %1$s · vēstuļu: %2$s</string>
     <string name="mail_open_folder">Atvērt mapi</string>
+    <string name="mail_share">E-pasts (Tetra)</string>
+    <string name="mail_default_app">Noklusējuma e-pasta lietotne</string>
+    <string name="mail_default_is">Tagad: %1$s. Izvēlieties Tetra Android noklusējuma lietotnēs vai nospiediet «Vienmēr», kad e-pasta saite nākamreiz vaicās.</string>
+    <string name="mail_default_none">Android jautā katru reizi. Izvēlieties Tetra Android noklusējuma lietotnēs vai nospiediet «Vienmēr», kad e-pasta saite nākamreiz vaicās.</string>
+    <string name="mail_no_sender">Neviens konts no šejienes nevar sūtīt</string>
+    <string name="mail_no_sender_how">Pievienojiet kontu šajā ierīcē vai datorā: tad vēstule iet caur datoru (⇄), no tā izsūtāmo vēstuļu mapes, nākamajā sinhronizācijā.</string>
 </resources>

@@ -220,4 +220,10 @@
     <string name="mail_storage_has">%1$s · ríomhphost: %2$s</string>
     <string name="mail_storage_total">Iomlán: %1$s · ríomhphost: %2$s</string>
     <string name="mail_open_folder">Oscail fillteán</string>
+    <string name="mail_share">Ríomhphost (Tetra)</string>
+    <string name="mail_default_app">Aip ríomhphoist réamhshocraithe</string>
+    <string name="mail_default_is">Anois: %1$s. Roghnaigh Tetra in aipeanna réamhshocraithe Android, nó brúigh «I gcónaí» an chéad uair eile a fhiafraíonn nasc ríomhphoist.</string>
+    <string name="mail_default_none">Fiafraíonn Android gach uair. Roghnaigh Tetra in aipeanna réamhshocraithe Android, nó brúigh «I gcónaí» an chéad uair eile a fhiafraíonn nasc ríomhphoist.</string>
+    <string name="mail_no_sender">Ní féidir le cuntas ar bith seoladh as seo</string>
+    <string name="mail_no_sender_how">Cuir cuntas leis ar an ngléas seo, nó cuir leis ar an ríomhaire é: ansin téann an post tríd an ríomhaire (⇄), óna bhosca amach, ag an gcéad sioncrónú eile.</string>
 </resources>

@@ -208,4 +208,10 @@
     <string name="mail_storage_has">%1$s · mejl: %2$s</string>
     <string name="mail_storage_total">Totalt: %1$s · mejl: %2$s</string>
     <string name="mail_open_folder">Öppna mapp</string>
+    <string name="mail_share">E-post (Tetra)</string>
+    <string name="mail_default_app">Standardapp för e-post</string>
+    <string name="mail_default_is">Nu: %1$s. Välj Tetra bland Androids standardappar, eller tryck på «Alltid» nästa gång en e-postlänk frågar.</string>
+    <string name="mail_default_none">Android frågar varje gång. Välj Tetra bland Androids standardappar, eller tryck på «Alltid» nästa gång en e-postlänk frågar.</string>
+    <string name="mail_no_sender">Inget konto kan skicka härifrån</string>
+    <string name="mail_no_sender_how">Lägg till ett konto på den här enheten, eller på datorn: då går e-posten via datorn (⇄), från dess utkorg, vid nästa synkning.</string>
 </resources>

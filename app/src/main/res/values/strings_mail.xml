@@ -219,4 +219,10 @@
     <string name="mail_storage_has">%1$s · %2$s mails</string>
     <string name="mail_storage_total">In all: %1$s · %2$s mails</string>
     <string name="mail_open_folder">Open folder</string>
+    <string name="mail_share">Email (Tetra)</string>
+    <string name="mail_default_app">Default email app</string>
+    <string name="mail_default_is">Now: %1$s. Choose Tetra in Android\'s default apps, or press Always the next time an email link asks.</string>
+    <string name="mail_default_none">Android asks each time. Choose Tetra in Android\'s default apps, or press Always the next time an email link asks.</string>
+    <string name="mail_no_sender">No account can send from here</string>
+    <string name="mail_no_sender_how">Add an account on this device, or add it on the PC: then the mail goes through the PC (⇄), from its outbox, at the next sync.</string>
 </resources>

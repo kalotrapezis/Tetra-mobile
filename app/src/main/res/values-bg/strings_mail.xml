@@ -208,4 +208,10 @@
     <string name="mail_storage_has">%1$s · писма: %2$s</string>
     <string name="mail_storage_total">Общо: %1$s · писма: %2$s</string>
     <string name="mail_open_folder">Отвори папката</string>
+    <string name="mail_share">Имейл (Tetra)</string>
+    <string name="mail_default_app">Приложение за имейл по подразбиране</string>
+    <string name="mail_default_is">Сега: %1$s. Изберете Tetra в приложенията по подразбиране на Android или натиснете «Винаги» следващия път, когато връзка към имейл попита.</string>
+    <string name="mail_default_none">Android пита всеки път. Изберете Tetra в приложенията по подразбиране на Android или натиснете «Винаги» следващия път, когато връзка към имейл попита.</string>
+    <string name="mail_no_sender">Никой акаунт не може да изпраща оттук</string>
+    <string name="mail_no_sender_how">Добавете акаунт на това устройство или го добавете на компютъра: тогава писмото тръгва през компютъра (⇄), от неговите изходящи, при следващата синхронизация.</string>
 </resources>

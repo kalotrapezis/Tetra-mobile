@@ -343,5 +343,19 @@ class MailTest {
         assertEquals(10L to 1, MailFiles.held(dir, null))
         dir.deleteRecursively()
     }
+
+    @Test fun aMailtoLinkOpensAMailToWrite() {
+        // RFC 6068: several recipients, an encoded Greek subject, a body with line breaks, "+" kept, unknown fields left out
+        val d = MailTo.draft("mailto:a@b.gr,c%40d.gr?cc=e@f.gr&BCC=g@h.gr,i@j.gr&subject=%CE%93%CE%B5%CE%B9%CE%B1%20%CF%83%CE%BF%CF%85" +
+            "&body=1%20+%201%0D%0A%CE%94%CE%B5%CF%8D%CF%84%CE%B5%CF%81%CE%B7%0D%0A&in-reply-to=%3Cx@y%3E")
+        assertEquals("a@b.gr, c@d.gr", d.to); assertEquals("e@f.gr", d.cc); assertEquals("g@h.gr, i@j.gr", d.bcc)
+        assertEquals("Γεια σου", d.subject); assertEquals("1 + 1\nΔεύτερη\n", d.body)
+        assertEquals("x@y.gr", MailTo.draft("MAILTO:x@y.gr").to)
+        assertEquals("", MailTo.draft("mailto:?subject=%E2%9C%93").to); assertEquals("✓", MailTo.draft("mailto:?subject=%E2%9C%93").subject)
+        assertEquals("50%", MailTo.draft("mailto:?subject=50%").subject) // a stray % stays
+        // the hand-over keeps cc, bcc and the copied files
+        val back = MailDraft.of(d.copy(files = listOf(File("/tmp/a.pdf"))).json())
+        assertEquals(d.copy(files = listOf(File("/tmp/a.pdf"))), back)
+    }
 }
 

@@ -216,4 +216,10 @@
     <string name="mail_storage_has">%1$s · e-poštnih sporočil: %2$s</string>
     <string name="mail_storage_total">Skupaj: %1$s · e-poštnih sporočil: %2$s</string>
     <string name="mail_open_folder">Odpri mapo</string>
+    <string name="mail_share">E-pošta (Tetra)</string>
+    <string name="mail_default_app">Privzeta e-poštna aplikacija</string>
+    <string name="mail_default_is">Zdaj: %1$s. Izberite Tetra med privzetimi aplikacijami Androida ali pritisnite «Vedno», ko vas bo povezava do e-pošte naslednjič vprašala.</string>
+    <string name="mail_default_none">Android vpraša vsakič. Izberite Tetra med privzetimi aplikacijami Androida ali pritisnite «Vedno», ko vas bo povezava do e-pošte naslednjič vprašala.</string>
+    <string name="mail_no_sender">Od tu noben račun ne more pošiljati</string>
+    <string name="mail_no_sender_how">Dodajte račun v tej napravi ali v računalniku: potem pošta gre prek računalnika (⇄), iz njegove izhodne pošte, ob naslednji sinhronizaciji.</string>
 </resources>

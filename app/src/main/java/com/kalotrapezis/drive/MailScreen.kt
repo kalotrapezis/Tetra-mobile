@@ -204,7 +204,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
         when {
             data == null -> Unit // the accounts first: «Από» is chosen from them
             start?.startsWith("mail-write:") == true -> if (writing == null) runCatching { org.json.JSONObject(start.removePrefix("mail-write:")) }.getOrNull()?.let { o ->
-                writing = MailDraft("new", to = o.optString("to"), subject = o.optString("subject"), body = o.optString("body")) }
+                writing = MailDraft.of(o) }
             start?.startsWith("mail:") == true -> mails.firstOrNull { it.id == start.removePrefix("mail:") }?.let { e -> if (openId != e.id) { role = e.folder; account = null; mailboxes = false; autoOpened = false; openId = e.id } }
         }
     }
@@ -401,8 +401,8 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
             if (wide && many.size > 1) SelectionPane(many, accountOf, Modifier.statusBarsPadding().padding(16.dp), later)
             else if (current.size > 1 && single == null) MailThreadPage(current, accounts.map { it.address.lowercase() }.toSet(), accountOf, root, MailLook.top, showBack = !three, back = { openId = null }, openFile = openFile) { e -> if (e.folder == "Drafts") writing = MailDraft("draft", e, current) else single = e.id }
             else if (single != null && current.any { it.id == single }) MailPage(current.first { it.id == single }, accountOf[current.first { it.id == single }.account], root, islandTop = MailLook.top, showBack = true,
-                back = { single = null }, openFile = openFile, say = { message = it }, fetched = { version++ })
-            else if (open != null) MailPage(open, accountOf[open.account], root, islandTop = MailLook.top, showBack = !three, back = { openId = null }, openFile = openFile, say = { message = it }, fetched = { version++ })
+                back = { single = null }, openFile = openFile, say = { message = it }, fetched = { version++ }, write = { writing = it })
+            else if (open != null) MailPage(open, accountOf[open.account], root, islandTop = MailLook.top, showBack = !three, back = { openId = null }, openFile = openFile, say = { message = it }, fetched = { version++ }, write = { writing = it })
             else if (wide) MailHint(stringResource(R.string.mail_choose), Modifier.align(Alignment.Center))
             // the mail's island: one big Απάντηση; the rest pulled up from it
             if (open != null && !(wide && many.size > 1)) Box(if (MailLook.top) Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 8.dp, end = 16.dp) else Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp)) {
@@ -438,6 +438,11 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     }
 
     if (storage) MailStorageDialog(null, openFolder) { storage = false }
+    // a mail to write (a mailto:, a share) and no account at all: said plainly; one added here, or the PC's (⇄, sent through the outbox), and it goes on
+    if (writing != null && data != null && accounts.isEmpty() && !adding) AlertDialog(onDismissRequest = { writing = null },
+        title = { Text(stringResource(R.string.mail_no_sender)) }, text = { Text(stringResource(R.string.mail_no_sender_how)) },
+        confirmButton = { TextButton(onClick = { adding = true }) { Text(stringResource(R.string.mail_add_account)) } },
+        dismissButton = { TextButton(onClick = { writing = null }) { Text(stringResource(R.string.common_cancel)) } })
     if (filterOpen) FilterSheet(view, accounts, keep, set = { v -> view = v; if (keep) MailPrefs.setView(context, folderKey, v) },
         setKeep = { k -> keep = k; MailPrefs.setView(context, folderKey, if (k) view else null) }) { filterOpen = false }
     if (listDrawer) ModalBottomSheet(onDismissRequest = { listDrawer = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
@@ -653,7 +658,8 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
  * text. Pictures and anything else from the web load only when allowed (MAIL_PLAN §9c): once, always from this sender,
  * or always (Settings).
  */
-@Composable private fun MailPage(e: MailEntry, account: MailAccount?, root: File, islandTop: Boolean, showBack: Boolean, back: () -> Unit, openFile: (File) -> Unit, say: (String) -> Unit, fetched: () -> Unit) {
+@Composable private fun MailPage(e: MailEntry, account: MailAccount?, root: File, islandTop: Boolean, showBack: Boolean, back: () -> Unit, openFile: (File) -> Unit, say: (String) -> Unit, fetched: () -> Unit,
+    write: (MailDraft) -> Unit = {}) {
     val context = LocalContext.current
     var failed by remember(e.id) { mutableStateOf<String?>(null) }
     var got by remember(e.id) { mutableIntStateOf(0) } // an attachment fetched: the cards again
@@ -742,7 +748,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
                 Text(message!!.text.orEmpty(), Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 110.dp), style = MaterialTheme.typography.bodyLarge)
             }
             else -> MailHtml(html!!.let { if (!blocked && MailPrefs.switch(context, "tracking")) Mime.withoutPixels(it) else it }, load = !blocked,
-                Modifier.weight(1f).fillMaxWidth().padding(bottom = 96.dp).clip(MaterialTheme.shapes.large))
+                Modifier.weight(1f).fillMaxWidth().padding(bottom = 96.dp).clip(MaterialTheme.shapes.large), write)
         }
     }
     risky?.let { (name, f) ->
@@ -813,7 +819,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
 }
 
 /** A mail's HTML on its own white page, no scripts, nothing from the web unless [load]; a link opens in the browser. */
-@Composable private fun MailHtml(html: String, load: Boolean, modifier: Modifier) {
+@Composable private fun MailHtml(html: String, load: Boolean, modifier: Modifier, write: (MailDraft) -> Unit = {}) {
     AndroidView(factory = { c -> android.webkit.WebView(c).apply {
         settings.javaScriptEnabled = false
         settings.allowFileAccess = false
@@ -824,6 +830,8 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
         webViewClient = object : android.webkit.WebViewClient() {
             // shortcut: no check that a link's text and its address agree (Settings' warning) yet; step 3 with the rest of the safety bar
             override fun shouldOverrideUrlLoading(view: android.webkit.WebView, request: android.webkit.WebResourceRequest): Boolean {
+                // a mailto: link writes here, not through Android's chooser
+                if (request.url.scheme.equals("mailto", true)) { write(MailTo.draft(request.url.toString())); return true }
                 runCatching { view.context.startActivity(Intent(Intent.ACTION_VIEW, request.url).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                 return true
             }
