@@ -4660,4 +4660,6 @@
     <string name="maps_welcome_title">Ti diamo il benvenuto in Mappe</string>
     <string name="maps_welcome_intro">Tetra arriva senza una mappa, così ognuno ha la mappa che vuole, offline e tutta sua. La crei una volta sola, sul tuo computer:</string>
     <string name="maps_welcome_steps">1. Sul tuo computer, apri Tetra › Impostazioni › Mappe › Aggiungi una mappa.\n2. Scegli il tuo paese. Il computer ha bisogno di internet per questo.\n3. Tieni il computer acceso e collegato alla corrente mentre la mappa viene creata: pochi minuti per un paese piccolo, un\'ora o più per uno grande.\n4. Tieni Tetra aperto su questo dispositivo, sulla stessa rete Wi-Fi del computer: la mappa arriva qui da sola.</string>
+    <string name="sync_others">Altre</string>
+    <string name="sync_keep_auto">quello che ci sta (secondo lo spazio libero)</string>
 </resources>

@@ -4761,4 +4761,6 @@
     <string name="maps_welcome_title">Dobro došli u Karte</string>
     <string name="maps_welcome_intro">Tetra dolazi bez karte, tako da svatko dobije kartu koju želi, izvan mreže i svoju. Izrađujete je jednom, na računalu:</string>
     <string name="maps_welcome_steps">1. Na računalu otvorite Tetra › Postavke › Karte › Dodaj kartu.\n2. Odaberite svoju zemlju. Računalu je za to potreban internet.\n3. Neka računalo ostane uključeno i priključeno na struju dok se karta izrađuje: nekoliko minuta za malu zemlju, sat vremena ili više za veliku.\n4. Neka Tetra ostane otvorena na ovom uređaju, na istoj Wi-Fi mreži kao i računalo: karta dolazi ovamo sama.</string>
+    <string name="sync_others">Ostalo</string>
+    <string name="sync_keep_auto">ono što stane (prema slobodnom prostoru)</string>
 </resources>

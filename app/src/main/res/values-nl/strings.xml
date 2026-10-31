@@ -4660,4 +4660,6 @@
     <string name="maps_welcome_title">Welkom bij Kaarten</string>
     <string name="maps_welcome_intro">Tetra wordt zonder kaart geleverd, zodat iedereen de kaart krijgt die hij wil, offline en helemaal eigen. Dat doe je één keer, op je computer:</string>
     <string name="maps_welcome_steps">1. Open op je computer Tetra › Instellingen › Kaarten › Kaart toevoegen.\n2. Kies je land. De computer heeft hiervoor internet nodig.\n3. Laat de computer aan en op het stopcontact aangesloten terwijl de kaart wordt gemaakt: een paar minuten voor een klein land, een uur of langer voor een groot land.\n4. Houd Tetra open op dit apparaat, op hetzelfde Wi-Fi als de computer: de kaart komt vanzelf hierheen.</string>
+    <string name="sync_others">Overige</string>
+    <string name="sync_keep_auto">wat past (op basis van vrije ruimte)</string>
 </resources>

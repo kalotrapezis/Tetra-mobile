@@ -663,6 +663,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
             else e.file?.takeIf { e.saved }?.let { rel ->
                 runCatching { fetch(MailSync.PART + rel) }.onSuccess { fetched() }.onFailure { failed = it.shownMessage(context) ?: it.message; WriterLog.w("Mail: fetching a mail (${it.message})") }.getOrNull()
             }
+            f?.setLastModified(System.currentTimeMillis()) // opened: kept here at least another week (MailSync.drop)
             f?.let { runCatching { Mime.read(it.readBytes()) }.onFailure { WriterLog.e("Mail: reading a mail", it) }.getOrNull() }
         }
     }

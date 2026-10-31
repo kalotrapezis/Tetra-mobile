@@ -47,9 +47,16 @@ internal data class BackupResult(val checked: Int, val sent: Int, val alreadyThe
  * phone → computer, **receive** is computer → phone, **both** is both. Keep says what the source does with its
  * copy afterwards, and only "everything" — a Copy — is implemented; two-way forces it anyway.
  */
-internal data class SyncConnection(val content: String, val direction: String, val keep: String, val keepDays: Int = 30, val keepFavorites: Boolean = true) {
-    val sends: Boolean get() = direction == "send" || direction == "both"
-    val receives: Boolean get() = direction == "receive" || direction == "both"
+/**
+ * One row of a device's card on the computer (the computer owns them): photos, files, mail, other. A path follows its own
+ * row ([of]): Mail/… the mail row; Calendar, Contacts, Phone, Data, Timer, Maps, AI Assist the other row; the rest, the
+ * Trash among it, the files row. Mail goes both ways unless off. [keepAuto] (Automatic): the newest stay while at least
+ * 15 % of the device stays free ([SyncRules.overflow]); [keepDays] is then only a fallback.
+ */
+internal data class SyncConnection(val content: String, val direction: String, val keep: String, val keepDays: Int = 30, val keepFavorites: Boolean = true,
+    val keepAuto: Boolean = false, val keepBytes: Long? = null) {
+    val sends: Boolean get() = if (content == "mail") direction != "off" else direction == "send" || direction == "both"
+    val receives: Boolean get() = if (content == "mail") direction != "off" else direction == "receive" || direction == "both"
 
     /** The way this row goes, as the phone shows it before the computer's name: → send, ← receive, ⇄ both; null when off. */
     val arrow: String? get() = when (direction) {
@@ -62,12 +69,32 @@ internal data class SyncConnection(val content: String, val direction: String, v
     val moves: Boolean get() = keep == "nothing"
 
     companion object {
-        val defaults = listOf(SyncConnection("photos", "both", "everything"), SyncConnection("files", "both", "everything"))
+        val defaults = listOf(SyncConnection("photos", "both", "everything"), SyncConnection("files", "both", "everything"),
+            SyncConnection("mail", "both", "everything"), SyncConnection("other", "both", "everything"))
+        /** Which row a Drive path follows (the computer's sync.js contentOf). */
+        fun of(rel: String): String = rel.substringBefore('/').let { top -> when {
+            top == MailFiles.FOLDER -> "mail"
+            top != "Trash" && top in TetraSystem.SHARED -> "other"
+            else -> "files"
+        } }
+        /** A computer from before the four rows: mail and other as its files row says. */
+        fun complete(rows: List<SyncConnection>): List<SyncConnection> {
+            val files = rows.firstOrNull { it.content == "files" } ?: defaults[1]
+            return rows + listOf("mail", "other").filter { c -> rows.none { it.content == c } }.map { files.copy(content = it) }
+        }
     }
 }
 
 internal object SyncRules {
     private val hex64 = Regex("^[0-9a-f]{64}$")
+
+    /** Automatic (the card's promise): what may stay is the newest, as long as at least this much of the device stays free. */
+    const val FREE_PERCENT = 15
+    /** Of [oldestFirst], those to let go so that [FREE_PERCENT] % of the device's [size] is free again ([free] now). */
+    fun <T> overflow(oldestFirst: List<T>, bytes: (T) -> Long, free: Long, size: Long): List<T> {
+        var short = size * FREE_PERCENT / 100 - free
+        return oldestFirst.takeWhile { short > 0 && run { short -= bytes(it); true } }
+    }
 
     /** How many times a sync that died on a lost network is started again, once a network is back. */
     const val NETWORK_RETRIES = 3
@@ -220,12 +247,12 @@ internal class SyncStore(private val context: Context) : SQLiteOpenHelper(contex
      */
     fun connections(): List<SyncConnection> = prefs.getString("connections", null)
         ?.split(';')?.mapNotNull { row -> row.split(',').takeIf { it.size >= 3 }?.let {
-            SyncConnection(it[0], it[1], it[2], it.getOrNull(3)?.toIntOrNull() ?: 30, it.getOrNull(4) != "0")
+            SyncConnection(it[0], it[1], it[2], it.getOrNull(3)?.toIntOrNull() ?: 30, it.getOrNull(4) != "0", it.getOrNull(5) == "1", it.getOrNull(6)?.toLongOrNull())
         } }
-        ?.takeIf { it.isNotEmpty() } ?: SyncConnection.defaults
+        ?.takeIf { it.isNotEmpty() }?.let(SyncConnection::complete) ?: SyncConnection.defaults
 
     fun saveConnections(rows: List<SyncConnection>) =
-        prefs.edit().putString("connections", rows.joinToString(";") { "${it.content},${it.direction},${it.keep},${it.keepDays},${if (it.keepFavorites) 1 else 0}" }).apply()
+        prefs.edit().putString("connections", rows.joinToString(";") { "${it.content},${it.direction},${it.keep},${it.keepDays},${if (it.keepFavorites) 1 else 0},${if (it.keepAuto) 1 else 0},${it.keepBytes ?: ""}" }).apply()
 
     /** Trash items already safe in the purgatory, so they are not sent twice while Android counts down. */
     fun handedOver(uri: String) = uri in prefs.getStringSet("purgatory_sent", emptySet())!!
@@ -472,8 +499,9 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         (0 until array.length()).map { i ->
             val o = array.getJSONObject(i)
             SyncConnection(o.getString("content"), o.optString("direction", "both"), o.optString("keep", "everything"),
-                o.optInt("keepDays", 30).coerceAtLeast(1), o.optBoolean("keepFavorites", true))
-        }.ifEmpty { SyncConnection.defaults }
+                o.optInt("keepDays", 30).coerceAtLeast(1), o.optBoolean("keepFavorites", true), o.optBoolean("keepAuto"),
+                o.optLong("keepBytes", -1).takeIf { it >= 0 && !o.isNull("keepBytes") })
+        }.ifEmpty { SyncConnection.defaults }.let(SyncConnection::complete)
     }.getOrDefault(SyncConnection.defaults).also(store::saveConnections)
 
     /**
@@ -674,7 +702,6 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         }
         val rows = connections(host, p).associateBy { it.content }
         val photos = rows["photos"] ?: SyncConnection("photos", "both", "everything")
-        val files = rows["files"] ?: SyncConnection("files", "both", "everything")
         // Asking what the computer is missing is only worth the round trip if we are allowed to send it.
         // "Declined": deleted on the computer on purpose. Not sent again, and not counted as safe there either, so a
         // Move never offers to let this phone's copy go (the bug of 26 September: a trashed photo came back).
@@ -716,9 +743,12 @@ internal class SyncClient(private val context: Context, private val store: SyncS
             val cutoff = System.currentTimeMillis() - photos.keepDays * 86_400_000L
             val favorites = if (photos.keepFavorites) metadataStore.states(bySha.values.map { it.photoKey }).filterValues { it.favorite }.keys else emptySet()
             store.forgetQueued(store.queuedForRemoval()) // the window may have changed since the last sync
-            bySha.forEach { (sha, entry) ->
-                if (sha in onComputer && entry.takenMillis in 1 until cutoff && entry.photoKey !in favorites) store.queueForRemoval(entry.photoKey, sha)
-            }
+            val room = runCatching { android.os.StatFs(android.os.Environment.getExternalStorageDirectory().path) }.getOrNull()
+            val can = bySha.filter { (sha, entry) -> sha in onComputer && entry.takenMillis > 0 && entry.photoKey !in favorites }
+            // Automatic: the oldest offered until 15 % of the phone is free; else (or free storage unknown) the last keepDays
+            val going = if (photos.keepAuto && room != null) SyncRules.overflow(can.entries.sortedBy { it.value.takenMillis }, { it.value.sizeBytes }, room.availableBytes, room.totalBytes)
+                else can.entries.filter { it.value.takenMillis < cutoff }
+            going.forEach { (sha, entry) -> store.queueForRemoval(entry.photoKey, sha) }
         } else {
             // The card says Copy again. An offer to move photos off this phone must not outlive the rule that
             // made it, or a setting changed on the computer leaves a question here that nothing can answer.
@@ -733,7 +763,7 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         if (photos.receives) runCatching { received += pullPhotos(host, p, bySha.keys + alsoHere, failed, checkpoint, progress) }
             .onFailure { if (it is kotlinx.coroutines.CancellationException) throw it else failed += fail(R.string.sync_fail_photos_from, it.message) }
         // Files (the Drive folder) go over the same connection, by path rather than by gallery entry.
-        runCatching { received += syncFiles(host, p, files, failed, checkpoint, progress) }
+        runCatching { received += syncFiles(host, p, rows, failed, checkpoint, progress) }
             .onFailure { if (it is kotlinx.coroutines.CancellationException) throw it else failed += fail(R.string.sync_fail_drive_files, it.message) }
         runCatching { CalendarAlarms.plan(context) } // an event that arrived, or changed, rings on time
         TimerService.check(context)
@@ -1018,11 +1048,11 @@ internal class SyncClient(private val context: Context, private val store: SyncS
     suspend fun scopeOnly(scope: String): Int {
         val p = reach(store.pairing() ?: return 0)
         val host = p.hosts.first()
-        val files = connections(host, p).firstOrNull { it.content == "files" } ?: SyncConnection("files", "both", "everything")
-        if (!files.sends && !files.receives) return 0
+        val rows = connections(host, p).associateBy { it.content }
+        if (rows[if (scope == "mail") "mail" else "other"]?.let { !it.sends && !it.receives } == true) return 0 // that part's row is off
         val failed = mutableListOf<String>()
         val counts = IntArray(1)
-        val n = syncFiles(host, p, files, failed, {}, {}, scope, counts)
+        val n = syncFiles(host, p, rows, failed, {}, {}, scope, counts)
         runCatching { CalendarAlarms.plan(context) }
         if (scope == "timer") TimerService.check(context) // a timer started, paused or stopped elsewhere: here too
         if (scope == "contacts") ContactsAccount.soon(context) // a contact changed elsewhere: the phone's copy follows
@@ -1030,9 +1060,12 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         return n + counts[0] // what came here, and what went there or moved
     }
 
-    private suspend fun syncFiles(host: String, p: Pairing, connection: SyncConnection, failed: MutableList<String>, checkpoint: suspend () -> Unit, progress: (BackupProgress) -> Unit, scope: String? = null, counts: IntArray? = null): Int {
+    private suspend fun syncFiles(host: String, p: Pairing, rows: Map<String, SyncConnection>, failed: MutableList<String>, checkpoint: suspend () -> Unit, progress: (BackupProgress) -> Unit, scope: String? = null, counts: IntArray? = null): Int {
         val root = TetraFolder.root(android.os.Environment.getExternalStorageDirectory())
         if (!root.isDirectory) return 0
+        // each path by its own row; the part sync runs while any of files, mail and other is on
+        val row = { rel: String -> SyncConnection.of(rel).let { rows[it] ?: SyncConnection.defaults.first { d -> d.content == it } } }
+        if (rows.values.none { it.content != "photos" && (it.sends || it.receives) }) return 0
         val entries = if (scope == null) driveManifest.entries(root) else driveManifest.entries(root) { DriveScope.contains(scope, it) }
         val me = MailEngine.device()
         val manifest = JSONArray(entries.map { JSONObject().put("path", it.relativePath).put("sha256", it.sha256).put("size", it.sizeBytes).put("modified", it.modified) })
@@ -1044,10 +1077,10 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         val answer = postJson(host, p, if (scope == null) "/files/manifest" else "/files/manifest/scoped", JSONObject().put("files", manifest).put("device", about).apply { if (scope != null) put("scope", scope) })
         val want = answer.optJSONArray("want") ?: JSONArray()
         val sent = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
-        if (connection.sends) {
+        run {
             val byPath = entries.associateBy { it.relativePath }
             // never the PC's own Mail files back (when both changed, the PC asks: its version wins here)
-            val mine = (0 until want.length()).mapNotNull { byPath[want.getString(it)] }.filterNot { MailSync.mirrored(it.relativePath, me) }
+            val mine = (0 until want.length()).mapNotNull { byPath[want.getString(it)] }.filter { row(it.relativePath).sends && !MailSync.mirrored(it.relativePath, me) }
             // Mail's outbox: a .json starts the sending, so it goes after its attachments (MAIL_PLAN §12)
             val (starts, rest) = mine.partition { it.relativePath.startsWith(MailSync.OUTBOX) && it.relativePath.endsWith(".json") }
             for (batch in listOf(rest, starts)) eachInParallel(batch, context.getString(R.string.sync_stage_sending_files), checkpoint, progress, failed, { it.relativePath }) { entry ->
@@ -1060,38 +1093,41 @@ internal class SyncClient(private val context: Context, private val store: SyncS
             counts?.let { it[0] += sent.size + (answer.optJSONArray("moved")?.length() ?: 0) }
             // A Move keeps a window of files here and deletes the older ones — files only; system folders stay,
             // regular folders left empty go (asked 2026-09-25). Only what the computer confirmed holding in this sync
-            // goes: it did not ask for it, or it just received it verified.
-            if (connection.keep == "nothing" && scope == null) { // a part's sync never lets files go
+            // goes: it did not ask for it, or it just received it verified. Each path by its row's window: its last
+            // keepDays, or with Automatic the newest while 15 % of the device stays free. Mail has its own plan, below.
+            if (scope == null) { // a part's sync never lets files go
                 val asked = (0 until want.length()).mapTo(HashSet()) { want.getString(it) }
-                val cutoff = System.currentTimeMillis() - connection.keepDays * 86_400_000L
-                val favorites = if (connection.keepFavorites) driveMetadata.records().filter { it.favorite }.mapTo(HashSet()) { it.path } else emptySet()
-                entries.filter { e ->
-                    !e.relativePath.startsWith("Trash/") && !e.relativePath.startsWith(MailSync.PART) && (e.relativePath !in asked || e.relativePath in sent) && // Mail: its own plan, below
-                        e.modified in 1 until cutoff && e.relativePath !in favorites
-                }.also { going ->
+                val now = System.currentTimeMillis()
+                val favorites = driveMetadata.records().filter { it.favorite }.mapTo(HashSet()) { it.path }
+                val held = entries.filter { e -> val r = row(e.relativePath)
+                    r.content != "mail" && r.sends && r.moves && !e.relativePath.startsWith("Trash/") && (e.relativePath !in asked || e.relativePath in sent) &&
+                        e.modified > 0 && !(r.keepFavorites && e.relativePath in favorites)
+                }
+                val auto = { e: DriveFileEntry -> row(e.relativePath).keepAuto && stat != null }
+                (held.filter { !auto(it) && it.modified < now - row(it.relativePath).keepDays * 86_400_000L } +
+                    SyncRules.overflow(held.filter(auto).sortedBy { it.modified }, { it.sizeBytes }, stat?.availableBytes ?: 0, stat?.totalBytes ?: 0)).also { going ->
                     // Deleted, not trashed: the computer holds each one (asked 2026-09-25 — a Trash only keeps the room).
                     going.forEach { e -> runCatching { check(DriveRules.file(root, e.relativePath).delete()) { context.getString(R.string.sync_not_deleted) } }.onFailure { failed += "${e.relativePath}: ${it.message}" } }
                     DriveRules.removeEmptyFolders(root, going.map { DriveRules.parent(it.relativePath) }.toSet())
                 }
             }
         }
-        if (!connection.receives) return 0
         // A move the computer made is followed, never downloaded: the bytes are already here, under another name.
-        val moveTo = answer.optJSONArray("moveTo") ?: JSONArray()
-        counts?.let { it[0] += moveTo.length() }
-        for (i in 0 until moveTo.length()) runCatching {
-            val move = moveTo.getJSONObject(i)
+        val moveTo = answer.optJSONArray("moveTo")?.let { a -> (0 until a.length()).map(a::getJSONObject) }.orEmpty()
+            .filter { row(it.optString("from")).receives && row(it.optString("to")).receives }
+        counts?.let { it[0] += moveTo.size }
+        for (move in moveTo) runCatching {
             moveFile(root, move.getString("from"), move.getString("to"))
         }.onFailure { failed += fail(R.string.sync_fail_moving, it.message) }
 
         val have = answer.optJSONArray("have") ?: JSONArray()
         // Mail: only what this device keeps (its setting on the Devices page, MAIL_PLAN §14); the rest comes on demand
-        val offered = (0 until have.length()).map(have::getJSONObject)
+        val offered = (0 until have.length()).map(have::getJSONObject).filter { row(it.optString("path")).receives }
         val storage = MailStorage.read(MailFiles.root(root), MailEngine.device())
         val local = entries.filter { it.relativePath.startsWith(MailSync.PART) && !MailSync.outgoing(it.relativePath) }
         val keep = MailSync.plan(local.associate { it.relativePath to it.sizeBytes } +
             (if (storage.mode == MailStorage.COPY) offered.filter { it.optString("path").startsWith(MailSync.PART) }.associate { it.optString("path") to it.optLong("size") } else emptyMap()),
-            storage.budget(stat?.availableBytes ?: -1, local.sumOf { it.sizeBytes }), storage.since())
+            storage.budget(stat?.availableBytes ?: -1, stat?.totalBytes ?: -1, local.sumOf { it.sizeBytes }), storage.since())
         val incoming = offered.filter { !(storage.off && it.optString("path").startsWith(MailSync.PART)) && MailSync.take(it.optString("path"), storage, keep) }
         if (scope == null) {
             val asked = (0 until want.length()).mapTo(HashSet()) { want.getString(it) }
@@ -1100,7 +1136,7 @@ internal class SyncClient(private val context: Context, private val store: SyncS
                 val f = File(root, TetraSystem.onDisk(e.relativePath))
                 // Mail off for this device: none of the PC's mail stays here (this device's own accounts do)
                 if (storage.off && MailSync.pcMail(e.relativePath, me, own)) f.delete()
-                else if (MailSync.drop(e.relativePath, f, keep, held = connection.sends && (e.relativePath !in asked || e.relativePath in sent))) f.delete()
+                else if (MailSync.drop(e.relativePath, f, keep, held = row(e.relativePath).sends && (e.relativePath !in asked || e.relativePath in sent))) f.delete()
             }
             runCatching { MailStorage.report(MailFiles.root(root), MailEngine.device()) }
         }
@@ -1148,7 +1184,8 @@ internal class SyncClient(private val context: Context, private val store: SyncS
                 target.copyTo(old, overwrite = true)
             }
             if (!part.renameTo(target)) throw SyncException(context.getString(R.string.sync_not_in_place))
-            file.optLong("modified").takeIf { it > 0 }?.let { target.setLastModified(it) }
+            // a mail keeps its arrival here as its time: let go a week after it came or was opened, not by the mail's date
+            file.optLong("modified").takeIf { it > 0 && !rel.startsWith(MailSync.PART) }?.let { target.setLastModified(it) }
             driveManifest.remember(DriveRules.relative(root, target), target, sha)
         } finally {
             part.delete()

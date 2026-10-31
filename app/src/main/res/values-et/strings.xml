@@ -4660,4 +4660,6 @@
     <string name="maps_welcome_title">Tere tulemast Kaartidesse</string>
     <string name="maps_welcome_intro">Tetra tuleb ilma kaardita, et igaüks saaks just selle kaardi, mida soovib, võrguühenduseta ja omaenda. Teete selle ühe korra ära, oma arvutis:</string>
     <string name="maps_welcome_steps">1. Avage oma arvutis Tetra › Seaded › Kaardid › Lisa kaart.\n2. Valige oma riik. Selleks vajab arvuti internetti.\n3. Hoidke arvuti sisse lülitatud ja vooluvõrku ühendatud, kuni kaarti tehakse: väikese riigi puhul paar minutit, suure puhul tund või rohkem.\n4. Hoidke Tetra selles seadmes avatuna, samas Wi-Fi-võrgus kui arvuti: kaart jõuab siia ise.</string>
+    <string name="sync_others">Muud</string>
+    <string name="sync_keep_auto">seda, mis mahub (vaba ruumi järgi)</string>
 </resources>

@@ -4963,4 +4963,6 @@
     <string name="maps_welcome_title">Fáilte go Léarscáileanna</string>
     <string name="maps_welcome_intro">Tagann Tetra gan léarscáil, ionas go bhfaigheann gach duine an léarscáil a theastaíonn uaidh, as líne agus a chuid féin. Déanann tú é uair amháin, ar do ríomhaire:</string>
     <string name="maps_welcome_steps">1. Ar do ríomhaire, oscail Tetra › Socruithe › Léarscáileanna › Cuir léarscáil leis.\n2. Roghnaigh do thír. Teastaíonn idirlíon ón ríomhaire chuige seo.\n3. Fág an ríomhaire air agus plugáilte isteach cé go bhfuil an léarscáil á déanamh: cúpla nóiméad do thír bheag, uair an chloig nó níos mó do thír mhór.\n4. Fág Tetra oscailte ar an ngléas seo, ar an Wi-Fi céanna leis an ríomhaire: tagann an léarscáil anseo uaithi féin.</string>
+    <string name="sync_others">Eile</string>
+    <string name="sync_keep_auto">an méid a oireann (de réir an spáis shaor)</string>
 </resources>

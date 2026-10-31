@@ -95,7 +95,7 @@ class SyncConnectionTest {
 
     @Test
     fun `a computer too old to answer is treated as two-way, which is what it always did`() {
-        assertEquals(listOf("photos", "files"), SyncConnection.defaults.map { it.content })
+        assertEquals(listOf("photos", "files", "mail", "other"), SyncConnection.defaults.map { it.content })
         assertTrue(SyncConnection.defaults.all { it.sends && it.receives && it.keep == "everything" })
     }
 }
@@ -159,4 +159,27 @@ class SyncConnectionOffTest {
         assertFalse(off.receives)
         assertNull(off.arrow) // said "Photos · not synced"
     }
+
+    @Test fun eachPathFollowsItsOwnRow() {
+        assertEquals("mail", SyncConnection.of("Mail/index.jsonl"))
+        assertEquals("other", SyncConnection.of("Calendar/Personal/a.ics"))
+        assertEquals("other", SyncConnection.of("AI Assist/ai.json"))
+        assertEquals("files", SyncConnection.of("Trash/a.ics")) // the Trash is Files'
+        assertEquals("files", SyncConnection.of("Documents/a.txt"))
+        val mail = SyncConnection("mail", "send", "nothing")
+        assertTrue(mail.sends && mail.receives) // mail goes both ways unless off
+        assertFalse(SyncConnection("mail", "off", "everything").let { it.sends || it.receives })
+        // a computer from before the four rows: mail and other as its files row
+        val old = SyncConnection.complete(listOf(SyncConnection("photos", "send", "nothing"), SyncConnection("files", "receive", "everything")))
+        assertEquals(listOf("photos", "files", "mail", "other"), old.map { it.content })
+        assertEquals("receive", old.first { it.content == "other" }.direction)
+    }
+
+    @Test fun automaticLetsTheOldestGoUntil15PercentIsFree() {
+        val sizes = listOf(3L, 4L, 5L, 6L) // oldest first
+        assertEquals(listOf(3L, 4L), SyncRules.overflow(sizes, { it }, free = 8, size = 100)) // 15 free wanted: 7 short
+        assertEquals(emptyList<Long>(), SyncRules.overflow(sizes, { it }, free = 15, size = 100))
+        assertEquals(sizes, SyncRules.overflow(sizes, { it }, free = 0, size = 1000)) // all of it is not enough: all goes
+    }
 }
+

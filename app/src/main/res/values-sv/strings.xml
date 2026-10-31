@@ -4660,4 +4660,6 @@
     <string name="maps_welcome_title">Välkommen till Kartor</string>
     <string name="maps_welcome_intro">Tetra kommer utan karta, så att alla får den karta de vill ha, offline och sin egen. Du gör den en gång, på din dator:</string>
     <string name="maps_welcome_steps">1. Öppna Tetra › Inställningar › Kartor › Lägg till en karta på din dator.\n2. Välj ditt land. Datorn behöver internet för det.\n3. Låt datorn vara på och ansluten till eluttaget medan kartan görs: några minuter för ett litet land, en timme eller mer för ett stort.\n4. Låt appen Tetra vara öppen på den här enheten, på samma Wi-Fi som datorn: kartan kommer hit av sig själv.</string>
+    <string name="sync_others">Övrigt</string>
+    <string name="sync_keep_auto">det som ryms (efter ledigt utrymme)</string>
 </resources>

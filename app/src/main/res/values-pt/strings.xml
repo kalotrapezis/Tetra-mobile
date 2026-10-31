@@ -4761,4 +4761,6 @@
     <string name="maps_welcome_title">Boas-vindas aos Mapas</string>
     <string name="maps_welcome_intro">O Tetra vem sem mapa, para que cada pessoa tenha o mapa que quer, offline e só seu. Cria-o uma só vez, no seu computador:</string>
     <string name="maps_welcome_steps">1. No seu computador, abra Tetra › Definições › Mapas › Adicionar um mapa.\n2. Escolha o seu país. O computador precisa de internet para isto.\n3. Mantenha o computador a funcionar e ligado à corrente enquanto o mapa é criado: alguns minutos para um país pequeno, uma hora ou mais para um grande.\n4. Mantenha o Tetra aberto neste dispositivo, na mesma rede Wi-Fi que o computador: o mapa chega aqui sozinho.</string>
+    <string name="sync_others">Outras</string>
+    <string name="sync_keep_auto">o que couber (segundo o espaço livre)</string>
 </resources>
