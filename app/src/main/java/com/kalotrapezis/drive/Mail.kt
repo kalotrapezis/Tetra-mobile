@@ -239,6 +239,9 @@ internal object MailSync {
         var left = limit
         val (attachments, bodies) = files.keys.filter(::dated).partition { ".files/" in it }
         for (group in listOf(bodies, attachments)) for (rel in group.sortedByDescending { DATED.find(it)!!.groupValues[1] }) {
+            // an attachment only beside its own mail: one huge mail stopping the mails early must not leave older mails'
+            // attachments here without them ("only attachments, no mails")
+            if (group === attachments && rel.substringBefore(".files/") + ".eml" !in keep) continue
             val size = files.getValue(rel)
             if (size > left) break // oldest dropped first: nothing older than the first that does not fit
             keep += rel; left -= size

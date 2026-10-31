@@ -395,5 +395,15 @@ class MailTest {
         assertEquals("a_b.txt", MailExport.free(dir, "a/b.txt").name) // never a path out of Documents
         dir.deleteRecursively(); src.delete()
     }
+
+    @Test fun anAttachmentStaysOnlyBesideItsOwnMail() {
+        val new = "Mail/a/Inbox/2026/2026-10-01 0800 X - new"
+        val huge = "Mail/a/Inbox/2026/2026-09-01 0800 X - huge"
+        val old = "Mail/a/Inbox/2026/2026-08-01 0800 X - old"
+        val files = mapOf("$new.eml" to 10L, "$huge.eml" to 900L, "$old.eml" to 10L,
+            "$new.files/a.pdf" to 50L, "$old.files/b.pdf" to 50L)
+        // 100 bytes: the new mail fits, the huge one stops the mails; the old mail's attachment would fit, but its mail is not here
+        assertEquals(setOf("$new.eml", "$new.files/a.pdf"), MailSync.plan(files, 100))
+    }
 }
 
