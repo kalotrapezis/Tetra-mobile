@@ -236,19 +236,30 @@ internal object MailRequests {
 internal object MailSignatures {
     private fun file(root: File) = File(root, "signatures.json")
     private fun all(root: File) = runCatching { JSONObject(file(root).readText()) }.getOrDefault(JSONObject())
-    fun text(root: File, address: String): String = all(root).optJSONObject(address.lowercase())?.optString("html")?.let { html ->
-        html.replace(Regex("<br\\s*/?>|</p>|</div>", RegexOption.IGNORE_CASE), "\n").replace(Regex("<[^>]+>"), "")
-            .replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&nbsp;", " ").replace("&amp;", "&").trim()
-    }.orEmpty()
-    fun set(root: File, address: String, text: String) {
+    /** The signature as stored: HTML. */
+    fun html(root: File, address: String): String = all(root).optJSONObject(address.lowercase())?.optString("html").orEmpty()
+    /** Whether it is more than text and line breaks (a designed signature: shown and edited as HTML). */
+    fun designed(html: String) = Regex("<(div|p|span|a|img|table|tr|td|b|i|u|strong|em|h[1-6]|font|ul|ol|li|style|center|hr|html|body)\\b[^>]*>", RegexOption.IGNORE_CASE).containsMatchIn(html)
+    /** The same as plain text, for a text/plain copy and the preview. */
+    fun text(root: File, address: String): String = plain(html(root, address))
+    fun plain(html: String) = html.replace(Regex("<(style|script|title)[^>]*>[\\s\\S]*?</\\1>", RegexOption.IGNORE_CASE), "")
+        .replace(Regex("<br\\s*/?>|</p>|</div>|</h\\d>|</tr>", RegexOption.IGNORE_CASE), "\n").replace(Regex("<[^>]+>"), "")
+        .replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&nbsp;", " ").replace("&amp;", "&")
+        .lines().map { it.trim() }.filter { it.isNotEmpty() }.joinToString("\n")
+    /** [input] kept as HTML when it is HTML (a pasted page: only what is in its body), else as text with its lines. */
+    fun stored(input: String): String = if (!designed(input)) escaped(input) else
+        (Regex("<body[^>]*>([\\s\\S]*)</body>", RegexOption.IGNORE_CASE).find(input)?.groupValues?.get(1) ?: input).trim()
+    /** Whether the signature already begins with the "-- " line, so none is added. */
+    fun dashed(html: String) = plain(html).startsWith("--")
+    fun set(root: File, address: String, input: String) {
         val all = all(root)
         val was = all.optJSONObject(address.lowercase()) ?: JSONObject().put("newMail", true).put("replies", true).put("position", "above")
-        all.put(address.lowercase(), was.put("html", html(text)))
+        all.put(address.lowercase(), was.put("html", stored(input)))
         val part = File(root, ".signatures.json.part").apply { parentFile?.mkdirs(); writeText(all.toString(2)) }
         check(part.renameTo(file(root)))
     }
     /** Plain text as the HTML of a mail's body: escaped, its lines kept. */
-    fun html(text: String) = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
+    fun escaped(text: String) = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
 }
 
 /** The Filter modal's choices (MAIL_PLAN §9), the computer's mailView.ts: quick filters on top, sorting and grouping below. */

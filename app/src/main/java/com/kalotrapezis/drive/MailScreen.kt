@@ -90,6 +90,19 @@ internal val MAIL_TEXT = Color(0xFFD27AAE)
 private val GREEN = Color(0xFF3FB27F)
 private val ORANGE = Color(0xFFE0A43A)
 
+/**
+ * Where Mail's islands stand (the user, 31 Oct: "UI options as the Office has, top or bottom or automatic"): Office's own
+ * rule — "auto" at the top while a mouse is in use and at the bottom for a finger (OfficeUi.mouse), or always one.
+ */
+internal object MailLook {
+    var place by mutableStateOf("auto"); private set
+    /** At the top only on a tablet or a big screen: on a phone they stay at the bottom (the user, 31 Oct: "that breaks the UI"). */
+    val top: Boolean @Composable get() = LocalConfiguration.current.screenWidthDp >= 700 && (place == "top" || (place == "auto" && OfficeUi.mouse))
+    private fun p(c: android.content.Context) = c.getSharedPreferences("mail", android.content.Context.MODE_PRIVATE)
+    fun load(c: android.content.Context) { place = p(c).getString("islands", "auto") ?: "auto" }
+    fun set(c: android.content.Context, where: String) { place = where; p(c).edit().putString("islands", where).apply() }
+}
+
 internal fun mailRoot() = MailFiles.root(TetraFolder.root(Environment.getExternalStorageDirectory()))
 
 private val ROLE_NAMES = mapOf("Inbox" to R.string.mail_inbox, "Drafts" to R.string.mail_drafts, "Sent" to R.string.mail_sent,
@@ -217,7 +230,8 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
                     IconButton(onClick = back) { Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.home_back_to_home)) }
                 }
                 Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.app_mail), Modifier.padding(horizontal = 18.dp, vertical = 13.dp), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(stringResource(R.string.app_mail), Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 13.dp), fontWeight = FontWeight.Bold, maxLines = 1,
+                        overflow = TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 }
             }
             LazyColumn(Modifier.fillMaxSize().padding(horizontal = 12.dp), contentPadding = PaddingValues(bottom = 24.dp)) {
@@ -265,7 +279,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
     // ---- the list ----
     val list: @Composable (Modifier) -> Unit = { m ->
         Box(m) {
-            LazyColumn(Modifier.fillMaxSize().statusBarsPadding(), contentPadding = PaddingValues(top = 72.dp, bottom = 120.dp, start = 8.dp, end = 8.dp),
+            LazyColumn(Modifier.fillMaxSize().statusBarsPadding(), contentPadding = PaddingValues(top = if (MailLook.top) 150.dp else 72.dp, bottom = if (MailLook.top) 24.dp else 120.dp, start = 8.dp, end = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (data == null) item { MailHint(stringResource(R.string.mail_reading)) }
                 else if (shown.isEmpty()) item { MailHint(stringResource(when {
@@ -320,7 +334,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
                 }
             }
             // the list's island: New · Sync · Filter · Archive, the rest pulled up; while choosing, the selection island
-            Box(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp)) {
+            Box(if (MailLook.top) Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 72.dp) else Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp)) {
                 IslandBottomBar(expand = { listDrawer = true }, visible = !listDrawer && !filterOpen) {
                     if (selected.isNotEmpty()) {
                         MailIslandItem(R.drawable.ic_archive, stringResource(R.string.mail_do_archive)) { act("archive", selected) }
@@ -348,10 +362,10 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
         Box(m) {
             val many = mails.filter { it.id in selected }
             if (wide && many.size > 1) SelectionPane(many, accountOf, Modifier.statusBarsPadding().padding(16.dp), later)
-            else if (open != null) MailPage(open, accountOf[open.account], root, showBack = !three, back = { openId = null }, openFile = openFile, say = { message = it }, fetched = { version++ })
+            else if (open != null) MailPage(open, accountOf[open.account], root, islandTop = MailLook.top, showBack = !three, back = { openId = null }, openFile = openFile, say = { message = it }, fetched = { version++ })
             else if (wide) MailHint(stringResource(R.string.mail_choose), Modifier.align(Alignment.Center))
             // the mail's island: one big Απάντηση; the rest pulled up from it
-            if (open != null && !(wide && many.size > 1)) Box(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp)) {
+            if (open != null && !(wide && many.size > 1)) Box(if (MailLook.top) Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 8.dp, end = 16.dp) else Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp)) {
                 IslandBottomBar(expand = { mailDrawer = true }, visible = !mailDrawer) {
                     Surface(color = MAIL_ACCENT, contentColor = Color.White, shape = CircleShape, modifier = Modifier.clickable { writing = MailDraft("reply", open) }) {
                         Row(Modifier.padding(horizontal = 26.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -363,7 +377,8 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
         }
     }
 
-    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    LaunchedEffect(Unit) { MailLook.load(context) }
+    Surface(Modifier.fillMaxSize().noticePointer(), color = MaterialTheme.colorScheme.background) { // a mouse or a finger: where "auto" puts the islands
         Box(Modifier.fillMaxSize()) {
             val compose: @Composable (Modifier) -> Unit = { m -> Box(m) { MailCompose(writing!!, accounts, root) { said -> writing = null; said?.let { message = it } } } }
             when {
@@ -583,7 +598,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
  * text. Pictures and anything else from the web load only when allowed (MAIL_PLAN §9c): once, always from this sender,
  * or always (Settings).
  */
-@Composable private fun MailPage(e: MailEntry, account: MailAccount?, root: File, showBack: Boolean, back: () -> Unit, openFile: (File) -> Unit, say: (String) -> Unit, fetched: () -> Unit) {
+@Composable private fun MailPage(e: MailEntry, account: MailAccount?, root: File, islandTop: Boolean, showBack: Boolean, back: () -> Unit, openFile: (File) -> Unit, say: (String) -> Unit, fetched: () -> Unit) {
     val context = LocalContext.current
     var failed by remember(e.id) { mutableStateOf<String?>(null) }
     var got by remember(e.id) { mutableIntStateOf(0) } // an attachment fetched: the cards again
@@ -622,7 +637,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
     var risky by remember { mutableStateOf<Pair<String, File?>?>(null) }
     val html = message?.let { it.html ?: it.text?.let(Mime::textAsHtml) }
     val blocked = html != null && !(once || allowed) && Mime.remote(html)
-    Column(Modifier.fillMaxSize().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
+    Column(Modifier.fillMaxSize().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = if (islandTop) 84.dp else 12.dp)) { // under an island at the top
         Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             if (showBack) Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape) {
                 IconButton(onClick = back) { Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.common_back)) }
@@ -700,7 +715,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
     } }, update = { w ->
         w.settings.blockNetworkLoads = !load
         w.settings.blockNetworkImage = !load
-        val page = "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{margin:12px;word-wrap:break-word}img{max-width:100%;height:auto}</style>$html"
+        val page = "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{margin:12px;word-wrap:break-word}img{max-width:100%;height:auto}*{max-width:100%!important;box-sizing:border-box}</style>$html"
         if (w.tag != page) { w.tag = page; w.loadDataWithBaseURL(null, page, "text/html", "utf-8", null) }
     }, onRelease = { it.destroy() }, modifier = modifier)
 }

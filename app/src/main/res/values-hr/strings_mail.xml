@@ -185,4 +185,7 @@
     <string name="mail_outbox_send">Računalo je šalje čim se sinkronizira.</string>
     <string name="mail_outbox_draft">Računalo sprema skicu čim se sinkronizira.</string>
     <string name="mail_outbox_failed">Računalo nije moglo poslati ove poruke</string>
+    <string name="mail_signature_hint">Napišite tekst ili zalijepite HTML potpisa (iz Thunderbirda, s web-stranice): zadržava se kakav jest.</string>
+    <string name="mail_islands">Gumbi</string>
+    <string name="mail_islands_summary">Gdje stoje. Automatski: gore s mišem, dolje s prstom.</string>
 </resources>

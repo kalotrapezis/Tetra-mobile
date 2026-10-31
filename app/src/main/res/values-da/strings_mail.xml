@@ -181,4 +181,7 @@
     <string name="mail_outbox_send">Pc’en sender den, så snart den synkroniserer.</string>
     <string name="mail_outbox_draft">Pc’en gemmer kladden, så snart den synkroniserer.</string>
     <string name="mail_outbox_failed">Pc’en kunne ikke sende disse</string>
+    <string name="mail_signature_hint">Skriv tekst, eller indsæt en signaturs HTML (fra Thunderbird, fra en webside): den bevares, som den er.</string>
+    <string name="mail_islands">Knapperne</string>
+    <string name="mail_islands_summary">Hvor de står. Automatisk: øverst med mus, nederst med fingeren.</string>
 </resources>

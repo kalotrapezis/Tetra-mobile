@@ -193,4 +193,7 @@
     <string name="mail_outbox_send">Seolann an ríomhaire é a luaithe a shioncrónaíonn sé.</string>
     <string name="mail_outbox_draft">Coinníonn an ríomhaire an dréacht a luaithe a shioncrónaíonn sé.</string>
     <string name="mail_outbox_failed">Níorbh fhéidir leis an ríomhaire iad seo a sheoladh</string>
+    <string name="mail_signature_hint">Scríobh téacs, nó greamaigh HTML sínithe (ó Thunderbird, ó leathanach gréasáin): coinnítear mar atá sé.</string>
+    <string name="mail_islands">Na cnaipí</string>
+    <string name="mail_islands_summary">Cá seasann siad. Uathoibríoch: thuas le luch, thíos le méar.</string>
 </resources>

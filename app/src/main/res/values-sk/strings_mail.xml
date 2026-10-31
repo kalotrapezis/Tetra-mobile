@@ -189,4 +189,7 @@
     <string name="mail_outbox_send">PC ju odošle, hneď ako sa synchronizuje.</string>
     <string name="mail_outbox_draft">PC koncept uloží, hneď ako sa synchronizuje.</string>
     <string name="mail_outbox_failed">PC tieto správy nemohol odoslať</string>
+    <string name="mail_signature_hint">Napíšte text alebo vložte HTML podpisu (z Thunderbirdu, z webovej stránky): zostane tak, ako je.</string>
+    <string name="mail_islands">Tlačidlá</string>
+    <string name="mail_islands_summary">Kde sú. Automaticky: hore s myšou, dole s prstom.</string>
 </resources>

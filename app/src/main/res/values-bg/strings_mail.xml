@@ -181,4 +181,7 @@
     <string name="mail_outbox_send">Компютърът го изпраща веднага щом се синхронизира.</string>
     <string name="mail_outbox_draft">Компютърът пази черновата веднага щом се синхронизира.</string>
     <string name="mail_outbox_failed">Компютърът не можа да изпрати тези писма</string>
+    <string name="mail_signature_hint">Напишете текст или поставете HTML на подпис (от Thunderbird, от уеб страница): запазва се както е.</string>
+    <string name="mail_islands">Бутоните</string>
+    <string name="mail_islands_summary">Къде стоят. Автоматично: горе с мишка, долу с пръст.</string>
 </resources>

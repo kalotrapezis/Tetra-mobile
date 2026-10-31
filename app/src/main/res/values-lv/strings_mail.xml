@@ -185,4 +185,7 @@
     <string name="mail_outbox_send">Dators to nosūtīs, tiklīdz sinhronizēs.</string>
     <string name="mail_outbox_draft">Dators saglabās melnrakstu, tiklīdz sinhronizēs.</string>
     <string name="mail_outbox_failed">Dators nevarēja nosūtīt šīs vēstules</string>
+    <string name="mail_signature_hint">Ierakstiet tekstu vai ielīmējiet paraksta HTML (no Thunderbird, no tīmekļa lapas): tas tiek saglabāts, kā ir.</string>
+    <string name="mail_islands">Pogas</string>
+    <string name="mail_islands_summary">Kur tās atrodas. Automātiski: augšā ar peli, apakšā ar pirkstu.</string>
 </resources>

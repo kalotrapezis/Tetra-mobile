@@ -181,4 +181,7 @@
     <string name="mail_outbox_send">Der PC sendet sie, sobald er synchronisiert.</string>
     <string name="mail_outbox_draft">Der PC speichert den Entwurf, sobald er synchronisiert.</string>
     <string name="mail_outbox_failed">Der PC konnte diese nicht senden</string>
+    <string name="mail_signature_hint">Schreib Text oder füge das HTML einer Signatur ein (aus Thunderbird, von einer Webseite): Es bleibt, wie es ist.</string>
+    <string name="mail_islands">Die Schaltflächen</string>
+    <string name="mail_islands_summary">Wo sie stehen. Automatisch: oben mit Maus, unten mit dem Finger.</string>
 </resources>

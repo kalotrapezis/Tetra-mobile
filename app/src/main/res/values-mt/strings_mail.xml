@@ -189,4 +189,7 @@
     <string name="mail_outbox_send">Il-PC jibagħtu hekk kif jissinkronizza.</string>
     <string name="mail_outbox_draft">Il-PC iżomm l-abbozz hekk kif jissinkronizza.</string>
     <string name="mail_outbox_failed">Il-PC ma setax jibgħat dawn</string>
+    <string name="mail_signature_hint">Ikteb test, jew waħħal l-HTML ta’ firma (minn Thunderbird, minn paġna web): tinżamm kif inhi.</string>
+    <string name="mail_islands">Il-buttuni</string>
+    <string name="mail_islands_summary">Fejn joqogħdu. Waħedhom: fuq bil-maws, isfel bis-saba’.</string>
 </resources>

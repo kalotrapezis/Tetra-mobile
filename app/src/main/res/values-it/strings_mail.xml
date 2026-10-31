@@ -181,4 +181,7 @@
     <string name="mail_outbox_send">Il PC lo invia appena si sincronizza.</string>
     <string name="mail_outbox_draft">Il PC salva la bozza appena si sincronizza.</string>
     <string name="mail_outbox_failed">Il PC non è riuscito a inviare questi</string>
+    <string name="mail_signature_hint">Scrivi del testo o incolla l\'HTML di una firma (di Thunderbird, di una pagina web): resta così com\'è.</string>
+    <string name="mail_islands">I pulsanti</string>
+    <string name="mail_islands_summary">Dove stanno. In automatico: in alto con il mouse, in basso con il dito.</string>
 </resources>

@@ -191,4 +191,7 @@
     <string name="mail_outbox_send">Ο υπολογιστής θα το στείλει μόλις συγχρονιστεί.</string>
     <string name="mail_outbox_draft">Ο υπολογιστής θα κρατήσει το πρόχειρο μόλις συγχρονιστεί.</string>
     <string name="mail_outbox_failed">Ο υπολογιστής δεν μπόρεσε να στείλει αυτά</string>
+    <string name="mail_signature_hint">Γράψε κείμενο ή επικόλλησε το HTML μιας υπογραφής (του Thunderbird, μιας σελίδας): κρατιέται όπως είναι.</string>
+    <string name="mail_islands">Τα κουμπιά</string>
+    <string name="mail_islands_summary">Πού στέκονται. Μόνο του: πάνω με ποντίκι, κάτω με το δάχτυλο.</string>
 </resources>

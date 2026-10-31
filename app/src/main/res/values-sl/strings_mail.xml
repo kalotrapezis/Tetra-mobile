@@ -189,4 +189,7 @@
     <string name="mail_outbox_send">Računalnik ga pošlje takoj, ko se sinhronizira.</string>
     <string name="mail_outbox_draft">Računalnik shrani osnutek takoj, ko se sinhronizira.</string>
     <string name="mail_outbox_failed">Računalnik teh sporočil ni mogel poslati</string>
+    <string name="mail_signature_hint">Napišite besedilo ali prilepite HTML podpisa (iz Thunderbirda, s spletne strani): ohrani se tak, kot je.</string>
+    <string name="mail_islands">Gumbi</string>
+    <string name="mail_islands_summary">Kje stojijo. Samodejno: zgoraj z miško, spodaj s prstom.</string>
 </resources>

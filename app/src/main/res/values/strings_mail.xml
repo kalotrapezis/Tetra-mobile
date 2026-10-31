@@ -192,4 +192,7 @@
     <string name="mail_outbox_send">The PC sends it as soon as it syncs.</string>
     <string name="mail_outbox_draft">The PC keeps the draft as soon as it syncs.</string>
     <string name="mail_outbox_failed">The PC could not send these</string>
+    <string name="mail_signature_hint">Write text, or paste a signature\'s HTML (Thunderbird\'s, a web page\'s): it is kept as it is.</string>
+    <string name="mail_islands">The buttons</string>
+    <string name="mail_islands_summary">Where they stand. By itself: at the top with a mouse, at the bottom with a finger.</string>
 </resources>

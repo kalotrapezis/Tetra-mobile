@@ -181,4 +181,7 @@
     <string name="mail_outbox_send">Tietokone lähettää sen heti, kun se synkronoi.</string>
     <string name="mail_outbox_draft">Tietokone tallentaa luonnoksen heti, kun se synkronoi.</string>
     <string name="mail_outbox_failed">Tietokone ei voinut lähettää näitä</string>
+    <string name="mail_signature_hint">Kirjoita tekstiä tai liitä allekirjoituksen HTML (Thunderbirdistä, verkkosivulta): se säilyy sellaisenaan.</string>
+    <string name="mail_islands">Painikkeet</string>
+    <string name="mail_islands_summary">Missä ne ovat. Automaattisesti: hiirellä ylhäällä, sormella alhaalla.</string>
 </resources>

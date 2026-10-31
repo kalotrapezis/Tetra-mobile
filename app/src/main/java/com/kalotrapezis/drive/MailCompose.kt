@@ -111,7 +111,7 @@ internal object MailOutbox {
 
 /** A mail written here, ready to go: what [MailSend] sends or saves. */
 internal data class MailOut(val account: String, val to: String, val cc: String, val bcc: String, val subject: String, val body: String,
-    val attachments: List<MailAttachment>, val inReplyTo: String? = null, val references: String? = null)
+    val attachments: List<MailAttachment>, val inReplyTo: String? = null, val references: String? = null, val html: String? = null)
 
 /**
  * Sending and drafts for the accounts this device fetches (MAIL_PLAN §10 step 4): SMTP to send, then a copy in Sent
@@ -131,9 +131,14 @@ internal object MailSend {
             m.references?.let { setHeader("References", it) }
             setHeader("User-Agent", "Tetra")
             sentDate = java.util.Date()
-            if (m.attachments.isEmpty()) setText(m.body, "UTF-8")
-            else setContent(MimeMultipart().apply {
+            // the text and, beside it, the HTML (a designed signature keeps its look)
+            val text = if (m.html == null) MimeBodyPart().apply { setText(m.body, "UTF-8") } else MimeBodyPart().apply { setContent(MimeMultipart("alternative").apply {
                 addBodyPart(MimeBodyPart().apply { setText(m.body, "UTF-8") })
+                addBodyPart(MimeBodyPart().apply { setText(m.html, "UTF-8", "html") })
+            }) }
+            if (m.attachments.isEmpty()) setContent(MimeMultipart().apply { addBodyPart(text) })
+            else setContent(MimeMultipart().apply {
+                addBodyPart(text)
                 m.attachments.forEach { a ->
                     val bytes = a.file?.readBytes() ?: c.contentResolver.openInputStream(a.uri!!)!!.use { it.readBytes() }
                     addBodyPart(MimeBodyPart().apply {
@@ -211,7 +216,9 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
     var showCc by remember { mutableStateOf(cc.isNotEmpty()) }
     var subject by remember { mutableStateOf(of?.let { MailSend.subject(draft.kind, it.subject) }.orEmpty()) }
     var signed by remember { mutableStateOf(true) }
-    val signature = remember(me) { MailSignatures.text(root, me?.address.orEmpty()) }
+    val signatureHtml = remember(me) { MailSignatures.html(root, me?.address.orEmpty()) }
+    val signature = remember(signatureHtml) { MailSignatures.plain(signatureHtml) }
+    val dash = if (MailSignatures.dashed(signatureHtml)) "" else "-- \n" // one that has its own "-- " line gets no second
     val messageId = remember { "<${java.util.UUID.randomUUID()}@" } // one per mail written: the PC replaces a saved draft by it
     val at = of?.let { Instant.ofEpochMilli(it.date).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", java.util.Locale.getDefault())) }.orEmpty()
     // the line over the quoted mail: the signature goes above it
@@ -244,17 +251,18 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
     fun signedBody(): String {
         if (!signed || signature.isBlank()) return body
         val i = quoteHead?.let { body.indexOf("\n\n$it") } ?: -1
-        return if (i >= 0) body.substring(0, i).trimEnd() + "\n\n-- \n" + signature + body.substring(i) else body.trimEnd() + "\n\n-- \n" + signature
+        return if (i >= 0) body.substring(0, i).trimEnd() + "\n\n" + dash + signature + body.substring(i) else body.trimEnd() + "\n\n" + dash + signature
     }
     /** The same as HTML for the PC's outbox, the signature in its <div class="tetra-signature"> (MAIL_PLAN §12). */
     fun bodyHtml(): String {
-        val esc = MailSignatures::html
+        val esc = MailSignatures::escaped
         if (!signed || signature.isBlank()) return esc(body)
-        val sig = "<div class=\"tetra-signature\">-- <br>${esc(signature)}</div>"
+        val sig = "<div class=\"tetra-signature\">${if (dash.isEmpty()) "" else "-- <br>"}$signatureHtml</div>" // the stored HTML as it is
         val i = quoteHead?.let { body.indexOf("\n\n$it") } ?: -1
         return if (i >= 0) esc(body.substring(0, i).trimEnd()) + sig + esc(body.substring(i)) else esc(body.trimEnd()) + sig
     }
-    fun out() = MailOut(from, to, cc, bcc, subject, signedBody(), attachments, of?.let { original?.headers?.get("message-id") }, of?.let { listOfNotNull(original?.headers?.get("references"), original?.headers?.get("message-id")).joinToString(" ").ifEmpty { null } })
+    fun out() = MailOut(from, to, cc, bcc, subject, signedBody(), attachments, of?.let { original?.headers?.get("message-id") },
+        of?.let { listOfNotNull(original?.headers?.get("references"), original?.headers?.get("message-id")).joinToString(" ").ifEmpty { null } }, html = bodyHtml())
     fun go(save: Boolean) {
         if (!save && to.isBlank()) { problem = context.getString(R.string.mail_no_recipient); return }
         busy = true; problem = null
@@ -279,7 +287,7 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
     }
 
     Box(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize().statusBarsPadding().imePadding().padding(horizontal = 16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.fillMaxSize().statusBarsPadding().imePadding().padding(horizontal = 16.dp).padding(top = if (MailLook.top) 76.dp else 0.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(Modifier.padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape) {
                     IconButton(onClick = { if (touched) asking = true else close(null) }) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.mail_discard)) }
@@ -314,12 +322,12 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
                 }
             }
             OutlinedTextField(body, { body = it }, label = { Text(stringResource(R.string.mail_body)) }, modifier = Modifier.fillMaxWidth().heightIn(min = 240.dp))
-            if (signed && signature.isNotBlank()) Text("-- \n$signature", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+            if (signed && signature.isNotBlank()) Text(dash + signature, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
             problem?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             Box(Modifier.heightIn(min = 120.dp))
         }
         // the writing island: two big buttons with words; the rest pulled up
-        Box(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().imePadding().padding(bottom = 12.dp)) {
+        Box(if (MailLook.top) Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 8.dp) else Modifier.align(Alignment.BottomCenter).navigationBarsPadding().imePadding().padding(bottom = 12.dp)) {
             IslandBottomBar(expand = { panel = true }, visible = !panel) {
                 Surface(color = MAIL_ACCENT, contentColor = Color.White, shape = CircleShape, modifier = Modifier.clickable(enabled = !busy) { go(false) }) {
                     Row(Modifier.padding(horizontal = 22.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {

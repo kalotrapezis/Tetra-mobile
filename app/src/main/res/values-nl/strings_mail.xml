@@ -181,4 +181,7 @@
     <string name="mail_outbox_send">De pc verstuurt het zodra hij synchroniseert.</string>
     <string name="mail_outbox_draft">De pc bewaart het concept zodra hij synchroniseert.</string>
     <string name="mail_outbox_failed">De pc kon deze niet versturen</string>
+    <string name="mail_signature_hint">Schrijf tekst of plak de HTML van een handtekening (uit Thunderbird, van een webpagina): die blijft zoals hij is.</string>
+    <string name="mail_islands">De knoppen</string>
+    <string name="mail_islands_summary">Waar ze staan. Vanzelf: boven met een muis, onder met een vinger.</string>
 </resources>

@@ -185,4 +185,7 @@
     <string name="mail_outbox_send">PC-ul îl trimite imediat ce se sincronizează.</string>
     <string name="mail_outbox_draft">PC-ul păstrează ciorna imediat ce se sincronizează.</string>
     <string name="mail_outbox_failed">PC-ul nu a putut trimite acestea</string>
+    <string name="mail_signature_hint">Scrie text sau lipește HTML-ul unei semnături (din Thunderbird, de pe o pagină web): este păstrat așa cum este.</string>
+    <string name="mail_islands">Butoanele</string>
+    <string name="mail_islands_summary">Unde stau. Automat: sus cu mouse-ul, jos cu degetul.</string>
 </resources>

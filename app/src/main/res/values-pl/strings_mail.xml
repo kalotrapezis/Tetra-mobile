@@ -189,4 +189,7 @@
     <string name="mail_outbox_send">Komputer wyśle ją, gdy tylko się zsynchronizuje.</string>
     <string name="mail_outbox_draft">Komputer zachowa wersję roboczą, gdy tylko się zsynchronizuje.</string>
     <string name="mail_outbox_failed">Komputer nie mógł wysłać tych wiadomości</string>
+    <string name="mail_signature_hint">Wpisz tekst albo wklej HTML podpisu (z Thunderbirda, ze strony internetowej): zostanie zachowany bez zmian.</string>
+    <string name="mail_islands">Przyciski</string>
+    <string name="mail_islands_summary">Gdzie stoją. Samo: na górze z myszą, na dole z palcem.</string>
 </resources>

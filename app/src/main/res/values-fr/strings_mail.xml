@@ -185,4 +185,7 @@
     <string name="mail_outbox_send">Le PC l’envoie dès qu’il se synchronise.</string>
     <string name="mail_outbox_draft">Le PC garde le brouillon dès qu’il se synchronise.</string>
     <string name="mail_outbox_failed">Le PC n’a pas pu envoyer ces messages</string>
+    <string name="mail_signature_hint">Écrivez du texte, ou collez le HTML d’une signature (de Thunderbird, d’une page web) : il est gardé tel quel.</string>
+    <string name="mail_islands">Les boutons</string>
+    <string name="mail_islands_summary">Où ils se placent. Automatique : en haut avec une souris, en bas avec le doigt.</string>
 </resources>

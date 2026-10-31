@@ -199,4 +199,16 @@ class MailTest {
         assertEquals(listOf("Θέμα" to "No address"), MailOutbox.failed(dir).map { it.first to it.second })
         dir.deleteRecursively()
     }
+
+    @Test fun aDesignedSignatureIsKeptAsItsHtml() {
+        val page = """<!DOCTYPE html><html><head><title>Υπογραφή</title></head><body style="margin:0"><div class="moz-signature">-- <br>
+            <div style="width:700px"><h2 style="margin:0">Θεολόγος Καλοτραπέζης</h2><p>Δάσκαλος Πληροφορικής</p>
+            <a href="tel:+30">📞 Τηλέφωνο</a></div></div></body></html>"""
+        val kept = MailSignatures.stored(page)
+        assertTrue(kept.startsWith("<div class=\"moz-signature\">")); assertFalse(kept.contains("<title>")); assertFalse(kept.contains("<body"))
+        assertTrue(MailSignatures.designed(kept)); assertTrue(MailSignatures.dashed(kept)) // it has its own "-- ": none is added
+        assertEquals("--\nΘεολόγος Καλοτραπέζης\nΔάσκαλος Πληροφορικής\n📞 Τηλέφωνο", MailSignatures.plain(kept))
+        assertEquals("Θεολόγος<br>NUP &amp; co", MailSignatures.stored("Θεολόγος\nNUP & co")) // text stays text
+        assertFalse(MailSignatures.designed("Θεολόγος<br>NUP"))
+    }
 }

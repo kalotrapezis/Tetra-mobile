@@ -181,4 +181,7 @@
     <string name="mail_outbox_send">A számítógép elküldi, amint szinkronizál.</string>
     <string name="mail_outbox_draft">A számítógép megőrzi a piszkozatot, amint szinkronizál.</string>
     <string name="mail_outbox_failed">A számítógép nem tudta elküldeni ezeket</string>
+    <string name="mail_signature_hint">Írj szöveget, vagy illeszd be egy aláírás HTML-kódját (a Thunderbirdből, egy weboldalról): úgy marad, ahogy van.</string>
+    <string name="mail_islands">A gombok</string>
+    <string name="mail_islands_summary">Hol állnak. Automatikusan: egérrel felül, ujjal alul.</string>
 </resources>

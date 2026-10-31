@@ -181,4 +181,7 @@
     <string name="mail_outbox_send">Arvuti saadab selle kohe, kui sünkroonib.</string>
     <string name="mail_outbox_draft">Arvuti hoiab mustandi alles kohe, kui sünkroonib.</string>
     <string name="mail_outbox_failed">Arvuti ei saanud neid saata</string>
+    <string name="mail_signature_hint">Kirjutage tekst või kleepige allkirja HTML (Thunderbirdist, veebilehelt): see jääb nii, nagu on.</string>
+    <string name="mail_islands">Nupud</string>
+    <string name="mail_islands_summary">Kus need asuvad. Automaatselt: hiirega üleval, sõrmega all.</string>
 </resources>

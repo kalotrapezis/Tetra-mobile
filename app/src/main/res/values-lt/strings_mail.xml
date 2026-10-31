@@ -189,4 +189,7 @@
     <string name="mail_outbox_send">Kompiuteris jį išsiųs, kai tik susinchronizuos.</string>
     <string name="mail_outbox_draft">Kompiuteris išsaugos juodraštį, kai tik susinchronizuos.</string>
     <string name="mail_outbox_failed">Kompiuteris negalėjo išsiųsti šių laiškų</string>
+    <string name="mail_signature_hint">Parašykite tekstą arba įklijuokite parašo HTML (iš Thunderbird, iš tinklalapio): jis išlieka toks, koks yra.</string>
+    <string name="mail_islands">Mygtukai</string>
+    <string name="mail_islands_summary">Kur jie yra. Automatiškai: viršuje su pele, apačioje su pirštu.</string>
 </resources>
