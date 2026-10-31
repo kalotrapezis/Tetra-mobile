@@ -82,6 +82,12 @@ Per account, and overridable per folder, as Thunderbird's *Disk space* and *Arch
   - always keep: starred, tagged "Keep" (each a switch).
 - **Free space on the server**: optionally delete from the server mail already archived locally and older than *N*.
 - A preview before the first clean-up: "This will remove 1 240 mails (3.1 GB) — Show them".
+- **First-run check** (the user, 31 Oct): before the first archive or clean-up of an account, and on demand
+  («Έλεγχος αρχειοθέτησης»): (1) a dry run — what would be archived where, deleted on the server, deleted locally, with
+  counts and sizes, each server deletion backed by a checked local copy; (2) the real run and a report of what was done;
+  (3) a **garbage scan** — files not in the index, index lines without a file, attachment folders without their .eml,
+  partial downloads, empty folders, leftover requests/outbox files, duplicate copies of one mail — with «Καθαρισμός»
+  after the same kind of preview. An automated test runs whole cycles against a test server and asserts no garbage.
 
 ## 4. Folders: unified, expanding
 
