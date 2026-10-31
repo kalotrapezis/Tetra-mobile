@@ -266,4 +266,13 @@ class MailTest {
         assertTrue(t.run("mail_write", org.json.JSONObject().put("to", "Κανείς").put("subject", "x").put("body", "y")).forModel.contains("no e-mail address"))
         tetra.deleteRecursively()
     }
+
+    @Test fun anAccountThisDeviceFetchesCanBeRenamed() {
+        val dir = java.nio.file.Files.createTempDirectory("mail").toFile()
+        File(dir, "accounts.${MailEngine.device()}.json").writeText("""[{"id":"a@b.gr","name":"b.gr","color":"#e5534b","addedOn":"phone"},{"id":"c@d.gr","name":"d.gr"}]""")
+        MailEngine.rename(dir, "a@b.gr", "Masters")
+        assertEquals(listOf("Masters", "d.gr"), MailEngine.ownAccounts(dir).map { it.getString("name") })
+        assertEquals("#e5534b", MailEngine.ownAccounts(dir)[0].getString("color")) // the rest kept
+        dir.deleteRecursively()
+    }
 }

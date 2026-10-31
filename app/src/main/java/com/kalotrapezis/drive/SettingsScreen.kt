@@ -848,17 +848,22 @@ internal fun SettingsTab(
     if (adding) MailAddAccount { adding = false; version++ }
     managing?.let { a ->
         var pass by remember { mutableStateOf("") }
+        var name by remember { mutableStateOf(a.name) } // Work, Personal, Masters…: what the folders and the list call it
+        val microsoft = a.json?.optString("provider") == "microsoft" // signs in with Microsoft: no password here
         AlertDialog(onDismissRequest = { managing = null }, title = { Text(a.name) },
             text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(a.address)
-                OutlinedTextField(pass, { pass = it }, singleLine = true, label = { Text(stringResource(R.string.mail_new_password)) },
+                OutlinedTextField(name, { name = it }, singleLine = true, label = { Text(stringResource(R.string.common_name)) }, modifier = Modifier.fillMaxWidth())
+                if (!microsoft) OutlinedTextField(pass, { pass = it }, singleLine = true, label = { Text(stringResource(R.string.mail_new_password)) },
                     visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
                 TextButton(onClick = { MailEngine.remove(context.applicationContext, mailRoot(), a.id); MailEngine.schedule(context.applicationContext); managing = null; version++ }) {
                     Text(stringResource(R.string.mail_remove_here), color = MaterialTheme.colorScheme.error)
                 }
             } },
-            confirmButton = { TextButton(enabled = pass.isNotBlank(), onClick = { MailSecret.set(context, a.id, pass.trim()); MailPrefs.setState(context, a.id, null)
-                Thread { MailEngine.syncAll(context.applicationContext) }.start(); managing = null; version++ }) { Text(stringResource(R.string.common_save)) } },
+            confirmButton = { TextButton(enabled = pass.isNotBlank() || (name.isNotBlank() && name.trim() != a.name), onClick = {
+                if (name.isNotBlank() && name.trim() != a.name) runCatching { MailEngine.rename(mailRoot(), a.id, name.trim()) }.onFailure { WriterLog.e("Mail: renaming an account", it) }
+                if (pass.isNotBlank()) { MailSecret.set(context, a.id, pass.trim()); MailPrefs.setState(context, a.id, null); Thread { MailEngine.syncAll(context.applicationContext) }.start() }
+                managing = null; version++ }) { Text(stringResource(R.string.common_save)) } },
             dismissButton = { TextButton(onClick = { managing = null }) { Text(stringResource(R.string.common_cancel)) } })
     }
 }

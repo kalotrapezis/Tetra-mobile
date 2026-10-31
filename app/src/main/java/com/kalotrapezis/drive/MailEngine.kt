@@ -200,6 +200,11 @@ internal object MailEngine {
         acc
     }
 
+    /** A new name for an account this device fetches (Work, Personal, Masters…), in its accounts.<device>.json; the PC shows it too. */
+    fun rename(root: File, id: String, name: String) = synchronized(lock) {
+        saveAccounts(root, ownAccounts(root).map { if (it.optString("id") == id) JSONObject(it.toString()).put("name", name) else it })
+    }
+
     /** Out of this device: its password, its account line and its index lines (the mail files stay; the PC keeps its own). */
     fun remove(c: Context, root: File, id: String) = synchronized(lock) {
         MailSecret.set(c, id, null)
