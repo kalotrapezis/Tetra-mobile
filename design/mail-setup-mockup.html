@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<title>Tetra Mail: add an account</title>
+<style>
+  :root { --bg: #0e1112; --island: #1d2224; --island2: #262c2f; --text: #e8ecee; --muted: #9aa3a7; --accent: #1ba3a8; --ok: #2fa86a; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: #070909; color: var(--text); font: 15px/1.4 "Noto Sans", system-ui, sans-serif; padding: 24px; display: flex; gap: 26px; }
+  .phone { width: 360px; height: 760px; background: var(--bg); border: 10px solid #000; border-radius: 30px; padding: 48px 18px 18px; position: relative; display: flex; flex-direction: column; gap: 14px; }
+  .status { position: absolute; top: 12px; left: 22px; right: 22px; display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .top { display: flex; gap: 10px; align-items: center; }
+  .round { width: 44px; height: 44px; border-radius: 50%; background: var(--island); display: grid; place-items: center; flex: none; }
+  .title { background: var(--island); border-radius: 999px; padding: 11px 18px; font-weight: 600; flex: 1; }
+  .step { color: var(--accent); font-size: 13px; font-weight: 600; letter-spacing: .04em; }
+  h1 { font-size: 24px; line-height: 1.2; }
+  .muted { color: var(--muted); font-size: 14px; }
+  .field { background: var(--island); border-radius: 16px; padding: 14px 16px; font-size: 17px; border: 2px solid var(--accent); }
+  .found { background: var(--island); border-radius: 16px; padding: 14px 16px; display: flex; gap: 12px; align-items: center; }
+  .logo { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; color: #fff; flex: none; }
+  .btn { border-radius: 999px; padding: 14px 18px; font-weight: 700; text-align: center; font-size: 16px; }
+  .primary { background: var(--accent); color: #fff; }
+  .ghost { background: var(--island); color: var(--text); }
+  .link { color: var(--accent); text-align: center; font-size: 14px; }
+  .spacer { flex: 1; }
+  .card { background: var(--island); border-radius: 18px; padding: 6px 16px; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid #2a3033; font-size: 14.5px; }
+  .row:last-child { border: 0; }
+  .row span:last-child { color: var(--muted); }
+  .check { width: 64px; height: 64px; border-radius: 50%; background: var(--ok); display: grid; place-items: center; font-size: 34px; color: #fff; align-self: center; }
+  .dots { display: flex; gap: 6px; justify-content: center; }
+  .dots i { width: 8px; height: 8px; border-radius: 50%; background: #3a4144; }
+  .dots i.on { background: var(--accent); width: 22px; border-radius: 4px; }
+  .cap { color: var(--muted); font-size: 13px; margin-top: 8px; max-width: 360px; }
+</style>
+</head>
+<body>
+<div>
+<div class="phone">
+  <div class="status"><span>10:41</span><span>▾ ▮</span></div>
+  <div class="top"><div class="round">‹</div><div class="title">Νέος λογαριασμός</div></div>
+  <div class="step">ΒΗΜΑ 1 ΑΠΟ 3</div>
+  <h1>Ποια είναι η διεύθυνσή σου;</h1>
+  <div class="field">t.kalotrapezis@nup.ac.cy</div>
+  <div class="found"><div class="logo" style="background:#2f6fd6">M</div><div>Microsoft 365<div class="muted">Βρέθηκε αυτόματα · Neapolis University Pafos</div></div></div>
+  <div class="spacer"></div>
+  <div class="link">Ρυθμίσεις χειροκίνητα</div>
+  <div class="btn primary">Συνέχεια</div>
+  <div class="dots"><i class="on"></i><i></i><i></i></div>
+</div>
+<p class="cap">1 · Only the address. Tetra finds the provider itself (here from the domain's records: Microsoft 365).</p>
+</div>
+
+<div>
+<div class="phone">
+  <div class="status"><span>10:41</span><span>▾ ▮</span></div>
+  <div class="top"><div class="round">‹</div><div class="title">Νέος λογαριασμός</div></div>
+  <div class="step">ΒΗΜΑ 2 ΑΠΟ 3</div>
+  <h1>Σύνδεση</h1>
+  <p class="muted">Θα ανοίξει η σελίδα της Microsoft. Συνδέσου εκεί όπως πάντα· το Tetra δεν βλέπει ποτέ τον κωδικό σου.</p>
+  <div class="btn primary" style="display:flex;gap:10px;justify-content:center;align-items:center"><span class="logo" style="width:26px;height:26px;border-radius:6px;background:#fff;color:#2f6fd6;font-size:14px">M</span>Σύνδεση με Microsoft</div>
+  <div class="spacer"></div>
+  <div class="card" style="padding:14px 16px">
+    <div style="font-weight:600;margin-bottom:6px">Για Gmail</div>
+    <p class="muted">«Άνοιγμα της Google» → φτιάξε έναν κωδικό εφαρμογής → αντέγραψέ τον. Όταν γυρίσεις, το Tetra τον βρίσκει μόνο του.</p>
+  </div>
+  <div class="card" style="padding:14px 16px">
+    <div style="font-weight:600;margin-bottom:6px">Για sch.gr</div>
+    <p class="muted">Ο κωδικός σου, σε ένα πεδίο.</p>
+  </div>
+  <div class="dots"><i></i><i class="on"></i><i></i></div>
+</div>
+<p class="cap">2 · Sign in the way the provider needs: Microsoft's own page; for Gmail a guided app password (read from the clipboard); for sch.gr just the password. The two grey cards show the other cases.</p>
+</div>
+
+<div>
+<div class="phone">
+  <div class="status"><span>10:41</span><span>▾ ▮</span></div>
+  <div class="top"><div class="round">‹</div><div class="title">Νέος λογαριασμός</div></div>
+  <div class="step">ΒΗΜΑ 3 ΑΠΟ 3</div>
+  <div class="check">✓</div>
+  <h1 style="text-align:center">nup.ac.cy είναι έτοιμο</h1>
+  <p class="muted" style="text-align:center">Κατεβαίνουν τα μηνύματα: 1.240 από 5.800</p>
+  <div class="card">
+    <div class="row"><span>Όνομα</span><span>nup.ac.cy ●</span></div>
+    <div class="row"><span>Αρχειοθέτηση τοπικά</span><span>Ναι</span></div>
+    <div class="row"><span>Καθαρισμός στον server</span><span>3 / 2 χρόνια</span></div>
+    <div class="row"><span>Ειδοποιήσεις</span><span>Ναι</span></div>
+    <div class="row"><span>Και στο κινητό & tablet</span><span>⇄ μέσω PC</span></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="btn ghost">Αλλαγή</div>
+  <div class="btn primary">Έτοιμο</div>
+  <div class="dots"><i></i><i></i><i class="on"></i></div>
+</div>
+<p class="cap">3 · Done: folders found by the server's own markings, download started, the defaults on one card. One tap.</p>
+</div>
+</body>
+</html>

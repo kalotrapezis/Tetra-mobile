@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<title>Tetra Mail: settings</title>
+<style>
+  :root { --bg: #0e1112; --island: #1d2224; --island2: #262c2f; --text: #e8ecee; --muted: #9aa3a7; --accent: #1ba3a8; --ok: #2fa86a; --warn: #e8912d;
+    --gmail: #e8574a; --sch: #3b82f6; --nup: #f2a93b; --hot: #22a06b; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: #070909; color: var(--text); font: 14.5px/1.4 "Noto Sans", system-ui, sans-serif; padding: 24px; display: grid; grid-template-columns: auto auto; gap: 26px; }
+  .tab { width: 1000px; height: 780px; overflow: hidden; background: var(--bg); border: 10px solid #000; border-radius: 28px; padding: 44px 16px 16px; position: relative; display: grid; grid-template-columns: 330px 1fr; gap: 14px; }
+  .status { position: absolute; top: 12px; left: 22px; right: 22px; display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .top { display: flex; gap: 10px; margin-bottom: 10px; }
+  .round { width: 44px; height: 44px; border-radius: 50%; background: var(--island); display: grid; place-items: center; flex: none; }
+  .pill { background: var(--island); border-radius: 999px; padding: 11px 16px; flex: 1; color: var(--muted); }
+  .cats { background: var(--island); border-radius: 22px; padding: 10px; }
+  .hdr { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; padding: 10px 12px 4px; }
+  .cat { display: flex; gap: 12px; align-items: center; padding: 9px 12px; border-radius: 14px; }
+  .cat.on { background: var(--island2); font-weight: 600; }
+  .ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font-size: 16px; flex: none; }
+  .page { background: var(--island); border-radius: 22px; padding: 20px 24px; overflow: hidden; }
+  .page h2 { font-size: 22px; margin-bottom: 4px; }
+  .sec { color: var(--muted); font-size: 13px; font-weight: 600; margin: 16px 0 2px; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid #2a3033; }
+  .row .t { flex: 1; }
+  .row .t small { display: block; color: var(--muted); font-size: 12.5px; }
+  .row .v { color: var(--muted); }
+  .chev { color: var(--muted); font-size: 18px; }
+  .sw { width: 40px; height: 23px; border-radius: 999px; background: var(--accent); position: relative; flex: none; }
+  .sw::after { content: ""; position: absolute; right: 3px; top: 3px; width: 17px; height: 17px; border-radius: 50%; background: #fff; }
+  .sw.off { background: #454c4f; } .sw.off::after { right: auto; left: 3px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .add { color: var(--accent); font-weight: 600; }
+  .tool { display: flex; gap: 6px; background: var(--island2); border-radius: 12px; padding: 6px; margin-top: 8px; align-items: center; }
+  .tool span { padding: 4px 10px; border-radius: 8px; }
+  .tool .src { margin-left: auto; display: flex; gap: 8px; align-items: center; color: var(--muted); }
+  .editor { background: #fff; color: #222; border-radius: 0 0 12px 12px; padding: 16px; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5; min-height: 150px; }
+  .editor .name { font-weight: 700; color: #0e6f73; }
+  .editor .logo { display: inline-block; background: #1ba3a8; color: #fff; font-weight: 800; padding: 4px 8px; border-radius: 6px; margin-right: 8px; }
+  .seg { display: inline-flex; background: var(--island2); border-radius: 999px; padding: 3px; }
+  .seg span { padding: 5px 12px; border-radius: 999px; color: var(--muted); font-size: 13px; }
+  .seg .on { background: var(--accent); color: #fff; }
+  .demo { background: var(--island2); border-radius: 14px; padding: 10px 14px; margin-top: 12px; display: flex; gap: 10px; align-items: center; font-size: 13.5px; }
+  .demo b { color: var(--accent); margin-left: auto; }
+  .cap { color: var(--muted); font-size: 13px; margin-top: 8px; max-width: 1000px; }
+  .catlist { overflow: hidden; }
+</style>
+</head>
+<body>
+<!-- 1: the Mail category -->
+<div>
+<div class="tab">
+  <div class="status"><span>10:41</span><span>▾ ▮</span></div>
+  <div class="catlist">
+    <div class="top"><div class="round">‹</div><div class="pill">🔍 Αναζήτηση ρυθμίσεων</div></div>
+    <div class="cats">
+      <div class="hdr">Tetra</div>
+      <div class="cat"><span class="ic" style="background:#2b3a3c">⇄</span>Συγχρονισμός</div>
+      <div class="cat"><span class="ic" style="background:#2b3a3c">◐</span>Εμφάνιση</div>
+      <div class="hdr">Εφαρμογές</div>
+      <div class="cat on"><span class="ic" style="background:#1ba3a8">✉</span>Αλληλογραφία</div>
+      <div class="cat"><span class="ic" style="background:#2f6fd6">▦</span>Ημερολόγιο</div>
+      <div class="cat"><span class="ic" style="background:#f2b705;color:#222">✎</span>Σημειώσεις</div>
+      <div class="cat"><span class="ic" style="background:#22a06b">☎</span>Τηλέφωνο</div>
+      <div class="cat"><span class="ic" style="background:#8a5cf6">✦</span>Βοηθός AI</div>
+    </div>
+  </div>
+  <div class="page">
+    <h2>Αλληλογραφία</h2>
+    <div class="sec">Λογαριασμοί</div>
+    <div class="row"><span class="dot" style="background:var(--gmail)"></span><span class="t">Gmail<small>kalotrapezis@gmail.com · <span style="color:var(--ok)">● όλα τοπικά</span></small></span><span class="chev">›</span></div>
+    <div class="row"><span class="dot" style="background:var(--sch)"></span><span class="t">sch.gr<small>goodtable@sch.gr · <span style="color:var(--ok)">● όλα τοπικά</span></small></span><span class="chev">›</span></div>
+    <div class="row"><span class="dot" style="background:var(--nup)"></span><span class="t">nup.ac.cy<small>t.kalotrapezis@nup.ac.cy · ⇄ μέσω PC · <span style="color:var(--warn)">● 43 μόνο στον server</span></small></span><span class="chev">›</span></div>
+    <div class="row"><span class="add">＋ Προσθήκη λογαριασμού</span></div>
+    <div class="sec">Γράψιμο και ανάγνωση</div>
+    <div class="row"><span class="t">Υπογραφές<small>Μία HTML υπογραφή για κάθε διεύθυνση</small></span><span class="chev">›</span></div>
+    <div class="row"><span class="t">Εμφάνιση<small>Μήνυμα δίπλα ή κάτω από τη λίστα, νήματα</small></span><span class="chev">›</span></div>
+    <div class="sec">Προστασία</div>
+    <div class="row"><span class="t">Ασφάλεια και απόρρητο<small>Εξωτερικό περιεχόμενο: ερώτηση κάθε φορά</small></span><span class="chev">›</span></div>
+    <div class="row"><span class="t">Ανεπιθύμητα και φίλτρα</span><span class="chev">›</span></div>
+    <div class="row" style="border:0"><span class="t">Αρχειοθέτηση και καθαρισμός<small>Τοπικά: ναι · Server: 3 / 2 χρόνια</small></span><span class="chev">›</span></div>
+  </div>
+</div>
+<p class="cap">Settings › Αλληλογραφία: the accounts with their backup state and «Προσθήκη λογαριασμού» (opens the three-step setup), then one row per page.</p>
+</div>
+
+<!-- 2: signature -->
+<div>
+<div class="tab" style="grid-template-columns: 1fr">
+  <div class="status"><span>10:41</span><span>▾ ▮</span></div>
+  <div>
+    <div class="top"><div class="round">‹</div><div class="pill" style="color:var(--text);font-weight:600;flex:none">Υπογραφές</div><div class="seg" style="margin-left:auto;align-self:center"><span>Gmail</span><span>sch.gr</span><span class="on">nup.ac.cy</span></div></div>
+    <div class="page">
+      <div class="tool"><span><b>B</b></span><span><i>I</i></span><span><u>U</u></span><span>🎨</span><span>🔗</span><span>🖼</span><span class="src">HTML <span class="sw off"></span></span></div>
+      <div class="editor">
+        <div class="name">Θεολόγος Καλοτραπέζης</div>
+        <div>Μεταπτυχιακός φοιτητής · Neapolis University Pafos</div>
+        <div style="margin-top:8px"><span class="logo">NUP</span><a style="color:#0e6f73">t.kalotrapezis@nup.ac.cy</a></div>
+      </div>
+      <div class="sec">Πότε μπαίνει</div>
+      <div class="row"><span class="t">Σε νέα μηνύματα</span><span class="sw"></span></div>
+      <div class="row"><span class="t">Σε απαντήσεις και προωθήσεις</span><span class="sw"></span></div>
+      <div class="row" style="border:0"><span class="t">Θέση στις απαντήσεις</span><span class="seg"><span class="on">Πάνω από το παλιό</span><span>Κάτω</span></span></div>
+    </div>
+  </div>
+</div>
+<p class="cap">Υπογραφές: one per address (the switch at the top). A rich editor with bold, colour, link and an image/logo; the «HTML» switch shows the source to paste or edit. A plain-text copy is made automatically.</p>
+</div>
+
+<!-- 3: security -->
+<div style="grid-column: 1 / 3">
+<div class="tab" style="grid-template-columns: 1fr; height: 760px">
+  <div class="status"><span>10:41</span><span>▾ ▮</span></div>
+  <div>
+    <div class="top"><div class="round">‹</div><div class="pill" style="color:var(--text);font-weight:600;flex:none">Ασφάλεια και απόρρητο</div></div>
+    <div class="page">
+      <div class="sec" style="margin-top:0">Εξωτερικό περιεχόμενο</div>
+      <div class="row"><span class="t">Φόρτωση εξωτερικού περιεχομένου<small>Εικόνες και γραμματοσειρές από το internet. Κλειστό: ρωτάει σε κάθε μήνυμα.</small></span><span class="sw off"></span></div>
+      <div class="demo">🛡 Οι εικόνες αυτού του μηνύματος δεν φορτώθηκαν. <b>Εμφάνιση</b><b style="margin-left:14px">Πάντα από αυτόν</b></div>
+      <div class="row"><span class="t">Επιτρεπόμενοι αποστολείς<small>moodle.nup.ac.cy, skroutz.gr και 3 ακόμα</small></span><span class="chev">›</span></div>
+      <div class="row"><span class="t">Αποκλεισμός κρυφών εικόνων παρακολούθησης<small>Ακόμα κι όταν φορτώνονται οι εικόνες</small></span><span class="sw"></span></div>
+      <div class="sec">Προειδοποιήσεις</div>
+      <div class="row"><span class="t">Σύνδεσμος που δείχνει αλλού<small>Όταν το κείμενο και η πραγματική διεύθυνση διαφέρουν</small></span><span class="sw"></span></div>
+      <div class="row"><span class="t">Επικίνδυνα συνημμένα<small>.exe, .js, .bat, μακροεντολές σε έγγραφα Office</small></span><span class="sw"></span></div>
+      <div class="row"><span class="t">Η πραγματική διεύθυνση δίπλα στο όνομα</span><span class="sw"></span></div>
+      <div class="row" style="border:0"><span class="t">Αποδεικτικά ανάγνωσης</span><span class="seg"><span>Ποτέ</span><span class="on">Ερώτηση</span><span>Πάντα</span></span></div>
+    </div>
+  </div>
+</div>
+<p class="cap">Ασφάλεια και απόρρητο: external content off by default, so every mail asks (the bar shown in the middle is what appears at the top of such a mail), with the allowed senders editable; tracking pixels blocked; warnings for misleading links and risky attachments; read receipts.</p>
+</div>
+</body>
+</html>
