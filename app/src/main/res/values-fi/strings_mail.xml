@@ -195,4 +195,13 @@
     <string name="mail_assist">✦ Ehdota avustajan avulla</string>
     <string name="mail_assist_working">✦ Avustaja kirjoittaa…</string>
     <string name="mail_draft_card">Luonnos – napauta viimeistelläksesi ja lähettääksesi sen</string>
+    <string name="mail_check">Tarkista uudet viestit</string>
+    <string name="mail_check_summary">Tileille, jotka tämä laite hakee itse. Heti: kun viestejä saapuu Sähköpostin ollessa auki, ja 15 minuutin välein sen ollessa kiinni. Tietokone tarkistaa omat ⇄-tilinsä; Sähköpostin avaaminen pyytää sitä tarkistamaan heti.</string>
+    <string name="mail_check_now">Heti</string>
+    <string name="mail_check_every">%d minuutin välein</string>
+    <string name="mail_check_manual">Manuaalisesti</string>
+    <string name="mail_use_here">Käytä myös tällä laitteella</string>
+    <string name="mail_use_here_summary">Tietokone hakee tämän tilin. Käytä sitä myös täällä: tietokone välittää sen salasanan paritetun, salatun yhteyden kautta, se tallennetaan tämän laitteen suojattuun tallennustilaan, ja laite hakee viestit itse, myös kaukana tietokoneesta.</string>
+    <string name="mail_use_here_microsoft">Microsoft-tili: kirjaudu uudelleen sisään tällä laitteella, niin laite hakee viestit itse, myös kaukana tietokoneesta.</string>
+    <string name="mail_use_here_busy">Kysytään tietokoneelta…</string>
 </resources>

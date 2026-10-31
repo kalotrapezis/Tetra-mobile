@@ -275,4 +275,51 @@ class MailTest {
         assertEquals("#e5534b", MailEngine.ownAccounts(dir)[0].getString("color")) // the rest kept
         dir.deleteRecursively()
     }
+
+    @Test fun theComputersMailFilesAreMirroredAndThisDevicesOwnAreNot() {
+        for (rel in listOf("Mail/index.jsonl", "Mail/accounts.json", "Mail/privacy.json", "Mail/devices/Pixel.json", "Mail/index.Tab.jsonl", "Mail/devices/Tab.usage.json"))
+            assertTrue(rel, MailSync.mirrored(rel, "Pixel"))
+        for (rel in listOf("Mail/index.Pixel.jsonl", "Mail/accounts.Pixel.json", "Mail/devices/Pixel.usage.json", "Mail/signatures.json", "Mail/settings.json",
+            "Mail/requests/Pixel-1.json", "Mail/outbox/Pixel-1.json", "Mail/outbox/Pixel-1.failed.json", "Mail/a@b.gr/Inbox/2026/2026-10-31 0912 X - y.eml", "Notes/index.jsonl"))
+            assertFalse(rel, MailSync.mirrored(rel, "Pixel"))
+        val dir = java.nio.file.Files.createTempDirectory("mail").toFile()
+        listOf("index.jsonl", "index (2).jsonl", "accounts (3).json", "index.Pixel.jsonl").forEach { File(dir, it).writeText("") }
+        assertEquals(setOf("index (2).jsonl", "accounts (3).json"), MailSync.strays(dir).map { it.name }.toSet())
+        dir.deleteRecursively()
+    }
+
+    @Test fun checkingForNewMailIsOneSettingSharedWithThePC() {
+        val dir = java.nio.file.Files.createTempDirectory("mail").toFile()
+        assertEquals(MailPrefs.NOW, MailPrefs.every(dir)) // nothing said: right away
+        File(dir, "settings.json").writeText("""{"check":15,"other":1}""") // as the desktop writes it
+        assertEquals(15, MailPrefs.every(dir))
+        MailPrefs.setEvery(MailPrefs.MANUAL, dir, "Pixel")
+        val o = org.json.JSONObject(File(dir, "settings.json").readText())
+        assertEquals("manual", o.getString("check")); assertEquals(1, o.getInt("other")); assertEquals("Pixel", o.getString("setBy"))
+        assertEquals(MailPrefs.MANUAL, MailPrefs.every(dir))
+        MailPrefs.setEvery(MailPrefs.NOW, dir, "Pixel")
+        assertEquals("push", org.json.JSONObject(File(dir, "settings.json").readText()).getString("check"))
+        dir.deleteRecursively()
+    }
+
+    @Test fun theDeviceRowSaysOffAYearOrAutomatic() {
+        val dir = java.nio.file.Files.createTempDirectory("mail").toFile()
+        File(dir, "devices").mkdirs()
+        File(dir, "devices/Pixel.json").writeText("""{"device":"Pixel","mode":"copy","limit":1000000000,"off":false,"keepDays":365,"auto":false}""")
+        val year = MailStorage.read(dir, "Pixel")
+        assertEquals(365, year.keepDays); assertEquals("2025-10-31 0000", year.since(java.time.LocalDate.of(2026, 10, 31)))
+        val files = mapOf("Mail/index.jsonl" to 9L, "Mail/a/Inbox/2026/2026-01-02 0800 X - new.eml" to 5L, "Mail/a/Inbox/2024/2024-01-02 0800 X - old.eml" to 5L)
+        assertEquals(setOf("Mail/index.jsonl", "Mail/a/Inbox/2026/2026-01-02 0800 X - new.eml"), MailSync.plan(files, -1, "2025-10-31 0000"))
+        File(dir, "devices/Pixel.json").writeText("""{"device":"Pixel","limit":1000000000,"keepDays":null,"auto":true}""")
+        val auto = MailStorage.read(dir, "Pixel")
+        assertNull(auto.since()); assertEquals(300_000_000, auto.budget(free = 2_900_000_000, used = 100_000_000)) // a tenth of Mail's room
+        assertEquals(1_000_000_000, auto.budget(free = -1, used = 0)) // free storage unknown: the limit
+        File(dir, "devices/Pixel.json").writeText("""{"device":"Pixel","off":true}""")
+        assertTrue(MailStorage.read(dir, "Pixel").off)
+        assertTrue(MailSync.pcMail("Mail/index.jsonl", "Pixel", setOf("me@x.gr")))
+        assertTrue(MailSync.pcMail("Mail/a@b.gr/Inbox/2026/2026-01-02 0800 X - y.eml", "Pixel", setOf("me@x.gr")))
+        assertFalse(MailSync.pcMail("Mail/me@x.gr/Inbox/2026/2026-01-02 0800 X - y.eml", "Pixel", setOf("me@x.gr"))) // its own account's
+        assertFalse(MailSync.pcMail("Mail/index.Pixel.jsonl", "Pixel", setOf("me@x.gr")))
+        dir.deleteRecursively()
+    }
 }

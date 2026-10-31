@@ -199,4 +199,13 @@
     <string name="mail_assist">✦ Ieteikt ar asistentu</string>
     <string name="mail_assist_working">✦ Asistents raksta…</string>
     <string name="mail_draft_card">Melnraksts – pieskarieties, lai to pabeigtu un nosūtītu</string>
+    <string name="mail_check">Pārbaudīt jaunas vēstules</string>
+    <string name="mail_check_summary">Kontiem, ko šī ierīce saņem pati. Uzreiz: tiklīdz vēstules ienāk, kamēr Pasts ir atvērts, un ik pēc 15 minūtēm, kad tas ir aizvērts. Savus ⇄ kontus pārbauda dators; atverot Pastu, tas tiek lūgts pārbaudīt uzreiz.</string>
+    <string name="mail_check_now">Uzreiz</string>
+    <string name="mail_check_every">Ik pēc %d minūtēm</string>
+    <string name="mail_check_manual">Manuāli</string>
+    <string name="mail_use_here">Izmantot arī šajā ierīcē</string>
+    <string name="mail_use_here_summary">Šo kontu saņem dators. Izmantojiet to arī šeit: dators nodod paroli pa sapārotu, šifrētu savienojumu, tā tiek glabāta šīs ierīces drošajā krātuvē, un ierīce vēstules saņem pati, arī prom no datora.</string>
+    <string name="mail_use_here_microsoft">Microsoft konts: pierakstieties šajā ierīcē vēlreiz, un tā vēstules saņems pati, arī prom no datora.</string>
+    <string name="mail_use_here_busy">Jautāju datoram…</string>
 </resources>

@@ -187,11 +187,11 @@ internal object MailEngine {
     }
 
     /** An account checked and its password kept: written, synced at once, looked at every quarter hour. */
-    fun add(c: Context, root: File, address: String, name: String, imap: MailServer, smtp: MailServer, pass: String, provider: String? = null): JSONObject = synchronized(lock) {
+    fun add(c: Context, root: File, address: String, name: String, imap: MailServer, smtp: MailServer, pass: String, provider: String? = null, color: String? = null): JSONObject = synchronized(lock) {
         val colors = listOf("#e5534b", "#4f8ff7", "#e0a43a", "#3fb27f", "#b77ce6", "#e57ab0", "#3bb8c4")
         val used = MailFiles.accounts(root).map { it.color }.toSet()
         val acc = JSONObject().put("id", address).put("address", address).put("name", name)
-            .put("color", colors.firstOrNull { (0xFF000000 or it.removePrefix("#").toLong(16)) !in used } ?: colors[0])
+            .put("color", color ?: colors.firstOrNull { (0xFF000000 or it.removePrefix("#").toLong(16)) !in used } ?: colors[0])
             .put("server", imap.json()).put("smtp", smtp.json()).put("archive", true).put("notify", true)
             .put("addedOn", "phone").put("device", device()).put("added", System.currentTimeMillis()).apply { provider?.let { put("provider", it) } }
         MailSecret.set(c, address, pass)
@@ -203,6 +203,21 @@ internal object MailEngine {
     /** A new name for an account this device fetches (Work, Personal, Masters…), in its accounts.<device>.json; the PC shows it too. */
     fun rename(root: File, id: String, name: String) = synchronized(lock) {
         saveAccounts(root, ownAccounts(root).map { if (it.optString("id") == id) JSONObject(it.toString()).put("name", name) else it })
+    }
+
+    /**
+     * One of the PC's accounts fetched here too («Χρήση και σε αυτή τη συσκευή»): the PC's servers, name and colour, the
+     * password the PC gave ([SyncClient.mailCredentials]) checked at the server first. Same id, so its mail stays one list.
+     */
+    fun adopt(c: Context, root: File, pc: MailAccount, given: JSONObject): JSONObject {
+        val o = pc.json ?: JSONObject()
+        val pass = given.getString("password")
+        val imap = MailServer.of(given.optJSONObject("server") ?: o.optJSONObject("server")) ?: throw IllegalStateException("No IMAP server for ${pc.address}")
+        val checked = check(imap, listOfNotNull(given.optString("user").ifEmpty { null }, imap.user.ifEmpty { null }, pc.address), pass)
+        val smtp = MailServer.of(given.optJSONObject("smtp") ?: o.optJSONObject("smtp"))?.let { it.copy(user = it.user.ifEmpty { checked.user }) }
+            ?: throw IllegalStateException("No SMTP server for ${pc.address}")
+        val provider = given.optString("provider").takeIf { it.isNotEmpty() && !given.isNull("provider") }
+        return add(c, root, pc.address, given.optString("name").ifEmpty { pc.name }, checked, smtp, pass, provider, o.optString("color").ifEmpty { null })
     }
 
     /** Out of this device: its password, its account line and its index lines (the mail files stay; the PC keeps its own). */
@@ -457,31 +472,61 @@ internal object MailEngine {
         for (acc in ownAccounts(root)) runCatching { sync(c, root, acc) }.onFailure { WriterLog.w("Mail: ${acc.optString("id")}: ${it.message}") }
     }
 
-    /** While the Mail screen is open: IDLE in each account's Inbox, a look at the account whenever it changes. */
-    fun watch(c: Context, root: File, stop: () -> Boolean) {
-        val threads = ownAccounts(root).map { acc -> Thread {
+    /**
+     * While Mail is in front: with «Αμέσως» IDLE in each account's Inbox and a look whenever it changes, otherwise a single
+     * look (Settings › Έλεγχος για νέα). The function returned stops it, closing the connections so none waits in IDLE.
+     */
+    fun watch(c: Context, root: File): () -> Unit {
+        if (MailPrefs.every(c) != MailPrefs.NOW) { Thread { syncAll(c, root) }.start(); return {} }
+        val stopped = java.util.concurrent.atomic.AtomicBoolean(false)
+        val open = java.util.Collections.synchronizedSet(HashSet<Store>())
+        for (acc in ownAccounts(root)) Thread {
             var delay = 5_000L
-            while (!stop()) runCatching {
+            while (!stopped.get()) runCatching {
                 sync(c, root, acc)
                 val server = MailServer.of(acc.optJSONObject("server")) ?: return@Thread
                 val store = connect(server, secret(c, acc) ?: return@Thread, oauth(acc))
+                open += store
                 try {
+                    if (stopped.get()) return@Thread
                     val inbox = store.getFolder("INBOX") as IMAPFolder
                     inbox.open(Folder.READ_ONLY)
-                    while (!stop()) { inbox.idle(true); if (!stop()) sync(c, root, acc) } // idle(true): back after the first change
-                } finally { runCatching { store.close() } }
+                    while (!stopped.get()) { inbox.idle(true); if (!stopped.get()) sync(c, root, acc) } // idle(true): back after the first change
+                } finally { open -= store; runCatching { store.close() } }
                 delay = 5_000L
-            }.onFailure { if (!stop()) { WriterLog.w("Mail: watching ${acc.optString("id")}: ${it.message}"); Thread.sleep(delay); delay = minOf(delay * 2, 15 * 60_000L) } }
-        }.apply { isDaemon = true; start() } }
-        threads.forEach { it.join() }
+            }.onFailure { if (!stopped.get()) { WriterLog.w("Mail: watching ${acc.optString("id")}: ${it.message}"); Thread.sleep(delay); delay = minOf(delay * 2, 15 * 60_000L) } }
+        }.apply { isDaemon = true; start() }
+        return { stopped.set(true); Thread { synchronized(open) { open.toList() }.forEach { runCatching { it.close() } } }.start() }
     }
 
-    /** The quarter-hourly look with Tetra closed (JobScheduler, as Data's hourly one), while this device has an account of its own. */
-    fun schedule(c: Context) {
+    private var askedPc = 0L
+    /**
+     * Mail opened with the PC's accounts here: the PC looks at their servers now (POST /mail/sync), and this device takes
+     * what it found shortly after rather than at the next 30-second round. At most once a minute.
+     */
+    fun askPc(c: Context, root: File) {
+        if (SyncStore(c).pairing() == null || MailFiles.accounts(root, MailSecret.ids(c)).none { it.shadow }) return
+        val now = System.currentTimeMillis()
+        if (now - askedPc < 60_000) return
+        askedPc = now
+        runCatching { SyncClient(c, SyncStore(c)).mailCheckNow() }.onFailure { WriterLog.w("Mail: asking the PC to look: ${it.message}"); return } // away: the next sync
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            runCatching { androidx.core.content.ContextCompat.startForegroundService(c, Intent(c, SyncService::class.java).setAction(SyncService.ACTION_START)) }
+                .onFailure { WriterLog.w("Mail: the sync after asking the PC: ${it.message}") }
+        }, 10_000)
+    }
+
+    /**
+     * The look with Tetra closed (JobScheduler, as Data's hourly one), while this device has an account of its own: every
+     * 15 minutes with «Αμέσως», else every 5, 15 or 30; none when checked by hand. One job at a time, set again when it
+     * ran ([again]) — a periodic job cannot run every 5 minutes.
+     */
+    fun schedule(c: Context, again: Boolean = false) {
         val jobs = c.getSystemService(JobScheduler::class.java) ?: return
-        if (ownAccounts(mailRoot()).isEmpty()) return jobs.cancel(JOB)
-        if (jobs.getPendingJob(JOB) != null) return
-        jobs.schedule(JobInfo.Builder(JOB, ComponentName(c, SyncJob::class.java)).setPeriodic(15 * 60_000L)
+        val every = MailPrefs.every(c).let { if (it == MailPrefs.NOW) 15 else it } * 60_000L
+        if (every <= 0 || ownAccounts(mailRoot()).isEmpty()) return jobs.cancel(JOB)
+        if (!again && jobs.getPendingJob(JOB)?.let { !it.isPeriodic && it.minLatencyMillis == every } == true) return
+        jobs.schedule(JobInfo.Builder(JOB, ComponentName(c, SyncJob::class.java)).setMinimumLatency(every)
             .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY).setPersisted(true).build())
     }
 

@@ -51,7 +51,7 @@ import kotlinx.coroutines.withContext
 internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, val icon: Int, val tint: Color?, @androidx.annotation.StringRes val summary: Int, val items: List<Int>) {
     Sync(R.string.app_sync, R.drawable.ic_sync, null, R.string.settings_sync_summary, listOf(R.string.settings_computer, R.string.settings_open_sync, R.string.settings_sync_auto, R.string.settings_listen)),
     Appearance(R.string.settings_appearance, R.drawable.ic_palette, null, R.string.settings_appearance_summary, listOf(R.string.settings_theme, R.string.settings_language, R.string.settings_photo_on_home, R.string.settings_hidden_from_home, R.string.settings_app_icons)),
-    Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_threads, R.string.mail_islands, R.string.mail_security,
+    Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_check, R.string.mail_threads, R.string.mail_islands, R.string.mail_security,
         R.string.mail_remote, R.string.mail_allowed, R.string.mail_tracking, R.string.mail_link_warning, R.string.mail_risky, R.string.mail_real_address, R.string.mail_receipts)),
     Gallery(R.string.app_gallery, Category.Gallery.icon, Category.Gallery.color, R.string.settings_gallery_summary, listOf(R.string.settings_photos_videos, R.string.settings_search_quality, R.string.settings_folders)),
     Files(R.string.app_files, Category.Files.icon, Category.Files.color, R.string.settings_files_summary, listOf(R.string.settings_drive_workspace, R.string.settings_all_files)),
@@ -788,6 +788,7 @@ internal fun SettingsTab(
     }
     var adding by remember { mutableStateOf(false) }
     var managing by remember { mutableStateOf<MailAccount?>(null) }
+    var using by remember { mutableStateOf<MailAccount?>(null) }
     SettingsSection(stringResource(R.string.mail_accounts)) {
         data?.first?.forEach { a ->
             val orange = data!!.second.count { it.account == a.id && !it.saved }
@@ -795,10 +796,14 @@ internal fun SettingsTab(
             SettingRow(a.name, listOfNotNull(a.address, stringResource(if (a.own) R.string.mail_own_device else R.string.mail_via_pc),
                 trouble?.let { stringResource(when (it) { "auth" -> R.string.mail_why_auth; "appPassword" -> R.string.mail_why_app_password; "unreachable" -> R.string.mail_why_unreachable; else -> R.string.mail_why_other }) }
                     ?: if (orange == 0) "● " + stringResource(R.string.mail_all_local) else "● " + pluralStringResource(R.plurals.mail_n_server_only, orange, orange)).joinToString(" · "),
-                onClick = if (a.own) ({ managing = a }) else null,
-                warn = orange > 0 || trouble != null, leading = { Box(Modifier.size(12.dp).clip(CircleShape).background(Color(a.color))) }) { if (a.own) Chevron() }
+                onClick = { if (a.own) managing = a else using = a },
+                warn = orange > 0 || trouble != null, leading = { Box(Modifier.size(12.dp).clip(CircleShape).background(Color(a.color))) }) { Chevron() }
         }
         SettingRow(stringResource(R.string.mail_add_account), onClick = { adding = true }) { Icon(painterResource(R.drawable.ic_add), contentDescription = null) }
+        var every by remember { mutableIntStateOf(MailPrefs.every(context)) }
+        ChoiceRow(stringResource(R.string.mail_check), stringResource(R.string.mail_check_summary), MailPrefs.EVERY.map { it to when (it) {
+            MailPrefs.NOW -> stringResource(R.string.mail_check_now); MailPrefs.MANUAL -> stringResource(R.string.mail_check_manual)
+            else -> stringResource(R.string.mail_check_every, it) } }, every) { every = it; MailPrefs.setEvery(it); MailEngine.schedule(context.applicationContext) }
     }
     // Υπογραφές (MAIL_PLAN §9c): one per address; plain text for now
     var signing by remember { mutableStateOf<MailAccount?>(null) }
@@ -859,6 +864,40 @@ internal fun SettingsTab(
             receipts) { receipts = it; MailPrefs.setReceipts(context, it) }
     }
     if (adding) MailAddAccount { adding = false; version++ }
+    // a PC account fetched here too: the PC gives its password over the paired connection; Microsoft signs in again here
+    using?.let { a ->
+        var busy by remember { mutableStateOf(false) }
+        var problem by remember { mutableStateOf<String?>(null) }
+        val scope = androidx.compose.runtime.rememberCoroutineScope()
+        val microsoft = a.json?.optString("provider") == "microsoft" || a.json?.optString("auth").let { it != null && it != "" && it != "password" }
+        AlertDialog(onDismissRequest = { if (!busy) using = null }, title = { Text(a.name) },
+            text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(a.address)
+                Text(stringResource(if (microsoft) R.string.mail_use_here_microsoft else R.string.mail_use_here_summary), style = MaterialTheme.typography.bodySmall)
+                problem?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            } },
+            confirmButton = { TextButton(enabled = !busy, onClick = {
+                if (microsoft) { using = null; adding = true; return@TextButton }
+                busy = true; problem = null
+                scope.launch {
+                    val app = context.applicationContext
+                    val r = withContext(Dispatchers.IO) { runCatching {
+                        val given = SyncClient(app, SyncStore(app)).mailCredentials(a.id)
+                        if (given.optString("signIn") == "microsoft" || !given.has("password")) return@runCatching false // signs in with Microsoft: here too
+                        MailEngine.adopt(app, mailRoot(), a, given)
+                        Thread { MailEngine.syncAll(app) }.start()
+                        true
+                    } }
+                    busy = false
+                    r.onSuccess { using = null; if (!it) adding = true; version++ }.onFailure {
+                        WriterLog.w("Mail: using ${a.id} here: ${it.message}")
+                        problem = when (mailReason(it)) { "auth" -> context.getString(R.string.mail_why_auth); "appPassword" -> context.getString(R.string.mail_why_app_password)
+                            "unreachable" -> context.getString(R.string.mail_why_unreachable); else -> it.message ?: context.getString(R.string.mail_why_other) }
+                    }
+                }
+            }) { Text(stringResource(if (busy) R.string.mail_use_here_busy else R.string.mail_use_here)) } },
+            dismissButton = { TextButton(enabled = !busy, onClick = { using = null }) { Text(stringResource(R.string.common_cancel)) } })
+    }
     managing?.let { a ->
         var pass by remember { mutableStateOf("") }
         var name by remember { mutableStateOf(a.name) } // Work, Personal, Masters…: what the folders and the list call it

@@ -441,6 +441,32 @@ Mail/devices/<device>.usage.json    { "used": 34512, "files": 18, "at": 17934440
 - **Islands** at the top, the bottom or by themselves (top with a mouse) — Office's rule, on a tablet or a big
   screen only; a phone keeps them at the bottom.
 
+## 16. The phone installed: the PC's accounts, checking for new mail, one account on both (the user, 31 Oct)
+
+Formats are the desktop's (step 1's sync.js/mail.js of the same day); the phone follows them.
+
+- **Why the PC's accounts were empty.** The phone fetched each file by its hash (GET /file/<sha>), and the PC rewrites
+  `index.jsonl` while it fetches: by the time the phone asked, the PC answered "not what is here any more", and the index
+  also waited behind thousands of .eml files. The PC now keeps a growing index as offered for ten minutes. The phone
+  takes the PC's Mail files it only reads — `index.jsonl`, `accounts.json`, `privacy/filters/junk.json`,
+  `devices/<other>.json`, other devices' `index.<d>.jsonl`/`accounts.<d>.json` — **first**, replacing its copy in place
+  (by hash, else GET /mail/file as it is now), and never sends them back. Its own files, `signatures.json` and
+  `settings.json` (both write them) go the usual way. Stray "index (2).jsonl"-style copies are deleted.
+- **Έλεγχος για νέα**: `Mail/settings.json` `check` — "push" (IDLE while Mail is open, every 15 minutes otherwise; the
+  default), 5, 15, 30, or "manual" — one setting for the PC and every device (Settings › Αλληλογραφία on either). The
+  phone's background look is one JobScheduler job set again after each run. Opening Mail or coming back to it looks at
+  once: the phone's own accounts at their servers; for the PC's, POST /mail/sync (the PC looks now), then a whole sync 10 s later.
+- **Per device** (`Mail/devices/<device>.json`, written from the PC's device card): `off` (nothing of Mail crosses; the
+  phone deletes the PC's mail and files it holds, keeping its own accounts'), `mode` copy/move, and what stays —
+  `keepDays` (365, 30) by the date in the path, or `auto` (a tenth of the room Mail could have: free storage plus what
+  Mail holds), else `limit` bytes. Each sync's list carries `device: { free, size, mail }` — the phone's free and whole
+  storage and Mail's name for it — so the card can suggest moving old things when the phone is nearly full.
+- **Χρήση και σε αυτή τη συσκευή** on a ⇄ PC account: POST /mail/credentials { account } over the paired, pinned-TLS
+  connection; the PC answers { account, address, name, server, smtp, provider, user, password }, or signIn: "microsoft"
+  (sign in again here; no token leaves the PC). The password is checked at the server, kept only in the phone's
+  keystore, and the account written to `accounts.<device>.json` with the same id and colour: the phone fetches it itself
+  from then on, its mail still one list.
+
 ## Open questions for the user
 
 - Away from home, does the phone sync with the desktop over the internet, or only on the same Wi-Fi?

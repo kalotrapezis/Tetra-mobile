@@ -203,4 +203,13 @@
     <string name="mail_assist">✦ Navrhnúť s asistentom</string>
     <string name="mail_assist_working">✦ Asistent píše…</string>
     <string name="mail_draft_card">Koncept – ťuknutím ho dokončíte a odošlete</string>
+    <string name="mail_check">Kontrolovať novú poštu</string>
+    <string name="mail_check_summary">Pre účty, ktoré si toto zariadenie sťahuje samo. Okamžite: len čo pošta dorazí, kým je Pošta otvorená, a každých 15 minút, keď je zatvorená. PC kontroluje svoje vlastné účty ⇄; otvorenie Pošty ho požiada, aby skontroloval hneď.</string>
+    <string name="mail_check_now">Okamžite</string>
+    <string name="mail_check_every">Každých %d minút</string>
+    <string name="mail_check_manual">Ručne</string>
+    <string name="mail_use_here">Používať aj na tomto zariadení</string>
+    <string name="mail_use_here_summary">PC tento účet sťahuje. Používajte ho aj tu: PC odovzdá jeho heslo cez spárované šifrované spojenie, uloží sa do zabezpečeného úložiska tohto zariadenia a zariadenie si poštu sťahuje samo, aj keď ste mimo PC.</string>
+    <string name="mail_use_here_microsoft">Účet Microsoft: prihláste sa na tomto zariadení znova a zariadenie si poštu bude sťahovať samo, aj keď ste mimo PC.</string>
+    <string name="mail_use_here_busy">Pýtam sa PC…</string>
 </resources>

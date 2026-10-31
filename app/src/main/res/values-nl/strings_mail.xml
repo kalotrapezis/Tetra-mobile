@@ -195,4 +195,13 @@
     <string name="mail_assist">✦ Laten voorstellen door de assistent</string>
     <string name="mail_assist_working">✦ De assistent schrijft…</string>
     <string name="mail_draft_card">Concept – tik om het af te maken en te versturen</string>
+    <string name="mail_check">Controleren op nieuwe mail</string>
+    <string name="mail_check_summary">Voor de accounts die dit apparaat zelf ophaalt. Direct: zodra er mail binnenkomt terwijl Mail open is, en elke 15 minuten als het gesloten is. De pc controleert zijn eigen ⇄-accounts; als je Mail opent, wordt hem gevraagd direct te controleren.</string>
+    <string name="mail_check_now">Direct</string>
+    <string name="mail_check_every">Elke %d minuten</string>
+    <string name="mail_check_manual">Handmatig</string>
+    <string name="mail_use_here">Ook op dit apparaat gebruiken</string>
+    <string name="mail_use_here_summary">De pc haalt dit account op. Gebruik het ook hier: de pc geeft het wachtwoord door via de gekoppelde, versleutelde verbinding, het wordt bewaard in de beveiligde opslag van dit apparaat, en dit apparaat haalt de mail zelf op, ook als je niet bij de pc bent.</string>
+    <string name="mail_use_here_microsoft">Een Microsoft-account: log opnieuw in op dit apparaat, en dit apparaat haalt de mail zelf op, ook als je niet bij de pc bent.</string>
+    <string name="mail_use_here_busy">De pc vragen…</string>
 </resources>

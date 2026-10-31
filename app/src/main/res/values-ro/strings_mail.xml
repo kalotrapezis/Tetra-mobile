@@ -199,4 +199,13 @@
     <string name="mail_assist">✦ Sugerează cu asistentul</string>
     <string name="mail_assist_working">✦ Asistentul scrie…</string>
     <string name="mail_draft_card">Ciornă – atinge ca s-o termini și s-o trimiți</string>
+    <string name="mail_check">Verifică e-mailurile noi</string>
+    <string name="mail_check_summary">Pentru conturile pe care dispozitivul acesta le aduce singur. Imediat: de îndată ce sosesc e-mailuri cât timp E-mail este deschis, și din 15 în 15 minute când este închis. Conturile ⇄ le verifică PC-ul; deschiderea aplicației E-mail îi cere să verifice imediat.</string>
+    <string name="mail_check_now">Imediat</string>
+    <string name="mail_check_every">La fiecare %d minute</string>
+    <string name="mail_check_manual">Manual</string>
+    <string name="mail_use_here">Folosește și pe acest dispozitiv</string>
+    <string name="mail_use_here_summary">PC-ul aduce acest cont. Folosește-l și aici: PC-ul transmite parola prin conexiunea asociată și criptată, aceasta este păstrată în stocarea securizată a acestui dispozitiv, iar dispozitivul aduce singur e-mailurile, chiar și departe de PC.</string>
+    <string name="mail_use_here_microsoft">Un cont Microsoft: conectează-te din nou pe acest dispozitiv, iar acesta va aduce singur e-mailurile, chiar și departe de PC.</string>
+    <string name="mail_use_here_busy">Întreb PC-ul…</string>
 </resources>

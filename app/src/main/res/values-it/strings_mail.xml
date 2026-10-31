@@ -195,4 +195,13 @@
     <string name="mail_assist">✦ Suggerisci con l\'assistente</string>
     <string name="mail_assist_working">✦ L\'assistente sta scrivendo…</string>
     <string name="mail_draft_card">Bozza – tocca per finirla e inviarla</string>
+    <string name="mail_check">Controlla nuova posta</string>
+    <string name="mail_check_summary">Per gli account che questo dispositivo scarica da solo. Subito: appena arriva la posta mentre Posta è aperta, e ogni 15 minuti quando è chiusa. Il PC controlla i propri account ⇄; aprire Posta gli chiede di controllare subito.</string>
+    <string name="mail_check_now">Subito</string>
+    <string name="mail_check_every">Ogni %d minuti</string>
+    <string name="mail_check_manual">Manualmente</string>
+    <string name="mail_use_here">Usa anche su questo dispositivo</string>
+    <string name="mail_use_here_summary">Il PC scarica questo account. Usalo anche qui: il PC passa la sua password tramite la connessione associata e cifrata, viene conservata nella memoria sicura di questo dispositivo, e il dispositivo scarica la posta da solo, anche lontano dal PC.</string>
+    <string name="mail_use_here_microsoft">Un account Microsoft: accedi di nuovo su questo dispositivo, e il dispositivo scaricherà la posta da solo, anche lontano dal PC.</string>
+    <string name="mail_use_here_busy">Chiedo al PC…</string>
 </resources>

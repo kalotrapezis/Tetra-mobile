@@ -203,4 +203,13 @@
     <string name="mail_assist">✦ Pasiūlyti su asistentu</string>
     <string name="mail_assist_working">✦ Asistentas rašo…</string>
     <string name="mail_draft_card">Juodraštis – bakstelėkite, kad užbaigtumėte ir išsiųstumėte</string>
+    <string name="mail_check">Tikrinti, ar yra naujų laiškų</string>
+    <string name="mail_check_summary">Paskyroms, kurias šis įrenginys parsiunčia pats. Iš karto: vos tik atkeliauja laiškai, kol Paštas atidarytas, ir kas 15 minučių, kai jis uždarytas. Savo ⇄ paskyras tikrina kompiuteris; atidarius Paštą jo paprašoma patikrinti iš karto.</string>
+    <string name="mail_check_now">Iš karto</string>
+    <string name="mail_check_every">Kas %d min.</string>
+    <string name="mail_check_manual">Rankiniu būdu</string>
+    <string name="mail_use_here">Naudoti ir šiame įrenginyje</string>
+    <string name="mail_use_here_summary">Šią paskyrą parsiunčia kompiuteris. Naudokite ją ir čia: kompiuteris perduoda jos slaptažodį suporuotu, šifruotu ryšiu, jis saugomas šio įrenginio saugioje saugykloje, o įrenginys laiškus parsiunčia pats, net toli nuo kompiuterio.</string>
+    <string name="mail_use_here_microsoft">Microsoft paskyra: prisijunkite iš naujo šiame įrenginyje, ir jis laiškus parsiųs pats, net toli nuo kompiuterio.</string>
+    <string name="mail_use_here_busy">Klausiu kompiuterio…</string>
 </resources>

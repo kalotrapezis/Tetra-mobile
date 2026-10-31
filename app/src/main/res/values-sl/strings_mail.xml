@@ -203,4 +203,13 @@
     <string name="mail_assist">✦ Predlagaj z asistentom</string>
     <string name="mail_assist_working">✦ Asistent piše…</string>
     <string name="mail_draft_card">Osnutek – tapnite, da ga dokončate in pošljete</string>
+    <string name="mail_check">Preveri novo pošto</string>
+    <string name="mail_check_summary">Za račune, ki jih ta naprava prenaša sama. Takoj: ko pošta prispe, medtem ko je Pošta odprta, in vsakih 15 minut, ko je zaprta. Račune ⇄ preverja računalnik; ko odprete Pošto, ga to prosi, naj preveri takoj.</string>
+    <string name="mail_check_now">Takoj</string>
+    <string name="mail_check_every">Vsakih %d minut</string>
+    <string name="mail_check_manual">Ročno</string>
+    <string name="mail_use_here">Uporabi tudi na tej napravi</string>
+    <string name="mail_use_here_summary">Ta račun prenaša računalnik. Uporabite ga tudi tukaj: računalnik posreduje geslo prek seznanjene, šifrirane povezave, shranjeno je v varni shrambi te naprave, naprava pa pošto prenaša sama, tudi stran od računalnika.</string>
+    <string name="mail_use_here_microsoft">Račun Microsoft: znova se prijavite v tej napravi in pošto bo prenašala sama, tudi stran od računalnika.</string>
+    <string name="mail_use_here_busy">Sprašujem računalnik…</string>
 </resources>

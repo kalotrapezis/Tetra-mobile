@@ -368,6 +368,16 @@ internal class SyncClient(private val context: Context, private val store: SyncS
     /** The tablet's Phone (PhoneRelay): a call placed, or a button pressed, by the phone through the computer. */
     fun phoneViaComputer(path: String): JSONObject { val p = reach(store.pairing() ?: throw SyncException(context.getString(R.string.sync_not_paired))); return postJson(p.hosts.first(), p, path, JSONObject()) }
 
+    /**
+     * «Χρήση και σε αυτή τη συσκευή»: one of the computer's mail accounts as it signs in — { account, address, name, server,
+     * smtp, provider, user, password }, or with signIn: "microsoft" and no password (sign in again here). Only over this
+     * pinned connection; the caller keeps it in memory until the keystore has it.
+     */
+    fun mailCredentials(id: String): JSONObject { val p = reach(store.pairing() ?: throw SyncException(context.getString(R.string.sync_not_paired))); return postJson(p.hosts.first(), p, "/mail/credentials", JSONObject().put("account", id)) }
+
+    /** Mail opened here: the computer looks for new mail on every account now, not at its next look. */
+    fun mailCheckNow(): JSONObject { val p = reach(store.pairing() ?: throw SyncException(context.getString(R.string.sync_not_paired))); return postJson(p.hosts.first(), p, "/mail/sync", JSONObject()) }
+
     /** Data › Signal: what the computer sees of its Wi-Fi now (signal, speed, network), for "Phone as hotspot". */
     fun computerWifi(): JSONObject { val p = reach(store.pairing() ?: throw SyncException(context.getString(R.string.sync_not_paired))); return postJson(p.hosts.first(), p, "/data/wifi", JSONObject()) }
 
@@ -1024,15 +1034,20 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         val root = TetraFolder.root(android.os.Environment.getExternalStorageDirectory())
         if (!root.isDirectory) return 0
         val entries = if (scope == null) driveManifest.entries(root) else driveManifest.entries(root) { DriveScope.contains(scope, it) }
+        val me = MailEngine.device()
         val manifest = JSONArray(entries.map { JSONObject().put("path", it.relativePath).put("sha256", it.sha256).put("size", it.sizeBytes).put("modified", it.modified) })
+        // and what this device says of itself: its free storage (the card suggests moving old things when nearly full), Mail's name for it
+        val stat = runCatching { android.os.StatFs(root.path) }.getOrNull()
+        val about = JSONObject().put("mail", me).apply { stat?.let { put("free", it.availableBytes).put("size", it.totalBytes) } }
         // a part's list goes to its own address: a computer too old for parts answers "Unknown request" instead of
         // taking it for the whole Drive (and offering everything else back as copies)
-        val answer = postJson(host, p, if (scope == null) "/files/manifest" else "/files/manifest/scoped", JSONObject().put("files", manifest).apply { if (scope != null) put("scope", scope) })
+        val answer = postJson(host, p, if (scope == null) "/files/manifest" else "/files/manifest/scoped", JSONObject().put("files", manifest).put("device", about).apply { if (scope != null) put("scope", scope) })
         val want = answer.optJSONArray("want") ?: JSONArray()
         val sent = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
         if (connection.sends) {
             val byPath = entries.associateBy { it.relativePath }
-            val mine = (0 until want.length()).mapNotNull { byPath[want.getString(it)] }
+            // never the PC's own Mail files back (when both changed, the PC asks: its version wins here)
+            val mine = (0 until want.length()).mapNotNull { byPath[want.getString(it)] }.filterNot { MailSync.mirrored(it.relativePath, me) }
             // Mail's outbox: a .json starts the sending, so it goes after its attachments (MAIL_PLAN §12)
             val (starts, rest) = mine.partition { it.relativePath.startsWith(MailSync.OUTBOX) && it.relativePath.endsWith(".json") }
             for (batch in listOf(rest, starts)) eachInParallel(batch, context.getString(R.string.sync_stage_sending_files), checkpoint, progress, failed, { it.relativePath }) { entry ->
@@ -1051,7 +1066,7 @@ internal class SyncClient(private val context: Context, private val store: SyncS
                 val cutoff = System.currentTimeMillis() - connection.keepDays * 86_400_000L
                 val favorites = if (connection.keepFavorites) driveMetadata.records().filter { it.favorite }.mapTo(HashSet()) { it.path } else emptySet()
                 entries.filter { e ->
-                    !e.relativePath.startsWith("Trash/") && (e.relativePath !in asked || e.relativePath in sent) &&
+                    !e.relativePath.startsWith("Trash/") && !e.relativePath.startsWith(MailSync.PART) && (e.relativePath !in asked || e.relativePath in sent) && // Mail: its own plan, below
                         e.modified in 1 until cutoff && e.relativePath !in favorites
                 }.also { going ->
                     // Deleted, not trashed: the computer holds each one (asked 2026-09-25 — a Trash only keeps the room).
@@ -1075,17 +1090,31 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         val storage = MailStorage.read(MailFiles.root(root), MailEngine.device())
         val local = entries.filter { it.relativePath.startsWith(MailSync.PART) && !MailSync.outgoing(it.relativePath) }
         val keep = MailSync.plan(local.associate { it.relativePath to it.sizeBytes } +
-            (if (storage.mode == MailStorage.COPY) offered.filter { it.optString("path").startsWith(MailSync.PART) }.associate { it.optString("path") to it.optLong("size") } else emptyMap()), storage.limit)
-        val incoming = offered.filter { MailSync.take(it.optString("path"), storage, keep) }
+            (if (storage.mode == MailStorage.COPY) offered.filter { it.optString("path").startsWith(MailSync.PART) }.associate { it.optString("path") to it.optLong("size") } else emptyMap()),
+            storage.budget(stat?.availableBytes ?: -1, local.sumOf { it.sizeBytes }), storage.since())
+        val incoming = offered.filter { !(storage.off && it.optString("path").startsWith(MailSync.PART)) && MailSync.take(it.optString("path"), storage, keep) }
         if (scope == null) {
             val asked = (0 until want.length()).mapTo(HashSet()) { want.getString(it) }
+            val own = MailSecret.ids(context)
             local.forEach { e -> // let go only of what the computer holds: it did not ask for it, or just received it verified
                 val f = File(root, TetraSystem.onDisk(e.relativePath))
-                if (MailSync.drop(e.relativePath, f, keep, held = connection.sends && (e.relativePath !in asked || e.relativePath in sent))) f.delete()
+                // Mail off for this device: none of the PC's mail stays here (this device's own accounts do)
+                if (storage.off && MailSync.pcMail(e.relativePath, me, own)) f.delete()
+                else if (MailSync.drop(e.relativePath, f, keep, held = connection.sends && (e.relativePath !in asked || e.relativePath in sent))) f.delete()
             }
             runCatching { MailStorage.report(MailFiles.root(root), MailEngine.device()) }
         }
-        return eachInParallel(incoming, context.getString(R.string.sync_stage_receiving_files), checkpoint, progress, failed, { it.optString("path") }) { file ->
+        // Those first, replacing this device's copy in place: the index changes while the computer fetches, and behind
+        // thousands of mails it came too late to be what was offered (31 Oct: the PC's accounts here, none of their mail)
+        val (mirror, rest) = incoming.partition { MailSync.mirrored(it.optString("path"), me) }
+        for (file in mirror) runCatching {
+            val rel = file.getString("path")
+            // as offered (the PC keeps that version aside a while), else as it is now
+            val got = runCatching { mailFile(host, p, root, rel, file.getString("sha256")) }.getOrElse { mailFile(host, p, root, rel) }
+            driveManifest.remember(rel, got, sha256(got))
+        }.onFailure { failed += "${file.optString("path")}: ${it.message}" }
+        if (scope == null) MailSync.strays(MailFiles.root(root)).forEach { it.delete() }
+        return eachInParallel(rest, context.getString(R.string.sync_stage_receiving_files), checkpoint, progress, failed, { it.optString("path") }) { file ->
             receiveFile(host, p, root, file)
         }
     }
@@ -1155,17 +1184,24 @@ internal class SyncClient(private val context: Context, private val store: SyncS
      * ("Mail/<address>/…"; step 1's GET /mail/file). Written beside the others; let go again at a sync a week after.
      */
     fun mailFile(rel: String): File {
-        require(rel.startsWith(MailSync.PART) && !rel.startsWith(MailSync.REQUESTS) && rel.split('/').none { it == ".." || it.isEmpty() })
         val p = reach(store.pairing() ?: throw SyncException(context.getString(R.string.sync_not_paired)))
-        val root = TetraFolder.root(android.os.Environment.getExternalStorageDirectory())
+        return mailFile(p.hosts.first(), p, TetraFolder.root(android.os.Environment.getExternalStorageDirectory()), rel)
+    }
+
+    /** One Mail file into its place, replacing what is there: by [sha] (verified) when given, else as the PC has it now. */
+    private fun mailFile(host: String, p: Pairing, root: File, rel: String, sha: String? = null): File {
+        require(rel.startsWith(MailSync.PART) && !rel.startsWith(MailSync.REQUESTS) && rel.split('/').none { it == ".." || it.isEmpty() })
         val target = File(root, TetraSystem.onDisk(rel))
         require(DriveRules.inside(root, target))
-        val c = open(p.hosts.first(), p.port, p.fingerprint, "/mail/file?path=${URLEncoder.encode(rel, "UTF-8")}", "GET", p.token)
+        val q = "path=${URLEncoder.encode(rel, "UTF-8")}"
+        val c = open(host, p.port, p.fingerprint, if (sha != null) "/file/$sha?$q" else "/mail/file?$q", "GET", p.token)
         try {
             if (c.responseCode != 200) throw SyncException(c.errorStream?.bufferedReader()?.readText()?.let { runCatching { JSONObject(it).optString("error") }.getOrNull() } ?: "HTTP ${c.responseCode}")
             target.parentFile?.mkdirs()
             val part = File(target.parentFile, ".${target.name}.part")
-            c.inputStream.use { input -> part.outputStream().use { input.copyTo(it) } }
+            val digest = MessageDigest.getInstance("SHA-256")
+            c.inputStream.use { input -> part.outputStream().use { out -> java.security.DigestInputStream(input, digest).copyTo(out) } }
+            if (sha != null && SyncRules.hex(digest.digest()) != sha) { part.delete(); throw SyncException(context.getString(R.string.sync_changed_on_way)) }
             if (!part.renameTo(target)) { part.delete(); throw SyncException(context.getString(R.string.sync_not_in_place)) }
         } finally { c.disconnect() }
         return target

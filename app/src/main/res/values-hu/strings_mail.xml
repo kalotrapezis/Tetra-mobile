@@ -195,4 +195,13 @@
     <string name="mail_assist">✦ Javaslat az asszisztenssel</string>
     <string name="mail_assist_working">✦ Az asszisztens ír…</string>
     <string name="mail_draft_card">Piszkozat – koppints a befejezéséhez és elküldéséhez</string>
+    <string name="mail_check">Új levelek keresése</string>
+    <string name="mail_check_summary">Azokhoz a fiókokhoz, amelyeket ez az eszköz maga tölt le. Azonnal: amint levél érkezik, amíg az E-mail meg van nyitva, és 15 percenként, amikor be van zárva. A ⇄ fiókokat a számítógép ellenőrzi; az E-mail megnyitásakor megkéri, hogy azonnal nézze meg.</string>
+    <string name="mail_check_now">Azonnal</string>
+    <string name="mail_check_every">%d percenként</string>
+    <string name="mail_check_manual">Kézzel</string>
+    <string name="mail_use_here">Használd ezen az eszközön is</string>
+    <string name="mail_use_here_summary">Ezt a fiókot a számítógép tölti le. Használd itt is: a számítógép a párosított, titkosított kapcsolaton adja át a jelszavát, az eszköz biztonságos tárolójában őrződik, és az eszköz maga tölti le a leveleket, a számítógéptől távol is.</string>
+    <string name="mail_use_here_microsoft">Microsoft-fiók: jelentkezz be újra ezen az eszközön, és az eszköz maga tölti le a leveleket, a számítógéptől távol is.</string>
+    <string name="mail_use_here_busy">Megkérdezem a számítógépet…</string>
 </resources>

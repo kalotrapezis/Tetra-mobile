@@ -199,4 +199,13 @@
     <string name="mail_assist">✦ Sugerir com o assistente</string>
     <string name="mail_assist_working">✦ O assistente está a escrever…</string>
     <string name="mail_draft_card">Rascunho – toque para o terminar e enviar</string>
+    <string name="mail_check">Verificar correio novo</string>
+    <string name="mail_check_summary">Para as contas que este dispositivo obtém sozinho. De imediato: assim que chega correio, com o Correio aberto, e a cada 15 minutos quando está fechado. O PC verifica as suas próprias contas ⇄; abrir o Correio pede-lhe que verifique de imediato.</string>
+    <string name="mail_check_now">De imediato</string>
+    <string name="mail_check_every">A cada %d minutos</string>
+    <string name="mail_check_manual">Manualmente</string>
+    <string name="mail_use_here">Usar também neste dispositivo</string>
+    <string name="mail_use_here_summary">O PC obtém esta conta. Use-a também aqui: o PC passa a palavra-passe pela ligação emparelhada e cifrada, que fica guardada no armazenamento seguro deste dispositivo, e este dispositivo obtém o correio sozinho, mesmo longe do PC.</string>
+    <string name="mail_use_here_microsoft">Uma conta Microsoft: inicie sessão de novo neste dispositivo, e este obterá o correio sozinho, mesmo longe do PC.</string>
+    <string name="mail_use_here_busy">A perguntar ao PC…</string>
 </resources>

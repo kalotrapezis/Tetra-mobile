@@ -138,17 +138,26 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     val root = remember { mailRoot() }
     var version by remember { mutableIntStateOf(0) }
     // the computer's index and accounts arriving by sync: read again
-    DisposableEffect(root) {
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(root, lifecycle) {
         root.mkdirs()
         val watch = object : FileObserver(root, CLOSE_WRITE or MOVED_TO or DELETE) {
             override fun onEvent(event: Int, path: String?) { if (path != null && (path.startsWith("index.") || path.startsWith("accounts.")) && !path.endsWith(".part")) android.os.Handler(android.os.Looper.getMainLooper()).post { version++ } }
         }
         watch.startWatching()
-        // the accounts this device fetches: a look now, then IDLE in their Inboxes while Mail is open
-        var stopped = false
-        Thread { runCatching { MailEngine.watch(context.applicationContext, root) { stopped } } }.apply { isDaemon = true; start() }
+        // opened or come back to: a look at once (Settings › Έλεγχος για νέα), this device's accounts at their servers and
+        // the PC's through the PC; IDLE while in front with «Αμέσως»
+        var stop: () -> Unit = {}
+        val seen = androidx.lifecycle.LifecycleEventObserver { _, e ->
+            if (e == androidx.lifecycle.Lifecycle.Event.ON_START && MailPrefs.every(context) != MailPrefs.MANUAL) {
+                stop(); stop = MailEngine.watch(context.applicationContext, root)
+                Thread { runCatching { MailEngine.askPc(context.applicationContext, root) } }.start()
+            }
+            if (e == androidx.lifecycle.Lifecycle.Event.ON_STOP) { stop(); stop = {} }
+        }
+        lifecycle.lifecycle.addObserver(seen)
         MailEngine.schedule(context.applicationContext)
-        onDispose { watch.stopWatching(); stopped = true }
+        onDispose { watch.stopWatching(); lifecycle.lifecycle.removeObserver(seen); stop() }
     }
     val data by produceState<Pair<List<MailAccount>, List<MailEntry>>?>(null, version) {
         value = withContext(Dispatchers.IO) { runCatching { MailFiles.accounts(root, MailSecret.ids(context)) to MailFiles.index(root, MailEngine.device()) }.onFailure { WriterLog.e("Mail: reading the archive", it) }.getOrDefault(emptyList<MailAccount>() to emptyList()) }

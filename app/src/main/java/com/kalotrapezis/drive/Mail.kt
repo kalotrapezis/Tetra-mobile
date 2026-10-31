@@ -136,8 +136,20 @@ internal object MailSync {
     /** A mail or an attachment (its path has the mail's date), rather than one of the part's own files. */
     fun dated(rel: String) = DATED.containsMatchIn(rel)
 
+    /**
+     * A Mail file the computer (or another device) writes and this one only reads: never sent back, taken first and
+     * replaced here in place. This device's own files and those both write (signatures, settings) go the usual way.
+     */
+    fun mirrored(rel: String, me: String) = rel.startsWith(PART) && !dated(rel) && !outgoing(rel) && !rel.startsWith(OUTBOX) &&
+        rel !in setOf("${PART}signatures.json", "${PART}settings.json", "${PART}index.$me.jsonl", "${PART}accounts.$me.json", "${PART}devices/$me.usage.json")
+
+    /** "index (2).jsonl" and the like: a computer's file that once arrived beside an older copy, read by nobody. */
+    fun strays(root: File): List<File> = root.listFiles { f -> f.isFile && Regex("^(index|accounts|signatures)\\b.* \\(\\d+\\)\\.jsonl?$").matches(f.name) }.orEmpty().toList()
+
     /** Of [files] (path → bytes), those kept within [limit] bytes (-1: all). */
-    fun plan(files: Map<String, Long>, limit: Long): Set<String> {
+    fun plan(files: Map<String, Long>, limit: Long, since: String? = null): Set<String> {
+        // the last year or month: by the date in the path alone ("yyyy-mm-dd hhmm" sorts as text)
+        if (since != null) return files.keys.filterTo(HashSet()) { !dated(it) || DATED.find(it)!!.groupValues[1] >= since }
         if (limit < 0) return files.keys
         val keep = files.keys.filterTo(HashSet()) { !dated(it) }
         var left = limit
@@ -154,19 +166,31 @@ internal object MailSync {
     fun take(rel: String, storage: MailStorage, keep: Set<String>) = !rel.startsWith(PART) || rel.endsWith(".failed.json") ||
         (!outgoing(rel) && (!dated(rel) || (storage.mode == MailStorage.COPY && rel in keep)))
 
+    /** With Mail off for this device: the PC's mail it holds (the PC's files, and mail of accounts it does not fetch itself). */
+    fun pcMail(rel: String, me: String, own: Set<String>) = mirrored(rel, me) ||
+        (rel.startsWith(PART) && dated(rel) && !outgoing(rel) && !rel.startsWith(OUTBOX) && rel.removePrefix(PART).substringBefore('/') !in own)
+
     /** A mail file this device may let go of: outside [keep], held by the PC ([held]), and not opened here in the last week. */
     fun drop(rel: String, file: File, keep: Set<String>, held: Boolean) = rel.startsWith(PART) && !outgoing(rel) && !rel.startsWith(OUTBOX) &&
         dated(rel) && rel !in keep && held && file.lastModified() < System.currentTimeMillis() - 7 * 86_400_000L
 }
 
 /**
- * One device's mail storage, set on the PC's Devices page, the hub as for files and photos (MAIL_PLAN §14; the user, 31
- * Oct): Mail/devices/<device>.json = { device, name, mode: "copy" | "move", limit: bytes (-1 everything), setAt, setBy },
- * written by the PC and only read here; Mail/devices/<device>.usage.json = { used, files, at }, written only by the device. Copy: the device holds the newest mail up to the limit, filled from the PC too. Move:
- * it takes nothing from the PC, and lets go of what it fetched itself once the PC holds it, keeping what fits.
+ * One device's mail storage, set on the PC's device card, the hub as for files and photos (MAIL_PLAN §14, §16; the user,
+ * 31 Oct): Mail/devices/<device>.json = { device, name, mode: "copy" | "move", limit: bytes (-1 everything), off,
+ * keepDays (365, 30 or null), auto, setAt, setBy }, written by the PC and only read here; Mail/devices/<device>.usage.json
+ * = { used, files, at }, written only by the device. Copy: the device holds the newest mail within what it keeps, filled
+ * from the PC too. Move: it takes nothing from the PC, and lets go of what it fetched itself once the PC holds it, keeping
+ * what fits. Off: nothing of Mail crosses, and the PC's mail is not kept here. What it keeps: the last [keepDays] days,
+ * or with [auto] a tenth of the room Mail could have (its free storage and what Mail holds), else [limit] bytes.
  */
 internal data class MailStorage(val device: String, val name: String = device, val mode: String = COPY, val limit: Long = DEFAULT,
-    val setAt: Long = 0, val setBy: String = "") {
+    val setAt: Long = 0, val setBy: String = "", val off: Boolean = false, val keepDays: Int? = null, val auto: Boolean = false) {
+
+    /** Bytes to keep, given the device's [free] storage (-1 unknown) and what Mail holds now ([used]). */
+    fun budget(free: Long, used: Long): Long = if (auto && free >= 0) (free + used) / 10 else limit
+    /** The oldest date kept ("yyyy-mm-dd 0000"), when kept by days. */
+    fun since(now: java.time.LocalDate = java.time.LocalDate.now()): String? = keepDays?.let { "${now.minusDays(it.toLong())} 0000" }
 
     companion object {
         const val COPY = "copy"; const val MOVE = "move"
@@ -175,7 +199,8 @@ internal data class MailStorage(val device: String, val name: String = device, v
         val LIMITS = listOf(GB / 2, GB, 2 * GB, 5 * GB, 10 * GB, -1L)
         private fun dir(root: File) = File(root, "devices")
         private fun of(o: JSONObject, device: String) = MailStorage(o.optString("device", device), o.optString("name", device),
-            o.optString("mode", COPY).takeIf { it == COPY || it == MOVE } ?: COPY, o.optLong("limit", DEFAULT), o.optLong("setAt"), o.optString("setBy"))
+            o.optString("mode", COPY).takeIf { it == COPY || it == MOVE } ?: COPY, o.optLong("limit", DEFAULT), o.optLong("setAt"), o.optString("setBy"),
+            o.optBoolean("off"), o.optInt("keepDays", 0).takeIf { it > 0 && !o.isNull("keepDays") }, o.optBoolean("auto"))
 
         fun read(root: File, device: String): MailStorage = runCatching { of(JSONObject(File(dir(root), "$device.json").readText()), device) }.getOrDefault(MailStorage(device))
         /** Every device that has a setting or has said how much it uses. */
@@ -345,6 +370,23 @@ internal object MailPrefs {
     /** An account's trouble on this device's last look (auth, appPassword, unreachable, other), or null. */
     fun state(c: Context, id: String): String? = p(c).getString("state.$id", null)
     fun setState(c: Context, id: String, reason: String?) = p(c).edit().apply { if (reason == null) remove("state.$id") else putString("state.$id", reason) }.apply()
+    /**
+     * «Έλεγχος για νέα», one for every device (the desktop's Mail/settings.json, `check`: "push", 5, 15, 30 or "manual"):
+     * [NOW] (IDLE while Mail is open, every 15 minutes otherwise), every 5, 15 or 30 minutes, or [MANUAL].
+     */
+    const val NOW = 0; const val MANUAL = -1
+    val EVERY = listOf(NOW, 5, 15, 30, MANUAL)
+    @Suppress("UNUSED_PARAMETER") fun every(c: Context) = every(mailRoot())
+    fun every(root: File): Int = when (val v = runCatching { JSONObject(File(root, "settings.json").readText()).get("check") }.getOrNull()) {
+        "manual" -> MANUAL; 5, 15, 30 -> v as Int; else -> NOW
+    }
+    fun setEvery(v: Int, root: File = mailRoot(), by: String = MailEngine.device()) {
+        val f = File(root, "settings.json")
+        val o = runCatching { JSONObject(f.readText()) }.getOrDefault(JSONObject()) // the other keys are kept
+        o.put("check", when (v) { NOW -> "push"; MANUAL -> "manual"; else -> v }).put("setAt", System.currentTimeMillis()).put("setBy", by)
+        root.mkdirs()
+        check(File(root, ".settings.json.part").apply { writeText(o.toString(2)) }.renameTo(f))
+    }
     fun receipts(c: Context) = p(c).getInt("receipts", 1) // 0 never, 1 ask, 2 always
     fun setReceipts(c: Context, v: Int) = p(c).edit().putInt("receipts", v).apply()
     /** A folder's kept view ("Κράτησε για αυτόν τον φάκελο"), or null. */

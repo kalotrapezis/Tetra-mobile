@@ -195,4 +195,13 @@
     <string name="mail_assist">✦ Предложение от асистента</string>
     <string name="mail_assist_working">✦ Асистентът пише…</string>
     <string name="mail_draft_card">Чернова – докоснете, за да я довършите и изпратите</string>
+    <string name="mail_check">Проверка за нова поща</string>
+    <string name="mail_check_summary">За акаунтите, които устройството изтегля само. Веднага: щом пристигне поща, докато Поща е отворена, и на всеки 15 минути, когато е затворена. Компютърът проверява собствените си ⇄ акаунти; отварянето на Поща го моли да провери веднага.</string>
+    <string name="mail_check_now">Веднага</string>
+    <string name="mail_check_every">На всеки %d минути</string>
+    <string name="mail_check_manual">Ръчно</string>
+    <string name="mail_use_here">Използване и на това устройство</string>
+    <string name="mail_use_here_summary">Компютърът изтегля този акаунт. Използвайте го и тук: компютърът предава паролата му по сдвоената, шифрована връзка, тя се пази в защитеното хранилище на това устройство, а устройството изтегля пощата само, дори далеч от компютъра.</string>
+    <string name="mail_use_here_microsoft">Акаунт на Microsoft: влезте отново на това устройство и то ще изтегля пощата само, дори далеч от компютъра.</string>
+    <string name="mail_use_here_busy">Питам компютъра…</string>
 </resources>

@@ -195,4 +195,13 @@
     <string name="mail_assist">✦ Vom Assistenten vorschlagen lassen</string>
     <string name="mail_assist_working">✦ Der Assistent schreibt…</string>
     <string name="mail_draft_card">Entwurf – tippen, um ihn fertigzustellen und zu senden</string>
+    <string name="mail_check">Auf neue E-Mails prüfen</string>
+    <string name="mail_check_summary">Für die Konten, die dieses Gerät selbst abruft. Sofort: sobald E-Mails eintreffen, solange E-Mail geöffnet ist, und alle 15 Minuten, wenn es geschlossen ist. Die ⇄-Konten prüft der PC selbst; beim Öffnen von E-Mail wird er gebeten, sofort zu prüfen.</string>
+    <string name="mail_check_now">Sofort</string>
+    <string name="mail_check_every">Alle %d Minuten</string>
+    <string name="mail_check_manual">Manuell</string>
+    <string name="mail_use_here">Auch auf diesem Gerät verwenden</string>
+    <string name="mail_use_here_summary">Der PC ruft dieses Konto ab. Verwende es auch hier: Der PC gibt sein Passwort über die gekoppelte, verschlüsselte Verbindung weiter, es wird im sicheren Speicher dieses Geräts abgelegt, und dieses Gerät ruft die E-Mails selbst ab, auch fern vom PC.</string>
+    <string name="mail_use_here_microsoft">Ein Microsoft-Konto: Melde dich auf diesem Gerät erneut an, dann ruft dieses Gerät die E-Mails selbst ab, auch fern vom PC.</string>
+    <string name="mail_use_here_busy">Frage den PC…</string>
 </resources>

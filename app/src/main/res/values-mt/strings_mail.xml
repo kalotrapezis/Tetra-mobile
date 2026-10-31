@@ -203,4 +203,13 @@
     <string name="mail_assist">✦ Issuġġerixxi mal-assistent</string>
     <string name="mail_assist_working">✦ L-assistent qed jikteb…</string>
     <string name="mail_draft_card">Abbozz – agħfas biex tlestih u tibagħtu</string>
+    <string name="mail_check">Iċċekkja għal posta ġdida</string>
+    <string name="mail_check_summary">Għall-kontijiet li dan l-apparat iġib waħdu. Minnufih: hekk kif tasal posta waqt li Posta tkun miftuħa, u kull 15-il minuta meta tkun magħluqa. Il-PC jiċċekkja l-kontijiet ⇄ tiegħu stess; meta tiftaħ Posta, jintalab jiċċekkja minnufih.</string>
+    <string name="mail_check_now">Minnufih</string>
+    <string name="mail_check_every">Kull %d minuti</string>
+    <string name="mail_check_manual">Manwalment</string>
+    <string name="mail_use_here">Uża fuq dan l-apparat ukoll</string>
+    <string name="mail_use_here_summary">Il-PC iġib dan il-kont. Użah hawn ukoll: il-PC jgħaddi l-password tiegħu mill-konnessjoni mqabbda u kriptata, tinżamm fil-ħażna sigura ta’ dan l-apparat, u l-apparat iġib il-posta waħdu, anke ’l bogħod mill-PC.</string>
+    <string name="mail_use_here_microsoft">Kont Microsoft: idħol għal darb’oħra fuq dan l-apparat, u l-apparat iġib il-posta waħdu, anke ’l bogħod mill-PC.</string>
+    <string name="mail_use_here_busy">Qed insaqsi lill-PC…</string>
 </resources>

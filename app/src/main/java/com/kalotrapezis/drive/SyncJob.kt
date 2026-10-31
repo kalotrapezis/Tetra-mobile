@@ -29,7 +29,7 @@ internal class SyncJob : JobService() {
         // Data's hourly look (Plan.md § Data): Android's counts into this device's files, then the plan's warnings
         // Mail's quarter-hourly look at the accounts this device fetches itself (MailEngine)
         if (params.jobId == MailEngine.JOB) {
-            scope.launch { runCatching { MailEngine.syncAll(applicationContext) }; jobFinished(params, false) }
+            scope.launch { runCatching { MailEngine.syncAll(applicationContext) }; jobFinished(params, false); MailEngine.schedule(applicationContext, again = true) }
             return true
         }
         if (params.jobId == DataStats.JOB) {

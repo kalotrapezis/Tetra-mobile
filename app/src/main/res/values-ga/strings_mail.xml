@@ -207,4 +207,13 @@
     <string name="mail_assist">✦ Moltaí ón gcúntóir</string>
     <string name="mail_assist_working">✦ Tá an cúntóir ag scríobh…</string>
     <string name="mail_draft_card">Dréacht – tapáil chun é a chríochnú agus a sheoladh</string>
+    <string name="mail_check">Seiceáil le haghaidh post nua</string>
+    <string name="mail_check_summary">Do na cuntais a fhaigheann an gléas seo é féin. Láithreach: nuair a thagann post agus Ríomhphost oscailte, agus gach 15 nóiméad nuair a bhíonn sé dúnta. Seiceálann an ríomhaire a chuntais ⇄ féin; nuair a osclaíonn tú Ríomhphost, iarrtar air seiceáil láithreach.</string>
+    <string name="mail_check_now">Láithreach</string>
+    <string name="mail_check_every">Gach %d nóiméad</string>
+    <string name="mail_check_manual">De láimh</string>
+    <string name="mail_use_here">Úsáid ar an ngléas seo freisin</string>
+    <string name="mail_use_here_summary">Faigheann an ríomhaire an cuntas seo. Úsáid anseo freisin é: seolann an ríomhaire a phasfhocal thar an gceangal péireáilte, criptithe, stóráiltear é i stóras slán an ghléis seo, agus faigheann an gléas an post é féin, fiú i bhfad ón ríomhaire.</string>
+    <string name="mail_use_here_microsoft">Cuntas Microsoft: sínigh isteach arís ar an ngléas seo, agus gheobhaidh an gléas an post é féin, fiú i bhfad ón ríomhaire.</string>
+    <string name="mail_use_here_busy">Ag fiafraí den ríomhaire…</string>
 </resources>

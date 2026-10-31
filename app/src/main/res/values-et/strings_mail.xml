@@ -195,4 +195,13 @@
     <string name="mail_assist">✦ Lase assistendil soovitada</string>
     <string name="mail_assist_working">✦ Assistent kirjutab…</string>
     <string name="mail_draft_card">Mustand – puudutage, et see lõpetada ja saata</string>
+    <string name="mail_check">Uute kirjade kontroll</string>
+    <string name="mail_check_summary">Kontodele, mida see seade ise toob. Kohe: niipea kui kirjad saabuvad, kui E-post on avatud, ja iga 15 minuti järel, kui see on suletud. ⇄ kontosid kontrollib arvuti ise; E-posti avamine palub tal kohe kontrollida.</string>
+    <string name="mail_check_now">Kohe</string>
+    <string name="mail_check_every">Iga %d minuti järel</string>
+    <string name="mail_check_manual">Käsitsi</string>
+    <string name="mail_use_here">Kasuta ka sellel seadmel</string>
+    <string name="mail_use_here_summary">Seda kontot toob arvuti. Kasutage seda ka siin: arvuti annab selle parooli edasi seotud krüptitud ühenduse kaudu, see salvestatakse selle seadme turvalisse hoidlasse ja seade toob kirjad ise, ka arvutist eemal.</string>
+    <string name="mail_use_here_microsoft">Microsofti konto: logige sellel seadmel uuesti sisse ja seade toob kirjad ise, ka arvutist eemal.</string>
+    <string name="mail_use_here_busy">Küsin arvutilt…</string>
 </resources>

@@ -203,4 +203,13 @@
     <string name="mail_assist">✦ Zaproponuj z asystentem</string>
     <string name="mail_assist_working">✦ Asystent pisze…</string>
     <string name="mail_draft_card">Wersja robocza – dotknij, by ją dokończyć i wysłać</string>
+    <string name="mail_check">Sprawdzaj nową pocztę</string>
+    <string name="mail_check_summary">Dla kont, które to urządzenie pobiera samo. Od razu: gdy poczta nadejdzie, kiedy Poczta jest otwarta, i co 15 minut, gdy jest zamknięta. Własne konta ⇄ sprawdza komputer; otwarcie Poczty prosi go, by sprawdził od razu.</string>
+    <string name="mail_check_now">Od razu</string>
+    <string name="mail_check_every">Co %d min</string>
+    <string name="mail_check_manual">Ręcznie</string>
+    <string name="mail_use_here">Używaj także na tym urządzeniu</string>
+    <string name="mail_use_here_summary">To konto pobiera komputer. Używaj go także tutaj: komputer przekazuje jego hasło przez sparowane, szyfrowane połączenie, jest ono przechowywane w bezpiecznym magazynie tego urządzenia, a urządzenie pobiera pocztę samo, także z dala od komputera.</string>
+    <string name="mail_use_here_microsoft">Konto Microsoft: zaloguj się ponownie na tym urządzeniu, a ono samo będzie pobierać pocztę, także z dala od komputera.</string>
+    <string name="mail_use_here_busy">Pytam komputer…</string>
 </resources>

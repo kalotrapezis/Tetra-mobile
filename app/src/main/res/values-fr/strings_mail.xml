@@ -199,4 +199,13 @@
     <string name="mail_assist">✦ Suggérer avec l’assistant</string>
     <string name="mail_assist_working">✦ L’assistant écrit…</string>
     <string name="mail_draft_card">Brouillon – touchez pour le terminer et l’envoyer</string>
+    <string name="mail_check">Vérifier les nouveaux e-mails</string>
+    <string name="mail_check_summary">Pour les comptes que cet appareil récupère lui-même. Tout de suite : dès que des e-mails arrivent pendant que Mail est ouvert, et toutes les 15 minutes quand il est fermé. Le PC vérifie ses propres comptes ⇄ ; ouvrir Mail lui demande de vérifier aussitôt.</string>
+    <string name="mail_check_now">Tout de suite</string>
+    <string name="mail_check_every">Toutes les %d minutes</string>
+    <string name="mail_check_manual">Manuellement</string>
+    <string name="mail_use_here">Utiliser aussi sur cet appareil</string>
+    <string name="mail_use_here_summary">Le PC récupère ce compte. Utilisez-le aussi ici : le PC transmet son mot de passe par la connexion jumelée et chiffrée, il est conservé dans le stockage sécurisé de cet appareil, et cet appareil récupère lui-même les e-mails, même loin du PC.</string>
+    <string name="mail_use_here_microsoft">Un compte Microsoft : reconnectez-vous sur cet appareil, et il récupérera lui-même les e-mails, même loin du PC.</string>
+    <string name="mail_use_here_busy">Interrogation du PC…</string>
 </resources>

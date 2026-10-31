@@ -195,4 +195,13 @@
     <string name="mail_assist">✦ Få et forslag fra assistenten</string>
     <string name="mail_assist_working">✦ Assistenten skriver…</string>
     <string name="mail_draft_card">Kladde – tryk for at gøre den færdig og sende den</string>
+    <string name="mail_check">Tjek for ny mail</string>
+    <string name="mail_check_summary">Til de konti, som denne enhed selv henter. Med det samme: når mail ankommer, mens Mail er åben, og hvert 15. minut, når den er lukket. Pc’en tjekker sine egne ⇄-konti; når du åbner Mail, bliver den bedt om at tjekke med det samme.</string>
+    <string name="mail_check_now">Med det samme</string>
+    <string name="mail_check_every">Med %d minutters mellemrum</string>
+    <string name="mail_check_manual">Manuelt</string>
+    <string name="mail_use_here">Brug også på denne enhed</string>
+    <string name="mail_use_here_summary">Pc’en henter denne konto. Brug den også her: pc’en videregiver adgangskoden over den parrede, krypterede forbindelse, den gemmes i denne enheds sikre lager, og enheden henter selv mailen, også væk fra pc’en.</string>
+    <string name="mail_use_here_microsoft">En Microsoft-konto: log ind igen på denne enhed, så henter enheden selv mailen, også væk fra pc’en.</string>
+    <string name="mail_use_here_busy">Spørger pc’en…</string>
 </resources>

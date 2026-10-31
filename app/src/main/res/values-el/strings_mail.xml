@@ -205,4 +205,13 @@
     <string name="mail_assist">✦ Πρόταση από τον βοηθό</string>
     <string name="mail_assist_working">✦ Ο βοηθός γράφει…</string>
     <string name="mail_draft_card">Πρόχειρο — πάτα για να το ολοκληρώσεις και να το στείλεις</string>
+    <string name="mail_check">Έλεγχος για νέα</string>
+    <string name="mail_check_summary">Για τους λογαριασμούς που φέρνει η ίδια η συσκευή. Αμέσως: μόλις φτάσουν όσο η Αλληλογραφία είναι ανοιχτή, και κάθε 15 λεπτά όταν είναι κλειστή. Τους λογαριασμούς ⇄ τους ελέγχει ο υπολογιστής· όταν ανοίγεις την Αλληλογραφία, του ζητάει να ελέγξει αμέσως.</string>
+    <string name="mail_check_now">Αμέσως</string>
+    <string name="mail_check_every">Κάθε %d λεπτά</string>
+    <string name="mail_check_manual">Χειροκίνητα</string>
+    <string name="mail_use_here">Χρήση και σε αυτή τη συσκευή</string>
+    <string name="mail_use_here_summary">Αυτόν τον λογαριασμό τον φέρνει ο υπολογιστής. Χρησιμοποίησέ τον και εδώ: ο υπολογιστής δίνει τον κωδικό του μέσα από τη συνδεδεμένη, κρυπτογραφημένη σύνδεση, φυλάγεται στον ασφαλή χώρο της συσκευής, και η συσκευή φέρνει μόνη της την αλληλογραφία, και μακριά από τον υπολογιστή.</string>
+    <string name="mail_use_here_microsoft">Λογαριασμός Microsoft: συνδέσου ξανά σε αυτή τη συσκευή, και θα φέρνει μόνη της την αλληλογραφία, και μακριά από τον υπολογιστή.</string>
+    <string name="mail_use_here_busy">Ρωτάω τον υπολογιστή…</string>
 </resources>

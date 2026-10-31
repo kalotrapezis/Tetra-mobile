@@ -206,4 +206,13 @@
     <string name="mail_assist">✦ Suggest with the assistant</string>
     <string name="mail_assist_working">✦ The assistant is writing…</string>
     <string name="mail_draft_card">Draft — tap to finish and send it</string>
+    <string name="mail_check">Check for new mail</string>
+    <string name="mail_check_summary">For the accounts this device fetches itself. Right away: as mail arrives while Mail is open, and every 15 minutes when it is closed. The PC checks its own ⇄ accounts; opening Mail asks it to check at once.</string>
+    <string name="mail_check_now">Right away</string>
+    <string name="mail_check_every">Every %d minutes</string>
+    <string name="mail_check_manual">Manually</string>
+    <string name="mail_use_here">Use on this device too</string>
+    <string name="mail_use_here_summary">The PC fetches this account. Use it here too: the PC passes its password over the paired, encrypted connection, it is kept in this device\'s secure storage, and this device fetches the mail itself, even away from the PC.</string>
+    <string name="mail_use_here_microsoft">A Microsoft account: sign in again on this device, and this device fetches the mail itself, even away from the PC.</string>
+    <string name="mail_use_here_busy">Asking the PC…</string>
 </resources>

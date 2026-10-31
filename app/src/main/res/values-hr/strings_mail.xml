@@ -199,4 +199,13 @@
     <string name="mail_assist">✦ Predloži s asistentom</string>
     <string name="mail_assist_working">✦ Asistent piše…</string>
     <string name="mail_draft_card">Skica – dodirnite da je dovršite i pošaljete</string>
+    <string name="mail_check">Provjeri novu poštu</string>
+    <string name="mail_check_summary">Za račune koje ovaj uređaj sam preuzima. Odmah: čim pošta stigne dok je Pošta otvorena, i svakih 15 minuta kad je zatvorena. Računalo provjerava vlastite ⇄ račune; otvaranje Pošte traži od njega da provjeri odmah.</string>
+    <string name="mail_check_now">Odmah</string>
+    <string name="mail_check_every">Svakih %d minuta</string>
+    <string name="mail_check_manual">Ručno</string>
+    <string name="mail_use_here">Koristi i na ovom uređaju</string>
+    <string name="mail_use_here_summary">Ovaj račun preuzima računalo. Koristite ga i ovdje: računalo prosljeđuje njegovu lozinku preko uparene, šifrirane veze, ona se čuva u sigurnoj pohrani ovog uređaja, a uređaj sam preuzima poštu, čak i daleko od računala.</string>
+    <string name="mail_use_here_microsoft">Microsoftov račun: ponovno se prijavite na ovom uređaju i on će sam preuzimati poštu, čak i daleko od računala.</string>
+    <string name="mail_use_here_busy">Pitam računalo…</string>
 </resources>

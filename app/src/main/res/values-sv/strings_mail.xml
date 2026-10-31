@@ -195,4 +195,13 @@
     <string name="mail_assist">✦ Låt assistenten föreslå</string>
     <string name="mail_assist_working">✦ Assistenten skriver…</string>
     <string name="mail_draft_card">Utkast – tryck för att göra klart och skicka det</string>
+    <string name="mail_check">Sök efter ny e-post</string>
+    <string name="mail_check_summary">För de konton som den här enheten hämtar själv. Direkt: så fort e-post kommer medan E-post är öppen, och var 15:e minut när den är stängd. Datorn kontrollerar sina egna ⇄-konton; när du öppnar E-post ombeds den kontrollera direkt.</string>
+    <string name="mail_check_now">Direkt</string>
+    <string name="mail_check_every">Med %d minuters mellanrum</string>
+    <string name="mail_check_manual">Manuellt</string>
+    <string name="mail_use_here">Använd även på den här enheten</string>
+    <string name="mail_use_here_summary">Datorn hämtar det här kontot. Använd det även här: datorn för över lösenordet via den parkopplade, krypterade anslutningen, det sparas i den här enhetens säkra lagring, och enheten hämtar e-posten själv, även när du är borta från datorn.</string>
+    <string name="mail_use_here_microsoft">Ett Microsoft-konto: logga in igen på den här enheten, så hämtar enheten e-posten själv, även när du är borta från datorn.</string>
+    <string name="mail_use_here_busy">Frågar datorn…</string>
 </resources>
