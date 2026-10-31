@@ -897,8 +897,12 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
         }
     }
     val number = java.text.NumberFormat.getInstance()
-    // as the desktop shows sizes: GB with one decimal from a gigabyte, else whole MB
-    fun size(n: Long) = if (n >= 1_000_000_000) "${java.text.DecimalFormat("#,##0.#").format(n / 1e9)} GB" else "${number.format(Math.round(n / 1e6))} MB"
+    // as the desktop shows sizes, decimal: GB with one decimal from a gigabyte, else whole MB, else whole KB
+    fun size(n: Long) = when {
+        n >= 1_000_000_000 -> "${java.text.DecimalFormat("#,##0.#").format(n / 1e9)} GB"
+        n >= 1_000_000 -> "${number.format(Math.round(n / 1e6))} MB"
+        else -> "${number.format(Math.round(n / 1e3))} KB"
+    }
     AlertDialog(onDismissRequest = dismiss, icon = { Icon(painterResource(R.drawable.ic_folder), contentDescription = null) }, title = { Text(stringResource(R.string.mail_storage)) },
         text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             val got = info
