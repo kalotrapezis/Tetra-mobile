@@ -144,4 +144,33 @@
     <string name="mail_year_1">1 year</string>
     <string name="mail_keep_all">All</string>
     <string name="mail_keep_none">None</string>
+
+    <string name="mail_not_done">Not done on the server: %1$s</string>
+    <string name="mail_why_auth">The password was not accepted.</string>
+    <string name="mail_why_app_password">Google wants an app password here, not your normal one.</string>
+    <string name="mail_why_unreachable">The server could not be reached. Check the connection.</string>
+    <string name="mail_why_other">The server answered with an error.</string>
+    <string name="mail_address">Your address</string>
+    <string name="mail_bad_address">That does not look like an e-mail address.</string>
+    <string name="mail_finding">Finding the servers…</string>
+    <string name="mail_not_found">No servers found for this address. Fill them in below.</string>
+    <string name="mail_manual">Manual setup</string>
+    <string name="mail_ms_later">Microsoft accounts (Hotmail, Outlook, Microsoft 365) need Microsoft\'s sign-in, which comes later. Add it on the PC for now.</string>
+    <string name="mail_password">Password</string>
+    <string name="mail_gmail_hint">Gmail needs an app password: open Google\'s page, make one named Tetra, copy its 16 letters and come back. Tetra reads them by itself.</string>
+    <string name="mail_gmail_open">Open Google\'s page</string>
+    <string name="mail_sign_in">Sign in</string>
+    <string name="mail_checking">Checking…</string>
+    <string name="mail_done_title">Ready</string>
+    <string name="mail_done_text">%1$s is added. Its mail is saved here and goes to the PC with sync. Notifications are on.</string>
+    <string name="mail_incoming">Incoming (IMAP)</string>
+    <string name="mail_outgoing">Outgoing (SMTP)</string>
+    <string name="mail_host">Server</string>
+    <string name="mail_port">Port</string>
+    <string name="mail_user">User name</string>
+    <string name="mail_security_none">None</string>
+    <string name="mail_own_device">fetched by this device</string>
+    <string name="mail_remove_here">Remove from this device</string>
+    <string name="mail_new_password">New password</string>
+
 </resources>

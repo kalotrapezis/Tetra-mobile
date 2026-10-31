@@ -120,13 +120,17 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
     DisposableEffect(root) {
         root.mkdirs()
         val watch = object : FileObserver(root, CLOSE_WRITE or MOVED_TO or DELETE) {
-            override fun onEvent(event: Int, path: String?) { if (path == "index.jsonl" || path == "accounts.json") android.os.Handler(android.os.Looper.getMainLooper()).post { version++ } }
+            override fun onEvent(event: Int, path: String?) { if (path != null && (path.startsWith("index.") || path.startsWith("accounts.")) && !path.endsWith(".part")) android.os.Handler(android.os.Looper.getMainLooper()).post { version++ } }
         }
         watch.startWatching()
-        onDispose { watch.stopWatching() }
+        // the accounts this device fetches: a look now, then IDLE in their Inboxes while Mail is open
+        var stopped = false
+        Thread { runCatching { MailEngine.watch(context.applicationContext, root) { stopped } } }.apply { isDaemon = true; start() }
+        MailEngine.schedule(context.applicationContext)
+        onDispose { watch.stopWatching(); stopped = true }
     }
     val data by produceState<Pair<List<MailAccount>, List<MailEntry>>?>(null, version) {
-        value = withContext(Dispatchers.IO) { runCatching { MailFiles.accounts(root) to MailFiles.index(root) }.onFailure { WriterLog.e("Mail: reading the archive", it) }.getOrDefault(emptyList<MailAccount>() to emptyList()) }
+        value = withContext(Dispatchers.IO) { runCatching { MailFiles.accounts(root, MailSecret.ids(context)) to MailFiles.index(root, MailEngine.device()) }.onFailure { WriterLog.e("Mail: reading the archive", it) }.getOrDefault(emptyList<MailAccount>() to emptyList()) }
     }
     val accounts = data?.first.orEmpty()
     // what was asked here and the computer has not done yet, shown as done (step 1: show it, then trust index.jsonl)
@@ -162,9 +166,18 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
         val now = mails.filter { it.id in ids }
         changed = changed + now.associate { it.id to MailRequests.applied(it, op) }
         if (MailRequests.applied(now.first(), op) == null) { selected = emptySet(); if (openId in ids) openId = null }
+        // this device's own accounts: on the server at once; the PC's: a request it carries out
+        val own = now.filter { accountOf[it.account]?.own == true }.map { it.id }
+        val theirs = ids - own.toSet()
         Thread {
-            runCatching { MailRequests.write(root, DataFiles.device(), op, ids, to) }.onFailure { WriterLog.e("Mail: a request", it) }
-            ScopedSync.soon(context.applicationContext, "mail", 0, orWhole = true)
+            if (own.isNotEmpty()) runCatching { MailEngine.act(context.applicationContext, root, op, own, to) }.onFailure {
+                WriterLog.e("Mail: $op on the server", it)
+                android.os.Handler(android.os.Looper.getMainLooper()).post { changed = changed - own.toSet(); message = context.getString(R.string.mail_not_done, mailWhy(context, it)) }
+            }
+            if (theirs.isNotEmpty()) {
+                runCatching { MailRequests.write(root, MailEngine.device(), op, theirs, to) }.onFailure { WriterLog.e("Mail: a request", it) }
+                ScopedSync.soon(context.applicationContext, "mail", 0, orWhole = true)
+            }
         }.start()
         if (op in setOf("archive", "delete", "move", "spam", "notSpam")) message = context.getString(R.string.mail_done_on_pc)
     }
@@ -309,6 +322,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
                     } else {
                         MailIslandItem(R.drawable.ic_add, stringResource(R.string.common_new), enabled = false, click = writeLater)
                         MailIslandItem(R.drawable.ic_sync, stringResource(R.string.mail_sync)) {
+                            Thread { MailEngine.syncAll(context.applicationContext, root) }.start()
                             runCatching { androidx.core.content.ContextCompat.startForegroundService(context, Intent(context, SyncService::class.java).setAction(SyncService.ACTION_START)) }
                                 .onFailure { WriterLog.e("Mail: sync", it) }
                             message = context.getString(R.string.mail_syncing)
@@ -465,6 +479,11 @@ private fun shortTime(ms: Long): String {
     return t.format(DateTimeFormatter.ofPattern(if (days == 0L) "HH:mm" else if (days < 7) "EEE" else "d MMM", java.util.Locale.getDefault()))
 }
 
+/** What went wrong with a server, in one plain sentence (MAIL_PLAN §9b: never a raw error). */
+internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getString(when (mailReason(e)) {
+    "auth" -> R.string.mail_why_auth; "appPassword" -> R.string.mail_why_app_password; "unreachable" -> R.string.mail_why_unreachable; else -> R.string.mail_why_other
+})
+
 /** A mail's state: green saved here, a green ring saved on the PC (this device keeps it there), orange only on the server. */
 @Composable private fun StateDot(color: Color, ring: Boolean = false) =
     Box(Modifier.size(8.dp).clip(CircleShape).then(if (ring) Modifier.border(1.5.dp, color, CircleShape) else Modifier.background(color)))
@@ -548,7 +567,10 @@ private fun shortTime(ms: Long): String {
     fun fetch(rel: String): File = SyncClient(context.applicationContext, SyncStore(context.applicationContext)).mailFile(rel)
     val message by produceState<Mime.Message?>(null, e.id, e.file) {
         value = withContext(Dispatchers.IO) {
-            val f = MailFiles.eml(root, e) ?: e.file?.takeIf { e.saved }?.let { rel ->
+            // not here: from the server when this device fetches the account itself, else from the PC
+            val f = MailFiles.eml(root, e) ?: if (account?.own == true) runCatching { MailEngine.body(context.applicationContext, root, e)?.file?.let { File(root, it) } }
+                .onSuccess { fetched() }.onFailure { failed = mailWhy(context, it); WriterLog.w("Mail: from the server (${it.message})") }.getOrNull()
+            else e.file?.takeIf { e.saved }?.let { rel ->
                 runCatching { fetch(MailSync.PART + rel) }.onSuccess { fetched() }.onFailure { failed = it.shownMessage(context) ?: it.message; WriterLog.w("Mail: fetching a mail (${it.message})") }.getOrNull()
             }
             f?.let { runCatching { Mime.read(it.readBytes()) }.onFailure { WriterLog.e("Mail: reading a mail", it) }.getOrNull() }
@@ -616,7 +638,7 @@ private fun shortTime(ms: Long): String {
             }
         }
         when {
-            e.file == null || !e.saved || failed != null -> {
+            failed != null || (account?.own != true && (e.file == null || !e.saved)) -> {
                 MailHint(failed?.let { stringResource(R.string.mail_fetch_failed, it) } ?: stringResource(R.string.mail_not_here))
                 if (e.snippet.isNotEmpty()) Text(e.snippet, Modifier.padding(horizontal = 24.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }

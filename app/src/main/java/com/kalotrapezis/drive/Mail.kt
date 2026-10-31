@@ -22,13 +22,17 @@ import org.json.JSONObject
 internal data class MailEntry(
     val id: String, val account: String, val folder: String, val date: Long, val from: String, val fromAddress: String,
     val to: List<String>, val subject: String, val seen: Boolean, val flagged: Boolean, val size: Long, val attachments: Int,
-    val snippet: String, val saved: Boolean, val file: String?, val gone: Boolean,
+    val snippet: String, val saved: Boolean, val file: String?, val gone: Boolean, val messageId: String? = null,
 )
 
-/** An account as the computer describes it; [shadow]: the phone does not fetch it itself, it comes through the PC (MAIL_PLAN §1). */
-internal data class MailAccount(val id: String, val address: String, val name: String, val color: Long, val addedOn: String) {
-    // shortcut: the phone fetches no account itself yet (step 2), so every account is the PC's; upgrade when it signs in on its own
-    val shadow get() = addedOn != "phone"
+/**
+ * An account as accounts.json (the computer's) or accounts.<device>.json (a phone's or tablet's own) describes it.
+ * [own]: this device fetches it itself (its password is in this device's keystore); otherwise it is a shadow account,
+ * its mail through the PC (MAIL_PLAN §1). [json] is the account as written, kept for the engine (server, smtp).
+ */
+internal data class MailAccount(val id: String, val address: String, val name: String, val color: Long, val addedOn: String,
+    val own: Boolean = false, val json: JSONObject? = null) {
+    val shadow get() = !own
 }
 
 /** A folder's counts for one account: unread, all, and how many are only on the server (orange). */
@@ -40,35 +44,55 @@ internal object MailFiles {
 
     fun root(tetra: File) = File(tetra, TetraSystem.onDisk(FOLDER))
 
-    fun accounts(root: File): List<MailAccount> = runCatching {
-        val a = JSONArray(File(root, "accounts.json").readText())
-        (0 until a.length()).map { a.getJSONObject(it) }.map { o ->
-            MailAccount(o.getString("id"), o.optString("address", o.getString("id")), o.optString("name", o.getString("id")),
-                color(o.optString("color")), o.optString("addedOn", "desktop"))
+    /** The computer's accounts.json, then each device's accounts.<device>.json; one account once, [own] those this device fetches. */
+    fun accounts(root: File, own: Set<String> = emptySet()): List<MailAccount> {
+        val files = listOf(File(root, "accounts.json")) + (root.listFiles { f -> f.name.startsWith("accounts.") && f.name.endsWith(".json") && f.name != "accounts.json" }.orEmpty().sortedBy { it.name })
+        val byId = LinkedHashMap<String, MailAccount>()
+        for (f in files) runCatching {
+            val a = JSONArray(f.readText())
+            for (o in (0 until a.length()).map { a.getJSONObject(it) }) {
+                val id = o.getString("id")
+                if (id in byId && id !in own) continue // the computer's description first; this device's own when it fetches it
+                byId[id] = MailAccount(id, o.optString("address", id), o.optString("name", id), color(o.optString("color")), o.optString("addedOn", "desktop"), id in own, o)
+            }
         }
-    }.getOrDefault(emptyList())
+        return byId.values.toList()
+    }
 
     private fun color(hex: String) = hex.removePrefix("#").takeIf { it.length == 6 }?.toLongOrNull(16)?.let { 0xFF000000 or it } ?: 0xFF9E9E9E
 
-    private var cached: Triple<Long, Long, List<MailEntry>>? = null
-    /** Every mail not gone; the last line for an id wins. Read again only when the file's size or time changed (it may be long). */
-    fun index(root: File): List<MailEntry> = synchronized(this) {
-        val f = File(root, "index.jsonl")
-        cached?.takeIf { it.first == f.length() && it.second == f.lastModified() }?.let { return it.third }
-        val read = runCatching { f.useLines { parse(it) } }.getOrDefault(emptyList())
-        cached = Triple(f.length(), f.lastModified(), read)
+    private var cached: Pair<String, List<MailEntry>>? = null
+    /**
+     * Every mail not gone: the computer's index.jsonl, then each device's index.<device>.jsonl (the mail a phone fetched
+     * itself), this device's last; the last line for an id wins, and an id is the same mail whoever fetched it. Read
+     * again only when a file's size or time changed (they may be long).
+     */
+    fun index(root: File, own: String? = null): List<MailEntry> = synchronized(this) {
+        val others = root.listFiles { f -> f.name.startsWith("index.") && f.name.endsWith(".jsonl") && f.name != "index.jsonl" }.orEmpty().sortedBy { it.name }
+        val files = listOf(File(root, "index.jsonl")) + others.sortedBy { it.name == "index.$own.jsonl" }
+        val stamp = files.joinToString { "${it.name}:${it.length()}:${it.lastModified()}" }
+        cached?.takeIf { it.first == stamp }?.let { return it.second }
+        val read = parse(files.asSequence().flatMap { f -> runCatching { f.readLines() }.getOrDefault(emptyList()) })
+        cached = stamp to read
         read
     }
 
-    fun parse(lines: Sequence<String>): List<MailEntry> {
+    fun parse(lines: Sequence<String>, keepGone: Boolean = false): List<MailEntry> {
         val byId = LinkedHashMap<String, MailEntry>()
         for (line in lines) {
             if (line.isBlank()) continue
             val e = runCatching { entry(JSONObject(line)) }.getOrNull() ?: continue // a line cut by a crash on the computer
-            byId[e.id] = e
+            val before = byId[e.id]
+            // a device that has only the headers does not hide the body another one saved
+            byId[e.id] = if (e.file == null && !e.gone && before?.file != null) e.copy(file = before.file, saved = before.saved, attachments = before.attachments, snippet = before.snippet) else e
         }
-        return byId.values.filter { !it.gone }
+        return byId.values.filter { keepGone || !it.gone }
     }
+
+    fun json(e: MailEntry): JSONObject = JSONObject().put("id", e.id).put("account", e.account).put("folder", e.folder).put("date", e.date)
+        .put("from", e.from).put("fromAddress", e.fromAddress).put("to", JSONArray(e.to)).put("subject", e.subject).put("seen", e.seen)
+        .put("flagged", e.flagged).put("size", e.size).put("attachments", e.attachments).put("snippet", e.snippet).put("saved", e.saved)
+        .put("file", e.file ?: JSONObject.NULL).put("gone", e.gone).apply { e.messageId?.let { put("messageId", it) } }
 
     private fun entry(o: JSONObject) = MailEntry(
         id = o.getString("id"), account = o.getString("account"), folder = o.getString("folder"), date = o.optLong("date"),
@@ -76,7 +100,8 @@ internal object MailFiles {
         to = o.optJSONArray("to")?.let { a -> (0 until a.length()).map { a.optString(it) } }.orEmpty(),
         subject = o.optString("subject"), seen = o.optBoolean("seen"), flagged = o.optBoolean("flagged"), size = o.optLong("size"),
         attachments = o.optInt("attachments"), snippet = o.optString("snippet"), saved = o.optBoolean("saved"),
-        file = o.optString("file").ifEmpty { null }, gone = o.optBoolean("gone"),
+        file = o.optString("file").takeIf { it.isNotEmpty() && !o.isNull("file") }, gone = o.optBoolean("gone"),
+        messageId = o.optString("messageId").ifEmpty { null },
     )
 
     /** Role → account → counts, for the unified folders (MAIL_PLAN §4); only the accounts in accounts.json. */
@@ -109,11 +134,12 @@ internal object MailSync {
     fun keep(rel: String, today: LocalDate, bodies: Int, attachments: Int): Boolean {
         if (!rel.startsWith(PART)) return true
         if (rel.startsWith(REQUESTS)) return false
-        val m = DATED.find(rel) ?: return true // index.jsonl, accounts.json
+        val m = DATED.find(rel) ?: return true // index.jsonl, accounts.json, a device's own index and accounts
         val date = runCatching { LocalDate.of(m.groupValues[1].toInt(), m.groupValues[2].toInt(), m.groupValues[3].toInt()) }.getOrNull() ?: return true
-        val months = if (".files/" in rel) attachments else bodies
-        return months < 0 || (months > 0 && !date.isBefore(today.minusMonths(months.toLong())))
+        return recent(date, today, if (".files/" in rel) attachments else bodies)
     }
+
+    fun recent(date: LocalDate, today: LocalDate, months: Int) = months < 0 || (months > 0 && !date.isBefore(today.minusMonths(months.toLong())))
 
     fun keep(c: Context, rel: String) = keep(rel, LocalDate.now(), MailPrefs.bodies(c), MailPrefs.attachments(c))
 
@@ -207,6 +233,12 @@ internal object MailPrefs {
     fun allow(c: Context, sender: String, on: Boolean = true) = p(c).edit().putStringSet("allowed", if (on) allowed(c) + sender.lowercase() else allowed(c) - sender).apply()
     fun switch(c: Context, name: String) = p(c).getBoolean(name, true) // tracking, links, risky, realAddress: on by default
     fun setSwitch(c: Context, name: String, on: Boolean) = p(c).edit().putBoolean(name, on).apply()
+    /** The signature for [address] (Settings › Αλληλογραφία › Υπογραφές), plain text, added to new mail and replies. */
+    fun signature(c: Context, address: String) = p(c).getString("signature.${address.lowercase()}", "")!!
+    fun setSignature(c: Context, address: String, text: String) = p(c).edit().putString("signature.${address.lowercase()}", text).apply()
+    /** An account's trouble on this device's last look (auth, appPassword, unreachable, other), or null. */
+    fun state(c: Context, id: String): String? = p(c).getString("state.$id", null)
+    fun setState(c: Context, id: String, reason: String?) = p(c).edit().apply { if (reason == null) remove("state.$id") else putString("state.$id", reason) }.apply()
     fun receipts(c: Context) = p(c).getInt("receipts", 1) // 0 never, 1 ask, 2 always
     /** Months of mail (-1 all) and of attachments (0 none, -1 all) kept on this device (MAIL_PLAN §2). */
     fun bodies(c: Context) = p(c).getInt("bodies", 6)
@@ -241,13 +273,29 @@ internal object Mime {
             ?: extended(headers["content-type"].orEmpty(), "name") ?: param(headers["content-type"].orEmpty(), "name")?.let(::words)
     }
 
-    fun read(raw: ByteArray): Message {
+    private class Parts(val top: Part, val leaves: List<Part>) {
+        val htmlPart = leaves.firstOrNull { it.type == "text/html" && !it.attachment }
+        val textPart = leaves.firstOrNull { it.type == "text/plain" && !it.attachment }
+        // what is not the text, nor a picture the HTML shows (mailparser's "related", which the computer leaves out)
+        val files by lazy { val h = htmlPart?.text(); leaves.filter { p -> p !== htmlPart && p !== textPart && (p.attachment || p.filename != null) &&
+            p.headers["content-id"]?.let { h?.contains("cid:" + it.trim().removePrefix("<").removeSuffix(">")) } != true } }
+    }
+    private fun parts(raw: ByteArray): Parts {
         val top = part(raw)
         val leaves = mutableListOf<Part>()
         fun walk(p: Part) { if (p.type.startsWith("multipart/")) p.param("boundary")?.let { b -> split(p.body, b).forEach { walk(part(it)) } } else leaves += p }
         walk(top)
-        val htmlPart = leaves.firstOrNull { it.type == "text/html" && !it.attachment }
-        val textPart = leaves.firstOrNull { it.type == "text/plain" && !it.attachment }
+        return Parts(top, leaves)
+    }
+
+    /** The attachments as the computer writes them into the .files folder: their names on disk and their bytes. */
+    fun attachments(raw: ByteArray): List<Pair<String, ByteArray>> = parts(raw).files.let { f -> diskNames(f.map { it.filename }).zip(f.map { it.bytes() }) }
+
+    fun read(raw: ByteArray): Message {
+        val ps = parts(raw)
+        val top = ps.top; val leaves = ps.leaves
+        val htmlPart = ps.htmlPart
+        val textPart = ps.textPart
         val html = htmlPart?.text()?.let { h ->
             // pictures inside the mail (cid:) as data: URLs, so nothing is fetched for them
             leaves.filter { it.type.startsWith("image/") && it.headers["content-id"] != null }.fold(h) { acc, img ->
@@ -256,9 +304,7 @@ internal object Mime {
             }
         }
         val text = textPart?.text()
-        // what is not the text, nor a picture the HTML shows (mailparser's "related", which the computer leaves out)
-        val files = leaves.filter { p -> p !== htmlPart && p !== textPart && (p.attachment || p.filename != null) &&
-            p.headers["content-id"]?.let { html?.contains("cid:" + it.trim().removePrefix("<").removeSuffix(">")) } != true }
+        val files = ps.files
         return Message(html, text, words(top.headers["to"].orEmpty()), words(top.headers["cc"].orEmpty()), top.headers, diskNames(files.map { it.filename }))
     }
 

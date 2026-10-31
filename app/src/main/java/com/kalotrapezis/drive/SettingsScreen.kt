@@ -769,16 +769,21 @@ internal fun SettingsTab(
  */
 @Composable private fun MailPage() {
     val context = LocalContext.current
-    val data by produceState<Pair<List<MailAccount>, List<MailEntry>>?>(null) {
-        value = withContext(Dispatchers.IO) { runCatching { mailRoot().let { MailFiles.accounts(it) to MailFiles.index(it) } }.getOrNull() }
+    var version by remember { mutableIntStateOf(0) }
+    val data by produceState<Pair<List<MailAccount>, List<MailEntry>>?>(null, version) {
+        value = withContext(Dispatchers.IO) { runCatching { mailRoot().let { MailFiles.accounts(it, MailSecret.ids(context)) to MailFiles.index(it, MailEngine.device()) } }.getOrNull() }
     }
     var adding by remember { mutableStateOf(false) }
+    var managing by remember { mutableStateOf<MailAccount?>(null) }
     SettingsSection(stringResource(R.string.mail_accounts)) {
         data?.first?.forEach { a ->
             val orange = data!!.second.count { it.account == a.id && !it.saved }
-            SettingRow(a.name, listOfNotNull(a.address, stringResource(R.string.mail_via_pc).takeIf { a.shadow },
-                if (orange == 0) "● " + stringResource(R.string.mail_all_local) else "● " + pluralStringResource(R.plurals.mail_n_server_only, orange, orange)).joinToString(" · "),
-                warn = orange > 0, leading = { Box(Modifier.size(12.dp).clip(CircleShape).background(Color(a.color))) })
+            val trouble = if (a.own) MailPrefs.state(context, a.id) else null
+            SettingRow(a.name, listOfNotNull(a.address, stringResource(if (a.own) R.string.mail_own_device else R.string.mail_via_pc),
+                trouble?.let { stringResource(when (it) { "auth" -> R.string.mail_why_auth; "appPassword" -> R.string.mail_why_app_password; "unreachable" -> R.string.mail_why_unreachable; else -> R.string.mail_why_other }) }
+                    ?: if (orange == 0) "● " + stringResource(R.string.mail_all_local) else "● " + pluralStringResource(R.plurals.mail_n_server_only, orange, orange)).joinToString(" · "),
+                onClick = if (a.own) ({ managing = a }) else null,
+                warn = orange > 0 || trouble != null, leading = { Box(Modifier.size(12.dp).clip(CircleShape).background(Color(a.color))) }) { if (a.own) Chevron() }
         }
         SettingRow(stringResource(R.string.mail_add_account), onClick = { adding = true }) { Icon(painterResource(R.drawable.ic_add), contentDescription = null) }
     }
@@ -823,8 +828,22 @@ internal fun SettingsTab(
         ChoiceRow(stringResource(R.string.mail_receipts), null, listOf(0 to stringResource(R.string.mail_receipts_never), 1 to stringResource(R.string.mail_receipts_ask), 2 to stringResource(R.string.mail_receipts_always)),
             receipts) { receipts = it; MailPrefs.setReceipts(context, it) }
     }
-    if (adding) AlertDialog(onDismissRequest = { adding = false }, title = { Text(stringResource(R.string.mail_add_account)) }, text = { Text(stringResource(R.string.mail_add_on_pc)) },
-        confirmButton = { TextButton(onClick = { adding = false }) { Text(stringResource(R.string.common_ok)) } })
+    if (adding) MailAddAccount { adding = false; version++ }
+    managing?.let { a ->
+        var pass by remember { mutableStateOf("") }
+        AlertDialog(onDismissRequest = { managing = null }, title = { Text(a.name) },
+            text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(a.address)
+                OutlinedTextField(pass, { pass = it }, singleLine = true, label = { Text(stringResource(R.string.mail_new_password)) },
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
+                TextButton(onClick = { MailEngine.remove(context.applicationContext, mailRoot(), a.id); MailEngine.schedule(context.applicationContext); managing = null; version++ }) {
+                    Text(stringResource(R.string.mail_remove_here), color = MaterialTheme.colorScheme.error)
+                }
+            } },
+            confirmButton = { TextButton(enabled = pass.isNotBlank(), onClick = { MailSecret.set(context, a.id, pass.trim()); MailPrefs.setState(context, a.id, null)
+                Thread { MailEngine.syncAll(context.applicationContext) }.start(); managing = null; version++ }) { Text(stringResource(R.string.common_save)) } },
+            dismissButton = { TextButton(onClick = { managing = null }) { Text(stringResource(R.string.common_cancel)) } })
+    }
 }
 
 /** Settings › Data (Plan.md § Data): the plan is set up in Data's own Setup; here its state and the switches. */

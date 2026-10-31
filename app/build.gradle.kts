@@ -63,6 +63,8 @@ android {
     // One APK per processor. OpenCV, ML Kit, TensorFlow and MapLibre each ship a native library for four
     // architectures, and together they were 346 MB of a 423 MB APK — two thirds of it for emulators nobody
     // installs this on. Split, an arm64 phone downloads only its own.
+    // Angus Mail's four jars each carry the same licence texts; one is enough (its META-INF/javamail.* stay)
+    packaging { resources { excludes += setOf("META-INF/LICENSE.md", "META-INF/NOTICE.md") } }
     splits {
         abi {
             isEnable = true
@@ -101,6 +103,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0") // AI Assist live: Voxtral realtime's WebSocket (already in the app through MapLibre)
     implementation("org.dmfs:lib-recur:0.17.1") // Calendar: iCalendar RRULE repeats (Apache 2.0)
     implementation("com.googlecode.libphonenumber:libphonenumber:9.0.42") // Phone: a number read in the SIM's country (Apache 2.0)
+    implementation("org.eclipse.angus:angus-mail:2.0.3") // Mail: IMAP and SMTP for the accounts the phone fetches itself (EPL 2.0 / GPL 2.0 + Classpath Exception)
     // Maps: offline routing on the graph the computer builds (Apache 2.0). Only what reading a graph needs: Janino (run-time
     // bytecode, which Android cannot load — MapsRouting writes the custom models out), the OSM reader, XML and logback stay out.
     implementation("com.graphhopper:graphhopper-core:10.2") {

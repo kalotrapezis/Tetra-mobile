@@ -119,4 +119,39 @@ class MailTest {
         assertEquals(listOf("α β.pdf", "α β (2).pdf", "attachment"), Mime.read(raw).attachments)
         assertEquals("a b", Mime.clean("..a/ \t b", 150))
     }
+
+    @Test fun everyDevicesIndexAndAccountsAreOneArchive() {
+        val dir = java.nio.file.Files.createTempDirectory("mail").toFile()
+        File(dir, "accounts.json").writeText("""[{"id":"a@pc.gr","address":"a@pc.gr","name":"PC","color":"#e5534b"},{"id":"b@both.gr","name":"Both on PC","color":"#4f8ff7"}]""")
+        File(dir, "accounts.Pixel.json").writeText("""[{"id":"b@both.gr","name":"Both on phone","color":"#3fb27f","addedOn":"phone","server":{"host":"imap.both.gr","port":993,"user":"b","secure":true}},{"id":"c@phone.gr","name":"Phone","color":"#e0a43a","addedOn":"phone"}]""")
+        val accounts = MailFiles.accounts(dir, own = setOf("b@both.gr", "c@phone.gr"))
+        assertEquals(listOf("PC", "Both on phone", "Phone"), accounts.map { it.name }) // the device's own description of an account it fetches
+        assertEquals(listOf(true, false, false), accounts.map { it.shadow })
+        assertEquals("imap.both.gr", MailServer.of(accounts[1].json!!.optJSONObject("server"))!!.host)
+        assertEquals("Both on PC", MailFiles.accounts(dir).first { it.id == "b@both.gr" }.name) // another device: the PC's
+
+        fun line(id: String, file: String?, seen: Boolean, gone: Boolean = false) = """{"id":"$id","account":"b@both.gr","folder":"Inbox","date":1,"subject":"s","seen":$seen,"saved":${file != null},"file":${file?.let { "\"$it\"" } ?: "null"},"gone":$gone}"""
+        File(dir, "index.jsonl").writeText(line("b@both.gr/Inbox/1/1", "b@both.gr/Inbox/2026/x.eml", false) + "\n" + line("b@both.gr/Inbox/1/2", null, false) + "\n")
+        File(dir, "index.Pixel.jsonl").writeText(line("b@both.gr/Inbox/1/1", null, true) + "\n" + line("b@both.gr/Inbox/1/2", null, false, gone = true) + "\n")
+        val mails = MailFiles.index(dir, own = "Pixel")
+        assertEquals(listOf("b@both.gr/Inbox/1/1"), mails.map { it.id }) // the phone saw 2 leave the server
+        assertTrue(mails[0].seen) // its flags, this device's last
+        assertEquals("b@both.gr/Inbox/2026/x.eml", mails[0].file) // but the body the PC saved is not hidden by a line with only headers
+        dir.deleteRecursively()
+    }
+
+    @Test fun theEngineNamesAndReadsAsTheComputer() {
+        assertEquals("Καλημέρα", MailEngine.utf8(String("Καλημέρα".toByteArray(), Charsets.ISO_8859_1))) // raw UTF-8 headers read as Latin-1
+        assertEquals("Grüße", MailEngine.utf8("Grüße")); assertEquals("plain", MailEngine.utf8("plain"))
+        val at = java.time.LocalDateTime.of(2026, 10, 31, 9, 12).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+        assertEquals("2026/2026-10-31 0912 Γραμματεία ΜΠΣ - Προθεσμία εργασίας 15 Νοεμβρίου", MailEngine.mailName(at, "Γραμματεία ΜΠΣ", "Προθεσμία εργασίας: 15 Νοεμβρίου"))
+        assertEquals("2026/2026-10-31 0912 - - -", MailEngine.mailName(at, "", ""))
+        val xml = """<clientConfig><emailProvider><incomingServer type="imap"><hostname>imap.uni.cy</hostname><port>993</port><socketType>SSL</socketType><username>%EMAILLOCALPART%</username></incomingServer>
+            <outgoingServer type="smtp"><hostname>smtp.uni.cy</hostname><port>587</port><socketType>STARTTLS</socketType><username>%EMAILADDRESS%</username></outgoingServer></emailProvider></clientConfig>"""
+        val f = MailDetect.parse(xml, "t.k@uni.cy")!!
+        assertEquals(MailServer("imap.uni.cy", 993, "t.k", secure = true), f.imap)
+        assertEquals(MailServer("smtp.uni.cy", 587, "t.k@uni.cy", secure = false, starttls = true), f.smtp)
+        assertTrue(MailDetect.known("x@hotmail.com")!!.microsoft); assertEquals("goodtable", MailDetect.known("goodtable@sch.gr")!!.imap.user)
+        assertEquals(null, MailDetect.parse("<html>no</html>", "a@b.c"))
+    }
 }
