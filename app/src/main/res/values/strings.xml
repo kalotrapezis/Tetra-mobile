@@ -4662,5 +4662,5 @@
     <string name="maps_welcome_intro">Tetra comes without a map, so everyone gets the map they want, offline and their own. You make it once, on your computer:</string>
     <string name="maps_welcome_steps">1. On your computer, open Tetra › Settings › Maps › Add a map.\n2. Choose your country. The computer needs internet for this.\n3. Keep the computer on and plugged in while the map is made: a few minutes for a small country, an hour or more for a big one.\n4. Keep Tetra open on this device, on the same Wi-Fi as the computer: the map comes here by itself.</string>
     <string name="sync_others">Others</string>
-    <string name="sync_keep_auto">what fits (by free space)</string>
+    <string name="sync_keep_auto" formatted="false">everything, until it is 90% full</string>
 </resources>

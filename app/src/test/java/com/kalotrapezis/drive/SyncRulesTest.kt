@@ -175,11 +175,9 @@ class SyncConnectionOffTest {
         assertEquals("receive", old.first { it.content == "other" }.direction)
     }
 
-    @Test fun automaticLetsTheOldestGoUntil15PercentIsFree() {
-        val sizes = listOf(3L, 4L, 5L, 6L) // oldest first
-        assertEquals(listOf(3L, 4L), SyncRules.overflow(sizes, { it }, free = 8, size = 100)) // 15 free wanted: 7 short
-        assertEquals(emptyList<Long>(), SyncRules.overflow(sizes, { it }, free = 15, size = 100))
-        assertEquals(sizes, SyncRules.overflow(sizes, { it }, free = 0, size = 1000)) // all of it is not enough: all goes
+    @Test fun automaticKeepsEverything() {
+        assertFalse(SyncConnection("photos", "send", "nothing", keepAuto = true).moves) // nothing goes by itself
+        assertTrue(SyncConnection("photos", "send", "nothing", 730).moves) // the PC's suggested Move, once confirmed
     }
 }
 

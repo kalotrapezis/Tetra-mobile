@@ -1923,8 +1923,8 @@ private fun photoUrisByKey(context: android.content.Context, keys: Set<String>):
 private fun connectionSentence(row: SyncConnection, computer: String): String {
     val what = stringResource(when (row.content) { "files" -> R.string.app_files; "mail" -> R.string.app_mail; "other" -> R.string.sync_others; else -> R.string.app_photos })
     val arrow = row.arrow ?: return stringResource(R.string.sync_not_synced, what)
-    val keep = if (!row.moves) stringResource(R.string.sync_copy)
-        else if (row.keepAuto) stringResource(R.string.sync_move_keeping, stringResource(R.string.sync_keep_auto))
+    val keep = if (row.keepAuto) stringResource(R.string.sync_keep_auto) // everything, until it is 90 % full
+        else if (!row.moves) stringResource(R.string.sync_copy)
         else SyncRules.span(row.keepDays).let { (n, unit) -> stringResource(R.string.sync_move_keeping, pluralStringResource(unit, n, n)) }
     return stringResource(R.string.sync_connection, what, arrow, computer, keep)
 }

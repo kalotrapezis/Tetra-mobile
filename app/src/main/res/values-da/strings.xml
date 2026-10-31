@@ -4661,5 +4661,5 @@
     <string name="maps_welcome_intro">Tetra kommer uden kort, så alle får det kort, de vil have, offline og deres eget. Du laver det én gang, på din computer:</string>
     <string name="maps_welcome_steps">1. Åbn Tetra › Indstillinger › Kort › Tilføj et kort på din computer.\n2. Vælg dit land. Computeren skal bruge internet til det.\n3. Lad computeren være tændt og sat i stikkontakten, mens kortet laves: nogle få minutter for et lille land, en time eller mere for et stort.\n4. Hold Tetra åben på denne enhed, på samme Wi-Fi som computeren: kortet kommer hertil af sig selv.</string>
     <string name="sync_others">Andre</string>
-    <string name="sync_keep_auto">det, der kan være på (efter ledig plads)</string>
+    <string name="sync_keep_auto" formatted="false">alt, indtil den er 90 % fuld</string>
 </resources>

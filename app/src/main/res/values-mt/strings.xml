@@ -4863,5 +4863,5 @@
     <string name="maps_welcome_intro">Tetra tiġi mingħajr mappa, biex kulħadd ikollu l-mappa li jrid, offline u tiegħu stess. Tagħmilha darba waħda, fuq il-kompjuter tiegħek:</string>
     <string name="maps_welcome_steps">1. Fuq il-kompjuter tiegħek, iftaħ Tetra › Settings › Mapep › Żid mappa.\n2. Agħżel pajjiżek. Il-kompjuter jeħtieġ l-internet għal dan.\n3. Żomm il-kompjuter mixgħul u mqabbad mal-kurrent waqt li l-mappa tkun qed issir: ftit minuti għal pajjiż żgħir, siegħa jew aktar għal wieħed kbir.\n4. Żomm Tetra miftuħa fuq dan l-apparat, fuq l-istess Wi-Fi tal-kompjuter: il-mappa tasal hawn waħedha.</string>
     <string name="sync_others">Oħrajn</string>
-    <string name="sync_keep_auto">dak li jidħol (skont l-ispazju ħieles)</string>
+    <string name="sync_keep_auto" formatted="false">kollox, sakemm jimtela 90%</string>
 </resources>

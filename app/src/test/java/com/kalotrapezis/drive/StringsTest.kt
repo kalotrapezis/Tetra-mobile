@@ -18,7 +18,9 @@ class StringsTest {
             val list = mutableListOf<Pair<String, String>>()
             val s = doc.getElementsByTagName("string")
             for (i in 0 until s.length) s.item(i).let { n ->
-                if (n.attributes.getNamedItem("translatable")?.nodeValue != "false") list += n.attributes.getNamedItem("name").nodeValue to n.textContent
+                // formatted="false": a plain text ("90% full"), no placeholders to compare
+                val plain = n.attributes.getNamedItem("formatted")?.nodeValue == "false"
+                if (n.attributes.getNamedItem("translatable")?.nodeValue != "false") list += n.attributes.getNamedItem("name").nodeValue to (if (plain) n.textContent.replace("%", "") else n.textContent)
             }
             val p = doc.getElementsByTagName("plurals")
             for (i in 0 until p.length) p.item(i).let { n ->

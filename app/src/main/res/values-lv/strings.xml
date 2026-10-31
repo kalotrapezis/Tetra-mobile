@@ -4762,5 +4762,5 @@
     <string name="maps_welcome_intro">Tetra nāk bez kartes, lai katrs saņemtu karti, kādu vēlas, bezsaistē un savu. Jūs to izveidojat vienreiz, savā datorā:</string>
     <string name="maps_welcome_steps">1. Savā datorā atveriet Tetra › Iestatījumi › Kartes › Pievienot karti.\n2. Izvēlieties savu valsti. Datoram tam vajadzīgs internets.\n3. Turiet datoru ieslēgtu un pieslēgtu elektrībai, kamēr karte tiek veidota: dažas minūtes mazai valstij, stunda vai ilgāk lielai.\n4. Turiet Tetra atvērtu šajā ierīcē, tajā pašā Wi-Fi tīklā, kurā ir dators: karte nonāk šeit pati.</string>
     <string name="sync_others">Citas</string>
-    <string name="sync_keep_auto">to, kas ietilpst (pēc brīvās vietas)</string>
+    <string name="sync_keep_auto" formatted="false">visu, līdz tā ir 90 % pilna</string>
 </resources>

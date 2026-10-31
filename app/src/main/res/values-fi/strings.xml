@@ -4661,5 +4661,5 @@
     <string name="maps_welcome_intro">Tetra tulee ilman karttaa, jotta jokainen saa juuri haluamansa kartan, offline-tilassa ja omanaan. Teet sen kerran, tietokoneellasi:</string>
     <string name="maps_welcome_steps">1. Avaa tietokoneellasi Tetra › Asetukset › Kartat › Lisää kartta.\n2. Valitse maasi. Tietokone tarvitsee siihen internetin.\n3. Pidä tietokone päällä ja kiinni virtalähteessä, kun karttaa tehdään: muutama minuutti pienelle maalle, tunti tai enemmän isolle.\n4. Pidä Tetra auki tässä laitteessa, samassa Wi-Fi-verkossa kuin tietokone: kartta tulee tänne itsestään.</string>
     <string name="sync_others">Muut</string>
-    <string name="sync_keep_auto">se, mikä mahtuu (vapaan tilan mukaan)</string>
+    <string name="sync_keep_auto" formatted="false">kaikki, kunnes se on 90 % täynnä</string>
 </resources>

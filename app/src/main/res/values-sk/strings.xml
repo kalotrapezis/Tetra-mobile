@@ -4863,5 +4863,5 @@
     <string name="maps_welcome_intro">Tetra sa dodáva bez mapy, aby každý mal mapu, akú chce, offline a vlastnú. Vytvoríte ju raz, na počítači:</string>
     <string name="maps_welcome_steps">1. Na počítači otvorte Tetra › Nastavenia › Mapy › Pridať mapu.\n2. Vyberte svoju krajinu. Počítač na to potrebuje internet.\n3. Nechajte počítač zapnutý a pripojený do zásuvky, kým sa mapa vytvára: niekoľko minút pri malej krajine, hodinu alebo dlhšie pri veľkej.\n4. Nechajte na tomto zariadení otvorenú aplikáciu Tetra, v rovnakej sieti Wi-Fi ako počítač: mapa sa sem dostane sama.</string>
     <string name="sync_others">Ostatné</string>
-    <string name="sync_keep_auto">čo sa zmestí (podľa voľného miesta)</string>
+    <string name="sync_keep_auto" formatted="false">všetko, kým sa nezaplní na 90 %</string>
 </resources>

@@ -4863,5 +4863,5 @@
     <string name="maps_welcome_intro">Tetra pateikiama be žemėlapio, kad kiekvienas gautų norimą žemėlapį, veikiantį be interneto ir tik savo. Jį sukuriate vieną kartą, savo kompiuteryje:</string>
     <string name="maps_welcome_steps">1. Savo kompiuteryje atidarykite Tetra › Nustatymai › Žemėlapiai › Pridėti žemėlapį.\n2. Pasirinkite savo šalį. Tam kompiuteriui reikia interneto.\n3. Laikykite kompiuterį įjungtą ir prijungtą prie elektros tinklo, kol kuriamas žemėlapis: kelios minutės mažai šaliai, valanda ar ilgiau didelei.\n4. Laikykite Tetra atvirą šiame įrenginyje, tame pačiame Wi-Fi tinkle kaip ir kompiuteris: žemėlapis čia atkeliauja pats.</string>
     <string name="sync_others">Kiti</string>
-    <string name="sync_keep_auto">tai, kas telpa (pagal laisvą vietą)</string>
+    <string name="sync_keep_auto" formatted="false">viską, kol užsipildys 90 %</string>
 </resources>

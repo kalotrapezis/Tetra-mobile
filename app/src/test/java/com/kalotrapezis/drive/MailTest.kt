@@ -312,10 +312,7 @@ class MailTest {
         assertEquals(setOf("Mail/index.jsonl", "Mail/a/Inbox/2026/2026-01-02 0800 X - new.eml"), MailSync.plan(files, -1, "2025-10-31 0000"))
         File(dir, "devices/Pixel.json").writeText("""{"device":"Pixel","limit":1000000000,"keepDays":null,"auto":true}""")
         val auto = MailStorage.read(dir, "Pixel")
-        // the newest while 15 % stays free: 100 GB phone, 20 GB free, Mail 1 GB → Mail may grow to 6 GB
-        assertNull(auto.since()); assertEquals(6_000_000_000, auto.budget(free = 20_000_000_000, size = 100_000_000_000, used = 1_000_000_000))
-        assertEquals(0, auto.budget(free = 5_000_000_000, size = 100_000_000_000, used = 1_000_000_000)) // already under 15 % free
-        assertEquals(1_000_000_000, auto.budget(free = -1, size = -1, used = 0)) // free storage unknown: the limit
+        assertNull(auto.since()); assertEquals(-1, auto.budget()) // Automatic: everything stays
         File(dir, "devices/Pixel.json").writeText("""{"device":"Pixel","off":true}""")
         assertTrue(MailStorage.read(dir, "Pixel").off)
         assertTrue(MailSync.pcMail("Mail/index.jsonl", "Pixel", setOf("me@x.gr")))

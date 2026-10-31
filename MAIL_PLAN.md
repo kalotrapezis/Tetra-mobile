@@ -458,8 +458,9 @@ Formats are the desktop's (step 1's sync.js/mail.js of the same day); the phone 
   once: the phone's own accounts at their servers; for the PC's, POST /mail/sync (the PC looks now), then a whole sync 10 s later.
 - **Per device** (`Mail/devices/<device>.json`, written from the PC's device card): `off` (nothing of Mail crosses; the
   phone deletes the PC's mail and files it holds, keeping its own accounts'), `mode` copy/move, and what stays —
-  `keepDays` (365, 30) by the date in the path, or `auto` (the newest while at least 15 % of the device stays free — the
-  same rule as photos and files), else `limit` bytes (1 GB when Automatic has no free storage to go by). Each sync's list carries `device: { free, size, mail }` — the phone's free and whole
+  `keepDays` (365, 30) by the date in the path, or `auto` (everything, as photos and files: nothing goes by itself; at
+  90 % full the PC suggests moving what is over 2 years old, or 1, and sets an ordinary Move once the user confirms),
+  else `limit` bytes. Each sync's list carries `device: { free, size, mail }` — the phone's free and whole
   storage and Mail's name for it — so the card can suggest moving old things when the phone is nearly full.
 - **Four rows per device** (GET /connections): photos, files, mail, other — each { content, direction, keep, keepDays,
   keepFavorites, keepAuto, keepBytes }. A path follows its own row: `Mail/…` mail; a top folder of the system's shared

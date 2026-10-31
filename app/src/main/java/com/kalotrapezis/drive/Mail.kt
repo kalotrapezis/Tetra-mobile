@@ -182,14 +182,13 @@ internal object MailSync {
  * = { used, files, at }, written only by the device. Copy: the device holds the newest mail within what it keeps, filled
  * from the PC too. Move: it takes nothing from the PC, and lets go of what it fetched itself once the PC holds it, keeping
  * what fits. Off: nothing of Mail crosses, and the PC's mail is not kept here. What it keeps: the last [keepDays] days,
- * or with [auto] the newest while 15 % of the device stays free (as photos and files), else [limit] bytes.
+ * or with [auto] everything (as photos and files), else [limit] bytes.
  */
 internal data class MailStorage(val device: String, val name: String = device, val mode: String = COPY, val limit: Long = DEFAULT,
     val setAt: Long = 0, val setBy: String = "", val off: Boolean = false, val keepDays: Int? = null, val auto: Boolean = false) {
 
-    /** Bytes to keep, given the device's [free] and whole [size] storage (-1 unknown) and what Mail holds now ([used]). */
-    fun budget(free: Long, size: Long, used: Long): Long =
-        if (auto && free >= 0 && size > 0) maxOf(0, used + free - size * SyncRules.FREE_PERCENT / 100) else limit
+    /** Bytes to keep (-1 all): Automatic keeps everything (the PC suggests a Move at 90 % full). */
+    fun budget(): Long = if (auto) -1 else limit
     /** The oldest date kept ("yyyy-mm-dd 0000"), when kept by days. */
     fun since(now: java.time.LocalDate = java.time.LocalDate.now()): String? = keepDays?.let { "${now.minusDays(it.toLong())} 0000" }
 
