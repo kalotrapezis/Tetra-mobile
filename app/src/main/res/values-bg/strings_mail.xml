@@ -214,4 +214,13 @@
     <string name="mail_default_none">Android пита всеки път. Изберете Tetra в приложенията по подразбиране на Android или натиснете «Винаги» следващия път, когато връзка към имейл попита.</string>
     <string name="mail_no_sender">Никой акаунт не може да изпраща оттук</string>
     <string name="mail_no_sender_how">Добавете акаунт на това устройство или го добавете на компютъра: тогава писмото тръгва през компютъра (⇄), от неговите изходящи, при следващата синхронизация.</string>
+    <string name="mail_local_only">само тук</string>
+    <string name="mail_export_message">Експортирай писмото</string>
+    <string name="mail_export_documents">Експортирай в Документи</string>
+    <string name="mail_save_as">Запиши като…</string>
+    <string name="mail_exported">Копирано: %1$s</string>
+    <string name="mail_show">Покажи</string>
+    <string name="mail_stored_hint">Пощата, съхранена на това устройство, включително изтритата от сървъра</string>
+    <string name="mail_stored_read_only">Хранилището е само за четене: нищо тук не се променя на сървъра.</string>
+    <string name="mail_saved">Запазено</string>
 </resources>

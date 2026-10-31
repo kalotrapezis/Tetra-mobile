@@ -167,7 +167,12 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     val accounts = data?.first.orEmpty()
     // what was asked here and the computer has not done yet, shown as done (step 1: show it, then trust index.jsonl)
     var changed by remember { mutableStateOf(mapOf<String, MailEntry?>()) }
-    val mails = remember(data, changed) { data?.second.orEmpty().mapNotNull { e -> if (e.id in changed) changed[e.id] else e } }
+    // «Αποθήκευση»: the same folders, list and pages over every mail kept here, deleted ones too (MailArchive); read only
+    var stored by remember { mutableStateOf(false) }
+    val archive by produceState<List<MailEntry>?>(null, stored, version) {
+        if (stored) value = withContext(Dispatchers.IO) { runCatching { MailArchive.entries(root, MailEngine.device()) }.onFailure { WriterLog.e("Mail: reading the stored mail", it) }.getOrDefault(emptyList()) }
+    }
+    val mails = remember(data, changed, stored, archive) { if (stored) archive.orEmpty() else data?.second.orEmpty().mapNotNull { e -> if (e.id in changed) changed[e.id] else e } }
     OpenTiming("Mail", data != null)
     val counts = remember(mails, accounts) { MailFiles.counts(mails, accounts) }
     val accountOf = remember(accounts) { accounts.associateBy { it.id } }
@@ -188,6 +193,8 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     var source by remember { mutableStateOf<String?>(null) }
     var message by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(message) { if (message != null) { delay(3500); message = null } }
+    var exported by remember { mutableStateOf<File?>(null) } // a copy just put in Tetra/Documents: said, with «Εμφάνιση»
+    LaunchedEffect(exported) { if (exported != null) { delay(6000); exported = null } }
     val later = { message = context.getString(R.string.mail_later) }
     val writeLater = { message = context.getString(R.string.mail_write_later) }
     var moving by remember { mutableStateOf<Collection<String>?>(null) }
@@ -211,6 +218,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     /** [op] on these mails: a request for the computer, sent at once; shown done here meanwhile. */
     fun act(op: String, ids: Collection<String>, to: String? = null) {
         if (ids.isEmpty()) return
+        if (stored) { if (op != "read") message = context.getString(R.string.mail_stored_read_only); return } // the archive is never the server's
         val now = mails.filter { it.id in ids }
         changed = changed + now.associate { it.id to MailRequests.applied(it, op) }
         if (MailRequests.applied(now.first(), op) == null) { selected = emptySet(); if (openId in ids) openId = null }
@@ -251,6 +259,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
 
     BackHandler { when {
         selected.isNotEmpty() -> selected = emptySet()
+        stored && open == null -> { stored = false; openId = null }
         single != null -> single = null // from a conversation's mail back to the conversation
         !three && open != null -> openId = null
         query.isNotEmpty() -> query = ""
@@ -266,7 +275,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
                     IconButton(onClick = back) { Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.home_back_to_home)) }
                 }
                 Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.app_mail), Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 13.dp), fontWeight = FontWeight.Bold, maxLines = 1,
+                    Text(stringResource(if (stored) R.string.mail_storage else R.string.app_mail), Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 13.dp), fontWeight = FontWeight.Bold, maxLines = 1,
                         overflow = TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 }
             }
@@ -302,6 +311,18 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
                         }
                     }
                 }
+                // «Αποθήκευση» at the bottom: the mail kept on this device, the same folders over it; again, back to the mail
+                if (accounts.isNotEmpty()) item(key = "stored") {
+                    Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(MaterialTheme.shapes.large).background(if (stored) MAIL_COLOR.copy(alpha = 0.22f) else Color.Transparent)
+                        .clickable { stored = !stored; openId = null; selected = emptySet(); mailboxes = false }.padding(start = 14.dp, end = 10.dp).heightIn(min = 48.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(R.drawable.ic_folder), null, Modifier.size(20.dp))
+                        Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                            Text(stringResource(R.string.mail_storage), fontWeight = if (stored) FontWeight.Bold else null)
+                            Text(stringResource(R.string.mail_stored_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
                 if (accounts.isNotEmpty()) item {
                     @OptIn(ExperimentalLayoutApi::class)
                     FlowRow(Modifier.padding(start = 16.dp, top = 16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -317,7 +338,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
         Box(m) {
             LazyColumn(Modifier.fillMaxSize().statusBarsPadding(), contentPadding = PaddingValues(top = if (MailLook.top) 150.dp else 72.dp, bottom = if (MailLook.top) 24.dp else 120.dp, start = 8.dp, end = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                if (data == null) item { MailHint(stringResource(R.string.mail_reading)) }
+                if (data == null || (stored && archive == null)) item { MailHint(stringResource(R.string.mail_reading)) }
                 else if (accounts.isEmpty()) item { NoAccounts { adding = true } }
                 else if (shown.isEmpty()) item { MailHint(stringResource(when {
                     query.isNotEmpty() -> R.string.mail_no_match
@@ -401,8 +422,8 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
             if (wide && many.size > 1) SelectionPane(many, accountOf, Modifier.statusBarsPadding().padding(16.dp), later)
             else if (current.size > 1 && single == null) MailThreadPage(current, accounts.map { it.address.lowercase() }.toSet(), accountOf, root, MailLook.top, showBack = !three, back = { openId = null }, openFile = openFile) { e -> if (e.folder == "Drafts") writing = MailDraft("draft", e, current) else single = e.id }
             else if (single != null && current.any { it.id == single }) MailPage(current.first { it.id == single }, accountOf[current.first { it.id == single }.account], root, islandTop = MailLook.top, showBack = true,
-                back = { single = null }, openFile = openFile, say = { message = it }, fetched = { version++ }, write = { writing = it })
-            else if (open != null) MailPage(open, accountOf[open.account], root, islandTop = MailLook.top, showBack = !three, back = { openId = null }, openFile = openFile, say = { message = it }, fetched = { version++ }, write = { writing = it })
+                back = { single = null }, openFile = openFile, say = { message = it }, fetched = { version++ }, write = { writing = it }, exported = { exported = it })
+            else if (open != null) MailPage(open, accountOf[open.account], root, islandTop = MailLook.top, showBack = !three, back = { openId = null }, openFile = openFile, say = { message = it }, fetched = { version++ }, write = { writing = it }, exported = { exported = it })
             else if (wide) MailHint(stringResource(R.string.mail_choose), Modifier.align(Alignment.Center))
             // the mail's island: one big Απάντηση; the rest pulled up from it
             if (open != null && !(wide && many.size > 1)) Box(if (MailLook.top) Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 8.dp, end = 16.dp) else Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp)) {
@@ -429,6 +450,15 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
                 open != null -> page(Modifier.fillMaxSize())
                 mailboxes -> folders(Modifier.fillMaxSize())
                 else -> list(Modifier.fillMaxSize())
+            }
+            exported?.let { f ->
+                Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape,
+                    modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 100.dp, start = 16.dp, end = 16.dp)) {
+                    Row(Modifier.padding(start = 18.dp, end = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.mail_exported, f.name), Modifier.weight(1f, fill = false), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        TextButton(onClick = { exported = null; openFolder("Documents") }) { Text(stringResource(R.string.mail_show), color = MAIL_TEXT) }
+                    }
+                }
             }
             message?.let { t ->
                 Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape,
@@ -491,6 +521,12 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
             DrawerRow(R.drawable.ic_done_all, stringResource(R.string.mail_mark_unread), true) { mailDrawer = false; act("unread", current.map { it.id }); openId = null }
             DrawerRow(R.drawable.ic_label, stringResource(R.string.mail_tag), false, later)
             DrawerRow(R.drawable.ic_print, stringResource(R.string.mail_print), false, later)
+            // the whole mail as a .eml in Tetra/Documents (synced to the PC's)
+            DrawerRow(R.drawable.ic_file_download, stringResource(R.string.mail_export_message), MailFiles.eml(root, open) != null) {
+                mailDrawer = false
+                runCatching { MailFiles.eml(root, open)!!.let { f -> MailExport.toDocuments(f, documentsDir(), MailExport.emlName(open, f)) } }
+                    .onSuccess { exported = it }.onFailure { message = it.message; WriterLog.e("Mail: exporting a mail", it) }
+            }
             DrawerRow(R.drawable.ic_code, stringResource(R.string.mail_source), MailFiles.eml(root, open) != null) {
                 mailDrawer = false
                 source = runCatching { MailFiles.eml(root, open)!!.readText(Charsets.ISO_8859_1).take(200_000) }.getOrNull()
@@ -600,6 +636,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
                 if (e.attachments > 0) Icon(painterResource(R.drawable.ic_attach), stringResource(R.string.mail_has_attachments), Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 StateDot(if (e.saved) GREEN else ORANGE, ring = e.saved && !here)
             }
+            if (e.gone) Text(stringResource(R.string.mail_local_only), style = MaterialTheme.typography.labelSmall, color = MAIL_TEXT) // in «Αποθήκευση»: no longer on the server
             Text(e.subject.ifEmpty { stringResource(R.string.mail_no_subject) }, fontWeight = if (e.seen) null else FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (e.snippet.isNotEmpty()) Text(e.snippet, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
@@ -659,7 +696,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
  * or always (Settings).
  */
 @Composable private fun MailPage(e: MailEntry, account: MailAccount?, root: File, islandTop: Boolean, showBack: Boolean, back: () -> Unit, openFile: (File) -> Unit, say: (String) -> Unit, fetched: () -> Unit,
-    write: (MailDraft) -> Unit = {}) {
+    write: (MailDraft) -> Unit = {}, exported: (File) -> Unit = {}) {
     val context = LocalContext.current
     var failed by remember(e.id) { mutableStateOf<String?>(null) }
     var got by remember(e.id) { mutableIntStateOf(0) } // an attachment fetched: the cards again
@@ -697,6 +734,13 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
     val sender = e.fromAddress.lowercase()
     val allowed = remember(allowedVersion, sender) { MailPrefs.remote(context) || sender in MailPrefs.allowed(context) || sender.substringAfter('@') in MailPrefs.allowed(context) }
     var risky by remember { mutableStateOf<Pair<String, File?>?>(null) }
+    // «Αποθήκευση ως…»: Android's own picker says where; the attachment's bytes go there
+    var savingAs by remember { mutableStateOf<File?>(null) }
+    val saveAs = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("*/*")) { uri ->
+        val file = savingAs; savingAs = null
+        if (uri != null && file != null) runCatching { context.contentResolver.openOutputStream(uri)!!.use { out -> file.inputStream().use { it.copyTo(out) } } }
+            .onSuccess { say(context.getString(R.string.mail_saved)) }.onFailure { say(it.message.orEmpty()) }
+    }
     val html = message?.let { it.html ?: it.text?.let(Mime::textAsHtml) }
     val blocked = html != null && !(once || allowed) && Mime.remote(html)
     Column(Modifier.fillMaxSize().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = if (islandTop) 84.dp else 12.dp)) { // under an island at the top
@@ -722,11 +766,28 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
         }
         if (files.isNotEmpty()) Row(Modifier.horizontalScroll(rememberScrollState()).padding(bottom = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             files.forEach { (name, f) ->
+                var menu by remember { mutableStateOf(false) }
                 Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.medium,
                     modifier = Modifier.clickable { if (Mime.risky(name) && MailPrefs.switch(context, "risky")) risky = name to f else open(name, f) }) {
-                    Row(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(Modifier.padding(start = 12.dp, top = 4.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(painterResource(R.drawable.ic_attach), null, Modifier.size(16.dp))
                         Text(if (f != null) "$name · ${android.text.format.Formatter.formatShortFileSize(context, f.length())}" else "$name · ⇄ PC", style = MaterialTheme.typography.labelLarge, maxLines = 1)
+                        Box {
+                            IconButton(onClick = { menu = true }, modifier = Modifier.size(36.dp)) { Icon(painterResource(R.drawable.ic_more_vert), stringResource(R.string.common_more), Modifier.size(18.dp)) }
+                            androidx.compose.material3.DropdownMenu(menu, { menu = false }) {
+                                // each on the file here; one left on the PC is fetched first
+                                fun withFile(then: (File) -> Unit) { menu = false; if (f != null) then(f) else Thread {
+                                    val r = runCatching { fetch(MailSync.PART + e.file!!.removeSuffix(".eml") + ".files/" + name) }
+                                    android.os.Handler(android.os.Looper.getMainLooper()).post { r.onSuccess { got++; then(it) }.onFailure { say(context.getString(R.string.mail_fetch_failed, it.message.orEmpty())) } }
+                                }.start() }
+                                androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.mail_export_documents)) }, leadingIcon = { Icon(painterResource(R.drawable.ic_file_download), null) }, onClick = {
+                                    withFile { file -> runCatching { MailExport.toDocuments(file, documentsDir()) }.onSuccess(exported).onFailure { say(it.message.orEmpty()) } } })
+                                androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.mail_save_as)) }, leadingIcon = { Icon(painterResource(R.drawable.ic_save), null) }, onClick = {
+                                    withFile { file -> savingAs = file; saveAs.launch(file.name) } })
+                                androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.common_share)) }, leadingIcon = { Icon(painterResource(R.drawable.ic_share), null) }, onClick = {
+                                    withFile { file -> runCatching { shareFile(context, file) }.onFailure { say(it.message.orEmpty()) } } })
+                            }
+                        }
                     }
                 }
             }
@@ -936,5 +997,16 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
             }
         } },
         confirmButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.common_close)) } })
+}
+
+/** Tetra/Documents: where Mail's exports go (synced to the PC's ~/Tetra/Documents). */
+internal fun documentsDir() = File(TetraFolder.root(Environment.getExternalStorageDirectory()), "Documents")
+
+/** A file of Tetra's to another app (Android's share sheet). */
+internal fun shareFile(context: android.content.Context, f: File) {
+    val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.files", f)
+    val type = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(f.extension.lowercase()) ?: "application/octet-stream"
+    context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType(type).putExtra(Intent.EXTRA_STREAM, uri)
+        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 }
 

@@ -222,4 +222,13 @@
     <string name="mail_default_none">Android jistaqsi kull darba. Agħżel Tetra fl-applikazzjonijiet predefiniti ta’ Android, jew agħfas «Dejjem» il-darba li jmiss li link tal-imejl jistaqsi.</string>
     <string name="mail_no_sender">L-ebda kont ma jista’ jibgħat minn hawn</string>
     <string name="mail_no_sender_how">Żid kont fuq dan l-apparat, jew żidu fuq il-PC: imbagħad il-posta tgħaddi mill-PC (⇄), mill-kaxxa tal-ħruġ tiegħu, fis-sinkronizzazzjoni li jmiss.</string>
+    <string name="mail_local_only">hawn biss</string>
+    <string name="mail_export_message">Esporta l-email</string>
+    <string name="mail_export_documents">Esporta fid-Dokumenti</string>
+    <string name="mail_save_as">Ħżen bħala…</string>
+    <string name="mail_exported">Ikkopjat: %1$s</string>
+    <string name="mail_show">Uri</string>
+    <string name="mail_stored_hint">Il-posta miżmuma fuq dan l-apparat, inkluża dik li tħassret mis-server</string>
+    <string name="mail_stored_read_only">Il-Ħażna hija għall-qari biss: xejn hawn ma jinbidel fuq is-server.</string>
+    <string name="mail_saved">Salvat</string>
 </resources>

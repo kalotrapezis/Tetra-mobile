@@ -222,4 +222,13 @@
     <string name="mail_default_none">Android se ptá pokaždé. Vyberte Tetra ve výchozích aplikacích Androidu, nebo příště, až se odkaz na e-mail zeptá, stiskněte «Vždy».</string>
     <string name="mail_no_sender">Odtud nemůže odesílat žádný účet</string>
     <string name="mail_no_sender_how">Přidejte účet na tomto zařízení, nebo ho přidejte na PC: pošta pak odejde přes PC (⇄), z jeho odchozí pošty, při další synchronizaci.</string>
+    <string name="mail_local_only">jen zde</string>
+    <string name="mail_export_message">Exportovat zprávu</string>
+    <string name="mail_export_documents">Exportovat do Dokumentů</string>
+    <string name="mail_save_as">Uložit jako…</string>
+    <string name="mail_exported">Zkopírováno: %1$s</string>
+    <string name="mail_show">Zobrazit</string>
+    <string name="mail_stored_hint">Pošta uložená v tomto zařízení, včetně té, která byla smazána ze serveru</string>
+    <string name="mail_stored_read_only">Úložiště je jen pro čtení: nic se zde na serveru nemění.</string>
+    <string name="mail_saved">Uloženo</string>
 </resources>

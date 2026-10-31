@@ -214,4 +214,13 @@
     <string name="mail_default_none">Android vraagt het elke keer. Kies Tetra in de standaard-apps van Android, of tik op «Altijd» wanneer een e-maillink de volgende keer vraagt.</string>
     <string name="mail_no_sender">Geen enkel account kan vanaf hier versturen</string>
     <string name="mail_no_sender_how">Voeg een account toe op dit apparaat, of voeg het toe op de pc: dan gaat de mail via de pc (⇄), uit zijn map met uitgaande mail, bij de volgende synchronisatie.</string>
+    <string name="mail_local_only">alleen hier</string>
+    <string name="mail_export_message">Mail exporteren</string>
+    <string name="mail_export_documents">Exporteren naar Documenten</string>
+    <string name="mail_save_as">Opslaan als…</string>
+    <string name="mail_exported">Gekopieerd: %1$s</string>
+    <string name="mail_show">Tonen</string>
+    <string name="mail_stored_hint">De mail die op dit apparaat bewaard is, inclusief wat van de server is verwijderd</string>
+    <string name="mail_stored_read_only">Opslag is alleen-lezen: niets hier verandert op de server.</string>
+    <string name="mail_saved">Opgeslagen</string>
 </resources>

@@ -51,4 +51,20 @@ class AiGateTest {
         AiGate.set(AiGate.State(true, mapOf("web" to false)), tetra) // the PC's "web" switch: search and pictures
         assertTrue(AssistantTools(tetra, "Phone").run("web_search", org.json.JSONObject().put("query", "x")).forModel.contains("does not let"))
     }
+
+    @Test fun theAssistantFindsKeptMailAndCopiesAnAttachmentOut() {
+        AiGate.set(AiGate.State(true), tetra)
+        val mail = File(tetra, ".System/Mail/Shared/a@b.gr/Inbox/2024/2024-05-06 1000 Nikos - Τιμολόγιο.eml").apply { parentFile!!.mkdirs()
+            writeText("From: Nikos <n@x.gr>\r\nSubject: =?UTF-8?Q?=CE=A4=CE=B9=CE=BC=CE=BF=CE=BB=CF=8C=CE=B3=CE=B9=CE=BF?=\r\n\r\nHi") }
+        File(mail.path.removeSuffix(".eml") + ".files").apply { mkdirs(); File(this, "invoice-2024.pdf").writeText("pdf") }
+        val t = AssistantTools(tetra, "Phone")
+        val found = t.run("mail_stored_find", org.json.JSONObject().put("query", "invoice"))
+        assertTrue(found.forModel, found.forModel.contains("Nikos") && found.forModel.contains("local only") && found.forModel.contains("invoice-2024.pdf"))
+        val copied = t.run("mail_export", org.json.JSONObject().put("choice", 1).put("attachment", "invoice"))
+        assertTrue(copied.forModel, copied.forModel.contains("Tetra/Documents/invoice-2024.pdf"))
+        assertEquals("pdf", File(tetra, "Documents/invoice-2024.pdf").readText())
+        assertTrue(t.run("mail_export", org.json.JSONObject().put("choice", 1)).forModel.contains("Tetra/Documents/Τιμολόγιο.eml")) // the whole mail
+        assertTrue(t.run("mail_export", org.json.JSONObject().put("choice", 1).put("attachment", "photo")).forModel.contains("it has: invoice-2024.pdf"))
+    }
 }
+

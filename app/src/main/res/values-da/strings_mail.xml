@@ -214,4 +214,13 @@
     <string name="mail_default_none">Android spørger hver gang. Vælg Tetra i Androids standardapps, eller tryk på «Altid», næste gang et maillink spørger.</string>
     <string name="mail_no_sender">Ingen konto kan sende herfra</string>
     <string name="mail_no_sender_how">Tilføj en konto på denne enhed, eller tilføj den på pc’en: så går mailen via pc’en (⇄), fra dens udbakke, ved næste synkronisering.</string>
+    <string name="mail_local_only">kun her</string>
+    <string name="mail_export_message">Eksportér mail</string>
+    <string name="mail_export_documents">Eksportér til Dokumenter</string>
+    <string name="mail_save_as">Gem som…</string>
+    <string name="mail_exported">Kopieret: %1$s</string>
+    <string name="mail_show">Vis</string>
+    <string name="mail_stored_hint">Mail, der er gemt på denne enhed, også den, der er slettet fra serveren</string>
+    <string name="mail_stored_read_only">Lager er skrivebeskyttet: intet her ændrer sig på serveren.</string>
+    <string name="mail_saved">Gemt</string>
 </resources>

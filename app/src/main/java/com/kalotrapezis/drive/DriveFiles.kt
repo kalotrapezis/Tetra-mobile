@@ -494,7 +494,10 @@ fun listDriveFolder(root: File, relativePath: String): List<DriveItem> {
             if (a == null || a.isSymbolicLink) file.takeIf { DriveRules.inside(root, it) }?.let { DriveItem(it.canonicalFile, DriveRules.relative(root, it), it.isDirectory) }
             else DriveItem(file, prefix + file.name, a.isDirectory, a.lastModifiedTime().toMillis(), a.size())
         }
-        .sortedWith(compareBy<DriveItem>({ !it.isDirectory }, { it.file.name.lowercase(Locale.ROOT) }))
+        // Mail's folders (reached by «Αποθήκευση»): each mail beside its attachments' folder, not after hundreds of ".files"
+        // folders that hid the mails below them (31 Oct: "it only holds attachments, no mails")
+        .sortedWith(if (relativePath == MailFiles.FOLDER || relativePath.startsWith(MailFiles.FOLDER + "/")) compareBy { it.file.name.lowercase(Locale.ROOT) }
+            else compareBy<DriveItem>({ !it.isDirectory }, { it.file.name.lowercase(Locale.ROOT) }))
 }
 
 /**

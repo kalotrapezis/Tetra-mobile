@@ -214,4 +214,13 @@
     <string name="mail_default_none">Android kysyy joka kerta. Valitse Tetra Androidin oletussovelluksista tai paina «Aina», kun sähköpostilinkki seuraavan kerran kysyy.</string>
     <string name="mail_no_sender">Mikään tili ei voi lähettää täältä</string>
     <string name="mail_no_sender_how">Lisää tili tälle laitteelle tai lisää se tietokoneella: silloin viesti lähtee tietokoneen kautta (⇄), sen lähtevien kansiosta, seuraavassa synkronoinnissa.</string>
+    <string name="mail_local_only">vain täällä</string>
+    <string name="mail_export_message">Vie viesti</string>
+    <string name="mail_export_documents">Vie kansioon Asiakirjat</string>
+    <string name="mail_save_as">Tallenna nimellä…</string>
+    <string name="mail_exported">Kopioitu: %1$s</string>
+    <string name="mail_show">Näytä</string>
+    <string name="mail_stored_hint">Tälle laitteelle tallennetut viestit, myös palvelimelta poistetut</string>
+    <string name="mail_stored_read_only">Tallennustila on vain luku -tilassa: mikään täällä ei muutu palvelimella.</string>
+    <string name="mail_saved">Tallennettu</string>
 </resources>

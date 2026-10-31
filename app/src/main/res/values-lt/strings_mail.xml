@@ -222,4 +222,13 @@
     <string name="mail_default_none">Android klausia kaskart. Pasirinkite Tetra Android numatytosiose programėlėse arba paspauskite «Visada», kai kitą kartą el. pašto nuoroda paklaus.</string>
     <string name="mail_no_sender">Iš čia nė viena paskyra negali siųsti</string>
     <string name="mail_no_sender_how">Pridėkite paskyrą šiame įrenginyje arba kompiuteryje: tada laiškas eis per kompiuterį (⇄), iš jo siunčiamų laiškų aplanko, per kitą sinchronizavimą.</string>
+    <string name="mail_local_only">tik čia</string>
+    <string name="mail_export_message">Eksportuoti laišką</string>
+    <string name="mail_export_documents">Eksportuoti į aplanką „Dokumentai“</string>
+    <string name="mail_save_as">Įrašyti kaip…</string>
+    <string name="mail_exported">Nukopijuota: %1$s</string>
+    <string name="mail_show">Rodyti</string>
+    <string name="mail_stored_hint">Šiame įrenginyje laikomi laiškai, įskaitant ištrintus iš serverio</string>
+    <string name="mail_stored_read_only">Saugykla yra tik skaitymui: čia niekas nesikeičia serveryje.</string>
+    <string name="mail_saved">Išsaugota</string>
 </resources>

@@ -218,4 +218,13 @@
     <string name="mail_default_none">Android jautā katru reizi. Izvēlieties Tetra Android noklusējuma lietotnēs vai nospiediet «Vienmēr», kad e-pasta saite nākamreiz vaicās.</string>
     <string name="mail_no_sender">Neviens konts no šejienes nevar sūtīt</string>
     <string name="mail_no_sender_how">Pievienojiet kontu šajā ierīcē vai datorā: tad vēstule iet caur datoru (⇄), no tā izsūtāmo vēstuļu mapes, nākamajā sinhronizācijā.</string>
+    <string name="mail_local_only">tikai šeit</string>
+    <string name="mail_export_message">Eksportēt vēstuli</string>
+    <string name="mail_export_documents">Eksportēt mapē „Dokumenti”</string>
+    <string name="mail_save_as">Saglabāt kā…</string>
+    <string name="mail_exported">Nokopēts: %1$s</string>
+    <string name="mail_show">Rādīt</string>
+    <string name="mail_stored_hint">Šajā ierīcē glabātās vēstules, arī tās, kas izdzēstas no servera</string>
+    <string name="mail_stored_read_only">Krātuve ir tikai lasāma: nekas šeit nemainās serverī.</string>
+    <string name="mail_saved">Saglabāts</string>
 </resources>

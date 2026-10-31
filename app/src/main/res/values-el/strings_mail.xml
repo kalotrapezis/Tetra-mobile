@@ -224,4 +224,13 @@
     <string name="mail_default_none">Το Android ρωτάει κάθε φορά. Διάλεξε το Tetra στις προεπιλεγμένες εφαρμογές του Android, ή πάτα «Πάντα» την επόμενη φορά που ένας σύνδεσμος email ρωτήσει.</string>
     <string name="mail_no_sender">Κανένας λογαριασμός δεν μπορεί να στείλει από εδώ</string>
     <string name="mail_no_sender_how">Πρόσθεσε έναν λογαριασμό σε αυτή τη συσκευή, ή στον υπολογιστή: τότε το μήνυμα φεύγει μέσω του υπολογιστή (⇄), από τα εξερχόμενά του, στον επόμενο συγχρονισμό.</string>
+    <string name="mail_local_only">μόνο τοπικά</string>
+    <string name="mail_export_message">Εξαγωγή μηνύματος</string>
+    <string name="mail_export_documents">Εξαγωγή στα Έγγραφα</string>
+    <string name="mail_save_as">Αποθήκευση ως…</string>
+    <string name="mail_exported">Αντιγράφηκε: %1$s</string>
+    <string name="mail_show">Εμφάνιση</string>
+    <string name="mail_stored_hint">Η αλληλογραφία που φυλάσσεται σε αυτή τη συσκευή, και όση έχει σβηστεί από τον διακομιστή</string>
+    <string name="mail_stored_read_only">Η Αποθήκευση είναι μόνο για ανάγνωση: τίποτα από εδώ δεν αλλάζει στον διακομιστή.</string>
+    <string name="mail_saved">Αποθηκεύτηκε</string>
 </resources>

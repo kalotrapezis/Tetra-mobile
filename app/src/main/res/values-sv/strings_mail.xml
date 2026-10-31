@@ -214,4 +214,13 @@
     <string name="mail_default_none">Android frågar varje gång. Välj Tetra bland Androids standardappar, eller tryck på «Alltid» nästa gång en e-postlänk frågar.</string>
     <string name="mail_no_sender">Inget konto kan skicka härifrån</string>
     <string name="mail_no_sender_how">Lägg till ett konto på den här enheten, eller på datorn: då går e-posten via datorn (⇄), från dess utkorg, vid nästa synkning.</string>
+    <string name="mail_local_only">bara här</string>
+    <string name="mail_export_message">Exportera mejl</string>
+    <string name="mail_export_documents">Exportera till Dokument</string>
+    <string name="mail_save_as">Spara som…</string>
+    <string name="mail_exported">Kopierad: %1$s</string>
+    <string name="mail_show">Visa</string>
+    <string name="mail_stored_hint">Mejlen som finns sparade på den här enheten, även de som raderats från servern</string>
+    <string name="mail_stored_read_only">Lagring är skrivskyddad: inget här ändras på servern.</string>
+    <string name="mail_saved">Sparat</string>
 </resources>

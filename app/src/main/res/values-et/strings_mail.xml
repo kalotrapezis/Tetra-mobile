@@ -214,4 +214,13 @@
     <string name="mail_default_none">Android küsib iga kord. Valige Tetra Androidi vaikerakenduste seast või vajutage «Alati», kui e-posti link järgmine kord küsib.</string>
     <string name="mail_no_sender">Ükski konto ei saa siit saata</string>
     <string name="mail_no_sender_how">Lisage konto sellesse seadmesse või lisage see arvutis: siis läheb kiri arvuti kaudu (⇄), selle väljuvate kirjade kaustast, järgmisel sünkroonimisel.</string>
+    <string name="mail_local_only">ainult siin</string>
+    <string name="mail_export_message">Ekspordi kiri</string>
+    <string name="mail_export_documents">Ekspordi kausta Dokumendid</string>
+    <string name="mail_save_as">Salvesta kui…</string>
+    <string name="mail_exported">Kopeeritud: %1$s</string>
+    <string name="mail_show">Näita</string>
+    <string name="mail_stored_hint">Sellesse seadmesse salvestatud kirjad, ka need, mis serverist kustutati</string>
+    <string name="mail_stored_read_only">Salvestusruum on kirjutuskaitstud: siin ei muutu serveris midagi.</string>
+    <string name="mail_saved">Salvestatud</string>
 </resources>

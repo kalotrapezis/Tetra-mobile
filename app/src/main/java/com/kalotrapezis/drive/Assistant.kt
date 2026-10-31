@@ -217,7 +217,10 @@ internal class AssistantTools(
             "mail_new" -> mailNew(args)
             "mail_attention" -> mailAttention(args)
             "mail_find" -> mailFind(args)
-            "mail_open" -> pick(mailsShown, args) { e -> ToolResult("Opened the mail.", go = "mail:${e.id}") }
+            "mail_open" -> pick(mailsShown, args) { e -> if (e.gone) ToolResult("Opened the mail (kept only on this device).", open = MailFiles.eml(MailFiles.root(tetra), e))
+                else ToolResult("Opened the mail.", go = "mail:${e.id}") }
+            "mail_stored_find" -> mailStoredFind(args)
+            "mail_export" -> pick(mailsShown, args) { e -> mailExport(e, args.optString("attachment").trim()) }
             "mail_write" -> mailWrite(args)
             "web_search" -> ToolResult(search(args.getString("query")))
             "make_image" -> image(args.getString("prompt")).let { ToolResult("The picture is on the screen, saved as ${it.name}.", image = it) }
@@ -423,13 +426,44 @@ internal class AssistantTools(
     // ---- Mail (the user, 31 Oct: new mail, what needs attention, a mail from someone, write one) ----
     private fun mails() = MailFiles.index(MailFiles.root(tetra), MailEngine.device())
     /** A numbered list for the model (sender, subject, when, unread/♥, the start of the text) and the screen (each opens the mail). */
-    private fun mailList(found: List<MailEntry>, empty: String): ToolResult {
+    private fun mailList(found: List<MailEntry>, empty: String, stored: Boolean = false): ToolResult {
         mailsShown = found
         if (found.isEmpty()) return ToolResult(empty)
+        val root = MailFiles.root(tetra)
         return ToolResult(found.mapIndexed { i, e ->
             "${i + 1}. ${e.from.ifEmpty { e.fromAddress }} <${e.fromAddress}> — ${e.subject} (${Instant.ofEpochMilli(e.date).atZone(zone).format(SHOWN)}, ${e.folder})" +
-                (if (!e.seen) " unread" else "") + (if (e.flagged) " ♥" else "") + (if (e.attachments > 0) " 📎" else "") + e.snippet.take(160).let { if (it.isBlank()) "" else ": $it" }
-        }.joinToString("\n"), choices = found.map { AssistantChoice("${it.from.ifEmpty { it.fromAddress }}: ${it.subject}", go = "mail:${it.id}") })
+                (if (!e.seen) " unread" else "") + (if (e.flagged) " ♥" else "") + (if (e.gone) " local only (no longer on the server)" else "") +
+                // the stored ones: their attachments by name, to export one
+                (if (stored) MailFiles.attachments(root, e).takeIf { it.isNotEmpty() }?.joinToString(", ", " 📎 ") { it.name }.orEmpty() else if (e.attachments > 0) " 📎" else "") +
+                e.snippet.take(160).let { if (it.isBlank()) "" else ": $it" }
+        }.joinToString("\n"), choices = found.map { e -> AssistantChoice("${e.from.ifEmpty { e.fromAddress }}: ${e.subject}",
+            go = if (e.gone) null else "mail:${e.id}", file = if (e.gone) MailFiles.eml(root, e) else null) })
+    }
+
+    /**
+     * The mail kept on this device («Αποθήκευση», the user, 31 Oct: "search the local storage and find files"): every
+     * account's, deleted ones too, by sender, words (subject, recipients, attachments' names) and dates.
+     */
+    private fun mailStoredFind(a: JSONObject): ToolResult {
+        val root = MailFiles.root(tetra)
+        fun day(key: String) = a.optString(key).takeIf { it.isNotBlank() }?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+        val from = day("from_date")?.atStartOfDay(zone)?.toInstant()?.toEpochMilli()
+        val to = day("to_date")?.plusDays(1)?.atStartOfDay(zone)?.toInstant()?.toEpochMilli()?.minus(1)
+        val words = listOf(a.optString("from"), a.optString("query")).joinToString(" ").trim()
+        if (words.isEmpty() && from == null && to == null) return ToolResult("Say who it is from, some words, or the dates.")
+        return mailList(MailArchive.search(root, MailArchive.entries(root, device), words, from, to).take(15), "Nothing like that in the mail kept on this device.", stored = true)
+    }
+
+    /** One mail of the last list, or one of its attachments, copied into Tetra/Documents (never over a file there). */
+    private fun mailExport(e: MailEntry, attachment: String): ToolResult {
+        val root = MailFiles.root(tetra)
+        val eml = MailFiles.eml(root, e) ?: return ToolResult("That mail is not on this device (only on the PC or the server); it cannot be copied from here.")
+        val documents = File(tetra, "Documents")
+        if (attachment.isEmpty()) return MailExport.toDocuments(eml, documents, MailExport.emlName(e, eml)).let { ToolResult("Copied the mail to Tetra/Documents/${it.name}.", open = null) }
+        val all = MailFiles.attachments(root, e)
+        val f = all.firstOrNull { it.name.equals(attachment, true) } ?: all.firstOrNull { it.name.contains(attachment, true) }
+            ?: return ToolResult(if (all.isEmpty()) "That mail has no attachments on this device." else "No attachment like \"$attachment\"; it has: ${all.joinToString(", ") { it.name }}.")
+        return MailExport.toDocuments(f, documents).let { ToolResult("Copied ${f.name} to Tetra/Documents/${it.name}.") }
     }
 
     private fun mailNew(a: JSONObject): ToolResult {
@@ -584,7 +618,7 @@ internal class AssistantTools(
             "timer_start" to "timer", "timer_list" to "timer", "timer_stop" to "timer", "alarm_add" to "timer", "alarm_list" to "timer", "alarm_delete" to "timer", "stopwatch" to "timer",
             "notes_search" to "notes", "note_new" to "notes", "note_open" to "notes", "shopping_list" to "notes", "files_find" to "files", "file_open" to "files",
             "contacts_find" to "contacts", "my_card" to "contacts", "relation_remember" to "contacts", "relation_forget" to "contacts", "contact_call" to "phone",
-            "navigate" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail",
+            "navigate" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail", "mail_stored_find" to "mail", "mail_export" to "mail",
             "web_search" to "web", "make_image" to "web", "youtube" to "web")
         /** The tools of the apps the assistant may use now: the others are not even offered. */
         fun allowed(): JSONArray = JSONArray((0 until SCHEMA.length()).map { SCHEMA.getJSONObject(it) }
@@ -641,6 +675,11 @@ internal class AssistantTools(
             fn("mail_find", "Find mail from someone (a contact's name, a name or an address) and/or with some words; a numbered list, newest first.", emptyList(),
                 "from" to p("string", "Who it is from, as said."), "query" to p("string", "Words in the subject or the text.")),
             fn("mail_open", "Open a mail from the last mail list in Tetra's Mail.", listOf("choice"), CHOICE),
+            fn("mail_stored_find", "Search the mail kept on this device (Mail › Αποθήκευση): every account, mail deleted from the server too, with their attachments' names; a numbered list.", emptyList(),
+                "from" to p("string", "Who it is from, as said."), "query" to p("string", "Words in the subject, the recipients or an attachment's name."),
+                "from_date" to p("string", "Earliest day, YYYY-MM-DD."), "to_date" to p("string", "Latest day, YYYY-MM-DD.")),
+            fn("mail_export", "Only when the user asks: copy a mail from the last mail list, or one of its attachments, into Tetra/Documents.", listOf("choice"),
+                "choice" to p("integer", "The number in the last list."), "attachment" to p("string", "The attachment's name, or part of it; empty for the whole mail (.eml).")),
             fn("mail_write", "Write an e-mail: Tetra's compose page opens with it filled in, and the user sends it. It is never sent by you.", listOf("to", "subject", "body"),
                 "to" to p("string", "An e-mail address, or a contact's name as said."), "subject" to p("string", "A short subject."),
                 "body" to p("string", "The whole text as a proper e-mail: a greeting, what the user wants said, a closing line; no signature (Tetra adds it).")),
@@ -666,6 +705,8 @@ internal class AssistantTools(
             Mail: "νέα μηνύματα;", "ήρθε κάτι;": mail_new, then say how many and from whom. "Τι χρειάζεται απάντηση;", "σημαντικά mail": mail_attention, then name
             only those that need an answer or an action and in a few words why (a deadline, a question to the user, a payment). "Βρες το mail από τη Μαρία": mail_find.
             "Στείλε mail στον …": mail_write, written as a proper e-mail in the language the user speaks; after it, say it waits for their Send.
+            An old or deleted mail, a file someone sent long ago: mail_stored_find. "Αντέγραψέ το / βγάλε το συνημμένο στα Έγγραφα": mail_export,
+            then say where it went (Tetra/Documents/…). Copy only when asked.
             Work out dates yourself from today's date ("αύριο", "την Πέμπτη").
         """.trimIndent()
     }

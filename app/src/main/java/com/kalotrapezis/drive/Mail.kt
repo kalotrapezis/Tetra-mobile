@@ -67,13 +67,18 @@ internal object MailFiles {
      * again only when a file's size or time changed (they may be long).
      */
     fun index(root: File, own: String? = null): List<MailEntry> = synchronized(this) {
-        val others = root.listFiles { f -> f.name.startsWith("index.") && f.name.endsWith(".jsonl") && f.name != "index.jsonl" }.orEmpty().sortedBy { it.name }
-        val files = listOf(File(root, "index.jsonl")) + others.sortedBy { it.name == "index.$own.jsonl" }
+        val files = indexFiles(root, own)
         val stamp = files.joinToString { "${it.name}:${it.length()}:${it.lastModified()}" }
         cached?.takeIf { it.first == stamp }?.let { return it.second }
         val read = parse(files.asSequence().flatMap { f -> runCatching { f.readLines() }.getOrDefault(emptyList()) })
         cached = stamp to read
         read
+    }
+
+    /** The index files in the order their lines count: the computer's, the other devices', this device's last. */
+    fun indexFiles(root: File, own: String?): List<File> {
+        val others = root.listFiles { f -> f.name.startsWith("index.") && f.name.endsWith(".jsonl") && f.name != "index.jsonl" }.orEmpty().sortedBy { it.name }
+        return listOf(File(root, "index.jsonl")) + others.sortedBy { it.name == "index.$own.jsonl" }
     }
 
     fun parse(lines: Sequence<String>, keepGone: Boolean = false): List<MailEntry> {
@@ -125,6 +130,77 @@ internal object MailFiles {
     fun attachments(root: File, e: MailEntry): List<File> = eml(root, e)?.let { File(it.path.removeSuffix(".eml") + ".files") }
         ?.listFiles()?.filter { it.isFile }?.sortedBy { it.name.lowercase() }.orEmpty()
     private fun inside(root: File, f: File) = f.canonicalPath.startsWith(root.canonicalPath + File.separator) // never a path out of the archive
+}
+
+/**
+ * «Αποθήκευση» (the user, 31 Oct: "the mail app to be the file manager … my local backups, to find an important mail I
+ * deleted by mistake"): every mail kept on this device, from its files — the PC's accounts' and this device's own. Each
+ * as the index describes it where a line names its file; one the server no longer has (gone), or no line names at all,
+ * is local only ([MailEntry.gone]). Read only: nothing here goes to a server.
+ */
+internal object MailArchive {
+    fun entries(root: File, own: String?): List<MailEntry> {
+        val indexed = MailFiles.parse(MailFiles.indexFiles(root, own).asSequence().flatMap { f -> runCatching { f.readLines() }.getOrDefault(emptyList()) }, keepGone = true)
+        val byFile = HashMap<String, MailEntry>()
+        for (e in indexed) e.file?.let { f -> val was = byFile[f]; if (was == null || (was.gone && !e.gone)) byFile[f] = e } // a live line before a gone one
+        return root.walkTopDown().onEnter { !it.name.startsWith(".") }.filter { it.isFile && it.name.endsWith(".eml") && !it.name.startsWith(".") }.mapNotNull { f ->
+            val rel = f.relativeTo(root).invariantSeparatorsPath
+            val parts = rel.split('/')
+            if (parts.size < 3 || parts[1] !in MailFiles.ROLES) return@mapNotNull null // <address>/<Role>/…: not the outbox, not a stray
+            byFile[rel]?.copy(saved = true) ?: runCatching { fromFile(f, rel, parts[0], parts[1]) }.getOrNull()
+        }.sortedByDescending { it.date }.toList()
+    }
+
+    /** A mail no index line names: what its own headers say (the first 64 KB), its date from its name when they say none. */
+    fun fromFile(f: File, rel: String, account: String, role: String): MailEntry {
+        val head = f.inputStream().use { it.readNBytes(65_536) }
+        val h = Mime.headers(head)
+        val from = Mime.words(h["from"].orEmpty())
+        val address = Regex("<([^>]+)>").find(from)?.groupValues?.get(1) ?: from.trim()
+        val date = runCatching { java.time.ZonedDateTime.parse(h["date"].orEmpty().replace(Regex("\\s*\\(.*\\)$"), "").trim(), java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli() }
+            .getOrElse { Regex("(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2})(\\d{2}) ").find(f.name)?.destructured?.let { (y, mo, d, hh, mm) ->
+                java.time.LocalDateTime.of(y.toInt(), mo.toInt(), d.toInt(), hh.toInt(), mm.toInt()).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli() } ?: f.lastModified() }
+        val files = File(f.path.removeSuffix(".eml") + ".files").listFiles()?.count { it.isFile } ?: 0
+        return MailEntry("file:$rel", account, role, date, from.substringBefore('<').trim().trim('"').ifEmpty { address }, address,
+            Mime.words(h["to"].orEmpty()).split(',').map { it.trim() }.filter { it.isNotEmpty() }, Mime.words(h["subject"].orEmpty()), seen = true, flagged = false,
+            size = f.length(), attachments = files, snippet = "", saved = true, file = rel, gone = true, messageId = h["message-id"]?.trim())
+    }
+
+    /** The archive's mails matching [query] in sender, subject, recipients or an attachment's name, and within the dates given (ms). */
+    fun search(root: File, entries: List<MailEntry>, query: String, from: Long? = null, to: Long? = null): List<MailEntry> {
+        val words = query.lowercase().split(Regex("\\s+")).filter { it.isNotEmpty() }
+        return entries.filter { e ->
+            (from == null || e.date >= from) && (to == null || e.date <= to) && words.all { w ->
+                listOf(e.from, e.fromAddress, e.subject, e.to.joinToString(" "), e.snippet).any { it.lowercase().contains(w) } ||
+                    MailFiles.attachments(root, e).any { it.name.lowercase().contains(w) }
+            }
+        }
+    }
+}
+
+/**
+ * Copies out of Mail (the user, 31 Oct: "click export to copy an attachment … in Tetra/Documents for me to find"): into
+ * Tetra/Documents, which syncs to the PC's, never over a file there — "name (2).pdf" instead.
+ */
+internal object MailExport {
+    fun free(dir: File, name: String): File {
+        val clean = name.replace(Regex("[/\\\\\u0000]"), "_").ifBlank { "attachment" }
+        val base = clean.substringBeforeLast('.', clean); val ext = clean.substringAfterLast('.', "").let { if (it.isEmpty() || it == clean) "" else ".$it" }
+        var f = File(dir, clean); var n = 2
+        while (f.exists()) f = File(dir, "$base ($n)$ext").also { n++ }
+        return f
+    }
+    /** [file] copied into [documents] (Tetra/Documents); the copy. */
+    fun toDocuments(file: File, documents: File, name: String = file.name): File {
+        documents.mkdirs()
+        val target = free(documents, name)
+        val part = File(documents, ".${target.name}.part")
+        file.inputStream().use { input -> part.outputStream().use { input.copyTo(it) } }
+        check(part.renameTo(target)) { "Not saved: ${target.name}" }
+        return target
+    }
+    /** A mail's own name for its .eml outside the archive: its subject, else the file's. */
+    fun emlName(e: MailEntry, file: File) = Mime.clean(e.subject, 120).ifEmpty { file.nameWithoutExtension } + ".eml"
 }
 
 /**
@@ -458,6 +534,9 @@ internal object Mime {
         val files = ps.files
         return Message(html, text, words(top.headers["to"].orEmpty()), words(top.headers["cc"].orEmpty()), top.headers, diskNames(files.map { it.filename }))
     }
+
+    /** A mail's top headers only (unfolded, names in lower case, the first of each). */
+    fun headers(raw: ByteArray): Map<String, String> = part(raw).headers
 
     /** Headers (unfolded, names in lower case, the first of each) and the body after the empty line. */
     private fun part(raw: ByteArray): Part {

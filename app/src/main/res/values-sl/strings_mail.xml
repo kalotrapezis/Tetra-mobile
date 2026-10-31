@@ -222,4 +222,13 @@
     <string name="mail_default_none">Android vpraša vsakič. Izberite Tetra med privzetimi aplikacijami Androida ali pritisnite «Vedno», ko vas bo povezava do e-pošte naslednjič vprašala.</string>
     <string name="mail_no_sender">Od tu noben račun ne more pošiljati</string>
     <string name="mail_no_sender_how">Dodajte račun v tej napravi ali v računalniku: potem pošta gre prek računalnika (⇄), iz njegove izhodne pošte, ob naslednji sinhronizaciji.</string>
+    <string name="mail_local_only">samo tukaj</string>
+    <string name="mail_export_message">Izvozi sporočilo</string>
+    <string name="mail_export_documents">Izvozi v Dokumente</string>
+    <string name="mail_save_as">Shrani kot…</string>
+    <string name="mail_exported">Kopirano: %1$s</string>
+    <string name="mail_show">Pokaži</string>
+    <string name="mail_stored_hint">Pošta, shranjena v tej napravi, vključno s tisto, izbrisano s strežnika</string>
+    <string name="mail_stored_read_only">Shramba je samo za branje: nič se tu na strežniku ne spremeni.</string>
+    <string name="mail_saved">Shranjeno</string>
 </resources>

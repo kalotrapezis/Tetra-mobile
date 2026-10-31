@@ -503,6 +503,19 @@ Formats are the desktop's (step 1's sync.js/mail.js of the same day); the phone 
 - A mailto: link inside a mail opens compose here, not Android's chooser.
 - Settings › Αλληλογραφία › «Προεπιλεγμένη εφαρμογή email»: which app opens email links now; opens Android's default apps.
 
+## 19. Storage as the mail's own file manager (the user, 31 Oct: "the mail app to be the file manager … find an important mail I deleted by mistake")
+
+- **«Αποθήκευση» at the bottom of the folder list**: the same folders, list, search, filter and pages over every mail
+  kept on this device (MailArchive), the PC's accounts' and this device's own; one the server no longer has, or that no
+  index line names, is marked «μόνο τοπικά». Read only: no action there reaches a server.
+- **Attachments** (⋮ on each card): «Εξαγωγή στα Έγγραφα» (Tetra/Documents, synced to the PC's; never over a file,
+  « (2)» instead), «Αποθήκευση ως…» (Android's picker), «Κοινοποίηση». The mail's panel: «Εξαγωγή μηνύματος» (.eml).
+  A copy says «Αντιγράφηκε: …» with «Εμφάνιση», which opens Documents in Files.
+- **Files** showed Mail's year folders as hundreds of "….files" attachment folders first (folders before files), the
+  mails far below: inside Mail's folders each mail now sits beside its attachments' folder.
+- **AI Assist** (Mail allowed): mail_stored_find (sender, words, attachment names, dates; local-only ones too) and,
+  only when asked, mail_export (a mail or one attachment into Tetra/Documents, saying where).
+
 ## Open questions for the user
 
 - Away from home, does the phone sync with the desktop over the internet, or only on the same Wi-Fi?

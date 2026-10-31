@@ -214,4 +214,13 @@
     <string name="mail_default_none">Az Android minden alkalommal rákérdez. Válaszd a Tetrát az Android alapértelmezett alkalmazásai között, vagy koppints a «Mindig» gombra, amikor legközelebb egy e-mail-hivatkozás rákérdez.</string>
     <string name="mail_no_sender">Innen egyetlen fiók sem tud küldeni</string>
     <string name="mail_no_sender_how">Adj hozzá egy fiókot ezen az eszközön, vagy a számítógépen: ekkor a levél a számítógépen keresztül megy (⇄), a kimenő levelei közül, a következő szinkronizáláskor.</string>
+    <string name="mail_local_only">csak itt</string>
+    <string name="mail_export_message">Levél exportálása</string>
+    <string name="mail_export_documents">Exportálás a Dokumentumok mappába</string>
+    <string name="mail_save_as">Mentés másként…</string>
+    <string name="mail_exported">Másolva: %1$s</string>
+    <string name="mail_show">Megjelenítés</string>
+    <string name="mail_stored_hint">Az ezen az eszközön tárolt levelek, a szerverről törölteket is beleértve</string>
+    <string name="mail_stored_read_only">A tárhely csak olvasható: itt semmi sem változik a szerveren.</string>
+    <string name="mail_saved">Mentve</string>
 </resources>

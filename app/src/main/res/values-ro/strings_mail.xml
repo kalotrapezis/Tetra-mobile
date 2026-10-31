@@ -218,4 +218,13 @@
     <string name="mail_default_none">Android întreabă de fiecare dată. Alege Tetra în aplicațiile implicite ale Android sau apasă «Întotdeauna» data viitoare când un link de e-mail te întreabă.</string>
     <string name="mail_no_sender">Niciun cont nu poate trimite de aici</string>
     <string name="mail_no_sender_how">Adaugă un cont pe acest dispozitiv sau pe PC: atunci mesajul pleacă prin PC (⇄), din căsuța lui de ieșire, la următoarea sincronizare.</string>
+    <string name="mail_local_only">doar aici</string>
+    <string name="mail_export_message">Exportă mesajul</string>
+    <string name="mail_export_documents">Exportă în Documente</string>
+    <string name="mail_save_as">Salvează ca…</string>
+    <string name="mail_exported">Copiat: %1$s</string>
+    <string name="mail_show">Afișează</string>
+    <string name="mail_stored_hint">Mesajele păstrate pe acest dispozitiv, inclusiv cele șterse de pe server</string>
+    <string name="mail_stored_read_only">Stocarea este doar în citire: nimic de aici nu se schimbă pe server.</string>
+    <string name="mail_saved">Salvat</string>
 </resources>

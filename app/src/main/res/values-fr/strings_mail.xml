@@ -218,4 +218,13 @@
     <string name="mail_default_none">Android demande à chaque fois. Choisissez Tetra dans les applications par défaut d’Android, ou appuyez sur « Toujours » la prochaine fois qu’un lien e-mail vous le demande.</string>
     <string name="mail_no_sender">Aucun compte ne peut envoyer d’ici</string>
     <string name="mail_no_sender_how">Ajoutez un compte sur cet appareil, ou ajoutez-le sur le PC : l’e-mail passera alors par le PC (⇄), depuis sa boîte d’envoi, à la prochaine synchro.</string>
+    <string name="mail_local_only">ici seulement</string>
+    <string name="mail_export_message">Exporter le message</string>
+    <string name="mail_export_documents">Exporter vers Documents</string>
+    <string name="mail_save_as">Enregistrer sous…</string>
+    <string name="mail_exported">Copié : %1$s</string>
+    <string name="mail_show">Afficher</string>
+    <string name="mail_stored_hint">Les e-mails conservés sur cet appareil, y compris ceux supprimés du serveur</string>
+    <string name="mail_stored_read_only">Le stockage est en lecture seule : rien ici ne change sur le serveur.</string>
+    <string name="mail_saved">Enregistré</string>
 </resources>

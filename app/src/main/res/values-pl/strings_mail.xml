@@ -222,4 +222,13 @@
     <string name="mail_default_none">Android pyta za każdym razem. Wybierz Tetra w domyślnych aplikacjach Androida albo naciśnij «Zawsze», gdy następnym razem zapyta o to link do e-maila.</string>
     <string name="mail_no_sender">Żadne konto nie może stąd wysyłać</string>
     <string name="mail_no_sender_how">Dodaj konto na tym urządzeniu albo na komputerze: wtedy poczta pójdzie przez komputer (⇄), z jego skrzynki nadawczej, przy następnej synchronizacji.</string>
+    <string name="mail_local_only">tylko tutaj</string>
+    <string name="mail_export_message">Eksportuj wiadomość</string>
+    <string name="mail_export_documents">Eksportuj do Dokumentów</string>
+    <string name="mail_save_as">Zapisz jako…</string>
+    <string name="mail_exported">Skopiowano: %1$s</string>
+    <string name="mail_show">Pokaż</string>
+    <string name="mail_stored_hint">Poczta przechowywana na tym urządzeniu, także ta usunięta z serwera</string>
+    <string name="mail_stored_read_only">Magazyn jest tylko do odczytu: nic tutaj nie zmienia się na serwerze.</string>
+    <string name="mail_saved">Zapisano</string>
 </resources>

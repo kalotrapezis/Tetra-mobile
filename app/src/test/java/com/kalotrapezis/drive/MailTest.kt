@@ -357,5 +357,43 @@ class MailTest {
         val back = MailDraft.of(d.copy(files = listOf(File("/tmp/a.pdf"))).json())
         assertEquals(d.copy(files = listOf(File("/tmp/a.pdf"))), back)
     }
+
+    @Test fun storageShowsEveryKeptMailDeletedOnesLocalOnly() {
+        val dir = java.nio.file.Files.createTempDirectory("mail").toFile()
+        val a = "a@b.gr/Inbox/2026/2026-01-02 0800 Maria - Live.eml"
+        val b = "a@b.gr/Inbox/2025/2025-03-04 0900 Nikos - Deleted on the server.eml"
+        val c = "a@b.gr/Archive/2024/2024-05-06 1000 Old - Nobody knows me.eml"
+        for (rel in listOf(a, b, c)) File(dir, rel).apply { parentFile!!.mkdirs() }
+        File(dir, a).writeText("From: Maria <m@x.gr>\r\nSubject: Live\r\n\r\nHi")
+        File(dir, b).writeText("From: Nikos <n@x.gr>\r\nSubject: Deleted\r\n\r\nHi")
+        File(dir, c).writeText("From: =?UTF-8?B?zpzOsc+Bzq/OsQ==?= <old@x.gr>\r\nSubject: =?UTF-8?Q?Ka=CE=BB=CE=B7?=\r\nDate: Mon, 6 May 2024 10:00:00 +0300\r\nMessage-ID: <c@x>\r\n\r\nHi")
+        File(dir, "${c.removeSuffix(".eml")}.files").mkdirs(); File(dir, "${c.removeSuffix(".eml")}.files/invoice.pdf").writeText("pdf")
+        File(dir, "outbox").mkdirs(); File(dir, "outbox/x.eml").writeText("not a kept mail")
+        fun line(id: String, file: String, gone: Boolean) = """{"id":"$id","account":"a@b.gr","folder":"Inbox","date":1,"from":"x","fromAddress":"x@y","subject":"s","file":"$file","gone":$gone}"""
+        File(dir, "index.jsonl").writeText(line("a/1", a, false) + "\n" + line("b/2", b, false) + "\n" + line("b/2", b, true) + "\n")
+        val all = MailArchive.entries(dir, "Pixel")
+        assertEquals(setOf(a, b, c), all.map { it.file }.toSet()) // the outbox's file is not a kept mail
+        assertFalse(all.first { it.file == a }.gone)
+        assertTrue(all.first { it.file == b }.gone) // deleted on the server: local only
+        val old = all.first { it.file == c }
+        assertTrue(old.gone); assertEquals("Μαρία", old.from); assertEquals("old@x.gr", old.fromAddress); assertEquals("Kaλη", old.subject)
+        assertEquals("Archive", old.folder); assertEquals(1, old.attachments); assertEquals("<c@x>", old.messageId)
+        assertEquals(listOf(c), MailArchive.search(dir, all, "invoice").map { it.file }) // by an attachment's name
+        assertEquals(listOf(c), MailArchive.search(dir, all, "μαρία").map { it.file })
+        assertEquals(emptyList<String>(), MailArchive.search(dir, all, "μαρία", from = System.currentTimeMillis()).map { it.file })
+        dir.deleteRecursively()
+    }
+
+    @Test fun anExportNeverOverwrites() {
+        val dir = java.nio.file.Files.createTempDirectory("docs").toFile()
+        val src = File.createTempFile("att", ".pdf").apply { writeText("new") }
+        File(dir, "invoice.pdf").writeText("old")
+        val first = MailExport.toDocuments(src, dir, "invoice.pdf")
+        assertEquals("invoice (2).pdf", first.name); assertEquals("old", File(dir, "invoice.pdf").readText()); assertEquals("new", first.readText())
+        assertEquals("invoice (3).pdf", MailExport.toDocuments(src, dir, "invoice.pdf").name)
+        assertEquals("README (2)", MailExport.free(dir.also { File(it, "README").writeText("") }, "README").name) // no extension
+        assertEquals("a_b.txt", MailExport.free(dir, "a/b.txt").name) // never a path out of Documents
+        dir.deleteRecursively(); src.delete()
+    }
 }
 
