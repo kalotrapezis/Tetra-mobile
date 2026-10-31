@@ -231,4 +231,6 @@
     <string name="mail_stored_hint">Il-posta miżmuma fuq dan l-apparat, inkluża dik li tħassret mis-server</string>
     <string name="mail_stored_read_only">Il-Ħażna hija għall-qari biss: xejn hawn ma jinbidel fuq is-server.</string>
     <string name="mail_saved">Salvat</string>
+    <string name="mail_search_stored">Fittex fil-Ħażna</string>
+    <string name="mail_search_stored_in">Fittex fil-Ħażna › %1$s</string>
 </resources>

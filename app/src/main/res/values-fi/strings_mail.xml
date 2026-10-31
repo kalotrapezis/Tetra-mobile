@@ -223,4 +223,6 @@
     <string name="mail_stored_hint">Tälle laitteelle tallennetut viestit, myös palvelimelta poistetut</string>
     <string name="mail_stored_read_only">Tallennustila on vain luku -tilassa: mikään täällä ei muutu palvelimella.</string>
     <string name="mail_saved">Tallennettu</string>
+    <string name="mail_search_stored">Hae tallennustilasta</string>
+    <string name="mail_search_stored_in">Hae tallennustilasta › %1$s</string>
 </resources>

@@ -405,5 +405,19 @@ class MailTest {
         // 100 bytes: the new mail fits, the huge one stops the mails; the old mail's attachment would fit, but its mail is not here
         assertEquals(setOf("$new.eml", "$new.files/a.pdf"), MailSync.plan(files, 100))
     }
+
+    @Test fun storageExpandsIntoAccountsAndTheirFolders() {
+        fun e(account: String, folder: String, gone: Boolean) = MailEntry("$account/$folder/${Math.random()}", account, folder, 0, "", "", emptyList(), "", true, false, 0, 0, "", true, "f", gone)
+        val tree = MailArchive.tree(listOf(e("b@x.gr", "Sent", false), e("b@x.gr", "Inbox", true), e("b@x.gr", "Inbox", false), e("a@x.gr", "Archive", true)))
+        assertEquals(listOf("a@x.gr", "b@x.gr"), tree.keys.toList())
+        assertEquals(listOf("Inbox", "Sent"), tree.getValue("b@x.gr").keys.toList()) // the roles' order
+        assertEquals(2 to 1, tree.getValue("b@x.gr").getValue("Inbox")) // all, local only
+    }
+
+    @Test fun magentaIsLeftToStorage() {
+        assertEquals(MailFiles.INSTEAD, MailFiles.notMagenta(0xFFE57AB0)) // the old pink account colour
+        assertEquals(MailFiles.INSTEAD, MailFiles.notMagenta(0xFFFD0DA4)) // Mail's own
+        for (c in listOf(0xFFE5534B, 0xFF4F8FF7, 0xFFE0A43A, 0xFF3FB27F, 0xFFB77CE6, 0xFF3BB8C4, 0xFF9E9E9E)) assertEquals(c, MailFiles.notMagenta(c)) // the others stay
+    }
 }
 

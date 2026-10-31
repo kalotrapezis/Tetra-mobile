@@ -235,4 +235,6 @@
     <string name="mail_stored_hint">An post atá á choinneáil ar an ngléas seo, an post a scriosadh den fhreastalaí san áireamh</string>
     <string name="mail_stored_read_only">Tá an Stóras inléite amháin: ní athraíonn aon rud anseo ar an bhfreastalaí.</string>
     <string name="mail_saved">Sábháilte</string>
+    <string name="mail_search_stored">Cuardaigh Stóras</string>
+    <string name="mail_search_stored_in">Cuardaigh Stóras › %1$s</string>
 </resources>

@@ -223,4 +223,6 @@
     <string name="mail_stored_hint">De mail die op dit apparaat bewaard is, inclusief wat van de server is verwijderd</string>
     <string name="mail_stored_read_only">Opslag is alleen-lezen: niets hier verandert op de server.</string>
     <string name="mail_saved">Opgeslagen</string>
+    <string name="mail_search_stored">Opslag doorzoeken</string>
+    <string name="mail_search_stored_in">Opslag doorzoeken › %1$s</string>
 </resources>

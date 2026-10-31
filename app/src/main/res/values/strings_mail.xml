@@ -234,4 +234,6 @@
     <string name="mail_stored_hint">The mail kept on this device, including what was deleted from the server</string>
     <string name="mail_stored_read_only">Storage is read only: nothing here changes on the server.</string>
     <string name="mail_saved">Saved</string>
+    <string name="mail_search_stored">Search Storage</string>
+    <string name="mail_search_stored_in">Search Storage › %1$s</string>
 </resources>

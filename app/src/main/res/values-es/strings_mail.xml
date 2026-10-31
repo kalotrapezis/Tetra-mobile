@@ -227,4 +227,6 @@
     <string name="mail_stored_hint">El correo guardado en este dispositivo, incluido lo que se borró del servidor</string>
     <string name="mail_stored_read_only">El almacenamiento es de solo lectura: nada de aquí cambia en el servidor.</string>
     <string name="mail_saved">Guardado</string>
+    <string name="mail_search_stored">Buscar en Almacenamiento</string>
+    <string name="mail_search_stored_in">Buscar en Almacenamiento › %1$s</string>
 </resources>

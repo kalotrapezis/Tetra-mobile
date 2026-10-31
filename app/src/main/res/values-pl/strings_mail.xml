@@ -231,4 +231,6 @@
     <string name="mail_stored_hint">Poczta przechowywana na tym urządzeniu, także ta usunięta z serwera</string>
     <string name="mail_stored_read_only">Magazyn jest tylko do odczytu: nic tutaj nie zmienia się na serwerze.</string>
     <string name="mail_saved">Zapisano</string>
+    <string name="mail_search_stored">Szukaj w magazynie</string>
+    <string name="mail_search_stored_in">Szukaj w magazynie › %1$s</string>
 </resources>

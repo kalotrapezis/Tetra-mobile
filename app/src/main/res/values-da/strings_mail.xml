@@ -223,4 +223,6 @@
     <string name="mail_stored_hint">Mail, der er gemt på denne enhed, også den, der er slettet fra serveren</string>
     <string name="mail_stored_read_only">Lager er skrivebeskyttet: intet her ændrer sig på serveren.</string>
     <string name="mail_saved">Gemt</string>
+    <string name="mail_search_stored">Søg i Lager</string>
+    <string name="mail_search_stored_in">Søg i Lager › %1$s</string>
 </resources>

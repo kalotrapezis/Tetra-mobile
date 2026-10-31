@@ -58,7 +58,17 @@ internal object MailFiles {
         return byId.values.toList()
     }
 
-    private fun color(hex: String) = hex.removePrefix("#").takeIf { it.length == 6 }?.toLongOrNull(16)?.let { 0xFF000000 or it } ?: 0xFF9E9E9E
+    private fun color(hex: String) = hex.removePrefix("#").takeIf { it.length == 6 }?.toLongOrNull(16)?.let { 0xFF000000 or it }?.let(::notMagenta) ?: 0xFF9E9E9E
+
+    /** Magenta is Mail's own, for «Αποθήκη» alone (the user, 31 Oct): an account's colour near it is shown as [INSTEAD]. */
+    const val INSTEAD = 0xFFA0785A
+    fun notMagenta(argb: Long): Long {
+        val r = (argb shr 16 and 0xFF).toInt(); val g = (argb shr 8 and 0xFF).toInt(); val b = (argb and 0xFF).toInt()
+        val max = maxOf(r, g, b); val min = minOf(r, g, b)
+        if (max == 0 || (max - min) * 100 / max < 25) return argb // grey enough: not a colour to mistake
+        val h = when (max) { r -> 60f * (((g - b).toFloat() / (max - min)) % 6); g -> 60f * ((b - r).toFloat() / (max - min) + 2); else -> 60f * ((r - g).toFloat() / (max - min) + 4) }.let { if (it < 0) it + 360 else it }
+        return if (h in 285f..345f) INSTEAD else argb
+    }
 
     private var cached: Pair<String, List<MailEntry>>? = null
     /**
@@ -164,6 +174,14 @@ internal object MailArchive {
         return MailEntry("file:$rel", account, role, date, from.substringBefore('<').trim().trim('"').ifEmpty { address }, address,
             Mime.words(h["to"].orEmpty()).split(',').map { it.trim() }.filter { it.isNotEmpty() }, Mime.words(h["subject"].orEmpty()), seen = true, flagged = false,
             size = f.length(), attachments = files, snippet = "", saved = true, file = rel, gone = true, messageId = h["message-id"]?.trim())
+    }
+
+    /**
+     * «Αποθήκη» expanded, as the desktop's: each account with stored mail (a removed one too), and under it each of its
+     * folders that holds some, in the roles' order — (all, local only) for each.
+     */
+    fun tree(entries: List<MailEntry>): Map<String, Map<String, Pair<Int, Int>>> = entries.groupBy { it.account }.toSortedMap().mapValues { (_, ms) ->
+        ms.groupBy { it.folder }.toList().sortedBy { MailFiles.ROLES.indexOf(it.first) }.associate { (r, l) -> r to (l.size to l.count { it.gone }) }
     }
 
     /** The archive's mails matching [query] in sender, subject, recipients or an attachment's name, and within the dates given (ms). */

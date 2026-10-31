@@ -223,4 +223,6 @@
     <string name="mail_stored_hint">Die auf diesem Gerät gespeicherten E-Mails, auch die vom Server gelöschten</string>
     <string name="mail_stored_read_only">Der Speicher ist schreibgeschützt: Nichts hier ändert sich auf dem Server.</string>
     <string name="mail_saved">Gespeichert</string>
+    <string name="mail_search_stored">Speicher durchsuchen</string>
+    <string name="mail_search_stored_in">Speicher durchsuchen › %1$s</string>
 </resources>

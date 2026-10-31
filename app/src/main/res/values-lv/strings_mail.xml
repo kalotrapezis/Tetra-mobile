@@ -227,4 +227,6 @@
     <string name="mail_stored_hint">Šajā ierīcē glabātās vēstules, arī tās, kas izdzēstas no servera</string>
     <string name="mail_stored_read_only">Krātuve ir tikai lasāma: nekas šeit nemainās serverī.</string>
     <string name="mail_saved">Saglabāts</string>
+    <string name="mail_search_stored">Meklēt krātuvē</string>
+    <string name="mail_search_stored_in">Meklēt krātuvē › %1$s</string>
 </resources>

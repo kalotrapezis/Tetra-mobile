@@ -188,7 +188,7 @@ internal object MailEngine {
 
     /** An account checked and its password kept: written, synced at once, looked at every quarter hour. */
     fun add(c: Context, root: File, address: String, name: String, imap: MailServer, smtp: MailServer, pass: String, provider: String? = null, color: String? = null): JSONObject = synchronized(lock) {
-        val colors = listOf("#e5534b", "#4f8ff7", "#e0a43a", "#3fb27f", "#b77ce6", "#e57ab0", "#3bb8c4")
+        val colors = listOf("#e5534b", "#4f8ff7", "#e0a43a", "#3fb27f", "#b77ce6", "#a0785a", "#3bb8c4") // no pink: magenta is «Αποθήκη»'s
         val used = MailFiles.accounts(root).map { it.color }.toSet()
         val acc = JSONObject().put("id", address).put("address", address).put("name", name)
             .put("color", color ?: colors.firstOrNull { (0xFF000000 or it.removePrefix("#").toLong(16)) !in used } ?: colors[0])

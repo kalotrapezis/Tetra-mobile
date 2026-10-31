@@ -223,4 +223,6 @@
     <string name="mail_stored_hint">Пощата, съхранена на това устройство, включително изтритата от сървъра</string>
     <string name="mail_stored_read_only">Хранилището е само за четене: нищо тук не се променя на сървъра.</string>
     <string name="mail_saved">Запазено</string>
+    <string name="mail_search_stored">Търсене в Хранилището</string>
+    <string name="mail_search_stored_in">Търсене в Хранилището › %1$s</string>
 </resources>

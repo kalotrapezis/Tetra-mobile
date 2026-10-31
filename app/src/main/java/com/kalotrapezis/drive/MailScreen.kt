@@ -169,8 +169,11 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     var changed by remember { mutableStateOf(mapOf<String, MailEntry?>()) }
     // «Αποθήκη»: the same folders, list and pages over every mail kept here, deleted ones too (MailArchive); read only
     var stored by remember { mutableStateOf(false) }
-    val archive by produceState<List<MailEntry>?>(null, stored, version) {
-        if (stored) value = withContext(Dispatchers.IO) { runCatching { MailArchive.entries(root, MailEngine.device()) }.onFailure { WriterLog.e("Mail: reading the stored mail", it) }.getOrDefault(emptyList()) }
+    var storeOpen by remember { mutableStateOf(false) } // «Αποθήκη» expanded into its accounts and their folders
+    var storeAccount by remember { mutableStateOf<String?>(null) } // null: every account's
+    var storeRole by remember { mutableStateOf<String?>(null) } // null: every folder's
+    val archive by produceState<List<MailEntry>?>(null, stored || storeOpen, version) {
+        if (stored || storeOpen) value = withContext(Dispatchers.IO) { runCatching { MailArchive.entries(root, MailEngine.device()) }.onFailure { WriterLog.e("Mail: reading the stored mail", it) }.getOrDefault(emptyList()) }
     }
     val mails = remember(data, changed, stored, archive) { if (stored) archive.orEmpty() else data?.second.orEmpty().mapNotNull { e -> if (e.id in changed) changed[e.id] else e } }
     OpenTiming("Mail", data != null)
@@ -239,7 +242,10 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     }
     val spamOp = if (role == "Spam") "notSpam" else "spam"
 
-    val inFolder = remember(mails, role, account) { mails.filter { it.folder == role && it.account in accountOf && (account == null || it.account == account) } }
+    val inFolder = remember(mails, role, account, stored, storeAccount, storeRole) {
+        if (stored) mails.filter { (storeAccount == null || it.account == storeAccount) && (storeRole == null || it.folder == storeRole) } // a removed account's too
+        else mails.filter { it.folder == role && it.account in accountOf && (account == null || it.account == account) }
+    }
     val conversations = remember(mails, accountOf) { MailThreads.of(mails.filter { it.account in accountOf }) }
     // conversations on: each one once, where its first mail in this order stands
     val groups = remember(inFolder, view, query, MailLook.threads) { view.arrange(inFolder, query).let { gs ->
@@ -255,7 +261,8 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     // what a reply answers: the newest mail from someone else (not one's own reply, which would address oneself), and no draft
     val newest = current.lastOrNull { it.folder != "Drafts" && accounts.none { a -> a.address.equals(it.fromAddress, true) } } ?: current.lastOrNull { it.folder != "Drafts" } ?: current.lastOrNull()
     LaunchedEffect(openId) { if (!autoOpened) current.filter { !it.seen }.map { it.id }.takeIf { it.isNotEmpty() }?.let { act("read", it) } }
-    fun choose(r: String, a: String?) { role = r; account = a; openId = null; selected = emptySet(); mailboxes = false }
+    fun choose(r: String, a: String?) { stored = false; role = r; account = a; openId = null; selected = emptySet(); mailboxes = false }
+    fun chooseStored(a: String?, r: String?) { stored = true; storeAccount = a; storeRole = r; openId = null; selected = emptySet(); mailboxes = false }
 
     BackHandler { when {
         selected.isNotEmpty() -> selected = emptySet()
@@ -284,7 +291,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
                 if (accounts.isNotEmpty()) MailFiles.ROLES.forEach { r ->
                     val per = counts[r].orEmpty()
                     item(key = r) {
-                        val on = role == r && account == null
+                        val on = !stored && role == r && account == null
                         Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).background(if (on) MAIL_COLOR.copy(alpha = 0.22f) else Color.Transparent)
                             .clickable { choose(r, null) }.padding(end = 10.dp).heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
                             IconButton(onClick = { expanded = if (r in expanded) expanded - r else expanded + r }) {
@@ -298,7 +305,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
                     if (r in expanded) accounts.forEach { a ->
                         val c = per[a.id] ?: MailCount(0, 0, 0)
                         item(key = "$r/${a.id}") {
-                            val on = role == r && account == a.id
+                            val on = !stored && role == r && account == a.id
                             Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).background(if (on) MAIL_COLOR.copy(alpha = 0.22f) else Color.Transparent)
                                 .clickable { choose(r, a.id) }.padding(start = 52.dp, end = 10.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -311,16 +318,47 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
                         }
                     }
                 }
-                // «Αποθήκη» at the bottom: the mail kept on this device, the same folders over it; again, back to the mail
+                // «Αποθήκη» at the bottom: the mail kept on this device; it expands as the desktop's — each account (a removed
+                // one by its address), each of its stored folders; itself, all of it
                 if (accounts.isNotEmpty()) item(key = "stored") {
-                    Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(MaterialTheme.shapes.large).background(if (stored) MAIL_COLOR.copy(alpha = 0.22f) else Color.Transparent)
-                        .clickable { stored = !stored; openId = null; selected = emptySet(); mailboxes = false }.padding(start = 14.dp, end = 10.dp).heightIn(min = 48.dp),
-                        verticalAlignment = Alignment.CenterVertically) {
-                        Icon(painterResource(R.drawable.ic_folder), null, Modifier.size(20.dp))
-                        Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                            Text(stringResource(R.string.mail_storage), fontWeight = if (stored) FontWeight.Bold else null)
+                    val on = stored && storeAccount == null && storeRole == null
+                    Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(MaterialTheme.shapes.large).background(if (on) MAIL_COLOR.copy(alpha = 0.22f) else Color.Transparent)
+                        .clickable { chooseStored(null, null) }.padding(end = 10.dp).heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { storeOpen = !storeOpen }) {
+                            Icon(painterResource(R.drawable.ic_chevron_right), stringResource(R.string.mail_show_accounts), Modifier.size(20.dp).rotate(if (storeOpen) 90f else 0f))
+                        }
+                        Icon(painterResource(R.drawable.ic_folder), null, Modifier.size(20.dp), tint = MAIL_COLOR)
+                        Column(Modifier.weight(1f).padding(start = 10.dp)) {
+                            Text(stringResource(R.string.mail_storage), fontWeight = if (on) FontWeight.Bold else null)
                             Text(stringResource(R.string.mail_stored_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
+                    }
+                }
+                if (accounts.isNotEmpty() && storeOpen) {
+                    val tree = MailArchive.tree(archive.orEmpty())
+                    if (archive == null) item(key = "stored:reading") { MailHint(stringResource(R.string.mail_reading)) }
+                    tree.forEach { (id, roles) ->
+                        val a = accountOf[id]
+                        item(key = "stored/$id") {
+                            val on = stored && storeAccount == id && storeRole == null
+                            Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).background(if (on) MAIL_COLOR.copy(alpha = 0.22f) else Color.Transparent)
+                                .clickable { chooseStored(id, null) }.padding(start = 52.dp, end = 10.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Box(Modifier.size(9.dp).clip(CircleShape).background(Color(a?.color ?: 0xFF9E9E9E)))
+                                Text(a?.name ?: id, Modifier.weight(1f), fontWeight = if (on) FontWeight.Bold else null, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                StoredCount(roles.values.sumOf { it.first }, roles.values.sumOf { it.second })
+                            }
+                        }
+                        roles.forEach { (r, n) -> item(key = "stored/$id/$r") {
+                            val on = stored && storeAccount == id && storeRole == r
+                            Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).background(if (on) MAIL_COLOR.copy(alpha = 0.22f) else Color.Transparent)
+                                .clickable { chooseStored(id, r) }.padding(start = 76.dp, end = 10.dp).heightIn(min = 40.dp), verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Icon(painterResource(ROLE_ICONS[r] ?: R.drawable.ic_folder), null, Modifier.size(18.dp))
+                                Text(stringResource(ROLE_NAMES[r] ?: R.string.mail_storage), Modifier.weight(1f), fontWeight = if (on) FontWeight.Bold else null, maxLines = 1)
+                                StoredCount(n.first, n.second)
+                            }
+                        } }
                     }
                 }
                 if (accounts.isNotEmpty()) item {
@@ -350,7 +388,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
                         Text(groupName(view.group, key, accountOf), Modifier.padding(start = 12.dp, top = 8.dp), color = MAIL_TEXT, style = MaterialTheme.typography.labelLarge)
                     }
                     items(ms, key = { it.id }) { e ->
-                        MailRow(e, accountOf[e.account], count = if (MailLook.threads) conversations[MailThreads.key(e)]?.size ?: 1 else 1, picked = e.id in selected, choosing = selected.isNotEmpty(), chosen = wide && selected.isEmpty() && e.id == openId,
+                        MailRow(e, accountOf[e.account], stored = stored, count = if (MailLook.threads) conversations[MailThreads.key(e)]?.size ?: 1 else 1, picked = e.id in selected, choosing = selected.isNotEmpty(), chosen = wide && selected.isEmpty() && e.id == openId,
                             click = { if (selected.isNotEmpty()) selected = if (e.id in selected) selected - e.id else selected + e.id else { autoOpened = false; openId = e.id } },
                             long = { selected = if (e.id in selected) selected - e.id else selected + e.id },
                             here = remember(e.file, version) { e.file != null && File(root, e.file).isFile },
@@ -381,7 +419,13 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
                         Row(Modifier.padding(start = 16.dp, end = 4.dp).height(48.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             Icon(painterResource(R.drawable.ic_search), contentDescription = null, Modifier.size(22.dp))
                             Box(Modifier.weight(1f)) {
-                                if (query.isEmpty()) Text(if (wide) stringResource(R.string.mail_search) else folderName(role, account, accountOf), color = islandContentColor().copy(alpha = 0.7f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                // where it searches: in «Αποθήκη», never the live folder's name
+                                if (query.isEmpty()) Text(when {
+                                    stored -> listOfNotNull(storeAccount?.let { accountOf[it]?.name ?: it }, storeRole?.let { stringResource(ROLE_NAMES[it] ?: R.string.mail_storage) })
+                                        .joinToString(" › ").let { if (it.isEmpty()) stringResource(R.string.mail_search_stored) else stringResource(R.string.mail_search_stored_in, it) }
+                                    wide -> stringResource(R.string.mail_search)
+                                    else -> folderName(role, account, accountOf)
+                                }, color = islandContentColor().copy(alpha = 0.7f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                                 BasicTextField(query, { query = it }, singleLine = true, textStyle = TextStyle(color = islandContentColor(), fontSize = 16.sp),
                                     cursorBrush = SolidColor(islandContentColor()), modifier = Modifier.fillMaxWidth())
                             }
@@ -422,8 +466,8 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
             if (wide && many.size > 1) SelectionPane(many, accountOf, Modifier.statusBarsPadding().padding(16.dp), later)
             else if (current.size > 1 && single == null) MailThreadPage(current, accounts.map { it.address.lowercase() }.toSet(), accountOf, root, MailLook.top, showBack = !three, back = { openId = null }, openFile = openFile) { e -> if (e.folder == "Drafts") writing = MailDraft("draft", e, current) else single = e.id }
             else if (single != null && current.any { it.id == single }) MailPage(current.first { it.id == single }, accountOf[current.first { it.id == single }.account], root, islandTop = MailLook.top, showBack = true,
-                back = { single = null }, openFile = openFile, say = { message = it }, fetched = { version++ }, write = { writing = it }, exported = { exported = it })
-            else if (open != null) MailPage(open, accountOf[open.account], root, islandTop = MailLook.top, showBack = !three, back = { openId = null }, openFile = openFile, say = { message = it }, fetched = { version++ }, write = { writing = it }, exported = { exported = it })
+                back = { single = null }, openFile = openFile, say = { message = it }, fetched = { version++ }, write = { writing = it }, exported = { exported = it }, stored = stored)
+            else if (open != null) MailPage(open, accountOf[open.account], root, islandTop = MailLook.top, showBack = !three, back = { openId = null }, openFile = openFile, say = { message = it }, fetched = { version++ }, write = { writing = it }, exported = { exported = it }, stored = stored)
             else if (wide) MailHint(stringResource(R.string.mail_choose), Modifier.align(Alignment.Center))
             // the mail's island: one big Απάντηση; the rest pulled up from it
             if (open != null && !(wide && many.size > 1)) Box(if (MailLook.top) Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 8.dp, end = 16.dp) else Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp)) {
@@ -619,7 +663,8 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
     Box(Modifier.size(8.dp).clip(CircleShape).then(if (ring) Modifier.border(1.5.dp, color, CircleShape) else Modifier.background(color)))
 
 /** One mail in the list (MAIL_PLAN §9): the account's colour as a bar, ♥ at the right, its state's dot. */
-@Composable private fun MailRow(e: MailEntry, account: MailAccount?, count: Int = 1, picked: Boolean, choosing: Boolean, chosen: Boolean, click: () -> Unit, long: () -> Unit, here: Boolean, heart: () -> Unit) {
+@Composable private fun MailRow(e: MailEntry, account: MailAccount?, count: Int = 1, picked: Boolean, choosing: Boolean, chosen: Boolean, click: () -> Unit, long: () -> Unit, here: Boolean, heart: () -> Unit,
+    stored: Boolean = false) {
     Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large)
         .background(if (picked) MAIL_COLOR.copy(alpha = 0.32f) else if (chosen) MAIL_COLOR.copy(alpha = 0.16f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
         .combinedClickable(onLongClick = long, onClick = click).heightIn(min = 72.dp)) {
@@ -636,7 +681,10 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
                 if (e.attachments > 0) Icon(painterResource(R.drawable.ic_attach), stringResource(R.string.mail_has_attachments), Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 StateDot(if (e.saved) GREEN else ORANGE, ring = e.saved && !here)
             }
-            if (e.gone) Text(stringResource(R.string.mail_local_only), style = MaterialTheme.typography.labelSmall, color = MAIL_TEXT) // in «Αποθήκη»: no longer on the server
+            if (stored || e.gone) Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (stored) StoredTag()
+                if (e.gone) Text(stringResource(R.string.mail_local_only), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) // no longer on the server
+            }
             Text(e.subject.ifEmpty { stringResource(R.string.mail_no_subject) }, fontWeight = if (e.seen) null else FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (e.snippet.isNotEmpty()) Text(e.snippet, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
@@ -684,7 +732,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
         }
         Text(stringResource(R.string.mail_selection_summary, pluralStringResource(R.plurals.mail_n_accounts, many.map { it.account }.distinct().size, many.map { it.account }.distinct().size),
             android.text.format.Formatter.formatShortFileSize(context, many.sumOf { it.size }), many.count { !it.saved }), color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Surface(color = MAIL_COLOR.copy(alpha = 0.2f), contentColor = MAIL_COLOR, shape = CircleShape, modifier = Modifier.alpha(0.6f).clickable(onClick = later)) {
+        Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = CircleShape, modifier = Modifier.alpha(0.6f).clickable(onClick = later)) { // magenta is «Αποθήκη»'s
             Text(stringResource(R.string.mail_summarise_n, many.size), Modifier.padding(horizontal = 16.dp, vertical = 10.dp), fontWeight = FontWeight.Bold)
         }
     }
@@ -696,7 +744,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
  * or always (Settings).
  */
 @Composable private fun MailPage(e: MailEntry, account: MailAccount?, root: File, islandTop: Boolean, showBack: Boolean, back: () -> Unit, openFile: (File) -> Unit, say: (String) -> Unit, fetched: () -> Unit,
-    write: (MailDraft) -> Unit = {}, exported: (File) -> Unit = {}) {
+    write: (MailDraft) -> Unit = {}, exported: (File) -> Unit = {}, stored: Boolean = false) {
     val context = LocalContext.current
     var failed by remember(e.id) { mutableStateOf<String?>(null) }
     var got by remember(e.id) { mutableIntStateOf(0) } // an attachment fetched: the cards again
@@ -762,6 +810,10 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
                 Text(parts.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 message?.cc?.takeIf { it.isNotBlank() }?.let { Text(stringResource(R.string.mail_cc, it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 if (!e.saved) Text("● " + stringResource(R.string.mail_server_only), style = MaterialTheme.typography.bodySmall, color = ORANGE)
+                if (stored || e.gone) Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (stored) StoredTag()
+                    if (e.gone) Text(stringResource(R.string.mail_local_only), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
         }
         if (files.isNotEmpty()) Row(Modifier.horizontalScroll(rememberScrollState()).padding(bottom = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -854,7 +906,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
                     Row(Modifier.height(androidx.compose.foundation.layout.IntrinsicSize.Min)) {
                         if (!me) Box(Modifier.width(4.dp).fillMaxHeight().background(color))
                         Column(Modifier.weight(1f).padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            if (draft) Text(stringResource(R.string.mail_draft_card), style = MaterialTheme.typography.labelLarge, color = MAIL_TEXT)
+                            if (draft) Text(stringResource(R.string.mail_draft_card), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(e.subject.ifEmpty { stringResource(R.string.mail_no_subject) }, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Box(Modifier.size(8.dp).clip(CircleShape).background(color))
@@ -1009,4 +1061,13 @@ internal fun shareFile(context: android.content.Context, f: File) {
     context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType(type).putExtra(Intent.EXTRA_STREAM, uri)
         .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 }
+
+/** The «Αποθήκη» tag: on every mail shown from the mail kept here, in Mail's magenta — that colour is for it alone. */
+@Composable internal fun StoredTag() = Surface(color = MAIL_COLOR.copy(alpha = 0.18f), contentColor = MAIL_COLOR, shape = CircleShape) {
+    Text(stringResource(R.string.mail_storage), Modifier.padding(horizontal = 8.dp, vertical = 1.dp), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+}
+
+/** A stored folder's count, as the desktop's "N · M": all of it, and how many are here only. */
+@Composable private fun StoredCount(all: Int, only: Int) = Text(if (only > 0) "$all · $only" else "$all", style = MaterialTheme.typography.labelMedium,
+    color = MaterialTheme.colorScheme.onSurfaceVariant)
 

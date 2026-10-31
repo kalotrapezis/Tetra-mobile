@@ -227,4 +227,6 @@
     <string name="mail_stored_hint">Les e-mails conservés sur cet appareil, y compris ceux supprimés du serveur</string>
     <string name="mail_stored_read_only">Le stockage est en lecture seule : rien ici ne change sur le serveur.</string>
     <string name="mail_saved">Enregistré</string>
+    <string name="mail_search_stored">Rechercher dans Stockage</string>
+    <string name="mail_search_stored_in">Rechercher dans Stockage › %1$s</string>
 </resources>

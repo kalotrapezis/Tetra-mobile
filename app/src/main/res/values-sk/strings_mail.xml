@@ -231,4 +231,6 @@
     <string name="mail_stored_hint">Pošta uložená v tomto zariadení, vrátane tej, ktorá bola zmazaná zo servera</string>
     <string name="mail_stored_read_only">Úložisko je len na čítanie: nič sa tu na serveri nemení.</string>
     <string name="mail_saved">Uložené</string>
+    <string name="mail_search_stored">Hľadať v úložisku</string>
+    <string name="mail_search_stored_in">Hľadať v úložisku › %1$s</string>
 </resources>

@@ -516,6 +516,12 @@ Formats are the desktop's (step 1's sync.js/mail.js of the same day); the phone 
 - **AI Assist** (Mail allowed): mail_stored_find (sender, words, attachment names, dates; local-only ones too) and,
   only when asked, mail_export (a mail or one attachment into Tetra/Documents, saying where).
 
+- **«Αποθήκη» expands** as the desktop's: under it each account (a removed one by its address), under each its stored
+  folders with "N · M" (all · local only); «Αποθήκη» itself is all of it. The search field says «Αναζήτηση στην Αποθήκη
+  › <account> › <folder>», never the live folder. Every mail shown from it carries a magenta «Αποθήκη» tag (row and the
+  opened mail): magenta is reserved for it — the account palette's pink became #a0785a, an account colour near magenta
+  is shown so, and the draft label, «μόνο τοπικά» and the summary chip left magenta.
+
 ## Open questions for the user
 
 - Away from home, does the phone sync with the desktop over the internet, or only on the same Wi-Fi?

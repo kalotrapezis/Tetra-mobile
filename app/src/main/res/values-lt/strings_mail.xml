@@ -231,4 +231,6 @@
     <string name="mail_stored_hint">Šiame įrenginyje laikomi laiškai, įskaitant ištrintus iš serverio</string>
     <string name="mail_stored_read_only">Saugykla yra tik skaitymui: čia niekas nesikeičia serveryje.</string>
     <string name="mail_saved">Išsaugota</string>
+    <string name="mail_search_stored">Ieškoti saugykloje</string>
+    <string name="mail_search_stored_in">Ieškoti saugykloje › %1$s</string>
 </resources>

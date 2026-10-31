@@ -233,4 +233,6 @@
     <string name="mail_stored_hint">Η αλληλογραφία που φυλάσσεται σε αυτή τη συσκευή, και όση έχει σβηστεί από τον διακομιστή</string>
     <string name="mail_stored_read_only">Η Αποθήκη είναι μόνο για ανάγνωση: τίποτα από εδώ δεν αλλάζει στον διακομιστή.</string>
     <string name="mail_saved">Αποθηκεύτηκε</string>
+    <string name="mail_search_stored">Αναζήτηση στην Αποθήκη</string>
+    <string name="mail_search_stored_in">Αναζήτηση στην Αποθήκη › %1$s</string>
 </resources>

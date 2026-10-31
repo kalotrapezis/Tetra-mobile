@@ -223,4 +223,6 @@
     <string name="mail_stored_hint">Az ezen az eszközön tárolt levelek, a szerverről törölteket is beleértve</string>
     <string name="mail_stored_read_only">A tárhely csak olvasható: itt semmi sem változik a szerveren.</string>
     <string name="mail_saved">Mentve</string>
+    <string name="mail_search_stored">Keresés a tárhelyen</string>
+    <string name="mail_search_stored_in">Keresés a tárhelyen › %1$s</string>
 </resources>

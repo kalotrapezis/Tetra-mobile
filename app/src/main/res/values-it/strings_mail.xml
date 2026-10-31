@@ -223,4 +223,6 @@
     <string name="mail_stored_hint">La posta conservata su questo dispositivo, compresa quella eliminata dal server</string>
     <string name="mail_stored_read_only">L’archivio è di sola lettura: qui nulla cambia sul server.</string>
     <string name="mail_saved">Salvato</string>
+    <string name="mail_search_stored">Cerca in Archivio</string>
+    <string name="mail_search_stored_in">Cerca in Archivio › %1$s</string>
 </resources>

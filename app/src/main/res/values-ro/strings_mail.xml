@@ -227,4 +227,6 @@
     <string name="mail_stored_hint">Mesajele păstrate pe acest dispozitiv, inclusiv cele șterse de pe server</string>
     <string name="mail_stored_read_only">Stocarea este doar în citire: nimic de aici nu se schimbă pe server.</string>
     <string name="mail_saved">Salvat</string>
+    <string name="mail_search_stored">Caută în Stocare</string>
+    <string name="mail_search_stored_in">Caută în Stocare › %1$s</string>
 </resources>

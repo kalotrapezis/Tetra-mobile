@@ -231,4 +231,6 @@
     <string name="mail_stored_hint">Pošta, shranjena v tej napravi, vključno s tisto, izbrisano s strežnika</string>
     <string name="mail_stored_read_only">Shramba je samo za branje: nič se tu na strežniku ne spremeni.</string>
     <string name="mail_saved">Shranjeno</string>
+    <string name="mail_search_stored">Iskanje po shrambi</string>
+    <string name="mail_search_stored_in">Iskanje po shrambi › %1$s</string>
 </resources>

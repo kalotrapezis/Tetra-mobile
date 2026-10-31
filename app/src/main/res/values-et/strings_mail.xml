@@ -223,4 +223,6 @@
     <string name="mail_stored_hint">Sellesse seadmesse salvestatud kirjad, ka need, mis serverist kustutati</string>
     <string name="mail_stored_read_only">Salvestusruum on kirjutuskaitstud: siin ei muutu serveris midagi.</string>
     <string name="mail_saved">Salvestatud</string>
+    <string name="mail_search_stored">Otsi salvestusruumist</string>
+    <string name="mail_search_stored_in">Otsi salvestusruumist › %1$s</string>
 </resources>

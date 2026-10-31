@@ -223,4 +223,6 @@
     <string name="mail_stored_hint">Mejlen som finns sparade på den här enheten, även de som raderats från servern</string>
     <string name="mail_stored_read_only">Lagring är skrivskyddad: inget här ändras på servern.</string>
     <string name="mail_saved">Sparat</string>
+    <string name="mail_search_stored">Sök i Lagring</string>
+    <string name="mail_search_stored_in">Sök i Lagring › %1$s</string>
 </resources>
