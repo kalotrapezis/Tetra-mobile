@@ -23,7 +23,7 @@
     </plurals>
     <string name="mail_search">Търсене в пощата</string>
     <string name="mail_reading">Пощата се чете…</string>
-    <string name="mail_no_accounts">Тук още няма поща. Добавете акаунтите си на компютъра (Tetra › Поща): писмата им идват тук със синхронизацията.</string>
+    <string name="mail_no_accounts">Тук още няма поща. Добавете акаунт: телефонът сам изтегля пощата. С компютър акаунтите на компютъра също идват тук сами.</string>
     <string name="mail_no_match">Няма съвпадащи писма.</string>
     <string name="mail_none_filtered">Няма писма с тези филтри.</string>
     <string name="mail_none_here">Няма писма в тази папка.</string>
@@ -136,7 +136,6 @@
     <string name="mail_finding">Търсене на сървърите…</string>
     <string name="mail_not_found">Не са намерени сървъри за този адрес. Попълнете ги отдолу.</string>
     <string name="mail_manual">Ръчна настройка</string>
-    <string name="mail_ms_later">Акаунтите на Microsoft (Hotmail, Outlook, Microsoft 365) изискват влизане през Microsoft, което идва по-късно. Засега го добавете на компютъра.</string>
     <string name="mail_password">Парола</string>
     <string name="mail_gmail_hint">Gmail изисква парола за приложение: отворете страницата на Google, създайте парола с име Tetra, копирайте нейните 16 букви и се върнете. Tetra ги прочита сама.</string>
     <string name="mail_gmail_open">Отвори страницата на Google</string>
@@ -186,4 +185,14 @@
     <string name="mail_islands_summary">Къде стоят. Автоматично: горе с мишка, долу с пръст.</string>
     <string name="mail_threads">Разговори</string>
     <string name="mail_threads_summary">Писмата от един разговор заедно, едно под друго, като в чат</string>
+    <string name="mail_ms_sign_in">Вход с Microsoft</string>
+    <string name="mail_ms_hint">Страницата на Microsoft се отваря в браузъра: влезте там (с кода от телефона си, ако ползвате такъв) и се върнете. Tetra никога не вижда паролата ви.</string>
+    <string name="mail_ms_client">ID на приложението на Microsoft (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft първо иска ID на приложението на Tetra: това, регистрирано веднъж в entra.microsoft.com (същото като на компютъра).</string>
+    <string name="mail_ms_waiting">Изчакване на страницата на Microsoft…</string>
+    <string name="mail_why_approval">Вашата организация (университетът) трябва първо да одобри Tetra. Попитайте нейния IT отдел или препращайте тази поща към Gmail.</string>
+    <string name="mail_checking_servers">Търсене на нова поща…</string>
+    <string name="mail_assist">✦ Предложение от асистента</string>
+    <string name="mail_assist_working">✦ Асистентът пише…</string>
+    <string name="mail_draft_card">Чернова – докоснете, за да я довършите и изпратите</string>
 </resources>

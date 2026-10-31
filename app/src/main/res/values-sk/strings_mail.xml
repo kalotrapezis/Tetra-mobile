@@ -25,7 +25,7 @@
     </plurals>
     <string name="mail_search">Hľadať v pošte</string>
     <string name="mail_reading">Načítava sa pošta…</string>
-    <string name="mail_no_accounts">Zatiaľ tu nie je žiadna pošta. Pridajte svoje účty v počítači (Tetra › Pošta): ich pošta sem príde so synchronizáciou.</string>
+    <string name="mail_no_accounts">Zatiaľ tu nie je žiadna pošta. Pridajte účet: telefón si poštu stiahne sám. S PC sem prídu samy aj účty z PC.</string>
     <string name="mail_no_match">Žiadna správa nezodpovedá.</string>
     <string name="mail_none_filtered">Žiadne správy s týmito filtrami.</string>
     <string name="mail_none_here">V tomto priečinku nie sú žiadne správy.</string>
@@ -144,7 +144,6 @@
     <string name="mail_finding">Hľadajú sa servery…</string>
     <string name="mail_not_found">Pre túto adresu sa nenašli žiadne servery. Vyplňte ich nižšie.</string>
     <string name="mail_manual">Ručné nastavenie</string>
-    <string name="mail_ms_later">Účty Microsoft (Hotmail, Outlook, Microsoft 365) vyžadujú prihlásenie Microsoftu, ktoré príde neskôr. Zatiaľ účet pridajte v PC.</string>
     <string name="mail_password">Heslo</string>
     <string name="mail_gmail_hint">Gmail vyžaduje heslo aplikácie: otvorte stránku Googlu, vytvorte heslo s názvom Tetra, skopírujte jeho 16 písmen a vráťte sa. Tetra ich načíta sama.</string>
     <string name="mail_gmail_open">Otvoriť stránku Googlu</string>
@@ -194,4 +193,14 @@
     <string name="mail_islands_summary">Kde sú. Automaticky: hore s myšou, dole s prstom.</string>
     <string name="mail_threads">Konverzácie</string>
     <string name="mail_threads_summary">Správy jednej konverzácie spolu, pod sebou, ako v chate</string>
+    <string name="mail_ms_sign_in">Prihlásiť sa cez Microsoft</string>
+    <string name="mail_ms_hint">Stránka Microsoftu sa otvorí v prehliadači: prihláste sa tam (kódom z telefónu, ak ho používate) a vráťte sa. Tetra vaše heslo nikdy nevidí.</string>
+    <string name="mail_ms_client">ID aplikácie Microsoft (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft najprv potrebuje ID aplikácie Tetra: to, ktoré bolo raz zaregistrované na entra.microsoft.com (rovnaké ako v PC).</string>
+    <string name="mail_ms_waiting">Čaká sa na stránku Microsoftu…</string>
+    <string name="mail_why_approval">Vaša organizácia (univerzita) musí Tetru najprv schváliť. Požiadajte jej IT alebo túto poštu preposielajte do Gmailu.</string>
+    <string name="mail_checking_servers">Hľadá sa nová pošta…</string>
+    <string name="mail_assist">✦ Navrhnúť s asistentom</string>
+    <string name="mail_assist_working">✦ Asistent píše…</string>
+    <string name="mail_draft_card">Koncept – ťuknutím ho dokončíte a odošlete</string>
 </resources>

@@ -407,7 +407,8 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
     val preferences = remember(context) { context.getSharedPreferences("onboarding", Context.MODE_PRIVATE) }
     // the first start opens the guide (Guide.kt), which can be skipped; Settings › Guide opens it again
     var screen by remember { mutableStateOf(if (AppLocale.reopenSettings) Screen.Settings.also { AppLocale.reopenSettings = false } else if (preferences.getBoolean(PHOTO_SETUP_COMPLETED, false)) Screen.Home else Screen.Guide) }
-    var settingsStart by remember { mutableStateOf<SettingsPage?>(null) } // a notification's Settings page (MapsAge)
+    var settingsStart by remember { mutableStateOf<SettingsPage?>(null) }
+    var mailStart by remember { mutableStateOf<String?>(null) } // AI Assist's "mail:<id>" or "mail-write:<json>" // a notification's Settings page (MapsAge)
     var guideAt by remember { mutableStateOf(if (screen == Screen.Guide) 0 else null) } // the guide's step; docked under the screen when screen isn't Guide
     var notesStart by remember { mutableStateOf<Boolean?>(null) }
     var notesOpen by remember { mutableStateOf<String?>(null) } // a note AI Assist found: open on it
@@ -720,9 +721,10 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
             screen = Screen.Contacts; return@LaunchedEffect
         }
         // AI Assist's tools (AssistantTools): a note it found, directions in Maps, or Maps' search on a place it could not find
-        applet.value?.takeIf { (it.startsWith("note:") || it.startsWith("maps-go:") || it.startsWith("maps-search:")) && screen != Screen.Guide }?.let { v ->
+        applet.value?.takeIf { (it.startsWith("note:") || it.startsWith("maps-go:") || it.startsWith("maps-search:") || it.startsWith("mail:") || it.startsWith("mail-write:")) && screen != Screen.Guide }?.let { v ->
             applet.value = null
             when {
+                v.startsWith("mail") -> { mailStart = v; screen = Screen.Mail } // a mail AI Assist found, or one it wrote for the user to send
                 v.startsWith("note:") -> { notesStart = null; notesOpen = v.removePrefix("note:"); screen = Screen.Notes }
                 v.startsWith("maps-go:") -> v.removePrefix("maps-go:").split(",", limit = 3).takeIf { it.size == 3 }?.let { (lat, lng, name) ->
                     mapsGo = Place("", name, lat.toDouble(), lng.toDouble()); mapsSearch = null; mapsBack = Screen.Home; screen = Screen.Maps }
@@ -937,10 +939,10 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                     context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                 }, startKind = calendarNew, openContact = { uid -> contactsOpen = uid; screen = Screen.Contacts })
                 Screen.Maps -> MapsScreen(MapsFiles.root(driveRoot()), mapsGo, back = { mapsGo = null; mapsSearch = null; screen = mapsBack }, search = mapsSearch)
-                Screen.Mail -> MailScreen(back = { screen = Screen.Home }, hasAccess = hasAllFilesAccess(), grant = {
+                Screen.Mail -> androidx.compose.runtime.key(mailStart) { MailScreen(start = mailStart, back = { mailStart = null; screen = Screen.Home }, hasAccess = hasAllFilesAccess(), grant = {
                     context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                 }, openFile = { f -> openDriveFile(DriveRules.relative(driveRoot(), f), false)?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() } },
-                    openSettings = { settingsStart = SettingsPage.Mail; screen = Screen.Settings })
+                    openSettings = { settingsStart = SettingsPage.Mail; screen = Screen.Settings }) }
                 Screen.Contacts -> androidx.compose.runtime.key(contactsOpen, contactsNew) { ContactsScreen(back = { screen = Screen.Home }, hasAccess = hasAllFilesAccess(), grant = {
                     context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                 }, start = contactsOpen, newNumber = contactsNew, openMaps = { q -> mapsGo = null; mapsSearch = q; mapsBack = Screen.Contacts; screen = Screen.Maps }) }

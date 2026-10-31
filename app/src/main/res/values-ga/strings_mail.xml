@@ -26,7 +26,7 @@
     </plurals>
     <string name="mail_search">Cuardaigh an post</string>
     <string name="mail_reading">Ag léamh an phoist…</string>
-    <string name="mail_no_accounts">Níl aon phost anseo fós. Cuir do chuntais leis ar an ríomhaire (Tetra › Ríomhphost): tagann a gcuid poist anseo leis an sioncrónú.</string>
+    <string name="mail_no_accounts">Níl aon phost anseo fós. Cuir cuntas leis: faigheann an fón an post é féin. Le ríomhaire, tagann cuntais an ríomhaire anseo leo féin freisin.</string>
     <string name="mail_no_match">Níl aon phost ag teacht leis.</string>
     <string name="mail_none_filtered">Níl aon phost leis na scagairí seo.</string>
     <string name="mail_none_here">Níl aon phost san fhillteán seo.</string>
@@ -148,7 +148,6 @@
     <string name="mail_finding">Ag aimsiú na bhfreastalaithe…</string>
     <string name="mail_not_found">Níor aimsíodh aon fhreastalaí don seoladh seo. Líon isteach thíos iad.</string>
     <string name="mail_manual">Socrú de láimh</string>
-    <string name="mail_ms_later">Tá síniú isteach Microsoft ag teastáil ó chuntais Microsoft (Hotmail, Outlook, Microsoft 365), agus tiocfaidh sé sin níos déanaí. Faoi láthair, cuir leis ar an ríomhaire é.</string>
     <string name="mail_password">Focal faire</string>
     <string name="mail_gmail_hint">Tá focal faire aipe ag teastáil ó Gmail: oscail leathanach Google, déan ceann darb ainm Tetra, cóipeáil a 16 litir agus fill ar ais. Léann Tetra iad leis féin.</string>
     <string name="mail_gmail_open">Oscail leathanach Google</string>
@@ -198,4 +197,14 @@
     <string name="mail_islands_summary">Cá seasann siad. Uathoibríoch: thuas le luch, thíos le méar.</string>
     <string name="mail_threads">Comhráite</string>
     <string name="mail_threads_summary">Teachtaireachtaí comhrá amháin le chéile, ceann faoi cheann, mar a bheadh i gcomhrá beo</string>
+    <string name="mail_ms_sign_in">Sínigh isteach le Microsoft</string>
+    <string name="mail_ms_hint">Osclaítear leathanach Microsoft sa bhrabhsálaí: sínigh isteach ansin (le cód d’fhóin má úsáideann tú ceann) agus fill ar ais. Ní fheiceann Tetra d’fhocal faire riamh.</string>
+    <string name="mail_ms_client">Aitheantas aipe Microsoft (client ID)</string>
+    <string name="mail_ms_client_hint">Tá aitheantas aipe Tetra ag teastáil ó Microsoft ar dtús: an ceann a cláraíodh uair amháin ag entra.microsoft.com (an ceann céanna leis an ríomhaire).</string>
+    <string name="mail_ms_waiting">Ag fanacht ar leathanach Microsoft…</string>
+    <string name="mail_why_approval">Caithfidh d’eagraíocht (an ollscoil) Tetra a cheadú ar dtús. Fiafraigh dá IT, nó seol an post seo ar aghaidh chuig Gmail.</string>
+    <string name="mail_checking_servers">Ag lorg poist nua…</string>
+    <string name="mail_assist">✦ Moltaí ón gcúntóir</string>
+    <string name="mail_assist_working">✦ Tá an cúntóir ag scríobh…</string>
+    <string name="mail_draft_card">Dréacht – tapáil chun é a chríochnú agus a sheoladh</string>
 </resources>

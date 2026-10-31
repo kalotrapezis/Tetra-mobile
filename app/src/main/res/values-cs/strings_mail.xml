@@ -25,7 +25,7 @@
     </plurals>
     <string name="mail_search">Hledat v poště</string>
     <string name="mail_reading">Načítání pošty…</string>
-    <string name="mail_no_accounts">Zatím tu není žádná pošta. Přidejte své účty na počítači (Tetra › Pošta): jejich pošta sem přijde se synchronizací.</string>
+    <string name="mail_no_accounts">Zatím tu není žádná pošta. Přidejte účet: telefon si poštu stáhne sám. S PC sem přijdou samy i účty z PC.</string>
     <string name="mail_no_match">Žádná zpráva neodpovídá.</string>
     <string name="mail_none_filtered">Žádné zprávy s těmito filtry.</string>
     <string name="mail_none_here">V této složce nejsou žádné zprávy.</string>
@@ -144,7 +144,6 @@
     <string name="mail_finding">Hledání serverů…</string>
     <string name="mail_not_found">Pro tuto adresu nebyly nalezeny žádné servery. Vyplňte je níže.</string>
     <string name="mail_manual">Ruční nastavení</string>
-    <string name="mail_ms_later">Účty Microsoft (Hotmail, Outlook, Microsoft 365) vyžadují přihlášení Microsoftu, které přijde později. Zatím účet přidejte na PC.</string>
     <string name="mail_password">Heslo</string>
     <string name="mail_gmail_hint">Gmail vyžaduje heslo aplikace: otevřete stránku Googlu, vytvořte heslo s názvem Tetra, zkopírujte jeho 16 písmen a vraťte se. Tetra je načte sama.</string>
     <string name="mail_gmail_open">Otevřít stránku Googlu</string>
@@ -194,4 +193,14 @@
     <string name="mail_islands_summary">Kde jsou. Automaticky: nahoře s myší, dole s prstem.</string>
     <string name="mail_threads">Konverzace</string>
     <string name="mail_threads_summary">Zprávy jedné konverzace pohromadě, pod sebou, jako v chatu</string>
+    <string name="mail_ms_sign_in">Přihlásit se přes Microsoft</string>
+    <string name="mail_ms_hint">Stránka Microsoftu se otevře v prohlížeči: přihlaste se tam (kódem z telefonu, pokud ho používáte) a vraťte se. Tetra vaše heslo nikdy nevidí.</string>
+    <string name="mail_ms_client">ID aplikace Microsoft (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft nejdřív potřebuje ID aplikace Tetra: to, které bylo jednou zaregistrováno na entra.microsoft.com (stejné jako na PC).</string>
+    <string name="mail_ms_waiting">Čekání na stránku Microsoftu…</string>
+    <string name="mail_why_approval">Vaše organizace (univerzita) musí Tetru nejdřív schválit. Požádejte její IT, nebo tuto poštu přeposílejte do Gmailu.</string>
+    <string name="mail_checking_servers">Hledání nové pošty…</string>
+    <string name="mail_assist">✦ Navrhnout s asistentem</string>
+    <string name="mail_assist_working">✦ Asistent píše…</string>
+    <string name="mail_draft_card">Koncept – klepnutím ho dokončíte a odešlete</string>
 </resources>

@@ -26,7 +26,7 @@
 
     <string name="mail_search">Search mail</string>
     <string name="mail_reading">Reading the mail…</string>
-    <string name="mail_no_accounts">No mail here yet. Add your accounts on the computer (Tetra › Mail): their mail comes here with sync.</string>
+    <string name="mail_no_accounts">No mail here yet. Add an account: the phone fetches it itself. With a PC, the PC\'s accounts come here by themselves too.</string>
     <string name="mail_no_match">No mail matches.</string>
     <string name="mail_none_filtered">No mail with these filters.</string>
     <string name="mail_none_here">No mail in this folder.</string>
@@ -146,7 +146,6 @@
     <string name="mail_finding">Finding the servers…</string>
     <string name="mail_not_found">No servers found for this address. Fill them in below.</string>
     <string name="mail_manual">Manual setup</string>
-    <string name="mail_ms_later">Microsoft accounts (Hotmail, Outlook, Microsoft 365) need Microsoft\'s sign-in, which comes later. Add it on the PC for now.</string>
     <string name="mail_password">Password</string>
     <string name="mail_gmail_hint">Gmail needs an app password: open Google\'s page, make one named Tetra, copy its 16 letters and come back. Tetra reads them by itself.</string>
     <string name="mail_gmail_open">Open Google\'s page</string>
@@ -197,4 +196,14 @@
     <string name="mail_islands_summary">Where they stand. By itself: at the top with a mouse, at the bottom with a finger.</string>
     <string name="mail_threads">Conversations</string>
     <string name="mail_threads_summary">The mails of one conversation together, one under the other, as in a chat</string>
+    <string name="mail_ms_sign_in">Sign in with Microsoft</string>
+    <string name="mail_ms_hint">Microsoft\'s page opens in the browser: sign in there (with your phone\'s code if you use one) and come back. Tetra never sees your password.</string>
+    <string name="mail_ms_client">Microsoft app id (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft needs Tetra\'s app id first: the one registered once at entra.microsoft.com (the same as on the PC).</string>
+    <string name="mail_ms_waiting">Waiting for Microsoft\'s page…</string>
+    <string name="mail_why_approval">Your organisation (the university) must approve Tetra first. Ask its IT, or forward this mail to Gmail.</string>
+    <string name="mail_checking_servers">Looking for new mail…</string>
+    <string name="mail_assist">✦ Suggest with the assistant</string>
+    <string name="mail_assist_working">✦ The assistant is writing…</string>
+    <string name="mail_draft_card">Draft — tap to finish and send it</string>
 </resources>

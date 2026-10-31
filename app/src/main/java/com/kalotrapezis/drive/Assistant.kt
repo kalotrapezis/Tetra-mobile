@@ -4,6 +4,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -183,6 +184,7 @@ internal class AssistantTools(
     private var files = emptyList<File>()
     private var notesFound = emptyList<Note>()
     private var alarmsShown = emptyList<AlarmRecord>()
+    private var mailsShown = emptyList<MailEntry>()
 
     fun run(name: String, args: JSONObject): ToolResult = runCatching {
         when (name) {
@@ -210,6 +212,11 @@ internal class AssistantTools(
             "relation_remember" -> relationRemember(args)
             "relation_forget" -> relationForget(args)
             "contact_call" -> pick(contacts, args) { c -> ToolResult("The call to ${c.name} waits for the user's yes (a button on the screen).", call = c) }
+            "mail_new" -> mailNew(args)
+            "mail_attention" -> mailAttention(args)
+            "mail_find" -> mailFind(args)
+            "mail_open" -> pick(mailsShown, args) { e -> ToolResult("Opened the mail.", go = "mail:${e.id}") }
+            "mail_write" -> mailWrite(args)
             "web_search" -> ToolResult(search(args.getString("query")))
             "make_image" -> image(args.getString("prompt")).let { ToolResult("The picture is on the screen, saved as ${it.name}.", image = it) }
             else -> ToolResult("No tool called $name.")
@@ -411,6 +418,51 @@ internal class AssistantTools(
             choices = found.map { AssistantChoice(it.file.name, file = it.file) })
     }
 
+    // ---- Mail (the user, 31 Oct: new mail, what needs attention, a mail from someone, write one) ----
+    private fun mails() = MailFiles.index(MailFiles.root(tetra), MailEngine.device())
+    /** A numbered list for the model (sender, subject, when, unread/♥, the start of the text) and the screen (each opens the mail). */
+    private fun mailList(found: List<MailEntry>, empty: String): ToolResult {
+        mailsShown = found
+        if (found.isEmpty()) return ToolResult(empty)
+        return ToolResult(found.mapIndexed { i, e ->
+            "${i + 1}. ${e.from.ifEmpty { e.fromAddress }} <${e.fromAddress}> — ${e.subject} (${Instant.ofEpochMilli(e.date).atZone(zone).format(SHOWN)}, ${e.folder})" +
+                (if (!e.seen) " unread" else "") + (if (e.flagged) " ♥" else "") + (if (e.attachments > 0) " 📎" else "") + e.snippet.take(160).let { if (it.isBlank()) "" else ": $it" }
+        }.joinToString("\n"), choices = found.map { AssistantChoice("${it.from.ifEmpty { it.fromAddress }}: ${it.subject}", go = "mail:${it.id}") })
+    }
+
+    private fun mailNew(a: JSONObject): ToolResult {
+        val since = now().minusHours(a.optLong("hours", 24)).toInstant().toEpochMilli()
+        return mailList(mails().filter { it.folder == "Inbox" && (it.date >= since || (!it.seen && a.optBoolean("unread", true))) }.sortedByDescending { it.date }.take(15),
+            "No new mail.")
+    }
+
+    /** The recent Inbox mail that is unread or ♥, with the start of each: the model says which need an answer or an action. */
+    private fun mailAttention(a: JSONObject): ToolResult {
+        val since = now().minusDays(a.optLong("days", 14)).toInstant().toEpochMilli()
+        return mailList(mails().filter { it.folder == "Inbox" && it.date >= since && (!it.seen || it.flagged) }.sortedByDescending { it.date }.take(25),
+            "Nothing unread or marked ♥ in the last ${a.optLong("days", 14)} days.")
+    }
+
+    /** Mail from someone (a name, an address, or a contact's addresses) and/or with some words, in every folder but Spam and Trash. */
+    private fun mailFind(a: JSONObject): ToolResult {
+        val who = ContactsFiles.plain(a.optString("from")).trim()
+        val addresses = if (who.isEmpty()) emptySet() else named(a.optString("from")).flatMap { c -> c.emails.map { it.value.lowercase() } }.toSet()
+        val words = ContactsFiles.plain(a.optString("query")).split(' ').filter { it.length >= 2 }
+        if (who.isEmpty() && words.isEmpty()) return ToolResult("Say who it is from or some words.")
+        return mailList(mails().filter { e -> e.folder != "Spam" && e.folder != "Trash" &&
+            (who.isEmpty() || e.fromAddress.lowercase() in addresses || who.split(' ').all { w -> ContactsFiles.plain("${e.from} ${e.fromAddress}").contains(w) }) &&
+            words.all { w -> ContactsFiles.plain("${e.subject} ${e.snippet}").contains(w) } }.sortedByDescending { it.date }.take(15), "No mail found.")
+    }
+
+    /** A mail written for the user: Tetra's compose page opens filled in, and waits for their «Αποστολή» (never sent from here). */
+    private fun mailWrite(a: JSONObject): ToolResult {
+        val said = a.getString("to").trim()
+        val to = if ('@' in said) said else named(said).flatMap { it.emails }.firstOrNull()?.value
+            ?: return ToolResult("$said has no e-mail address in Contacts. Ask the user for the address.")
+        val draft = JSONObject().put("to", to).put("subject", a.optString("subject")).put("body", a.optString("body"))
+        return ToolResult("The mail to $to is open on the screen, written; it waits for the user to check it and press Send.", go = "mail-write:$draft")
+    }
+
     // ---- Contacts ----
     /** Each match's name and the label of each of its numbers: the numbers themselves stay on the phone. */
     private fun contactsFind(a: JSONObject): ToolResult {
@@ -567,12 +619,22 @@ internal class AssistantTools(
                 "place" to p("string", "A place, a town or an address (\"Ερμού 10, Αθήνα\")."), "contact" to p("string", "A contact's name, to go to their address.")),
             fn("photos_place", "Show the user's photos taken at a place.", listOf("place"), "place" to p("string", "A town or a place.")),
             fn("youtube", "Open YouTube on a search for a song or a video.", listOf("query"), "query" to p("string", "The song or video, with the artist if said.")),
+            fn("mail_new", "The new mail in the Inbox: what came in the last hours, and anything still unread; a numbered list with senders, subjects and the start of each.", emptyList(),
+                "hours" to p("integer", "How far back; 24 if not said."), "unread" to p("boolean", "Also older mail that is still unread; true if not said.")),
+            fn("mail_attention", "The recent Inbox mail that is unread or marked ♥, with the start of each, to judge which needs an answer or an action.", emptyList(),
+                "days" to p("integer", "How far back; 14 if not said.")),
+            fn("mail_find", "Find mail from someone (a contact's name, a name or an address) and/or with some words; a numbered list, newest first.", emptyList(),
+                "from" to p("string", "Who it is from, as said."), "query" to p("string", "Words in the subject or the text.")),
+            fn("mail_open", "Open a mail from the last mail list in Tetra's Mail.", listOf("choice"), CHOICE),
+            fn("mail_write", "Write an e-mail: Tetra's compose page opens with it filled in, and the user sends it. It is never sent by you.", listOf("to", "subject", "body"),
+                "to" to p("string", "An e-mail address, or a contact's name as said."), "subject" to p("string", "A short subject."),
+                "body" to p("string", "The whole text as a proper e-mail: a greeting, what the user wants said, a closing line; no signature (Tetra adds it).")),
             fn("web_search", "Search the web for current facts, news, opening hours, prices.", listOf("query"), "query" to p("string", "What to search for.")),
             fn("make_image", "Draw a picture from a description.", listOf("prompt"), "prompt" to p("string", "What the picture shows, in detail.")),
         ))
 
         fun system(now: ZonedDateTime) = """
-            You are Tetra Assistant, on the user's Android phone, inside the app Tetra (calendar, timers, alarms, stopwatch, notes, files, contacts, maps, photos).
+            You are Tetra Assistant, on the user's Android phone, inside the app Tetra (calendar, timers, alarms, stopwatch, notes, files, contacts, mail, maps, photos).
             Now: ${now.format(DateTimeFormatter.ofPattern("EEEE yyyy-MM-dd HH:mm"))} (${now.zone}).
             Answer in the user's language (usually Greek), in one or two short plain sentences: answers are often read aloud. No markdown.
             Use the tools for anything about the user's own calendar, timers, notes, files or contacts; never invent what they hold.
@@ -586,6 +648,9 @@ internal class AssistantTools(
             "Χρονόμετρο" is both a timer and a stopwatch: with a length ("βάλε χρονόμετρο 10 λεπτά") timer_start; without ("ξεκίνα χρονόμετρο", "σταμάτα το χρονόμετρο", "πόση ώρα πάει") the stopwatch.
             "Ξυπνητήρι", "ξύπνα με": alarm_add ("κάθε μέρα" all seven days, "τις καθημερινές" MO–FR; "αύριο στις 6" a date). To remove one, alarm_list then alarm_delete.
             A song or a video: youtube. "Κάνε σημείωση": note_new.
+            Mail: "νέα μηνύματα;", "ήρθε κάτι;": mail_new, then say how many and from whom. "Τι χρειάζεται απάντηση;", "σημαντικά mail": mail_attention, then name
+            only those that need an answer or an action and in a few words why (a deadline, a question to the user, a payment). "Βρες το mail από τη Μαρία": mail_find.
+            "Στείλε mail στον …": mail_write, written as a proper e-mail in the language the user speaks; after it, say it waits for their Send.
             Work out dates yourself from today's date ("αύριο", "την Πέμπτη").
         """.trimIndent()
     }

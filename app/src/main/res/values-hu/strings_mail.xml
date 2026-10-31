@@ -23,7 +23,7 @@
     </plurals>
     <string name="mail_search">Keresés a levelekben</string>
     <string name="mail_reading">Levelek olvasása…</string>
-    <string name="mail_no_accounts">Még nincsenek itt levelek. Add hozzá a fiókjaidat a számítógépen (Tetra › E-mail): a leveleik a szinkronnal érkeznek ide.</string>
+    <string name="mail_no_accounts">Még nincsenek itt levelek. Adj hozzá egy fiókot: a telefon maga tölti le a leveleket. Számítógéppel a gép fiókjai is maguktól érkeznek ide.</string>
     <string name="mail_no_match">Nincs egyező levél.</string>
     <string name="mail_none_filtered">Nincs levél ezekkel a szűrőkkel.</string>
     <string name="mail_none_here">Nincs levél ebben a mappában.</string>
@@ -136,7 +136,6 @@
     <string name="mail_finding">Szerverek keresése…</string>
     <string name="mail_not_found">Ehhez a címhez nem találhatók szerverek. Add meg őket lent.</string>
     <string name="mail_manual">Kézi beállítás</string>
-    <string name="mail_ms_later">A Microsoft-fiókokhoz (Hotmail, Outlook, Microsoft 365) a Microsoft bejelentkezése kell, ez később jön. Egyelőre a számítógépen add hozzá.</string>
     <string name="mail_password">Jelszó</string>
     <string name="mail_gmail_hint">A Gmailhez alkalmazásjelszó kell: nyisd meg a Google oldalát, hozz létre egyet Tetra néven, másold ki a 16 betűjét, és gyere vissza. A Tetra magától beolvassa.</string>
     <string name="mail_gmail_open">A Google oldalának megnyitása</string>
@@ -186,4 +185,14 @@
     <string name="mail_islands_summary">Hol állnak. Automatikusan: egérrel felül, ujjal alul.</string>
     <string name="mail_threads">Beszélgetések</string>
     <string name="mail_threads_summary">Egy beszélgetés levelei együtt, egymás alatt, mint egy csevegésben</string>
+    <string name="mail_ms_sign_in">Bejelentkezés Microsofttal</string>
+    <string name="mail_ms_hint">A Microsoft oldala a böngészőben nyílik meg: jelentkezz be ott (a telefonod kódjával, ha használsz ilyet), és gyere vissza. A Tetra soha nem látja a jelszavadat.</string>
+    <string name="mail_ms_client">Microsoft-alkalmazásazonosító (client ID)</string>
+    <string name="mail_ms_client_hint">A Microsoftnak előbb a Tetra alkalmazásazonosítója kell: az, amelyet egyszer regisztráltak az entra.microsoft.com oldalon (ugyanaz, mint a számítógépen).</string>
+    <string name="mail_ms_waiting">Várakozás a Microsoft oldalára…</string>
+    <string name="mail_why_approval">A szervezetednek (az egyetemnek) előbb jóvá kell hagynia a Tetrát. Kérdezd meg az IT-részlegét, vagy továbbítsd ezeket a leveleket a Gmailbe.</string>
+    <string name="mail_checking_servers">Új levelek keresése…</string>
+    <string name="mail_assist">✦ Javaslat az asszisztenssel</string>
+    <string name="mail_assist_working">✦ Az asszisztens ír…</string>
+    <string name="mail_draft_card">Piszkozat – koppints a befejezéséhez és elküldéséhez</string>
 </resources>

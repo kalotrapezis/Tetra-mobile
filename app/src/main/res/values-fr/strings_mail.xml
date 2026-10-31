@@ -24,7 +24,7 @@
     </plurals>
     <string name="mail_search">Rechercher dans les e-mails</string>
     <string name="mail_reading">Lecture des e-mails…</string>
-    <string name="mail_no_accounts">Pas encore d’e-mails ici. Ajoutez vos comptes sur l’ordinateur (Tetra › Mail) : leurs e-mails arrivent ici avec la synchro.</string>
+    <string name="mail_no_accounts">Pas encore d’e-mails ici. Ajoutez un compte : le téléphone récupère les e-mails lui-même. Avec un PC, les comptes du PC arrivent aussi ici tout seuls.</string>
     <string name="mail_no_match">Aucun e-mail ne correspond.</string>
     <string name="mail_none_filtered">Aucun e-mail avec ces filtres.</string>
     <string name="mail_none_here">Aucun e-mail dans ce dossier.</string>
@@ -140,7 +140,6 @@
     <string name="mail_finding">Recherche des serveurs…</string>
     <string name="mail_not_found">Aucun serveur trouvé pour cette adresse. Renseignez-les ci-dessous.</string>
     <string name="mail_manual">Configuration manuelle</string>
-    <string name="mail_ms_later">Les comptes Microsoft (Hotmail, Outlook, Microsoft 365) demandent la connexion de Microsoft, qui arrive plus tard. Pour l’instant, ajoutez le compte sur le PC.</string>
     <string name="mail_password">Mot de passe</string>
     <string name="mail_gmail_hint">Gmail demande un mot de passe d’application : ouvrez la page de Google, créez-en un nommé Tetra, copiez ses 16 lettres et revenez. Tetra les lit tout seul.</string>
     <string name="mail_gmail_open">Ouvrir la page de Google</string>
@@ -190,4 +189,14 @@
     <string name="mail_islands_summary">Où ils se placent. Automatique : en haut avec une souris, en bas avec le doigt.</string>
     <string name="mail_threads">Conversations</string>
     <string name="mail_threads_summary">Les e-mails d’une conversation regroupés, les uns sous les autres, comme dans un chat</string>
+    <string name="mail_ms_sign_in">Se connecter avec Microsoft</string>
+    <string name="mail_ms_hint">La page de Microsoft s’ouvre dans le navigateur : connectez-vous là (avec le code de votre téléphone si vous en utilisez un) et revenez. Tetra ne voit jamais votre mot de passe.</string>
+    <string name="mail_ms_client">ID d’application Microsoft (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft a d’abord besoin de l’ID d’application de Tetra : celui enregistré une fois sur entra.microsoft.com (le même que sur le PC).</string>
+    <string name="mail_ms_waiting">En attente de la page de Microsoft…</string>
+    <string name="mail_why_approval">Votre organisation (l’université) doit d’abord approuver Tetra. Demandez à son service IT, ou transférez ces e-mails vers Gmail.</string>
+    <string name="mail_checking_servers">Recherche de nouveaux e-mails…</string>
+    <string name="mail_assist">✦ Suggérer avec l’assistant</string>
+    <string name="mail_assist_working">✦ L’assistant écrit…</string>
+    <string name="mail_draft_card">Brouillon – touchez pour le terminer et l’envoyer</string>
 </resources>

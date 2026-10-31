@@ -224,4 +224,46 @@ class MailTest {
         assertEquals("Hi\nthere", MailThreads.own("Hi\nthere\n-- \nTheo\nNUP"))
         assertEquals("> only a quote", MailThreads.own("> only a quote")) // nothing of its own: shown as it is
     }
+
+    @Test fun theAssistantIsAskedForAProperMailFromTheConversation() {
+        val m = MailAssist.messages(listOf("Γραμματεία <s@x>" to "Ήρθε;", "Εγώ <t@x>" to "Ναι."), "t@x", "πες ότι θα έρθω Δευτέρα")
+        assertEquals("system", m.getJSONObject(0).getString("role"))
+        assertTrue(m.getJSONObject(0).getString("content").contains("proper e-mail reply"))
+        val user = m.getJSONObject(1).getString("content")
+        assertTrue(user.indexOf("--- Γραμματεία <s@x>:\nΉρθε;") < user.indexOf("--- Εγώ <t@x>:\nΝαι.")) // oldest first
+        assertTrue(user.endsWith("My notes for the reply:\nπες ότι θα έρθω Δευτέρα"))
+        assertTrue(MailAssist.messages(emptyList(), "t@x", " ").getJSONObject(1).getString("content").endsWith("Draft my reply to the last message."))
+    }
+
+    @Test fun microsoftsSignInPieces() {
+        assertTrue(MailMicrosoft.isClientId("1a2b3c4d-0000-4000-8000-123456789abc")); assertFalse(MailMicrosoft.isClientId("tetra"))
+        val t = MailMicrosoft.tokens(org.json.JSONObject().put("access_token", "A").put("refresh_token", "R").put("expires_in", 3600), now = 1000)
+        assertEquals(MailMicrosoft.Tokens("A", "R", 1000 + 3_600_000 - 60_000), t)
+        fun reason(desc: String) = runCatching { MailMicrosoft.tokens(org.json.JSONObject().put("error", "x").put("error_description", desc)) }.exceptionOrNull() as MailMsError
+        assertEquals("approval", reason("AADSTS65001: The user or administrator has not consented").reason)
+        assertEquals("auth", reason("invalid_grant AADSTS70008 expired").reason)
+        assertEquals("approval", mailReason(RuntimeException("wrapped", reason("AADSTS90094 admin"))))
+        assertEquals(mapOf("code" to "a b", "state" to "s/1"), MailMicrosoft.query("GET /?code=a+b&state=s%2F1 HTTP/1.1"))
+        val url = MailMicrosoft.authorizeUrl("1a2b3c4d-0000-4000-8000-123456789abc", "http://localhost:5000/", "CH", "ST", "me@hotmail.com")
+        assertTrue(url.contains("redirect_uri=http%3A%2F%2Flocalhost%3A5000%2F")); assertTrue(url.contains("code_challenge_method=S256")); assertTrue(url.contains("IMAP.AccessAsUser.All"))
+        assertTrue(MailDetect.known("x@outlook.com")!!.microsoft)
+    }
+
+    @Test fun aiAssistsMailTools() {
+        val tetra = java.nio.file.Files.createTempDirectory("tetra").toFile()
+        root.copyRecursively(File(tetra, ".System/Mail/Shared"))
+        val zone = java.time.ZoneId.systemDefault()
+        val t = AssistantTools(tetra, "Phone", zone, { java.time.ZonedDateTime.of(2026, 10, 31, 12, 0, 0, 0, zone) })
+        val fresh = t.run("mail_new", org.json.JSONObject())
+        assertTrue(fresh.forModel.contains("Γραμματεία ΜΠΣ")); assertFalse(fresh.forModel.contains("Ταχυδρομείο")) // three days old and read
+        assertTrue(fresh.choices.first().go!!.startsWith("mail:"))
+        val attention = t.run("mail_attention", org.json.JSONObject())
+        assertTrue(attention.forModel.contains("unread")); assertTrue(attention.forModel.contains("♥")); assertFalse(attention.forModel.contains("Skroutz")) // read, no ♥
+        assertEquals(listOf("GitHub"), t.run("mail_find", org.json.JSONObject().put("from", "github")).choices.map { it.label.substringBefore(':') })
+        assertEquals("mail:" + mails.first { it.from == "GitHub" }.id, t.run("mail_open", org.json.JSONObject().put("choice", 1)).go)
+        val w = t.run("mail_write", org.json.JSONObject().put("to", "a@b.gr").put("subject", "Θέμα").put("body", "Καλημέρα"))
+        assertEquals("a@b.gr", org.json.JSONObject(w.go!!.removePrefix("mail-write:")).getString("to"))
+        assertTrue(t.run("mail_write", org.json.JSONObject().put("to", "Κανείς").put("subject", "x").put("body", "y")).forModel.contains("no e-mail address"))
+        tetra.deleteRecursively()
+    }
 }

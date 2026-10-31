@@ -62,6 +62,9 @@ internal fun MailAddAccount(dismiss: () -> Unit) {
     var busy by remember { mutableStateOf<String?>(null) }
     var problem by remember { mutableStateOf<String?>(null) }
     val gmail = imap.host == "imap.gmail.com"
+    val microsoft = found?.microsoft == true // Hotmail, Outlook.com, Microsoft 365: «Σύνδεση με Microsoft», no password
+    var clientId by remember { mutableStateOf(MailMicrosoft.clientId(context)) }
+    var msTokens by remember { mutableStateOf<MailMicrosoft.Tokens?>(null) }
     val back = resumes()
     // back from Google's page: its 16 letters from the clipboard, no typing
     LaunchedEffect(back.intValue) {
@@ -79,11 +82,26 @@ internal fun MailAddAccount(dismiss: () -> Unit) {
         busy = null
         when {
             f == null -> { manual = true; imap = MailServer("", 993, a, true); smtp = MailServer("", 465, a, true); problem = context.getString(R.string.mail_not_found) }
-            f.microsoft -> problem = context.getString(R.string.mail_ms_later)
             else -> { found = f; imap = f.imap; smtp = f.smtp; step = 1 }
         }
     }
+    /** Microsoft's page in the browser, the answer back here, then the same check with the token (MailMicrosoft). */
+    fun signInMicrosoft() = scope.launch {
+        problem = null
+        if (!MailMicrosoft.isClientId(clientId)) { problem = context.getString(R.string.mail_ms_client_hint); return@launch }
+        MailMicrosoft.setClientId(context, clientId)
+        busy = context.getString(R.string.mail_ms_waiting)
+        val main = android.os.Handler(android.os.Looper.getMainLooper())
+        val r = withContext(Dispatchers.IO) { runCatching {
+            val t = MailMicrosoft.signIn(clientId, address.trim(), open = { url -> main.post { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } } })
+            t to MailEngine.check(imap, listOf(address.trim()), t.access, oauth = true)
+        } }
+        busy = null
+        r.onSuccess { (t, s) -> msTokens = t; imap = s; smtp = smtp.copy(user = s.user); step = 2 }
+            .onFailure { problem = mailWhy(context, it); WriterLog.w("Mail: Microsoft sign-in failed (${it.message})") }
+    }
     fun signIn() = scope.launch {
+        if (microsoft) { signInMicrosoft(); return@launch }
         problem = null; busy = context.getString(R.string.mail_checking)
         val r = withContext(Dispatchers.IO) { runCatching { MailEngine.check(imap, found?.users ?: listOf(imap.user.ifEmpty { address.trim() }), password.trim()) } }
         busy = null
@@ -106,14 +124,18 @@ internal fun MailAddAccount(dismiss: () -> Unit) {
                 1 -> {
                     Text(address.trim(), style = MaterialTheme.typography.titleMedium)
                     Text("${imap.host}:${imap.port}", style = MaterialTheme.typography.bodySmall)
-                    if (gmail) {
+                    if (microsoft) {
+                        Text(stringResource(R.string.mail_ms_hint), style = MaterialTheme.typography.bodyMedium)
+                        // the app id registered once with Microsoft (MAIL_PLAN §13), the same as the PC's
+                        OutlinedTextField(clientId, { clientId = it.trim(); problem = null }, singleLine = true, label = { Text(stringResource(R.string.mail_ms_client)) }, modifier = Modifier.fillMaxWidth())
+                    } else if (gmail) {
                         Text(stringResource(R.string.mail_gmail_hint), style = MaterialTheme.typography.bodyMedium)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             TextButton(onClick = { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(GOOGLE_APP_PASSWORDS))) } }) { Text(stringResource(R.string.mail_gmail_open)) }
                             TextButton(onClick = { clipboardAppPassword(context, any = true)?.let { password = it } }) { Text(stringResource(R.string.common_paste)) }
                         }
                     }
-                    OutlinedTextField(password, { password = it; problem = null }, singleLine = true, label = { Text(stringResource(R.string.mail_password)) },
+                    if (!microsoft) OutlinedTextField(password, { password = it; problem = null }, singleLine = true, label = { Text(stringResource(R.string.mail_password)) },
                         visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), modifier = Modifier.fillMaxWidth())
                 }
                 else -> {
@@ -131,13 +153,17 @@ internal fun MailAddAccount(dismiss: () -> Unit) {
                 else -> scope.launch {
                     val a = address.trim().lowercase()
                     withContext(Dispatchers.IO) {
-                        runCatching { MailEngine.add(context.applicationContext, mailRoot(), a, name.trim().ifEmpty { a }, imap, smtp, password.trim()) }.onFailure { WriterLog.e("Mail: adding an account", it) }
+                        runCatching {
+                            val t = msTokens
+                            if (t != null) { MailEngine.add(context.applicationContext, mailRoot(), a, name.trim().ifEmpty { a }, imap, smtp, MailMicrosoft.secret(t.refresh.orEmpty()), "microsoft"); MailMicrosoft.remember(a, t) }
+                            else MailEngine.add(context.applicationContext, mailRoot(), a, name.trim().ifEmpty { a }, imap, smtp, password.trim())
+                        }.onFailure { WriterLog.e("Mail: adding an account", it) }
                     }
                     Thread { MailEngine.syncAll(context.applicationContext) }.start()
                     dismiss()
                 }
             }
-        }) { Text(stringResource(when (step) { 0 -> R.string.common_next; 1 -> R.string.mail_sign_in; else -> R.string.common_done })) } },
+        }) { Text(stringResource(when (step) { 0 -> R.string.common_next; 1 -> if (microsoft) R.string.mail_ms_sign_in else R.string.mail_sign_in; else -> R.string.common_done })) } },
         dismissButton = { if (step < 2) TextButton(onClick = { if (step == 1) { step = 0; password = "" } else dismiss() }) { Text(stringResource(if (step == 1) R.string.common_back else R.string.common_cancel)) } })
 }
 

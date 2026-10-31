@@ -23,7 +23,7 @@
     </plurals>
     <string name="mail_search">Hae sähköposteista</string>
     <string name="mail_reading">Luetaan sähköpostia…</string>
-    <string name="mail_no_accounts">Täällä ei ole vielä sähköpostia. Lisää tilisi tietokoneella (Tetra › Sähköposti): niiden viestit tulevat tänne synkronoinnissa.</string>
+    <string name="mail_no_accounts">Täällä ei ole vielä sähköpostia. Lisää tili: puhelin hakee viestit itse. Tietokoneen kanssa myös sen tilit tulevat tänne itsestään.</string>
     <string name="mail_no_match">Mikään viesti ei täsmää.</string>
     <string name="mail_none_filtered">Ei viestejä näillä suodattimilla.</string>
     <string name="mail_none_here">Tässä kansiossa ei ole viestejä.</string>
@@ -136,7 +136,6 @@
     <string name="mail_finding">Etsitään palvelimia…</string>
     <string name="mail_not_found">Tälle osoitteelle ei löytynyt palvelimia. Täytä ne alle.</string>
     <string name="mail_manual">Manuaaliset asetukset</string>
-    <string name="mail_ms_later">Microsoft-tilit (Hotmail, Outlook, Microsoft 365) tarvitsevat Microsoftin kirjautumisen, joka tulee myöhemmin. Lisää tili toistaiseksi tietokoneella.</string>
     <string name="mail_password">Salasana</string>
     <string name="mail_gmail_hint">Gmail tarvitsee sovellussalasanan: avaa Googlen sivu, tee salasana nimellä Tetra, kopioi sen 16 kirjainta ja palaa tänne. Tetra lukee ne itse.</string>
     <string name="mail_gmail_open">Avaa Googlen sivu</string>
@@ -186,4 +185,14 @@
     <string name="mail_islands_summary">Missä ne ovat. Automaattisesti: hiirellä ylhäällä, sormella alhaalla.</string>
     <string name="mail_threads">Keskustelut</string>
     <string name="mail_threads_summary">Yhden keskustelun viestit yhdessä, allekkain, kuin chatissa</string>
+    <string name="mail_ms_sign_in">Kirjaudu Microsoftilla</string>
+    <string name="mail_ms_hint">Microsoftin sivu avautuu selaimessa: kirjaudu siellä (puhelimesi koodilla, jos käytät sellaista) ja palaa tänne. Tetra ei koskaan näe salasanaasi.</string>
+    <string name="mail_ms_client">Microsoftin sovellustunnus (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft tarvitsee ensin Tetran sovellustunnuksen: sen, joka rekisteröitiin kerran osoitteessa entra.microsoft.com (sama kuin tietokoneella).</string>
+    <string name="mail_ms_waiting">Odotetaan Microsoftin sivua…</string>
+    <string name="mail_why_approval">Organisaatiosi (yliopisto) täytyy ensin hyväksyä Tetra. Kysy sen IT:ltä tai välitä tämä sähköposti Gmailiin.</string>
+    <string name="mail_checking_servers">Etsitään uusia viestejä…</string>
+    <string name="mail_assist">✦ Ehdota avustajan avulla</string>
+    <string name="mail_assist_working">✦ Avustaja kirjoittaa…</string>
+    <string name="mail_draft_card">Luonnos – napauta viimeistelläksesi ja lähettääksesi sen</string>
 </resources>

@@ -23,7 +23,7 @@
     </plurals>
     <string name="mail_search">Sök i e-post</string>
     <string name="mail_reading">Läser e-posten…</string>
-    <string name="mail_no_accounts">Ingen e-post här än. Lägg till dina konton på datorn (Tetra › E-post): deras e-post kommer hit med synk.</string>
+    <string name="mail_no_accounts">Ingen e-post här än. Lägg till ett konto: telefonen hämtar e-posten själv. Med en dator kommer datorns konton också hit av sig själva.</string>
     <string name="mail_no_match">Ingen e-post matchar.</string>
     <string name="mail_none_filtered">Ingen e-post med de här filtren.</string>
     <string name="mail_none_here">Ingen e-post i den här mappen.</string>
@@ -136,7 +136,6 @@
     <string name="mail_finding">Letar efter servrarna…</string>
     <string name="mail_not_found">Inga servrar hittades för den här adressen. Fyll i dem nedan.</string>
     <string name="mail_manual">Manuell inställning</string>
-    <string name="mail_ms_later">Microsoft-konton (Hotmail, Outlook, Microsoft 365) kräver Microsofts inloggning, som kommer senare. Lägg till kontot på datorn tills vidare.</string>
     <string name="mail_password">Lösenord</string>
     <string name="mail_gmail_hint">Gmail kräver ett applösenord: öppna Googles sida, skapa ett med namnet Tetra, kopiera dess 16 bokstäver och kom tillbaka. Tetra läser dem själv.</string>
     <string name="mail_gmail_open">Öppna Googles sida</string>
@@ -186,4 +185,14 @@
     <string name="mail_islands_summary">Var de står. Automatiskt: överst med mus, nederst med fingret.</string>
     <string name="mail_threads">Konversationer</string>
     <string name="mail_threads_summary">Mejlen i en konversation samlade, under varandra, som i en chatt</string>
+    <string name="mail_ms_sign_in">Logga in med Microsoft</string>
+    <string name="mail_ms_hint">Microsofts sida öppnas i webbläsaren: logga in där (med telefonens kod om du använder en) och kom tillbaka. Tetra ser aldrig ditt lösenord.</string>
+    <string name="mail_ms_client">Microsoft-app-id (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft behöver först Tetras app-id: det som registrerats en gång på entra.microsoft.com (samma som på datorn).</string>
+    <string name="mail_ms_waiting">Väntar på Microsofts sida…</string>
+    <string name="mail_why_approval">Din organisation (universitetet) måste först godkänna Tetra. Fråga dess IT, eller vidarebefordra den här e-posten till Gmail.</string>
+    <string name="mail_checking_servers">Letar efter ny e-post…</string>
+    <string name="mail_assist">✦ Låt assistenten föreslå</string>
+    <string name="mail_assist_working">✦ Assistenten skriver…</string>
+    <string name="mail_draft_card">Utkast – tryck för att göra klart och skicka det</string>
 </resources>

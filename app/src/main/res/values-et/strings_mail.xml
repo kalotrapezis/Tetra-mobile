@@ -23,7 +23,7 @@
     </plurals>
     <string name="mail_search">Otsi kirjadest</string>
     <string name="mail_reading">Kirjade lugemine…</string>
-    <string name="mail_no_accounts">Siin pole veel kirju. Lisage oma kontod arvutis (Tetra › E-post): nende kirjad tulevad siia sünkroonimisega.</string>
+    <string name="mail_no_accounts">Siin pole veel kirju. Lisage konto: telefon toob kirjad ise. Arvutiga tulevad siia ise ka arvuti kontod.</string>
     <string name="mail_no_match">Ükski kiri ei sobi.</string>
     <string name="mail_none_filtered">Nende filtritega kirju pole.</string>
     <string name="mail_none_here">Selles kaustas pole kirju.</string>
@@ -136,7 +136,6 @@
     <string name="mail_finding">Serverite otsimine…</string>
     <string name="mail_not_found">Sellele aadressile servereid ei leitud. Täitke need allpool.</string>
     <string name="mail_manual">Käsitsi seadistamine</string>
-    <string name="mail_ms_later">Microsofti kontod (Hotmail, Outlook, Microsoft 365) vajavad Microsofti sisselogimist, mis tuleb hiljem. Praegu lisage konto arvutis.</string>
     <string name="mail_password">Parool</string>
     <string name="mail_gmail_hint">Gmail vajab rakenduse parooli: avage Google’i leht, looge parool nimega Tetra, kopeerige selle 16 tähte ja tulge tagasi. Tetra loeb need ise.</string>
     <string name="mail_gmail_open">Ava Google’i leht</string>
@@ -186,4 +185,14 @@
     <string name="mail_islands_summary">Kus need asuvad. Automaatselt: hiirega üleval, sõrmega all.</string>
     <string name="mail_threads">Vestlused</string>
     <string name="mail_threads_summary">Ühe vestluse kirjad koos, üksteise all, nagu vestlusaknas</string>
+    <string name="mail_ms_sign_in">Logi sisse Microsoftiga</string>
+    <string name="mail_ms_hint">Microsofti leht avaneb brauseris: logige seal sisse (telefoni koodiga, kui seda kasutate) ja tulge tagasi. Tetra ei näe kunagi teie parooli.</string>
+    <string name="mail_ms_client">Microsofti rakenduse ID (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft vajab kõigepealt Tetra rakenduse ID-d: seda, mis registreeriti üks kord saidil entra.microsoft.com (sama mis arvutis).</string>
+    <string name="mail_ms_waiting">Microsofti lehe ootamine…</string>
+    <string name="mail_why_approval">Teie organisatsioon (ülikool) peab Tetra kõigepealt heaks kiitma. Küsige selle IT-lt või suunake need kirjad Gmaili.</string>
+    <string name="mail_checking_servers">Uute kirjade otsimine…</string>
+    <string name="mail_assist">✦ Lase assistendil soovitada</string>
+    <string name="mail_assist_working">✦ Assistent kirjutab…</string>
+    <string name="mail_draft_card">Mustand – puudutage, et see lõpetada ja saata</string>
 </resources>

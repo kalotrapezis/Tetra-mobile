@@ -67,7 +67,30 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** What is being written: new, a reply (to all), a forward, of [of]; what MailScreen hands the compose page. */
-internal data class MailDraft(val kind: String, val of: MailEntry? = null)
+internal data class MailDraft(val kind: String, val of: MailEntry? = null, val thread: List<MailEntry> = emptyList(),
+    val to: String = "", val subject: String = "", val body: String = "") // a new one's start (AI Assist's mail_write)
+
+/**
+ * AI Assist's help with a reply (the user, 31 Oct: "AI assist on the writing when there is a thread going on"): Mistral, as
+ * the assistant, drafts a proper mail — not a chat line — from the conversation and the user's own notes.
+ */
+internal object MailAssist {
+    /** The chat for the draft: the conversation, oldest first ([from] to what each said), and what the user typed as notes. */
+    fun messages(thread: List<Pair<String, String>>, me: String, notes: String): JSONArray = JSONArray()
+        .put(JSONObject().put("role", "system").put("content",
+            "You write e-mail replies for $me. Write only the body of a proper e-mail reply: a greeting, clear paragraphs, a closing line — not a chat message. " +
+            "No subject line and no signature (Tetra adds it). Write in the language of the conversation. If the user's notes are given, the reply says what they say, " +
+            "in good form; do not invent facts, dates or promises that are not in the conversation or the notes."))
+        .put(JSONObject().put("role", "user").put("content", "The conversation, oldest first:\n\n" +
+            thread.joinToString("\n\n") { (from, text) -> "--- $from:\n$text" } +
+            (if (notes.isNotBlank()) "\n\nMy notes for the reply:\n$notes" else "\n\nDraft my reply to the last message.")))
+
+    fun draft(c: Context, thread: List<Pair<String, String>>, me: String, notes: String): String {
+        val body = JSONObject().put("model", Mistral.CHAT).put("messages", messages(thread, me, notes)).put("temperature", 0.4)
+        return JSONObject(AssistantNet.post(AssistantNet.key(c), "/chat/completions", body.toString()))
+            .getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content").trim()
+    }
+}
 
 /** An attachment chosen on this device ([uri]) or carried from the mail being forwarded ([file]). */
 internal data class MailAttachment(val name: String, val uri: Uri? = null, val file: File? = null)
@@ -155,7 +178,7 @@ internal object MailSend {
     private fun appendTo(c: Context, root: File, account: String, role: String, msg: MimeMessage, flags: Flags) {
         val acc = MailEngine.ownAccounts(root).first { it.optString("id") == account }
         val server = MailServer.of(acc.optJSONObject("server")) ?: return
-        val store = MailEngine.session(server).getStore("imap").apply { connect(server.host, server.port, server.user, MailSecret.get(c, account)) }
+        val store = MailEngine.session(server, oauth = MailEngine.oauth(acc)).getStore("imap").apply { connect(server.host, server.port, server.user, MailEngine.secret(c, acc)) }
         try {
             val folder = store.getFolder(MailEngine.roles(store)[role] ?: return)
             folder.open(Folder.READ_WRITE)
@@ -167,8 +190,8 @@ internal object MailSend {
         val acc = MailEngine.ownAccounts(root).first { it.optString("id") == m.account }
         val smtp = MailServer.of(acc.optJSONObject("smtp"))!!
         val msg = message(c, root, m)
-        MailEngine.session(smtp, smtp = true).getTransport("smtp").use { t ->
-            t.connect(smtp.host, smtp.port, smtp.user, MailSecret.get(c, m.account))
+        MailEngine.session(smtp, smtp = true, oauth = MailEngine.oauth(acc)).getTransport("smtp").use { t ->
+            t.connect(smtp.host, smtp.port, smtp.user, MailEngine.secret(c, acc))
             t.sendMessage(msg, msg.allRecipients)
         }
         if (smtp.host != "smtp.gmail.com") runCatching { appendTo(c, root, m.account, "Sent", msg, Flags(Flags.Flag.SEEN)) } // Gmail keeps its own copy
@@ -206,20 +229,24 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
     // from: the account the mail came to, or the first this device sends from
     var from by remember { mutableStateOf(accounts.firstOrNull { it.id == of?.account }?.id ?: accounts.firstOrNull { it.own }?.id ?: accounts.firstOrNull()?.id.orEmpty()) }
     val me = accounts.firstOrNull { it.id == from }
+    val isDraft = draft.kind == "draft" // a saved draft, opened from its greyed card to finish and send
     var to by remember { mutableStateOf(when (draft.kind) {
+        "draft" -> original?.to.orEmpty()
         "reply" -> of?.fromAddress.orEmpty()
         "replyAll" -> (listOfNotNull(of?.fromAddress) + of?.to.orEmpty()).filter { !it.equals(me?.address, true) }.distinct().joinToString(", ")
-        else -> ""
+        else -> draft.to
     }) }
-    var cc by remember { mutableStateOf(if (draft.kind == "replyAll") original?.cc.orEmpty() else "") }
+    var cc by remember { mutableStateOf(if (draft.kind == "replyAll" || isDraft) original?.cc.orEmpty() else "") }
     var bcc by remember { mutableStateOf("") }
     var showCc by remember { mutableStateOf(cc.isNotEmpty()) }
-    var subject by remember { mutableStateOf(of?.let { MailSend.subject(draft.kind, it.subject) }.orEmpty()) }
-    var signed by remember { mutableStateOf(true) }
+    var subject by remember { mutableStateOf(of?.let { MailSend.subject(draft.kind, it.subject) } ?: draft.subject) }
+    var signed by remember { mutableStateOf(!isDraft) } // a draft has its signature in it already
     val signatureHtml = remember(me) { MailSignatures.html(root, me?.address.orEmpty()) }
     val signature = remember(signatureHtml) { MailSignatures.plain(signatureHtml) }
     val dash = if (MailSignatures.dashed(signatureHtml)) "" else "-- \n" // one that has its own "-- " line gets no second
     val messageId = remember { "<${java.util.UUID.randomUUID()}@" } // one per mail written: the PC replaces a saved draft by it
+    // a draft keeps its own Message-ID, so the PC replaces it (or, sent, removes it) rather than keeping two
+    fun messageIdFor() = original?.headers?.get("message-id")?.takeIf { isDraft } ?: (messageId + (me?.address ?: from).substringAfter('@') + ">")
     val at = of?.let { Instant.ofEpochMilli(it.date).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", java.util.Locale.getDefault())) }.orEmpty()
     // the line over the quoted mail: the signature goes above it
     val quoteHead = remember { when (draft.kind) {
@@ -230,21 +257,42 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
     var body by remember { mutableStateOf(run {
         val text = original?.text ?: original?.html?.replace(Regex("<br\\s*/?>|</p>", RegexOption.IGNORE_CASE), "\n")?.replace(Regex("<[^>]+>"), "")?.let { android.text.Html.fromHtml(it, 0).toString() } ?: of?.snippet.orEmpty()
         when (draft.kind) {
+            "draft" -> text
             "reply", "replyAll" -> "\n\n" + quoteHead + "\n" + MailSend.quote(text)
             "forward" -> "\n\n" + quoteHead + "\n" + listOf(context.getString(R.string.mail_from) + ": " + of?.from + " <" + of?.fromAddress + ">",
                 context.getString(R.string.mail_sort_date) + ": " + at, context.getString(R.string.mail_subject) + ": " + of?.subject).joinToString("\n") + "\n\n" + text
-            else -> ""
+            else -> draft.body
         }
     }) }
+    var problem by remember { mutableStateOf<String?>(null) }
+    var drafting by remember { mutableStateOf(false) }
+    /** «✦ Πρόταση από τον βοηθό»: the reply drafted from the conversation; what was typed above the quote is its notes, and is replaced. */
+    fun assist() {
+        val quoteAt = quoteHead?.let { body.indexOf("\n\n$it") }?.takeIf { it >= 0 } ?: body.length
+        val notes = body.substring(0, quoteAt).trim()
+        drafting = true; problem = null
+        scope.launch {
+            val r = withContext(Dispatchers.IO) { runCatching {
+                val mails = draft.thread.ifEmpty { listOfNotNull(of) }
+                val said = mails.map { e -> e.from.ifEmpty { e.fromAddress } + " <" + e.fromAddress + ">" to (MailFiles.eml(root, e)?.let { f -> runCatching { Mime.read(f.readBytes()) }.getOrNull() }
+                    ?.let { m -> MailThreads.own(m.text ?: MailSignatures.plain(m.html.orEmpty())) } ?: e.snippet) }
+                MailAssist.draft(context.applicationContext, said, me?.address ?: from, notes)
+            } }
+            drafting = false
+            r.onSuccess { text -> body = text + body.substring(quoteAt) }
+                .onFailure { WriterLog.w("Mail: the assistant's draft (${it.message})"); problem = it.shownMessage(context) ?: it.message }
+        }
+    }
     var attachments by remember { mutableStateOf(if (draft.kind == "forward" && of != null) MailFiles.attachments(root, of).map { MailAttachment(it.name, file = it) } else emptyList()) }
     var panel by remember { mutableStateOf(false) }
     var asking by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
-    var problem by remember { mutableStateOf<String?>(null) }
     val pick = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         attachments = attachments + uris.map { u -> MailAttachment(context.contentResolver.query(u, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c -> if (c.moveToFirst()) c.getString(0) else null } ?: "attachment", uri = u) }
     }
-    val touched = to.isNotBlank() || subject != (of?.let { MailSend.subject(draft.kind, it.subject) }.orEmpty()) || body.isNotBlank() && draft.kind == "new"
+    // asked before leaving only when something was changed from how the page opened (a reply's prefilled To is not a change)
+    val opened = remember { listOf(to, cc, subject, body) }
+    val touched = listOf(to, cc, subject, body) != opened || attachments.size != (if (draft.kind == "forward" && of != null) MailFiles.attachments(root, of).size else 0)
     BackHandler { if (panel) panel = false else if (touched) asking = true else close(null) }
 
     /** The text with the signature (Settings › Υπογραφές) above the quoted mail, as Thunderbird puts it. */
@@ -261,15 +309,17 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
         val i = quoteHead?.let { body.indexOf("\n\n$it") } ?: -1
         return if (i >= 0) esc(body.substring(0, i).trimEnd()) + sig + esc(body.substring(i)) else esc(body.trimEnd()) + sig
     }
-    fun out() = MailOut(from, to, cc, bcc, subject, signedBody(), attachments, of?.let { original?.headers?.get("message-id") },
-        of?.let { listOfNotNull(original?.headers?.get("references"), original?.headers?.get("message-id")).joinToString(" ").ifEmpty { null } }, html = bodyHtml())
+    fun out() = MailOut(from, to, cc, bcc, subject, signedBody(), attachments,
+        if (isDraft) original?.headers?.get("in-reply-to") else of?.let { original?.headers?.get("message-id") },
+        if (isDraft) original?.headers?.get("references") else of?.let { listOfNotNull(original?.headers?.get("references"), original?.headers?.get("message-id")).joinToString(" ").ifEmpty { null } },
+        html = bodyHtml())
     fun go(save: Boolean) {
         if (!save && to.isBlank()) { problem = context.getString(R.string.mail_no_recipient); return }
         busy = true; problem = null
         if (me?.own != true) { // the PC's account: its outbox, sent at once by the scoped sync "mail"
             scope.launch {
                 val r = withContext(Dispatchers.IO) { runCatching {
-                    MailOutbox.write(context.applicationContext, root, out(), if (save) "draft" else "send", bodyHtml(), messageId + (me?.address ?: from).substringAfter('@') + ">")
+                    MailOutbox.write(context.applicationContext, root, out(), if (save) "draft" else "send", bodyHtml(), messageIdFor())
                     ScopedSync.soon(context.applicationContext, "mail", 0, orWhole = true)
                 } }
                 busy = false
@@ -279,7 +329,10 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
             return
         }
         scope.launch {
-            val r = withContext(Dispatchers.IO) { runCatching { if (save) MailSend.draft(context.applicationContext, root, out()) else MailSend.send(context.applicationContext, root, out()) } }
+            val r = withContext(Dispatchers.IO) { runCatching {
+                if (save) MailSend.draft(context.applicationContext, root, out()) else MailSend.send(context.applicationContext, root, out())
+                if (isDraft && of != null) MailEngine.removeDraft(context.applicationContext, root, of) // sent or saved anew: the old version goes
+            } }
             busy = false
             r.onSuccess { close(context.getString(if (save) R.string.mail_draft_saved else R.string.mail_sent_ok)) }
                 .onFailure { WriterLog.w("Mail: ${if (save) "draft" else "send"} failed (${it.message})"); problem = context.getString(R.string.mail_not_sent, mailWhy(context, it)) }
@@ -320,6 +373,9 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
                         }
                     }
                 }
+            }
+            if (of != null && draft.kind != "forward") Surface(color = MAIL_ACCENT.copy(alpha = 0.35f), shape = CircleShape, modifier = Modifier.clickable(enabled = !drafting) { assist() }) {
+                Text(stringResource(if (drafting) R.string.mail_assist_working else R.string.mail_assist), Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.labelLarge)
             }
             OutlinedTextField(body, { body = it }, label = { Text(stringResource(R.string.mail_body)) }, modifier = Modifier.fillMaxWidth().heightIn(min = 240.dp))
             if (signed && signature.isNotBlank()) Text(dash + signature, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)

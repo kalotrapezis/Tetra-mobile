@@ -23,7 +23,7 @@
     </plurals>
     <string name="mail_search">Søg i mail</string>
     <string name="mail_reading">Læser mailen…</string>
-    <string name="mail_no_accounts">Ingen mail her endnu. Tilføj dine konti på computeren (Tetra › Mail): deres mail kommer hertil med synk.</string>
+    <string name="mail_no_accounts">Ingen mail her endnu. Tilføj en konto: telefonen henter selv mailen. Med en pc kommer pc’ens konti også selv hertil.</string>
     <string name="mail_no_match">Ingen mail passer.</string>
     <string name="mail_none_filtered">Ingen mail med disse filtre.</string>
     <string name="mail_none_here">Ingen mail i denne mappe.</string>
@@ -136,7 +136,6 @@
     <string name="mail_finding">Finder serverne…</string>
     <string name="mail_not_found">Ingen servere fundet til denne adresse. Udfyld dem nedenfor.</string>
     <string name="mail_manual">Manuel opsætning</string>
-    <string name="mail_ms_later">Microsoft-konti (Hotmail, Outlook, Microsoft 365) kræver Microsofts login, som kommer senere. Tilføj kontoen på pc’en indtil videre.</string>
     <string name="mail_password">Adgangskode</string>
     <string name="mail_gmail_hint">Gmail kræver en app-adgangskode: åbn Googles side, lav en med navnet Tetra, kopiér de 16 bogstaver og kom tilbage. Tetra læser dem selv.</string>
     <string name="mail_gmail_open">Åbn Googles side</string>
@@ -186,4 +185,14 @@
     <string name="mail_islands_summary">Hvor de står. Automatisk: øverst med mus, nederst med fingeren.</string>
     <string name="mail_threads">Samtaler</string>
     <string name="mail_threads_summary">Mails fra én samtale samlet, under hinanden, som i en chat</string>
+    <string name="mail_ms_sign_in">Log ind med Microsoft</string>
+    <string name="mail_ms_hint">Microsofts side åbner i browseren: log ind der (med din telefons kode, hvis du bruger en) og kom tilbage. Tetra ser aldrig din adgangskode.</string>
+    <string name="mail_ms_client">Microsoft-app-id (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft skal først have Tetras app-id: det, der blev registreret én gang på entra.microsoft.com (det samme som på pc’en).</string>
+    <string name="mail_ms_waiting">Venter på Microsofts side…</string>
+    <string name="mail_why_approval">Din organisation (universitetet) skal først godkende Tetra. Spørg dens IT, eller videresend denne mail til Gmail.</string>
+    <string name="mail_checking_servers">Leder efter ny mail…</string>
+    <string name="mail_assist">✦ Få et forslag fra assistenten</string>
+    <string name="mail_assist_working">✦ Assistenten skriver…</string>
+    <string name="mail_draft_card">Kladde – tryk for at gøre den færdig og sende den</string>
 </resources>

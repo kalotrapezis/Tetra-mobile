@@ -25,7 +25,7 @@
     </plurals>
     <string name="mail_search">Szukaj w poczcie</string>
     <string name="mail_reading">Czytam pocztę…</string>
-    <string name="mail_no_accounts">Nie ma tu jeszcze poczty. Dodaj swoje konta na komputerze (Tetra › Poczta): ich poczta trafi tu z synchronizacją.</string>
+    <string name="mail_no_accounts">Nie ma tu jeszcze poczty. Dodaj konto: telefon sam pobierze pocztę. Z komputerem konta komputera też pojawią się tu same.</string>
     <string name="mail_no_match">Brak pasujących wiadomości.</string>
     <string name="mail_none_filtered">Brak wiadomości z tymi filtrami.</string>
     <string name="mail_none_here">Brak wiadomości w tym folderze.</string>
@@ -144,7 +144,6 @@
     <string name="mail_finding">Szukam serwerów…</string>
     <string name="mail_not_found">Nie znaleziono serwerów dla tego adresu. Wpisz je poniżej.</string>
     <string name="mail_manual">Ręczna konfiguracja</string>
-    <string name="mail_ms_later">Konta Microsoft (Hotmail, Outlook, Microsoft 365) wymagają logowania Microsoft, które pojawi się później. Na razie dodaj konto na komputerze.</string>
     <string name="mail_password">Hasło</string>
     <string name="mail_gmail_hint">Gmail wymaga hasła do aplikacji: otwórz stronę Google, utwórz hasło o nazwie Tetra, skopiuj jego 16 liter i wróć. Tetra odczyta je sama.</string>
     <string name="mail_gmail_open">Otwórz stronę Google</string>
@@ -194,4 +193,14 @@
     <string name="mail_islands_summary">Gdzie stoją. Samo: na górze z myszą, na dole z palcem.</string>
     <string name="mail_threads">Wątki</string>
     <string name="mail_threads_summary">Wiadomości z jednej rozmowy razem, jedna pod drugą, jak w czacie</string>
+    <string name="mail_ms_sign_in">Zaloguj się przez Microsoft</string>
+    <string name="mail_ms_hint">Strona Microsoft otworzy się w przeglądarce: zaloguj się tam (kodem z telefonu, jeśli go używasz) i wróć. Tetra nigdy nie widzi twojego hasła.</string>
+    <string name="mail_ms_client">Identyfikator aplikacji Microsoft (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft potrzebuje najpierw identyfikatora aplikacji Tetra: tego zarejestrowanego raz na entra.microsoft.com (tego samego co na komputerze).</string>
+    <string name="mail_ms_waiting">Czekam na stronę Microsoft…</string>
+    <string name="mail_why_approval">Twoja organizacja (uczelnia) musi najpierw zatwierdzić Tetrę. Zapytaj jej IT albo przekazuj tę pocztę do Gmaila.</string>
+    <string name="mail_checking_servers">Szukam nowej poczty…</string>
+    <string name="mail_assist">✦ Zaproponuj z asystentem</string>
+    <string name="mail_assist_working">✦ Asystent pisze…</string>
+    <string name="mail_draft_card">Wersja robocza – dotknij, by ją dokończyć i wysłać</string>
 </resources>

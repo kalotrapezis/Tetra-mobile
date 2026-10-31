@@ -125,6 +125,7 @@ internal object MailDetect {
 
 /** What went wrong, as the screen says it: auth, appPassword, unreachable, other (the computer's mail.js reason()). */
 internal fun mailReason(e: Throwable): String {
+    (generateSequence(e) { it.cause }.firstOrNull { it is MailMsError } as MailMsError?)?.let { return it.reason }
     val text = generateSequence(e) { it.cause }.joinToString(" ") { it.message.orEmpty() }
     return when {
         Regex("application-specific password|app password", RegexOption.IGNORE_CASE).containsMatchIn(text) -> "appPassword"
@@ -158,35 +159,41 @@ internal object MailEngine {
         check(part.renameTo(accountsFile(root)))
     }
 
-    fun session(server: MailServer, smtp: Boolean = false): Session = Session.getInstance(Properties().apply {
+    /** An account signed in with Microsoft (MailMicrosoft): its secret is a token, given to the server by XOAUTH2. */
+    fun oauth(acc: JSONObject) = acc.optString("provider") == "microsoft"
+    /** What an account signs in with: its password, or for Microsoft an access token renewed from the kept refresh token. */
+    fun secret(c: Context, acc: JSONObject): String? = if (oauth(acc)) MailMicrosoft.access(c, acc.getString("id")) else MailSecret.get(c, acc.getString("id"))
+
+    fun session(server: MailServer, smtp: Boolean = false, oauth: Boolean = false): Session = Session.getInstance(Properties().apply {
         val p = if (smtp) "mail.smtp" else "mail.imap"
         put("$p.connectiontimeout", "15000"); put("$p.timeout", "30000"); put("$p.writetimeout", "30000")
         if (server.secure) { put("$p.ssl.enable", "true"); put("$p.ssl.checkserveridentity", "true") }
         if (server.starttls) { put("$p.starttls.enable", "true"); put("$p.starttls.required", "true") }
         put("mail.imap.peek", "true") // reading a mail here never marks it read on the server; "read" is its own request
         if (smtp) put("mail.smtp.auth", "true")
+        if (oauth) put("$p.auth.mechanisms", "XOAUTH2")
     })
 
-    private fun connect(server: MailServer, pass: String): Store = session(server).getStore("imap").apply { connect(server.host, server.port, server.user, pass) }
+    private fun connect(server: MailServer, pass: String, oauth: Boolean = false): Store = session(server, oauth = oauth).getStore("imap").apply { connect(server.host, server.port, server.user, pass) }
 
     /** Signs in with each user name the server may take; the one that worked, or throws (its reason by [mailReason]). */
-    fun check(server: MailServer, users: List<String>, pass: String): MailServer {
+    fun check(server: MailServer, users: List<String>, pass: String, oauth: Boolean = false): MailServer {
         var last: Throwable? = null
         for (u in users.distinct()) {
             val s = server.copy(user = u)
-            try { connect(s, pass).close(); return s } catch (e: Exception) { last = e; if (mailReason(e) != "auth") break }
+            try { connect(s, pass, oauth).close(); return s } catch (e: Exception) { last = e; if (mailReason(e) != "auth") break }
         }
         throw last ?: IllegalStateException("no user name")
     }
 
     /** An account checked and its password kept: written, synced at once, looked at every quarter hour. */
-    fun add(c: Context, root: File, address: String, name: String, imap: MailServer, smtp: MailServer, pass: String): JSONObject = synchronized(lock) {
+    fun add(c: Context, root: File, address: String, name: String, imap: MailServer, smtp: MailServer, pass: String, provider: String? = null): JSONObject = synchronized(lock) {
         val colors = listOf("#e5534b", "#4f8ff7", "#e0a43a", "#3fb27f", "#b77ce6", "#e57ab0", "#3bb8c4")
         val used = MailFiles.accounts(root).map { it.color }.toSet()
         val acc = JSONObject().put("id", address).put("address", address).put("name", name)
             .put("color", colors.firstOrNull { (0xFF000000 or it.removePrefix("#").toLong(16)) !in used } ?: colors[0])
             .put("server", imap.json()).put("smtp", smtp.json()).put("archive", true).put("notify", true)
-            .put("addedOn", "phone").put("device", device()).put("added", System.currentTimeMillis())
+            .put("addedOn", "phone").put("device", device()).put("added", System.currentTimeMillis()).apply { provider?.let { put("provider", it) } }
         MailSecret.set(c, address, pass)
         saveAccounts(root, ownAccounts(root).filter { it.optString("id") != address } + acc)
         schedule(c)
@@ -268,8 +275,8 @@ internal object MailEngine {
     private fun syncNow(c: Context, root: File, acc: JSONObject) {
         val id = acc.getString("id")
         val server = MailServer.of(acc.optJSONObject("server")) ?: return
-        val pass = MailSecret.get(c, id) ?: return
-        val store = connect(server, pass)
+        val pass = secret(c, acc) ?: return
+        val store = connect(server, pass, oauth(acc))
         try {
             val boxes = roles(store)
             val fresh = mutableListOf<MailEntry>()
@@ -333,7 +340,9 @@ internal object MailEngine {
         val pcToo = MailFiles.accounts(root).any { it.id == id && it.json?.optString("addedOn", "desktop") != "phone" }
         val waiting = all.filter { it.id !in saved && it.id !in moved.map { m -> m.id } }
         val pseudo = waiting.associateBy { "x/${mailName(it.date, "x", "x")} ${it.id.hashCode()}.eml" }
-        val fits = if (!pcToo) pseudo.keys else MailSync.plan(pseudo.mapValues { it.value.size } + localMail(root), MailStorage.read(root, device()).limit)
+        // ... and with no PC paired to take them (Tetra on the phone alone), what fits too: the rest stays on the server, opened from there
+        val keepsAll = !pcToo && SyncStore(c).pairing() != null
+        val fits = if (keepsAll) pseudo.keys else MailSync.plan(pseudo.mapValues { it.value.size } + localMail(root), MailStorage.read(root, device()).limit)
         val todo = pseudo.filterKeys { it in fits }.values.sortedByDescending { it.date }
         for ((role, list) in todo.groupBy { it.folder }) {
             val f = store.getFolder(boxes[role] ?: continue) as IMAPFolder
@@ -371,7 +380,7 @@ internal object MailEngine {
     fun body(c: Context, root: File, e: MailEntry): MailEntry? {
         val acc = ownAccounts(root).firstOrNull { it.optString("id") == e.account } ?: return null
         val server = MailServer.of(acc.optJSONObject("server")) ?: return null
-        val store = connect(server, MailSecret.get(c, e.account) ?: return null)
+        val store = connect(server, secret(c, acc) ?: return null, oauth(acc))
         try {
             val f = store.getFolder(roles(store)[e.folder] ?: return null) as IMAPFolder
             f.open(Folder.READ_ONLY)
@@ -394,7 +403,7 @@ internal object MailEngine {
         for ((accId, list) in entries.groupBy { it.account }) {
             val acc = ownAccounts(root).firstOrNull { it.optString("id") == accId } ?: continue
             val server = MailServer.of(acc.optJSONObject("server")) ?: continue
-            val store = connect(server, MailSecret.get(c, accId) ?: continue)
+            val store = connect(server, secret(c, acc) ?: continue, oauth(acc))
             try {
                 val boxes = roles(store)
                 val target = when (op) { "archive" -> "Archive"; "delete" -> "Trash"; "spam" -> "Spam"; "notSpam" -> "Inbox"; "move" -> to; else -> null }
@@ -425,6 +434,19 @@ internal object MailEngine {
         }
     }
 
+    /** A draft that was sent or saved anew: out of Drafts on the server for good (not to the Trash), and out of the lists. */
+    fun removeDraft(c: Context, root: File, e: MailEntry) {
+        val acc = ownAccounts(root).firstOrNull { it.optString("id") == e.account } ?: return
+        val server = MailServer.of(acc.optJSONObject("server")) ?: return
+        val store = connect(server, secret(c, acc) ?: return, oauth(acc))
+        try {
+            val f = store.getFolder(roles(store)["Drafts"] ?: return) as IMAPFolder
+            f.open(Folder.READ_WRITE)
+            try { f.getMessageByUID(e.id.substringAfterLast('/').toLong())?.setFlag(Flags.Flag.DELETED, true) } finally { f.close(true) }
+        } finally { runCatching { store.close() } }
+        synchronized(lock) { append(root, listOf(e.copy(gone = true))) }
+    }
+
     /** Every account this device fetches; the quarter-hourly job and the Sync button. */
     fun syncAll(c: Context, root: File = mailRoot()) {
         for (acc in ownAccounts(root)) runCatching { sync(c, root, acc) }.onFailure { WriterLog.w("Mail: ${acc.optString("id")}: ${it.message}") }
@@ -437,7 +459,7 @@ internal object MailEngine {
             while (!stop()) runCatching {
                 sync(c, root, acc)
                 val server = MailServer.of(acc.optJSONObject("server")) ?: return@Thread
-                val store = connect(server, MailSecret.get(c, acc.getString("id")) ?: return@Thread)
+                val store = connect(server, secret(c, acc) ?: return@Thread, oauth(acc))
                 try {
                     val inbox = store.getFolder("INBOX") as IMAPFolder
                     inbox.open(Folder.READ_ONLY)

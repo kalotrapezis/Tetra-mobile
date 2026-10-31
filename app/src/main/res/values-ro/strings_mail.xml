@@ -24,7 +24,7 @@
     </plurals>
     <string name="mail_search">Caută în e-mailuri</string>
     <string name="mail_reading">Se citesc e-mailurile…</string>
-    <string name="mail_no_accounts">Încă nu sunt e-mailuri aici. Adaugă-ți conturile pe computer (Tetra › E-mail): mesajele lor vin aici prin sincronizare.</string>
+    <string name="mail_no_accounts">Încă nu sunt e-mailuri aici. Adaugă un cont: telefonul aduce singur e-mailurile. Cu un PC, conturile PC-ului vin și ele aici singure.</string>
     <string name="mail_no_match">Niciun e-mail nu se potrivește.</string>
     <string name="mail_none_filtered">Niciun e-mail cu aceste filtre.</string>
     <string name="mail_none_here">Niciun e-mail în acest dosar.</string>
@@ -140,7 +140,6 @@
     <string name="mail_finding">Se caută serverele…</string>
     <string name="mail_not_found">Nu s-au găsit servere pentru această adresă. Completează-le mai jos.</string>
     <string name="mail_manual">Configurare manuală</string>
-    <string name="mail_ms_later">Conturile Microsoft (Hotmail, Outlook, Microsoft 365) au nevoie de conectarea Microsoft, care vine mai târziu. Deocamdată adaugă-l pe PC.</string>
     <string name="mail_password">Parolă</string>
     <string name="mail_gmail_hint">Gmail are nevoie de o parolă pentru aplicații: deschide pagina Google, creează una numită Tetra, copiază cele 16 litere și revino. Tetra le citește singur.</string>
     <string name="mail_gmail_open">Deschide pagina Google</string>
@@ -190,4 +189,14 @@
     <string name="mail_islands_summary">Unde stau. Automat: sus cu mouse-ul, jos cu degetul.</string>
     <string name="mail_threads">Conversații</string>
     <string name="mail_threads_summary">E-mailurile unei conversații împreună, unul sub altul, ca într-un chat</string>
+    <string name="mail_ms_sign_in">Conectează-te cu Microsoft</string>
+    <string name="mail_ms_hint">Pagina Microsoft se deschide în browser: conectează-te acolo (cu codul telefonului, dacă folosești unul) și revino. Tetra nu îți vede niciodată parola.</string>
+    <string name="mail_ms_client">ID-ul aplicației Microsoft (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft are nevoie mai întâi de ID-ul aplicației Tetra: cel înregistrat o dată pe entra.microsoft.com (același ca pe PC).</string>
+    <string name="mail_ms_waiting">Se așteaptă pagina Microsoft…</string>
+    <string name="mail_why_approval">Organizația ta (universitatea) trebuie mai întâi să aprobe Tetra. Întreabă departamentul IT sau redirecționează aceste e-mailuri către Gmail.</string>
+    <string name="mail_checking_servers">Se caută e-mailuri noi…</string>
+    <string name="mail_assist">✦ Sugerează cu asistentul</string>
+    <string name="mail_assist_working">✦ Asistentul scrie…</string>
+    <string name="mail_draft_card">Ciornă – atinge ca s-o termini și s-o trimiți</string>
 </resources>

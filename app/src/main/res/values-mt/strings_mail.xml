@@ -25,7 +25,7 @@
     </plurals>
     <string name="mail_search">Fittex fil-posta</string>
     <string name="mail_reading">Qed naqra l-posta…</string>
-    <string name="mail_no_accounts">Għad m’hemmx posta hawn. Żid il-kontijiet tiegħek fuq il-kompjuter (Tetra › Posta): il-posta tagħhom tasal hawn bis-sinkronizzazzjoni.</string>
+    <string name="mail_no_accounts">Għad m’hemmx posta hawn. Żid kont: il-mowbajl iġib il-posta waħdu. B’PC, il-kontijiet tal-PC jaslu hawn waħedhom ukoll.</string>
     <string name="mail_no_match">L-ebda messaġġ ma jaqbel.</string>
     <string name="mail_none_filtered">L-ebda messaġġ b’dawn il-filtri.</string>
     <string name="mail_none_here">L-ebda messaġġ f’din il-kartella.</string>
@@ -144,7 +144,6 @@
     <string name="mail_finding">Qed infittex is-servers…</string>
     <string name="mail_not_found">Ma nstabux servers għal dan l-indirizz. Imlihom hawn taħt.</string>
     <string name="mail_manual">Konfigurazzjoni manwali</string>
-    <string name="mail_ms_later">Il-kontijiet Microsoft (Hotmail, Outlook, Microsoft 365) jeħtieġu d-dħul ta’ Microsoft, li jiġi aktar tard. Għalissa żidu fuq il-PC.</string>
     <string name="mail_password">Password</string>
     <string name="mail_gmail_hint">Gmail jeħtieġ password tal-app: iftaħ il-paġna ta’ Google, agħmel waħda bl-isem Tetra, ikkopja s-16-il ittra tagħha u erġa’ lura. Tetra jaqrahom waħdu.</string>
     <string name="mail_gmail_open">Iftaħ il-paġna ta’ Google</string>
@@ -194,4 +193,14 @@
     <string name="mail_islands_summary">Fejn joqogħdu. Waħedhom: fuq bil-maws, isfel bis-saba’.</string>
     <string name="mail_threads">Konversazzjonijiet</string>
     <string name="mail_threads_summary">Il-messaġġi ta’ konversazzjoni waħda flimkien, wieħed taħt l-ieħor, bħal f’chat</string>
+    <string name="mail_ms_sign_in">Idħol b’Microsoft</string>
+    <string name="mail_ms_hint">Il-paġna ta’ Microsoft tinfetaħ fil-browser: idħol hemm (bil-kodiċi tal-mowbajl jekk tużah) u erġa’ lura. Tetra qatt ma jara l-password tiegħek.</string>
+    <string name="mail_ms_client">ID tal-app ta’ Microsoft (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft trid l-ewwel l-ID tal-app ta’ Tetra: dik irreġistrata darba fuq entra.microsoft.com (l-istess bħal fuq il-PC).</string>
+    <string name="mail_ms_waiting">Qed nistenna l-paġna ta’ Microsoft…</string>
+    <string name="mail_why_approval">L-organizzazzjoni tiegħek (l-università) trid tapprova lil Tetra l-ewwel. Staqsi lill-IT tagħha, jew għaddi din il-posta lil Gmail.</string>
+    <string name="mail_checking_servers">Qed infittex posta ġdida…</string>
+    <string name="mail_assist">✦ Issuġġerixxi mal-assistent</string>
+    <string name="mail_assist_working">✦ L-assistent qed jikteb…</string>
+    <string name="mail_draft_card">Abbozz – agħfas biex tlestih u tibagħtu</string>
 </resources>

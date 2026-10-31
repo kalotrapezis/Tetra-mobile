@@ -25,7 +25,7 @@
 
     <string name="mail_search">Αναζήτηση στην αλληλογραφία</string>
     <string name="mail_reading">Διαβάζω την αλληλογραφία…</string>
-    <string name="mail_no_accounts">Δεν υπάρχει αλληλογραφία ακόμη. Πρόσθεσε τους λογαριασμούς σου στον υπολογιστή (Tetra › Αλληλογραφία): τα μηνύματά τους έρχονται εδώ με τον συγχρονισμό.</string>
+    <string name="mail_no_accounts">Δεν υπάρχει αλληλογραφία ακόμη. Πρόσθεσε έναν λογαριασμό: το κινητό τη φέρνει μόνο του. Με υπολογιστή, έρχονται εδώ μόνοι τους και οι λογαριασμοί του.</string>
     <string name="mail_no_match">Κανένα μήνυμα δεν ταιριάζει.</string>
     <string name="mail_none_filtered">Κανένα μήνυμα με αυτά τα φίλτρα.</string>
     <string name="mail_none_here">Κανένα μήνυμα σε αυτόν τον φάκελο.</string>
@@ -145,7 +145,6 @@
     <string name="mail_finding">Βρίσκω τους servers…</string>
     <string name="mail_not_found">Δεν βρέθηκαν servers για αυτή τη διεύθυνση. Συμπλήρωσέ τους παρακάτω.</string>
     <string name="mail_manual">Ρυθμίσεις χειροκίνητα</string>
-    <string name="mail_ms_later">Οι λογαριασμοί Microsoft (Hotmail, Outlook, Microsoft 365) θέλουν τη σύνδεση της Microsoft, που έρχεται αργότερα. Προς το παρόν πρόσθεσέ τον στον υπολογιστή.</string>
     <string name="mail_password">Κωδικός</string>
     <string name="mail_gmail_hint">Το Gmail θέλει κωδικό εφαρμογής: άνοιξε τη σελίδα της Google, φτιάξε έναν με όνομα Tetra, αντίγραψε τα 16 γράμματα και γύρνα εδώ. Το Tetra τα διαβάζει μόνο του.</string>
     <string name="mail_gmail_open">Σελίδα της Google</string>
@@ -196,4 +195,14 @@
     <string name="mail_islands_summary">Πού στέκονται. Μόνο του: πάνω με ποντίκι, κάτω με το δάχτυλο.</string>
     <string name="mail_threads">Συζητήσεις</string>
     <string name="mail_threads_summary">Τα μηνύματα μιας συζήτησης μαζί, το ένα κάτω από το άλλο, όπως σε συνομιλία</string>
+    <string name="mail_ms_sign_in">Σύνδεση με Microsoft</string>
+    <string name="mail_ms_hint">Ανοίγει η σελίδα της Microsoft στον browser: συνδέσου εκεί (με τον κωδικό του κινητού, αν τον χρησιμοποιείς) και γύρνα εδώ. Το Tetra δεν βλέπει ποτέ τον κωδικό σου.</string>
+    <string name="mail_ms_client">Κωδικός εφαρμογής Microsoft (client ID)</string>
+    <string name="mail_ms_client_hint">Η Microsoft θέλει πρώτα τον κωδικό εφαρμογής του Tetra: αυτόν που καταχωρίστηκε μία φορά στο entra.microsoft.com (ο ίδιος με του υπολογιστή).</string>
+    <string name="mail_ms_waiting">Περιμένω τη σελίδα της Microsoft…</string>
+    <string name="mail_why_approval">Ο οργανισμός σου (το πανεπιστήμιο) πρέπει πρώτα να εγκρίνει το Tetra. Ζήτησέ το από το IT του ή προώθησε την αλληλογραφία στο Gmail.</string>
+    <string name="mail_checking_servers">Κοιτάζω για νέα μηνύματα…</string>
+    <string name="mail_assist">✦ Πρόταση από τον βοηθό</string>
+    <string name="mail_assist_working">✦ Ο βοηθός γράφει…</string>
+    <string name="mail_draft_card">Πρόχειρο — πάτα για να το ολοκληρώσεις και να το στείλεις</string>
 </resources>

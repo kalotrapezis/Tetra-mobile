@@ -24,7 +24,7 @@
     </plurals>
     <string name="mail_search">Meklēt pastā</string>
     <string name="mail_reading">Notiek pasta lasīšana…</string>
-    <string name="mail_no_accounts">Šeit vēl nav vēstuļu. Pievienojiet savus kontus datorā (Tetra › Pasts): to vēstules nonāk šeit ar sinhronizāciju.</string>
+    <string name="mail_no_accounts">Šeit vēl nav vēstuļu. Pievienojiet kontu: tālrunis vēstules saņem pats. Ar datoru šeit paši nonāk arī datora konti.</string>
     <string name="mail_no_match">Neviena vēstule neatbilst.</string>
     <string name="mail_none_filtered">Ar šiem filtriem vēstuļu nav.</string>
     <string name="mail_none_here">Šajā mapē vēstuļu nav.</string>
@@ -140,7 +140,6 @@
     <string name="mail_finding">Notiek serveru meklēšana…</string>
     <string name="mail_not_found">Šai adresei serveri netika atrasti. Aizpildiet tos zemāk.</string>
     <string name="mail_manual">Manuāla iestatīšana</string>
-    <string name="mail_ms_later">Microsoft kontiem (Hotmail, Outlook, Microsoft 365) vajadzīga Microsoft pierakstīšanās, kas būs vēlāk. Pagaidām pievienojiet kontu datorā.</string>
     <string name="mail_password">Parole</string>
     <string name="mail_gmail_hint">Gmail vajadzīga lietotnes parole: atveriet Google lapu, izveidojiet paroli ar nosaukumu Tetra, nokopējiet tās 16 burtus un atgriezieties. Tetra tos nolasīs pati.</string>
     <string name="mail_gmail_open">Atvērt Google lapu</string>
@@ -190,4 +189,14 @@
     <string name="mail_islands_summary">Kur tās atrodas. Automātiski: augšā ar peli, apakšā ar pirkstu.</string>
     <string name="mail_threads">Sarunas</string>
     <string name="mail_threads_summary">Vienas sarunas vēstules kopā, cita zem citas, kā tērzēšanā</string>
+    <string name="mail_ms_sign_in">Pierakstīties ar Microsoft</string>
+    <string name="mail_ms_hint">Microsoft lapa atveras pārlūkā: pierakstieties tur (ar tālruņa kodu, ja to izmantojat) un atgriezieties. Tetra nekad neredz jūsu paroli.</string>
+    <string name="mail_ms_client">Microsoft lietotnes ID (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft vispirms vajadzīgs Tetra lietotnes ID: tas, kas vienreiz reģistrēts entra.microsoft.com (tas pats, kas datorā).</string>
+    <string name="mail_ms_waiting">Gaida Microsoft lapu…</string>
+    <string name="mail_why_approval">Jūsu organizācijai (universitātei) vispirms jāapstiprina Tetra. Jautājiet tās IT vai pārsūtiet šīs vēstules uz Gmail.</string>
+    <string name="mail_checking_servers">Meklē jaunas vēstules…</string>
+    <string name="mail_assist">✦ Ieteikt ar asistentu</string>
+    <string name="mail_assist_working">✦ Asistents raksta…</string>
+    <string name="mail_draft_card">Melnraksts – pieskarieties, lai to pabeigtu un nosūtītu</string>
 </resources>

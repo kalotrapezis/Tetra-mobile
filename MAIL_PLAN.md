@@ -419,6 +419,28 @@ Mail/devices/<device>.usage.json    { "used": 34512, "files": 18, "at": 17934440
   `used` counts every file of `Mail/` on that device except `devices/`.
 - `<device>` is the same name as in `index.<device>.jsonl` (Build.MODEL with only [A-Za-z0-9_-]).
 
+## 15. The phone on its own, conversations, the assistant (the user, 31 Oct; as built on the phone)
+
+- **Standalone.** Tetra on a phone with no PC works: accounts are added on the phone (Gmail with an app password,
+  sch.gr and others with their password, **Hotmail/Outlook/Microsoft 365 with «Σύνδεση με Microsoft»** — the
+  desktop's msauth.js on Android: the browser, a one-time server on 127.0.0.1, PKCE, the refresh token in the phone's
+  keystore, XOAUTH2 for IMAP and SMTP; the app id is the one registered for the PC, §13, typed once on the phone).
+  The empty Mail screen offers «Προσθήκη λογαριασμού»; the Sync button looks at the servers (and asks the PC only
+  when one is paired). With no PC, an account the phone fetches keeps only what fits the device's limit (default
+  1 GB); older mail stays on the server and opens from there. With a PC, it downloads every body for the PC to keep.
+  `accounts.<device>.json` marks such an account `"provider": "microsoft"`.
+- **Conversations** (Settings › Αλληλογραφία › Εμφάνιση › Συζητήσεις, off by default): the list one row per
+  conversation (account + subject without Re:/Fwd:, every folder but Spam and Trash), opened as its mails one
+  under another, each a card with its header — the device's own at the right, the others' at the left, in the
+  account's colour — with only what each says itself. A card opens that mail; a draft's card is greyed, and opens
+  in the compose page to finish and send (sent or saved anew, the old draft goes; the PC's by the same Message-ID).
+  Replies stay proper mails: «Απάντηση» opens the compose page with the subject and recipient filled in.
+- **The assistant in a reply.** «✦ Πρόταση από τον βοηθό» in a reply's compose page: AI Assist (Mistral, its key in
+  Settings › AI Assist) drafts the body from the conversation and whatever the user typed as notes, as a proper mail
+  in the conversation's language; the user edits it before sending.
+- **Islands** at the top, the bottom or by themselves (top with a mouse) — Office's rule, on a tablet or a big
+  screen only; a phone keeps them at the bottom.
+
 ## Open questions for the user
 
 - Away from home, does the phone sync with the desktop over the internet, or only on the same Wi-Fi?

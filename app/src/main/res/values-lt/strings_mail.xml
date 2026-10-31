@@ -25,7 +25,7 @@
     </plurals>
     <string name="mail_search">Ieškoti pašte</string>
     <string name="mail_reading">Skaitomas paštas…</string>
-    <string name="mail_no_accounts">Čia dar nėra laiškų. Pridėkite savo paskyras kompiuteryje (Tetra › Paštas): jų laiškai ateina čia sinchronizuojant.</string>
+    <string name="mail_no_accounts">Čia dar nėra laiškų. Pridėkite paskyrą: telefonas pats parsiunčia laiškus. Su kompiuteriu čia patys atkeliauja ir kompiuterio paskyros.</string>
     <string name="mail_no_match">Neatitinka nė vienas laiškas.</string>
     <string name="mail_none_filtered">Su šiais filtrais laiškų nėra.</string>
     <string name="mail_none_here">Šiame aplanke laiškų nėra.</string>
@@ -144,7 +144,6 @@
     <string name="mail_finding">Ieškoma serverių…</string>
     <string name="mail_not_found">Šiam adresui serverių nerasta. Įveskite juos žemiau.</string>
     <string name="mail_manual">Rankinė sąranka</string>
-    <string name="mail_ms_later">Microsoft paskyroms (Hotmail, Outlook, Microsoft 365) reikia Microsoft prisijungimo, kuris bus vėliau. Kol kas pridėkite ją kompiuteryje.</string>
     <string name="mail_password">Slaptažodis</string>
     <string name="mail_gmail_hint">Gmail reikia programos slaptažodžio: atidarykite Google puslapį, sukurkite slaptažodį pavadinimu Tetra, nukopijuokite jo 16 raidžių ir grįžkite. Tetra jas perskaitys pati.</string>
     <string name="mail_gmail_open">Atidaryti Google puslapį</string>
@@ -194,4 +193,14 @@
     <string name="mail_islands_summary">Kur jie yra. Automatiškai: viršuje su pele, apačioje su pirštu.</string>
     <string name="mail_threads">Pokalbiai</string>
     <string name="mail_threads_summary">Vieno pokalbio laiškai kartu, vienas po kito, kaip pokalbyje</string>
+    <string name="mail_ms_sign_in">Prisijungti su Microsoft</string>
+    <string name="mail_ms_hint">Microsoft puslapis atsidaro naršyklėje: prisijunkite ten (telefono kodu, jei jį naudojate) ir grįžkite. Tetra niekada nemato jūsų slaptažodžio.</string>
+    <string name="mail_ms_client">Microsoft programos ID (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoft pirmiausia reikia Tetra programos ID: to, kuris kartą užregistruotas entra.microsoft.com (to paties kaip kompiuteryje).</string>
+    <string name="mail_ms_waiting">Laukiama Microsoft puslapio…</string>
+    <string name="mail_why_approval">Jūsų organizacija (universitetas) pirmiausia turi patvirtinti Tetra. Paklauskite jos IT arba persiųskite šiuos laiškus į Gmail.</string>
+    <string name="mail_checking_servers">Ieškoma naujų laiškų…</string>
+    <string name="mail_assist">✦ Pasiūlyti su asistentu</string>
+    <string name="mail_assist_working">✦ Asistentas rašo…</string>
+    <string name="mail_draft_card">Juodraštis – bakstelėkite, kad užbaigtumėte ir išsiųstumėte</string>
 </resources>

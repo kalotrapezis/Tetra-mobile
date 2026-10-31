@@ -24,7 +24,7 @@
     </plurals>
     <string name="mail_search">Pretraži poštu</string>
     <string name="mail_reading">Čitanje pošte…</string>
-    <string name="mail_no_accounts">Ovdje još nema pošte. Dodajte svoje račune na računalu (Tetra › Pošta): njihova pošta stiže ovamo sinkronizacijom.</string>
+    <string name="mail_no_accounts">Ovdje još nema pošte. Dodajte račun: telefon sam preuzima poštu. S računalom ovamo sami stižu i računi s računala.</string>
     <string name="mail_no_match">Nijedna poruka ne odgovara.</string>
     <string name="mail_none_filtered">Nema poruka s ovim filtrima.</string>
     <string name="mail_none_here">U ovoj mapi nema poruka.</string>
@@ -140,7 +140,6 @@
     <string name="mail_finding">Traženje servera…</string>
     <string name="mail_not_found">Za ovu adresu nisu pronađeni serveri. Unesite ih ispod.</string>
     <string name="mail_manual">Ručno postavljanje</string>
-    <string name="mail_ms_later">Microsoftovi računi (Hotmail, Outlook, Microsoft 365) trebaju Microsoftovu prijavu, koja dolazi kasnije. Za sada ga dodajte na računalu.</string>
     <string name="mail_password">Lozinka</string>
     <string name="mail_gmail_hint">Gmail treba lozinku aplikacije: otvorite Googleovu stranicu, napravite lozinku s imenom Tetra, kopirajte njezinih 16 slova i vratite se. Tetra ih čita sama.</string>
     <string name="mail_gmail_open">Otvori Googleovu stranicu</string>
@@ -190,4 +189,14 @@
     <string name="mail_islands_summary">Gdje stoje. Automatski: gore s mišem, dolje s prstom.</string>
     <string name="mail_threads">Razgovori</string>
     <string name="mail_threads_summary">Poruke jednog razgovora zajedno, jedna ispod druge, kao u chatu</string>
+    <string name="mail_ms_sign_in">Prijava putem Microsofta</string>
+    <string name="mail_ms_hint">Microsoftova stranica otvara se u pregledniku: prijavite se tamo (kodom s telefona ako ga koristite) i vratite se. Tetra nikad ne vidi vašu lozinku.</string>
+    <string name="mail_ms_client">ID Microsoftove aplikacije (client ID)</string>
+    <string name="mail_ms_client_hint">Microsoftu najprije treba ID aplikacije Tetra: onaj koji je jednom registriran na entra.microsoft.com (isti kao na računalu).</string>
+    <string name="mail_ms_waiting">Čekanje Microsoftove stranice…</string>
+    <string name="mail_why_approval">Vaša organizacija (sveučilište) mora najprije odobriti Tetru. Pitajte njezin IT ili prosljeđujte ovu poštu na Gmail.</string>
+    <string name="mail_checking_servers">Traženje nove pošte…</string>
+    <string name="mail_assist">✦ Predloži s asistentom</string>
+    <string name="mail_assist_working">✦ Asistent piše…</string>
+    <string name="mail_draft_card">Skica – dodirnite da je dovršite i pošaljete</string>
 </resources>
