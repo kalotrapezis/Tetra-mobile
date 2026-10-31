@@ -55,6 +55,8 @@ internal object AssistantKey {
         }.generateKey()
     }
 
+    /** Whether a key is set, without reading it. */
+    fun has(c: Context) = prefs(c).contains("key")
     fun get(c: Context): String? = prefs(c).getString("key", null)?.let { saved -> runCatching {
         val b = Base64.decode(saved, Base64.NO_WRAP)
         Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.DECRYPT_MODE, secret(), GCMParameterSpec(128, b, 0, 12)) }.doFinal(b, 12, b.size - 12).decodeToString()
@@ -69,7 +71,8 @@ internal object AssistantKey {
 
 /** Mistral over HTTPS; every failure a [DriveProblem] the screen says in the user's language. */
 internal object AssistantNet {
-    fun key(c: Context): String = AssistantKey.get(c) ?: throw DriveProblem("No Mistral key.", R.string.assistant_no_key)
+    /** The key for a request, only while the AI is on (AiGate, read again here: the switch may have come by sync). */
+    fun key(c: Context): String { AiGate.load(c); AiGate.check(); return AssistantKey.get(c) ?: throw DriveProblem("No Mistral key.", R.string.assistant_no_key) }
 
     fun post(key: String, path: String, body: String): String =
         send(key, path, "application/json", body.toByteArray()).decodeToString()
@@ -135,6 +138,7 @@ internal object AssistantNet {
     private fun send(key: String, path: String, type: String?, body: ByteArray?): ByteArray = request(key, path, type, body) { it.readBytes() }
 
     private fun <T> request(key: String, path: String, type: String?, body: ByteArray?, read: (java.io.InputStream) -> T): T {
+        AiGate.check() // nothing leaves for the AI while it is off, whoever asks
         val c = URL(Mistral.API + path).openConnection() as HttpURLConnection
         try {
             c.connectTimeout = 15_000; c.readTimeout = 120_000 // a picture takes a while
@@ -285,6 +289,7 @@ internal class AssistantLive(
     private val text = StringBuilder()
 
     fun start() {
+        AiGate.check() // the live voice too
         val request = okhttp3.Request.Builder().url("wss://api.mistral.ai/v1/audio/transcriptions/realtime?model=${Mistral.REALTIME}")
             .header("Authorization", "Bearer $key").build()
         socket = okhttp3.OkHttpClient().newWebSocket(request, object : okhttp3.WebSocketListener() {

@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Koji ste kontakt vi?</string>
     <string name="assistant_relation_own">Ili vaša riječ</string>
     <string name="assistant_me_new">Napravi moju karticu: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Uključeno: ono što pitate ide u Mistral, AI uslugu na internetu.</string>
+    <string name="ai_master_off">Isključeno: ništa ne ide ni u jednu AI uslugu; Tetra radi bez ijedne internetske tvrtke.</string>
+    <string name="ai_master_note">Kad je isključeno, AI Assist i svi gumbi ✦ su skriveni i nijedan zahtjev ne napušta uređaj. Isto vrijedi na svim vašim uređajima.</string>
+    <string name="ai_apps">Što AI Assist smije koristiti</string>
+    <string name="ai_apps_note">Isključenu aplikaciju AI Assist ne može ni čitati ni u njoj djelovati, a njezini AI gumbi su skriveni.</string>
+    <string name="ai_is_off">AI Assist je isključen (Postavke › AI Assist).</string>
+    <string name="ai_app_web">Pretraživanje weba i slike</string>
 </resources>

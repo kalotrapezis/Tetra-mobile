@@ -68,4 +68,12 @@
     <string name="assistant_me_pick">Which contact is you?</string>
     <string name="assistant_relation_own">Or your own word</string>
     <string name="assistant_me_new">Make my card: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">On: what you ask goes to Mistral, an AI service on the internet.</string>
+    <string name="ai_master_off">Off: nothing goes to any AI service; Tetra works with no internet company at all.</string>
+    <string name="ai_master_note">Off, AI Assist and every ✦ button are hidden and no request leaves the device. It is the same on all your devices.</string>
+    <string name="ai_apps">What AI Assist may use</string>
+    <string name="ai_apps_note">An app switched off is one AI Assist can neither read nor act in, and its AI buttons are hidden.</string>
+    <string name="ai_is_off">AI Assist is off (Settings › AI Assist).</string>
+    <string name="ai_app_web">Web search and pictures</string>
 </resources>

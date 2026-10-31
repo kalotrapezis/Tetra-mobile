@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Ποια επαφή είστε εσείς;</string>
     <string name="assistant_relation_own">Ή δική σας λέξη</string>
     <string name="assistant_me_new">Νέα κάρτα για μένα: %1$s</string>
+    <string name="ai_master">Βοηθός AI</string>
+    <string name="ai_master_on">Ανοιχτός: ό,τι ζητάς πηγαίνει στη Mistral, μια υπηρεσία AI στο internet.</string>
+    <string name="ai_master_off">Κλειστός: τίποτα δεν πηγαίνει σε καμία υπηρεσία AI· το Tetra δουλεύει χωρίς καμία εταιρεία του internet.</string>
+    <string name="ai_master_note">Κλειστός, ο Βοηθός AI και κάθε κουμπί ✦ κρύβονται και κανένα αίτημα δεν φεύγει από τη συσκευή. Ισχύει σε όλες τις συσκευές σου.</string>
+    <string name="ai_apps">Τι μπορεί να χρησιμοποιεί ο Βοηθός AI</string>
+    <string name="ai_apps_note">Μια εφαρμογή κλειστή εδώ ο Βοηθός AI ούτε τη διαβάζει ούτε κάνει κάτι σε αυτήν, και τα κουμπιά AI της κρύβονται.</string>
+    <string name="ai_is_off">Ο Βοηθός AI είναι κλειστός (Ρυθμίσεις › Βοηθός AI).</string>
+    <string name="ai_app_web">Αναζήτηση στο internet και εικόνες</string>
 </resources>

@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Kuris kontaktas esate jūs?</string>
     <string name="assistant_relation_own">Arba jūsų žodis</string>
     <string name="assistant_me_new">Sukurti mano kortelę: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Įjungta: tai, ko klausiate, keliauja į Mistral, AI paslaugą internete.</string>
+    <string name="ai_master_off">Išjungta: niekas nekeliauja į jokią AI paslaugą; Tetra veikia be jokios interneto bendrovės.</string>
+    <string name="ai_master_note">Kai išjungta, AI Assist ir visi ✦ mygtukai paslėpti ir jokia užklausa nepalieka įrenginio. Taip yra visuose jūsų įrenginiuose.</string>
+    <string name="ai_apps">Ką AI Assist gali naudoti</string>
+    <string name="ai_apps_note">Išjungtos programos AI Assist negali nei skaityti, nei joje veikti, o jos AI mygtukai paslėpti.</string>
+    <string name="ai_is_off">AI Assist išjungtas (Nustatymai › AI Assist).</string>
+    <string name="ai_app_web">Paieška žiniatinklyje ir paveikslėliai</string>
 </resources>

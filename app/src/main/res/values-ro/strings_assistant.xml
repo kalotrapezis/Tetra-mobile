@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Care contact ești tu?</string>
     <string name="assistant_relation_own">Sau propriul cuvânt</string>
     <string name="assistant_me_new">Creează fișa mea: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Pornit: ce întrebi ajunge la Mistral, un serviciu AI de pe internet.</string>
+    <string name="ai_master_off">Oprit: nimic nu ajunge la niciun serviciu AI; Tetra funcționează fără nicio companie de internet.</string>
+    <string name="ai_master_note">Când e oprit, AI Assist și toate butoanele ✦ sunt ascunse și nicio cerere nu pleacă de pe dispozitiv. La fel pe toate dispozitivele tale.</string>
+    <string name="ai_apps">Ce poate folosi AI Assist</string>
+    <string name="ai_apps_note">O aplicație oprită este una pe care AI Assist nu o poate nici citi, nici folosi, iar butoanele ei AI sunt ascunse.</string>
+    <string name="ai_is_off">AI Assist este oprit (Setări › AI Assist).</string>
+    <string name="ai_app_web">Căutare web și imagini</string>
 </resources>

@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Mikä yhteystieto olet sinä?</string>
     <string name="assistant_relation_own">Tai oma sanasi</string>
     <string name="assistant_me_new">Luo oma korttini: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Päällä: kysymyksesi menevät Mistralille, internetissä toimivalle AI-palvelulle.</string>
+    <string name="ai_master_off">Pois: mitään ei mene millekään AI-palvelulle; Tetra toimii ilman yhtään internetyhtiötä.</string>
+    <string name="ai_master_note">Kun pois päältä, AI Assist ja kaikki ✦-painikkeet ovat piilossa eikä mikään pyyntö lähde laitteelta. Sama pätee kaikilla laitteillasi.</string>
+    <string name="ai_apps">Mitä AI Assist saa käyttää</string>
+    <string name="ai_apps_note">Pois kytkettyä sovellusta AI Assist ei voi lukea eikä toimia siinä, ja sen AI-painikkeet ovat piilossa.</string>
+    <string name="ai_is_off">AI Assist on pois päältä (Asetukset › AI Assist).</string>
+    <string name="ai_app_web">Verkkohaku ja kuvat</string>
 </resources>

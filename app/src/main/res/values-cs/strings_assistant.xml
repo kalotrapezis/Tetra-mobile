@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Který kontakt jste vy?</string>
     <string name="assistant_relation_own">Nebo vlastní slovo</string>
     <string name="assistant_me_new">Vytvořit mou kartu: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Zapnuto: na co se zeptáte, jde do Mistralu, AI služby na internetu.</string>
+    <string name="ai_master_off">Vypnuto: nic nejde do žádné AI služby; Tetra funguje zcela bez internetových firem.</string>
+    <string name="ai_master_note">Když je vypnuto, AI Assist a všechna tlačítka ✦ jsou skrytá a žádný požadavek neopustí zařízení. Platí to na všech vašich zařízeních.</string>
+    <string name="ai_apps">Co smí AI Assist používat</string>
+    <string name="ai_apps_note">Vypnutou aplikaci AI Assist nemůže číst ani v ní nic dělat a její tlačítka AI jsou skrytá.</string>
+    <string name="ai_is_off">AI Assist je vypnutý (Nastavení › AI Assist).</string>
+    <string name="ai_app_web">Hledání na webu a obrázky</string>
 </resources>

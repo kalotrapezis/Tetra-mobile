@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Кой контакт сте вие?</string>
     <string name="assistant_relation_own">Или ваша дума</string>
     <string name="assistant_me_new">Нова карта за мен: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Включено: каквото питате, отива към Mistral, AI услуга в интернет.</string>
+    <string name="ai_master_off">Изключено: нищо не отива към никоя AI услуга; Tetra работи без никаква интернет компания.</string>
+    <string name="ai_master_note">Когато е изключено, AI Assist и всички бутони ✦ са скрити и никоя заявка не напуска устройството. Важи за всичките ви устройства.</string>
+    <string name="ai_apps">Какво може да ползва AI Assist</string>
+    <string name="ai_apps_note">Изключено приложение AI Assist не може нито да чете, нито да действа в него, а AI бутоните му са скрити.</string>
+    <string name="ai_is_off">AI Assist е изключен (Настройки › AI Assist).</string>
+    <string name="ai_app_web">Търсене в мрежата и снимки</string>
 </resources>

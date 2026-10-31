@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Który kontakt to Ty?</string>
     <string name="assistant_relation_own">Lub własne słowo</string>
     <string name="assistant_me_new">Utwórz moją kartę: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Włączone: to, o co pytasz, trafia do Mistral, usługi AI w internecie.</string>
+    <string name="ai_master_off">Wyłączone: nic nie trafia do żadnej usługi AI; Tetra działa bez żadnej firmy internetowej.</string>
+    <string name="ai_master_note">Gdy wyłączone, AI Assist i wszystkie przyciski ✦ są ukryte i żadne zapytanie nie opuszcza urządzenia. Tak samo na wszystkich twoich urządzeniach.</string>
+    <string name="ai_apps">Czego AI Assist może używać</string>
+    <string name="ai_apps_note">Wyłączonej aplikacji AI Assist nie może ani czytać, ani w niej działać, a jej przyciski AI są ukryte.</string>
+    <string name="ai_is_off">AI Assist jest wyłączony (Ustawienia › AI Assist).</string>
+    <string name="ai_app_web">Wyszukiwanie w sieci i obrazy</string>
 </resources>

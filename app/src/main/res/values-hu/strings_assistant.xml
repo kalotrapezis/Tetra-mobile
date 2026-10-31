@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Melyik névjegy Ön?</string>
     <string name="assistant_relation_own">Vagy saját szó</string>
     <string name="assistant_me_new">Saját névjegy létrehozása: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Be: amit kérdezel, a Mistralhoz kerül, egy internetes AI-szolgáltatáshoz.</string>
+    <string name="ai_master_off">Ki: semmi sem kerül AI-szolgáltatáshoz; a Tetra egyetlen internetes cég nélkül működik.</string>
+    <string name="ai_master_note">Kikapcsolva az AI Assist és minden ✦ gomb rejtve van, és egyetlen kérés sem hagyja el az eszközt. Ez minden eszközödön így van.</string>
+    <string name="ai_apps">Mit használhat az AI Assist</string>
+    <string name="ai_apps_note">Egy kikapcsolt alkalmazást az AI Assist nem olvashat, és nem tehet benne semmit, az AI-gombjai pedig rejtve vannak.</string>
+    <string name="ai_is_off">Az AI Assist ki van kapcsolva (Beállítások › AI Assist).</string>
+    <string name="ai_app_web">Webes keresés és képek</string>
 </resources>

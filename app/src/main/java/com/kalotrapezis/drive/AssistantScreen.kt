@@ -62,6 +62,8 @@ open class AssistantActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WriterLog.init(this)
         TetraLook.load(this)
+        // AI off (Settings › Βοηθός AI): no assistant at all, from Home, its icon or the phone's assistant gesture
+        if (!AiGate.load(this).enabled) { android.widget.Toast.makeText(this, R.string.ai_is_off, android.widget.Toast.LENGTH_LONG).show(); finish(); return }
         if (!sheet) androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = TetraLook.light
         setContent { TetraTheme { AssistantApp(sheet) { finish() } } }
     }

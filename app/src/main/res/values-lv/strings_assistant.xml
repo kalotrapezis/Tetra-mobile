@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Kurš kontakts esat jūs?</string>
     <string name="assistant_relation_own">Vai jūsu vārds</string>
     <string name="assistant_me_new">Izveidot manu karti: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Ieslēgts: tas, ko jautājat, nonāk pie Mistral, AI pakalpojuma internetā.</string>
+    <string name="ai_master_off">Izslēgts: nekas nenonāk ne pie viena AI pakalpojuma; Tetra darbojas bez neviena interneta uzņēmuma.</string>
+    <string name="ai_master_note">Kad izslēgts, AI Assist un visas ✦ pogas ir paslēptas un neviens pieprasījums neatstāj ierīci. Tas pats attiecas uz visām jūsu ierīcēm.</string>
+    <string name="ai_apps">Ko AI Assist drīkst izmantot</string>
+    <string name="ai_apps_note">Izslēgtu lietotni AI Assist nevar ne lasīt, ne tajā darboties, un tās AI pogas ir paslēptas.</string>
+    <string name="ai_is_off">AI Assist ir izslēgts (Iestatījumi › AI Assist).</string>
+    <string name="ai_app_web">Meklēšana tīmeklī un attēli</string>
 </resources>

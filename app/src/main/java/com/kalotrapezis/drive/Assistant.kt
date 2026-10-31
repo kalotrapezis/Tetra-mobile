@@ -187,6 +187,8 @@ internal class AssistantTools(
     private var mailsShown = emptyList<MailEntry>()
 
     fun run(name: String, args: JSONObject): ToolResult = runCatching {
+        // an app the user keeps the assistant out of (Settings › Βοηθός AI): neither read nor acted in
+        APP_OF[name]?.takeIf { !AiGate.state.keeps(it) }?.let { return@runCatching ToolResult("The user does not let the assistant use their $it (Settings › AI Assist). Say so; do not try another way.") }
         when (name) {
             "calendar_add" -> calendarAdd(args)
             "calendar_list" -> calendarList(args)
@@ -458,7 +460,8 @@ internal class AssistantTools(
     private fun mailWrite(a: JSONObject): ToolResult {
         val said = a.getString("to").trim()
         val to = if ('@' in said) said else named(said).flatMap { it.emails }.firstOrNull()?.value
-            ?: return ToolResult("$said has no e-mail address in Contacts. Ask the user for the address.")
+            ?: return ToolResult(if (!AiGate.state.keeps("contacts")) "The assistant may not look in Contacts. Ask the user for $said's address."
+                else "$said has no e-mail address in Contacts. Ask the user for the address.")
         val draft = JSONObject().put("to", to).put("subject", a.optString("subject")).put("body", a.optString("body"))
         return ToolResult("The mail to $to is open on the screen, written; it waits for the user to check it and press Send.", go = "mail-write:$draft")
     }
@@ -497,7 +500,8 @@ internal class AssistantTools(
 
     // ---- Relations: on the user's own card, as Apple and Google write them (X-ABRELATEDNAMES with its X-ABLabel), so they
     // sync and show in Contacts, where they can be changed; no file of the assistant's own ----
-    private fun allContacts() = ContactsFiles.all(ContactsFiles.root(tetra))
+    /** Every card, unless the user keeps the assistant out of Contacts: then no tool (mail, maps) looks anyone up either. */
+    private fun allContacts() = if (!AiGate.state.keeps("contacts")) emptyList() else ContactsFiles.all(ContactsFiles.root(tetra))
     private fun myContact() = me()?.let { uid -> allContacts().firstOrNull { it.info.uid == uid } }
     private fun sameLabel(a: String, b: String) = ContactsFiles.plain(a) == ContactsFiles.plain(b)
     /** All a card says about who someone is, without accents: what keywords are looked for in. */
@@ -574,6 +578,17 @@ internal class AssistantTools(
         private const val NO_ME = "Tetra does not know which contact is the user. Ask the user for their own name as saved in Contacts, then call my_card, then try again."
         private const val RELATION = "Spouse, Partner, Mother, Father, Parent, Brother, Sister, Child, Friend, Assistant or Manager in English; any other in the user's own word (κουμπάρος)."
         private val ONLY_ONE = setOf("Spouse", "Partner", "Mother", "Father", "Assistant", "Manager")
+
+        /** Each tool's app (AiGate.APPS). */
+        val APP_OF = mapOf("calendar_add" to "calendar", "calendar_list" to "calendar", "calendar_free" to "calendar",
+            "timer_start" to "timer", "timer_list" to "timer", "timer_stop" to "timer", "alarm_add" to "timer", "alarm_list" to "timer", "alarm_delete" to "timer", "stopwatch" to "timer",
+            "notes_search" to "notes", "note_new" to "notes", "note_open" to "notes", "shopping_list" to "notes", "files_find" to "files", "file_open" to "files",
+            "contacts_find" to "contacts", "my_card" to "contacts", "relation_remember" to "contacts", "relation_forget" to "contacts", "contact_call" to "phone",
+            "navigate" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail",
+            "web_search" to "web", "make_image" to "web", "youtube" to "web")
+        /** The tools of the apps the assistant may use now: the others are not even offered. */
+        fun allowed(): JSONArray = JSONArray((0 until SCHEMA.length()).map { SCHEMA.getJSONObject(it) }
+            .filter { AiGate.state.keeps(APP_OF[it.getJSONObject("function").getString("name")]) })
 
         /** What the model may call, in Mistral's function-calling form. */
         val SCHEMA: JSONArray = JSONArray(listOf(
@@ -674,7 +689,7 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
         val choices = mutableListOf<AssistantChoice>(); val images = mutableListOf<File>()
         var call: PendingCall? = null; var open: File? = null; var go: String? = null
         repeat(ROUNDS) {
-            val m = api.chat(JSONArray(listOf(JSONObject().put("role", "system").put("content", AssistantTools.system(now()))) + messages), AssistantTools.SCHEMA, onText)
+            val m = api.chat(JSONArray(listOf(JSONObject().put("role", "system").put("content", AssistantTools.system(now()))) + messages), AssistantTools.allowed(), onText)
             val calls = m.optJSONArray("tool_calls")
             messages += JSONObject().put("role", "assistant").put("content", m.opt("content")?.takeIf { it != JSONObject.NULL } ?: "")
                 .apply { if (calls != null && calls.length() > 0) put("tool_calls", calls) }

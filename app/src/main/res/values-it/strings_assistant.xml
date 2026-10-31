@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Quale contatto sei tu?</string>
     <string name="assistant_relation_own">O una tua parola</string>
     <string name="assistant_me_new">Crea la mia scheda: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Attivo: ciò che chiedi va a Mistral, un servizio di AI su internet.</string>
+    <string name="ai_master_off">Disattivo: niente va a nessun servizio di AI; Tetra funziona senza alcuna azienda di internet.</string>
+    <string name="ai_master_note">Se disattivo, AI Assist e tutti i pulsanti ✦ sono nascosti e nessuna richiesta lascia il dispositivo. Vale su tutti i tuoi dispositivi.</string>
+    <string name="ai_apps">Cosa può usare AI Assist</string>
+    <string name="ai_apps_note">Un\'app disattivata, AI Assist non può né leggerla né agire in essa, e i suoi pulsanti AI sono nascosti.</string>
+    <string name="ai_is_off">AI Assist è disattivato (Impostazioni › AI Assist).</string>
+    <string name="ai_app_web">Ricerca web e immagini</string>
 </resources>

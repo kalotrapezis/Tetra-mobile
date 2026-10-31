@@ -86,6 +86,7 @@ internal object MailAssist {
             (if (notes.isNotBlank()) "\n\nMy notes for the reply:\n$notes" else "\n\nDraft my reply to the last message.")))
 
     fun draft(c: Context, thread: List<Pair<String, String>>, me: String, notes: String): String {
+        if (!AiGate.allows("mail")) throw DriveProblem("AI Assist may not use Mail.", R.string.ai_is_off)
         val body = JSONObject().put("model", Mistral.CHAT).put("messages", messages(thread, me, notes)).put("temperature", 0.4)
         return JSONObject(AssistantNet.post(AssistantNet.key(c), "/chat/completions", body.toString()))
             .getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content").trim()
@@ -374,7 +375,8 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
                     }
                 }
             }
-            if (of != null && draft.kind != "forward") Surface(color = MAIL_ACCENT.copy(alpha = 0.35f), shape = CircleShape, modifier = Modifier.clickable(enabled = !drafting) { assist() }) {
+            // hidden while the AI is off or kept out of Mail
+            if (of != null && draft.kind != "forward" && AiGate.allows("mail")) Surface(color = MAIL_ACCENT.copy(alpha = 0.35f), shape = CircleShape, modifier = Modifier.clickable(enabled = !drafting) { assist() }) {
                 Text(stringResource(if (drafting) R.string.mail_assist_working else R.string.mail_assist), Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.labelLarge)
             }
             OutlinedTextField(body, { body = it }, label = { Text(stringResource(R.string.mail_body)) }, modifier = Modifier.fillMaxWidth().heightIn(min = 240.dp))

@@ -70,7 +70,7 @@ object TetraFolder {
  */
 object TetraSystem {
     const val NAME = ".System"
-    val SHARED = mapOf("Calendar" to "Calendar", "Contacts" to "Contacts", "Data" to "Data", "Phone" to "Phone", "Timer" to "Timer", "Maps" to "Maps", "Mail" to "Mail", "Trash" to "Trash")
+    val SHARED = mapOf("Calendar" to "Calendar", "Contacts" to "Contacts", "Data" to "Data", "Phone" to "Phone", "Timer" to "Timer", "Maps" to "Maps", "Mail" to "Mail", "AI Assist" to "Assistant", "Trash" to "Trash")
 
     /** `<tetra>/.System/<app>/<kind>`, kind one of Data, Tools, Cache, Temp, Shared. */
     fun dir(tetra: File, app: String, kind: String) = File(tetra, "$NAME/$app/$kind")
@@ -225,7 +225,7 @@ object DriveRules {
      * the top of Tetra (a move that failed) is kept out of Files' lists, search and Move, as they all were since 18 Oct ("can we
      * hide the folders of the calendar and the timer"). The computer hides the same.
      */
-    private val APP_FOLDERS = listOf(CalendarFiles.FOLDER, TimerFiles.FOLDER, MapsFiles.FOLDER, ContactsFiles.FOLDER, PhoneHistory.FOLDER, DataFiles.FOLDER, MailFiles.FOLDER)
+    private val APP_FOLDERS = listOf(CalendarFiles.FOLDER, TimerFiles.FOLDER, MapsFiles.FOLDER, ContactsFiles.FOLDER, PhoneHistory.FOLDER, DataFiles.FOLDER, MailFiles.FOLDER, "AI Assist")
     fun isAppFolder(relativePath: String) = APP_FOLDERS.any { relativePath == it || relativePath.startsWith("$it/") }
     /**
      * Sync of the choice, folder by folder (the computer has the same rule): the later answer wins, and on a tie (a

@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Cén teagmhálaí thú féin?</string>
     <string name="assistant_relation_own">Nó d’fhocal féin</string>
     <string name="assistant_me_new">Déan mo chárta: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Ar siúl: téann a n-iarrann tú chuig Mistral, seirbhís AI ar an idirlíon.</string>
+    <string name="ai_master_off">As: ní théann aon rud chuig aon seirbhís AI; oibríonn Tetra gan aon chomhlacht idirlín ar chor ar bith.</string>
+    <string name="ai_master_note">Nuair atá sé as, tá AI Assist agus gach cnaipe ✦ i bhfolach agus ní fhágann aon iarratas an gléas. Is mar an gcéanna é ar do ghléasanna go léir.</string>
+    <string name="ai_apps">Cad is féidir le AI Assist a úsáid</string>
+    <string name="ai_apps_note">Aip atá múchta, ní féidir le AI Assist í a léamh ná aon rud a dhéanamh inti, agus tá a cnaipí AI i bhfolach.</string>
+    <string name="ai_is_off">Tá AI Assist as (Socruithe › AI Assist).</string>
+    <string name="ai_app_web">Cuardach gréasáin agus pictiúir</string>
 </resources>

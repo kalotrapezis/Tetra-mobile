@@ -70,7 +70,7 @@ internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, 
         R.string.settings_silence_unknown, R.string.settings_decline_hidden, R.string.settings_pc_calls, R.string.settings_phone_permission, R.string.settings_open_phone)),
     Data(R.string.app_data, Category.Data.icon, Category.Data.color, R.string.settings_data_summary, listOf(R.string.settings_data_setup, R.string.settings_usage_access, R.string.settings_your_plan, R.string.settings_warnings, R.string.settings_roaming,
         R.string.settings_live_speed, R.string.settings_signal_drops, R.string.settings_wifi_around, R.string.settings_open_data)),
-    Assistant(R.string.app_assistant, R.drawable.ic_chat, ASSISTANT_COLOR, R.string.settings_assistant_summary, listOf(R.string.assistant_key, R.string.assistant_words, R.string.assistant_contact_words, R.string.assistant_default, R.string.assistant_open)),
+    Assistant(R.string.app_assistant, R.drawable.ic_chat, ASSISTANT_COLOR, R.string.settings_assistant_summary, listOf(R.string.ai_master, R.string.ai_apps, R.string.assistant_key, R.string.assistant_words, R.string.assistant_contact_words, R.string.assistant_default, R.string.assistant_open)),
 }
 
 @Composable
@@ -473,6 +473,19 @@ internal fun SettingsTab(
     val context = LocalContext.current
     val version = resumes()
     val held = remember(version.intValue) { isDefaultAssistant(context) }
+    // the master switch and the apps it may use (the user, 31 Oct); synced, so every device follows (AiGate)
+    LaunchedEffect(version.intValue) { withContext(Dispatchers.IO) { AiGate.load(context) } }
+    SettingsSection(note = stringResource(R.string.ai_master_note)) {
+        SwitchRow(stringResource(R.string.ai_master), stringResource(if (AiGate.on) R.string.ai_master_on else R.string.ai_master_off), AiGate.on) { on ->
+            runCatching { AiGate.set(AiGate.state.copy(enabled = on)) }.onFailure { WriterLog.e("AI: the switch", it) }
+        }
+    }
+    if (AiGate.on) SettingsSection(stringResource(R.string.ai_apps), stringResource(R.string.ai_apps_note)) {
+        listOf("mail" to R.string.app_mail, "calendar" to R.string.app_calendar, "notes" to R.string.app_notes, "files" to R.string.app_files, "photos" to R.string.app_photos,
+            "timer" to R.string.app_timer, "contacts" to R.string.app_contacts, "phone" to R.string.app_phone, "maps" to R.string.app_maps, "web" to R.string.ai_app_web).forEach { (app, name) ->
+            SwitchRow(stringResource(name), null, AiGate.allows(app)) { on -> runCatching { AiGate.set(AiGate.state.copy(apps = AiGate.state.apps + (app to on))) }.onFailure { WriterLog.e("AI: an app's switch", it) } }
+        }
+    }
     SettingsSection { AssistantKeyField() }
     // Voxtral's context_bias (the VOICE app's terms): the user's own spellings, and the favourites' names only when switched on
     var words by remember { mutableStateOf(AssistantWords.words(context)) }

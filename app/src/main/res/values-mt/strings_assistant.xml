@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Liema kuntatt int?</string>
     <string name="assistant_relation_own">Jew kelma tiegħek</string>
     <string name="assistant_me_new">Agħmel il-kard tiegħi: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Mixgħul: dak li tistaqsi jmur għand Mistral, servizz AI fuq l-internet.</string>
+    <string name="ai_master_off">Mitfi: xejn ma jmur għand ebda servizz AI; Tetra jaħdem mingħajr ebda kumpanija tal-internet.</string>
+    <string name="ai_master_note">Meta jkun mitfi, AI Assist u kull buttuna ✦ huma moħbija u l-ebda talba ma titlaq mill-apparat. Hekk ukoll fuq l-apparati kollha tiegħek.</string>
+    <string name="ai_apps">X’jista’ juża AI Assist</string>
+    <string name="ai_apps_note">App mitfija AI Assist la jista’ jaqraha u lanqas jagħmel xi ħaġa fiha, u l-buttuni AI tagħha huma moħbija.</string>
+    <string name="ai_is_off">AI Assist huwa mitfi (Settings › AI Assist).</string>
+    <string name="ai_app_web">Tfittxija fuq il-web u stampi</string>
 </resources>

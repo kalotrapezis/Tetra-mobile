@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Milline kontakt oled sina?</string>
     <string name="assistant_relation_own">Või oma sõna</string>
     <string name="assistant_me_new">Loo minu kaart: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Sees: mida küsite, läheb Mistralile, internetis olevale AI-teenusele.</string>
+    <string name="ai_master_off">Väljas: midagi ei lähe ühelegi AI-teenusele; Tetra töötab ilma ühegi internetifirmata.</string>
+    <string name="ai_master_note">Kui see on väljas, on AI Assist ja kõik ✦ nupud peidetud ning ükski päring ei lahku seadmest. See kehtib kõigis teie seadmetes.</string>
+    <string name="ai_apps">Mida AI Assist tohib kasutada</string>
+    <string name="ai_apps_note">Väljalülitatud rakendust ei saa AI Assist lugeda ega selles midagi teha ning selle AI-nupud on peidetud.</string>
+    <string name="ai_is_off">AI Assist on väljas (Seaded › AI Assist).</string>
+    <string name="ai_app_web">Veebiotsing ja pildid</string>
 </resources>

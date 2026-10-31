@@ -65,4 +65,12 @@
     <string name="assistant_me_pick">Hvilken kontakt er dig?</string>
     <string name="assistant_relation_own">Eller dit eget ord</string>
     <string name="assistant_me_new">Opret mit kort: %1$s</string>
+    <string name="ai_master">AI Assist</string>
+    <string name="ai_master_on">Til: det, du spørger om, går til Mistral, en AI-tjeneste på internettet.</string>
+    <string name="ai_master_off">Fra: intet går til nogen AI-tjeneste; Tetra fungerer helt uden internetfirmaer.</string>
+    <string name="ai_master_note">Når den er slået fra, er AI Assist og alle ✦-knapper skjult, og ingen forespørgsel forlader enheden. Det gælder på alle dine enheder.</string>
+    <string name="ai_apps">Hvad AI Assist må bruge</string>
+    <string name="ai_apps_note">En app, der er slået fra, kan AI Assist hverken læse eller handle i, og dens AI-knapper er skjult.</string>
+    <string name="ai_is_off">AI Assist er slået fra (Indstillinger › AI Assist).</string>
+    <string name="ai_app_web">Websøgning og billeder</string>
 </resources>

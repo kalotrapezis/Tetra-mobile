@@ -437,6 +437,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
         runCatching { SyncServer.acquire(context.applicationContext, SyncStore(context.applicationContext)) }
         SyncListenService.start(context)
         Thread { runCatching { DataStats.startAll(context.applicationContext) } }.start()
+        Thread { runCatching { AiGate.load(context.applicationContext) } }.start() // whether Home shows AI Assist
         onDispose { runCatching { SyncServer.release() } }
     }
     // the computer asks where the phone is (desktop Maps) and Tetra may not use the location yet: Android's question, here
@@ -1194,7 +1195,7 @@ private fun Home(
         "contacts" -> HomeContactsGroup(openContacts)
         "phone" -> HomePhoneGroup()
         "data" -> HomeDataGroup()
-        "assistant" -> HomeWideCard(stringResource(R.string.app_assistant), stringResource(R.string.assistant_home_detail), R.drawable.assistant_art, { openAssistant(context) })
+        "assistant" -> if (AiGate.on) HomeWideCard(stringResource(R.string.app_assistant), stringResource(R.string.assistant_home_detail), R.drawable.assistant_art, { openAssistant(context) })
         "mail" -> HomeWideCard(stringResource(R.string.app_mail), stringResource(R.string.mail_home_detail), R.drawable.mail_art, openMail)
         "maps" -> HomeMapsGroup(wide, openMaps)
     } }
@@ -1213,7 +1214,7 @@ private fun Home(
         "contacts" -> listOf(HomeIcon(R.string.app_contacts, R.drawable.contacts_art, { openContacts(null) }))
         "phone" -> listOf(HomeIcon(R.string.app_phone, R.drawable.phone_art, { openPhone(context) }))
         "data" -> listOf(HomeIcon(R.string.app_data, R.drawable.data_art, { openData(context) }))
-        "assistant" -> listOf(HomeIcon(R.string.app_assistant, R.drawable.assistant_art, { openAssistant(context) }))
+        "assistant" -> if (AiGate.on) listOf(HomeIcon(R.string.app_assistant, R.drawable.assistant_art, { openAssistant(context) })) else emptyList() // AI off: not on Home
         "mail" -> listOf(HomeIcon(R.string.app_mail, R.drawable.mail_art, openMail))
         "maps" -> listOf(HomeIcon(R.string.app_maps, R.drawable.maps_art, { openMaps(null) }))
         else -> emptyList()
