@@ -80,17 +80,41 @@ class MailTest {
         assertNotNull(Mime.textAsHtml("a <b> & c").takeIf { it.contains("a &lt;b&gt; &amp; c") })
     }
 
-    @Test fun theDeviceKeepsRecentMailAndTheIndexAlways() {
-        val today = java.time.LocalDate.of(2026, 10, 31)
-        val eml = "Mail/a@b.gr/Inbox/2026/2026-05-02 0912 X - Y.eml"
-        val old = "Mail/a@b.gr/Archive/2025/2025-10-30 0800 X - Y.eml"
-        val att = "Mail/a@b.gr/Inbox/2026/2026-10-15 0912 X - Y.files/a.pdf"
-        assertTrue(MailSync.keep("Mail/index.jsonl", today, 1, 0)); assertTrue(MailSync.keep("Mail/accounts.json", today, 1, 0))
-        assertTrue(MailSync.keep(eml, today, 6, 1)); assertFalse(MailSync.keep(eml, today, 1, 1))
-        assertFalse(MailSync.keep(old, today, 12, 1)); assertTrue(MailSync.keep(old, today, -1, 1))
-        assertTrue(MailSync.keep(att, today, 6, 1)); assertFalse(MailSync.keep(att, today, 6, 0)); assertTrue(MailSync.keep(att, today, 6, -1))
-        assertFalse(MailSync.keep("Mail/requests/Pixel-1.json", today, -1, -1)) // never taken back from the computer
-        assertTrue(MailSync.keep("Documents/2020-01-01 0000 x .pdf", today, 1, 0)) // not Mail
+    @Test fun aDeviceKeepsTheNewestMailThenAttachmentsUpToItsLimit() {
+        val files = mapOf("Mail/index.jsonl" to 900L, "Mail/accounts.json" to 50L,
+            "Mail/a@b.gr/Inbox/2026/2026-10-31 0912 X - new.eml" to 40L, "Mail/a@b.gr/Inbox/2026/2026-10-30 0800 X - older.eml" to 40L,
+            "Mail/a@b.gr/Archive/2025/2025-01-01 0800 X - oldest.eml" to 40L, "Mail/a@b.gr/Inbox/2026/2026-10-31 0912 X - new.files/a.pdf" to 30L)
+        assertEquals(setOf("Mail/index.jsonl", "Mail/accounts.json", "Mail/a@b.gr/Inbox/2026/2026-10-31 0912 X - new.eml", "Mail/a@b.gr/Inbox/2026/2026-10-30 0800 X - older.eml"),
+            MailSync.plan(files, 100)) // the index never counts; two mails fit, the oldest and then the attachment do not
+        assertEquals(files.keys - "Mail/a@b.gr/Inbox/2026/2026-10-31 0912 X - new.files/a.pdf", MailSync.plan(files, 125)) // mail before attachments
+        assertEquals(files.keys, MailSync.plan(files, -1))
+        val keep = MailSync.plan(files, 100)
+        val copy = MailStorage("Pixel"); val move = MailStorage("Pixel", mode = MailStorage.MOVE)
+        assertTrue(MailSync.take("Mail/a@b.gr/Inbox/2026/2026-10-31 0912 X - new.eml", copy, keep))
+        assertFalse(MailSync.take("Mail/a@b.gr/Inbox/2026/2026-10-31 0912 X - new.eml", move, keep)) // move: nothing from the PC
+        assertTrue(MailSync.take("Mail/index.jsonl", move, keep)); assertTrue(MailSync.take("Documents/x.pdf", move, keep))
+        assertFalse(MailSync.take("Mail/requests/Pixel-1.json", copy, keep)) // never taken back from the computer
+        val old = java.io.File.createTempFile("mail", ".eml").apply { setLastModified(0) }
+        assertTrue(MailSync.drop("Mail/a@b.gr/Archive/2025/2025-01-01 0800 X - oldest.eml", old, keep, held = true))
+        assertFalse(MailSync.drop("Mail/a@b.gr/Archive/2025/2025-01-01 0800 X - oldest.eml", old, keep, held = false)) // not before the PC has it
+        assertFalse(MailSync.drop("Mail/a@b.gr/Inbox/2026/2026-10-31 0912 X - new.eml", old, keep, held = true))
+        old.setLastModified(System.currentTimeMillis())
+        assertFalse(MailSync.drop("Mail/a@b.gr/Archive/2025/2025-01-01 0800 X - oldest.eml", old, keep, held = true)) // opened this week
+        old.delete()
+    }
+
+    @Test fun aDevicesStorageIsAFileEitherSideWrites() {
+        val dir = java.nio.file.Files.createTempDirectory("mail").toFile()
+        assertEquals(MailStorage("Pixel"), MailStorage.read(dir, "Pixel")) // nothing said: copy, 1 GB
+        File(dir, "devices").mkdirs()
+        File(dir, "devices/Pixel.json").writeText("""{"device":"Pixel","name":"Pixel 8","mode":"move","limit":5000000000,"setAt":7,"setBy":"desktop"}""") // as the PC writes it
+        assertEquals(MailStorage("Pixel", "Pixel 8", MailStorage.MOVE, 5 * MailStorage.GB, 7, "desktop"), MailStorage.read(dir, "Pixel"))
+        File(dir, "a@b.gr").mkdirs(); File(dir, "a@b.gr/x.eml").writeText("12345")
+        MailStorage.report(dir, "Pixel")
+        assertEquals(5L to 1, MailStorage.usage(dir, "Pixel")) // the devices' own files are not counted
+        File(dir, "devices/Tab.usage.json").writeText("""{"used":3,"files":1,"at":1}""")
+        assertEquals(listOf("Pixel", "Tab"), MailStorage.all(dir).map { it.device })
+        dir.deleteRecursively()
     }
 
     @Test fun aRequestIsOneFileInStep1sFormat() {
@@ -163,9 +187,8 @@ class MailTest {
     }
 
     @Test fun theOutboxAndSignaturesAreStep1s() {
-        val today = java.time.LocalDate.of(2026, 10, 31)
-        assertFalse(MailSync.keep("Mail/outbox/Pixel-1.json", today, -1, -1)); assertFalse(MailSync.keep("Mail/outbox/Pixel-1.files/a.pdf", today, -1, -1))
-        assertTrue(MailSync.keep("Mail/outbox/Pixel-1.failed.json", today, 1, 0)) // what the PC gave up on comes back to be said
+        assertFalse(MailSync.take("Mail/outbox/Pixel-1.json", MailStorage("P"), emptySet())); assertFalse(MailSync.take("Mail/outbox/Pixel-1.files/a.pdf", MailStorage("P"), emptySet()))
+        assertTrue(MailSync.take("Mail/outbox/Pixel-1.failed.json", MailStorage("P"), emptySet())) // what the PC gave up on comes back to be said
         assertTrue(MailSync.outgoing("Mail/outbox/Pixel-1.json")); assertFalse(MailSync.outgoing("Mail/outbox/Pixel-1.failed.json"))
         val dir = java.nio.file.Files.createTempDirectory("mail").toFile()
         MailSignatures.set(dir, "A@B.gr", "Θεολόγος <K>\nNUP & co")

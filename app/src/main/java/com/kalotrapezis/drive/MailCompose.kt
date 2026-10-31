@@ -291,7 +291,7 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.mail_from), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 accounts.sortedBy { it.shadow }.forEach { a -> // this device's own first: they send from here
-                    Surface(color = if (a.id == from) MAIL_COLOR else MaterialTheme.colorScheme.surfaceVariant, contentColor = if (a.id == from) Color.White else MaterialTheme.colorScheme.onSurface,
+                    Surface(color = if (a.id == from) MAIL_ACCENT else MaterialTheme.colorScheme.surfaceVariant, contentColor = if (a.id == from) Color.White else MaterialTheme.colorScheme.onSurface,
                         shape = CircleShape, modifier = Modifier.clickable { from = a.id }) {
                         Text(a.address + if (a.shadow) " ⇄ PC" else "", Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelLarge)
                     }
@@ -321,7 +321,7 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
         // the writing island: two big buttons with words; the rest pulled up
         Box(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().imePadding().padding(bottom = 12.dp)) {
             IslandBottomBar(expand = { panel = true }, visible = !panel) {
-                Surface(color = MAIL_COLOR, contentColor = Color.White, shape = CircleShape, modifier = Modifier.clickable(enabled = !busy) { go(false) }) {
+                Surface(color = MAIL_ACCENT, contentColor = Color.White, shape = CircleShape, modifier = Modifier.clickable(enabled = !busy) { go(false) }) {
                     Row(Modifier.padding(horizontal = 22.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(painterResource(R.drawable.ic_arrow_forward), null)
                         Text(stringResource(if (busy) R.string.mail_sending else R.string.mail_send), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -335,17 +335,13 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
     }
     if (panel) ModalBottomSheet(onDismissRequest = { panel = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp)) {
-            @Composable fun PanelRow(icon: Int, label: String, enabled: Boolean = true, click: () -> Unit) =
-                Row(Modifier.fillMaxWidth().clickable(enabled = enabled) { panel = false; click() }.padding(vertical = 12.dp, horizontal = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(painterResource(icon), null, tint = if (enabled) islandContentColor() else islandContentColor().copy(alpha = 0.45f))
-                    Text(label, color = if (enabled) islandContentColor() else islandContentColor().copy(alpha = 0.45f), style = MaterialTheme.typography.bodyLarge)
-                }
-            PanelRow(R.drawable.ic_attach, stringResource(R.string.mail_attach)) { pick.launch(arrayOf("*/*")) }
-            PanelRow(R.drawable.ic_person, stringResource(R.string.mail_cc_bcc)) { showCc = !showCc }
-            PanelRow(R.drawable.ic_edit_note, stringResource(if (signed) R.string.mail_signature_off else R.string.mail_signature_on), enabled = signature.isNotBlank()) { signed = !signed }
-            PanelRow(R.drawable.ic_sort_time, stringResource(R.string.mail_send_later), enabled = false) {}
-            PanelRow(R.drawable.ic_delete, stringResource(R.string.mail_discard)) { if (touched) asking = true else close(null) }
+            ChoiceGroup {
+                DrawerRow(R.drawable.ic_attach, stringResource(R.string.mail_attach), true) { panel = false; pick.launch(arrayOf("*/*")) }
+                DrawerRow(R.drawable.ic_person, stringResource(R.string.mail_cc_bcc), true) { panel = false; showCc = !showCc }
+                DrawerRow(R.drawable.ic_edit_note, stringResource(if (signed) R.string.mail_signature_off else R.string.mail_signature_on), signature.isNotBlank()) { if (signature.isNotBlank()) { panel = false; signed = !signed } }
+                DrawerRow(R.drawable.ic_sort_time, stringResource(R.string.mail_send_later), false) {}
+                DrawerRow(R.drawable.ic_delete, stringResource(R.string.mail_discard), true) { panel = false; if (touched) asking = true else close(null) }
+            }
         }
     }
     if (asking) AlertDialog(onDismissRequest = { asking = false }, title = { Text(stringResource(R.string.mail_discard_ask)) },

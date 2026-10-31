@@ -3,7 +3,6 @@ package com.kalotrapezis.drive
 import android.content.Context
 import java.io.File
 import java.nio.charset.Charset
-import java.time.LocalDate
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -121,10 +120,11 @@ internal object MailFiles {
 }
 
 /**
- * What of the Mail part this device keeps (MAIL_PLAN §2: the index always, recent mail, older on demand): a body for
- * [bodies] months, an attachment for [attachments] (-1 all, 0 none), by the date in its path ("yyyy-mm-dd hhmm …"). The
- * computer offers every Mail file each sync; the rest comes by [SyncClient.mailFile] when opened. Requests are this
- * device's own to send, never taken back.
+ * What of the Mail part a device keeps (MAIL_PLAN §2, the user's per-device setting, §14): every file without a date
+ * (index, accounts, signatures, the devices' settings) always; then mail by the date in its path ("yyyy-mm-dd hhmm …"),
+ * newest first — first the mail itself, then, with what is left, the attachments — until the device's limit. The
+ * computer offers every Mail file each sync; the rest comes by [SyncClient.mailFile] when opened. Requests and the
+ * outbox are this device's own to send, never taken back.
  */
 internal object MailSync {
     const val PART = "Mail/"
@@ -132,23 +132,76 @@ internal object MailSync {
     const val OUTBOX = "Mail/outbox/"
     /** This device's own to send, never taken back: requests and the outbox (but a send the PC gave up on comes back as .failed.json). */
     fun outgoing(rel: String) = rel.startsWith(REQUESTS) || (rel.startsWith(OUTBOX) && !rel.endsWith(".failed.json"))
-    private val DATED = Regex("(?:^|/)(\\d{4})-(\\d{2})-(\\d{2}) \\d{4} ")
+    private val DATED = Regex("(?:^|/)(\\d{4}-\\d{2}-\\d{2} \\d{4}) ")
+    /** A mail or an attachment (its path has the mail's date), rather than one of the part's own files. */
+    fun dated(rel: String) = DATED.containsMatchIn(rel)
 
-    fun keep(rel: String, today: LocalDate, bodies: Int, attachments: Int): Boolean {
-        if (!rel.startsWith(PART)) return true
-        if (outgoing(rel)) return false
-        val m = DATED.find(rel) ?: return true // index.jsonl, accounts.json, a device's own index and accounts
-        val date = runCatching { LocalDate.of(m.groupValues[1].toInt(), m.groupValues[2].toInt(), m.groupValues[3].toInt()) }.getOrNull() ?: return true
-        return recent(date, today, if (".files/" in rel) attachments else bodies)
+    /** Of [files] (path → bytes), those kept within [limit] bytes (-1: all). */
+    fun plan(files: Map<String, Long>, limit: Long): Set<String> {
+        if (limit < 0) return files.keys
+        val keep = files.keys.filterTo(HashSet()) { !dated(it) }
+        var left = limit
+        val (attachments, bodies) = files.keys.filter(::dated).partition { ".files/" in it }
+        for (group in listOf(bodies, attachments)) for (rel in group.sortedByDescending { DATED.find(it)!!.groupValues[1] }) {
+            val size = files.getValue(rel)
+            if (size > left) break // oldest dropped first: nothing older than the first that does not fit
+            keep += rel; left -= size
+        }
+        return keep
     }
 
-    fun recent(date: LocalDate, today: LocalDate, months: Int) = months < 0 || (months > 0 && !date.isBefore(today.minusMonths(months.toLong())))
+    /** Whether to take [rel] when the PC offers it: the part's own files; mail only in copy mode and within [keep]. */
+    fun take(rel: String, storage: MailStorage, keep: Set<String>) = !rel.startsWith(PART) || rel.endsWith(".failed.json") ||
+        (!outgoing(rel) && (!dated(rel) || (storage.mode == MailStorage.COPY && rel in keep)))
 
-    fun keep(c: Context, rel: String) = keep(rel, LocalDate.now(), MailPrefs.bodies(c), MailPrefs.attachments(c))
+    /** A mail file this device may let go of: outside [keep], held by the PC ([held]), and not opened here in the last week. */
+    fun drop(rel: String, file: File, keep: Set<String>, held: Boolean) = rel.startsWith(PART) && !outgoing(rel) && !rel.startsWith(OUTBOX) &&
+        dated(rel) && rel !in keep && held && file.lastModified() < System.currentTimeMillis() - 7 * 86_400_000L
+}
 
-    /** A Mail file this device may let go of: older than it keeps, and not opened here in the last week. */
-    fun drop(c: Context, rel: String, file: File) = rel.startsWith(PART) && !outgoing(rel) && !rel.startsWith(OUTBOX) && !keep(c, rel) &&
-        file.lastModified() < System.currentTimeMillis() - 7 * 86_400_000L
+/**
+ * One device's mail storage, set on the PC's Devices page, the hub as for files and photos (MAIL_PLAN §14; the user, 31
+ * Oct): Mail/devices/<device>.json = { device, name, mode: "copy" | "move", limit: bytes (-1 everything), setAt, setBy },
+ * written by the PC and only read here; Mail/devices/<device>.usage.json = { used, files, at }, written only by the device. Copy: the device holds the newest mail up to the limit, filled from the PC too. Move:
+ * it takes nothing from the PC, and lets go of what it fetched itself once the PC holds it, keeping what fits.
+ */
+internal data class MailStorage(val device: String, val name: String = device, val mode: String = COPY, val limit: Long = DEFAULT,
+    val setAt: Long = 0, val setBy: String = "") {
+
+    companion object {
+        const val COPY = "copy"; const val MOVE = "move"
+        const val GB = 1_000_000_000L // as Android and the PC show sizes
+        const val DEFAULT = GB
+        val LIMITS = listOf(GB / 2, GB, 2 * GB, 5 * GB, 10 * GB, -1L)
+        private fun dir(root: File) = File(root, "devices")
+        private fun of(o: JSONObject, device: String) = MailStorage(o.optString("device", device), o.optString("name", device),
+            o.optString("mode", COPY).takeIf { it == COPY || it == MOVE } ?: COPY, o.optLong("limit", DEFAULT), o.optLong("setAt"), o.optString("setBy"))
+
+        fun read(root: File, device: String): MailStorage = runCatching { of(JSONObject(File(dir(root), "$device.json").readText()), device) }.getOrDefault(MailStorage(device))
+        /** Every device that has a setting or has said how much it uses. */
+        fun all(root: File): List<MailStorage> = dir(root).listFiles { f -> f.name.endsWith(".json") }.orEmpty()
+            .map { it.name.removeSuffix(".json").removeSuffix(".usage") }.distinct().sorted().map { read(root, it) }
+
+        /** (bytes, files) a device said it holds, or null. */
+        fun usage(root: File, device: String): Pair<Long, Int>? = runCatching { JSONObject(File(dir(root), "$device.usage.json").readText()).let { it.getLong("used") to it.getInt("files") } }.getOrNull()
+
+        /** What Mail holds on this device now: every file of the part but the devices' own. */
+        fun measure(root: File): Pair<Long, Int> {
+            var bytes = 0L; var n = 0
+            root.walkTopDown().filter { it.isFile && !it.name.startsWith(".") && it.parentFile != dir(root) }.forEach { bytes += it.length(); n++ }
+            return bytes to n
+        }
+
+        /** This device's usage file, written again only when it changed by a megabyte or more (each write is a file to sync). */
+        fun report(root: File, device: String) {
+            val (used, files) = measure(root)
+            val was = usage(root, device)
+            if (was != null && kotlin.math.abs(was.first - used) < (1 shl 20) && was.second == files) return
+            val d = dir(root).apply { mkdirs() }
+            val part = File(d, ".$device.usage.json.part").apply { writeText(JSONObject().put("used", used).put("files", files).put("at", System.currentTimeMillis()).toString()) }
+            check(part.renameTo(File(d, "$device.usage.json")))
+        }
+    }
 }
 
 /**
@@ -262,11 +315,6 @@ internal object MailPrefs {
     fun state(c: Context, id: String): String? = p(c).getString("state.$id", null)
     fun setState(c: Context, id: String, reason: String?) = p(c).edit().apply { if (reason == null) remove("state.$id") else putString("state.$id", reason) }.apply()
     fun receipts(c: Context) = p(c).getInt("receipts", 1) // 0 never, 1 ask, 2 always
-    /** Months of mail (-1 all) and of attachments (0 none, -1 all) kept on this device (MAIL_PLAN §2). */
-    fun bodies(c: Context) = p(c).getInt("bodies", 6)
-    fun attachments(c: Context) = p(c).getInt("attachments", 1)
-    fun setBodies(c: Context, months: Int) = p(c).edit().putInt("bodies", months).apply()
-    fun setAttachments(c: Context, months: Int) = p(c).edit().putInt("attachments", months).apply()
     fun setReceipts(c: Context, v: Int) = p(c).edit().putInt("receipts", v).apply()
     /** A folder's kept view ("Κράτησε για αυτόν τον φάκελο"), or null. */
     fun view(c: Context, folder: String) = p(c).getString("view.$folder", null)?.let(MailView::of)

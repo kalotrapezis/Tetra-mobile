@@ -129,16 +129,7 @@
     <string name="mail_on_pc">en el ordenador</string>
     <string name="mail_fetching">Descargando del ordenador…</string>
     <string name="mail_fetch_failed">No se pudo descargar del ordenador: %1$s</string>
-    <string name="mail_on_device">En este dispositivo</string>
-    <string name="mail_on_device_note">El correo y los adjuntos más antiguos se quedan en el ordenador y llegan aquí cuando los abres.</string>
-    <string name="mail_keep_bodies">Correo</string>
-    <string name="mail_keep_attachments">Adjuntos</string>
-    <string name="mail_month_1">1 mes</string>
-    <string name="mail_months_6">6 meses</string>
-    <string name="mail_months_12">12 meses</string>
-    <string name="mail_year_1">1 año</string>
     <string name="mail_keep_all">Todo</string>
-    <string name="mail_keep_none">Ninguno</string>
     <string name="mail_not_done">No se hizo en el servidor: %1$s</string>
     <string name="mail_why_auth">No se aceptó la contraseña.</string>
     <string name="mail_why_app_password">Google pide aquí una contraseña de aplicación, no la normal.</string>

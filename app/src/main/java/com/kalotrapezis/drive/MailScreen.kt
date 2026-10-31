@@ -83,6 +83,10 @@ import kotlinx.coroutines.withContext
 
 /** Mail's colour: the icon's own pink (tools/applet-icons.py: applet_mail). */
 internal val MAIL_COLOR = Color(0xFFFD0DA4)
+/** What is chosen or the main action: a dark pink, the tone of a picked row (the user, 31 Oct: the icon's pink is too bright and too like the Calendar's). */
+internal val MAIL_ACCENT = Color(0xFF6E1B50)
+/** Pink words (day headings, text buttons): muted, readable on the dark ground. */
+internal val MAIL_TEXT = Color(0xFFD27AAE)
 private val GREEN = Color(0xFF3FB27F)
 private val ORANGE = Color(0xFFE0A43A)
 
@@ -272,7 +276,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
                 })) }
                 groups.forEach { (key, ms) ->
                     if (key.isNotEmpty()) item(key = "g:$key") {
-                        Text(groupName(view.group, key, accountOf), Modifier.padding(start = 12.dp, top = 8.dp), color = MAIL_COLOR, style = MaterialTheme.typography.labelLarge)
+                        Text(groupName(view.group, key, accountOf), Modifier.padding(start = 12.dp, top = 8.dp), color = MAIL_TEXT, style = MaterialTheme.typography.labelLarge)
                     }
                     items(ms, key = { it.id }) { e ->
                         MailRow(e, accountOf[e.account], picked = e.id in selected, choosing = selected.isNotEmpty(), chosen = wide && selected.isEmpty() && e.id == openId,
@@ -349,7 +353,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
             // the mail's island: one big Απάντηση; the rest pulled up from it
             if (open != null && !(wide && many.size > 1)) Box(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp)) {
                 IslandBottomBar(expand = { mailDrawer = true }, visible = !mailDrawer) {
-                    Surface(color = MAIL_COLOR, contentColor = Color.White, shape = CircleShape, modifier = Modifier.clickable { writing = MailDraft("reply", open) }) {
+                    Surface(color = MAIL_ACCENT, contentColor = Color.White, shape = CircleShape, modifier = Modifier.clickable { writing = MailDraft("reply", open) }) {
                         Row(Modifier.padding(horizontal = 26.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(painterResource(R.drawable.ic_reply), null); Text(stringResource(R.string.mail_reply), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         }
@@ -384,6 +388,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             if (selected.isNotEmpty()) {
                 val allFav = mails.filter { it.id in selected }.all { it.flagged }
+                ChoiceGroup {
                 DrawerRow(R.drawable.ic_favorite, stringResource(if (allFav) R.string.mail_from_favourites else R.string.mail_to_favourites), true) { listDrawer = false; act(if (allFav) "unfavorite" else "favorite", selected) }
                 DrawerRow(R.drawable.ic_move, stringResource(R.string.mail_move), true) { listDrawer = false; moving = selected }
                 DrawerRow(R.drawable.ic_report, stringResource(if (role == "Spam") R.string.mail_not_spam else R.string.mail_spam), true) { listDrawer = false; act(spamOp, selected) }
@@ -391,6 +396,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
                 DrawerRow(R.drawable.ic_arrow_forward, stringResource(R.string.mail_forward_attached), false, writeLater)
                 DrawerRow(R.drawable.ic_file_download, stringResource(R.string.mail_fetch_local), false, later)
                 DrawerRow(R.drawable.ic_auto_fix, stringResource(R.string.mail_summarise), false, later)
+                }
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     // on the open mail
@@ -413,6 +419,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
     }
     if (mailDrawer && open != null) ModalBottomSheet(onDismissRequest = { mailDrawer = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            ChoiceGroup {
             DrawerRow(R.drawable.ic_reply_all, stringResource(R.string.mail_reply_all), true) { mailDrawer = false; writing = MailDraft("replyAll", open) }
             DrawerRow(R.drawable.ic_arrow_forward, stringResource(R.string.mail_forward), true) { mailDrawer = false; writing = MailDraft("forward", open) }
             DrawerRow(R.drawable.ic_archive, stringResource(R.string.mail_do_archive), true) { mailDrawer = false; act("archive", listOf(open.id)) }
@@ -425,6 +432,7 @@ internal fun MailScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit,
             DrawerRow(R.drawable.ic_code, stringResource(R.string.mail_source), MailFiles.eml(root, open) != null) {
                 mailDrawer = false
                 source = runCatching { MailFiles.eml(root, open)!!.readText(Charsets.ISO_8859_1).take(200_000) }.getOrNull()
+            }
             }
             Text(stringResource(R.string.mail_read_only_note), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodySmall, color = islandContentColor().copy(alpha = 0.7f))
         }
@@ -508,7 +516,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
         Box(Modifier.width(4.dp).fillMaxHeight().heightIn(min = 72.dp).background(Color(account?.color ?: 0xFF9E9E9E)))
         Column(Modifier.weight(1f).padding(start = 12.dp, top = 8.dp, bottom = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                if (choosing) Box(Modifier.size(20.dp).clip(CircleShape).background(if (picked) MAIL_COLOR else Color.Transparent)
+                if (choosing) Box(Modifier.size(20.dp).clip(CircleShape).background(if (picked) MAIL_ACCENT else Color.Transparent)
                     .then(if (picked) Modifier else Modifier.background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f), CircleShape)), contentAlignment = Alignment.Center) {
                     if (picked) Icon(painterResource(R.drawable.ic_check), stringResource(R.string.contacts_selected), Modifier.size(14.dp), tint = Color.White)
                 }
@@ -537,8 +545,12 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
     }
 }
 
-@Composable private fun DrawerRow(icon: Int, label: String, enabled: Boolean, click: () -> Unit) =
-    Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).alpha(if (enabled) 1f else 0.45f).clickable(onClick = click).padding(vertical = 12.dp, horizontal = 4.dp),
+/** A panel's choices on a ground of their own, one rounded block, so where they end and the words under them begin shows (as Settings' sections). */
+@Composable internal fun ChoiceGroup(content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) =
+    Column(Modifier.fillMaxWidth().clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp)), verticalArrangement = Arrangement.spacedBy(2.dp), content = content)
+
+@Composable internal fun DrawerRow(icon: Int, label: String, enabled: Boolean, click: () -> Unit) =
+    Row(Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.08f)).clickable(onClick = click).alpha(if (enabled) 1f else 0.45f).padding(vertical = 14.dp, horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
         Icon(painterResource(icon), null, Modifier.size(22.dp)); Text(label, style = MaterialTheme.typography.bodyLarge)
     }
@@ -645,8 +657,8 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
         if (blocked) Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.medium, modifier = Modifier.padding(bottom = 10.dp)) {
             Row(Modifier.fillMaxWidth().padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text("🛡 " + stringResource(R.string.mail_images_blocked), Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
-                TextButton(onClick = { once = true }) { Text(stringResource(R.string.mail_show_images), color = MAIL_COLOR) }
-                TextButton(onClick = { MailPrefs.allow(context, sender); allowedVersion++ }) { Text(stringResource(R.string.mail_always_sender), color = MAIL_COLOR) }
+                TextButton(onClick = { once = true }) { Text(stringResource(R.string.mail_show_images), color = MAIL_TEXT) }
+                TextButton(onClick = { MailPrefs.allow(context, sender); allowedVersion++ }) { Text(stringResource(R.string.mail_always_sender), color = MAIL_TEXT) }
             }
         }
         when {
@@ -700,7 +712,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(painterResource(R.drawable.ic_filter), null); Text("  " + stringResource(R.string.mail_filter), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
-                if (v != MailView()) TextButton(onClick = { set(MailView()) }) { Text(stringResource(R.string.common_clear), color = MAIL_COLOR) }
+                if (v != MailView()) TextButton(onClick = { set(MailView()) }) { Text(stringResource(R.string.common_clear), color = MAIL_TEXT) }
             }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(stringResource(R.string.mail_unread), v.unread) { set(v.copy(unread = !v.unread)) }
@@ -720,19 +732,21 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
                 listOf("day" to R.string.mail_group_day, "from" to R.string.mail_sort_from, "account" to R.string.mail_sort_account, "none" to R.string.mail_group_none)
                     .forEach { (k, s) -> FilterChip(stringResource(s), v.group == k) { set(v.copy(group = k)) } }
             }
-            SheetSwitch(stringResource(R.string.mail_unread_first), v.unreadFirst) { set(v.copy(unreadFirst = it)) }
-            SheetSwitch(stringResource(R.string.mail_favourites_first), v.favoritesFirst) { set(v.copy(favoritesFirst = it)) }
-            SheetSwitch(stringResource(R.string.mail_attachments_first), v.attachmentsFirst) { set(v.copy(attachmentsFirst = it)) }
-            SheetSwitch(stringResource(R.string.mail_keep_for_folder), keep, setKeep)
+            ChoiceGroup {
+                SheetSwitch(stringResource(R.string.mail_unread_first), v.unreadFirst) { set(v.copy(unreadFirst = it)) }
+                SheetSwitch(stringResource(R.string.mail_favourites_first), v.favoritesFirst) { set(v.copy(favoritesFirst = it)) }
+                SheetSwitch(stringResource(R.string.mail_attachments_first), v.attachmentsFirst) { set(v.copy(attachmentsFirst = it)) }
+                SheetSwitch(stringResource(R.string.mail_keep_for_folder), keep, setKeep)
+            }
         }
     }
 }
 
 @Composable private fun FilterChip(text: String, on: Boolean, click: () -> Unit) = Surface(
-    color = if (on) MAIL_COLOR else Color.White.copy(alpha = 0.10f), contentColor = islandContentColor(), shape = CircleShape, modifier = Modifier.clickable(onClick = click),
+    color = if (on) MAIL_ACCENT else Color.White.copy(alpha = 0.10f), contentColor = islandContentColor(), shape = CircleShape, modifier = Modifier.clickable(onClick = click),
 ) { Text(text, Modifier.padding(horizontal = 14.dp, vertical = 8.dp), style = MaterialTheme.typography.labelLarge, maxLines = 1) }
 
 @Composable private fun SheetSwitch(text: String, on: Boolean, set: (Boolean) -> Unit) =
-    Row(Modifier.fillMaxWidth().clickable { set(!on) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.08f)).clickable { set(!on) }.padding(horizontal = 16.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(text, Modifier.weight(1f)); Switch(checked = on, onCheckedChange = set)
     }

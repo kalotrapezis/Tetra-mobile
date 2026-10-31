@@ -133,16 +133,7 @@
     <string name="mail_on_pc">v počítači</string>
     <string name="mail_fetching">Sťahuje sa z počítača…</string>
     <string name="mail_fetch_failed">Nepodarilo sa stiahnuť z počítača: %1$s</string>
-    <string name="mail_on_device">V tomto zariadení</string>
-    <string name="mail_on_device_note">Staršie správy a prílohy zostávajú v počítači a prídu sem, keď ich otvoríte.</string>
-    <string name="mail_keep_bodies">Správy</string>
-    <string name="mail_keep_attachments">Prílohy</string>
-    <string name="mail_month_1">1 mesiac</string>
-    <string name="mail_months_6">6 mesiacov</string>
-    <string name="mail_months_12">12 mesiacov</string>
-    <string name="mail_year_1">1 rok</string>
     <string name="mail_keep_all">Všetko</string>
-    <string name="mail_keep_none">Žiadne</string>
     <string name="mail_not_done">Na serveri sa neurobilo: %1$s</string>
     <string name="mail_why_auth">Heslo nebolo prijaté.</string>
     <string name="mail_why_app_password">Google tu chce heslo aplikácie, nie vaše bežné heslo.</string>

@@ -298,6 +298,127 @@ archive's by path), the body as HTML with the signature in `<div class="tetra-si
 `.json` files after everything else and deletes its copies once uploaded; it takes back only `*.failed.json`, says
 them once and deletes them. Signatures are `signatures.json`'s, edited on the phone as plain text.
 
+## 12. Writing: the desktop sends, the phone's outbox (as built, desktop `mail.js`, 31 Oct)
+
+**On the desktop.** New, Reply, Reply all, Forward (inline, with the attachments) and Forward as attachment (the
+`.eml`). Sent by SMTP with the account's own password (`smtp` in `accounts.json`: built in for Gmail and sch.gr, from
+Thunderbird's database, or the IMAP host on 465). The same bytes are kept at once in `<address>/Sent/…` (green, a
+`local` index line) and appended to the server's Sent (Gmail files its own); when the sync finds the server's copy
+with the same Message-ID and size, that line takes over the file (`movedTo`), nothing downloaded. A draft is saved
+four seconds after typing stops: one file in `<address>/Drafts/…` and one message (`\Draft`) on the server, each
+replacing the last version (same Message-ID); sending removes it from both. The text copy (`text/plain`) is made
+from the HTML. Bcc goes on the envelope only.
+
+**Signatures** (§9c): `Mail/signatures.json` = `{ "<address>": { "html", "newMail": bool, "replies": bool,
+"position": "above" | "below" } }` (above or below the quoted text). Synced like the rest, so the phone can use the
+same one; it is put in by whoever builds the mail (the desktop for its own drafts, the phone for its own), in a
+`<div class="tetra-signature">-- <br>…</div>`.
+
+**The outbox (phone → desktop).** A mail written on the phone, to send or keep as a draft:
+
+```
+Mail/outbox/<device>-<ms>.json
+{ "account": "<address>",                        // which account sends it
+  "action": "send" | "draft" | "discard",        // discard: the draft with this messageId goes, here and on the server
+  "at": 1793439266004,                           // ms; done oldest first
+  "draft": {
+    "to":  [{ "name": "Γραμματεία", "address": "s@x.gr" }], "cc": [...], "bcc": [...],   // bcc: envelope only
+    "subject": "…", "html": "<p>…</p>",          // the whole body: the reply's quote and the signature already in it
+    "inReplyTo": "<id@x>", "references": ["<id@x>"],                                     // for a reply, else omit
+    "messageId": "<…>",                          // keep one per draft: saving it again replaces the last version
+    "attachments": [{ "name": "photo.jpg", "file": "outbox/<device>-<ms>.files/photo.jpg" },   // the phone's own file
+                    { "name": "Guide.pdf", "file": "<address>/Inbox/2026/….files/Guide.pdf" }, // one already in the archive
+                    { "name": "x.eml", "file": "<address>/Inbox/2026/x.eml", "type": "message/rfc822" }] },
+  "eml": "<device>-<ms>.eml" }                   // optional: a ready MIME mail beside it, sent as it is (then
+                                                 //   to/cc/subject come from it; bcc still from "draft")
+```
+
+- `file` paths are relative to `Mail/` (the synced folder). Upload the attachments (and the `.eml`) **first**, the
+  `.json` **last**: the `.json` is what starts it. One whose `.eml` has not arrived yet waits.
+- Done: the `.json`, its `.eml` and its `.files/` are deleted by the desktop; the result shows in `index.jsonl` (the
+  mail in Sent, green, or the draft in Drafts). Delete your own copies once uploaded.
+- It cannot be done now (no connection, a password to fix): it waits and is tried again every minute. It failed for
+  good (no recipients, a refused address, an attachment not there): it becomes `<device>-<ms>.failed.json`, the
+  same JSON plus `"error"` (`noRecipients`, `other`, …) and `"detail"`, for the phone to show; the desktop also says
+  it in a notification. The phone deletes the `.failed.json` once it has shown it.
+- Sync: the scope `"mail"` covers `Mail/requests` and `Mail/outbox`, so these go at once.
+
+## 13. Microsoft sign-in: registering Tetra once (for the user; as built, desktop `msauth.js`, 31 Oct)
+
+Hotmail/Outlook.com and Microsoft 365 (nup.ac.cy) refuse passwords; they sign in through an app registered with
+Microsoft. That registration is done **once, by you**, with your own Microsoft account; it is free. Tetra then needs
+only its **Application (client) ID** (a code like `1a2b3c4d-…`), entered in Tetra › Ρυθμίσεις › Αλληλογραφία ›
+«Σύνδεση Microsoft». No secret is created or needed (Tetra is a "public client": the browser sign-in with PKCE).
+
+1. Open **https://entra.microsoft.com** (or portal.azure.com → "Microsoft Entra ID") and sign in with your Hotmail
+   (a personal account works; if it asks to create a free tenant/directory, accept).
+2. **Applications → App registrations → New registration.**
+   - Name: `Tetra Mail`.
+   - Supported account types: **"Accounts in any organizational directory and personal Microsoft accounts"**
+     (multitenant + personal) — so both Hotmail and nup.ac.cy can use it.
+   - Redirect URI: platform **"Public client/native (mobile & desktop)"**, value **`http://localhost`**
+     (Microsoft lets a desktop app use any port on localhost; Tetra picks a free one each time).
+   - Register.
+3. On the app's **Overview** page, copy **Application (client) ID** → paste it in Tetra's setting.
+4. **Authentication**: under "Advanced settings", set **Allow public client flows = Yes**; save.
+5. **API permissions → Add a permission → APIs my organization uses → type "Office 365 Exchange Online"**
+   → Delegated permissions → tick **`IMAP.AccessAsUser.All`** and **`SMTP.Send`** → Add. (`offline_access` is asked for by
+   Tetra itself; "Microsoft Graph › User.Read" may stay.) Do **not** press "Grant admin consent" — it is not needed for
+   your own accounts.
+6. In Tetra: Αλληλογραφία › Λογαριασμοί › Προσθήκη → your Hotmail address → «Σύνδεση με Microsoft» → Microsoft's page
+   opens in the browser → sign in (and approve "Tetra Mail" the first time) → the browser says you can go back.
+
+**nup.ac.cy (Microsoft 365):** the university's IT may require that they approve new apps. Then Microsoft's page says
+"Need admin approval" and Tetra says so in plain words (`err_approval`). The two ways out: ask IT to approve
+"Tetra Mail" (send them the Application ID and the two permissions above), or forward the university mail to Gmail.
+
+**SMTP for Hotmail:** Microsoft has SMTP AUTH on by default for personal accounts; for Microsoft 365 the IT may have it
+switched off per mailbox ("Authenticated SMTP"). Then reading works and sending fails with a plain sentence; ask IT
+to enable it for your mailbox, or send from another account.
+
+How it works inside: the authorization code with PKCE (S256) and a loopback redirect on 127.0.0.1; scopes
+`offline_access`, `https://outlook.office.com/IMAP.AccessAsUser.All`, `https://outlook.office.com/SMTP.Send`; IMAP
+`outlook.office365.com:993` and SMTP `smtp.office365.com:587` (STARTTLS) by XOAUTH2. The refresh token is kept
+encrypted (safeStorage) in this computer's settings only, renewed when Microsoft sends a new one; access tokens live
+an hour, in memory. A phone does not sign in to Microsoft: it reads these accounts as shadow accounts (⇄ PC).
+
+## 14. How much mail each device keeps (the user, 31 Oct; as built on the phone, `Mail.kt`)
+
+On each device's card on **the PC's Devices page** — the PC is the hub, as for files and photos (the user, 31 Oct:
+"the sync options only on the desktop cards, not on the phone; the phone will take it from the desktop"; "no controls
+about the sync" on the phone: its Mail settings are its own look, signatures, outside content and so on). The phone
+only follows it:
+
+- **Αντιγραφή (copy):** the device keeps its own copy of the newest mail up to the limit, filled from the PC too.
+- **Μετακίνηση (move):** it takes nothing from the PC; mail it fetched itself it lets go once the PC holds it,
+  keeping what fits the limit. Older mail opens from the PC as before.
+- **Κράτα έως** 0,5 / 1 / 2 / 5 / 10 GB / Όλα (decimal GB, as Android and the PC show sizes); default copy, 1 GB.
+- How much Mail takes on that device now.
+
+**Budget.** Files without a date in their path (index, accounts, signatures, the devices' files) always, uncounted;
+then mail by the date in its path, newest first — first the `.eml` files, then, with what is left, the `.files/`
+attachments — until the limit; the first that does not fit ends it (nothing older is kept). A file outside it is let
+go at a whole sync only if the PC holds it (it did not ask for it, or just received it verified) and it was not opened
+here in the last week. An account only this device fetches has every body downloaded (until the PC has it, the
+device's copy is the only one); one the PC fetches too, only what fits.
+
+**Files** (synced like the rest of `Mail/`, hidden from Files):
+
+```
+Mail/devices/<device>.json          { "device": "<device>", "name": "Pixel 8",       // shown on the cards
+                                      "mode": "copy" | "move",
+                                      "limit": 1000000000,                          // bytes; -1 = everything
+                                      "setAt": 1793444028498,                       // ms; the later wins
+                                      "setBy": "<device>" | "desktop" }
+Mail/devices/<device>.usage.json    { "used": 34512, "files": 18, "at": 1793444028498 }   // only that device writes it
+```
+
+- Only the PC writes `<device>.json` (the whole object, `setAt` now) when the user changes it there. No file: copy,
+  1 GB. The device reads it at every sync and never writes it.
+- `<device>.usage.json` is rewritten by the device after a whole sync when its Mail changed by a megabyte or more.
+  `used` counts every file of `Mail/` on that device except `devices/`.
+- `<device>` is the same name as in `index.<device>.jsonl` (Build.MODEL with only [A-Za-z0-9_-]).
+
 ## Open questions for the user
 
 - Away from home, does the phone sync with the desktop over the internet, or only on the same Wi-Fi?

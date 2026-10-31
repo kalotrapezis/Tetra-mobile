@@ -24,7 +24,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.security.KeyStore
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Properties
 import javax.crypto.Cipher
@@ -320,18 +319,22 @@ internal object MailEngine {
     }
 
     private fun bodies(c: Context, root: File, store: Store, boxes: Map<String, String>, id: String) {
-        val today = LocalDate.now()
         val all = synchronized(lock) { mine(root) }.filter { it.account == id && it.file == null && !it.gone }
-            .filter { MailSync.recent(Instant.ofEpochMilli(it.date).atZone(ZoneId.systemDefault()).toLocalDate(), today, MailPrefs.bodies(c)) }
-        // one the PC (or another device) already saved: its file, not a second download
-        val saved = MailFiles.index(root, device()).filter { it.file != null && File(root, it.file).isFile }.associateBy { it.id }
+        // one the PC (or another device) already saved, here or not: its file, not a second download (opened, it comes from the PC)
+        val saved = MailFiles.index(root, device()).filter { it.file != null }.associateBy { it.id }
         synchronized(lock) { append(root, all.mapNotNull { e -> saved[e.id]?.let { s -> e.copy(file = s.file, saved = s.saved, attachments = s.attachments, snippet = s.snippet) } }) }
         // one that moved on the server (archived, deleted, a move): its file follows it, as the PC's does, not a second download
         fun same(e: MailEntry) = e.messageId ?: "${e.date}|${e.fromAddress}|${e.subject}|${e.size}" // a mail with no Message-ID: by what it is
         val left = synchronized(lock) { mine(root) }.filter { it.account == id && it.gone && it.file != null && File(root, it.file).isFile }.associateBy(::same)
         val moved = all.filter { it.id !in saved }.mapNotNull { e -> left[same(e)]?.let { old -> runCatching { relocate(root, old, e) }.getOrNull() } }
         synchronized(lock) { append(root, moved) }
-        val todo = all.filter { it.id !in saved && it.id !in moved.map { m -> m.id } }.sortedByDescending { it.date }
+        // an account only this device fetches: every body (until the PC has them this is the only copy; the limit frees the space
+        // after); one the PC fetches too: what fits this device's limit, newest first (MAIL_PLAN §14)
+        val pcToo = MailFiles.accounts(root).any { it.id == id && it.json?.optString("addedOn", "desktop") != "phone" }
+        val waiting = all.filter { it.id !in saved && it.id !in moved.map { m -> m.id } }
+        val pseudo = waiting.associateBy { "x/${mailName(it.date, "x", "x")} ${it.id.hashCode()}.eml" }
+        val fits = if (!pcToo) pseudo.keys else MailSync.plan(pseudo.mapValues { it.value.size } + localMail(root), MailStorage.read(root, device()).limit)
+        val todo = pseudo.filterKeys { it in fits }.values.sortedByDescending { it.date }
         for ((role, list) in todo.groupBy { it.folder }) {
             val f = store.getFolder(boxes[role] ?: continue) as IMAPFolder
             f.open(Folder.READ_ONLY)
@@ -346,6 +349,10 @@ internal object MailEngine {
             } finally { f.close(false) }
         }
     }
+
+    /** The mail files on this device, by their sync path (Mail/…) and size: what the limit is counted against. */
+    private fun localMail(root: File): Map<String, Long> = root.walkTopDown().filter { it.isFile && !it.name.startsWith(".") }
+        .associate { MailSync.PART + it.relativeTo(root).invariantSeparatorsPath to it.length() }.filterKeys { MailSync.dated(it) }
 
     /** [old]'s .eml and .files into [now]'s folder, under the name the PC's store() would give it there. */
     private fun relocate(root: File, old: MailEntry, now: MailEntry): MailEntry {

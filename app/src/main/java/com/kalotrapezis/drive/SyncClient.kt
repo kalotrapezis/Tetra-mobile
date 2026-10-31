@@ -1028,11 +1028,11 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         // a part's list goes to its own address: a computer too old for parts answers "Unknown request" instead of
         // taking it for the whole Drive (and offering everything else back as copies)
         val answer = postJson(host, p, if (scope == null) "/files/manifest" else "/files/manifest/scoped", JSONObject().put("files", manifest).apply { if (scope != null) put("scope", scope) })
+        val want = answer.optJSONArray("want") ?: JSONArray()
+        val sent = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
         if (connection.sends) {
-            val want = answer.optJSONArray("want") ?: JSONArray()
             val byPath = entries.associateBy { it.relativePath }
             val mine = (0 until want.length()).mapNotNull { byPath[want.getString(it)] }
-            val sent = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
             // Mail's outbox: a .json starts the sending, so it goes after its attachments (MAIL_PLAN §12)
             val (starts, rest) = mine.partition { it.relativePath.startsWith(MailSync.OUTBOX) && it.relativePath.endsWith(".json") }
             for (batch in listOf(rest, starts)) eachInParallel(batch, context.getString(R.string.sync_stage_sending_files), checkpoint, progress, failed, { it.relativePath }) { entry ->
@@ -1070,11 +1070,20 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         }.onFailure { failed += fail(R.string.sync_fail_moving, it.message) }
 
         val have = answer.optJSONArray("have") ?: JSONArray()
-        // Mail: only what this device keeps (MAIL_PLAN §2); the older mail it has let go, and comes on demand
-        val incoming = (0 until have.length()).map(have::getJSONObject).filter { MailSync.keep(context, it.optString("path")) }
-        if (scope == null) entries.filter { it.relativePath.startsWith(MailSync.PART) }.forEach { e ->
-            val f = File(root, TetraSystem.onDisk(e.relativePath))
-            if (MailSync.drop(context, e.relativePath, f)) f.delete() // the computer keeps its copy: a Mail file let go is never deleted there
+        // Mail: only what this device keeps (its setting on the Devices page, MAIL_PLAN §14); the rest comes on demand
+        val offered = (0 until have.length()).map(have::getJSONObject)
+        val storage = MailStorage.read(MailFiles.root(root), MailEngine.device())
+        val local = entries.filter { it.relativePath.startsWith(MailSync.PART) && !MailSync.outgoing(it.relativePath) }
+        val keep = MailSync.plan(local.associate { it.relativePath to it.sizeBytes } +
+            (if (storage.mode == MailStorage.COPY) offered.filter { it.optString("path").startsWith(MailSync.PART) }.associate { it.optString("path") to it.optLong("size") } else emptyMap()), storage.limit)
+        val incoming = offered.filter { MailSync.take(it.optString("path"), storage, keep) }
+        if (scope == null) {
+            val asked = (0 until want.length()).mapTo(HashSet()) { want.getString(it) }
+            local.forEach { e -> // let go only of what the computer holds: it did not ask for it, or just received it verified
+                val f = File(root, TetraSystem.onDisk(e.relativePath))
+                if (MailSync.drop(e.relativePath, f, keep, held = connection.sends && (e.relativePath !in asked || e.relativePath in sent))) f.delete()
+            }
+            runCatching { MailStorage.report(MailFiles.root(root), MailEngine.device()) }
         }
         return eachInParallel(incoming, context.getString(R.string.sync_stage_receiving_files), checkpoint, progress, failed, { it.optString("path") }) { file ->
             receiveFile(host, p, root, file)

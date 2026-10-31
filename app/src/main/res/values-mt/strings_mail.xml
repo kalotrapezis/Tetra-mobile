@@ -133,16 +133,7 @@
     <string name="mail_on_pc">fuq il-kompjuter</string>
     <string name="mail_fetching">Qed inġib mill-kompjuter…</string>
     <string name="mail_fetch_failed">Ma setax jinġieb mill-kompjuter: %1$s</string>
-    <string name="mail_on_device">Fuq dan l-apparat</string>
-    <string name="mail_on_device_note">Il-posta u l-annessi eqdem jibqgħu fuq il-kompjuter u jaslu hawn meta tiftaħhom.</string>
-    <string name="mail_keep_bodies">Posta</string>
-    <string name="mail_keep_attachments">Annessi</string>
-    <string name="mail_month_1">1 xahar</string>
-    <string name="mail_months_6">6 xhur</string>
-    <string name="mail_months_12">12-il xahar</string>
-    <string name="mail_year_1">1 sena</string>
     <string name="mail_keep_all">Kollha</string>
-    <string name="mail_keep_none">Xejn</string>
     <string name="mail_not_done">Ma sarx fuq is-server: %1$s</string>
     <string name="mail_why_auth">Il-password ma ġietx aċċettata.</string>
     <string name="mail_why_app_password">Google trid password tal-app hawn, mhux dik normali tiegħek.</string>

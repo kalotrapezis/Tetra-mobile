@@ -133,16 +133,7 @@
     <string name="mail_on_pc">kompiuteryje</string>
     <string name="mail_fetching">Parsiunčiama iš kompiuterio…</string>
     <string name="mail_fetch_failed">Nepavyko parsiųsti iš kompiuterio: %1$s</string>
-    <string name="mail_on_device">Šiame įrenginyje</string>
-    <string name="mail_on_device_note">Senesni laiškai ir priedai lieka kompiuteryje ir atkeliauja čia, kai juos atidarote.</string>
-    <string name="mail_keep_bodies">Laiškai</string>
-    <string name="mail_keep_attachments">Priedai</string>
-    <string name="mail_month_1">1 mėnuo</string>
-    <string name="mail_months_6">6 mėnesiai</string>
-    <string name="mail_months_12">12 mėnesių</string>
-    <string name="mail_year_1">1 metai</string>
     <string name="mail_keep_all">Visi</string>
-    <string name="mail_keep_none">Jokių</string>
     <string name="mail_not_done">Serveryje neatlikta: %1$s</string>
     <string name="mail_why_auth">Slaptažodis nepriimtas.</string>
     <string name="mail_why_app_password">Čia Google reikia programos slaptažodžio, ne įprasto.</string>
