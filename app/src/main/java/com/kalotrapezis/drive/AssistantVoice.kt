@@ -167,6 +167,7 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
             "calendar" -> { ScopedSync.soon(app, "calendar", 0, orWhole = true); CalendarAlarms.planSoon(app) }
             "timer" -> { ScopedSync.soon(app, "timer", 0, orWhole = true); TimerService.check(app) }
             "notes" -> NotesSync.soon(app)
+            "places" -> LocationReminders.planSoon(app)
             "contacts" -> { ScopedSync.soon(app, "contacts", 0, orWhole = true); ContactsAccount.soon(app) }
         } },
         search = { q ->
@@ -179,7 +180,8 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
         },
         // shortcut: which card is the user's is kept on this phone only (Contacts has no "me" mark yet); move it into the card when the computer needs it
         me = { prefs.getString("me", null) }, setMe = { prefs.edit().putString("me", it).apply() },
-        photos = { place, at -> AssistantPhotos.at(app, place, at) })
+        photos = { place, at -> AssistantPhotos.at(app, place, at) },
+        placesOn = { LocationReminders.ready(app) })
     return AssistantChat(api, tools, forgetMs)
 }
 

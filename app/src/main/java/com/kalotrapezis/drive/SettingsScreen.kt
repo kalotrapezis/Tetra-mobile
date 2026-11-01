@@ -634,6 +634,33 @@ internal fun SettingsTab(
             }
         }
     }
+    // place reminders (LocationReminders): off at first; Android asks the location, then "all the time" on a page of its own
+    val askAlways = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { version.intValue++; LocationReminders.planSoon(context) }
+    val askPlace = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        version.intValue++; if (LocationReminders.located(context)) askAlways.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+    }
+    fun allowPlaces() = if (!LocationReminders.located(context)) askPlace.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+        else askAlways.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+    SettingsSection(stringResource(R.string.place_reminders), stringResource(R.string.place_reminders_note)) {
+        var placesOn by remember { mutableStateOf(LocationReminders.enabled(context)) }
+        SwitchRow(stringResource(R.string.place_reminders_on), if (placesOn) stringResource(R.string.common_on) else stringResource(R.string.common_off), placesOn) {
+            placesOn = it; LocationReminders.setEnabled(context, it); if (it && !LocationReminders.always(context)) allowPlaces()
+        }
+        if (placesOn) {
+            val always = LocationReminders.always(context)
+            StatusRow(stringResource(R.string.place_reminders_location), if (always) stringResource(R.string.place_reminders_location_on) else stringResource(R.string.place_reminders_location_off),
+                always, if (always) null else stringResource(R.string.common_allow)) { allowPlaces() }
+        }
+        var places by remember { mutableStateOf(LocationReminders.list(driveRoot())) }
+        if (places.isEmpty()) SettingRow(stringResource(R.string.place_reminders_none))
+        places.forEach { r ->
+            SettingRow(if (r.kind.isNotEmpty()) MapsSearch.label(r.kind, context) else r.name, r.note.ifEmpty { stringResource(R.string.place_reminders_any) }) {
+                IconButton(onClick = { LocationReminders.remove(context, driveRoot(), r.id); places = LocationReminders.list(driveRoot()) }) {
+                    Icon(painterResource(R.drawable.ic_delete), contentDescription = stringResource(R.string.common_delete))
+                }
+            }
+        }
+    }
     val pick = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) scope.launch { say(withContext(Dispatchers.IO) { runCatching { importCalendars(context, uri) }.getOrElse { context.getString(R.string.settings_not_imported, it.message.orEmpty()) } }) }
     }

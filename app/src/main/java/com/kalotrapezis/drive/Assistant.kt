@@ -179,18 +179,20 @@ internal class AssistantTools(
     private val setMe: (String) -> Unit = {},
     /** The library's photos taken at a place: by the place name each keeps, else near where [at] finds it. */
     private val photos: (place: String, at: () -> Pair<Double, Double>?) -> List<File> = { _, _ -> emptyList() },
+    /** Place reminders on and the location allowed all the time (LocationReminders.ready). */
+    private val placesOn: () -> Boolean = { false },
 ) {
     private var contacts = emptyList<PendingCall>()
     private var files = emptyList<File>()
     private var notesFound = emptyList<Note>()
     private var alarmsShown = emptyList<AlarmRecord>()
     private var mailsShown = emptyList<MailEntry>()
-
-    fun run(name: String, args: JSONObject): ToolResult = runCatching {
     private var factsShown = emptyList<AssistantMemory.Fact>()
 
     /** The personal details (AssistantMemory): in every chat's instructions. */
     fun facts() = AssistantMemory.list(tetra)
+
+    fun run(name: String, args: JSONObject): ToolResult = runCatching {
         // an app the user keeps the assistant out of (Settings › Βοηθός AI): neither read nor acted in
         APP_OF[name]?.takeIf { !AiGate.state.keeps(it) }?.let { return@runCatching ToolResult("The user does not let the assistant use their $it (Settings › AI Assist). Say so; do not try another way.") }
         when (name) {
@@ -209,6 +211,7 @@ internal class AssistantTools(
             "note_open" -> pick(notesFound, args) { n -> ToolResult("Opened the note.", go = "note:${n.id}") }
             "navigate" -> navigate(args)
             "photos_place" -> photosPlace(args)
+            "place_reminder" -> placeReminder(args)
             "youtube" -> args.getString("query").trim().let { q -> ToolResult("YouTube is open on a search for \"$q\".", go = "youtube:$q") }
             "shopping_list" -> shoppingList(args)
             "files_find" -> filesFind(args)
@@ -226,12 +229,12 @@ internal class AssistantTools(
             "mail_stored_find" -> mailStoredFind(args)
             "mail_export" -> pick(mailsShown, args) { e -> mailExport(e, args.optString("attachment").trim()) }
             "mail_write" -> mailWrite(args)
-            "web_search" -> ToolResult(search(args.getString("query")))
-            "make_image" -> image(args.getString("prompt")).let { ToolResult("The picture is on the screen, saved as ${it.name}.", image = it) }
-            else -> ToolResult("No tool called $name.")
             "memory_add" -> AssistantMemory.add(tetra, args.getString("text"), device).let { changed("memory"); ToolResult("Kept: \"${it.text}\". Settings › AI Assist › Personal details shows it.") }
             "memory_list" -> facts().also { factsShown = it }.let { l -> ToolResult(if (l.isEmpty()) "Nothing is kept." else l.mapIndexed { i, f -> "${i + 1}. ${f.text}" }.joinToString("\n")) }
             "memory_forget" -> pick(factsShown, args) { f -> AssistantMemory.change(tetra, f.id, "", device); factsShown = factsShown - f; changed("memory"); ToolResult("Forgot \"${f.text}\".") }
+            "web_search" -> ToolResult(search(args.getString("query")))
+            "make_image" -> image(args.getString("prompt")).let { ToolResult("The picture is on the screen, saved as ${it.name}.", image = it) }
+            else -> ToolResult("No tool called $name.")
         }
     }.getOrElse { ToolResult("Failed: ${it.message}") }
 
@@ -401,6 +404,22 @@ internal class AssistantTools(
             else a.optString("place").trim().ifEmpty { return ToolResult("Say where to.") }
         val p = locate(where) ?: return ToolResult("Not on the map; Tetra Maps is open on a search for it.", go = "maps-search:$where")
         return ToolResult("Directions to ${if (contact.isNotEmpty()) contact else p.name} started in Tetra Maps.", go = "maps-go:${p.lat},${p.lng},${p.name}")
+    }
+
+    private fun placeReminder(a: JSONObject): ToolResult {
+        val kind = a.optString("kind").trim().takeIf { k -> MapsSearch.PILLS.any { it.key == k } }.orEmpty()
+        val note = a.optString("note").trim()
+        val r = if (kind.isNotEmpty()) PlaceReminder(MapsFiles.newId(), kind, "", 0.0, 0.0, note) else {
+            val where = a.optString("place").trim().ifEmpty { return ToolResult("Say which place or which kind of shop.") }
+            val p = locate(where) ?: return ToolResult("$where is not on the map.")
+            PlaceReminder(MapsFiles.newId(), "", p.name, p.lat, p.lng, note)
+        }
+        LocationReminders.add(tetra, r)
+        changed("places")
+        val what = if (kind.isNotEmpty()) "any $kind" else r.name
+        val list = if (note.isEmpty()) "the newest checklist with items left" else "the newest checklist titled \"$note\""
+        return if (placesOn()) ToolResult("Set: arriving at $what shows $list.")
+        else ToolResult("Saved: arriving at $what will show $list, but place reminders are off. Settings › Calendar is open: the user turns them on there and allows the location all the time.", go = LocationReminders.SCREEN)
     }
 
     private fun photosPlace(a: JSONObject): ToolResult {
@@ -625,7 +644,7 @@ internal class AssistantTools(
             "timer_start" to "timer", "timer_list" to "timer", "timer_stop" to "timer", "alarm_add" to "timer", "alarm_list" to "timer", "alarm_delete" to "timer", "stopwatch" to "timer",
             "notes_search" to "notes", "note_new" to "notes", "note_open" to "notes", "shopping_list" to "notes", "files_find" to "files", "file_open" to "files",
             "contacts_find" to "contacts", "my_card" to "contacts", "relation_remember" to "contacts", "relation_forget" to "contacts", "contact_call" to "phone",
-            "navigate" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail", "mail_stored_find" to "mail", "mail_export" to "mail",
+            "navigate" to "maps", "place_reminder" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail", "mail_stored_find" to "mail", "mail_export" to "mail",
             "web_search" to "web", "make_image" to "web", "youtube" to "web")
         /** The tools of the apps the assistant may use now: the others are not even offered. */
         fun allowed(): JSONArray = JSONArray((0 until SCHEMA.length()).map { SCHEMA.getJSONObject(it) }
@@ -673,6 +692,10 @@ internal class AssistantTools(
             fn("contact_call", "Ask to call a contact from the last contacts_find list. The phone asks the user to confirm; it does not call by itself.", listOf("choice"), CHOICE),
             fn("navigate", "Start driving directions in Tetra Maps (offline map), to a place or to a contact's saved address.", emptyList(),
                 "place" to p("string", "A place, a town or an address (\"Ερμού 10, Αθήνα\")."), "contact" to p("string", "A contact's name, to go to their address.")),
+            fn("place_reminder", "Show a checklist from Notes when the user arrives at a place: any shop of a kind (every supermarket), or one place.", emptyList(),
+                "kind" to JSONObject().put("type", "string").put("enum", JSONArray(MapsSearch.PILLS.map { it.key })).put("description", "A kind of place, for any of them (supermarket)."),
+                "place" to p("string", "One place instead: a saved place's name, a shop's name or an address."),
+                "note" to p("string", "Words of the checklist's title (Ψώνια for shopping); leave out for any checklist with items left.")),
             fn("photos_place", "Show the user's photos taken at a place.", listOf("place"), "place" to p("string", "A town or a place.")),
             fn("youtube", "Open YouTube on a search for a song or a video.", listOf("query"), "query" to p("string", "The song or video, with the artist if said.")),
             fn("mail_new", "The new mail in the Inbox: what came in the last hours, and anything still unread; a numbered list with senders, subjects and the start of each.", emptyList(),
@@ -690,6 +713,10 @@ internal class AssistantTools(
             fn("mail_write", "Write an e-mail: Tetra's compose page opens with it filled in, and the user sends it. It is never sent by you.", listOf("to", "subject", "body"),
                 "to" to p("string", "An e-mail address, or a contact's name as said."), "subject" to p("string", "A short subject."),
                 "body" to p("string", "The whole text as a proper e-mail: a greeting, what the user wants said, a closing line; no signature (Tetra adds it).")),
+            fn("memory_add", "Keep a lasting fact about the user that they asked you to remember («θυμήσου ότι…»): it is given to you in every later chat, on every device.", listOf("text"),
+                "text" to p("string", "The fact, short, in the user's language and in the third person (\"Διδάσκει στο 3ο Δημοτικό Καβάλας\").")),
+            fn("memory_list", "The facts kept about the user, a numbered list.", emptyList()),
+            fn("memory_forget", "Forget a fact from the last memory_list.", listOf("choice"), CHOICE),
             fn("web_search", "Search the web for current facts, news, opening hours, prices.", listOf("query"), "query" to p("string", "What to search for.")),
             fn("make_image", "Draw a picture from a description.", listOf("prompt"), "prompt" to p("string", "What the picture shows, in detail.")),
         ))
@@ -708,15 +735,12 @@ internal class AssistantTools(
             "Πάμε εκεί", "βάλε προορισμό": navigate; "there" is the last place in this conversation (an event's place, a search result); for a contact's home, navigate with contact.
             "Χρονόμετρο" is both a timer and a stopwatch: with a length ("βάλε χρονόμετρο 10 λεπτά") timer_start; without ("ξεκίνα χρονόμετρο", "σταμάτα το χρονόμετρο", "πόση ώρα πάει") the stopwatch.
             "Ξυπνητήρι", "ξύπνα με": alarm_add ("κάθε μέρα" all seven days, "τις καθημερινές" MO–FR; "αύριο στις 6" a date). To remove one, alarm_list then alarm_delete.
+            "Όταν πάω σούπερ μάρκετ δείξε μου τα ψώνια": place_reminder with kind supermarket and note Ψώνια; then say it rings on arrival.
             A song or a video: youtube. "Κάνε σημείωση": note_new.
             Mail: "νέα μηνύματα;", "ήρθε κάτι;": mail_new, then say how many and from whom. "Τι χρειάζεται απάντηση;", "σημαντικά mail": mail_attention, then name
             only those that need an answer or an action and in a few words why (a deadline, a question to the user, a payment). "Βρες το mail από τη Μαρία": mail_find.
             "Στείλε mail στον …": mail_write, written as a proper e-mail in the language the user speaks; after it, say it waits for their Send.
             An old or deleted mail, a file someone sent long ago: mail_stored_find. "Αντέγραψέ το / βγάλε το συνημμένο στα Έγγραφα": mail_export,
-            fn("memory_add", "Keep a lasting fact about the user that they asked you to remember («θυμήσου ότι…»): it is given to you in every later chat, on every device.", listOf("text"),
-                "text" to p("string", "The fact, short, in the user's language and in the third person (\"Διδάσκει στο 3ο Δημοτικό Καβάλας\").")),
-            fn("memory_list", "The facts kept about the user, a numbered list.", emptyList()),
-            fn("memory_forget", "Forget a fact from the last memory_list.", listOf("choice"), CHOICE),
             then say where it went (Tetra/Documents/…). Copy only when asked.
             Work out dates yourself from today's date ("αύριο", "την Πέμπτη").
             «Θυμήσου ότι…», a lasting fact about the user or what they like: memory_add, then say it is kept. «Ξέχασε ότι…»: memory_list, then memory_forget.

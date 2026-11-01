@@ -302,6 +302,7 @@ class MainActivity : ComponentActivity() {
         WriterLog.init(this) // the log from the start: a crash anywhere is written down
         CalendarIndex.dir = cacheDir // the Calendar's events kept between starts
         CalendarAlarms.planSoon(this) // the Calendar's next reminder, from the files as they are now
+        LocationReminders.planSoon(this) // the places watched again: a force stop or a permission taken back ends them
         ContactsPreload.warm(this) // Contacts open full, not "no contacts" for a second
         PhoneLog.warm(this) // and the Phone's Recents
         NotesStore.indexDir = cacheDir
@@ -753,6 +754,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
         }
         // a map turned old (MapsAge): Settings › Maps
         if (applet.value == MapsAge.SCREEN && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Maps; screen = Screen.Settings; return@LaunchedEffect }
+        if (applet.value == LocationReminders.SCREEN && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Calendar; screen = Screen.Settings; return@LaunchedEffect }
         // the Phone's "Contact" and "Add" (PhoneApp.kt): Contacts on that person, or a new one with the number
         applet.value?.takeIf { (it.startsWith("contact:") || it.startsWith("contact-new:")) && screen != Screen.Guide }?.let { v ->
             applet.value = null

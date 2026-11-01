@@ -27,7 +27,7 @@ import java.time.format.DateTimeFormatter
 internal data class DueReminder(val at: Instant, val occ: Occurrence, val key: String)
 
 /** A reminder rung while Tetra is in front: what its notification says, for the pop-up Tetra shows itself. */
-internal data class Ringing(val id: Int, val title: String, val text: String, val color: Int, val occurrence: String, val time: String)
+internal data class Ringing(val id: Int, val title: String, val text: String, val color: Int, val occurrence: String, val time: String, val open: String = Applet.Calendar.name)
 
 internal object CalendarAlarms {
     private const val CHANNEL = "calendar_reminders"
@@ -114,12 +114,13 @@ internal object CalendarAlarms {
         post(c, r.key.hashCode(), r.occ.event.title.ifEmpty { c.getString(R.string.calendar_no_title) }, whenText(c, r.occ).let { if (late) c.getString(R.string.calendar_missed, it) else it }, r.occ.calendar.color,
             occurrenceKey(r.key), if (r.occ.allDay) c.getString(R.string.calendar_all_day) else timeText(c, r.occ.start))
 
-    fun post(c: Context, id: Int, title: String, text: String, color: Int, occurrence: String = "", time: String = "") {
+    /** [open]: what its tap opens (MainActivity's applet: the Calendar, or "note:<id>" for a place reminder's list). */
+    fun post(c: Context, id: Int, title: String, text: String, color: Int, occurrence: String = "", time: String = "", open: String = Applet.Calendar.name) {
         channel(c)
-        val open = PendingIntent.getActivity(c, id, Intent(c, MainActivity::class.java).putExtra(Applet.EXTRA, Applet.Calendar.name)
+        val tap = PendingIntent.getActivity(c, id, Intent(c, MainActivity::class.java).putExtra(Applet.EXTRA, open)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val snooze = PendingIntent.getBroadcast(c, id, Intent(c, CalendarAlarmReceiver::class.java).setAction(ACTION_SNOOZE)
-            .putExtra("id", id).putExtra("title", title).putExtra("text", text).putExtra("color", color).putExtra("occurrence", occurrence).putExtra("time", time), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            .putExtra("id", id).putExtra("title", title).putExtra("text", text).putExtra("color", color).putExtra("occurrence", occurrence).putExtra("time", time).putExtra("open", open), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         // X: this time of the event is done — the notification goes and its other reminders (a daily repeat) do not ring
         val done = PendingIntent.getBroadcast(c, id + 1, Intent(c, CalendarAlarmReceiver::class.java).setAction(ACTION_DONE)
             .putExtra("id", id).putExtra("occurrence", occurrence), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
@@ -130,7 +131,7 @@ internal object CalendarAlarms {
             .setContentText(text)
             .setCategory(NotificationCompat.CATEGORY_EVENT)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setContentIntent(open)
+            .setContentIntent(tap)
             // ongoing, as Xiaomi's own Clock timer and Tetra's sync: HyperOS gives the island to an ongoing notification; it
             // stays until ✕ Done or Snooze (the user, 18 Oct: "an X button to consider the reminding complete")
             .setOngoing(true)
@@ -140,14 +141,14 @@ internal object CalendarAlarms {
         if (HyperIsland.isSupported(c)) HyperIsland.reminder(n, title, text, time, done,
             android.graphics.drawable.Icon.createWithResource(c, R.drawable.ic_reminder_done), snooze)
         runCatching { NotificationManagerCompat.from(c).notify(id, n.build()) } // notifications not allowed: nothing to show
-        if (front) ringing.value = Ringing(id, title, text, color, occurrence, time)
+        if (front) ringing.value = Ringing(id, title, text, color, occurrence, time, open)
     }
 
     /** The pop-up's ✕ Done or Snooze: the same as the notification's buttons. */
     fun answer(c: Context, r: Ringing, done: Boolean) {
         ringing.value = null
         c.sendBroadcast(Intent(c, CalendarAlarmReceiver::class.java).setAction(if (done) ACTION_DONE else ACTION_SNOOZE).putExtra("id", r.id)
-            .putExtra("title", r.title).putExtra("text", r.text).putExtra("color", r.color).putExtra("occurrence", r.occurrence).putExtra("time", r.time))
+            .putExtra("title", r.title).putExtra("text", r.text).putExtra("color", r.color).putExtra("occurrence", r.occurrence).putExtra("time", r.time).putExtra("open", r.open))
     }
 
 
@@ -182,7 +183,7 @@ internal object CalendarAlarms {
             plan(c)
         }
         ACTION_AGAIN -> post(c, i.getIntExtra("id", 0), i.getStringExtra("title").orEmpty(), i.getStringExtra("text").orEmpty(), i.getIntExtra("color", CalendarFiles.PALETTE[0]),
-            i.getStringExtra("occurrence").orEmpty(), i.getStringExtra("time").orEmpty())
+            i.getStringExtra("occurrence").orEmpty(), i.getStringExtra("time").orEmpty(), i.getStringExtra("open") ?: Applet.Calendar.name)
         else -> plan(c) // its alarm, a start, a clock or zone change, an update
     }
 }
@@ -201,6 +202,8 @@ class CalendarAlarmReceiver : BroadcastReceiver() {
                 else -> runCatching { CalendarAlarms.handle(app, intent) }.onFailure { WriterLog.e("Calendar reminders: ${intent.action} failed", it) }
             }
             runCatching { AlarmPlan.plan(app) }.onFailure { WriterLog.e("Alarms: plan failed", it) } // the alarms' clock too: boot, clock, zone, update
+            if (intent.action == Intent.ACTION_BOOT_COMPLETED || intent.action == Intent.ACTION_MY_PACKAGE_REPLACED) // proximity alerts end with a restart or an update
+                runCatching { LocationReminders.plan(app) }.onFailure { WriterLog.e("Place reminders: plan failed", it) }
             done.finish()
         }.start()
     }
