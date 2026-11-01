@@ -22,7 +22,7 @@ import java.util.Date
  * which is new: after a sync, a new one rings like a Calendar reminder (the island on HyperOS), and a tap opens the page.
  */
 internal object AssistantBriefs {
-    private const val CHANNEL = "assistant_briefs"
+    const val CHANNEL = "assistant_briefs"
     private const val ID = 7301
 
     fun dir(): File = File(TetraSystem.dir(TetraFolder.root(Environment.getExternalStorageDirectory()), "Assistant", "Shared"), "Briefs")

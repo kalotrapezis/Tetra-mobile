@@ -45,6 +45,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
@@ -70,7 +71,9 @@ open class AssistantActivity : ComponentActivity() {
         // AI off (Settings › Βοηθός AI): no assistant at all, from Home, its icon or the phone's assistant gesture
         if (!AiGate.load(this).enabled) { android.widget.Toast.makeText(this, R.string.ai_is_off, android.widget.Toast.LENGTH_LONG).show(); finish(); return }
         if (!sheet) androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = TetraLook.light
-        setContent { TetraTheme { AssistantApp(sheet) { finish() } } }
+        // a tap on "your audio is ready" (AudioJobs): the chat opens on its card
+        val job = intent.getStringExtra(AudioJobs.EXTRA)
+        setContent { TetraTheme { AssistantApp(sheet, job) { finish() } } }
     }
 }
 
@@ -85,7 +88,17 @@ internal fun openAssistant(c: Context) = c.startActivity(Intent(c, AssistantActi
 private object SheetMemory { var chat: AssistantChat? = null }
 
 private data class Bubble(val mine: Boolean, val text: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
-    val images: List<File> = emptyList(), val error: Boolean = false)
+    val images: List<File> = emptyList(), val error: Boolean = false, val files: List<Attach.Ref> = emptyList(), val audio: AudioAsk? = null, val job: String? = null) {
+    /** As History keeps it: the file's name and path, never its text. */
+    fun json(): org.json.JSONObject = org.json.JSONObject().put("mine", mine).put("text", text).put("error", error).apply {
+        if (files.isNotEmpty()) put("files", org.json.JSONArray(files.map { org.json.JSONObject().put("name", it.name).put("path", it.path).put("pages", it.pages) }))
+        job?.let { put("job", it) }
+    }
+    companion object {
+        fun of(o: org.json.JSONObject) = Bubble(o.optBoolean("mine"), o.optString("text"), error = o.optBoolean("error"), job = o.optString("job").takeIf { it.isNotEmpty() },
+            files = o.optJSONArray("files")?.let { a -> (0 until a.length()).mapNotNull { a.optJSONObject(it) }.map { Attach.Ref(it.optString("name"), it.optString("path"), it.optInt("pages")) } }.orEmpty())
+    }
+}
 
 private enum class Phase { Idle, Listening, Thinking }
 
@@ -93,20 +106,23 @@ private enum class Phase { Idle, Listening, Thinking }
 private enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Listening(40f), Thinking(90f), Speaking(200f), Stopping(0f) }
 
 @Composable
-private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
+private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val chat = remember { if (sheet) SheetMemory.chat ?: assistantChat(context, 60_000).also { SheetMemory.chat = it } else assistantChat(context) }
-    val bubbles = remember { mutableStateListOf<Bubble>() }
+    val bubbles = remember { mutableStateListOf<Bubble>().apply { openJob?.let { add(Bubble(false, "", job = it)) } } }
     OpenTiming("AI Assist", true)
     var typed by remember { mutableStateOf("") }
     var chatId by remember { mutableStateOf(java.util.UUID.randomUUID().toString()) }
     var expanded by remember { mutableStateOf(false) } // the island opened by its handle (the phone)
     fun offer(t: String) { typed = t; expanded = false }
-    fun keep() { if (!sheet) runCatching { AssistantChats.save(context, chatId, bubbles.map { Triple(it.mine, it.text, it.error) }, chat.saved()) } }
+    fun keep() { if (!sheet) runCatching { AssistantChats.save(context, chatId, bubbles.map { it.json() }, chat.saved()) } }
     var phase by remember { mutableStateOf(Phase.Idle) }
     var hearing by remember { mutableStateOf(false) }
     var pending by remember { mutableStateOf<PendingCall?>(null) }
+    var pendingAudio by remember { mutableStateOf<AudioAsk?>(null) } // audio_make's estimate, waiting for the user's yes
+    var attached by remember { mutableStateOf<Attach.Doc?>(null) } // goes with the next message
+    var attaching by remember { mutableStateOf(false) }
     var hasKey by remember { mutableStateOf(AssistantKey.get(context) != null) }
     val prefs = remember { context.getSharedPreferences("assistant", Context.MODE_PRIVATE) }
     var aloud by remember { mutableStateOf(sheet || prefs.getBoolean("aloud", false)) }
@@ -157,13 +173,34 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
     }
     fun choose(c: AssistantChoice) { c.call?.let(::call); c.file?.let { open(it); if (sheet) close() }; c.go?.let { go(it); if (sheet) close() } }
 
+    fun listenAgain() { live?.let { it.muted = false; livePhase = LivePhase.Listening; liveLast = System.currentTimeMillis() } }
+    /** The user's yes to an MP3: the ask goes to the computer (AudioJobs), and its card follows it here. */
+    fun startAudio(a: AudioAsk) = scope.launch {
+        pendingAudio = null
+        val id = withContext(Dispatchers.IO) { runCatching { AudioJobs.ask(driveRoot(), TimerControl.device(), a) } }
+            .getOrElse { WriterLog.e("AI Assist: the MP3 could not be asked for", it); say(it.message ?: "", true); return@launch }
+        ScopedSync.soon(context, "assistant", 0, orWhole = true) // the computer hears at once
+        bubbles += Bubble(false, context.getString(R.string.assistant_attach_started), job = id)
+        keep()
+    }
+    fun skipAudio() { pendingAudio = null; say(context.getString(R.string.assistant_attach_skipped)) }
+    fun attachFrom(uri: Uri) = scope.launch {
+        attaching = true
+        val r = withContext(Dispatchers.IO) { runCatching { Attach.reader(context)(Attach.fileOf(context, uri)) } }
+        attaching = false
+        r.onSuccess { attached = it }.onFailure { WriterLog.w("AI Assist: the file was not attached", it); say(it.shownMessage(context) ?: "", true) }
+    }
+
     fun send(text: String) = scope.launch {
         if (text.isBlank()) return@launch
-        bubbles += Bubble(true, text)
+        val file = attached; attached = null
+        bubbles += Bubble(true, text, files = listOfNotNull(file?.let { Attach.Ref(it.name, it.path, it.pages.size) }))
         val inLive = live != null
         if (inLive) { liveYou = text; liveAi = "" }
         // a yes or no to a waiting call is heard by the phone, never decided by the model
         pending?.let { p -> AssistantChat.yesNo(text)?.let { yes -> if (yes) call(p) else { pending = null; say(context.getString(R.string.assistant_call_cancelled)) }; return@launch } }
+        // and to an MP3's estimate (a short yes only: "ναι, αλλά 10 λεπτά" goes to the model): nothing is spent before it
+        pendingAudio?.let { a -> (if (text.trim().split(Regex("\\s+")).size <= 3) AssistantChat.yesNo(text) else null)?.let { yes -> if (yes) startAudio(a) else skipAudio(); listenAgain(); return@launch } }
         phase = Phase.Thinking
         live?.muted = true; if (inLive) livePhase = LivePhase.Thinking
         // the answer comes a few words at a time and is read a sentence at a time: the first is heard while the rest is made
@@ -171,17 +208,17 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
         val speech = if (aloud || inLive) AnswerVoice(context, reader, chat.bill, scope).also { voice = it } else null
         val cut = Sentences()
         AssistantTools.beside = Beside.can(context)
-        val r = withContext(Dispatchers.IO) { runCatching { chat.ask(text) { words ->
+        val r = withContext(Dispatchers.IO) { runCatching { chat.ask(text, file = file) { words ->
             cut.push(words).forEach { speech?.say(it) }
             if (inLive) scope.launch { liveAi += words; if (speech != null) livePhase = LivePhase.Speaking }
         } } }
         speech?.say(cut.rest()); speech?.finish()
         phase = Phase.Idle; spent = chat.bill.usd
-        fun listenAgain() { live?.let { it.muted = false; livePhase = LivePhase.Listening; liveLast = System.currentTimeMillis() } }
         val reply = r.getOrElse { speech?.stop(); say(it.shownMessage(context) ?: context.getString(R.string.assistant_server, 0), true); WriterLog.w("Assistant: ${it.message}"); listenAgain(); return@launch }
-        bubbles += Bubble(false, reply.text, reply.choices, reply.call, reply.images)
+        bubbles += Bubble(false, reply.text, reply.choices, reply.call, reply.images, audio = reply.audio)
         keep()
         pending = reply.call
+        pendingAudio = reply.audio
         // beside (open_beside): a second Tetra window in split screen, this one staying as it is; a file outside the library opens as usual
         if (reply.beside) { reply.open?.let { f -> runCatching { DriveRules.relative(driveRoot(), f) }.getOrNull()?.let { Beside.open(context, "file:$it") } ?: open(f) }; reply.go?.let { Beside.open(context, it) } }
         else reply.open?.let(::open)
@@ -199,6 +236,14 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
         }
     }
 
+    // Android's picker for an attachment, opening in Tetra's folder for «Από τα Αρχεία του Tetra» (as Scan's import)
+    val pickFromFiles = remember { AtomicBoolean(false) }
+    val pickAttach = rememberLauncherForActivityResult(object : ActivityResultContracts.OpenDocument() {
+        override fun createIntent(context: Context, input: Array<String>) = super.createIntent(context, input).apply {
+            if (pickFromFiles.get()) putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, android.provider.DocumentsContract.buildDocumentUri("com.android.externalstorage.documents",
+                "primary:" + driveRoot().relativeTo(android.os.Environment.getExternalStorageDirectory()).path))
+        }
+    }) { uri -> uri?.let { attachFrom(it) } }
     val askMic = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok -> if (ok) hear(10_000) else say(context.getString(R.string.assistant_mic_needed), true) }
     hear = { waitMs -> scope.launch {
         if (!hasKey) return@launch
@@ -216,7 +261,8 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
     fun mic() = when (phase) { Phase.Idle -> hear(10_000); Phase.Listening -> stopNow.set(true); Phase.Thinking -> Unit }
     LaunchedEffect(Unit) { if (sheet && hasKey) hear(8_000) }
 
-    fun startLive() = scope.launch {
+    /** [opening]: said for the user as soon as it listens (a talk about the attached file starts with the AI). */
+    fun startLive(opening: String? = null) = scope.launch {
         if (!hasKey || live != null || phase != Phase.Idle) return@launch
         if (!hasMic(context)) { askMic.launch(Manifest.permission.RECORD_AUDIO); return@launch }
         hush()
@@ -231,6 +277,7 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
             pauseMs = AssistantPause.ms(context), mic = withContext(Dispatchers.IO) { AssistantAudio.mic(context) },
         ).also { it.start(); livePhase = LivePhase.Listening }
         WriterLog.i("AI Assist: live on")
+        opening?.let { send(it) }
     }
     // the bill guard (live is paid by the minute): 20 s with nobody talking, or 5 minutes, and it ends by itself
     LaunchedEffect(liveShown) {
@@ -259,10 +306,11 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
                     Image(painterResource(R.drawable.assistant_art), contentDescription = null, Modifier.size(64.dp))
                     Text(stringResource(R.string.assistant_home_detail), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                     // what it can do, as a word cloud; gone while something is typed
-                    androidx.compose.animation.AnimatedVisibility(typed.isEmpty(), enter = androidx.compose.animation.fadeIn(), exit = androidx.compose.animation.fadeOut()) { WordCloud(::offer) }
+                    androidx.compose.animation.AnimatedVisibility(typed.isEmpty() && attached == null && !attaching, enter = androidx.compose.animation.fadeIn(), exit = androidx.compose.animation.fadeOut()) { WordCloud(::offer) }
                 }
             }
-            itemsIndexed(bubbles) { i, b -> BubbleView(b, pending.takeIf { i == bubbles.size - 1 }, ::choose, ::call, { pending = null; say(context.getString(R.string.assistant_call_cancelled)) }, ::open) }
+            itemsIndexed(bubbles) { i, b -> BubbleView(b, pending.takeIf { i == bubbles.size - 1 }, ::choose, ::call, { pending = null; say(context.getString(R.string.assistant_call_cancelled)) }, ::open,
+                pendingAudio.takeIf { i == bubbles.size - 1 }, { startAudio(it) }, ::skipAudio) }
         }
     }
 
@@ -300,7 +348,7 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
                 IconButton(onClick = { aloud = !aloud; prefs.edit().putBoolean("aloud", aloud).apply(); if (!aloud) hush() }) {
                     Icon(painterResource(if (aloud) R.drawable.ic_volume_up else R.drawable.ic_volume_off), contentDescription = stringResource(R.string.assistant_read_aloud))
                 }
-                IconButton(onClick = { chat.clear(); bubbles.clear(); pending = null; hush(); spent = 0.0; chatId = java.util.UUID.randomUUID().toString() }) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.assistant_new_chat)) }
+                IconButton(onClick = { chat.clear(); bubbles.clear(); pending = null; pendingAudio = null; attached = null; hush(); spent = 0.0; chatId = java.util.UUID.randomUUID().toString() }) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.assistant_new_chat)) }
             }
             // the phone: the input is the island, its handle opens Scheduled, History, Skills and Memory (the user, 1 Nov: "not
             // much, it does not have a big context window"); a tablet has the room for them in a sidebar beside the chat
@@ -310,8 +358,10 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
             val sectionContent: @Composable (Modifier) -> Unit = { m -> Box(m) { when (section) {
                 AssistSection.Scheduled -> ScheduledTab(::offer)
                 AssistSection.History -> HistoryTab(::offer) { saved ->
-                    chat.restore(saved.messages); bubbles.clear(); bubbles += saved.bubbles.map { Bubble(it.first, it.second, error = it.third) }
-                    chatId = saved.id; pending = null; expanded = false }
+                    chat.restore(saved.messages); bubbles.clear(); bubbles += saved.bubbles.map(Bubble::of)
+                    // its file is read again only if the chat asks for it
+                    chat.attach(bubbles.flatMap { it.files }.lastOrNull()?.let { File(it.path) })
+                    chatId = saved.id; pending = null; pendingAudio = null; expanded = false }
                 AssistSection.Skills -> SkillsTab(::offer)
                 AssistSection.Memory -> MemoryTab()
             } } }
@@ -324,6 +374,16 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
                 Column(Modifier.weight(1f).fillMaxHeight()) {
                     list(Modifier.weight(1f).fillMaxWidth())
                     status?.let { Text(it, Modifier.padding(horizontal = 20.dp), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
+                    // what can be done with a file, as soon as it is attached and nothing is typed (the user: "so users know what they can do with the file")
+                    attached?.takeIf { typed.isBlank() && phase == Phase.Idle }?.let { d -> val name = Attach.quoted(d.name)
+                        val show = stringResource(R.string.assistant_attach_show_prompt, name); val talk = stringResource(R.string.assistant_attach_live_prompt, name); val read = stringResource(R.string.assistant_attach_read_prompt, name)
+                        @OptIn(ExperimentalLayoutApi::class)
+                        FlowRow(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            AppChip(stringResource(R.string.assistant_attach_pill_show), AppColor.assistant) { offer(show) }
+                            AppChip(stringResource(R.string.assistant_attach_pill_live), Color(0xFF25C4FE)) { startLive(talk) }
+                            AppChip(stringResource(R.string.assistant_attach_pill_read), AppColor.timer) { offer(read) }
+                        }
+                    }
                     val dragThreshold = with(androidx.compose.ui.platform.LocalDensity.current) { 24.dp.toPx() }
                     Surface(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp), shape = MaterialTheme.shapes.extraLarge, color = islandColor(), contentColor = islandContentColor()) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -338,7 +398,31 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
                                     sectionContent(Modifier.fillMaxSize())
                                 }
                             }
+                            // the attached file, until it goes with the next message
+                            if (attached != null || attaching) Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                val d = attached
+                                if (d == null) { CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = islandContentColor()); Text(stringResource(R.string.assistant_attach_reading), style = MaterialTheme.typography.labelLarge) }
+                                else {
+                                    Icon(painterResource(if (d.kind == "docx") R.drawable.ic_file_word else R.drawable.ic_file_text), contentDescription = null, Modifier.size(20.dp))
+                                    Text(d.name, Modifier.weight(1f, fill = false), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    Text(listOfNotNull(pluralStringResource(R.plurals.assistant_attach_pages, d.pages.size, d.pages.size).takeIf { d.pages.size > 1 }, stringResource(R.string.assistant_attach_cut).takeIf { d.cut }).joinToString(" · "),
+                                        style = MaterialTheme.typography.labelMedium, color = islandContentColor().copy(alpha = 0.7f), maxLines = 1)
+                                    Spacer(Modifier.weight(1f))
+                                    IconButton(onClick = { attached = null }, Modifier.size(32.dp)) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_remove), Modifier.size(18.dp)) }
+                                }
+                            }
                             Row(Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 10.dp, top = if (wide) 10.dp else 0.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                // the paperclip: Tetra's Files (Android's picker opening there) or anywhere on the phone
+                                Box {
+                                    var clip by remember { mutableStateOf(false) }
+                                    IconButton(onClick = { clip = true }, enabled = hasKey && !attaching, modifier = Modifier.size(40.dp)) { Icon(painterResource(R.drawable.ic_attach), contentDescription = stringResource(R.string.assistant_attach_button)) }
+                                    DropdownMenu(clip, { clip = false }) {
+                                        DropdownMenuItem({ Text(stringResource(R.string.assistant_attach_from_files)) }, { clip = false; pickFromFiles.set(true); pickAttach.launch(Attach.TYPES) },
+                                            leadingIcon = { Icon(painterResource(R.drawable.ic_folder), contentDescription = null) })
+                                        DropdownMenuItem({ Text(stringResource(R.string.assistant_attach_from_device)) }, { clip = false; pickFromFiles.set(false); pickAttach.launch(Attach.TYPES) },
+                                            leadingIcon = { Icon(painterResource(R.drawable.ic_devices), contentDescription = null) })
+                                    }
+                                }
                                 TextField(typed, { typed = it }, Modifier.weight(1f), placeholder = { Text(stringResource(R.string.assistant_hint), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                                     shape = RoundedCornerShape(24.dp), maxLines = 5, enabled = hasKey,
                                     colors = TextFieldDefaults.colors(focusedContainerColor = Color.White.copy(alpha = 0.12f), unfocusedContainerColor = Color.White.copy(alpha = 0.12f), disabledContainerColor = Color.White.copy(alpha = 0.06f),
@@ -565,8 +649,17 @@ private fun MicButton(phase: Phase, hearing: Boolean, tap: () -> Unit) {
 }
 
 @Composable
-private fun BubbleView(b: Bubble, pending: PendingCall?, choose: (AssistantChoice) -> Unit, call: (PendingCall) -> Unit, cancel: () -> Unit, open: (File) -> Unit) {
+private fun BubbleView(b: Bubble, pending: PendingCall?, choose: (AssistantChoice) -> Unit, call: (PendingCall) -> Unit, cancel: () -> Unit, open: (File) -> Unit,
+    audio: AudioAsk?, startAudio: (AudioAsk) -> Unit, skipAudio: () -> Unit) {
     Column(Modifier.fillMaxWidth(), horizontalAlignment = if (b.mine) Alignment.End else Alignment.Start) {
+        // the file that went with it: its name and pages, never its text
+        b.files.forEach { f -> Surface(Modifier.padding(bottom = 4.dp).widthIn(max = 560.dp), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
+            Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(painterResource(R.drawable.ic_file_text), contentDescription = null, Modifier.size(22.dp))
+                Text(f.name, Modifier.weight(1f, fill = false), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (f.pages > 1) Text(pluralStringResource(R.plurals.assistant_attach_pages, f.pages, f.pages), style = MaterialTheme.typography.labelMedium)
+            }
+        } }
         if (b.text.isNotBlank()) Surface(shape = RoundedCornerShape(20.dp), color = when {
             b.error -> MaterialTheme.colorScheme.errorContainer
             b.mine -> MaterialTheme.colorScheme.primaryContainer
@@ -590,6 +683,18 @@ private fun BubbleView(b: Bubble, pending: PendingCall?, choose: (AssistantChoic
             }.getOrNull() }
             bmp?.let { Image(it, contentDescription = f.name, Modifier.padding(top = 6.dp).widthIn(max = 360.dp).clip(RoundedCornerShape(16.dp)).clickable { open(f) }, contentScale = ContentScale.FillWidth) }
         }
+        // audio_make's estimate: the user's «Ξεκίνα» (or a spoken yes) starts it
+        if (audio != null && b.audio == audio) Surface(Modifier.padding(top = 6.dp).widthIn(max = 560.dp), shape = RoundedCornerShape(16.dp), color = AppColor.assistant.copy(alpha = 0.16f).compositeOver(MaterialTheme.colorScheme.surface)) {
+            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(stringResource(if (audio.mode == "show") R.string.assistant_attach_show else R.string.assistant_attach_read) + " · " + audio.doc.name, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(stringResource(R.string.assistant_attach_estimate, audio.estimate.minutes, "%.2f".format(Locale.ROOT, audio.estimate.usd), audio.estimate.ready), style = MaterialTheme.typography.bodyLarge)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { startAudio(audio) }) { Icon(painterResource(R.drawable.ic_play), contentDescription = null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.assistant_attach_start), maxLines = 1) }
+                    TextButton(onClick = skipAudio) { Text(stringResource(R.string.common_cancel), maxLines = 1) }
+                }
+            }
+        }
+        b.job?.let { AudioJobCard(it) }
         if (pending != null && b.call == pending) Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = { call(pending) }) {
                 Icon(painterResource(R.drawable.ic_call), contentDescription = null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
@@ -598,6 +703,80 @@ private fun BubbleView(b: Bubble, pending: PendingCall?, choose: (AssistantChoic
             TextButton(onClick = cancel) { Text(stringResource(R.string.common_cancel), maxLines = 1) }
         }
     }
+}
+
+/**
+ * An MP3 the computer makes (AudioJobs): how far it has got, read from its job file every few seconds while it shows (a
+ * sync asked now and then, so the computer's answer comes); then played here, its chapters a tap away, saved in Files or shared.
+ */
+@Composable
+private fun AudioJobCard(id: String) {
+    val context = LocalContext.current
+    val tetra = remember { driveRoot() }
+    var job by remember(id) { mutableStateOf(AudioJobs.read(tetra, id)) }
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(id) {
+        var n = 0
+        while (job?.state.let { it == null || it == "asked" || it == "running" }) {
+            if (n++ % 10 == 0) ScopedSync.soon(context, "assistant", 0) // every 30 s: what the computer wrote comes here
+            delay(3_000)
+            job = withContext(Dispatchers.IO) { AudioJobs.read(tetra, id) }; now = System.currentTimeMillis()
+        }
+    }
+    val j = job
+    Surface(Modifier.padding(top = 6.dp).widthIn(max = 560.dp).fillMaxWidth(), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            when {
+                j == null -> Text(stringResource(R.string.assistant_attach_job_gone), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                j.state == "failed" -> Text(j.error.ifBlank { stringResource(R.string.assistant_attach_failed_title) }, color = MaterialTheme.colorScheme.error)
+                j.state != "done" || j.mp3 == null -> {
+                    Text(j.name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    val stage = when (j.stage) { "script" -> R.string.assistant_attach_stage_script; "voice" -> R.string.assistant_attach_stage_voice; "mix" -> R.string.assistant_attach_stage_mix; else -> R.string.assistant_attach_waiting }
+                    Text(stringResource(stage) + if (j.state == "running") " · ${Math.round(AudioJobs.share(j) * 100)}%" else "", style = MaterialTheme.typography.labelLarge)
+                    LinearProgressIndicator(progress = { AudioJobs.share(j) }, Modifier.fillMaxWidth())
+                    // nothing new for minutes: the computer that makes it must be on, with Tetra open
+                    if (now - j.changed > 3 * 60_000) Text(stringResource(R.string.assistant_attach_stalled), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                else -> AudioPlayer(j, tetra)
+            }
+        }
+    }
+}
+
+@Composable
+private fun AudioPlayer(j: AudioJobs.Job, tetra: File) {
+    val context = LocalContext.current
+    val player = remember(j.mp3) { runCatching { android.media.MediaPlayer().apply { setDataSource(j.mp3!!.path); prepare() } }.onFailure { WriterLog.w("AI Assist: the MP3 cannot be played", it) }.getOrNull() }
+    DisposableEffect(player) { onDispose { player?.release() } }
+    var playing by remember { mutableStateOf(false) }
+    var at by remember { mutableIntStateOf(0) }
+    LaunchedEffect(playing) { while (playing) { at = player?.currentPosition ?: 0; if (player?.isPlaying != true) playing = false; delay(500) } }
+    var saved by remember { mutableStateOf<String?>(null) }
+    val total = (j.seconds * 1000).toInt().coerceAtLeast(1)
+    fun clock(ms: Int) = "%d:%02d".format(Locale.ROOT, ms / 60_000, ms / 1000 % 60)
+    Text(j.title.ifBlank { j.name }, style = MaterialTheme.typography.titleSmall)
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FilledIconButton(onClick = { player ?: return@FilledIconButton; if (player.isPlaying) { player.pause(); playing = false } else { player.start(); playing = true } }, enabled = player != null) {
+            Icon(painterResource(if (playing) R.drawable.ic_pause else R.drawable.ic_play), contentDescription = null)
+        }
+        LinearProgressIndicator(progress = { at.toFloat() / total }, Modifier.weight(1f))
+        Text("${clock(at)} / ${clock(total)}", style = MaterialTheme.typography.labelMedium)
+    }
+    if (j.chapters.size > 1) Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        j.chapters.forEach { c -> AssistChip(onClick = { player?.let { it.seekTo((c.start * 1000).toInt()); it.start(); playing = true; at = it.currentPosition } },
+            label = { Text("${clock((c.start * 1000).toInt())} ${c.title}", maxLines = 1) }) }
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Button(onClick = { saved = runCatching { AudioJobs.save(tetra, j) }.map { context.getString(R.string.assistant_attach_saved_in, "Assistant/${it.name}") }
+            .getOrElse { WriterLog.e("AI Assist: the MP3 was not saved", it); it.message } }) { Text(stringResource(R.string.assistant_attach_save), maxLines = 1) }
+        TextButton(onClick = { runCatching {
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", j.mp3!!)
+            context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("audio/mpeg").putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), null))
+        }.onFailure { WriterLog.e("AI Assist: the MP3 was not shared", it) } }) {
+            Icon(painterResource(R.drawable.ic_share), contentDescription = null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.common_share), maxLines = 1)
+        }
+    }
+    saved?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
 }
 
 /** Until Tetra is the phone's assistant (the user: a clear button, so the power button opens the sheet); then nothing. */

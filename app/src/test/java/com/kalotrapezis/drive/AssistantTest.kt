@@ -137,7 +137,7 @@ class AssistantTest {
         assertEquals(0.43, api.bill.usd, 1e-9) // a search, no usage given
         api.bill.minutes(Mistral.TRANSCRIBE, 90.0)
         assertEquals(0.436, api.bill.usd, 1e-9)
-        assertEquals("$0.4360", Bill.text(api.bill.usd)); assertEquals("$12.50", Bill.text(12.5))
+        assertEquals("€0.4360", Bill.text(api.bill.usd)); assertEquals("€12.50", Bill.text(12.5))
         AssistantChat(api, tools()).clear()
         assertEquals(0.0, api.bill.usd, 0.0) // New chat: a new bill
     }

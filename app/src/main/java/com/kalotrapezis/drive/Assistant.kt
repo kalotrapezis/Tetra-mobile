@@ -29,11 +29,11 @@ internal data class AssistantChoice(val label: String, val call: PendingCall? = 
 
 /** What a tool hands back: words for the model (as few as it needs), and what the screen shows besides. */
 internal data class ToolResult(val forModel: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
-    val image: File? = null, val open: File? = null, val go: String? = null, val photos: List<File> = emptyList(), val beside: Boolean = false)
+    val image: File? = null, val open: File? = null, val go: String? = null, val photos: List<File> = emptyList(), val beside: Boolean = false, val audio: AudioAsk? = null)
 
 /** The model's answer to one turn, with everything the tools left for the screen. */
 internal data class AssistantReply(val text: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
-    val images: List<File> = emptyList(), val open: File? = null, val go: String? = null, val beside: Boolean = false)
+    val images: List<File> = emptyList(), val open: File? = null, val go: String? = null, val beside: Boolean = false, val audio: AudioAsk? = null)
 
 /**
  * What a conversation has cost so far, in US dollars by Mistral's list prices (the user: "the bill came"; shown in the
@@ -55,14 +55,14 @@ internal class Bill(private val counted: (Double) -> Unit = {}) {
 
     companion object {
         // shortcut: Mistral's list prices in $ as published Oct 2026 (tools' from price tables, not Mistral's page); update when they change
-        private val TOKENS = mapOf(Mistral.CHAT to (0.1 to 0.3), Mistral.BUILT_IN to (0.4 to 2.0))
+        val TOKENS = mapOf(Mistral.CHAT to (0.1 to 0.3), Mistral.BUILT_IN to (0.4 to 2.0))
         private val PER_MINUTE = mapOf(Mistral.TRANSCRIBE to 0.004, Mistral.REALTIME to 0.006)
         fun perMinute(model: String) = PER_MINUTE[model] ?: 0.0
         val PER_CALL = mapOf("web_search" to 0.03, "image_generation" to 0.10)
         const val PER_CHAR = 0.016 / 1000 // voxtral-mini-tts-3: $0.016 a thousand characters (Mistral's Voxtral TTS page)
 
-        /** "$0.0123": a cent's fractions while it is small. */
-        fun text(usd: Double) = if (usd < 1) "$%.4f".format(java.util.Locale.ROOT, usd) else "$%.2f".format(java.util.Locale.ROOT, usd)
+        /** "€0.0123": a cent's fractions while it is small (the user pays Mistral in euros; the same figures as the dollar list). */
+        fun text(usd: Double) = if (usd < 1) "€%.4f".format(java.util.Locale.ROOT, usd) else "€%.2f".format(java.util.Locale.ROOT, usd)
     }
 }
 
@@ -94,8 +94,8 @@ internal class Meter(var total: Double = 0.0, var trip: Double = 0.0, var since:
 internal class Mistral(private val http: (path: String, body: String) -> String, val bill: Bill = Bill(),
     private val stream: ((path: String, body: String, line: (String) -> Unit) -> Unit)? = null) {
     /** One chat turn; with [onText] (and a [stream]) its words come as they are made, so the voice can start on the first sentence. */
-    fun chat(messages: JSONArray, tools: JSONArray, onText: ((String) -> Unit)? = null): JSONObject {
-        val body = JSONObject().put("model", CHAT).put("messages", messages).put("tools", tools).put("tool_choice", "auto").put("temperature", 0.2)
+    fun chat(messages: JSONArray, tools: JSONArray, onText: ((String) -> Unit)? = null, choice: String = "auto"): JSONObject {
+        val body = JSONObject().put("model", CHAT).put("messages", messages).put("tools", tools).put("tool_choice", choice).put("temperature", 0.2)
         if (onText == null || stream == null) return JSONObject(http("/chat/completions", body.toString()))
             .also { bill.tokens(CHAT, it.optJSONObject("usage")) }
             .getJSONArray("choices").getJSONObject(0).getJSONObject("message")
@@ -181,7 +181,16 @@ internal class AssistantTools(
     private val photos: (place: String, at: () -> Pair<Double, Double>?) -> List<File> = { _, _ -> emptyList() },
     /** Place reminders on and the location allowed all the time (LocationReminders.ready). */
     private val placesOn: () -> Boolean = { false },
+    /** A file's text (Attach.extract; the phone's with its PDF and OCR): the attached one read again when a kept chat asks. */
+    private val extract: (File) -> Attach.Doc = { Attach.extract(it) },
 ) {
+    /** The file attached in this chat: read, or only its path until attachment_read needs it again (a chat from History). */
+    private var doc: Attach.Doc? = null
+    var docFile: File? = null; private set
+    fun attach(d: Attach.Doc) { doc = d; docFile = File(d.path) }
+    fun attach(f: File?) { doc = null; docFile = f?.takeIf { it.isFile } }
+    private fun attached(): Attach.Doc? = doc ?: docFile?.let(extract)?.also { doc = it }
+
     private var contacts = emptyList<PendingCall>()
     private var files = emptyList<File>()
     private var notesFound = emptyList<Note>()
@@ -248,6 +257,8 @@ internal class AssistantTools(
                 else { AssistantSchedules.remove(tetra, x.getString("id")); schedulesShown = schedulesShown - x; changed("schedules"); ToolResult("Deleted \"${x.optString("title")}\".") } }
             "web_search" -> ToolResult(search(args.getString("query")))
             "make_image" -> image(args.getString("prompt")).let { ToolResult("The picture is on the screen, saved as ${it.name}.", image = it) }
+            "attachment_read" -> ToolResult(attached()?.let { Attach.read(it, args.optInt("part", 0).takeIf { n -> n > 0 }, args.optString("query")) } ?: "No file is attached in this chat.")
+            "audio_make" -> audioMake(args)
             else -> ToolResult("No tool called $name.")
         }
     }.getOrElse { ToolResult("Failed: ${it.message}") }
@@ -463,6 +474,17 @@ internal class AssistantTools(
             choices = found.map { AssistantChoice(it.file.name, file = it.file) })
     }
 
+    /** An estimate and a card that waits for the user's yes: nothing is spent until then (the computer makes it: AudioJobs). */
+    private fun audioMake(a: JSONObject): ToolResult {
+        val n = a.optInt("choice", 0)
+        val d = if (n > 0) files.getOrNull(n - 1)?.let(extract) ?: return ToolResult("No choice $n: the last files list had ${files.size}.") else attached()
+        d ?: return ToolResult("No file: the user attaches one (the paperclip), or files_find one first.")
+        val mode = if (a.optString("mode") == "show") "show" else "narration"
+        val est = AudioJobs.estimate(d.text.length, mode, a.optInt("minutes", 0))
+        return ToolResult("Estimate: ≈ ${est.minutes} minutes of audio, ≈ €${"%.2f".format(java.util.Locale.ROOT, est.usd)}, ready in ~${est.ready} minutes; the user's computer makes it in the background and a notification says when it is ready. Say this in one sentence in the user's language and ask whether to start.",
+            audio = AudioAsk(d, mode, est.minutes, a.optString("focus"), a.optString("style"), a.optBoolean("per_section", false), est))
+    }
+
     // ---- Mail (the user, 31 Oct: new mail, what needs attention, a mail from someone, write one) ----
     private fun mails() = MailFiles.index(MailFiles.root(tetra), MailEngine.device())
     /** A numbered list for the model (sender, subject, when, unread/♥, the start of the text) and the screen (each opens the mail). */
@@ -671,7 +693,7 @@ internal class AssistantTools(
             "notes_search" to "notes", "note_new" to "notes", "note_open" to "notes", "shopping_list" to "notes", "files_find" to "files", "file_open" to "files",
             "contacts_find" to "contacts", "my_card" to "contacts", "relation_remember" to "contacts", "relation_forget" to "contacts", "contact_call" to "phone",
             "navigate" to "maps", "place_reminder" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail", "mail_stored_find" to "mail", "mail_export" to "mail",
-            "web_search" to "web", "make_image" to "web", "youtube" to "web")
+            "web_search" to "web", "make_image" to "web", "youtube" to "web", "attachment_read" to "files", "audio_make" to "files")
         /** The tools of the apps the assistant may use now: the others are not even offered. */
         fun allowed(): JSONArray = JSONArray((0 until SCHEMA.length()).map { SCHEMA.getJSONObject(it) }
             .filter { AiGate.state.keeps(APP_OF[it.getJSONObject("function").getString("name")]) && (beside || it.getJSONObject("function").getString("name") != "open_beside") })
@@ -756,6 +778,13 @@ internal class AssistantTools(
             fn("schedule_delete", "Delete a scheduled action from the last schedule_list.", listOf("choice"), CHOICE),
             fn("web_search", "Search the web for current facts, news, opening hours, prices.", listOf("query"), "query" to p("string", "What to search for.")),
             fn("make_image", "Draw a picture from a description.", listOf("prompt"), "prompt" to p("string", "What the picture shows, in detail.")),
+            fn("attachment_read", "Read more of the file attached in this chat: one part by its number, or the passages about something.", emptyList(),
+                "part" to p("integer", "The part's number (1 = the start)."), "query" to p("string", "What to look for in it, in its language.")),
+            fn("audio_make", "Make an MP3 of the attached file (or of a file from the last files_find list): \"narration\" reads it whole with one voice; \"show\" is a radio show, a host and an expert talking it through with examples and recaps. It answers an estimate (minutes, cost, when ready): say it in one sentence and ask whether to start. It starts only on the user's yes, which Tetra hears; never say it has started or is done.", listOf("mode"),
+                "mode" to JSONObject().put("type", "string").put("enum", JSONArray(listOf("narration", "show"))).put("description", "\"narration\": read it to me; \"show\": a radio show."),
+                "minutes" to p("integer", "For a show: how long, if the user said."), "focus" to p("string", "For a show: what to dwell on, if said."),
+                "style" to p("string", "For a show: the tone, if said (e.g. \"για εξετάσεις\", \"χαλαρό\")."), "per_section" to p("boolean", "Also one MP3 a section, if asked."),
+                "choice" to p("integer", "A file from the last files_find list instead of the attached one.")),
         ))
 
         fun system(now: ZonedDateTime, facts: List<AssistantMemory.Fact> = emptyList()) = """
@@ -783,6 +812,7 @@ internal class AssistantTools(
             «Θυμήσου ότι…», a lasting fact about the user or what they like: memory_add, then say it is kept. «Ξέχασε ότι…»: memory_list, then memory_forget.
             "Κάθε Δευτέρα στις 8 πες μου…", "κάθε μέρα", "μία φορά τον χρόνο": schedule_add, the prompt in the user's words; then say when it runs. To change, pause or delete one: schedule_list first.
             The daily brief («πρωινή αναφορά», «ενημέρωση της ημέρας») is built in: never schedule_add it; schedule_list, then schedule_change it (time, paused: false, sections).
+            A file attached to the user's message: answer from it; attachment_read the parts not given, never guess them. «Κάνε το ραδιοφωνική εκπομπή», «διάβασέ το μου», an MP3 of it: call audio_make at once, before saying anything; never make up minutes, cost or time yourself.
         """.trimIndent() + if (facts.isEmpty()) "" else "\nWhat the user asked you to remember about them (use it when it helps; never read it out unasked):\n" + facts.joinToString("\n") { "- ${it.text}" }
     }
 }
@@ -797,38 +827,58 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
     private var lastAt = 0L
     val bill get() = api.bill
 
-    /** The user's [text] answered, the tools run on the way; [onText] gets the answer's words as they come. */
-    fun ask(text: String, at: Long = System.currentTimeMillis(), onText: ((String) -> Unit)? = null): AssistantReply {
+    /** The user's [text] answered, the tools run on the way; [onText] gets the answer's words as they come; [file] goes with it, this turn only. */
+    fun ask(text: String, at: Long = System.currentTimeMillis(), file: Attach.Doc? = null, onText: ((String) -> Unit)? = null): AssistantReply {
         if (at - lastAt > forgetMs) messages.clear()
         lastAt = at
-        messages += JSONObject().put("role", "user").put("content", text)
+        file?.let(tools::attach)
+        val from = messages.size
+        messages += JSONObject().put("role", "user").put("content", if (file != null) "$text\n\n${Attach.forModel(file)}" else text)
+        // an MP3 of the file asked for: mistral-small sometimes makes up the estimate instead of asking audio_make, so it is made to
+        val must = if (tools.docFile != null && MP3.containsMatchIn(text)) "audio_make" else null
+        try { return turn(onText, must) } finally {
+            // the file's text goes once: after the turn only its name stays, for the next request and the kept chat
+            if (file != null) messages[from].put("content", "$text\n\n${Attach.kept(file)}")
+            for (m in messages.drop(from)) if (m.optString("role") == "tool" && m.optString("name") == "attachment_read") m.put("content", "[read from ${tools.docFile?.name ?: "the file"}; read it again if needed]")
+        }
+    }
+
+    private fun turn(onText: ((String) -> Unit)?, must: String?): AssistantReply {
         val choices = mutableListOf<AssistantChoice>(); val images = mutableListOf<File>()
-        var call: PendingCall? = null; var open: File? = null; var go: String? = null; var beside = false
-        repeat(ROUNDS) {
-            val m = api.chat(JSONArray(listOf(JSONObject().put("role", "system").put("content", AssistantTools.system(now(), tools.facts()))) + messages), AssistantTools.allowed(), onText)
+        var call: PendingCall? = null; var open: File? = null; var go: String? = null; var beside = false; var audio: AudioAsk? = null
+        repeat(ROUNDS) { round ->
+            // forced: only that tool, and a call is a must ("any")
+            val offered = AssistantTools.allowed()
+            val only = if (must != null && round == 0) JSONArray((0 until offered.length()).map { offered.getJSONObject(it) }.filter { it.getJSONObject("function").getString("name") == must }) else null
+            val forced = only != null && only.length() > 0
+            val m = api.chat(JSONArray(listOf(JSONObject().put("role", "system").put("content", AssistantTools.system(now(), tools.facts()))) + messages), if (forced) only!! else offered, onText, if (forced) "any" else "auto")
             val calls = m.optJSONArray("tool_calls")
             messages += JSONObject().put("role", "assistant").put("content", m.opt("content")?.takeIf { it != JSONObject.NULL } ?: "")
                 .apply { if (calls != null && calls.length() > 0) put("tool_calls", calls) }
-            if (calls == null || calls.length() == 0) return AssistantReply(text(m), choices, call, images, open, go, beside)
+            if (calls == null || calls.length() == 0) return AssistantReply(text(m), choices, call, images, open, go, beside, audio)
             for (i in 0 until calls.length()) {
                 val c = calls.getJSONObject(i); val f = c.getJSONObject("function")
                 val args = when (val a = f.opt("arguments")) { is JSONObject -> a; is String -> runCatching { JSONObject(a.ifBlank { "{}" }) }.getOrDefault(JSONObject()); else -> JSONObject() }
                 val r = tools.run(f.getString("name"), args)
                 if (r.choices.isNotEmpty()) { choices.clear(); choices += r.choices }
                 r.call?.let { call = it }; r.image?.let { images += it }; images += r.photos; r.open?.let { open = it }; r.go?.let { go = it }; if (r.open != null || r.go != null) beside = r.beside
+                r.audio?.let { audio = it }
                 messages += JSONObject().put("role", "tool").put("name", f.getString("name")).put("tool_call_id", c.optString("id")).put("content", r.forModel)
             }
         }
-        return AssistantReply("", choices, call, images, open, go, beside)
+        return AssistantReply("", choices, call, images, open, go, beside, audio)
     }
 
-    fun clear() { messages.clear(); bill.reset() }
+    /** A kept chat's file, read again only if it is asked about. */
+    fun attach(f: File?) = tools.attach(f)
+    fun clear() { messages.clear(); bill.reset(); tools.attach(null as File?) }
     /** The conversation as it is, for the History (AssistantChats); [restore] takes one back to go on with it. */
     fun saved() = JSONArray(messages.map { JSONObject(it.toString()) })
     fun restore(a: JSONArray) { messages.clear(); for (i in 0 until a.length()) a.optJSONObject(i)?.let { messages += it }; lastAt = System.currentTimeMillis() }
 
     companion object {
         const val ROUNDS = 5 // tool rounds in one turn at most: find, then act, with room to spare
+        private val MP3 = Regex("\\bmp3\\b|εκπομπ|radio show|διάβασ[εέ] (?:το|μου)|read it to me", RegexOption.IGNORE_CASE)
 
         /** A message's text: a string, or Mistral's chunks (text pieces among others). */
         fun text(m: JSONObject): String = words(m).trim()

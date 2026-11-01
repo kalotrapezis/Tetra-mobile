@@ -69,6 +69,7 @@ internal val CAPABILITIES = listOf(
     Capability(R.string.assistant_ex_mail, R.string.assistant_ex_mail, AppColor.mail, "mail"),
     Capability(R.string.assistant_ex_calendar, R.string.assistant_ex_calendar, AppColor.calendar, "calendar"),
     Capability(R.string.assistant_cap_file, R.string.assistant_cap_file_prompt, Color(0xFF177BFC), "files"),
+    Capability(R.string.assistant_cap_file_show, R.string.assistant_cap_file_show_prompt, AppColor.assistant, "files"),
     Capability(R.string.assistant_cap_go, R.string.assistant_cap_go_prompt, Color(0xFF25C4FE), "maps"),
     Capability(R.string.assistant_cap_remember, R.string.assistant_cap_remember_prompt, AppColor.assistant, null),
 )

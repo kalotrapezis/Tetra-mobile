@@ -45,7 +45,7 @@
     <string name="assistant_you">You</string>
     <string name="assistant_ai" translatable="false">AI</string>
     <string name="assistant_voice">Voice</string>
-    <string name="assistant_voice_note">Mistral\'s voices sound natural and cost a little ($0.016 for 1,000 letters read). Mistral has no Greek voice, but its English ones read Greek well. Tap a voice to hear it.</string>
+    <string name="assistant_voice_note">Mistral\'s voices sound natural and cost a little (€0.016 for 1,000 letters read). Mistral has no Greek voice, but its English ones read Greek well. Tap a voice to hear it.</string>
     <string name="assistant_voice_phone">The phone\'s voice (free)</string>
     <string name="assistant_voice_first">Mistral\'s first voice</string>
     <string name="assistant_voice_sample">Hello, this is how my answers will sound.</string>
@@ -143,4 +143,42 @@
     <string name="assistant_cap_go_prompt">Take me to [place]</string>
     <string name="assistant_cap_remember">Remember</string>
     <string name="assistant_cap_remember_prompt">Remember that [something about me]</string>
+    <string name="assistant_attach_button">Attach a file</string>
+    <string name="assistant_attach_from_files">From Tetra\'s Files</string>
+    <string name="assistant_attach_from_device">From this device</string>
+    <string name="assistant_attach_reading">Reading the file…</string>
+    <string name="assistant_attach_unknown">This kind of file cannot be read. Try a PDF, Word, PowerPoint, ODT, text or a picture.</string>
+    <string name="assistant_attach_too_big">The file is over %1$d MB: it cannot be read whole.</string>
+    <string name="assistant_attach_scan">It is a scan with no text in it.</string>
+    <string name="assistant_attach_empty">The file has no text.</string>
+    <string name="assistant_attach_cut">only the start was read</string>
+    <string name="assistant_attach_pill_show">🎙 Make it a radio show</string>
+    <string name="assistant_attach_pill_live">💬 Live talk about the document</string>
+    <string name="assistant_attach_pill_read">🔊 Read it to me</string>
+    <string name="assistant_attach_show_prompt">Make «%1$s» a radio show as an MP3: a host and an expert, about 15 minutes, with an example and a recap for each section.</string>
+    <string name="assistant_attach_read_prompt">Read «%1$s» to me whole as an MP3, with one voice.</string>
+    <string name="assistant_attach_live_prompt">Let\'s talk about the document «%1$s». Tell me in two sentences what it says and ask me where I want to start.</string>
+    <string name="assistant_attach_show">Radio show</string>
+    <string name="assistant_attach_read">Reading</string>
+    <string name="assistant_attach_estimate">≈ %1$d minutes of audio, ≈ €%2$s, ready in ~%3$d minutes.</string>
+    <string name="assistant_attach_start">Start</string>
+    <string name="assistant_attach_started">I\'m making it in the background. I\'ll let you know when it is ready.</string>
+    <string name="assistant_attach_skipped">All right, I won\'t make it.</string>
+    <string name="assistant_attach_stage_script">Writing the script</string>
+    <string name="assistant_attach_stage_voice">Recording the voices</string>
+    <string name="assistant_attach_stage_mix">Making the MP3</string>
+    <string name="assistant_attach_job_gone">This audio is no longer here.</string>
+    <string name="assistant_attach_save">Save in Files</string>
+    <string name="assistant_attach_saved_in">Saved: Files › %1$s</string>
+    <string name="assistant_attach_ready_title">Your audio is ready</string>
+    <string name="assistant_attach_ready_body">%1$s: %2$d minutes. Tap to listen.</string>
+    <string name="assistant_attach_failed_title">The audio could not be made</string>
+    <string name="assistant_cap_file_show">Show from a file</string>
+    <string name="assistant_cap_file_show_prompt">Make the file I attach a radio show as an MP3, about 15 minutes.</string>
+    <string name="assistant_attach_waiting">Waiting for your computer</string>
+    <string name="assistant_attach_stalled">Nothing yet: the computer that makes it must be on, with Tetra open.</string>
+    <plurals name="assistant_attach_pages">
+        <item quantity="one">%d page</item>
+        <item quantity="other">%d pages</item>
+    </plurals>
 </resources>
