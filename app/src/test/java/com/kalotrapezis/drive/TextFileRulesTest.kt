@@ -6,6 +6,14 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class TextFileRulesTest {
+    @Test fun markdownFilesAreKnownByExtensionAndLinesByTheirStart() {
+        assertEquals(true, TextFileRules.isMarkdown("README.MD"))
+        assertEquals(true, TextFileRules.isMarkdown("notes.markdown"))
+        assertEquals(false, TextFileRules.isMarkdown("md"))
+        assertArrayEquals(intArrayOf(0, 4, 5), TextFileRules.lineStarts("one\n\nlast"))
+        assertArrayEquals(intArrayOf(0), TextFileRules.lineStarts(""))
+    }
+
     @Test fun aWindowsFileIsEditedWithNewlinesAndSavedWithItsOwnLineEndings() {
         val bytes = "one\r\ntwo\r\nΕλληνικά".toByteArray()
         val loaded = TextFileRules.read(bytes)

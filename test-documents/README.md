@@ -13,3 +13,4 @@ words in them — nothing personal. TEST_TREE.md says what was done with each.
 | `Gallery_test.docx` | The ribbon-place strips: WordArt "Your text here", page numbers i ii iii, the file's name as header, a multilevel list (TEST_TREE 24) |
 | `Scanner_test.pdf` | Two plain pages for the PDF editor's Open in scanner and the scanner's From file (made 1 Nov 2026) |
 | `Curved_page.jpg` | A page bent like a book's and turned 6° on a table: Tilt, Auto straighten, Flatten curve, Perspective |
+| `Markdown_test.md` | The Text editor's View (headings, lists, checklist, link, code, quote, table) and line numbers on a long line and 250 lines (made 1 Nov 2026) |

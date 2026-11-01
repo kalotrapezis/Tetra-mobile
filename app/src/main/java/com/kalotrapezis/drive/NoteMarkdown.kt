@@ -3,6 +3,9 @@ package com.kalotrapezis.drive
 // From Notes for Android (the same author), for the notes editor's live styling and read view.
 
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
@@ -17,14 +20,15 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
 /**
- * Just enough Markdown for the read view: the same subset the format toolbar
- * writes. A parser, not a renderer — no HTML, no tables, no links-as-links.
+ * Just enough Markdown for the read view: the subset the format toolbar writes,
+ * plus links and pipe tables (for the text editor's View, asked 1 Nov). No HTML.
  *
  * ponytail: a hand-rolled scanner rather than a Markdown dependency. If nested
  * or reference-style syntax ever matters, swap in a real parser then.
  */
 internal fun renderMarkdown(source: String, bodySize: TextUnit = 16.sp): AnnotatedString = buildAnnotatedString {
     val lines = source.lines()
+    val tables = tableColumns(lines)
     var fenced = false
 
     lines.forEachIndexed { index, raw ->
@@ -36,6 +40,18 @@ internal fun renderMarkdown(source: String, bodySize: TextUnit = 16.sp): Annotat
         }
         if (fenced) {
             withStyle(SpanStyle(fontFamily = FontFamily.Monospace, fontSize = bodySize * 0.9f)) { append(raw) }
+            return@forEachIndexed
+        }
+
+        // A table row: cells padded to their column in monospace so the columns line up; the header bold, the --- rule a line.
+        tables[index]?.let { widths ->
+            val cells = tableCells(raw)
+            withStyle(SpanStyle(fontFamily = FontFamily.Monospace, fontSize = bodySize * 0.9f)) {
+                if (cells.all { it.matches(TABLE_RULE) }) append(widths.joinToString("─┼─") { "─".repeat(it) })
+                else withStyle(SpanStyle(fontWeight = if (tables[index + 1] != null && tableCells(lines[index + 1]).all { it.matches(TABLE_RULE) }) FontWeight.Bold else FontWeight.Normal)) {
+                    append(widths.indices.joinToString(" │ ") { (cells.getOrElse(it) { "" }).padEnd(widths[it]) })
+                }
+            }
             return@forEachIndexed
         }
 
@@ -89,6 +105,27 @@ internal fun renderMarkdown(source: String, bodySize: TextUnit = 16.sp): Annotat
 
         appendInline(raw, bodySize)
     }
+}
+
+private val TABLE_RULE = Regex(":?-{3,}:?")
+private fun tableCells(line: String) = line.trim().removePrefix("|").removeSuffix("|").split('|').map { it.trim() }
+
+/** Line index → column widths, for every line of a pipe table: a | row followed by a |---| rule, and the rows after it. */
+private fun tableColumns(lines: List<String>): Map<Int, List<Int>> {
+    val out = HashMap<Int, List<Int>>()
+    var i = 0
+    while (i < lines.size - 1) {
+        val isRow = { l: String -> l.trimStart().startsWith("|") }
+        if (isRow(lines[i]) && isRow(lines[i + 1]) && tableCells(lines[i + 1]).all { it.matches(TABLE_RULE) }) {
+            var end = i + 2
+            while (end < lines.size && isRow(lines[end])) end++
+            val rows = (i until end).filter { it != i + 1 }.map { tableCells(lines[it]) }
+            val widths = List(rows.maxOf { it.size }) { c -> rows.maxOf { it.getOrElse(c) { "" }.length }.coerceAtLeast(3) }
+            for (k in i until end) out[k] = widths
+            i = end
+        } else i++
+    }
+    return out
 }
 
 /** A small edit-mode preview which keeps the TextField's source value intact. */
@@ -167,6 +204,8 @@ private fun markdownEditPreview(source: AnnotatedString, bodySize: TextUnit): Tr
     })
 }
 
+private val LINK = Regex("""\[([^\]\n]+)]\(([^)\s]+)\)""")
+
 /** Inline spans: `**bold**`, `*italic*`, `~~strike~~`, `` `code` ``. */
 private fun AnnotatedString.Builder.appendInline(text: String, bodySize: TextUnit) {
     // Longest markers first, so ** is never mistaken for two *.
@@ -181,6 +220,13 @@ private fun AnnotatedString.Builder.appendInline(text: String, bodySize: TextUni
 
     var i = 0
     while (i < text.length) {
+        // [words](https://…) opens in the browser; only web and mail links, never a file's own intent: or content: URI.
+        val link = LINK.matchAt(text, i)?.takeIf { m -> m.groupValues[2].let { it.startsWith("https://") || it.startsWith("http://") || it.startsWith("mailto:") } }
+        if (link != null) {
+            withLink(LinkAnnotation.Url(link.groupValues[2], TextLinkStyles(SpanStyle(textDecoration = TextDecoration.Underline)))) { appendInline(link.groupValues[1], bodySize) }
+            i = link.range.last + 1
+            continue
+        }
         val hit = markers.firstNotNullOfOrNull { (marker, style) ->
             if (!text.startsWith(marker, i)) return@firstNotNullOfOrNull null
             val close = text.indexOf(marker, i + marker.length)

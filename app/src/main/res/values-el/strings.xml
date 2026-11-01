@@ -1131,6 +1131,15 @@
     <string name="text_word_wrap">Αναδίπλωση λέξεων</string>
     <string name="text_wrap_on">Οι μεγάλες γραμμές συνεχίζουν στην επόμενη γραμμή.</string>
     <string name="text_wrap_off">Οι μεγάλες γραμμές συνεχίζουν· κυλήστε οριζόντια.</string>
+    <string name="text_line_numbers">Αριθμοί γραμμών</string>
+    <string name="text_line_numbers_info">Ένας αριθμός στην αρχή κάθε γραμμής· μια αναδιπλωμένη γραμμή κρατά έναν.</string>
+    <string name="text_theme">Θέμα</string>
+    <string name="text_theme_plain">Απλό</string>
+    <string name="text_theme_stripes">Ρίγες</string>
+    <string name="text_markdown_view">Προβολή Markdown</string>
+    <string name="text_markdown_view_info">Το αρχείο μορφοποιημένο, όπως στις Σημειώσεις. Τα .md ανοίγουν έτσι.</string>
+    <string name="text_view_mode">Προβολή</string>
+    <string name="text_edit_mode">Επεξεργασία</string>
     <string name="text_not_saved">Δεν έχει αποθηκευτεί · Η Αποθήκευση το βάζει στο %1$s</string>
     <string name="text_crlf">Τέλη γραμμών Windows (CRLF), διατηρούνται</string>
     <string name="text_lf">Τέλη γραμμών: LF</string>

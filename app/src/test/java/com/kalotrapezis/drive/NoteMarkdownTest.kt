@@ -85,4 +85,20 @@ class NoteMarkdownTest {
             previous = mapped
         }
     }
+
+    @Test
+    fun `links keep their words and only web links become links`() {
+        val r = renderMarkdown("see [the site](https://example.org) or [this](intent://x)")
+        assertEquals("see the site or [this](intent://x)", r.text)
+        assertEquals(1, r.getLinkAnnotations(0, r.length).size)
+    }
+
+    @Test
+    fun `a pipe table lines its columns up and drops nothing`() {
+        val lines = plain("| Name | Age |\n|---|---|\n| Άννα | 9 |").lines()
+        assertEquals("Name │ Age", lines[0])
+        assertEquals("─────┼────", lines[1])
+        assertEquals("Άννα │ 9  ", lines[2])
+        assertEquals("| just a pipe", plain("| just a pipe"))
+    }
 }
