@@ -15,7 +15,7 @@ import org.json.JSONObject
  */
 internal object AssistantMemory {
     data class Fact(val id: String, val text: String, val at: Long)
-    private const val MAX = 50
+    const val MAX = 20 // the same as memory.js: they go into every request, and the model's window is small
     private const val LONG = 300
 
     fun file(tetra: File) = File(TetraSystem.dir(tetra, "Assistant", "Shared"), "memory.json")

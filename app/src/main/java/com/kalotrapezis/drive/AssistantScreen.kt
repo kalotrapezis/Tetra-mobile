@@ -15,6 +15,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -87,9 +89,6 @@ private data class Bubble(val mine: Boolean, val text: String, val choices: List
 
 private enum class Phase { Idle, Listening, Thinking }
 
-private val PROMPT_OF = mapOf(R.string.assistant_chip_brief to R.string.assistant_chip_brief_prompt, R.string.assistant_chip_image to R.string.assistant_chip_image_prompt,
-    R.string.assistant_chip_research to R.string.assistant_chip_research_prompt, R.string.assistant_chip_repeat to R.string.assistant_chip_repeat_prompt)
-
 /** The live screen's record: what it is doing decides how it turns. */
 private enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Listening(40f), Thinking(90f), Speaking(200f), Stopping(0f) }
 
@@ -101,8 +100,8 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
     val bubbles = remember { mutableStateListOf<Bubble>() }
     var typed by remember { mutableStateOf("") }
     var chatId by remember { mutableStateOf(java.util.UUID.randomUUID().toString()) }
-    var tab by remember { mutableStateOf(AssistTab.Chat) }
-    fun offer(t: String) { typed = t; tab = AssistTab.Chat }
+    var expanded by remember { mutableStateOf(false) } // the island opened by its handle (the phone)
+    fun offer(t: String) { typed = t; expanded = false }
     fun keep() { if (!sheet) runCatching { AssistantChats.save(context, chatId, bubbles.map { Triple(it.mine, it.text, it.error) }, chat.saved()) } }
     var phase by remember { mutableStateOf(Phase.Idle) }
     var hearing by remember { mutableStateOf(false) }
@@ -255,8 +254,8 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
                 Column(Modifier.fillMaxWidth().padding(top = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Image(painterResource(R.drawable.assistant_art), contentDescription = null, Modifier.size(64.dp))
                     Text(stringResource(R.string.assistant_home_detail), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                    AppChips(listOf(R.string.assistant_ex_calendar to AppColor.calendar, R.string.assistant_ex_mail to AppColor.mail, R.string.assistant_ex_notes to AppColor.notes, R.string.assistant_ex_timer to AppColor.timer)
-                        .map { (r, col) -> val t = stringResource(r); Triple(t, col) { offer(t) } }, center = true)
+                    // what it can do, as a word cloud; gone while something is typed
+                    androidx.compose.animation.AnimatedVisibility(typed.isEmpty(), enter = androidx.compose.animation.fadeIn(), exit = androidx.compose.animation.fadeOut()) { WordCloud(::offer) }
                 }
             }
             itemsIndexed(bubbles) { i, b -> BubbleView(b, pending.takeIf { i == bubbles.size - 1 }, ::choose, ::call, { pending = null; say(context.getString(R.string.assistant_call_cancelled)) }, ::open) }
@@ -297,36 +296,62 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
                 IconButton(onClick = { aloud = !aloud; prefs.edit().putBoolean("aloud", aloud).apply(); if (!aloud) hush() }) {
                     Icon(painterResource(if (aloud) R.drawable.ic_volume_up else R.drawable.ic_volume_off), contentDescription = stringResource(R.string.assistant_read_aloud))
                 }
-                IconButton(onClick = { chat.clear(); bubbles.clear(); pending = null; hush(); spent = 0.0; chatId = java.util.UUID.randomUUID().toString(); tab = AssistTab.Chat }) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.assistant_new_chat)) }
+                IconButton(onClick = { chat.clear(); bubbles.clear(); pending = null; hush(); spent = 0.0; chatId = java.util.UUID.randomUUID().toString() }) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.assistant_new_chat)) }
             }
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                AssistTab.entries.forEach { t -> FilterChip(tab == t, { tab = t }, { Text(stringResource(t.label)) }) }
-            }
-            when (tab) {
-                AssistTab.Chat -> list(Modifier.weight(1f).fillMaxWidth())
-                AssistTab.History -> Box(Modifier.weight(1f)) { HistoryTab { saved ->
+            // the phone: the input is the island, its handle opens Scheduled, History, Skills and Memory (the user, 1 Nov: "not
+            // much, it does not have a big context window"); a tablet has the room for them in a sidebar beside the chat
+            // the window's own width, not the device's: a tablet in split screen, or a narrow window, gets the phone's island
+            val wide = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp >= 720
+            var section by remember { mutableStateOf(AssistSection.Skills) }
+            val sectionContent: @Composable (Modifier) -> Unit = { m -> Box(m) { when (section) {
+                AssistSection.Scheduled -> ScheduledTab(::offer)
+                AssistSection.History -> HistoryTab(::offer) { saved ->
                     chat.restore(saved.messages); bubbles.clear(); bubbles += saved.bubbles.map { Bubble(it.first, it.second, error = it.third) }
-                    chatId = saved.id; pending = null; tab = AssistTab.Chat } }
-                AssistTab.Memory -> Box(Modifier.weight(1f)) { MemoryTab() }
-                AssistTab.Scheduled -> Box(Modifier.weight(1f)) { ScheduledTab() }
-            }
-            if (tab == AssistTab.Chat) status?.let { Text(it, Modifier.padding(horizontal = 20.dp), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
+                    chatId = saved.id; pending = null; expanded = false }
+                AssistSection.Skills -> SkillsTab(::offer)
+                AssistSection.Memory -> MemoryTab()
+            } } }
             fun sendTyped() { val t = typed.trim(); typed = ""; send(t) }
-            // bubbles that fill the input with a ready prompt to edit, never sent by the tap (the user, 1 Nov), on as many rows as
-            // they need, each in the colour of the applet it is about
-            if (hasKey && typed.isEmpty() && tab == AssistTab.Chat) AppChips(listOf(
-                R.string.assistant_chip_brief to AppColor.calendar, R.string.assistant_chip_image to AppColor.photos,
-                R.string.assistant_chip_research to AppColor.assistant, R.string.assistant_chip_repeat to AppColor.mail,
-            ).map { (label, col) -> val p = stringResource(PROMPT_OF.getValue(label)); Triple(stringResource(label), col) { offer(p) } }, Modifier.fillMaxWidth().padding(horizontal = 12.dp))
-            if (tab == AssistTab.Chat) Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(typed, { typed = it }, Modifier.weight(1f), placeholder = { Text(stringResource(R.string.assistant_hint), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                    shape = RoundedCornerShape(24.dp), maxLines = 5, enabled = hasKey,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send), keyboardActions = KeyboardActions(onSend = { sendTyped() }))
-                if (typed.isNotBlank()) FilledIconButton(onClick = ::sendTyped, enabled = phase == Phase.Idle) { Icon(painterResource(R.drawable.ic_arrow_upward), contentDescription = stringResource(R.string.common_send)) }
-                else {
-                    MicButton(phase, hearing, ::mic)
-                    FilledTonalIconButton(onClick = { startLive() }, enabled = hasKey && phase == Phase.Idle, modifier = Modifier.size(52.dp)) {
-                        Icon(painterResource(R.drawable.ic_graphic_eq), contentDescription = stringResource(R.string.assistant_live))
+            Row(Modifier.weight(1f).fillMaxWidth()) {
+                if (wide) Column(Modifier.width(380.dp).fillMaxHeight().padding(start = 12.dp, bottom = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    SectionBar(section) { section = it }
+                    Surface(Modifier.padding(top = 8.dp).weight(1f).fillMaxWidth(), shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceContainer) { sectionContent(Modifier.fillMaxSize()) }
+                }
+                Column(Modifier.weight(1f).fillMaxHeight()) {
+                    list(Modifier.weight(1f).fillMaxWidth())
+                    status?.let { Text(it, Modifier.padding(horizontal = 20.dp), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
+                    val dragThreshold = with(androidx.compose.ui.platform.LocalDensity.current) { 24.dp.toPx() }
+                    Surface(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp), shape = MaterialTheme.shapes.extraLarge, color = islandColor(), contentColor = islandContentColor()) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            if (!wide) Box(Modifier.fillMaxWidth().height(22.dp).clickable { expanded = !expanded }.pointerInput(Unit) {
+                                var dragged = 0f
+                                detectVerticalDragGestures(onDragStart = { dragged = 0f }, onVerticalDrag = { _, a -> dragged += a },
+                                    onDragEnd = { if (dragged < -dragThreshold) expanded = true else if (dragged > dragThreshold) expanded = false })
+                            }, contentAlignment = Alignment.Center) { Box(Modifier.width(32.dp).height(4.dp).background(islandContentColor().copy(alpha = 0.65f), CircleShape)) }
+                            if (!wide && expanded) {
+                                SectionBar(section) { section = it }
+                                Surface(Modifier.padding(8.dp).fillMaxWidth().heightIn(max = 460.dp).height(460.dp), shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface) {
+                                    sectionContent(Modifier.fillMaxSize())
+                                }
+                            }
+                            Row(Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 10.dp, top = if (wide) 10.dp else 0.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                TextField(typed, { typed = it }, Modifier.weight(1f), placeholder = { Text(stringResource(R.string.assistant_hint), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    shape = RoundedCornerShape(24.dp), maxLines = 5, enabled = hasKey,
+                                    colors = TextFieldDefaults.colors(focusedContainerColor = Color.White.copy(alpha = 0.12f), unfocusedContainerColor = Color.White.copy(alpha = 0.12f), disabledContainerColor = Color.White.copy(alpha = 0.06f),
+                                        focusedTextColor = Color.White, unfocusedTextColor = Color.White, cursorColor = Color.White, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
+                                        disabledIndicatorColor = Color.Transparent, focusedPlaceholderColor = Color.White.copy(alpha = 0.6f), unfocusedPlaceholderColor = Color.White.copy(alpha = 0.6f)),
+                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send), keyboardActions = KeyboardActions(onSend = { sendTyped() }))
+                                if (typed.isNotBlank()) FilledIconButton(onClick = ::sendTyped, enabled = phase == Phase.Idle) { Icon(painterResource(R.drawable.ic_arrow_upward), contentDescription = stringResource(R.string.common_send)) }
+                                else {
+                                    MicButton(phase, hearing, ::mic)
+                                    // light with a black wave on the dark island, in either theme (the user: "white on white")
+                                    FilledTonalIconButton(onClick = { startLive() }, enabled = hasKey && phase == Phase.Idle, modifier = Modifier.size(52.dp),
+                                        colors = IconButtonDefaults.filledTonalIconButtonColors(containerColor = Color.White.copy(alpha = 0.85f), contentColor = Color.Black)) {
+                                        Icon(painterResource(R.drawable.ic_graphic_eq), contentDescription = stringResource(R.string.assistant_live))
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
