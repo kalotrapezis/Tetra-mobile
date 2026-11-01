@@ -679,6 +679,7 @@
     <string name="files_save_tags">Tags speichern</string>
     <string name="files_back_to_actions">Zurück zu den Aktionen</string>
     <string name="files_open_with">Öffnen mit…</string>
+    <string name="files_open_beside">Daneben öffnen</string>
     <string name="files_favorite_remove">Aus Favoriten entfernen</string>
     <string name="files_favorite_add">Zu Favoriten hinzufügen</string>
     <string name="files_tags">Tags</string>

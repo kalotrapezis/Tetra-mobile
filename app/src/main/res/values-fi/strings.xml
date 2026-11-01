@@ -679,6 +679,7 @@
     <string name="files_save_tags">Tallenna tunnisteet</string>
     <string name="files_back_to_actions">Takaisin kohteen toimintoihin</string>
     <string name="files_open_with">Avaa sovelluksella…</string>
+    <string name="files_open_beside">Avaa viereen</string>
     <string name="files_favorite_remove">Poista suosikeista</string>
     <string name="files_favorite_add">Lisää suosikkeihin</string>
     <string name="files_tags">Tunnisteet</string>

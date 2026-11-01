@@ -713,6 +713,7 @@
     <string name="files_save_tags">Shrani oznake</string>
     <string name="files_back_to_actions">Nazaj na dejanja elementa</string>
     <string name="files_open_with">Odpri z…</string>
+    <string name="files_open_beside">Odpri ob strani</string>
     <string name="files_favorite_remove">Odstrani iz Priljubljenega</string>
     <string name="files_favorite_add">Dodaj med Priljubljeno</string>
     <string name="files_tags">Oznake</string>

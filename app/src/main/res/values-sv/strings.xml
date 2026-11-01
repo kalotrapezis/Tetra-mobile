@@ -679,6 +679,7 @@
     <string name="files_save_tags">Spara taggar</string>
     <string name="files_back_to_actions">Tillbaka till åtgärder</string>
     <string name="files_open_with">Öppna med…</string>
+    <string name="files_open_beside">Öppna bredvid</string>
     <string name="files_favorite_remove">Ta bort från Favoriter</string>
     <string name="files_favorite_add">Lägg till i Favoriter</string>
     <string name="files_tags">Taggar</string>

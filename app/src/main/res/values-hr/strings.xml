@@ -696,6 +696,7 @@
     <string name="files_save_tags">Spremi oznake</string>
     <string name="files_back_to_actions">Natrag na radnje stavke</string>
     <string name="files_open_with">Otvori pomoću…</string>
+    <string name="files_open_beside">Otvori pored</string>
     <string name="files_favorite_remove">Ukloni iz Favorita</string>
     <string name="files_favorite_add">Dodaj u Favorite</string>
     <string name="files_tags">Oznake</string>

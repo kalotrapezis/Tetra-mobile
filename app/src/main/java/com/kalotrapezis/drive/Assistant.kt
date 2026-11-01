@@ -29,11 +29,11 @@ internal data class AssistantChoice(val label: String, val call: PendingCall? = 
 
 /** What a tool hands back: words for the model (as few as it needs), and what the screen shows besides. */
 internal data class ToolResult(val forModel: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
-    val image: File? = null, val open: File? = null, val go: String? = null, val photos: List<File> = emptyList())
+    val image: File? = null, val open: File? = null, val go: String? = null, val photos: List<File> = emptyList(), val beside: Boolean = false)
 
 /** The model's answer to one turn, with everything the tools left for the screen. */
 internal data class AssistantReply(val text: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
-    val images: List<File> = emptyList(), val open: File? = null, val go: String? = null)
+    val images: List<File> = emptyList(), val open: File? = null, val go: String? = null, val beside: Boolean = false)
 
 /**
  * What a conversation has cost so far, in US dollars by Mistral's list prices (the user: "the bill came"; shown in the
@@ -227,6 +227,10 @@ internal class AssistantTools(
             "mail_find" -> mailFind(args)
             "mail_open" -> pick(mailsShown, args) { e -> if (e.gone) ToolResult("Opened the mail (kept only on this device).", open = MailFiles.eml(MailFiles.root(tetra), e))
                 else ToolResult("Opened the mail.", go = "mail:${e.id}") }
+            // split screen (Beside): the same open, in a window beside AI Assist
+            "open_beside" -> args.optString("kind").takeIf { it in setOf("note", "file", "mail") }?.let { k -> run("${k}_open", args).let { r ->
+                if (r.open == null && r.go == null) r else r.copy(forModel = r.forModel + " It is beside AI Assist, in split screen.", beside = true) } }
+                ?: ToolResult("kind must be note, file or mail.")
             "mail_stored_find" -> mailStoredFind(args)
             "mail_export" -> pick(mailsShown, args) { e -> mailExport(e, args.optString("attachment").trim()) }
             "mail_write" -> mailWrite(args)
@@ -670,7 +674,9 @@ internal class AssistantTools(
             "web_search" to "web", "make_image" to "web", "youtube" to "web")
         /** The tools of the apps the assistant may use now: the others are not even offered. */
         fun allowed(): JSONArray = JSONArray((0 until SCHEMA.length()).map { SCHEMA.getJSONObject(it) }
-            .filter { AiGate.state.keeps(APP_OF[it.getJSONObject("function").getString("name")]) })
+            .filter { AiGate.state.keeps(APP_OF[it.getJSONObject("function").getString("name")]) && (beside || it.getJSONObject("function").getString("name") != "open_beside") })
+        /** Split screen is there (Beside.can): the screen says so before each turn; open_beside is offered only then. */
+        @Volatile var beside = false
 
         /** What the model may call, in Mistral's function-calling form. */
         val SCHEMA: JSONArray = JSONArray(listOf(
@@ -697,6 +703,8 @@ internal class AssistantTools(
                 "action" to JSONObject().put("type", "string").put("enum", JSONArray(listOf("start", "pause", "reset", "read")))),
             fn("notes_search", "Find notes with some words anywhere in them; answers a numbered list of titles and the matching line.", listOf("query"), "query" to p("string", "Words to look for.")),
             fn("note_open", "Open a note from the last notes_search list in Tetra's Notes.", listOf("choice"), CHOICE),
+            fn("open_beside", "Open a note, file or mail from the last list beside AI Assist, in split screen, when the user asks for it beside (\"δίπλα\"); AI Assist stays on its side.", listOf("kind", "choice"),
+                "kind" to JSONObject().put("type", "string").put("enum", JSONArray(listOf("note", "file", "mail"))).put("description", "The last list it is from: notes_search, files_find or a mail list."), CHOICE),
             fn("note_new", "Make a new text note with what the user dictates.", listOf("text"),
                 "text" to p("string", "The note's text, as said."), "title" to p("string", "A title, only if the user gave one.")),
             fn("shopping_list", "Make a new checklist note (a shopping list).", listOf("items"),
@@ -795,23 +803,23 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
         lastAt = at
         messages += JSONObject().put("role", "user").put("content", text)
         val choices = mutableListOf<AssistantChoice>(); val images = mutableListOf<File>()
-        var call: PendingCall? = null; var open: File? = null; var go: String? = null
+        var call: PendingCall? = null; var open: File? = null; var go: String? = null; var beside = false
         repeat(ROUNDS) {
             val m = api.chat(JSONArray(listOf(JSONObject().put("role", "system").put("content", AssistantTools.system(now(), tools.facts()))) + messages), AssistantTools.allowed(), onText)
             val calls = m.optJSONArray("tool_calls")
             messages += JSONObject().put("role", "assistant").put("content", m.opt("content")?.takeIf { it != JSONObject.NULL } ?: "")
                 .apply { if (calls != null && calls.length() > 0) put("tool_calls", calls) }
-            if (calls == null || calls.length() == 0) return AssistantReply(text(m), choices, call, images, open, go)
+            if (calls == null || calls.length() == 0) return AssistantReply(text(m), choices, call, images, open, go, beside)
             for (i in 0 until calls.length()) {
                 val c = calls.getJSONObject(i); val f = c.getJSONObject("function")
                 val args = when (val a = f.opt("arguments")) { is JSONObject -> a; is String -> runCatching { JSONObject(a.ifBlank { "{}" }) }.getOrDefault(JSONObject()); else -> JSONObject() }
                 val r = tools.run(f.getString("name"), args)
                 if (r.choices.isNotEmpty()) { choices.clear(); choices += r.choices }
-                r.call?.let { call = it }; r.image?.let { images += it }; images += r.photos; r.open?.let { open = it }; r.go?.let { go = it }
+                r.call?.let { call = it }; r.image?.let { images += it }; images += r.photos; r.open?.let { open = it }; r.go?.let { go = it }; if (r.open != null || r.go != null) beside = r.beside
                 messages += JSONObject().put("role", "tool").put("name", f.getString("name")).put("tool_call_id", c.optString("id")).put("content", r.forModel)
             }
         }
-        return AssistantReply("", choices, call, images, open, go)
+        return AssistantReply("", choices, call, images, open, go, beside)
     }
 
     fun clear() { messages.clear(); bill.reset() }

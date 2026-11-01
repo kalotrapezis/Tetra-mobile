@@ -696,6 +696,7 @@
     <string name="files_save_tags">Saglabāt birkas</string>
     <string name="files_back_to_actions">Atpakaļ uz vienuma darbībām</string>
     <string name="files_open_with">Atvērt ar…</string>
+    <string name="files_open_beside">Atvērt blakus</string>
     <string name="files_favorite_remove">Noņemt no izlases</string>
     <string name="files_favorite_add">Pievienot izlasei</string>
     <string name="files_tags">Birkas</string>

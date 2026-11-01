@@ -696,6 +696,7 @@
     <string name="files_save_tags">Guardar etiquetas</string>
     <string name="files_back_to_actions">Volver a las acciones del elemento</string>
     <string name="files_open_with">Abrir con…</string>
+    <string name="files_open_beside">Abrir al lado</string>
     <string name="files_favorite_remove">Quitar de Favoritos</string>
     <string name="files_favorite_add">Añadir a Favoritos</string>
     <string name="files_tags">Etiquetas</string>

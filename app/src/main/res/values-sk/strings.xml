@@ -713,6 +713,7 @@
     <string name="files_save_tags">Uložiť značky</string>
     <string name="files_back_to_actions">Späť na akcie položky</string>
     <string name="files_open_with">Otvoriť v aplikácii…</string>
+    <string name="files_open_beside">Otvoriť vedľa</string>
     <string name="files_favorite_remove">Odobrať z Obľúbených</string>
     <string name="files_favorite_add">Pridať do Obľúbených</string>
     <string name="files_tags">Značky</string>

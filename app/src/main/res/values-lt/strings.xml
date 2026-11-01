@@ -713,6 +713,7 @@
     <string name="files_save_tags">Įrašyti žymas</string>
     <string name="files_back_to_actions">Atgal į elemento veiksmus</string>
     <string name="files_open_with">Atidaryti naudojant…</string>
+    <string name="files_open_beside">Atidaryti šalia</string>
     <string name="files_favorite_remove">Pašalinti iš mėgstamų</string>
     <string name="files_favorite_add">Įtraukti į mėgstamus</string>
     <string name="files_tags">Žymos</string>

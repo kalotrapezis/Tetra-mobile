@@ -40,7 +40,7 @@ class AssistantTest {
         assertEquals("call0", tool.getString("tool_call_id"))
         assertTrue(tool.getString("content").startsWith("Started a timer of 5 min"))
         assertEquals("system", second.getJSONObject(0).getString("role"))
-        assertEquals(AssistantTools.SCHEMA.length(), s.sent[0].getJSONArray("tools").length())
+        assertEquals(AssistantTools.SCHEMA.length() - 1, s.sent[0].getJSONArray("tools").length()) // open_beside only on a wide screen
     }
 
     @Test fun severalMatchesAreANumberedListAndTheCallWaitsForTheUser() {
@@ -244,6 +244,9 @@ class AssistantTest {
         assertEquals("Saved the note in Notes.", t.run("note_new", JSONObject().put("text", "Ο κωδικός της αποθήκης είναι στο συρτάρι.\nΚαι το κλειδί του κήπου.")).forModel)
         assertEquals("1. Ο κωδικός της αποθήκης είναι στο συρτάρι: Και το κλειδί του κήπου.", t.run("notes_search", JSONObject().put("query", "κλειδι")).forModel)
         assertTrue(t.run("note_open", JSONObject().put("choice", 1)).go!!.startsWith("note:"))
+        // beside, in split screen: the same open, marked for the screen; a wrong kind opens nothing
+        assertTrue(t.run("open_beside", JSONObject().put("kind", "note").put("choice", 1)).let { it.beside && it.go!!.startsWith("note:") })
+        assertFalse(t.run("open_beside", JSONObject().put("kind", "photo").put("choice", 1)).beside)
         assertEquals("youtube:Σαββόπουλος Ζήτω το ελληνικό τραγούδι", t.run("youtube", JSONObject().put("query", "Σαββόπουλος Ζήτω το ελληνικό τραγούδι")).go)
         // no map installed here: Maps opens on a search; a contact with no address says so
         assertEquals("maps-search:Ερμού 10, Αθήνα", t.run("navigate", JSONObject().put("place", "Ερμού 10, Αθήνα")).go)

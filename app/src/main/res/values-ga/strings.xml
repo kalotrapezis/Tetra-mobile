@@ -730,6 +730,7 @@
     <string name="files_save_tags">Sábháil clibeanna</string>
     <string name="files_back_to_actions">Ar ais go gníomhartha na míre</string>
     <string name="files_open_with">Oscail le…</string>
+    <string name="files_open_beside">Oscail taobh leis</string>
     <string name="files_favorite_remove">Bain ó Cheanáin</string>
     <string name="files_favorite_add">Cuir le Ceanáin</string>
     <string name="files_tags">Clibeanna</string>

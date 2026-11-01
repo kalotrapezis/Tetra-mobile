@@ -679,6 +679,7 @@
     <string name="files_save_tags">Αποθήκευση ετικετών</string>
     <string name="files_back_to_actions">Πίσω στις ενέργειες</string>
     <string name="files_open_with">Άνοιγμα με…</string>
+    <string name="files_open_beside">Άνοιγμα δίπλα</string>
     <string name="files_favorite_remove">Αφαίρεση από τα Αγαπημένα</string>
     <string name="files_favorite_add">Προσθήκη στα Αγαπημένα</string>
     <string name="files_tags">Ετικέτες</string>
