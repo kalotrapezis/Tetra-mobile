@@ -102,9 +102,12 @@ internal object MailLook {
     private fun p(c: android.content.Context) = c.getSharedPreferences("mail", android.content.Context.MODE_PRIVATE)
     /** Conversations: the list one row per conversation, its mails stacked like a chat (Settings › Εμφάνιση › Συζητήσεις). */
     var threads by mutableStateOf(false); private set
-    fun load(c: android.content.Context) { place = p(c).getString("islands", "auto") ?: "auto"; threads = p(c).getBoolean("threads", false) }
+    /** The mail a wide screen shows by itself counts as read too (Settings › Εμφάνιση; the user, 1 Nov). */
+    var readShown by mutableStateOf(false); private set
+    fun load(c: android.content.Context) { place = p(c).getString("islands", "auto") ?: "auto"; threads = p(c).getBoolean("threads", false); readShown = p(c).getBoolean("readShown", false) }
     fun set(c: android.content.Context, where: String) { place = where; p(c).edit().putString("islands", where).apply() }
     fun setThreads(c: android.content.Context, on: Boolean) { threads = on; p(c).edit().putBoolean("threads", on).apply() }
+    fun setReadShown(c: android.content.Context, on: Boolean) { readShown = on; p(c).edit().putBoolean("readShown", on).apply() }
 }
 
 internal fun mailRoot() = MailFiles.root(TetraFolder.root(Environment.getExternalStorageDirectory()))
@@ -255,12 +258,12 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     val open = mails.firstOrNull { it.id == openId }
     // a wide screen always shows a mail: the newest, until one is chosen
     LaunchedEffect(three, shown) { if (three && (open == null || open !in shown) && shown.isNotEmpty()) { openId = shown.first().id; autoOpened = true } }
-    // a mail the person opened is read (Thunderbird's way); not the one a wide screen showed by itself
+    // a mail the person opened is read (Thunderbird's way); the one a wide screen showed by itself only with readShown on
     // the open mail, or with conversations on all of its conversation (oldest first): what the island and the panel act on
     val current = open?.let { o -> conversations[MailThreads.key(o)]?.takeIf { MailLook.threads && it.size > 1 } ?: listOf(o) }.orEmpty()
     // what a reply answers: the newest mail from someone else (not one's own reply, which would address oneself), and no draft
     val newest = current.lastOrNull { it.folder != "Drafts" && accounts.none { a -> a.address.equals(it.fromAddress, true) } } ?: current.lastOrNull { it.folder != "Drafts" } ?: current.lastOrNull()
-    LaunchedEffect(openId) { if (!autoOpened) current.filter { !it.seen }.map { it.id }.takeIf { it.isNotEmpty() }?.let { act("read", it) } }
+    LaunchedEffect(openId) { if (!autoOpened || MailLook.readShown) current.filter { !it.seen }.map { it.id }.takeIf { it.isNotEmpty() }?.let { act("read", it) } }
     fun choose(r: String, a: String?) { stored = false; role = r; account = a; openId = null; selected = emptySet(); mailboxes = false }
     fun chooseStored(a: String?, r: String?) { stored = true; storeAccount = a; storeRole = r; openId = null; selected = emptySet(); mailboxes = false }
 

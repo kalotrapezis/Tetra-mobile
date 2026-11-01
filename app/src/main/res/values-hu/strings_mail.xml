@@ -185,6 +185,8 @@
     <string name="mail_islands_summary">Hol állnak. Automatikusan: egérrel felül, ujjal alul.</string>
     <string name="mail_threads">Beszélgetések</string>
     <string name="mail_threads_summary">Egy beszélgetés levelei együtt, egymás alatt, mint egy csevegésben</string>
+    <string name="mail_read_shown">Olvasott, ha megjelenik</string>
+    <string name="mail_read_shown_summary">A lista mellett megjelenő levél koppintás nélkül is olvasottnak számít</string>
     <string name="mail_ms_sign_in">Bejelentkezés Microsofttal</string>
     <string name="mail_ms_hint">A Microsoft oldala a böngészőben nyílik meg: jelentkezz be ott (a telefonod kódjával, ha használsz ilyet), és gyere vissza. A Tetra soha nem látja a jelszavadat.</string>
     <string name="mail_ms_client">Microsoft-alkalmazásazonosító (client ID)</string>

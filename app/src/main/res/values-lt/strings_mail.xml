@@ -193,6 +193,8 @@
     <string name="mail_islands_summary">Kur jie yra. Automatiškai: viršuje su pele, apačioje su pirštu.</string>
     <string name="mail_threads">Pokalbiai</string>
     <string name="mail_threads_summary">Vieno pokalbio laiškai kartu, vienas po kito, kaip pokalbyje</string>
+    <string name="mail_read_shown">Perskaityta, kai rodoma</string>
+    <string name="mail_read_shown_summary">Šalia sąrašo rodomas laiškas laikomas perskaitytu ir be palietimo</string>
     <string name="mail_ms_sign_in">Prisijungti su Microsoft</string>
     <string name="mail_ms_hint">Microsoft puslapis atsidaro naršyklėje: prisijunkite ten (telefono kodu, jei jį naudojate) ir grįžkite. Tetra niekada nemato jūsų slaptažodžio.</string>
     <string name="mail_ms_client">Microsoft programos ID (client ID)</string>

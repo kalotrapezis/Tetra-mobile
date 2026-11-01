@@ -189,6 +189,8 @@
     <string name="mail_islands_summary">Unde stau. Automat: sus cu mouse-ul, jos cu degetul.</string>
     <string name="mail_threads">Conversații</string>
     <string name="mail_threads_summary">E-mailurile unei conversații împreună, unul sub altul, ca într-un chat</string>
+    <string name="mail_read_shown">Citit când este afișat</string>
+    <string name="mail_read_shown_summary">Mesajul afișat lângă listă contează ca citit fără atingere</string>
     <string name="mail_ms_sign_in">Conectează-te cu Microsoft</string>
     <string name="mail_ms_hint">Pagina Microsoft se deschide în browser: conectează-te acolo (cu codul telefonului, dacă folosești unul) și revino. Tetra nu îți vede niciodată parola.</string>
     <string name="mail_ms_client">ID-ul aplicației Microsoft (client ID)</string>

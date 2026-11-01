@@ -193,6 +193,8 @@
     <string name="mail_islands_summary">Fejn joqogħdu. Waħedhom: fuq bil-maws, isfel bis-saba’.</string>
     <string name="mail_threads">Konversazzjonijiet</string>
     <string name="mail_threads_summary">Il-messaġġi ta’ konversazzjoni waħda flimkien, wieħed taħt l-ieħor, bħal f’chat</string>
+    <string name="mail_read_shown">Moqri meta jidher</string>
+    <string name="mail_read_shown_summary">Il-messaġġ li jidher ħdejn il-lista jgħodd bħala moqri mingħajr ma tagħfas</string>
     <string name="mail_ms_sign_in">Idħol b’Microsoft</string>
     <string name="mail_ms_hint">Il-paġna ta’ Microsoft tinfetaħ fil-browser: idħol hemm (bil-kodiċi tal-mowbajl jekk tużah) u erġa’ lura. Tetra qatt ma jara l-password tiegħek.</string>
     <string name="mail_ms_client">ID tal-app ta’ Microsoft (client ID)</string>

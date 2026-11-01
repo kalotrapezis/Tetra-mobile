@@ -195,6 +195,8 @@
     <string name="mail_islands_summary">Πού στέκονται. Μόνο του: πάνω με ποντίκι, κάτω με το δάχτυλο.</string>
     <string name="mail_threads">Συζητήσεις</string>
     <string name="mail_threads_summary">Τα μηνύματα μιας συζήτησης μαζί, το ένα κάτω από το άλλο, όπως σε συνομιλία</string>
+    <string name="mail_read_shown">Αναγνωσμένο όταν εμφανίζεται</string>
+    <string name="mail_read_shown_summary">Το μήνυμα που φαίνεται δίπλα στη λίστα μετράει ως αναγνωσμένο χωρίς πάτημα</string>
     <string name="mail_ms_sign_in">Σύνδεση με Microsoft</string>
     <string name="mail_ms_hint">Ανοίγει η σελίδα της Microsoft στον browser: συνδέσου εκεί (με τον κωδικό του κινητού, αν τον χρησιμοποιείς) και γύρνα εδώ. Το Tetra δεν βλέπει ποτέ τον κωδικό σου.</string>
     <string name="mail_ms_client">Κωδικός εφαρμογής Microsoft (client ID)</string>

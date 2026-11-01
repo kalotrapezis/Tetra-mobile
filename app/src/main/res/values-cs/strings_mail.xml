@@ -193,6 +193,8 @@
     <string name="mail_islands_summary">Kde jsou. Automaticky: nahoře s myší, dole s prstem.</string>
     <string name="mail_threads">Konverzace</string>
     <string name="mail_threads_summary">Zprávy jedné konverzace pohromadě, pod sebou, jako v chatu</string>
+    <string name="mail_read_shown">Přečteno při zobrazení</string>
+    <string name="mail_read_shown_summary">Zpráva zobrazená vedle seznamu se počítá jako přečtená i bez klepnutí</string>
     <string name="mail_ms_sign_in">Přihlásit se přes Microsoft</string>
     <string name="mail_ms_hint">Stránka Microsoftu se otevře v prohlížeči: přihlaste se tam (kódem z telefonu, pokud ho používáte) a vraťte se. Tetra vaše heslo nikdy nevidí.</string>
     <string name="mail_ms_client">ID aplikace Microsoft (client ID)</string>

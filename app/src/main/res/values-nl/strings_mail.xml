@@ -185,6 +185,8 @@
     <string name="mail_islands_summary">Waar ze staan. Vanzelf: boven met een muis, onder met een vinger.</string>
     <string name="mail_threads">Gesprekken</string>
     <string name="mail_threads_summary">De mails van één gesprek bij elkaar, onder elkaar, zoals in een chat</string>
+    <string name="mail_read_shown">Gelezen bij tonen</string>
+    <string name="mail_read_shown_summary">De mail naast de lijst telt als gelezen zonder tikken</string>
     <string name="mail_ms_sign_in">Aanmelden met Microsoft</string>
     <string name="mail_ms_hint">De pagina van Microsoft opent in de browser: meld je daar aan (met de code van je telefoon als je die gebruikt) en kom terug. Tetra ziet je wachtwoord nooit.</string>
     <string name="mail_ms_client">Microsoft-app-ID (client ID)</string>

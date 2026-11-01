@@ -185,6 +185,8 @@
     <string name="mail_islands_summary">Missä ne ovat. Automaattisesti: hiirellä ylhäällä, sormella alhaalla.</string>
     <string name="mail_threads">Keskustelut</string>
     <string name="mail_threads_summary">Yhden keskustelun viestit yhdessä, allekkain, kuin chatissa</string>
+    <string name="mail_read_shown">Luettu, kun näytetään</string>
+    <string name="mail_read_shown_summary">Luettelon vieressä näkyvä viesti merkitään luetuksi ilman napautusta</string>
     <string name="mail_ms_sign_in">Kirjaudu Microsoftilla</string>
     <string name="mail_ms_hint">Microsoftin sivu avautuu selaimessa: kirjaudu siellä (puhelimesi koodilla, jos käytät sellaista) ja palaa tänne. Tetra ei koskaan näe salasanaasi.</string>
     <string name="mail_ms_client">Microsoftin sovellustunnus (client ID)</string>

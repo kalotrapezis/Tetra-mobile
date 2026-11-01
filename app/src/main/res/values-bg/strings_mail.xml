@@ -185,6 +185,8 @@
     <string name="mail_islands_summary">Къде стоят. Автоматично: горе с мишка, долу с пръст.</string>
     <string name="mail_threads">Разговори</string>
     <string name="mail_threads_summary">Писмата от един разговор заедно, едно под друго, като в чат</string>
+    <string name="mail_read_shown">Прочетено при показване</string>
+    <string name="mail_read_shown_summary">Писмото, показано до списъка, се брои за прочетено без докосване</string>
     <string name="mail_ms_sign_in">Вход с Microsoft</string>
     <string name="mail_ms_hint">Страницата на Microsoft се отваря в браузъра: влезте там (с кода от телефона си, ако ползвате такъв) и се върнете. Tetra никога не вижда паролата ви.</string>
     <string name="mail_ms_client">ID на приложението на Microsoft (client ID)</string>

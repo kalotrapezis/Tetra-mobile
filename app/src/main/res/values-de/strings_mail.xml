@@ -185,6 +185,8 @@
     <string name="mail_islands_summary">Wo sie stehen. Automatisch: oben mit Maus, unten mit dem Finger.</string>
     <string name="mail_threads">Unterhaltungen</string>
     <string name="mail_threads_summary">Die E-Mails einer Unterhaltung zusammen, untereinander, wie in einem Chat</string>
+    <string name="mail_read_shown">Beim Anzeigen gelesen</string>
+    <string name="mail_read_shown_summary">Die neben der Liste angezeigte Mail gilt ohne Tippen als gelesen</string>
     <string name="mail_ms_sign_in">Mit Microsoft anmelden</string>
     <string name="mail_ms_hint">Die Seite von Microsoft öffnet sich im Browser: Melde dich dort an (mit dem Code deines Telefons, falls du einen nutzt) und komm zurück. Tetra sieht dein Passwort nie.</string>
     <string name="mail_ms_client">Microsoft-App-ID (client ID)</string>

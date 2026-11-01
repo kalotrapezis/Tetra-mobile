@@ -197,6 +197,8 @@
     <string name="mail_islands_summary">Cá seasann siad. Uathoibríoch: thuas le luch, thíos le méar.</string>
     <string name="mail_threads">Comhráite</string>
     <string name="mail_threads_summary">Teachtaireachtaí comhrá amháin le chéile, ceann faoi cheann, mar a bheadh i gcomhrá beo</string>
+    <string name="mail_read_shown">Léite nuair a thaispeántar é</string>
+    <string name="mail_read_shown_summary">Áirítear an ríomhphost a thaispeántar in aice leis an liosta mar léite gan tapáil</string>
     <string name="mail_ms_sign_in">Sínigh isteach le Microsoft</string>
     <string name="mail_ms_hint">Osclaítear leathanach Microsoft sa bhrabhsálaí: sínigh isteach ansin (le cód d’fhóin má úsáideann tú ceann) agus fill ar ais. Ní fheiceann Tetra d’fhocal faire riamh.</string>
     <string name="mail_ms_client">Aitheantas aipe Microsoft (client ID)</string>

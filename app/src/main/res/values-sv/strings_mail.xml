@@ -185,6 +185,8 @@
     <string name="mail_islands_summary">Var de står. Automatiskt: överst med mus, nederst med fingret.</string>
     <string name="mail_threads">Konversationer</string>
     <string name="mail_threads_summary">Mejlen i en konversation samlade, under varandra, som i en chatt</string>
+    <string name="mail_read_shown">Läst när det visas</string>
+    <string name="mail_read_shown_summary">Mejlet som visas bredvid listan räknas som läst utan att du trycker</string>
     <string name="mail_ms_sign_in">Logga in med Microsoft</string>
     <string name="mail_ms_hint">Microsofts sida öppnas i webbläsaren: logga in där (med telefonens kod om du använder en) och kom tillbaka. Tetra ser aldrig ditt lösenord.</string>
     <string name="mail_ms_client">Microsoft-app-id (client ID)</string>

@@ -185,6 +185,8 @@
     <string name="mail_islands_summary">Kus need asuvad. Automaatselt: hiirega üleval, sõrmega all.</string>
     <string name="mail_threads">Vestlused</string>
     <string name="mail_threads_summary">Ühe vestluse kirjad koos, üksteise all, nagu vestlusaknas</string>
+    <string name="mail_read_shown">Loetud, kui kuvatakse</string>
+    <string name="mail_read_shown_summary">Loendi kõrval kuvatud kiri loetakse loetuks ka ilma puudutuseta</string>
     <string name="mail_ms_sign_in">Logi sisse Microsoftiga</string>
     <string name="mail_ms_hint">Microsofti leht avaneb brauseris: logige seal sisse (telefoni koodiga, kui seda kasutate) ja tulge tagasi. Tetra ei näe kunagi teie parooli.</string>
     <string name="mail_ms_client">Microsofti rakenduse ID (client ID)</string>

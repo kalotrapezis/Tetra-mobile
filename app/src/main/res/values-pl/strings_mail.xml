@@ -193,6 +193,8 @@
     <string name="mail_islands_summary">Gdzie stoją. Samo: na górze z myszą, na dole z palcem.</string>
     <string name="mail_threads">Wątki</string>
     <string name="mail_threads_summary">Wiadomości z jednej rozmowy razem, jedna pod drugą, jak w czacie</string>
+    <string name="mail_read_shown">Przeczytana po wyświetleniu</string>
+    <string name="mail_read_shown_summary">Wiadomość pokazana obok listy liczy się jako przeczytana bez dotknięcia</string>
     <string name="mail_ms_sign_in">Zaloguj się przez Microsoft</string>
     <string name="mail_ms_hint">Strona Microsoft otworzy się w przeglądarce: zaloguj się tam (kodem z telefonu, jeśli go używasz) i wróć. Tetra nigdy nie widzi twojego hasła.</string>
     <string name="mail_ms_client">Identyfikator aplikacji Microsoft (client ID)</string>

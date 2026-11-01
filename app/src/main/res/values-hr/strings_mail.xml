@@ -189,6 +189,8 @@
     <string name="mail_islands_summary">Gdje stoje. Automatski: gore s mišem, dolje s prstom.</string>
     <string name="mail_threads">Razgovori</string>
     <string name="mail_threads_summary">Poruke jednog razgovora zajedno, jedna ispod druge, kao u chatu</string>
+    <string name="mail_read_shown">Pročitano kad se prikaže</string>
+    <string name="mail_read_shown_summary">Poruka prikazana pokraj popisa računa se pročitanom bez dodira</string>
     <string name="mail_ms_sign_in">Prijava putem Microsofta</string>
     <string name="mail_ms_hint">Microsoftova stranica otvara se u pregledniku: prijavite se tamo (kodom s telefona ako ga koristite) i vratite se. Tetra nikad ne vidi vašu lozinku.</string>
     <string name="mail_ms_client">ID Microsoftove aplikacije (client ID)</string>
