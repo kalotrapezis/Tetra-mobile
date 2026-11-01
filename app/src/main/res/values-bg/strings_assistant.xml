@@ -178,4 +178,46 @@
         <item quantity="one">%d страница</item>
         <item quantity="other">%d страници</item>
     </plurals>
+    <string name="usage_title">Употреба и разходи</string>
+    <string name="usage_today">Днес</string>
+    <string name="usage_month">Този месец</string>
+    <string name="usage_all">От %1$s</string>
+    <string name="usage_before">Преди подробният запис да започне: %1$s (без разбивка).</string>
+    <string name="usage_days">По ден, последните 30</string>
+    <string name="usage_by_feature">По функция</string>
+    <string name="usage_by_model">По модел</string>
+    <string name="usage_by_device">По устройство</string>
+    <string name="usage_files">Файлове</string>
+    <string name="usage_mp3s">Направени MP3</string>
+    <string name="usage_empty">Още няма записана употреба.</string>
+    <string name="usage_prices">Използвани цени (проверени на %1$s)</string>
+    <string name="usage_per_tokens">на 1 млн. tokens (вход / изход)</string>
+    <string name="usage_per_minute">на минута аудио</string>
+    <string name="usage_per_chars">на 1000 знака</string>
+    <string name="usage_per_page">на страница</string>
+    <string name="usage_per_call">на заявка</string>
+    <string name="usage_budget">Месечен бюджет (€)</string>
+    <string name="usage_budget_none">Без бюджет</string>
+    <string name="usage_budget_used">%1$s от %2$s този месец</string>
+    <string name="usage_budget_note" formatted="false">При 80% идва известие. При бюджета планираните действия и MP3 не започват.</string>
+    <string name="usage_note">Това са приблизителни стойности: tokens, знаци и минути по публикуваните цени на Mistral. Важна е сметката на Mistral.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% от месечния бюджет</string>
+    <string name="usage_warn_body">Похарчени са %1$s от %2$s този месец.</string>
+    <string name="usage_capped">Достигнат е месечният бюджет на AI Assist, затова това не стартира. Промени го в Настройки › AI Assist.</string>
+    <string name="usage_f_chat">Чат</string>
+    <string name="usage_f_live">На живо</string>
+    <string name="usage_f_brief">Дневен преглед</string>
+    <string name="usage_f_schedule">Планирани действия</string>
+    <string name="usage_f_dictation">Диктуване</string>
+    <string name="usage_f_voice">Отговори на глас</string>
+    <string name="usage_f_ocr">Четене на сканирани</string>
+    <string name="usage_f_script">Сценарий за MP3</string>
+    <string name="usage_f_verify">Проверка на сценарий</string>
+    <string name="usage_f_tts">Гласове за MP3</string>
+    <string name="usage_f_web">Търсене в интернет</string>
+    <string name="usage_f_image">Изображения</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d заявка</item>
+        <item quantity="other">%d заявки</item>
+    </plurals>
 </resources>

@@ -180,4 +180,48 @@
         <item quantity="many">%d puslapio</item>
         <item quantity="other">%d puslapių</item>
     </plurals>
+    <string name="usage_title">Naudojimas ir kaina</string>
+    <string name="usage_today">Šiandien</string>
+    <string name="usage_month">Šį mėnesį</string>
+    <string name="usage_all">Nuo %1$s</string>
+    <string name="usage_before">Prieš pradedant išsamų įrašą: %1$s (be išskaidymo).</string>
+    <string name="usage_days">Pagal dieną, paskutinės 30</string>
+    <string name="usage_by_feature">Pagal funkciją</string>
+    <string name="usage_by_model">Pagal modelį</string>
+    <string name="usage_by_device">Pagal įrenginį</string>
+    <string name="usage_files">Failai</string>
+    <string name="usage_mp3s">Sukurti MP3</string>
+    <string name="usage_empty">Naudojimo dar nėra įrašyta.</string>
+    <string name="usage_prices">Naudotos kainos (patikrinta %1$s)</string>
+    <string name="usage_per_tokens">už 1 mln. tokens (įvestis / išvestis)</string>
+    <string name="usage_per_minute">už garso minutę</string>
+    <string name="usage_per_chars">už 1000 simbolių</string>
+    <string name="usage_per_page">už puslapį</string>
+    <string name="usage_per_call">už užklausą</string>
+    <string name="usage_budget">Mėnesio biudžetas (€)</string>
+    <string name="usage_budget_none">Be biudžeto</string>
+    <string name="usage_budget_used">%1$s iš %2$s šį mėnesį</string>
+    <string name="usage_budget_note" formatted="false">Pasiekus 80%, ateina pranešimas. Pasiekus biudžetą, suplanuoti veiksmai ir MP3 nepradedami.</string>
+    <string name="usage_note">Tai įvertinimai: tokens, simboliai ir minutės, padauginti iš Mistral paskelbtų kainų. Svarbi yra pati Mistral sąskaita.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% mėnesio biudžeto</string>
+    <string name="usage_warn_body">Šį mėnesį išleista %1$s iš %2$s.</string>
+    <string name="usage_capped">Pasiektas AI Assist mėnesio biudžetas, todėl tai nepradedama. Pakeisk jį skiltyje Nustatymai › AI Assist.</string>
+    <string name="usage_f_chat">Pokalbis</string>
+    <string name="usage_f_live">Tiesiogiai</string>
+    <string name="usage_f_brief">Dienos apžvalga</string>
+    <string name="usage_f_schedule">Suplanuoti veiksmai</string>
+    <string name="usage_f_dictation">Diktavimas</string>
+    <string name="usage_f_voice">Atsakymai skaitomi balsu</string>
+    <string name="usage_f_ocr">Skenuotų dokumentų skaitymas</string>
+    <string name="usage_f_script">MP3 scenarijus</string>
+    <string name="usage_f_verify">Scenarijaus patikra</string>
+    <string name="usage_f_tts">MP3 balsai</string>
+    <string name="usage_f_web">Paieška internete</string>
+    <string name="usage_f_image">Paveikslėliai</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d užklausa</item>
+        <item quantity="few">%d užklausos</item>
+        <item quantity="many">%d užklausos</item>
+        <item quantity="other">%d užklausų</item>
+    </plurals>
 </resources>

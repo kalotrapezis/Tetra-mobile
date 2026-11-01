@@ -98,6 +98,7 @@
             <intent-filter><action android:name="android.intent.action.VIEW" /><category android:name="android.intent.category.DEFAULT" /><data android:mimeType="vnd.android.cursor.dir/calls" /></intent-filter>
         </activity>
         <activity android:name=".BriefActivity" android:exported="false" android:label="@string/assistant_briefs_channel" />
+        <activity android:name=".UsageActivity" android:exported="false" android:label="@string/usage_title" />
         <activity android:name=".DataActivity" android:exported="false" android:label="@string/home_label_data" android:taskAffinity="com.kalotrapezis.drive.data" />
         <receiver android:name=".PhoneCallReceiver" android:exported="false" />
         <receiver android:name=".PhoneRelayReceiver" android:exported="false" />

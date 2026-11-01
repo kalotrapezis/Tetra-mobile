@@ -172,11 +172,11 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
             "schedules", "memory" -> ScopedSync.soon(app, "assistant", 0, orWhole = true) // the computer runs the schedules: it hears at once
         } },
         search = { q ->
-            val (text, sources, _) = Mistral.output(api.conversation(q, "web_search", "Search the web and answer briefly with the facts found."))
+            val (text, sources, _) = Mistral.output(api.tagged("web").conversation(q, "web_search", "Search the web and answer briefly with the facts found."))
             text + if (sources.isEmpty()) "" else "\nSources: " + sources.take(3).joinToString("; ")
         },
         image = { prompt ->
-            val id = Mistral.output(api.conversation(prompt, "image_generation", "Draw the picture asked for.")).third.firstOrNull() ?: error("No picture came back.")
+            val id = Mistral.output(api.tagged("image").conversation(prompt, "image_generation", "Draw the picture asked for.")).third.firstOrNull() ?: error("No picture came back.")
             File(File(tetra, FOLDER).apply { mkdirs() }, "image-${System.currentTimeMillis()}.png").apply { writeBytes(AssistantNet.download(AssistantNet.key(app), id)) }
         },
         // shortcut: which card is the user's is kept on this phone only (Contacts has no "me" mark yet); move it into the card when the computer needs it
@@ -411,7 +411,7 @@ class AssistantRecognition : RecognitionService() {
                 cb.readyForSpeech(Bundle())
                 val pcm = listen(8_000, { stop }, pauseMs = AssistantPause.ms(this), mic = AssistantAudio.mic(this)) ?: return@Thread cb.error(SpeechRecognizer.ERROR_SPEECH_TIMEOUT)
                 cb.endOfSpeech()
-                cb.results(Bundle().apply { putStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION, arrayListOf(AssistantNet.transcribe(key, pcm, AssistantWords.terms(this@AssistantRecognition), AssistantMeter.bill(this@AssistantRecognition)))) })
+                cb.results(Bundle().apply { putStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION, arrayListOf(AssistantNet.transcribe(key, pcm, AssistantWords.terms(this@AssistantRecognition), AssistantMeter.bill(this@AssistantRecognition).part("dictation")))) })
             }.onFailure { WriterLog.w("Assistant: recognition for another app failed", it); runCatching { cb.error(SpeechRecognizer.ERROR_NETWORK) } }
         }.start()
     }
@@ -428,7 +428,7 @@ internal object AssistantMeter {
     @Synchronized fun add(c: Context, usd: Double) { if (usd > 0) change(c) { it.add(usd) } }
     @Synchronized fun reset(c: Context) = change(c) { it.reset(System.currentTimeMillis()) }
     /** A bill whose every cost is also counted here. */
-    fun bill(c: Context): Bill { val app = c.applicationContext; return Bill { add(app, it) } }
+    fun bill(c: Context): Bill { val app = c.applicationContext; return Bill({ add(app, it) }, { AssistantUsage.record(app, it) }) }
 }
 
 /** The voice that reads answers (Settings › AI Assist › Voice): one of Mistral's, or the phone's own ("", free). */

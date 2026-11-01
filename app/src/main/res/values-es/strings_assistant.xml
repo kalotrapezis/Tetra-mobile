@@ -179,4 +179,47 @@
         <item quantity="many">%d páginas</item>
         <item quantity="other">%d páginas</item>
     </plurals>
+    <string name="usage_title">Uso y coste</string>
+    <string name="usage_today">Hoy</string>
+    <string name="usage_month">Este mes</string>
+    <string name="usage_all">Desde %1$s</string>
+    <string name="usage_before">Antes de que empezara el registro detallado: %1$s (sin desglose).</string>
+    <string name="usage_days">Por día, últimos 30</string>
+    <string name="usage_by_feature">Por función</string>
+    <string name="usage_by_model">Por modelo</string>
+    <string name="usage_by_device">Por dispositivo</string>
+    <string name="usage_files">Archivos</string>
+    <string name="usage_mp3s">MP3 creados</string>
+    <string name="usage_empty">Todavía no hay uso registrado.</string>
+    <string name="usage_prices">Precios usados (revisados %1$s)</string>
+    <string name="usage_per_tokens">por 1 M de tokens (entrada / salida)</string>
+    <string name="usage_per_minute">por minuto de audio</string>
+    <string name="usage_per_chars">por 1.000 caracteres</string>
+    <string name="usage_per_page">por página</string>
+    <string name="usage_per_call">por llamada</string>
+    <string name="usage_budget">Presupuesto mensual (€)</string>
+    <string name="usage_budget_none">Sin presupuesto</string>
+    <string name="usage_budget_used">%1$s de %2$s este mes</string>
+    <string name="usage_budget_note" formatted="false">Al 80 % llega un aviso. Al llegar al presupuesto, las acciones programadas y los MP3 no se inician.</string>
+    <string name="usage_note">Son estimaciones: tokens, caracteres y minutos por los precios publicados de Mistral. Lo que cuenta es la factura de Mistral.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80 % del presupuesto mensual</string>
+    <string name="usage_warn_body">Se han gastado %1$s de %2$s este mes.</string>
+    <string name="usage_capped">Se ha alcanzado el presupuesto mensual de AI Assist, así que esto no se inicia. Cámbialo en Ajustes › AI Assist.</string>
+    <string name="usage_f_chat">Chat</string>
+    <string name="usage_f_live">En vivo</string>
+    <string name="usage_f_brief">Resumen diario</string>
+    <string name="usage_f_schedule">Acciones programadas</string>
+    <string name="usage_f_dictation">Dictado</string>
+    <string name="usage_f_voice">Respuestas leídas en voz alta</string>
+    <string name="usage_f_ocr">Lectura de escaneos</string>
+    <string name="usage_f_script">Guion de MP3</string>
+    <string name="usage_f_verify">Revisión del guion</string>
+    <string name="usage_f_tts">Voces de MP3</string>
+    <string name="usage_f_web">Búsqueda web</string>
+    <string name="usage_f_image">Imágenes</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d llamada</item>
+        <item quantity="many">%d llamadas</item>
+        <item quantity="other">%d llamadas</item>
+    </plurals>
 </resources>

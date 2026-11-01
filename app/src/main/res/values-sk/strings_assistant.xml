@@ -180,4 +180,48 @@
         <item quantity="many">%d strany</item>
         <item quantity="other">%d strán</item>
     </plurals>
+    <string name="usage_title">Využitie a náklady</string>
+    <string name="usage_today">Dnes</string>
+    <string name="usage_month">Tento mesiac</string>
+    <string name="usage_all">Od %1$s</string>
+    <string name="usage_before">Pred začiatkom podrobného záznamu: %1$s (bez rozpisu).</string>
+    <string name="usage_days">Po dňoch, posledných 30</string>
+    <string name="usage_by_feature">Podľa funkcie</string>
+    <string name="usage_by_model">Podľa modelu</string>
+    <string name="usage_by_device">Podľa zariadenia</string>
+    <string name="usage_files">Súbory</string>
+    <string name="usage_mp3s">Vytvorené MP3</string>
+    <string name="usage_empty">Zatiaľ nie je zaznamenané žiadne využitie.</string>
+    <string name="usage_prices">Použité ceny (overené %1$s)</string>
+    <string name="usage_per_tokens">za 1 mil. tokens (vstup / výstup)</string>
+    <string name="usage_per_minute">za minútu zvuku</string>
+    <string name="usage_per_chars">za 1 000 znakov</string>
+    <string name="usage_per_page">za stranu</string>
+    <string name="usage_per_call">za volanie</string>
+    <string name="usage_budget">Mesačný rozpočet (€)</string>
+    <string name="usage_budget_none">Bez rozpočtu</string>
+    <string name="usage_budget_used">%1$s z %2$s tento mesiac</string>
+    <string name="usage_budget_note" formatted="false">Pri 80 % príde upozornenie. Pri rozpočte sa naplánované akcie a MP3 nespustia.</string>
+    <string name="usage_note">Ide o odhady: tokens, znaky a minúty krát zverejnené ceny Mistralu. Rozhodujúci je účet od Mistralu.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80 % mesačného rozpočtu</string>
+    <string name="usage_warn_body">Tento mesiac sa minulo %1$s z %2$s.</string>
+    <string name="usage_capped">Dosiahol sa mesačný rozpočet AI Assist, takže sa to nespustí. Zmeň ho v Nastavenia › AI Assist.</string>
+    <string name="usage_f_chat">Chat</string>
+    <string name="usage_f_live">Naživo</string>
+    <string name="usage_f_brief">Denný prehľad</string>
+    <string name="usage_f_schedule">Naplánované akcie</string>
+    <string name="usage_f_dictation">Diktovanie</string>
+    <string name="usage_f_voice">Odpovede nahlas</string>
+    <string name="usage_f_ocr">Čítanie skenov</string>
+    <string name="usage_f_script">Scenár MP3</string>
+    <string name="usage_f_verify">Kontrola scenára</string>
+    <string name="usage_f_tts">Hlasy MP3</string>
+    <string name="usage_f_web">Hľadanie na webe</string>
+    <string name="usage_f_image">Obrázky</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d volanie</item>
+        <item quantity="few">%d volania</item>
+        <item quantity="many">%d volaní</item>
+        <item quantity="other">%d volaní</item>
+    </plurals>
 </resources>

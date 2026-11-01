@@ -178,4 +178,46 @@
         <item quantity="one">%d side</item>
         <item quantity="other">%d sider</item>
     </plurals>
+    <string name="usage_title">Brug og omkostning</string>
+    <string name="usage_today">I dag</string>
+    <string name="usage_month">Denne måned</string>
+    <string name="usage_all">Siden %1$s</string>
+    <string name="usage_before">Før den detaljerede registrering startede: %1$s (uden opdeling).</string>
+    <string name="usage_days">Pr. dag, de sidste 30</string>
+    <string name="usage_by_feature">Pr. funktion</string>
+    <string name="usage_by_model">Pr. model</string>
+    <string name="usage_by_device">Pr. enhed</string>
+    <string name="usage_files">Filer</string>
+    <string name="usage_mp3s">Lavede MP3\'er</string>
+    <string name="usage_empty">Der er endnu ikke registreret brug.</string>
+    <string name="usage_prices">Brugte priser (tjekket %1$s)</string>
+    <string name="usage_per_tokens">pr. 1 mio. tokens (input / output)</string>
+    <string name="usage_per_minute">pr. minut lyd</string>
+    <string name="usage_per_chars">pr. 1.000 tegn</string>
+    <string name="usage_per_page">pr. side</string>
+    <string name="usage_per_call">pr. kald</string>
+    <string name="usage_budget">Månedligt budget (€)</string>
+    <string name="usage_budget_none">Intet budget</string>
+    <string name="usage_budget_used">%1$s af %2$s denne måned</string>
+    <string name="usage_budget_note" formatted="false">Ved 80 % kommer der en besked. Ved budgettet starter planlagte handlinger og MP3\'er ikke.</string>
+    <string name="usage_note">Det er skøn: tokens, tegn og minutter gange Mistrals offentliggjorte priser. Mistrals egen regning er det, der tæller.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80 % af det månedlige budget</string>
+    <string name="usage_warn_body">%1$s af %2$s brugt denne måned.</string>
+    <string name="usage_capped">AI Assists månedlige budget er nået, så det startes ikke. Ændr det under Indstillinger › AI Assist.</string>
+    <string name="usage_f_chat">Chat</string>
+    <string name="usage_f_live">Live</string>
+    <string name="usage_f_brief">Dagsoversigt</string>
+    <string name="usage_f_schedule">Planlagte handlinger</string>
+    <string name="usage_f_dictation">Diktering</string>
+    <string name="usage_f_voice">Svar læst op</string>
+    <string name="usage_f_ocr">Læsning af scanninger</string>
+    <string name="usage_f_script">MP3-manuskript</string>
+    <string name="usage_f_verify">Manuskriptkontrol</string>
+    <string name="usage_f_tts">MP3-stemmer</string>
+    <string name="usage_f_web">Websøgning</string>
+    <string name="usage_f_image">Billeder</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d kald</item>
+        <item quantity="other">%d kald</item>
+    </plurals>
 </resources>

@@ -178,4 +178,46 @@
         <item quantity="one">%d Seite</item>
         <item quantity="other">%d Seiten</item>
     </plurals>
+    <string name="usage_title">Nutzung und Kosten</string>
+    <string name="usage_today">Heute</string>
+    <string name="usage_month">Diesen Monat</string>
+    <string name="usage_all">Seit %1$s</string>
+    <string name="usage_before">Vor Beginn der detaillierten Aufzeichnung: %1$s (ohne Aufschlüsselung).</string>
+    <string name="usage_days">Pro Tag, letzte 30</string>
+    <string name="usage_by_feature">Nach Funktion</string>
+    <string name="usage_by_model">Nach Modell</string>
+    <string name="usage_by_device">Nach Gerät</string>
+    <string name="usage_files">Dateien</string>
+    <string name="usage_mp3s">Erstellte MP3s</string>
+    <string name="usage_empty">Noch keine Nutzung erfasst.</string>
+    <string name="usage_prices">Verwendete Preise (geprüft %1$s)</string>
+    <string name="usage_per_tokens">pro 1 Mio. tokens (Eingabe / Ausgabe)</string>
+    <string name="usage_per_minute">pro Minute Audio</string>
+    <string name="usage_per_chars">pro 1.000 Zeichen</string>
+    <string name="usage_per_page">pro Seite</string>
+    <string name="usage_per_call">pro Aufruf</string>
+    <string name="usage_budget">Monatliches Budget (€)</string>
+    <string name="usage_budget_none">Kein Budget</string>
+    <string name="usage_budget_used">%1$s von %2$s diesen Monat</string>
+    <string name="usage_budget_note" formatted="false">Bei 80 % kommt eine Benachrichtigung. Beim Budget starten geplante Aktionen und MP3s nicht.</string>
+    <string name="usage_note">Das sind Schätzungen: tokens, Zeichen und Minuten mal Mistrals veröffentlichte Preise. Entscheidend ist Mistrals eigene Rechnung.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80 % des monatlichen Budgets</string>
+    <string name="usage_warn_body">Diesen Monat %1$s von %2$s ausgegeben.</string>
+    <string name="usage_capped">Das monatliche Budget von AI Assist ist erreicht, daher startet das nicht. Ändere es unter Einstellungen › AI Assist.</string>
+    <string name="usage_f_chat">Chat</string>
+    <string name="usage_f_live">Live</string>
+    <string name="usage_f_brief">Tagesüberblick</string>
+    <string name="usage_f_schedule">Geplante Aktionen</string>
+    <string name="usage_f_dictation">Diktat</string>
+    <string name="usage_f_voice">Antworten vorgelesen</string>
+    <string name="usage_f_ocr">Scans lesen</string>
+    <string name="usage_f_script">MP3-Skript</string>
+    <string name="usage_f_verify">Skriptprüfung</string>
+    <string name="usage_f_tts">MP3-Stimmen</string>
+    <string name="usage_f_web">Websuche</string>
+    <string name="usage_f_image">Bilder</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d Aufruf</item>
+        <item quantity="other">%d Aufrufe</item>
+    </plurals>
 </resources>

@@ -180,4 +180,48 @@
         <item quantity="many">%d paġna</item>
         <item quantity="other">%d paġna</item>
     </plurals>
+    <string name="usage_title">Użu u spiża</string>
+    <string name="usage_today">Illum</string>
+    <string name="usage_month">Dan ix-xahar</string>
+    <string name="usage_all">Mill-%1$s</string>
+    <string name="usage_before">Qabel ma beda r-reġistru dettaljat: %1$s (mingħajr taqsim).</string>
+    <string name="usage_days">Kuljum, l-aħħar 30</string>
+    <string name="usage_by_feature">Skont il-funzjoni</string>
+    <string name="usage_by_model">Skont il-mudell</string>
+    <string name="usage_by_device">Skont it-tagħmir</string>
+    <string name="usage_files">Fajls</string>
+    <string name="usage_mp3s">MP3 magħmula</string>
+    <string name="usage_empty">Għadu ma ġie rreġistrat l-ebda użu.</string>
+    <string name="usage_prices">Prezzijiet użati (iċċekkjati %1$s)</string>
+    <string name="usage_per_tokens">għal kull miljun tokens (input / output)</string>
+    <string name="usage_per_minute">għal kull minuta ta\' awdjo</string>
+    <string name="usage_per_chars">għal kull 1,000 karattru</string>
+    <string name="usage_per_page">għal kull paġna</string>
+    <string name="usage_per_call">għal kull sejħa</string>
+    <string name="usage_budget">Baġit kull xahar (€)</string>
+    <string name="usage_budget_none">Ebda baġit</string>
+    <string name="usage_budget_used">%1$s minn %2$s dan ix-xahar</string>
+    <string name="usage_budget_note" formatted="false">Fuq 80% tiġi notifika. Meta jintlaħaq il-baġit, l-azzjonijiet skedati u l-MP3 ma jibdewx.</string>
+    <string name="usage_note">Dawn huma stimi: tokens, karattri u minuti b\'prezzijiet ippubblikati minn Mistral. Il-fattura ta\' Mistral hija dik li tgħodd.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% tal-baġit ta\' kull xahar</string>
+    <string name="usage_warn_body">Intefqu %1$s minn %2$s dan ix-xahar.</string>
+    <string name="usage_capped">Intlaħaq il-baġit ta\' kull xahar ta\' AI Assist, allura dan ma jibdiex. Biddel dan f\'Settings › AI Assist.</string>
+    <string name="usage_f_chat">Chat</string>
+    <string name="usage_f_live">Live</string>
+    <string name="usage_f_brief">Sommarju tal-ġurnata</string>
+    <string name="usage_f_schedule">Azzjonijiet skedati</string>
+    <string name="usage_f_dictation">Dettar</string>
+    <string name="usage_f_voice">Tweġibiet moqrija b\'leħen għoli</string>
+    <string name="usage_f_ocr">Qari ta\' skannjar</string>
+    <string name="usage_f_script">Script tal-MP3</string>
+    <string name="usage_f_verify">Kontroll tal-iscript</string>
+    <string name="usage_f_tts">Leħinijiet tal-MP3</string>
+    <string name="usage_f_web">Tfittxija fuq il-web</string>
+    <string name="usage_f_image">Stampi</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d sejħa</item>
+        <item quantity="few">%d sejħiet</item>
+        <item quantity="many">%d sejħa</item>
+        <item quantity="other">%d sejħa</item>
+    </plurals>
 </resources>

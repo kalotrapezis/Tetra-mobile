@@ -178,4 +178,46 @@
         <item quantity="one">%d oldal</item>
         <item quantity="other">%d oldal</item>
     </plurals>
+    <string name="usage_title">Használat és költség</string>
+    <string name="usage_today">Ma</string>
+    <string name="usage_month">Ebben a hónapban</string>
+    <string name="usage_all">%1$s óta</string>
+    <string name="usage_before">A részletes nyilvántartás kezdete előtt: %1$s (bontás nélkül).</string>
+    <string name="usage_days">Naponta, az elmúlt 30</string>
+    <string name="usage_by_feature">Funkciónként</string>
+    <string name="usage_by_model">Modellenként</string>
+    <string name="usage_by_device">Eszközönként</string>
+    <string name="usage_files">Fájlok</string>
+    <string name="usage_mp3s">Készült MP3-ak</string>
+    <string name="usage_empty">Még nincs rögzített használat.</string>
+    <string name="usage_prices">Használt árak (ellenőrizve: %1$s)</string>
+    <string name="usage_per_tokens">1M tokenenként (bemenet / kimenet)</string>
+    <string name="usage_per_minute">hangperc szerint</string>
+    <string name="usage_per_chars">1000 karakterenként</string>
+    <string name="usage_per_page">oldalanként</string>
+    <string name="usage_per_call">hívásonként</string>
+    <string name="usage_budget">Havi keret (€)</string>
+    <string name="usage_budget_none">Nincs keret</string>
+    <string name="usage_budget_used">%1$s / %2$s ebben a hónapban</string>
+    <string name="usage_budget_note" formatted="false">80%-nál értesítés érkezik. A keret elérésekor az ütemezett műveletek és az MP3-ak nem indulnak el.</string>
+    <string name="usage_note">Ezek becslések: tokens, karakterek és percek szorozva a Mistral közzétett áraival. A Mistral saját számlája a mérvadó.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: a havi keret 80%-a</string>
+    <string name="usage_warn_body">%1$s / %2$s elköltve ebben a hónapban.</string>
+    <string name="usage_capped">Elérte az AI Assist havi keretét, ezért ez nem indul el. Módosítsd a Beállítások › AI Assist menüpontban.</string>
+    <string name="usage_f_chat">Csevegés</string>
+    <string name="usage_f_live">Élő</string>
+    <string name="usage_f_brief">Napi összefoglaló</string>
+    <string name="usage_f_schedule">Ütemezett műveletek</string>
+    <string name="usage_f_dictation">Diktálás</string>
+    <string name="usage_f_voice">Felolvasott válaszok</string>
+    <string name="usage_f_ocr">Szkennelések olvasása</string>
+    <string name="usage_f_script">MP3-forgatókönyv</string>
+    <string name="usage_f_verify">Forgatókönyv-ellenőrzés</string>
+    <string name="usage_f_tts">MP3-hangok</string>
+    <string name="usage_f_web">Webes keresés</string>
+    <string name="usage_f_image">Képek</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d hívás</item>
+        <item quantity="other">%d hívás</item>
+    </plurals>
 </resources>

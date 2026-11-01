@@ -178,4 +178,46 @@
         <item quantity="one">%d lehekülg</item>
         <item quantity="other">%d lehekülge</item>
     </plurals>
+    <string name="usage_title">Kasutus ja kulu</string>
+    <string name="usage_today">Täna</string>
+    <string name="usage_month">Sel kuul</string>
+    <string name="usage_all">Alates %1$s</string>
+    <string name="usage_before">Enne üksikasjaliku arvestuse algust: %1$s (jaotuseta).</string>
+    <string name="usage_days">Päeviti, viimased 30</string>
+    <string name="usage_by_feature">Funktsiooni järgi</string>
+    <string name="usage_by_model">Mudeli järgi</string>
+    <string name="usage_by_device">Seadme järgi</string>
+    <string name="usage_files">Failid</string>
+    <string name="usage_mp3s">Tehtud MP3-d</string>
+    <string name="usage_empty">Kasutust pole veel salvestatud.</string>
+    <string name="usage_prices">Kasutatud hinnad (kontrollitud %1$s)</string>
+    <string name="usage_per_tokens">1 M tokens kohta (sisend / väljund)</string>
+    <string name="usage_per_minute">heli minuti kohta</string>
+    <string name="usage_per_chars">1000 tähemärgi kohta</string>
+    <string name="usage_per_page">lehekülje kohta</string>
+    <string name="usage_per_call">päringu kohta</string>
+    <string name="usage_budget">Kuueelarve (€)</string>
+    <string name="usage_budget_none">Eelarve puudub</string>
+    <string name="usage_budget_used">%1$s / %2$s sel kuul</string>
+    <string name="usage_budget_note" formatted="false">80% juures tuleb teade. Eelarve täis saades ei alustata plaanitud toiminguid ega MP3-sid.</string>
+    <string name="usage_note">Need on hinnangud: tokens, tähemärgid ja minutid korrutatuna Mistrali avaldatud hindadega. Loeb Mistrali enda arve.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% kuueelarvest</string>
+    <string name="usage_warn_body">Sel kuul on kulutatud %1$s / %2$s.</string>
+    <string name="usage_capped">AI Assisti kuueelarve on täis, seega seda ei alustata. Muuda seda jaotises Seaded › AI Assist.</string>
+    <string name="usage_f_chat">Vestlus</string>
+    <string name="usage_f_live">Otse</string>
+    <string name="usage_f_brief">Päevaülevaade</string>
+    <string name="usage_f_schedule">Ajastatud toimingud</string>
+    <string name="usage_f_dictation">Diktaat</string>
+    <string name="usage_f_voice">Vastused ette loetud</string>
+    <string name="usage_f_ocr">Skannide lugemine</string>
+    <string name="usage_f_script">MP3 stsenaarium</string>
+    <string name="usage_f_verify">Stsenaariumi kontroll</string>
+    <string name="usage_f_tts">MP3 hääled</string>
+    <string name="usage_f_web">Veebiotsing</string>
+    <string name="usage_f_image">Pildid</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d päring</item>
+        <item quantity="other">%d päringut</item>
+    </plurals>
 </resources>

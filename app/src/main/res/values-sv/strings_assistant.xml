@@ -178,4 +178,46 @@
         <item quantity="one">%d sida</item>
         <item quantity="other">%d sidor</item>
     </plurals>
+    <string name="usage_title">Användning och kostnad</string>
+    <string name="usage_today">Idag</string>
+    <string name="usage_month">Den här månaden</string>
+    <string name="usage_all">Sedan %1$s</string>
+    <string name="usage_before">Innan den detaljerade loggen började: %1$s (ingen uppdelning).</string>
+    <string name="usage_days">Per dag, de senaste 30</string>
+    <string name="usage_by_feature">Per funktion</string>
+    <string name="usage_by_model">Per modell</string>
+    <string name="usage_by_device">Per enhet</string>
+    <string name="usage_files">Filer</string>
+    <string name="usage_mp3s">Gjorda MP3-filer</string>
+    <string name="usage_empty">Ingen användning har registrerats ännu.</string>
+    <string name="usage_prices">Använda priser (kontrollerade %1$s)</string>
+    <string name="usage_per_tokens">per 1 miljon tokens (in / ut)</string>
+    <string name="usage_per_minute">per minut ljud</string>
+    <string name="usage_per_chars">per 1 000 tecken</string>
+    <string name="usage_per_page">per sida</string>
+    <string name="usage_per_call">per anrop</string>
+    <string name="usage_budget">Månadsbudget (€)</string>
+    <string name="usage_budget_none">Ingen budget</string>
+    <string name="usage_budget_used">%1$s av %2$s den här månaden</string>
+    <string name="usage_budget_note" formatted="false">Vid 80 % kommer ett meddelande. Vid budgeten startar inte schemalagda åtgärder och MP3-filer.</string>
+    <string name="usage_note">Det här är uppskattningar: tokens, tecken och minuter gånger Mistrals publicerade priser. Det är Mistrals egen faktura som räknas.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80 % av månadsbudgeten</string>
+    <string name="usage_warn_body">%1$s av %2$s har använts den här månaden.</string>
+    <string name="usage_capped">AI Assists månadsbudget är nådd, så det här startar inte. Ändra den under Inställningar › AI Assist.</string>
+    <string name="usage_f_chat">Chatt</string>
+    <string name="usage_f_live">Live</string>
+    <string name="usage_f_brief">Dagsöversikt</string>
+    <string name="usage_f_schedule">Schemalagda åtgärder</string>
+    <string name="usage_f_dictation">Diktering</string>
+    <string name="usage_f_voice">Svar lästa högt</string>
+    <string name="usage_f_ocr">Läsning av skanningar</string>
+    <string name="usage_f_script">MP3-manus</string>
+    <string name="usage_f_verify">Manuskontroll</string>
+    <string name="usage_f_tts">MP3-röster</string>
+    <string name="usage_f_web">Webbsökning</string>
+    <string name="usage_f_image">Bilder</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d anrop</item>
+        <item quantity="other">%d anrop</item>
+    </plurals>
 </resources>

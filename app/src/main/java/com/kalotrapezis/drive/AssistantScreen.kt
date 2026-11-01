@@ -145,7 +145,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
     fun endLive(@androidx.annotation.StringRes why: Int? = null) {
         val l = live ?: return
         live = null; l.end(); hush()
-        chat.bill.minutes(Mistral.REALTIME, (System.currentTimeMillis() - liveStart) / 1000.0); spent = chat.bill.usd
+        chat.bill.part("live").minutes(Mistral.REALTIME, (System.currentTimeMillis() - liveStart) / 1000.0); spent = chat.bill.usd
         why?.let { bubbles += Bubble(false, context.getString(it)) }
         livePhase = LivePhase.Stopping
         scope.launch { delay(1_500); if (live == null) liveShown = false } // the record slows to a stop first
@@ -177,6 +177,8 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
     /** The user's yes to an MP3: the ask goes to the computer (AudioJobs), and its card follows it here. */
     fun startAudio(a: AudioAsk) = scope.launch {
         pendingAudio = null
+        // past the month's budget nothing runs by itself, and it says so
+        if (withContext(Dispatchers.IO) { AssistantUsage.of(context).capped() }) { say(context.getString(R.string.usage_capped), true); return@launch }
         val id = withContext(Dispatchers.IO) { runCatching { AudioJobs.ask(driveRoot(), TimerControl.device(), a) } }
             .getOrElse { WriterLog.e("AI Assist: the MP3 could not be asked for", it); say(it.message ?: "", true); return@launch }
         ScopedSync.soon(context, "assistant", 0, orWhole = true) // the computer hears at once
@@ -205,7 +207,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         live?.muted = true; if (inLive) livePhase = LivePhase.Thinking
         // the answer comes a few words at a time and is read a sentence at a time: the first is heard while the rest is made
         hush()
-        val speech = if (aloud || inLive) AnswerVoice(context, reader, chat.bill, scope).also { voice = it } else null
+        val speech = if (aloud || inLive) AnswerVoice(context, reader, chat.bill.part("voice"), scope).also { voice = it } else null
         val cut = Sentences()
         AssistantTools.beside = Beside.can(context)
         val r = withContext(Dispatchers.IO) { runCatching { chat.ask(text, file = file) { words ->
@@ -253,7 +255,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         hearing = false
         if (pcm == null) { phase = Phase.Idle; if (sheet && pending == null && bubbles.lastOrNull()?.images.isNullOrEmpty()) close(); return@launch }
         phase = Phase.Thinking
-        val text = withContext(Dispatchers.IO) { runCatching { AssistantNet.transcribe(AssistantNet.key(context), pcm, AssistantWords.terms(context), chat.bill) } }
+        val text = withContext(Dispatchers.IO) { runCatching { AssistantNet.transcribe(AssistantNet.key(context), pcm, AssistantWords.terms(context), chat.bill.part("dictation")) } }
         phase = Phase.Idle; spent = chat.bill.usd
         text.onSuccess { if (it.isBlank()) say(context.getString(R.string.assistant_heard_nothing)) else send(it) }
             .onFailure { say(it.shownMessage(context) ?: "", true) }
@@ -342,7 +344,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
                 Spacer(Modifier.width(10.dp))
                 Text(stringResource(R.string.app_assistant), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 // the thread's running total (the user: "the bill came")
-                Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+                Surface(onClick = { openUsage(context) }, shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
                     Text(Bill.text(spent), Modifier.padding(horizontal = 10.dp, vertical = 4.dp), style = MaterialTheme.typography.labelLarge, maxLines = 1)
                 }
                 IconButton(onClick = { aloud = !aloud; prefs.edit().putBoolean("aloud", aloud).apply(); if (!aloud) hush() }) {

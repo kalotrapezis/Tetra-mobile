@@ -179,4 +179,47 @@
         <item quantity="few">%d pagini</item>
         <item quantity="other">%d de pagini</item>
     </plurals>
+    <string name="usage_title">Utilizare și cost</string>
+    <string name="usage_today">Azi</string>
+    <string name="usage_month">Luna aceasta</string>
+    <string name="usage_all">De la %1$s</string>
+    <string name="usage_before">Înainte de începerea înregistrării detaliate: %1$s (fără defalcare).</string>
+    <string name="usage_days">Pe zi, ultimele 30</string>
+    <string name="usage_by_feature">Pe funcție</string>
+    <string name="usage_by_model">Pe model</string>
+    <string name="usage_by_device">Pe dispozitiv</string>
+    <string name="usage_files">Fișiere</string>
+    <string name="usage_mp3s">MP3-uri create</string>
+    <string name="usage_empty">Nicio utilizare înregistrată încă.</string>
+    <string name="usage_prices">Prețuri folosite (verificate %1$s)</string>
+    <string name="usage_per_tokens">la 1 mil. tokens (intrare / ieșire)</string>
+    <string name="usage_per_minute">pe minut de audio</string>
+    <string name="usage_per_chars">la 1.000 de caractere</string>
+    <string name="usage_per_page">pe pagină</string>
+    <string name="usage_per_call">pe apel</string>
+    <string name="usage_budget">Buget lunar (€)</string>
+    <string name="usage_budget_none">Fără buget</string>
+    <string name="usage_budget_used">%1$s din %2$s luna aceasta</string>
+    <string name="usage_budget_note" formatted="false">La 80% vine o notificare. La buget, acțiunile programate și MP3-urile nu pornesc.</string>
+    <string name="usage_note">Acestea sunt estimări: tokens, caractere și minute înmulțite cu prețurile publicate de Mistral. Contează factura Mistral.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% din bugetul lunar</string>
+    <string name="usage_warn_body">%1$s din %2$s cheltuiți luna aceasta.</string>
+    <string name="usage_capped">Bugetul lunar al AI Assist a fost atins, deci asta nu pornește. Schimbă-l din Setări › AI Assist.</string>
+    <string name="usage_f_chat">Chat</string>
+    <string name="usage_f_live">Live</string>
+    <string name="usage_f_brief">Rezumatul zilei</string>
+    <string name="usage_f_schedule">Acțiuni programate</string>
+    <string name="usage_f_dictation">Dictare</string>
+    <string name="usage_f_voice">Răspunsuri citite cu voce tare</string>
+    <string name="usage_f_ocr">Citire scanări</string>
+    <string name="usage_f_script">Scenariu MP3</string>
+    <string name="usage_f_verify">Verificarea scenariului</string>
+    <string name="usage_f_tts">Voci MP3</string>
+    <string name="usage_f_web">Căutare pe web</string>
+    <string name="usage_f_image">Imagini</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d apel</item>
+        <item quantity="few">%d apeluri</item>
+        <item quantity="other">%d de apeluri</item>
+    </plurals>
 </resources>

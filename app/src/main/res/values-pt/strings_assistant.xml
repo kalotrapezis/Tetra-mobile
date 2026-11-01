@@ -179,4 +179,47 @@
         <item quantity="many">%d páginas</item>
         <item quantity="other">%d páginas</item>
     </plurals>
+    <string name="usage_title">Utilização e custo</string>
+    <string name="usage_today">Hoje</string>
+    <string name="usage_month">Este mês</string>
+    <string name="usage_all">Desde %1$s</string>
+    <string name="usage_before">Antes de começar o registo detalhado: %1$s (sem detalhe).</string>
+    <string name="usage_days">Por dia, últimos 30</string>
+    <string name="usage_by_feature">Por funcionalidade</string>
+    <string name="usage_by_model">Por modelo</string>
+    <string name="usage_by_device">Por dispositivo</string>
+    <string name="usage_files">Ficheiros</string>
+    <string name="usage_mp3s">MP3 criados</string>
+    <string name="usage_empty">Ainda não há utilização registada.</string>
+    <string name="usage_prices">Preços usados (verificados em %1$s)</string>
+    <string name="usage_per_tokens">por 1 M de tokens (entrada / saída)</string>
+    <string name="usage_per_minute">por minuto de áudio</string>
+    <string name="usage_per_chars">por 1000 carateres</string>
+    <string name="usage_per_page">por página</string>
+    <string name="usage_per_call">por chamada</string>
+    <string name="usage_budget">Orçamento mensal (€)</string>
+    <string name="usage_budget_none">Sem orçamento</string>
+    <string name="usage_budget_used">%1$s de %2$s este mês</string>
+    <string name="usage_budget_note" formatted="false">Aos 80% chega uma notificação. No orçamento, as ações agendadas e os MP3 não começam.</string>
+    <string name="usage_note">São estimativas: tokens, carateres e minutos vezes os preços publicados pela Mistral. Conta a fatura da própria Mistral.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% do orçamento mensal</string>
+    <string name="usage_warn_body">%1$s de %2$s gastos este mês.</string>
+    <string name="usage_capped">O orçamento mensal do AI Assist foi atingido, por isso isto não começa. Altera-o em Definições › AI Assist.</string>
+    <string name="usage_f_chat">Conversa</string>
+    <string name="usage_f_live">Em direto</string>
+    <string name="usage_f_brief">Resumo do dia</string>
+    <string name="usage_f_schedule">Ações agendadas</string>
+    <string name="usage_f_dictation">Ditado</string>
+    <string name="usage_f_voice">Respostas lidas em voz alta</string>
+    <string name="usage_f_ocr">Leitura de digitalizações</string>
+    <string name="usage_f_script">Guião MP3</string>
+    <string name="usage_f_verify">Verificação do guião</string>
+    <string name="usage_f_tts">Vozes MP3</string>
+    <string name="usage_f_web">Pesquisa na web</string>
+    <string name="usage_f_image">Imagens</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d chamada</item>
+        <item quantity="many">%d chamadas</item>
+        <item quantity="other">%d chamadas</item>
+    </plurals>
 </resources>

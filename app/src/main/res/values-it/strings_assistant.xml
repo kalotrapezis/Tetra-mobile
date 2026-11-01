@@ -179,4 +179,47 @@
         <item quantity="many">%d pagine</item>
         <item quantity="other">%d pagine</item>
     </plurals>
+    <string name="usage_title">Utilizzo e costo</string>
+    <string name="usage_today">Oggi</string>
+    <string name="usage_month">Questo mese</string>
+    <string name="usage_all">Dal %1$s</string>
+    <string name="usage_before">Prima dell\'inizio del registro dettagliato: %1$s (senza dettaglio).</string>
+    <string name="usage_days">Per giorno, ultimi 30</string>
+    <string name="usage_by_feature">Per funzione</string>
+    <string name="usage_by_model">Per modello</string>
+    <string name="usage_by_device">Per dispositivo</string>
+    <string name="usage_files">File</string>
+    <string name="usage_mp3s">MP3 creati</string>
+    <string name="usage_empty">Nessun utilizzo registrato finora.</string>
+    <string name="usage_prices">Prezzi usati (verificati il %1$s)</string>
+    <string name="usage_per_tokens">per 1 M di tokens (input / output)</string>
+    <string name="usage_per_minute">per minuto di audio</string>
+    <string name="usage_per_chars">per 1.000 caratteri</string>
+    <string name="usage_per_page">per pagina</string>
+    <string name="usage_per_call">per chiamata</string>
+    <string name="usage_budget">Budget mensile (€)</string>
+    <string name="usage_budget_none">Nessun budget</string>
+    <string name="usage_budget_used">%1$s su %2$s questo mese</string>
+    <string name="usage_budget_note" formatted="false">All\'80% arriva una notifica. Al budget, le azioni pianificate e gli MP3 non partono.</string>
+    <string name="usage_note">Sono stime: tokens, caratteri e minuti per i prezzi pubblicati da Mistral. Conta la fattura di Mistral.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% del budget mensile</string>
+    <string name="usage_warn_body">Spesi %1$s su %2$s questo mese.</string>
+    <string name="usage_capped">È stato raggiunto il budget mensile di AI Assist, quindi questo non parte. Cambialo in Impostazioni › AI Assist.</string>
+    <string name="usage_f_chat">Chat</string>
+    <string name="usage_f_live">Live</string>
+    <string name="usage_f_brief">Riepilogo del giorno</string>
+    <string name="usage_f_schedule">Azioni pianificate</string>
+    <string name="usage_f_dictation">Dettatura</string>
+    <string name="usage_f_voice">Risposte lette ad alta voce</string>
+    <string name="usage_f_ocr">Lettura di scansioni</string>
+    <string name="usage_f_script">Copione MP3</string>
+    <string name="usage_f_verify">Controllo del copione</string>
+    <string name="usage_f_tts">Voci MP3</string>
+    <string name="usage_f_web">Ricerca web</string>
+    <string name="usage_f_image">Immagini</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d chiamata</item>
+        <item quantity="many">%d chiamate</item>
+        <item quantity="other">%d chiamate</item>
+    </plurals>
 </resources>

@@ -180,4 +180,48 @@
         <item quantity="few">%d strani</item>
         <item quantity="other">%d strani</item>
     </plurals>
+    <string name="usage_title">Poraba in strošek</string>
+    <string name="usage_today">Danes</string>
+    <string name="usage_month">Ta mesec</string>
+    <string name="usage_all">Od %1$s</string>
+    <string name="usage_before">Pred začetkom podrobnega zapisa: %1$s (brez razčlenitve).</string>
+    <string name="usage_days">Po dnevih, zadnjih 30</string>
+    <string name="usage_by_feature">Po funkciji</string>
+    <string name="usage_by_model">Po modelu</string>
+    <string name="usage_by_device">Po napravi</string>
+    <string name="usage_files">Datoteke</string>
+    <string name="usage_mp3s">Ustvarjeni MP3-ji</string>
+    <string name="usage_empty">Poraba še ni zabeležena.</string>
+    <string name="usage_prices">Uporabljene cene (preverjeno %1$s)</string>
+    <string name="usage_per_tokens">na 1 mio. tokens (vhod / izhod)</string>
+    <string name="usage_per_minute">na minuto zvoka</string>
+    <string name="usage_per_chars">na 1.000 znakov</string>
+    <string name="usage_per_page">na stran</string>
+    <string name="usage_per_call">na zahtevo</string>
+    <string name="usage_budget">Mesečni proračun (€)</string>
+    <string name="usage_budget_none">Brez proračuna</string>
+    <string name="usage_budget_used">%1$s od %2$s ta mesec</string>
+    <string name="usage_budget_note" formatted="false">Pri 80 % pride obvestilo. Ob proračunu se načrtovana dejanja in MP3-ji ne zaženejo.</string>
+    <string name="usage_note">To so ocene: tokens, znaki in minute, pomnoženi z objavljenimi cenami Mistrala. Šteje račun Mistrala.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80 % mesečnega proračuna</string>
+    <string name="usage_warn_body">Ta mesec porabljenih %1$s od %2$s.</string>
+    <string name="usage_capped">Mesečni proračun za AI Assist je dosežen, zato se to ne zažene. Spremeni ga v Nastavitve › AI Assist.</string>
+    <string name="usage_f_chat">Pogovor</string>
+    <string name="usage_f_live">V živo</string>
+    <string name="usage_f_brief">Dnevni pregled</string>
+    <string name="usage_f_schedule">Načrtovana dejanja</string>
+    <string name="usage_f_dictation">Diktiranje</string>
+    <string name="usage_f_voice">Odgovori prebrani na glas</string>
+    <string name="usage_f_ocr">Branje skenov</string>
+    <string name="usage_f_script">Scenarij MP3</string>
+    <string name="usage_f_verify">Preverjanje scenarija</string>
+    <string name="usage_f_tts">Glasovi MP3</string>
+    <string name="usage_f_web">Iskanje po spletu</string>
+    <string name="usage_f_image">Slike</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d zahteva</item>
+        <item quantity="two">%d zahtevi</item>
+        <item quantity="few">%d zahteve</item>
+        <item quantity="other">%d zahtev</item>
+    </plurals>
 </resources>

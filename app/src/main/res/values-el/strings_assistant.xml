@@ -178,4 +178,46 @@
         <item quantity="one">%d σελίδα</item>
         <item quantity="other">%d σελίδες</item>
     </plurals>
+    <string name="usage_title">Χρήση και κόστος</string>
+    <string name="usage_today">Σήμερα</string>
+    <string name="usage_month">Αυτόν τον μήνα</string>
+    <string name="usage_all">Από %1$s</string>
+    <string name="usage_before">Πριν ξεκινήσει η αναλυτική καταγραφή: %1$s (χωρίς ανάλυση).</string>
+    <string name="usage_days">Ανά ημέρα, τελευταίες 30</string>
+    <string name="usage_by_feature">Ανά λειτουργία</string>
+    <string name="usage_by_model">Ανά μοντέλο</string>
+    <string name="usage_by_device">Ανά συσκευή</string>
+    <string name="usage_files">Αρχεία</string>
+    <string name="usage_mp3s">MP3 που φτιάχτηκαν</string>
+    <string name="usage_empty">Δεν έχει καταγραφεί ακόμη χρήση.</string>
+    <string name="usage_prices">Οι τιμές που χρησιμοποιούνται (ελέγχθηκαν %1$s)</string>
+    <string name="usage_per_tokens">ανά 1 εκατ. tokens (είσοδος / έξοδος)</string>
+    <string name="usage_per_minute">ανά λεπτό ήχου</string>
+    <string name="usage_per_chars">ανά 1.000 γράμματα</string>
+    <string name="usage_per_page">ανά σελίδα</string>
+    <string name="usage_per_call">ανά κλήση</string>
+    <string name="usage_budget">Μηνιαίο όριο (€)</string>
+    <string name="usage_budget_none">Χωρίς όριο</string>
+    <string name="usage_budget_used">%1$s από %2$s αυτόν τον μήνα</string>
+    <string name="usage_budget_note" formatted="false">Στο 80% έρχεται ειδοποίηση. Στο όριο, οι προγραμματισμένες ενέργειες και τα MP3 δεν ξεκινούν.</string>
+    <string name="usage_note">Τα ποσά είναι εκτιμήσεις: tokens, γράμματα και λεπτά επί τις δημοσιευμένες τιμές της Mistral. Αυτό που μετράει είναι ο λογαριασμός της Mistral.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% του μηνιαίου ορίου</string>
+    <string name="usage_warn_body">Ξοδεύτηκαν %1$s από %2$s αυτόν τον μήνα.</string>
+    <string name="usage_capped">Έφτασε το μηνιαίο όριο του AI Assist, οπότε δεν ξεκινά. Άλλαξέ το στις Ρυθμίσεις › AI Assist.</string>
+    <string name="usage_f_chat">Συνομιλία</string>
+    <string name="usage_f_live">Ζωντανά</string>
+    <string name="usage_f_brief">Ενημέρωση της ημέρας</string>
+    <string name="usage_f_schedule">Προγραμματισμένες ενέργειες</string>
+    <string name="usage_f_dictation">Υπαγόρευση</string>
+    <string name="usage_f_voice">Ανάγνωση απαντήσεων</string>
+    <string name="usage_f_ocr">Ανάγνωση σκαναρισμένων</string>
+    <string name="usage_f_script">Σενάριο MP3</string>
+    <string name="usage_f_verify">Έλεγχος σεναρίου</string>
+    <string name="usage_f_tts">Φωνές MP3</string>
+    <string name="usage_f_web">Αναζήτηση στο διαδίκτυο</string>
+    <string name="usage_f_image">Εικόνες</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d κλήση</item>
+        <item quantity="other">%d κλήσεις</item>
+    </plurals>
 </resources>

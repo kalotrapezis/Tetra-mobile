@@ -179,4 +179,47 @@
         <item quantity="few">%d stranice</item>
         <item quantity="other">%d stranica</item>
     </plurals>
+    <string name="usage_title">Upotreba i trošak</string>
+    <string name="usage_today">Danas</string>
+    <string name="usage_month">Ovaj mjesec</string>
+    <string name="usage_all">Od %1$s</string>
+    <string name="usage_before">Prije početka detaljnog zapisa: %1$s (bez razrade).</string>
+    <string name="usage_days">Po danu, zadnjih 30</string>
+    <string name="usage_by_feature">Po funkciji</string>
+    <string name="usage_by_model">Po modelu</string>
+    <string name="usage_by_device">Po uređaju</string>
+    <string name="usage_files">Datoteke</string>
+    <string name="usage_mp3s">Napravljeni MP3-ovi</string>
+    <string name="usage_empty">Još nema zabilježene upotrebe.</string>
+    <string name="usage_prices">Korištene cijene (provjereno %1$s)</string>
+    <string name="usage_per_tokens">po 1 mil. tokens (ulaz / izlaz)</string>
+    <string name="usage_per_minute">po minuti zvuka</string>
+    <string name="usage_per_chars">po 1.000 znakova</string>
+    <string name="usage_per_page">po stranici</string>
+    <string name="usage_per_call">po pozivu</string>
+    <string name="usage_budget">Mjesečni proračun (€)</string>
+    <string name="usage_budget_none">Bez proračuna</string>
+    <string name="usage_budget_used">%1$s od %2$s ovaj mjesec</string>
+    <string name="usage_budget_note" formatted="false">Kod 80% stiže obavijest. Kad se dosegne proračun, zakazane radnje i MP3-ovi se ne pokreću.</string>
+    <string name="usage_note">Ovo su procjene: tokens, znakovi i minute puta objavljene cijene Mistrala. Mjerodavan je Mistralov vlastiti račun.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% mjesečnog proračuna</string>
+    <string name="usage_warn_body">Potrošeno je %1$s od %2$s ovaj mjesec.</string>
+    <string name="usage_capped">Dosegnut je mjesečni proračun za AI Assist, pa se ovo ne pokreće. Promijeni ga u Postavke › AI Assist.</string>
+    <string name="usage_f_chat">Razgovor</string>
+    <string name="usage_f_live">Uživo</string>
+    <string name="usage_f_brief">Dnevni pregled</string>
+    <string name="usage_f_schedule">Zakazane radnje</string>
+    <string name="usage_f_dictation">Diktiranje</string>
+    <string name="usage_f_voice">Odgovori naglas</string>
+    <string name="usage_f_ocr">Čitanje skenova</string>
+    <string name="usage_f_script">MP3 skripta</string>
+    <string name="usage_f_verify">Provjera skripte</string>
+    <string name="usage_f_tts">MP3 glasovi</string>
+    <string name="usage_f_web">Pretraga weba</string>
+    <string name="usage_f_image">Slike</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d poziv</item>
+        <item quantity="few">%d poziva</item>
+        <item quantity="other">%d poziva</item>
+    </plurals>
 </resources>

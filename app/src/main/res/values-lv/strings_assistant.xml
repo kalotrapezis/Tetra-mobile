@@ -179,4 +179,47 @@
         <item quantity="one">%d lappuse</item>
         <item quantity="other">%d lappuses</item>
     </plurals>
+    <string name="usage_title">Lietojums un izmaksas</string>
+    <string name="usage_today">Šodien</string>
+    <string name="usage_month">Šomēnes</string>
+    <string name="usage_all">Kopš %1$s</string>
+    <string name="usage_before">Pirms detalizētā ieraksta sākuma: %1$s (bez sadalījuma).</string>
+    <string name="usage_days">Pa dienām, pēdējās 30</string>
+    <string name="usage_by_feature">Pēc funkcijas</string>
+    <string name="usage_by_model">Pēc modeļa</string>
+    <string name="usage_by_device">Pēc ierīces</string>
+    <string name="usage_files">Faili</string>
+    <string name="usage_mp3s">Izveidotie MP3</string>
+    <string name="usage_empty">Lietojums vēl nav reģistrēts.</string>
+    <string name="usage_prices">Izmantotās cenas (pārbaudīts %1$s)</string>
+    <string name="usage_per_tokens">par 1 milj. tokens (ievade / izvade)</string>
+    <string name="usage_per_minute">par audio minūti</string>
+    <string name="usage_per_chars">par 1000 rakstzīmēm</string>
+    <string name="usage_per_page">par lapu</string>
+    <string name="usage_per_call">par izsaukumu</string>
+    <string name="usage_budget">Mēneša budžets (€)</string>
+    <string name="usage_budget_none">Nav budžeta</string>
+    <string name="usage_budget_used">%1$s no %2$s šomēnes</string>
+    <string name="usage_budget_note" formatted="false">Sasniedzot 80%, pienāk paziņojums. Sasniedzot budžetu, plānotās darbības un MP3 nesākas.</string>
+    <string name="usage_note">Tās ir aplēses: tokens, rakstzīmes un minūtes, reizinot ar Mistral publicētajām cenām. Svarīgs ir pats Mistral rēķins.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% no mēneša budžeta</string>
+    <string name="usage_warn_body">Šomēnes iztērēts %1$s no %2$s.</string>
+    <string name="usage_capped">Sasniegts AI Assist mēneša budžets, tāpēc tas nesākas. Maini to sadaļā Iestatījumi › AI Assist.</string>
+    <string name="usage_f_chat">Saruna</string>
+    <string name="usage_f_live">Tiešraide</string>
+    <string name="usage_f_brief">Dienas kopsavilkums</string>
+    <string name="usage_f_schedule">Plānotās darbības</string>
+    <string name="usage_f_dictation">Diktēšana</string>
+    <string name="usage_f_voice">Atbildes nolasītas balsī</string>
+    <string name="usage_f_ocr">Skenējumu lasīšana</string>
+    <string name="usage_f_script">MP3 scenārijs</string>
+    <string name="usage_f_verify">Scenārija pārbaude</string>
+    <string name="usage_f_tts">MP3 balsis</string>
+    <string name="usage_f_web">Tīmekļa meklēšana</string>
+    <string name="usage_f_image">Attēli</string>
+    <plurals name="usage_calls">
+        <item quantity="zero">%d izsaukumu</item>
+        <item quantity="one">%d izsaukums</item>
+        <item quantity="other">%d izsaukumi</item>
+    </plurals>
 </resources>

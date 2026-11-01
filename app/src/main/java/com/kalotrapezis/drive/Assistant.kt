@@ -36,22 +36,33 @@ internal data class AssistantReply(val text: String, val choices: List<Assistant
     val images: List<File> = emptyList(), val open: File? = null, val go: String? = null, val beside: Boolean = false, val audio: AudioAsk? = null)
 
 /**
- * What a conversation has cost so far, in US dollars by Mistral's list prices (the user: "the bill came"; shown in the
- * chat's top bar and on the live screen).
+ * What a conversation has cost so far, by Mistral's list prices (the user: "the bill came"; shown in the chat's top bar and
+ * on the live screen). [record] gets each call's line for the usage record (AssistantUsage), tagged with what it was for
+ * ([tag] f: chat, live, dictation, voice, web, image…); [part] makes a bill for one part of the work, whose costs are also
+ * its owner's (the desktop's Bill.for).
  */
-internal class Bill(private val counted: (Double) -> Unit = {}) {
+internal class Bill(private val counted: (Double) -> Unit = {}, private val record: ((Map<String, Any>) -> Unit)? = null,
+    val tag: Map<String, Any> = mapOf("f" to "chat"), private val owner: Bill? = null) {
     @Volatile var usd = 0.0; private set
     /** [counted] gets each cost too: the meter in Settings sums every chat's from here, so nothing is counted twice. */
-    @Synchronized fun add(x: Double) { usd += x; counted(x) }
+    fun add(x: Double, line: Map<String, Any> = emptyMap()) {
+        if (!(x > 0)) return
+        var b: Bill? = this
+        while (b != null) { synchronized(b) { b.usd += x }; b = b.owner }
+        counted(x)
+        record?.invoke(tag + line + ("usd" to x))
+    }
     @Synchronized fun reset() { usd = 0.0 }
+    fun part(f: String, more: Map<String, Any> = emptyMap()) = Bill(counted, record, tag + more + ("f" to f), this)
     fun tokens(model: String, usage: JSONObject?) {
         val (inPrice, outPrice) = TOKENS[model] ?: return
         usage ?: return
-        add((usage.optLong("prompt_tokens") * inPrice + usage.optLong("completion_tokens") * outPrice) / 1e6)
+        val i = usage.optLong("prompt_tokens"); val o = usage.optLong("completion_tokens")
+        add((i * inPrice + o * outPrice) / 1e6, mapOf("m" to model, "i" to i, "o" to o))
     }
-    fun minutes(model: String, seconds: Double) = add((PER_MINUTE[model] ?: 0.0) * seconds / 60)
+    fun minutes(model: String, seconds: Double) = add((PER_MINUTE[model] ?: 0.0) * seconds / 60, mapOf("m" to model, "s" to Math.round(seconds * 10) / 10.0))
     /** Mistral's voice is paid by the character read. */
-    fun chars(text: String) = add(text.length * PER_CHAR)
+    fun chars(text: String) = add(text.length * PER_CHAR, mapOf("m" to Mistral.TTS, "c" to text.length))
 
     companion object {
         // shortcut: Mistral's list prices in $ as published Oct 2026 (tools' from price tables, not Mistral's page); update when they change
@@ -60,6 +71,15 @@ internal class Bill(private val counted: (Double) -> Unit = {}) {
         fun perMinute(model: String) = PER_MINUTE[model] ?: 0.0
         val PER_CALL = mapOf("web_search" to 0.03, "image_generation" to 0.10)
         const val PER_CHAR = 0.016 / 1000 // voxtral-mini-tts-3: $0.016 a thousand characters (Mistral's Voxtral TTS page)
+        const val PER_PAGE = 0.001 // mistral-ocr: $1 a thousand pages (the computer's; Tesseract on the phone is free)
+
+        /** The prices the costs are worked out with, for the dashboard: when they were last checked, and each one (model, price, per). */
+        const val PRICES_CHECKED = "2026-10-31"
+        val PRICES: List<Triple<String, String, String>> get() {
+            fun n(x: Double) = java.math.BigDecimal(x).round(java.math.MathContext(6)).stripTrailingZeros().toPlainString()
+            return TOKENS.map { (m, p) -> Triple(m, "€${n(p.first)} / €${n(p.second)}", "tokens") } + PER_MINUTE.map { (m, x) -> Triple(m, "€${n(x)}", "minute") } +
+                Triple(Mistral.TTS, "€${n(PER_CHAR * 1000)}", "chars") + Triple("mistral-ocr-latest", "€${n(PER_PAGE)}", "page") + PER_CALL.map { (m, x) -> Triple(m, "€${n(x)}", "call") }
+        }
 
         /** "€0.0123": a cent's fractions while it is small (the user pays Mistral in euros; the same figures as the dollar list). */
         fun text(usd: Double) = if (usd < 1) "€%.4f".format(java.util.Locale.ROOT, usd) else "€%.2f".format(java.util.Locale.ROOT, usd)
@@ -119,11 +139,14 @@ internal class Mistral(private val http: (path: String, body: String) -> String,
         return JSONObject().put("role", "assistant").put("content", text.toString()).apply { if (calls.isNotEmpty()) put("tool_calls", JSONArray(calls.values)) }
     }
 
+    /** The same API, its costs recorded as [feature] (the desktop's Mistral.as). */
+    fun tagged(feature: String, more: Map<String, Any> = emptyMap()) = Mistral(http, bill.part(feature, more), stream)
+
     /** One stateless turn of the Conversations API with one of Mistral's own tools (web_search, image_generation). */
     fun conversation(input: String, tool: String, instructions: String): JSONArray = JSONObject(http("/conversations", JSONObject()
         .put("model", BUILT_IN).put("inputs", input).put("instructions", instructions).put("store", false)
         .put("tools", JSONArray().put(JSONObject().put("type", tool))).toString()))
-        .also { bill.tokens(BUILT_IN, it.optJSONObject("usage")); bill.add(Bill.PER_CALL[tool] ?: 0.0) }
+        .also { bill.tokens(BUILT_IN, it.optJSONObject("usage")); bill.add(Bill.PER_CALL[tool] ?: 0.0, mapOf("m" to tool)) }
         .getJSONArray("outputs")
 
     companion object {

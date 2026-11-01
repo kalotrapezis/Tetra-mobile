@@ -177,7 +177,7 @@ class AssistantTest {
 
     @Test fun theMeterCountsEveryBillAndAResetKeepsTheHistory() {
         val meter = Meter.of(null, 1_000)
-        val a = Bill { meter.add(it) }; val b = Bill { meter.add(it) }
+        val a = Bill({ meter.add(it) }); val b = Bill({ meter.add(it) })
         a.minutes(Mistral.REALTIME, 60.0); b.chars("x".repeat(1000))
         b.reset() // a new chat clears its own bill, not the meter
         assertEquals(0.022, meter.trip, 1e-9)

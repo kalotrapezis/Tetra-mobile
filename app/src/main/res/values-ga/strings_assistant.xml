@@ -181,4 +181,49 @@
         <item quantity="many">%d leathanach</item>
         <item quantity="other">%d leathanach</item>
     </plurals>
+    <string name="usage_title">Úsáid agus costas</string>
+    <string name="usage_today">Inniu</string>
+    <string name="usage_month">An mhí seo</string>
+    <string name="usage_all">Ó %1$s</string>
+    <string name="usage_before">Roimh thosú an taifead mhionsonraithe: %1$s (gan briseadh síos).</string>
+    <string name="usage_days">De réir lae, an 30 lá seo caite</string>
+    <string name="usage_by_feature">De réir gné</string>
+    <string name="usage_by_model">De réir samhail</string>
+    <string name="usage_by_device">De réir gléas</string>
+    <string name="usage_files">Comhaid</string>
+    <string name="usage_mp3s">MP3anna déanta</string>
+    <string name="usage_empty">Níl aon úsáid curtha ar taifead fós.</string>
+    <string name="usage_prices">Praghsanna a úsáideadh (seiceáilte %1$s)</string>
+    <string name="usage_per_tokens">in aghaidh 1M tokens (ionchur / aschur)</string>
+    <string name="usage_per_minute">in aghaidh nóiméad fuaime</string>
+    <string name="usage_per_chars">in aghaidh 1,000 carachtar</string>
+    <string name="usage_per_page">in aghaidh leathanaigh</string>
+    <string name="usage_per_call">in aghaidh glao</string>
+    <string name="usage_budget">Buiséad míosúil (€)</string>
+    <string name="usage_budget_none">Gan buiséad</string>
+    <string name="usage_budget_used">%1$s as %2$s an mhí seo</string>
+    <string name="usage_budget_note" formatted="false">Ag 80% tagann fógra. Ag an mbuiséad, ní thosaíonn gníomhartha sceidealta ná MP3anna.</string>
+    <string name="usage_note">Meastacháin is ea iad seo: tokens, carachtair agus nóiméid faoi phraghsanna foilsithe Mistral. Is é bille Mistral féin a bhfuil tábhacht leis.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% den bhuiséad míosúil</string>
+    <string name="usage_warn_body">Caitheadh %1$s as %2$s an mhí seo.</string>
+    <string name="usage_capped">Shroich buiséad míosúil AI Assist, mar sin ní thosaíonn seo. Athraigh é i Socruithe › AI Assist.</string>
+    <string name="usage_f_chat">Comhrá</string>
+    <string name="usage_f_live">Beo</string>
+    <string name="usage_f_brief">Achoimre laethúil</string>
+    <string name="usage_f_schedule">Gníomhartha sceidealta</string>
+    <string name="usage_f_dictation">Diktáil</string>
+    <string name="usage_f_voice">Freagraí léite os ard</string>
+    <string name="usage_f_ocr">Scanadh a léamh</string>
+    <string name="usage_f_script">Script MP3</string>
+    <string name="usage_f_verify">Seiceáil script</string>
+    <string name="usage_f_tts">Guthanna MP3</string>
+    <string name="usage_f_web">Cuardach gréasáin</string>
+    <string name="usage_f_image">Pictiúir</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d glao</item>
+        <item quantity="two">%d glao</item>
+        <item quantity="few">%d glaonna</item>
+        <item quantity="many">%d nglao</item>
+        <item quantity="other">%d glao</item>
+    </plurals>
 </resources>

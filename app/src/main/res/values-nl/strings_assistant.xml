@@ -178,4 +178,46 @@
         <item quantity="one">%d pagina</item>
         <item quantity="other">%d pagina\'s</item>
     </plurals>
+    <string name="usage_title">Gebruik en kosten</string>
+    <string name="usage_today">Vandaag</string>
+    <string name="usage_month">Deze maand</string>
+    <string name="usage_all">Sinds %1$s</string>
+    <string name="usage_before">Voordat de gedetailleerde registratie begon: %1$s (zonder uitsplitsing).</string>
+    <string name="usage_days">Per dag, laatste 30</string>
+    <string name="usage_by_feature">Per functie</string>
+    <string name="usage_by_model">Per model</string>
+    <string name="usage_by_device">Per apparaat</string>
+    <string name="usage_files">Bestanden</string>
+    <string name="usage_mp3s">Gemaakte MP3\'s</string>
+    <string name="usage_empty">Er is nog geen gebruik vastgelegd.</string>
+    <string name="usage_prices">Gebruikte prijzen (gecontroleerd %1$s)</string>
+    <string name="usage_per_tokens">per 1 mln. tokens (invoer / uitvoer)</string>
+    <string name="usage_per_minute">per minuut audio</string>
+    <string name="usage_per_chars">per 1.000 tekens</string>
+    <string name="usage_per_page">per pagina</string>
+    <string name="usage_per_call">per aanroep</string>
+    <string name="usage_budget">Maandbudget (€)</string>
+    <string name="usage_budget_none">Geen budget</string>
+    <string name="usage_budget_used">%1$s van %2$s deze maand</string>
+    <string name="usage_budget_note" formatted="false">Bij 80% komt er een melding. Bij het budget starten geplande acties en MP3\'s niet.</string>
+    <string name="usage_note">Dit zijn schattingen: tokens, tekens en minuten maal de gepubliceerde prijzen van Mistral. Wat telt is de rekening van Mistral zelf.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% van het maandbudget</string>
+    <string name="usage_warn_body">%1$s van %2$s uitgegeven deze maand.</string>
+    <string name="usage_capped">Het maandbudget van AI Assist is bereikt, dus dit start niet. Wijzig het bij Instellingen › AI Assist.</string>
+    <string name="usage_f_chat">Chat</string>
+    <string name="usage_f_live">Live</string>
+    <string name="usage_f_brief">Dagoverzicht</string>
+    <string name="usage_f_schedule">Geplande acties</string>
+    <string name="usage_f_dictation">Dicteren</string>
+    <string name="usage_f_voice">Antwoorden voorgelezen</string>
+    <string name="usage_f_ocr">Scans lezen</string>
+    <string name="usage_f_script">MP3-script</string>
+    <string name="usage_f_verify">Scriptcontrole</string>
+    <string name="usage_f_tts">MP3-stemmen</string>
+    <string name="usage_f_web">Webzoeken</string>
+    <string name="usage_f_image">Afbeeldingen</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d aanroep</item>
+        <item quantity="other">%d aanroepen</item>
+    </plurals>
 </resources>

@@ -544,6 +544,7 @@ internal fun SettingsTab(
     fun day(ms: Long) = java.time.Instant.ofEpochMilli(ms).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
         .format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM))
     SettingsSection(stringResource(R.string.assistant_spent), stringResource(R.string.assistant_spent_note)) {
+        SettingRow(stringResource(R.string.usage_title), onClick = { openUsage(context) }) { Chevron() }
         SettingRow(stringResource(R.string.assistant_spent_since, day(meter.since)), Bill.text(meter.trip)) {
             TextButton(onClick = { resetting = true }) { Text(stringResource(R.string.assistant_spent_reset)) }
         }
@@ -588,7 +589,7 @@ internal fun SettingsTab(
                     SettingRow(name, chosen = id == current, onClick = {
                         current = id; chosen(id, name)
                         sample?.stop()
-                        sample = AnswerVoice(context, reader, AssistantMeter.bill(context), scope).apply { say(context.getString(R.string.assistant_voice_sample)); finish() }
+                        sample = AnswerVoice(context, reader, AssistantMeter.bill(context).part("voice"), scope).apply { say(context.getString(R.string.assistant_voice_sample)); finish() }
                     })
                 }
                 if (voices == null) item { Text(stringResource(R.string.common_loading), color = quiet(), modifier = Modifier.padding(12.dp)) }

@@ -181,4 +181,46 @@
         <item quantity="one">%d page</item>
         <item quantity="other">%d pages</item>
     </plurals>
+    <string name="usage_title">Usage and cost</string>
+    <string name="usage_today">Today</string>
+    <string name="usage_month">This month</string>
+    <string name="usage_all">Since %1$s</string>
+    <string name="usage_before">Before the detailed record began: %1$s (no breakdown).</string>
+    <string name="usage_days">By day, last 30</string>
+    <string name="usage_by_feature">By feature</string>
+    <string name="usage_by_model">By model</string>
+    <string name="usage_by_device">By device</string>
+    <string name="usage_files">Files</string>
+    <string name="usage_mp3s">MP3s made</string>
+    <string name="usage_empty">No usage recorded yet.</string>
+    <string name="usage_prices">Prices used (checked %1$s)</string>
+    <string name="usage_per_tokens">per 1M tokens (in / out)</string>
+    <string name="usage_per_minute">per minute of audio</string>
+    <string name="usage_per_chars">per 1,000 characters</string>
+    <string name="usage_per_page">per page</string>
+    <string name="usage_per_call">per call</string>
+    <string name="usage_budget">Monthly budget (€)</string>
+    <string name="usage_budget_none">No budget</string>
+    <string name="usage_budget_used">%1$s of %2$s this month</string>
+    <string name="usage_budget_note" formatted="false">At 80% a notification comes. At the budget, scheduled actions and MP3s do not start.</string>
+    <string name="usage_note">These are estimates: tokens, characters and minutes times Mistral\'s published prices. Mistral\'s own bill is what counts.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80% of the monthly budget</string>
+    <string name="usage_warn_body">%1$s of %2$s spent this month.</string>
+    <string name="usage_capped">AI Assist\'s monthly budget is reached, so this does not start. Change it in Settings › AI Assist.</string>
+    <string name="usage_f_chat">Chat</string>
+    <string name="usage_f_live">Live</string>
+    <string name="usage_f_brief">Daily brief</string>
+    <string name="usage_f_schedule">Scheduled actions</string>
+    <string name="usage_f_dictation">Dictation</string>
+    <string name="usage_f_voice">Answers read aloud</string>
+    <string name="usage_f_ocr">Reading scans</string>
+    <string name="usage_f_script">MP3 script</string>
+    <string name="usage_f_verify">Script check</string>
+    <string name="usage_f_tts">MP3 voices</string>
+    <string name="usage_f_web">Web search</string>
+    <string name="usage_f_image">Pictures</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d call</item>
+        <item quantity="other">%d calls</item>
+    </plurals>
 </resources>

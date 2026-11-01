@@ -178,4 +178,46 @@
         <item quantity="one">%d sivu</item>
         <item quantity="other">%d sivua</item>
     </plurals>
+    <string name="usage_title">Käyttö ja kustannukset</string>
+    <string name="usage_today">Tänään</string>
+    <string name="usage_month">Tässä kuussa</string>
+    <string name="usage_all">Alkaen %1$s</string>
+    <string name="usage_before">Ennen yksityiskohtaisen kirjauksen alkua: %1$s (ilman erittelyä).</string>
+    <string name="usage_days">Päivittäin, viimeiset 30</string>
+    <string name="usage_by_feature">Ominaisuuden mukaan</string>
+    <string name="usage_by_model">Mallin mukaan</string>
+    <string name="usage_by_device">Laitteen mukaan</string>
+    <string name="usage_files">Tiedostot</string>
+    <string name="usage_mp3s">Tehdyt MP3-tiedostot</string>
+    <string name="usage_empty">Käyttöä ei ole vielä kirjattu.</string>
+    <string name="usage_prices">Käytetyt hinnat (tarkistettu %1$s)</string>
+    <string name="usage_per_tokens">per 1 milj. tokens (sisään / ulos)</string>
+    <string name="usage_per_minute">per minuutti ääntä</string>
+    <string name="usage_per_chars">per 1 000 merkkiä</string>
+    <string name="usage_per_page">per sivu</string>
+    <string name="usage_per_call">per kutsu</string>
+    <string name="usage_budget">Kuukausibudjetti (€)</string>
+    <string name="usage_budget_none">Ei budjettia</string>
+    <string name="usage_budget_used">%1$s / %2$s tässä kuussa</string>
+    <string name="usage_budget_note" formatted="false">80 %:ssa tulee ilmoitus. Budjetin täytyttyä ajastetut toiminnot ja MP3-tiedostot eivät käynnisty.</string>
+    <string name="usage_note">Nämä ovat arvioita: tokens, merkit ja minuutit kerrottuna Mistralin julkaistuilla hinnoilla. Ratkaisevaa on Mistralin oma lasku.</string>
+    <string name="usage_warn_title" formatted="false">AI Assist: 80 % kuukausibudjetista</string>
+    <string name="usage_warn_body">Tässä kuussa on käytetty %1$s / %2$s.</string>
+    <string name="usage_capped">AI Assistin kuukausibudjetti on täynnä, joten tätä ei käynnistetä. Muuta sitä kohdassa Asetukset › AI Assist.</string>
+    <string name="usage_f_chat">Keskustelu</string>
+    <string name="usage_f_live">Live</string>
+    <string name="usage_f_brief">Päivän yhteenveto</string>
+    <string name="usage_f_schedule">Ajastetut toiminnot</string>
+    <string name="usage_f_dictation">Sanelu</string>
+    <string name="usage_f_voice">Vastaukset luetaan ääneen</string>
+    <string name="usage_f_ocr">Skannausten lukeminen</string>
+    <string name="usage_f_script">MP3-käsikirjoitus</string>
+    <string name="usage_f_verify">Käsikirjoituksen tarkistus</string>
+    <string name="usage_f_tts">MP3-äänet</string>
+    <string name="usage_f_web">Verkkohaku</string>
+    <string name="usage_f_image">Kuvat</string>
+    <plurals name="usage_calls">
+        <item quantity="one">%d kutsu</item>
+        <item quantity="other">%d kutsua</item>
+    </plurals>
 </resources>
