@@ -169,6 +169,7 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
             "notes" -> NotesSync.soon(app)
             "places" -> LocationReminders.planSoon(app)
             "contacts" -> { ScopedSync.soon(app, "contacts", 0, orWhole = true); ContactsAccount.soon(app) }
+            "schedules", "memory" -> ScopedSync.soon(app, "assistant", 0, orWhole = true) // the computer runs the schedules: it hears at once
         } },
         search = { q ->
             val (text, sources, _) = Mistral.output(api.conversation(q, "web_search", "Search the web and answer briefly with the facts found."))

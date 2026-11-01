@@ -87,6 +87,9 @@ private data class Bubble(val mine: Boolean, val text: String, val choices: List
 
 private enum class Phase { Idle, Listening, Thinking }
 
+private val PROMPT_OF = mapOf(R.string.assistant_chip_brief to R.string.assistant_chip_brief_prompt, R.string.assistant_chip_image to R.string.assistant_chip_image_prompt,
+    R.string.assistant_chip_research to R.string.assistant_chip_research_prompt, R.string.assistant_chip_repeat to R.string.assistant_chip_repeat_prompt)
+
 /** The live screen's record: what it is doing decides how it turns. */
 private enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Listening(40f), Thinking(90f), Speaking(200f), Stopping(0f) }
 
@@ -96,6 +99,11 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
     val scope = rememberCoroutineScope()
     val chat = remember { if (sheet) SheetMemory.chat ?: assistantChat(context, 60_000).also { SheetMemory.chat = it } else assistantChat(context) }
     val bubbles = remember { mutableStateListOf<Bubble>() }
+    var typed by remember { mutableStateOf("") }
+    var chatId by remember { mutableStateOf(java.util.UUID.randomUUID().toString()) }
+    var tab by remember { mutableStateOf(AssistTab.Chat) }
+    fun offer(t: String) { typed = t; tab = AssistTab.Chat }
+    fun keep() { if (!sheet) runCatching { AssistantChats.save(context, chatId, bubbles.map { Triple(it.mine, it.text, it.error) }, chat.saved()) } }
     var phase by remember { mutableStateOf(Phase.Idle) }
     var hearing by remember { mutableStateOf(false) }
     var pending by remember { mutableStateOf<PendingCall?>(null) }
@@ -171,6 +179,7 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
         fun listenAgain() { live?.let { it.muted = false; livePhase = LivePhase.Listening; liveLast = System.currentTimeMillis() } }
         val reply = r.getOrElse { speech?.stop(); say(it.shownMessage(context) ?: context.getString(R.string.assistant_server, 0), true); WriterLog.w("Assistant: ${it.message}"); listenAgain(); return@launch }
         bubbles += Bubble(false, reply.text, reply.choices, reply.call, reply.images)
+        keep()
         pending = reply.call
         reply.open?.let(::open)
         if (inLive && liveAi.isBlank()) liveAi = reply.text
@@ -241,6 +250,15 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
         LazyColumn(m, state = state, contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             if (!hasKey) item { AssistantKeyField { hasKey = true; if (sheet) hear(8_000) } }
             if (!sheet && hasKey) item { DefaultAssistantCard() }
+            // a welcome with something to try, each in its applet's colour; a tap fills the input, it does not send
+            if (!sheet && hasKey && bubbles.isEmpty()) item {
+                Column(Modifier.fillMaxWidth().padding(top = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(painterResource(R.drawable.assistant_art), contentDescription = null, Modifier.size(64.dp))
+                    Text(stringResource(R.string.assistant_home_detail), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    AppChips(listOf(R.string.assistant_ex_calendar to AppColor.calendar, R.string.assistant_ex_mail to AppColor.mail, R.string.assistant_ex_notes to AppColor.notes, R.string.assistant_ex_timer to AppColor.timer)
+                        .map { (r, col) -> val t = stringResource(r); Triple(t, col) { offer(t) } }, center = true)
+                }
+            }
             itemsIndexed(bubbles) { i, b -> BubbleView(b, pending.takeIf { i == bubbles.size - 1 }, ::choose, ::call, { pending = null; say(context.getString(R.string.assistant_call_cancelled)) }, ::open) }
         }
     }
@@ -279,34 +297,28 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
                 IconButton(onClick = { aloud = !aloud; prefs.edit().putBoolean("aloud", aloud).apply(); if (!aloud) hush() }) {
                     Icon(painterResource(if (aloud) R.drawable.ic_volume_up else R.drawable.ic_volume_off), contentDescription = stringResource(R.string.assistant_read_aloud))
                 }
-                IconButton(onClick = { chat.clear(); bubbles.clear(); pending = null; hush(); spent = 0.0 }) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.assistant_new_chat)) }
+                IconButton(onClick = { chat.clear(); bubbles.clear(); pending = null; hush(); spent = 0.0; chatId = java.util.UUID.randomUUID().toString(); tab = AssistTab.Chat }) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.assistant_new_chat)) }
             }
-            list(Modifier.weight(1f).fillMaxWidth())
-            status?.let { Text(it, Modifier.padding(horizontal = 20.dp), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
-            var typed by remember { mutableStateOf("") }
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                AssistTab.entries.forEach { t -> FilterChip(tab == t, { tab = t }, { Text(stringResource(t.label)) }) }
+            }
+            when (tab) {
+                AssistTab.Chat -> list(Modifier.weight(1f).fillMaxWidth())
+                AssistTab.History -> Box(Modifier.weight(1f)) { HistoryTab { saved ->
+                    chat.restore(saved.messages); bubbles.clear(); bubbles += saved.bubbles.map { Bubble(it.first, it.second, error = it.third) }
+                    chatId = saved.id; pending = null; tab = AssistTab.Chat } }
+                AssistTab.Memory -> Box(Modifier.weight(1f)) { MemoryTab() }
+                AssistTab.Scheduled -> Box(Modifier.weight(1f)) { ScheduledTab() }
+            }
+            if (tab == AssistTab.Chat) status?.let { Text(it, Modifier.padding(horizontal = 20.dp), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
             fun sendTyped() { val t = typed.trim(); typed = ""; send(t) }
-            // bubbles that fill the input with a ready prompt to edit, never sent by the tap (the user, 1 Nov); the
-            // computer's scheduled reports: set up there, read here
-            var briefs by remember { mutableStateOf<List<java.io.File>?>(null) }
-            if (hasKey && typed.isEmpty()) Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(R.string.assistant_chip_image to R.string.assistant_chip_image_prompt, R.string.assistant_chip_research to R.string.assistant_chip_research_prompt).forEach { (label, prompt) ->
-                    val text = stringResource(prompt)
-                    SuggestionChip(onClick = { typed = text }, label = { Text(stringResource(label)) })
-                }
-                SuggestionChip(onClick = { briefs = AssistantBriefs.pages() }, label = { Text(stringResource(R.string.assistant_briefs)) })
-            }
-            briefs?.let { pages ->
-                AlertDialog(onDismissRequest = { briefs = null }, confirmButton = { TextButton({ briefs = null }) { Text(stringResource(R.string.common_close)) } },
-                    title = { Text(stringResource(R.string.assistant_briefs)) },
-                    text = {
-                        if (pages.isEmpty()) Text(stringResource(R.string.assistant_briefs_none))
-                        else LazyColumn { items(pages.size) { i -> val f = pages[i]
-                            Text("${java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(java.util.Date(f.lastModified()))} · ${AssistantBriefs.title(f)}",
-                                Modifier.fillMaxWidth().clickable { context.startActivity(android.content.Intent(context, BriefActivity::class.java).putExtra("file", f.absolutePath)) }.padding(vertical = 10.dp))
-                        } }
-                    })
-            }
-            Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // bubbles that fill the input with a ready prompt to edit, never sent by the tap (the user, 1 Nov), on as many rows as
+            // they need, each in the colour of the applet it is about
+            if (hasKey && typed.isEmpty() && tab == AssistTab.Chat) AppChips(listOf(
+                R.string.assistant_chip_brief to AppColor.calendar, R.string.assistant_chip_image to AppColor.photos,
+                R.string.assistant_chip_research to AppColor.assistant, R.string.assistant_chip_repeat to AppColor.mail,
+            ).map { (label, col) -> val p = stringResource(PROMPT_OF.getValue(label)); Triple(stringResource(label), col) { offer(p) } }, Modifier.fillMaxWidth().padding(horizontal = 12.dp))
+            if (tab == AssistTab.Chat) Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(typed, { typed = it }, Modifier.weight(1f), placeholder = { Text(stringResource(R.string.assistant_hint), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                     shape = RoundedCornerShape(24.dp), maxLines = 5, enabled = hasKey,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send), keyboardActions = KeyboardActions(onSend = { sendTyped() }))

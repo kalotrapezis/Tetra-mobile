@@ -188,6 +188,7 @@ internal class AssistantTools(
     private var alarmsShown = emptyList<AlarmRecord>()
     private var mailsShown = emptyList<MailEntry>()
     private var factsShown = emptyList<AssistantMemory.Fact>()
+    private var schedulesShown = emptyList<JSONObject>()
 
     /** The personal details (AssistantMemory): in every chat's instructions. */
     fun facts() = AssistantMemory.list(tetra)
@@ -232,6 +233,15 @@ internal class AssistantTools(
             "memory_add" -> AssistantMemory.add(tetra, args.getString("text"), device).let { changed("memory"); ToolResult("Kept: \"${it.text}\". Settings › AI Assist › Personal details shows it.") }
             "memory_list" -> facts().also { factsShown = it }.let { l -> ToolResult(if (l.isEmpty()) "Nothing is kept." else l.mapIndexed { i, f -> "${i + 1}. ${f.text}" }.joinToString("\n")) }
             "memory_forget" -> pick(factsShown, args) { f -> AssistantMemory.change(tetra, f.id, "", device); factsShown = factsShown - f; changed("memory"); ToolResult("Forgot \"${f.text}\".") }
+            "schedule_add" -> AssistantSchedules.add(tetra, args).let { changed("schedules"); ToolResult("Scheduled: ${scheduleLine(it)}. The computer runs it and the answer comes here as a notification.") }
+            "schedule_list" -> AssistantSchedules.list(tetra).also { schedulesShown = it }.let { l -> ToolResult(l.mapIndexed { i, x -> "${i + 1}. ${scheduleLine(x)}" }.joinToString("\n").ifEmpty { "Nothing is scheduled." }) }
+            "schedule_change" -> pick(schedulesShown, args) { x ->
+                args.optJSONObject("sections")?.takeIf { x.optString("kind") == "brief" }?.let { AssistantSchedules.setSections(tetra, it) }
+                val c = AssistantSchedules.change(tetra, x.getString("id"), JSONObject(args.toString()).apply { remove("choice"); remove("sections") })
+                changed("schedules"); ToolResult("Changed: ${scheduleLine(c)}.") }
+            "schedule_delete" -> pick(schedulesShown, args) { x ->
+                if (x.optString("kind") == "brief") ToolResult("The daily brief cannot be deleted; pause it instead (schedule_change with paused).")
+                else { AssistantSchedules.remove(tetra, x.getString("id")); schedulesShown = schedulesShown - x; changed("schedules"); ToolResult("Deleted \"${x.optString("title")}\".") } }
             "web_search" -> ToolResult(search(args.getString("query")))
             "make_image" -> image(args.getString("prompt")).let { ToolResult("The picture is on the screen, saved as ${it.name}.", image = it) }
             else -> ToolResult("No tool called $name.")
@@ -611,6 +621,14 @@ internal class AssistantTools(
         }
     }
 
+    private fun scheduleLine(x: JSONObject): String {
+        val days = x.optJSONArray("days")?.let { a -> (0 until a.length()).joinToString(", ") { listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")[a.optInt(it).coerceIn(0, 6)] } }.orEmpty()
+        val how = when (val r = x.optString("repeat")) { "weekly" -> "weekly on $days"; "once" -> "once on ${x.optString("date")}"; else -> r }
+        val next = AssistantSchedules.due(x)?.let { java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).format(SHOWN) }
+        return "${x.optString("title")} — $how at ${x.optString("time")}" + when { x.optBoolean("paused") -> ", paused"; next != null -> ", next $next"; else -> ", done" } +
+            if (x.optString("kind") == "brief") " (the daily brief)" else ": \"${x.optString("prompt")}\""
+    }
+
     private fun relationForget(a: JSONObject): ToolResult {
         val relation = a.getString("relation").trim()
         val card = myContact() ?: return ToolResult(NO_ME)
@@ -634,6 +652,10 @@ internal class AssistantTools(
                 .put("properties", JSONObject().apply { props.forEach { (k, v) -> put(k, v) } }).put("required", JSONArray(required))))
         private fun p(type: String, what: String) = JSONObject().put("type", type).put("description", what)
         private val CHOICE = "choice" to p("integer", "The number of the item in the list last shown (1 = the first).")
+        private val SCHEDULE = arrayOf("prompt" to p("string", "What to do then, as a request to AI Assist in the user's words (\"πες μου τι έχω την εβδομάδα\")."), "title" to p("string", "A short name for it."),
+            "time" to p("string", "Local time, HH:MM."), "repeat" to JSONObject().put("type", "string").put("enum", JSONArray(AssistantSchedules.REPEATS)).put("description", "How often."),
+            "days" to JSONObject().put("type", "array").put("items", JSONObject().put("type", "integer")).put("description", "For weekly: the weekdays, 0 = Sunday, 1 = Monday … 6 = Saturday."),
+            "date" to p("string", "YYYY-MM-DD: for once, the day; for monthly, a day of the month it runs on; for yearly, its day and month. Leave out for today."))
 
         private const val NO_ME = "Tetra does not know which contact is the user. Ask the user for their own name as saved in Contacts, then call my_card, then try again."
         private const val RELATION = "Spouse, Partner, Mother, Father, Parent, Brother, Sister, Child, Friend, Assistant or Manager in English; any other in the user's own word (κουμπάρος)."
@@ -717,6 +739,13 @@ internal class AssistantTools(
                 "text" to p("string", "The fact, short, in the user's language and in the third person (\"Διδάσκει στο 3ο Δημοτικό Καβάλας\").")),
             fn("memory_list", "The facts kept about the user, a numbered list.", emptyList()),
             fn("memory_forget", "Forget a fact from the last memory_list.", listOf("choice"), CHOICE),
+            fn("schedule_add", "Schedule something for AI Assist to do by itself at a time, once or again and again (\"κάθε Δευτέρα στις 8 πες μου τι έχω την εβδομάδα\"). The user's computer runs the prompt then and the answer comes to this phone as a notification.", listOf("prompt", "time", "repeat"), *SCHEDULE),
+            fn("schedule_list", "The scheduled actions (the daily brief among them), each with its next run; a numbered list.", emptyList()),
+            fn("schedule_change", "Change, pause or resume a scheduled action from the last schedule_list; give only what changes.", listOf("choice"), CHOICE, *SCHEDULE,
+                "paused" to p("boolean", "true to pause, false to resume."),
+                "sections" to JSONObject().put("type", "object").put("description", "Only for the daily brief: which sections it has (calendar, mail, weather, notes = open checklists), as true/false; only those that change.")
+                    .put("properties", JSONObject().apply { listOf("calendar", "mail", "weather", "notes").forEach { put(it, JSONObject().put("type", "boolean")) } })),
+            fn("schedule_delete", "Delete a scheduled action from the last schedule_list.", listOf("choice"), CHOICE),
             fn("web_search", "Search the web for current facts, news, opening hours, prices.", listOf("query"), "query" to p("string", "What to search for.")),
             fn("make_image", "Draw a picture from a description.", listOf("prompt"), "prompt" to p("string", "What the picture shows, in detail.")),
         ))
@@ -744,6 +773,8 @@ internal class AssistantTools(
             then say where it went (Tetra/Documents/…). Copy only when asked.
             Work out dates yourself from today's date ("αύριο", "την Πέμπτη").
             «Θυμήσου ότι…», a lasting fact about the user or what they like: memory_add, then say it is kept. «Ξέχασε ότι…»: memory_list, then memory_forget.
+            "Κάθε Δευτέρα στις 8 πες μου…", "κάθε μέρα", "μία φορά τον χρόνο": schedule_add, the prompt in the user's words; then say when it runs. To change, pause or delete one: schedule_list first.
+            The daily brief («πρωινή αναφορά», «ενημέρωση της ημέρας») is built in: never schedule_add it; schedule_list, then schedule_change it (time, paused: false, sections).
         """.trimIndent() + if (facts.isEmpty()) "" else "\nWhat the user asked you to remember about them (use it when it helps; never read it out unasked):\n" + facts.joinToString("\n") { "- ${it.text}" }
     }
 }
@@ -784,6 +815,9 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
     }
 
     fun clear() { messages.clear(); bill.reset() }
+    /** The conversation as it is, for the History (AssistantChats); [restore] takes one back to go on with it. */
+    fun saved() = JSONArray(messages.map { JSONObject(it.toString()) })
+    fun restore(a: JSONArray) { messages.clear(); for (i in 0 until a.length()) a.optJSONObject(i)?.let { messages += it }; lastAt = System.currentTimeMillis() }
 
     companion object {
         const val ROUNDS = 5 // tool rounds in one turn at most: find, then act, with room to spare
