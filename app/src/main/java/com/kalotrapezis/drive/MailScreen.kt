@@ -249,7 +249,8 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
         if (stored) mails.filter { (storeAccount == null || it.account == storeAccount) && (storeRole == null || it.folder == storeRole) } // a removed account's too
         else mails.filter { it.folder == role && it.account in accountOf && (account == null || it.account == account) }
     }
-    val conversations = remember(mails, accountOf) { MailThreads.of(mails.filter { it.account in accountOf }) }
+    // only with conversations on: every subject through a regex, on the UI thread, at each change (most of a 0.5 s frame)
+    val conversations = remember(mails, accountOf, MailLook.threads) { if (MailLook.threads) MailThreads.of(mails.filter { it.account in accountOf }) else emptyMap() }
     // conversations on: each one once, where its first mail in this order stands
     val groups = remember(inFolder, view, query, MailLook.threads) { view.arrange(inFolder, query).let { gs ->
         if (!MailLook.threads) gs else { val seen = HashSet<String>(); gs.map { (k, ms) -> k to ms.filter { seen.add(MailThreads.key(it)) } }.filter { it.second.isNotEmpty() } }

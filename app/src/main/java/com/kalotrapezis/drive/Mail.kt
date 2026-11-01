@@ -71,6 +71,8 @@ internal object MailFiles {
     }
 
     private var cached: Pair<String, List<MailEntry>>? = null
+    // at a background priority: the UI thread first, whatever Tetra is showing meanwhile
+    private val PARSERS = java.util.concurrent.Executors.newFixedThreadPool(maxOf(2, Runtime.getRuntime().availableProcessors() / 2)) { r -> Thread({ runCatching { android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND) }; r.run() }, "mail-index").apply { isDaemon = true } }
     /**
      * Every mail not gone: the computer's index.jsonl, then each device's index.<device>.jsonl (the mail a phone fetched
      * itself), this device's last; the last line for an id wins, and an id is the same mail whoever fetched it. Read
@@ -80,10 +82,22 @@ internal object MailFiles {
         val files = indexFiles(root, own)
         val stamp = files.joinToString { "${it.name}:${it.length()}:${it.lastModified()}" }
         cached?.takeIf { it.first == stamp }?.let { return it.second }
-        val read = parse(files.asSequence().flatMap { f -> runCatching { f.readLines() }.getOrDefault(emptyList()) })
+        val start = System.nanoTime()
+        val lines = files.flatMap { f -> runCatching { f.readLines() }.getOrDefault(emptyList()) }
+        // the lines parsed in pieces on half the cores, kept in order, so the last line for an id still wins (2.5 s on the
+        // phone on one core; on every core the UI's frames went up to 0.5 s)
+        val read = merge(lines.chunked(maxOf(1000, lines.size / 16)).map { c -> PARSERS.submit<List<MailEntry?>> { c.map(::line) } }.flatMap { it.get() }.filterNotNull())
+        WriterLog.i("Mail: index read, ${lines.size} lines, ${read.size} mails, ${(System.nanoTime() - start) / 1_000_000} ms")
         cached = stamp to read
         read
     }
+
+    /** Read ahead when Tetra starts, at a background priority: Mail then opens on its list, not on a wait. */
+    fun warm(own: String?) = Thread {
+        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND)
+        Thread.sleep(1000) // after the screen Tetra opened on has settled (started with it, AI Assist's taps waited 1.9 s)
+        runCatching { val root = mailRoot(); if (File(root, "index.jsonl").isFile) index(root, own) }
+    }.start()
 
     /** The index files in the order their lines count: the computer's, the other devices', this device's last. */
     fun indexFiles(root: File, own: String?): List<File> {
@@ -91,11 +105,13 @@ internal object MailFiles {
         return listOf(File(root, "index.jsonl")) + others.sortedBy { it.name == "index.$own.jsonl" }
     }
 
-    fun parse(lines: Sequence<String>, keepGone: Boolean = false): List<MailEntry> {
+    fun parse(lines: Sequence<String>, keepGone: Boolean = false): List<MailEntry> = merge(lines.mapNotNull(::line).asIterable(), keepGone)
+
+    private fun line(s: String): MailEntry? = if (s.isBlank()) null else runCatching { entry(JSONObject(s)) }.getOrNull() // null: a line cut by a crash on the computer
+
+    private fun merge(entries: Iterable<MailEntry>, keepGone: Boolean = false): List<MailEntry> {
         val byId = LinkedHashMap<String, MailEntry>()
-        for (line in lines) {
-            if (line.isBlank()) continue
-            val e = runCatching { entry(JSONObject(line)) }.getOrNull() ?: continue // a line cut by a crash on the computer
+        for (e in entries) {
             val before = byId[e.id]
             // a device that has only the headers does not hide the body another one saved
             byId[e.id] = if (e.file == null && !e.gone && before?.file != null) e.copy(file = before.file, saved = before.saved, attachments = before.attachments, snippet = before.snippet) else e
@@ -433,7 +449,7 @@ internal data class MailView(
         /** "Re: Fwd: Θέμα" sorts as "Θέμα". */
         private val PREFIX = Regex("^\\s*((re|fwd?|aw|απ|σχετ|προωθ)\\s*:\\s*)+", RegexOption.IGNORE_CASE)
         fun bare(s: String) = s.replace(PREFIX, "").trim().lowercase()
-        fun dayKey(ms: Long): String = java.time.Instant.ofEpochMilli(ms).atZone(java.time.ZoneId.systemDefault()).toLocalDate().toString()
+        fun dayKey(ms: Long, zone: java.time.ZoneId = java.time.ZoneId.systemDefault()): String = java.time.Instant.ofEpochMilli(ms).atZone(zone).toLocalDate().toString()
     }
 
     /** The mails this view keeps, sorted, in groups (in the order their first mail comes). */
@@ -457,7 +473,7 @@ internal data class MailView(
             "from" -> { m -> m.from.ifEmpty { m.fromAddress } }
             "account" -> { m -> m.account }
             "none" -> { _ -> "" }
-            else -> { m -> dayKey(m.date) }
+            else -> { val zone = java.time.ZoneId.systemDefault(); { m -> dayKey(m.date, zone) } } // the zone once, not for each of thousands
         }
         return kept.sortedWith(order).groupBy(group).toList()
     }

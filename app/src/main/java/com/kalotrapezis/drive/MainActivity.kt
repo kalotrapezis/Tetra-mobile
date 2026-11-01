@@ -313,6 +313,7 @@ class MainActivity : ComponentActivity() {
         // slowed that frame on the phone (25 Oct)
         android.view.Choreographer.getInstance().postFrameCallback { window.decorView.post {
             CalendarPreload.warm(this)
+            if (Environment.isExternalStorageManager()) MailFiles.warm(MailEngine.device()) // Mail's index (tens of MB)
             Thread { android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND); if (Environment.isExternalStorageManager()) runCatching { notesStore().list() } }.start()
         } }
         Thread { runCatching { TimerService.check(this) } }.start() // a timer running (here or started elsewhere): its notification
