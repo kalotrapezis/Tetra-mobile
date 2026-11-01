@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Направи го радиопредаване</string>
     <string name="assistant_attach_pill_live">💬 Жива беседа за документа</string>
     <string name="assistant_attach_pill_read">🔊 Прочети ми го</string>
-    <string name="assistant_attach_show_prompt">Направи «%1$s» радиопредаване в MP3: водещ и експерт, около 15 минути, с пример и резюме за всяка секция.</string>
-    <string name="assistant_attach_read_prompt">Прочети ми «%1$s» цял в MP3, с един глас.</string>
+    <string name="assistant_attach_show_prompt">Направи «%1$s» радиопредаване като аудиофайл: водещ и експерт, около 15 минути, с пример и резюме за всяка секция.</string>
+    <string name="assistant_attach_read_prompt">Прочети ми «%1$s» цял като аудиофайл, с един глас.</string>
     <string name="assistant_attach_live_prompt">Да поговорим за документа «%1$s». Кажи ми в две изречения какво казва и ме попитай откъде искам да започнем.</string>
     <string name="assistant_attach_show">Радиопредаване</string>
     <string name="assistant_attach_read">Четене</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d минути. Натисни, за да го чуеш.</string>
     <string name="assistant_attach_failed_title">Аудиото не можа да се направи</string>
     <string name="assistant_cap_file_show">Предаване от файл</string>
-    <string name="assistant_cap_file_show_prompt">Направи прикачения файл радиопредаване в MP3, около 15 минути.</string>
-    <string name="assistant_attach_waiting">Чакам компютъра ти</string>
-    <string name="assistant_attach_stalled">Още нищо: компютърът, който го прави, трябва да е включен и Tetra да е отворен.</string>
+    <string name="assistant_cap_file_show_prompt">Направи прикачения файл радиопредаване като аудиофайл, около 15 минути.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d страница</item>
         <item quantity="other">%d страници</item>

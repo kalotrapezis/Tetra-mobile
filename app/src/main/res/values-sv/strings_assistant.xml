@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Gör det till ett radioprogram</string>
     <string name="assistant_attach_pill_live">💬 Live-samtal om dokumentet</string>
     <string name="assistant_attach_pill_read">🔊 Läs upp den för mig</string>
-    <string name="assistant_attach_show_prompt">Gör «%1$s» till ett radioprogram i MP3: en programledare och en expert, cirka 15 minuter, med ett exempel och en sammanfattning för varje avsnitt.</string>
-    <string name="assistant_attach_read_prompt">Läs upp «%1$s» hela i MP3, med en röst.</string>
+    <string name="assistant_attach_show_prompt">Gör «%1$s» till ett radioprogram som ljudfil: en programledare och en expert, cirka 15 minuter, med ett exempel och en sammanfattning för varje avsnitt.</string>
+    <string name="assistant_attach_read_prompt">Läs upp «%1$s» hela som ljudfil, med en röst.</string>
     <string name="assistant_attach_live_prompt">Låt oss prata om dokumentet «%1$s». Berätta med två meningar vad det säger och fråga mig var jag vill börja.</string>
     <string name="assistant_attach_show">Radioprogram</string>
     <string name="assistant_attach_read">Uppläsning</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d minuter. Klicka för att lyssna.</string>
     <string name="assistant_attach_failed_title">Ljudet kunde inte skapas</string>
     <string name="assistant_cap_file_show">Radioprogram från en fil</string>
-    <string name="assistant_cap_file_show_prompt">Gör den bifogade filen till ett radioprogram i MP3, cirka 15 minuter.</string>
-    <string name="assistant_attach_waiting">Väntar på din dator</string>
-    <string name="assistant_attach_stalled">Inget än: datorn som gör den måste vara på, med Tetra öppen.</string>
+    <string name="assistant_cap_file_show_prompt">Gör den bifogade filen till ett radioprogram som ljudfil, cirka 15 minuter.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d sida</item>
         <item quantity="other">%d sidor</item>

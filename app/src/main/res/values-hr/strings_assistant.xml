@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Napravi od toga radijsku emisiju</string>
     <string name="assistant_attach_pill_live">💬 Uživo razgovor o dokumentu</string>
     <string name="assistant_attach_pill_read">🔊 Pročitaj mi to</string>
-    <string name="assistant_attach_show_prompt">Napravi od «%1$s» radijsku emisiju u MP3-u: voditelj i stručnjak, oko 15 minuta, s primjerom i sažetkom za svaki dio.</string>
-    <string name="assistant_attach_read_prompt">Pročitaj mi «%1$s» cijelo u MP3-u, jednim glasom.</string>
+    <string name="assistant_attach_show_prompt">Napravi od «%1$s» radijsku emisiju kao zvučnu datoteku: voditelj i stručnjak, oko 15 minuta, s primjerom i sažetkom za svaki dio.</string>
+    <string name="assistant_attach_read_prompt">Pročitaj mi «%1$s» cijelo kao zvučnu datoteku, jednim glasom.</string>
     <string name="assistant_attach_live_prompt">Razgovarajmo o dokumentu «%1$s». Reci mi u dvije rečenice što piše i pitaj me odakle želim početi.</string>
     <string name="assistant_attach_show">Radijska emisija</string>
     <string name="assistant_attach_read">Čitanje</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d minuta. Klikni za slušanje.</string>
     <string name="assistant_attach_failed_title">Zvuk nije mogao biti napravljen</string>
     <string name="assistant_cap_file_show">Emisija iz datoteke</string>
-    <string name="assistant_cap_file_show_prompt">Napravi od priložene datoteke radijsku emisiju u MP3-u, oko 15 minuta.</string>
-    <string name="assistant_attach_waiting">Čekam tvoje računalo</string>
-    <string name="assistant_attach_stalled">Još ništa: računalo koje ga izrađuje mora biti uključeno, s otvorenom Tetrom.</string>
+    <string name="assistant_cap_file_show_prompt">Napravi od priložene datoteke radijsku emisiju kao zvučnu datoteku, oko 15 minuta.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d stranica</item>
         <item quantity="few">%d stranice</item>

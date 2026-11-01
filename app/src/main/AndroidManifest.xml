@@ -112,6 +112,7 @@
         <service android:name=".SyncJob" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false" />
         <service android:name=".SyncService" android:exported="false" android:foregroundServiceType="dataSync" />
         <service android:name=".PhotoAnalysisService" android:exported="false" android:foregroundServiceType="dataSync" />
+        <service android:name=".AudioService" android:exported="false" android:foregroundServiceType="dataSync" />
         <!-- An alarm ringing: its time, Snooze and Dismiss, over the lock screen -->
         <activity android:name=".AlarmRingActivity" android:exported="false" android:launchMode="singleTask" android:taskAffinity="com.kalotrapezis.drive.alarm"
             android:excludeFromRecents="true" android:showWhenLocked="true" android:turnScreenOn="true" />

@@ -764,7 +764,6 @@ internal class SyncClient(private val context: Context, private val store: SyncS
             .onFailure { if (it is kotlinx.coroutines.CancellationException) throw it else failed += fail(R.string.sync_fail_drive_files, it.message) }
         runCatching { CalendarAlarms.plan(context) } // an event that arrived, or changed, rings on time
         runCatching { AssistantBriefs.check(context) } // a page the computer's scheduled AI made: rings once
-        runCatching { AudioJobs.check(context) } // an MP3 the computer made for this phone: rings once
         TimerService.check(context)
         // Notes: every note both ways, the newer edit of each kept (Notes.kt). Small, so all of them each time.
         runCatching { received += syncNotes(host, p) }
@@ -1055,7 +1054,6 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         runCatching { CalendarAlarms.plan(context) }
         if (scope == "timer") TimerService.check(context) // a timer started, paused or stopped elsewhere: here too
         if (scope == "contacts") ContactsAccount.soon(context) // a contact changed elsewhere: the phone's copy follows
-        if (scope == "assistant") runCatching { AudioJobs.check(context) } // an MP3 the computer made for this phone: rings once
         if (failed.isNotEmpty()) throw SyncException(failed.joinToString("; "))
         return n + counts[0] // what came here, and what went there or moved
     }

@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Maak er een radioprogramma van</string>
     <string name="assistant_attach_pill_live">💬 Live gesprek over het document</string>
     <string name="assistant_attach_pill_read">🔊 Lees het voor</string>
-    <string name="assistant_attach_show_prompt">Maak van «%1$s» een radioprogramma als MP3: een presentator en een expert, ongeveer 15 minuten, met een voorbeeld en een samenvatting per onderdeel.</string>
-    <string name="assistant_attach_read_prompt">Lees «%1$s» in zijn geheel voor als MP3, met één stem.</string>
+    <string name="assistant_attach_show_prompt">Maak van «%1$s» een radioprogramma als audiobestand: een presentator en een expert, ongeveer 15 minuten, met een voorbeeld en een samenvatting per onderdeel.</string>
+    <string name="assistant_attach_read_prompt">Lees «%1$s» in zijn geheel voor als audiobestand, met één stem.</string>
     <string name="assistant_attach_live_prompt">Laten we praten over het document «%1$s». Vertel me in twee zinnen wat het zegt en vraag waar ik wil beginnen.</string>
     <string name="assistant_attach_show">Radioprogramma</string>
     <string name="assistant_attach_read">Voorlezen</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d minuten. Klik om te luisteren.</string>
     <string name="assistant_attach_failed_title">De audio kon niet worden gemaakt</string>
     <string name="assistant_cap_file_show">Radioprogramma uit een bestand</string>
-    <string name="assistant_cap_file_show_prompt">Maak van het bestand dat ik bijvoeg een radioprogramma als MP3, ongeveer 15 minuten.</string>
-    <string name="assistant_attach_waiting">Wacht op je computer</string>
-    <string name="assistant_attach_stalled">Nog niets: de computer die het maakt moet aan staan, met Tetra open.</string>
+    <string name="assistant_cap_file_show_prompt">Maak van het bestand dat ik bijvoeg een radioprogramma als audiobestand, ongeveer 15 minuten.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d pagina</item>
         <item quantity="other">%d pagina\'s</item>

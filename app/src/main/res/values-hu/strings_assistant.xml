@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Legyen belőle rádióműsor</string>
     <string name="assistant_attach_pill_live">💬 Élő beszélgetés a dokumentumról</string>
     <string name="assistant_attach_pill_read">🔊 Olvasd fel nekem</string>
-    <string name="assistant_attach_show_prompt">Készíts a(z) «%1$s» fájlból MP3 rádióműsort: egy műsorvezető és egy szakértő, körülbelül 15 perc, minden részben példával és összefoglalóval.</string>
-    <string name="assistant_attach_read_prompt">Olvasd fel nekem a(z) «%1$s» fájlt egészben MP3-ként, egy hanggal.</string>
+    <string name="assistant_attach_show_prompt">Készíts a(z) «%1$s» fájlból rádióműsort hangfájlként: egy műsorvezető és egy szakértő, körülbelül 15 perc, minden részben példával és összefoglalóval.</string>
+    <string name="assistant_attach_read_prompt">Olvasd fel nekem a(z) «%1$s» fájlt egészben hangfájlként, egy hanggal.</string>
     <string name="assistant_attach_live_prompt">Beszélgessünk a(z) «%1$s» dokumentumról. Két mondatban mondd el, mit tartalmaz, és kérdezd meg, honnan szeretnék kezdeni.</string>
     <string name="assistant_attach_show">Rádióműsor</string>
     <string name="assistant_attach_read">Felolvasás</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d perc. Kattints a meghallgatáshoz.</string>
     <string name="assistant_attach_failed_title">A hang nem készült el</string>
     <string name="assistant_cap_file_show">Rádióműsor fájlból</string>
-    <string name="assistant_cap_file_show_prompt">Készíts a csatolt fájlból MP3 rádióműsort, körülbelül 15 perc hosszúságban.</string>
-    <string name="assistant_attach_waiting">Várom a számítógépedet</string>
-    <string name="assistant_attach_stalled">Még semmi: a készítő számítógépnek bekapcsolva kell lennie, nyitott Tetrával.</string>
+    <string name="assistant_cap_file_show_prompt">Készíts a csatolt fájlból rádióműsort hangfájlként, körülbelül 15 perc hosszúságban.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d oldal</item>
         <item quantity="other">%d oldal</item>

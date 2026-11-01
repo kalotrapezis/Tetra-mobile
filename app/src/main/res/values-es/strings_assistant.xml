@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Convertirlo en un programa de radio</string>
     <string name="assistant_attach_pill_live">💬 Charla en vivo sobre el documento</string>
     <string name="assistant_attach_pill_read">🔊 Léemelo</string>
-    <string name="assistant_attach_show_prompt">Convierte «%1$s» en un programa de radio en MP3: un presentador y un experto, unos 15 minutos, con un ejemplo y un resumen en cada sección.</string>
-    <string name="assistant_attach_read_prompt">Léeme «%1$s» entero en MP3, con una sola voz.</string>
+    <string name="assistant_attach_show_prompt">Convierte «%1$s» en un programa de radio en audio: un presentador y un experto, unos 15 minutos, con un ejemplo y un resumen en cada sección.</string>
+    <string name="assistant_attach_read_prompt">Léeme «%1$s» entero en audio, con una sola voz.</string>
     <string name="assistant_attach_live_prompt">Hablemos del documento «%1$s». Dime en dos frases qué dice y pregúntame por dónde quiero empezar.</string>
     <string name="assistant_attach_show">Programa de radio</string>
     <string name="assistant_attach_read">Lectura</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d minutos. Haz clic para escucharlo.</string>
     <string name="assistant_attach_failed_title">No se pudo crear el audio</string>
     <string name="assistant_cap_file_show">Programa desde un archivo</string>
-    <string name="assistant_cap_file_show_prompt">Convierte el archivo que adjunto en un programa de radio en MP3, de unos 15 minutos.</string>
-    <string name="assistant_attach_waiting">Esperando a tu ordenador</string>
-    <string name="assistant_attach_stalled">Nada aún: el ordenador que lo hace debe estar encendido y con Tetra abierto.</string>
+    <string name="assistant_cap_file_show_prompt">Convierte el archivo que adjunto en un programa de radio en audio, de unos 15 minutos.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d página</item>
         <item quantity="many">%d páginas</item>

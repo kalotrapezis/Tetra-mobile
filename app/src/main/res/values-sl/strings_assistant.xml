@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Naredi iz tega radijsko oddajo</string>
     <string name="assistant_attach_pill_live">💬 Živ pogovor o dokumentu</string>
     <string name="assistant_attach_pill_read">🔊 Preberi mi</string>
-    <string name="assistant_attach_show_prompt">Naredi iz «%1$s» radijsko oddajo v MP3: voditelj in strokovnjak, približno 15 minut, s primerom in povzetkom za vsak del.</string>
-    <string name="assistant_attach_read_prompt">Preberi mi «%1$s» v celoti v MP3, z enim glasom.</string>
+    <string name="assistant_attach_show_prompt">Naredi iz «%1$s» radijsko oddajo kot zvočno datoteko: voditelj in strokovnjak, približno 15 minut, s primerom in povzetkom za vsak del.</string>
+    <string name="assistant_attach_read_prompt">Preberi mi «%1$s» v celoti kot zvočno datoteko, z enim glasom.</string>
     <string name="assistant_attach_live_prompt">Pogovorimo se o dokumentu «%1$s». Povej mi v dveh stavkih, kaj piše, in me vprašaj, kje želim začeti.</string>
     <string name="assistant_attach_show">Radijska oddaja</string>
     <string name="assistant_attach_read">Branje</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d minut. Klikni za poslušanje.</string>
     <string name="assistant_attach_failed_title">Zvoka ni bilo mogoče ustvariti</string>
     <string name="assistant_cap_file_show">Oddaja iz datoteke</string>
-    <string name="assistant_cap_file_show_prompt">Naredi iz priložene datoteke radijsko oddajo v MP3, približno 15 minut.</string>
-    <string name="assistant_attach_waiting">Čakam na tvoj računalnik</string>
-    <string name="assistant_attach_stalled">Še nič: računalnik, ki ga izdeluje, mora biti vklopljen, s Tetro odprto.</string>
+    <string name="assistant_cap_file_show_prompt">Naredi iz priložene datoteke radijsko oddajo kot zvočno datoteko, približno 15 minut.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d stran</item>
         <item quantity="two">%d strani</item>

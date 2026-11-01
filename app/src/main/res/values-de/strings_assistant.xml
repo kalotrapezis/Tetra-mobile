@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Als Radiosendung hören</string>
     <string name="assistant_attach_pill_live">💬 Live-Gespräch über das Dokument</string>
     <string name="assistant_attach_pill_read">🔊 Lies es mir vor</string>
-    <string name="assistant_attach_show_prompt">Mach aus «%1$s» eine Radiosendung als MP3: ein Moderator und ein Experte, etwa 15 Minuten, mit einem Beispiel und einer Zusammenfassung zu jedem Abschnitt.</string>
-    <string name="assistant_attach_read_prompt">Lies mir «%1$s» ganz vor, als MP3, mit einer Stimme.</string>
+    <string name="assistant_attach_show_prompt">Mach aus «%1$s» eine Radiosendung als Audiodatei: ein Moderator und ein Experte, etwa 15 Minuten, mit einem Beispiel und einer Zusammenfassung zu jedem Abschnitt.</string>
+    <string name="assistant_attach_read_prompt">Lies mir «%1$s» ganz vor, als Audiodatei, mit einer Stimme.</string>
     <string name="assistant_attach_live_prompt">Lass uns über das Dokument «%1$s» sprechen. Sag mir in zwei Sätzen, was es sagt, und frag mich, wo ich anfangen möchte.</string>
     <string name="assistant_attach_show">Radiosendung</string>
     <string name="assistant_attach_read">Vorlesen</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d Minuten. Klicke zum Anhören.</string>
     <string name="assistant_attach_failed_title">Das Audio konnte nicht erstellt werden</string>
     <string name="assistant_cap_file_show">Sendung aus einer Datei</string>
-    <string name="assistant_cap_file_show_prompt">Mach die Datei, die ich anhänge, als MP3 zu einer Radiosendung, etwa 15 Minuten.</string>
-    <string name="assistant_attach_waiting">Warte auf deinen Computer</string>
-    <string name="assistant_attach_stalled">Noch nichts: Der Computer, der es macht, muss an sein und Tetra geöffnet haben.</string>
+    <string name="assistant_cap_file_show_prompt">Mach die Datei, die ich anhänge, als Audiodatei zu einer Radiosendung, etwa 15 Minuten.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d Seite</item>
         <item quantity="other">%d Seiten</item>

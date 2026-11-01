@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Udělej z toho rozhlasovou relaci</string>
     <string name="assistant_attach_pill_live">💬 Živý rozhovor o dokumentu</string>
     <string name="assistant_attach_pill_read">🔊 Přečti mi to</string>
-    <string name="assistant_attach_show_prompt">Udělej z «%1$s» rozhlasovou relaci v MP3: moderátor a odborník, asi 15 minut, s příkladem a shrnutím u každé části.</string>
-    <string name="assistant_attach_read_prompt">Přečti mi «%1$s» celé v MP3, jedním hlasem.</string>
+    <string name="assistant_attach_show_prompt">Udělej z «%1$s» rozhlasovou relaci jako zvukový soubor: moderátor a odborník, asi 15 minut, s příkladem a shrnutím u každé části.</string>
+    <string name="assistant_attach_read_prompt">Přečti mi «%1$s» celé jako zvukový soubor, jedním hlasem.</string>
     <string name="assistant_attach_live_prompt">Pojďme si popovídat o dokumentu «%1$s». Ve dvou větách mi řekni, co říká, a zeptej se, kde chci začít.</string>
     <string name="assistant_attach_show">Rozhlasová relace</string>
     <string name="assistant_attach_read">Čtení</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d minut. Klepněte pro poslech.</string>
     <string name="assistant_attach_failed_title">Zvuk se nepodařilo vytvořit</string>
     <string name="assistant_cap_file_show">Relace ze souboru</string>
-    <string name="assistant_cap_file_show_prompt">Udělej z přiloženého souboru rozhlasovou relaci v MP3, asi 15 minut.</string>
-    <string name="assistant_attach_waiting">Čekám na tvůj počítač</string>
-    <string name="assistant_attach_stalled">Zatím nic: počítač, který to dělá, musí být zapnutý a Tetra otevřená.</string>
+    <string name="assistant_cap_file_show_prompt">Udělej z přiloženého souboru rozhlasovou relaci jako zvukový soubor, asi 15 minut.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d stránka</item>
         <item quantity="few">%d stránky</item>

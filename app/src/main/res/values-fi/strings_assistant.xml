@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Tee siitä radio-ohjelma</string>
     <string name="assistant_attach_pill_live">💬 Elävä keskustelu asiakirjasta</string>
     <string name="assistant_attach_pill_read">🔊 Lue se minulle</string>
-    <string name="assistant_attach_show_prompt">Tee «%1$s» MP3-radio-ohjelmaksi: juontaja ja asiantuntija, noin 15 minuuttia, jokaisessa osiossa esimerkki ja yhteenveto.</string>
-    <string name="assistant_attach_read_prompt">Lue «%1$s» minulle kokonaan MP3-tiedostoksi yhdellä äänellä.</string>
+    <string name="assistant_attach_show_prompt">Tee «%1$s» radio-ohjelmaksi äänitiedostona: juontaja ja asiantuntija, noin 15 minuuttia, jokaisessa osiossa esimerkki ja yhteenveto.</string>
+    <string name="assistant_attach_read_prompt">Lue «%1$s» minulle kokonaan äänitiedostoksi yhdellä äänellä.</string>
     <string name="assistant_attach_live_prompt">Puhutaan asiakirjasta «%1$s». Kerro kahdessa lauseessa, mitä se sanoo, ja kysy, mistä haluan aloittaa.</string>
     <string name="assistant_attach_show">Radio-ohjelma</string>
     <string name="assistant_attach_read">Lukeminen</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d minuuttia. Kuuntele napsauttamalla.</string>
     <string name="assistant_attach_failed_title">Ääntä ei voitu tehdä</string>
     <string name="assistant_cap_file_show">Radio-ohjelma tiedostosta</string>
-    <string name="assistant_cap_file_show_prompt">Tee liittämästäni tiedostosta MP3-radio-ohjelma, noin 15 minuuttia.</string>
-    <string name="assistant_attach_waiting">Odotan tietokonettasi</string>
-    <string name="assistant_attach_stalled">Ei vielä mitään: sen tekevän tietokoneen pitää olla päällä ja Tetran auki.</string>
+    <string name="assistant_cap_file_show_prompt">Tee liittämästäni tiedostosta radio-ohjelma äänitiedostona, noin 15 minuuttia.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d sivu</item>
         <item quantity="other">%d sivua</item>

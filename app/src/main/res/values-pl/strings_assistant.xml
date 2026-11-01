@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Zrób z tego audycję radiową</string>
     <string name="assistant_attach_pill_live">💬 Rozmowa na żywo o dokumencie</string>
     <string name="assistant_attach_pill_read">🔊 Przeczytaj mi to</string>
-    <string name="assistant_attach_show_prompt">Zrób z «%1$s» audycję radiową w MP3: prowadzący i ekspert, około 15 minut, z przykładem i podsumowaniem każdej części.</string>
-    <string name="assistant_attach_read_prompt">Przeczytaj mi «%1$s» w całości jako MP3, jednym głosem.</string>
+    <string name="assistant_attach_show_prompt">Zrób z «%1$s» audycję radiową jako plik audio: prowadzący i ekspert, około 15 minut, z przykładem i podsumowaniem każdej części.</string>
+    <string name="assistant_attach_read_prompt">Przeczytaj mi «%1$s» w całości jako plik audio, jednym głosem.</string>
     <string name="assistant_attach_live_prompt">Porozmawiajmy o dokumencie «%1$s». Powiedz w dwóch zdaniach, co zawiera, i zapytaj, od czego chcę zacząć.</string>
     <string name="assistant_attach_show">Audycja radiowa</string>
     <string name="assistant_attach_read">Czytanie</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d minut. Kliknij, aby posłuchać.</string>
     <string name="assistant_attach_failed_title">Nie udało się utworzyć dźwięku</string>
     <string name="assistant_cap_file_show">Audycja z pliku</string>
-    <string name="assistant_cap_file_show_prompt">Zrób z załączonego pliku audycję radiową w MP3, około 15 minut.</string>
-    <string name="assistant_attach_waiting">Czekam na twój komputer</string>
-    <string name="assistant_attach_stalled">Jeszcze nic: komputer, który to robi, musi być włączony, z otwartą Tetrą.</string>
+    <string name="assistant_cap_file_show_prompt">Zrób z załączonego pliku audycję radiową jako plik audio, około 15 minut.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d strona</item>
         <item quantity="few">%d strony</item>

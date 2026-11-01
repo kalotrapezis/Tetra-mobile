@@ -133,24 +133,47 @@ class AssistantAttachTest {
         assertEquals(5, show.ready)
     }
 
-    @Test fun theAskIsAFileTheComputerAnswers() {
+    @Test fun theJobIsAFolderItsCardFollows() {
         val d = Attach.Doc("Πλάτων.pdf", "/x/Πλάτων.pdf", "pdf", listOf("Σελίδα 1", "Σελίδα 2"), emptyList(), false)
-        val id = AudioJobs.ask(tetra, "Phone", AudioAsk(d, "show", 15, "δικαιοσύνη", "", true, AudioJobs.estimate(16, "show")), now = 1000L)
-        val f = File(AudioJobs.dir(tetra), "$id.json")
+        val id = AudioJobs.ask(tetra, AudioAsk(d, "show", 15, "δικαιοσύνη", "", false, AudioJobs.estimate(16, "show")), now = 1000L)
+        val f = File(AudioJobs.dir(tetra), "$id/job.json")
+        assertTrue(f.path.endsWith(".System/Assistant/Data/Audio/$id/job.json"))
         val o = JSONObject(f.readText())
-        assertEquals("asked", o.getString("state")); assertEquals("Σελίδα 1\u000cΣελίδα 2", o.getString("text"))
-        assertEquals(1000L, o.getLong("asked")); assertTrue(o.getBoolean("perSection")); assertEquals(15, o.getInt("minutes")); assertEquals("Phone", o.getString("device"))
-        assertTrue(f.path.endsWith(".System/Assistant/Shared/AudioJobs/$id.json"))
+        assertEquals("asked", o.getString("state")); assertEquals(1000L, o.getLong("asked")); assertEquals(15, o.getInt("minutes"))
+        assertEquals("Σελίδα 1\u000cΣελίδα 2", File(f.parentFile, "source.txt").readText())
 
         f.writeText(o.put("state", "running").put("stage", "voice").put("done", 5).put("total", 10).toString())
         AudioJobs.read(tetra, id)!!.let { assertEquals("running", it.state); assertEquals(0.1f + 0.85f * 0.5f, AudioJobs.share(it), 1e-4f) }
-        File(AudioJobs.dir(tetra), "$id.mp3").writeBytes(byteArrayOf(1, 2, 3))
-        f.writeText(o.put("state", "done").put("title", "Πλάτων — Εκπομπή").put("seconds", 905.5).put("mp3", "$id.mp3")
+        File(f.parentFile, "Πλάτων — Εκπομπή.m4a").writeBytes(byteArrayOf(1, 2, 3))
+        f.writeText(o.put("state", "done").put("title", "Πλάτων — Εκπομπή").put("seconds", 905.5).put("file", "Πλάτων — Εκπομπή.m4a")
             .put("chapters", JSONArray().put(JSONObject().put("title", "Αρχή").put("start", 0)).put(JSONObject().put("title", "Δικαιοσύνη").put("start", 120.5))).toString())
         val j = AudioJobs.read(tetra, id)!!
         assertEquals("done", j.state); assertEquals(listOf(AudioJobs.Chapter("Αρχή", 0.0), AudioJobs.Chapter("Δικαιοσύνη", 120.5)), j.chapters)
         // saved into Files › Assistant, never over one there
-        assertEquals("Πλάτων — Εκπομπή.mp3", AudioJobs.save(tetra, j).name)
-        assertEquals("Πλάτων — Εκπομπή (2).mp3", AudioJobs.save(tetra, j).name)
+        assertEquals("Πλάτων — Εκπομπή.m4a", AudioJobs.save(tetra, j).name)
+        assertEquals("Πλάτων — Εκπομπή (2).m4a", AudioJobs.save(tetra, j).name)
+    }
+
+    @Test fun theScriptIsReadFromJsonLines() {
+        val lines = AudioMaker.parseScript("```json\n{\"speaker\":\"host\",\"text\":\"Καλώς  ήρθατε.\",\"section\":\"Αρχή\"},\nκάτι άλλο\n{\"speaker\":\"expert\",\"text\":\"Η πόλη.\"}\n{\"speaker\":\"x\",\"text\":\"\"}\n```")
+        assertEquals(listOf("host", "expert"), lines.map { it.speaker })
+        assertEquals(listOf("Καλώς ήρθατε.", "Η πόλη."), lines.map { it.text })
+        assertEquals(listOf("Αρχή", "Αρχή"), lines.map { it.section }) // a line without one is under the one before
+        assertEquals(2, AudioMaker.parseScript("""[{"text":"Α","section":"Σ"},{"speaker":"expert","text":"Β"}]""").size)
+        assertTrue(AudioMaker.pieces("Πρώτη πρόταση. ".repeat(100)).all { it.length <= 700 })
+    }
+
+    @Test fun theMixEvensTheLinesAndMarksTheSections() {
+        val rate = AudioMaker.RATE
+        fun line(section: String, amp: Float) = AudioMaker.Line("host", "x", section).apply { pcm = FloatArray(rate) { if (it % 2 == 0) amp else -amp } }
+        val m = AudioMaker.mix(listOf(line("Α", 0.01f), line("Α", 0.5f), line("Β", 0.08f)))
+        // 3 s of speech, 0.35 s between lines, 1.2 s before a new section
+        assertEquals(3 + 0.35 + 1.2, m.seconds, 1e-9)
+        assertEquals(listOf(AudioJobs.Chapter("Α", 0.0), AudioJobs.Chapter("Β", 2 + 0.35 + 1.2)), m.chapters)
+        assertEquals(Math.round(m.seconds * rate).toInt(), m.pcm.size)
+        assertEquals(0.04f, Math.abs(m.pcm[0]), 1e-5f) // too quiet: at most 4 times louder
+        assertEquals(0.08f, Math.abs(m.pcm[(1.35 * rate).toInt()]), 1e-5f) // too loud: brought down to RMS 0.08
+        assertEquals(0.08f, Math.abs(m.pcm.last()), 1e-5f)
+        // the .m4a itself is MediaCodec's, which plain JVM tests do not have (no Robolectric here): checked on the phone
     }
 }

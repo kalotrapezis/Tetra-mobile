@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Tee sellest raadiosaade</string>
     <string name="assistant_attach_pill_live">💬 Elav vestlus dokumendist</string>
     <string name="assistant_attach_pill_read">🔊 Loe mulle ette</string>
-    <string name="assistant_attach_show_prompt">Tee «%1$s» MP3-raadiosaateks: saatejuht ja ekspert, umbes 15 minutit, igas osas näide ja kokkuvõte.</string>
-    <string name="assistant_attach_read_prompt">Loe mulle «%1$s» tervikuna ette MP3-na, ühe häälega.</string>
+    <string name="assistant_attach_show_prompt">Tee «%1$s» raadiosaateks helifailina: saatejuht ja ekspert, umbes 15 minutit, igas osas näide ja kokkuvõte.</string>
+    <string name="assistant_attach_read_prompt">Loe mulle «%1$s» tervikuna ette helifailina, ühe häälega.</string>
     <string name="assistant_attach_live_prompt">Räägime dokumendist «%1$s». Ütle mulle kahe lausega, mis selles on, ja küsi, kust ma tahan alustada.</string>
     <string name="assistant_attach_show">Raadiosaade</string>
     <string name="assistant_attach_read">Lugemine</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d minutit. Kuulamiseks klõpsa.</string>
     <string name="assistant_attach_failed_title">Heli ei õnnestunud teha</string>
     <string name="assistant_cap_file_show">Raadiosaade failist</string>
-    <string name="assistant_cap_file_show_prompt">Tee manustatud fail MP3-raadiosaateks, umbes 15 minutit.</string>
-    <string name="assistant_attach_waiting">Ootan sinu arvutit</string>
-    <string name="assistant_attach_stalled">Veel mitte midagi: arvuti, mis seda teeb, peab olema sees ja Tetra avatud.</string>
+    <string name="assistant_cap_file_show_prompt">Tee manustatud fail raadiosaateks helifailina, umbes 15 minutit.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d lehekülg</item>
         <item quantity="other">%d lehekülge</item>

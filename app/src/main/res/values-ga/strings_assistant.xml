@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Déan clár raidió de</string>
     <string name="assistant_attach_pill_live">💬 Comhrá beo faoin doiciméad</string>
     <string name="assistant_attach_pill_read">🔊 Léigh dom é</string>
-    <string name="assistant_attach_show_prompt">Déan clár raidió MP3 de «%1$s»: láithreoir agus saineolaí, timpeall 15 nóiméad, sampla agus achoimre do gach roinn.</string>
-    <string name="assistant_attach_read_prompt">Léigh «%1$s» dom go hiomlán mar MP3, le guth amháin.</string>
+    <string name="assistant_attach_show_prompt">Déan clár raidió fuaime de «%1$s»: láithreoir agus saineolaí, timpeall 15 nóiméad, sampla agus achoimre do gach roinn.</string>
+    <string name="assistant_attach_read_prompt">Léigh «%1$s» dom go hiomlán mar chomhad fuaime, le guth amháin.</string>
     <string name="assistant_attach_live_prompt">Labhróimid faoin doiciméad «%1$s». Inis dom i ndá abairt cad atá ann agus fiafraigh díom cá bhfuil mé ag iarraidh tosú.</string>
     <string name="assistant_attach_show">Clár raidió</string>
     <string name="assistant_attach_read">Léamh</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d nóiméad. Cliceáil chun éisteacht leis.</string>
     <string name="assistant_attach_failed_title">Níorbh fhéidir an fhuaim a dhéanamh</string>
     <string name="assistant_cap_file_show">Clár ó chomhad</string>
-    <string name="assistant_cap_file_show_prompt">Déan clár raidió MP3 den chomhad a cheangailim, timpeall 15 nóiméad.</string>
-    <string name="assistant_attach_waiting">Ag fanacht le do ríomhaire</string>
-    <string name="assistant_attach_stalled">Faic fós: caithfidh an ríomhaire a dhéanann é a bheith ar siúl, agus Tetra oscailte.</string>
+    <string name="assistant_cap_file_show_prompt">Déan clár raidió fuaime den chomhad a cheangailim, timpeall 15 nóiméad.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d leathanach</item>
         <item quantity="two">%d leathanach</item>

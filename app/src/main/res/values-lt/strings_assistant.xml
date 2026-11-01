@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Padaryk radijo laidą</string>
     <string name="assistant_attach_pill_live">💬 Tiesioginis pokalbis apie dokumentą</string>
     <string name="assistant_attach_pill_read">🔊 Perskaityk man</string>
-    <string name="assistant_attach_show_prompt">Padaryk iš «%1$s» radijo laidą MP3 formatu: vedėjas ir ekspertas, apie 15 minučių, su pavyzdžiu ir santrauka kiekvienai daliai.</string>
-    <string name="assistant_attach_read_prompt">Perskaityk man «%1$s» visą MP3 formatu, vienu balsu.</string>
+    <string name="assistant_attach_show_prompt">Padaryk iš «%1$s» radijo laidą garso failu: vedėjas ir ekspertas, apie 15 minučių, su pavyzdžiu ir santrauka kiekvienai daliai.</string>
+    <string name="assistant_attach_read_prompt">Perskaityk man «%1$s» visą garso failu, vienu balsu.</string>
     <string name="assistant_attach_live_prompt">Pakalbėkime apie dokumentą «%1$s». Pasakyk dviem sakiniais, ką jis sako, ir paklausk, nuo ko norėčiau pradėti.</string>
     <string name="assistant_attach_show">Radijo laida</string>
     <string name="assistant_attach_read">Skaitymas</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d minučių. Spustelėk, kad paklausytum.</string>
     <string name="assistant_attach_failed_title">Garso nepavyko sukurti</string>
     <string name="assistant_cap_file_show">Laida iš failo</string>
-    <string name="assistant_cap_file_show_prompt">Padaryk prisegtą failą radijo laida MP3 formatu, apie 15 minučių.</string>
-    <string name="assistant_attach_waiting">Laukiu tavo kompiuterio</string>
-    <string name="assistant_attach_stalled">Kol kas nieko: jį darantis kompiuteris turi būti įjungtas, su atidaryta Tetra.</string>
+    <string name="assistant_cap_file_show_prompt">Padaryk prisegtą failą radijo laida garso failu, apie 15 minučių.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d puslapis</item>
         <item quantity="few">%d puslapiai</item>

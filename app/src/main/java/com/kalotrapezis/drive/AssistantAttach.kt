@@ -178,16 +178,16 @@ internal object Attach {
 internal data class AudioAsk(val doc: Attach.Doc, val mode: String, val minutes: Int, val focus: String, val style: String, val perSection: Boolean, val estimate: AudioJobs.Estimate)
 
 /**
- * An MP3 of a file (the user, 1 Nov 2026: "I give the file and it gives me an mp3"): the phone has no MP3 encoder, so it
- * asks the computer (the desktop's audio.js, which runs the schedules), by a job file in .System/Assistant/Shared/AudioJobs
- * that syncs as "AI Assist/AudioJobs". The computer writes back "running" (stage, done, total), then "done" with the MP3
- * beside it, or "failed"; the chat's card follows the file, and a sync that brings it done rings once.
+ * Audio of a file (the user, 1 Nov 2026: "I give the file and it gives me an mp3"; «M4A στο κινητό»), made on the phone
+ * (AudioMaker, in AudioService): a job is a folder .System/Assistant/Data/Audio/<id>/ with job.json, its state ("asked",
+ * "running" with stage, done, total, then "done" with the file, title, seconds and chapters, or "failed"), which the chat's
+ * card follows, and source.txt, the text read (pages split by \f).
  */
 internal object AudioJobs {
     data class Estimate(val minutes: Int, val usd: Double, val ready: Int)
     data class Chapter(val title: String, val start: Double)
     data class Job(val id: String, val state: String, val stage: String, val done: Int, val total: Int, val name: String, val mode: String, val title: String,
-        val seconds: Double, val chapters: List<Chapter>, val mp3: File?, val error: String, val changed: Long)
+        val seconds: Double, val chapters: List<Chapter>, val audio: File?, val error: String, val changed: Long)
 
     private const val CHARS_A_MINUTE = 900 // Greek read aloud: ~150 words of ~6 letters
     private const val TOKEN = 3.5 // letters a token, Greek
@@ -195,8 +195,8 @@ internal object AudioJobs {
     /** How long, how much, how soon (the desktop's audio.js estimate(), the same figures): said before anything is spent. */
     fun estimate(chars: Int, mode: String, minutes: Int = 0): Estimate {
         val show = mode == "show"
-        // a show is at most three times the reading of its source: two pages do not make fifteen minutes
-        val min = if (show) maxOf(3L, minOf(60L, Math.round(chars / 300.0), Math.round(if (minutes > 0) minutes.toDouble() else minOf(20.0, maxOf(8.0, chars / 2500.0))))).toInt()
+        // a show runs about as long as one and a half readings of its source (tried: two pages made 2 minutes, not the 6 asked)
+        val min = if (show) maxOf(3L, minOf(60L, Math.round(chars / 600.0), Math.round(if (minutes > 0) minutes.toDouble() else minOf(20.0, maxOf(8.0, chars / 2500.0))))).toInt()
             else maxOf(1L, Math.round(chars.toDouble() / CHARS_A_MINUTE)).toInt()
         val spoken = min * CHARS_A_MINUTE.toDouble()
         fun tok(model: String, inChars: Double, outChars: Double) = Bill.TOKENS.getValue(model).let { (i, o) -> (inChars / TOKEN * i + outChars / TOKEN * o) / 1e6 }
@@ -204,56 +204,74 @@ internal object AudioJobs {
         return Estimate(min, usd, maxOf(2, Math.ceil(min / 4.0).toInt() + if (show) 1 else 0))
     }
 
-    fun dir(tetra: File) = File(TetraSystem.dir(tetra, "Assistant", "Shared"), "AudioJobs")
+    fun dir(tetra: File) = File(TetraSystem.dir(tetra, "Assistant", "Data"), "Audio")
 
-    /** The ask written for the computer; answers its id. */
-    fun ask(tetra: File, device: String, a: AudioAsk, now: Long = System.currentTimeMillis()): String {
+    /** The job written, waiting for AudioService; answers its id. */
+    fun ask(tetra: File, a: AudioAsk, now: Long = System.currentTimeMillis()): String {
         val id = java.util.UUID.randomUUID().toString()
-        val o = JSONObject().put("id", id).put("asked", now).put("device", device).put("name", a.doc.name).put("text", a.doc.pages.joinToString("\u000c"))
-            .put("mode", a.mode).put("minutes", a.minutes).put("focus", a.focus).put("style", a.style).put("perSection", a.perSection).put("state", "asked")
-        File(dir(tetra).apply { mkdirs() }, "$id.json").writeText(o.toString())
-        WriterLog.i("AI Assist: asked the computer for an MP3 (${a.mode}, ${a.minutes} min) of ${a.doc.name}: $id")
+        val d = File(dir(tetra), id).apply { mkdirs() }
+        File(d, "source.txt").writeText(a.doc.pages.joinToString("\u000c"))
+        File(d, "job.json").writeText(JSONObject().put("id", id).put("asked", now).put("name", a.doc.name).put("mode", a.mode).put("minutes", a.minutes)
+            .put("focus", a.focus).put("style", a.style).put("state", "asked").toString())
+        WriterLog.i("AI Assist: audio asked (${a.mode}, ${a.minutes} min) of ${a.doc.name}: $id")
         return id
     }
 
     /** A job as its file says now; null when it is gone. */
     fun read(tetra: File, id: String): Job? {
-        val f = File(dir(tetra), "${File(id).name}.json")
+        val f = File(dir(tetra), "${File(id).name}/job.json")
         val o = runCatching { JSONObject(f.readText()) }.getOrNull() ?: return null
         return job(o, f)
     }
     fun job(o: JSONObject, f: File): Job {
         val ch = o.optJSONArray("chapters") ?: JSONArray()
-        return Job(o.optString("id", f.nameWithoutExtension), o.optString("state", "asked"), o.optString("stage"), o.optInt("done"), o.optInt("total", 1), o.optString("name"),
+        return Job(o.optString("id", f.parentFile?.name.orEmpty()), o.optString("state", "asked"), o.optString("stage"), o.optInt("done"), o.optInt("total", 1), o.optString("name"),
             o.optString("mode"), o.optString("title"), o.optDouble("seconds", 0.0), (0 until ch.length()).mapNotNull { ch.optJSONObject(it) }.map { Chapter(it.optString("title"), it.optDouble("start")) },
-            o.optString("mp3").takeIf { it.isNotBlank() }?.let { File(f.parentFile, File(it).name) }?.takeIf { it.isFile }, o.optString("error"), f.lastModified())
+            o.optString("file").takeIf { it.isNotBlank() }?.let { File(f.parentFile, File(it).name) }?.takeIf { it.isFile }, o.optString("error"), f.lastModified())
     }
 
-    /** How far, 0–1: the script a tenth, the voices most of it, the MP3 the end (the desktop's card). */
+    /** How far, 0–1: the script a tenth, the voices most of it, the file the end (the desktop's card). */
     fun share(j: Job) = when (j.stage) { "script" -> 0.1f * j.done / maxOf(1, j.total); "voice" -> 0.1f + 0.85f * j.done / maxOf(1, j.total); "mix" -> 0.97f; else -> 0f }
 
-    /** Into Files › Assistant (it reaches the computer), never over a file already there: "name (2).mp3". */
+    /** Into Files › Assistant (it reaches the computer), never over a file already there: "name (2).m4a". */
     fun save(tetra: File, j: Job): File {
         val into = File(tetra, "Assistant").apply { mkdirs() }
+        val ext = j.audio!!.extension
         val base = j.title.ifBlank { j.name.substringBeforeLast('.') }.replace(Regex("[\\\\/:*?\"<>|\\n\\r\\t]+"), " ").trim().take(90).ifEmpty { "Audio" }
-        var to = File(into, "$base.mp3"); var n = 2
-        while (to.exists()) to = File(into, "$base (${n++}).mp3")
-        return j.mp3!!.copyTo(to).also { WriterLog.i("AI Assist: the MP3 saved as Assistant/${it.name}") }
+        var to = File(into, "$base.$ext"); var n = 2
+        while (to.exists()) to = File(into, "$base (${n++}).$ext")
+        return j.audio.copyTo(to).also { WriterLog.i("AI Assist: the audio saved as Assistant/${it.name}") }
     }
 
-    /** After a sync: this phone's asks that came back done or failed ring once (and a tap opens AI Assist on the card). */
-    fun check(c: Context) {
-        val prefs = c.getSharedPreferences("assistant_audio", Context.MODE_PRIVATE)
-        val told = prefs.getStringSet("told", emptySet()).orEmpty()
-        val me = TimerControl.device()
-        for (f in dir(driveRoot()).listFiles { f -> f.name.endsWith(".json") }.orEmpty()) {
-            val o = runCatching { JSONObject(f.readText()) }.getOrNull() ?: continue
-            val j = job(o, f)
-            if (o.optString("device") != me || j.state !in setOf("done", "failed") || j.id in told) continue
-            prefs.edit().putStringSet("told", told + j.id).apply()
-            WriterLog.i("AI Assist: the MP3 ${j.id} came back ${j.state}")
-            if (AiGate.load(c).enabled) post(c, j)
-        }
+    /**
+     * One job made (in AudioService): its costs recorded as its file's (script, verify, tts), one "mp3" line with its whole
+     * cost when done, and the notification either way. Past the month's budget it does not start, and says so.
+     */
+    fun run(c: Context, id: String, progress: (String, Int, Int) -> Unit) {
+        val tetra = driveRoot(); val f = File(dir(tetra), "${File(id).name}/job.json")
+        val o = JSONObject(f.readText())
+        fun write(x: JSONObject.() -> Unit) = synchronized(o) { o.x(); f.writeText(o.toString()) }
+        runCatching {
+            val usage = AssistantUsage.of(c)
+            if (usage.capped()) error(c.getString(R.string.usage_capped))
+            val key = AssistantNet.key(c)
+            val d = Attach.Doc(o.optString("name"), "", "text", File(f.parentFile, "source.txt").readText().split('\u000c'), emptyList(), false)
+            val api = Mistral({ path, body -> AssistantNet.post(key, path, body) }, AssistantMeter.bill(c)).tagged("audio", mapOf("file" to d.name, "job" to id))
+            val tts = api.bill.part("tts")
+            // the host is the user's voice; the expert another of Mistral's presets
+            val all = AssistantNet.voices(key).map { it.first }
+            val host = AssistantVoices.id(c)?.takeIf { it.isNotEmpty() } ?: all.firstOrNull() ?: error("No voice.")
+            write { put("state", "running").put("stage", "script").put("done", 0).put("total", 1) }
+            WriterLog.i("AI Assist: making the audio $id (${o.optString("mode")}, ${o.optInt("minutes")} min)")
+            val r = AudioMaker.make(api, { v, t, each -> AssistantNet.speech(key, v, t, tts, each) }, d, o.optString("mode"), o.optInt("minutes"), o.optString("focus"), o.optString("style"),
+                listOf(host, all.firstOrNull { it != host } ?: host), f.parentFile!!, File(dir(tetra), "cache")) { stage, done, total ->
+                progress(stage, done, total); write { put("stage", stage).put("done", done).put("total", total) }
+            }
+            write { put("state", "done"); r.keys().forEach { k -> put(k, r.get(k)) } }
+            usage.add(mapOf("f" to "mp3", "file" to d.name, "title" to r.getString("title"), "s" to Math.round(r.getDouble("seconds")), "job" to id, "cost" to api.bill.usd, "mode" to o.optString("mode")))
+            WriterLog.i("AI Assist: the audio $id is ready: ${r.optString("file")}, ${r.getDouble("seconds").toInt()} s, ${Bill.text(api.bill.usd)}")
+        }.onFailure { e -> WriterLog.e("AI Assist: the audio $id failed", e); write { put("state", "failed").put("error", e.shownMessage(c) ?: e.message ?: "") } }
+        read(tetra, id)?.let { if (AiGate.load(c).enabled) post(c, it) }
     }
 
     private fun post(c: Context, j: Job) {

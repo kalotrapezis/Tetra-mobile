@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Lav det til et radioprogram</string>
     <string name="assistant_attach_pill_live">💬 Live-samtale om dokumentet</string>
     <string name="assistant_attach_pill_read">🔊 Læs den op for mig</string>
-    <string name="assistant_attach_show_prompt">Lav «%1$s» om til et radioprogram som MP3: en vært og en ekspert, cirka 15 minutter, med et eksempel og en opsummering for hvert afsnit.</string>
-    <string name="assistant_attach_read_prompt">Læs «%1$s» op for mig i sin helhed som MP3, med én stemme.</string>
+    <string name="assistant_attach_show_prompt">Lav «%1$s» om til et radioprogram som lydfil: en vært og en ekspert, cirka 15 minutter, med et eksempel og en opsummering for hvert afsnit.</string>
+    <string name="assistant_attach_read_prompt">Læs «%1$s» op for mig i sin helhed som lydfil, med én stemme.</string>
     <string name="assistant_attach_live_prompt">Lad os tale om dokumentet «%1$s». Fortæl mig i to sætninger, hvad det siger, og spørg mig, hvor jeg vil begynde.</string>
     <string name="assistant_attach_show">Radioprogram</string>
     <string name="assistant_attach_read">Oplæsning</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d minutter. Klik for at lytte.</string>
     <string name="assistant_attach_failed_title">Lyden kunne ikke laves</string>
     <string name="assistant_cap_file_show">Radioprogram fra en fil</string>
-    <string name="assistant_cap_file_show_prompt">Lav den fil, jeg vedhæfter, om til et radioprogram som MP3, cirka 15 minutter.</string>
-    <string name="assistant_attach_waiting">Venter på din computer</string>
-    <string name="assistant_attach_stalled">Intet endnu: computeren, der laver den, skal være tændt med Tetra åben.</string>
+    <string name="assistant_cap_file_show_prompt">Lav den fil, jeg vedhæfter, om til et radioprogram som lydfil, cirka 15 minutter.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d side</item>
         <item quantity="other">%d sider</item>

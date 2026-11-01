@@ -174,14 +174,14 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
     fun choose(c: AssistantChoice) { c.call?.let(::call); c.file?.let { open(it); if (sheet) close() }; c.go?.let { go(it); if (sheet) close() } }
 
     fun listenAgain() { live?.let { it.muted = false; livePhase = LivePhase.Listening; liveLast = System.currentTimeMillis() } }
-    /** The user's yes to an MP3: the ask goes to the computer (AudioJobs), and its card follows it here. */
+    /** The user's yes to the audio: made on the phone (AudioService), its card following the job here. */
     fun startAudio(a: AudioAsk) = scope.launch {
         pendingAudio = null
         // past the month's budget nothing runs by itself, and it says so
         if (withContext(Dispatchers.IO) { AssistantUsage.of(context).capped() }) { say(context.getString(R.string.usage_capped), true); return@launch }
-        val id = withContext(Dispatchers.IO) { runCatching { AudioJobs.ask(driveRoot(), TimerControl.device(), a) } }
-            .getOrElse { WriterLog.e("AI Assist: the MP3 could not be asked for", it); say(it.message ?: "", true); return@launch }
-        ScopedSync.soon(context, "assistant", 0, orWhole = true) // the computer hears at once
+        val id = withContext(Dispatchers.IO) { runCatching { AudioJobs.ask(driveRoot(), a) } }
+            .getOrElse { WriterLog.e("AI Assist: the audio could not be asked for", it); say(it.message ?: "", true); return@launch }
+        AudioService.start(context, id) // in the foreground: it goes on when the app is left
         bubbles += Bubble(false, context.getString(R.string.assistant_attach_started), job = id)
         keep()
     }
@@ -201,7 +201,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         if (inLive) { liveYou = text; liveAi = "" }
         // a yes or no to a waiting call is heard by the phone, never decided by the model
         pending?.let { p -> AssistantChat.yesNo(text)?.let { yes -> if (yes) call(p) else { pending = null; say(context.getString(R.string.assistant_call_cancelled)) }; return@launch } }
-        // and to an MP3's estimate (a short yes only: "ναι, αλλά 10 λεπτά" goes to the model): nothing is spent before it
+        // and to the audio's estimate (a short yes only: "ναι, αλλά 10 λεπτά" goes to the model): nothing is spent before it
         pendingAudio?.let { a -> (if (text.trim().split(Regex("\\s+")).size <= 3) AssistantChat.yesNo(text) else null)?.let { yes -> if (yes) startAudio(a) else skipAudio(); listenAgain(); return@launch } }
         phase = Phase.Thinking
         live?.muted = true; if (inLive) livePhase = LivePhase.Thinking
@@ -708,21 +708,18 @@ private fun BubbleView(b: Bubble, pending: PendingCall?, choose: (AssistantChoic
 }
 
 /**
- * An MP3 the computer makes (AudioJobs): how far it has got, read from its job file every few seconds while it shows (a
- * sync asked now and then, so the computer's answer comes); then played here, its chapters a tap away, saved in Files or shared.
+ * Audio being made on the phone (AudioJobs, AudioService): how far it has got, read from its job file every second while it
+ * shows; then played here, its chapters a tap away, saved in Files or shared.
  */
 @Composable
 private fun AudioJobCard(id: String) {
     val context = LocalContext.current
     val tetra = remember { driveRoot() }
     var job by remember(id) { mutableStateOf(AudioJobs.read(tetra, id)) }
-    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(id) {
-        var n = 0
         while (job?.state.let { it == null || it == "asked" || it == "running" }) {
-            if (n++ % 10 == 0) ScopedSync.soon(context, "assistant", 0) // every 30 s: what the computer wrote comes here
-            delay(3_000)
-            job = withContext(Dispatchers.IO) { AudioJobs.read(tetra, id) }; now = System.currentTimeMillis()
+            delay(1_000)
+            job = withContext(Dispatchers.IO) { AudioJobs.read(tetra, id) }
         }
     }
     val j = job
@@ -731,13 +728,11 @@ private fun AudioJobCard(id: String) {
             when {
                 j == null -> Text(stringResource(R.string.assistant_attach_job_gone), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 j.state == "failed" -> Text(j.error.ifBlank { stringResource(R.string.assistant_attach_failed_title) }, color = MaterialTheme.colorScheme.error)
-                j.state != "done" || j.mp3 == null -> {
+                j.state != "done" || j.audio == null -> {
                     Text(j.name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    val stage = when (j.stage) { "script" -> R.string.assistant_attach_stage_script; "voice" -> R.string.assistant_attach_stage_voice; "mix" -> R.string.assistant_attach_stage_mix; else -> R.string.assistant_attach_waiting }
+                    val stage = when (j.stage) { "script" -> R.string.assistant_attach_stage_script; "voice" -> R.string.assistant_attach_stage_voice; "mix" -> R.string.assistant_attach_stage_mix; else -> R.string.assistant_attach_stage_script }
                     Text(stringResource(stage) + if (j.state == "running") " · ${Math.round(AudioJobs.share(j) * 100)}%" else "", style = MaterialTheme.typography.labelLarge)
                     LinearProgressIndicator(progress = { AudioJobs.share(j) }, Modifier.fillMaxWidth())
-                    // nothing new for minutes: the computer that makes it must be on, with Tetra open
-                    if (now - j.changed > 3 * 60_000) Text(stringResource(R.string.assistant_attach_stalled), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 else -> AudioPlayer(j, tetra)
             }
@@ -748,7 +743,7 @@ private fun AudioJobCard(id: String) {
 @Composable
 private fun AudioPlayer(j: AudioJobs.Job, tetra: File) {
     val context = LocalContext.current
-    val player = remember(j.mp3) { runCatching { android.media.MediaPlayer().apply { setDataSource(j.mp3!!.path); prepare() } }.onFailure { WriterLog.w("AI Assist: the MP3 cannot be played", it) }.getOrNull() }
+    val player = remember(j.audio) { runCatching { android.media.MediaPlayer().apply { setDataSource(j.audio!!.path); prepare() } }.onFailure { WriterLog.w("AI Assist: the audio cannot be played", it) }.getOrNull() }
     DisposableEffect(player) { onDispose { player?.release() } }
     var playing by remember { mutableStateOf(false) }
     var at by remember { mutableIntStateOf(0) }
@@ -768,13 +763,14 @@ private fun AudioPlayer(j: AudioJobs.Job, tetra: File) {
         j.chapters.forEach { c -> AssistChip(onClick = { player?.let { it.seekTo((c.start * 1000).toInt()); it.start(); playing = true; at = it.currentPosition } },
             label = { Text("${clock((c.start * 1000).toInt())} ${c.title}", maxLines = 1) }) }
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    @OptIn(ExperimentalLayoutApi::class)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Button(onClick = { saved = runCatching { AudioJobs.save(tetra, j) }.map { context.getString(R.string.assistant_attach_saved_in, "Assistant/${it.name}") }
-            .getOrElse { WriterLog.e("AI Assist: the MP3 was not saved", it); it.message } }) { Text(stringResource(R.string.assistant_attach_save), maxLines = 1) }
+            .getOrElse { WriterLog.e("AI Assist: the audio was not saved", it); it.message } }) { Text(stringResource(R.string.assistant_attach_save), maxLines = 1) }
         TextButton(onClick = { runCatching {
-            val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", j.mp3!!)
-            context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("audio/mpeg").putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), null))
-        }.onFailure { WriterLog.e("AI Assist: the MP3 was not shared", it) } }) {
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", j.audio!!)
+            context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("audio/mp4").putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), null))
+        }.onFailure { WriterLog.e("AI Assist: the audio was not shared", it) } }) {
             Icon(painterResource(R.drawable.ic_share), contentDescription = null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.common_share), maxLines = 1)
         }
     }

@@ -139,6 +139,13 @@ internal class Mistral(private val http: (path: String, body: String) -> String,
         return JSONObject().put("role", "assistant").put("content", text.toString()).apply { if (calls.isNotEmpty()) put("tool_calls", JSONArray(calls.values)) }
     }
 
+    /** A plain completion without tools ([json]: one JSON object back), by [model]; its text. */
+    fun complete(messages: JSONArray, json: Boolean = false, model: String = CHAT): String {
+        val body = JSONObject().put("model", model).put("messages", messages).put("temperature", 0.4).apply { if (json) put("response_format", JSONObject().put("type", "json_object")) }
+        return JSONObject(http("/chat/completions", body.toString())).also { bill.tokens(model, it.optJSONObject("usage")) }
+            .getJSONArray("choices").getJSONObject(0).getJSONObject("message").let(AssistantChat::words)
+    }
+
     /** The same API, its costs recorded as [feature] (the desktop's Mistral.as). */
     fun tagged(feature: String, more: Map<String, Any> = emptyMap()) = Mistral(http, bill.part(feature, more), stream)
 
@@ -500,11 +507,12 @@ internal class AssistantTools(
     /** An estimate and a card that waits for the user's yes: nothing is spent until then (the computer makes it: AudioJobs). */
     private fun audioMake(a: JSONObject): ToolResult {
         val n = a.optInt("choice", 0)
-        val d = if (n > 0) files.getOrNull(n - 1)?.let(extract) ?: return ToolResult("No choice $n: the last files list had ${files.size}.") else attached()
+        // a choice with no files list (the model sends choice 1 for the attached file, seen on the phone): the attached one
+        val d = if (n > 0 && files.isNotEmpty()) files.getOrNull(n - 1)?.let(extract) ?: return ToolResult("No choice $n: the last files list had ${files.size}.") else attached()
         d ?: return ToolResult("No file: the user attaches one (the paperclip), or files_find one first.")
         val mode = if (a.optString("mode") == "show") "show" else "narration"
         val est = AudioJobs.estimate(d.text.length, mode, a.optInt("minutes", 0))
-        return ToolResult("Estimate: ≈ ${est.minutes} minutes of audio, ≈ €${"%.2f".format(java.util.Locale.ROOT, est.usd)}, ready in ~${est.ready} minutes; the user's computer makes it in the background and a notification says when it is ready. Say this in one sentence in the user's language and ask whether to start.",
+        return ToolResult("Estimate: ≈ ${est.minutes} minutes of audio, ≈ €${"%.2f".format(java.util.Locale.ROOT, est.usd)}, ready in ~${est.ready} minutes; the phone makes it in the background and a notification says when it is ready. Say this in one sentence in the user's language and ask whether to start.",
             audio = AudioAsk(d, mode, est.minutes, a.optString("focus"), a.optString("style"), a.optBoolean("per_section", false), est))
     }
 
@@ -803,7 +811,7 @@ internal class AssistantTools(
             fn("make_image", "Draw a picture from a description.", listOf("prompt"), "prompt" to p("string", "What the picture shows, in detail.")),
             fn("attachment_read", "Read more of the file attached in this chat: one part by its number, or the passages about something.", emptyList(),
                 "part" to p("integer", "The part's number (1 = the start)."), "query" to p("string", "What to look for in it, in its language.")),
-            fn("audio_make", "Make an MP3 of the attached file (or of a file from the last files_find list): \"narration\" reads it whole with one voice; \"show\" is a radio show, a host and an expert talking it through with examples and recaps. It answers an estimate (minutes, cost, when ready): say it in one sentence and ask whether to start. It starts only on the user's yes, which Tetra hears; never say it has started or is done.", listOf("mode"),
+            fn("audio_make", "Make an audio file (.m4a) of the attached file (or of a file from the last files_find list): \"narration\" reads it whole with one voice; \"show\" is a radio show, a host and an expert talking it through with examples and recaps. It answers an estimate (minutes, cost, when ready): say it in one sentence and ask whether to start. It starts only on the user's yes, which Tetra hears; never say it has started or is done.", listOf("mode"),
                 "mode" to JSONObject().put("type", "string").put("enum", JSONArray(listOf("narration", "show"))).put("description", "\"narration\": read it to me; \"show\": a radio show."),
                 "minutes" to p("integer", "For a show: how long, if the user said."), "focus" to p("string", "For a show: what to dwell on, if said."),
                 "style" to p("string", "For a show: the tone, if said (e.g. \"για εξετάσεις\", \"χαλαρό\")."), "per_section" to p("boolean", "Also one MP3 a section, if asked."),
@@ -886,6 +894,7 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
                 if (r.choices.isNotEmpty()) { choices.clear(); choices += r.choices }
                 r.call?.let { call = it }; r.image?.let { images += it }; images += r.photos; r.open?.let { open = it }; r.go?.let { go = it }; if (r.open != null || r.go != null) beside = r.beside
                 r.audio?.let { audio = it }
+                WriterLog.i("AI Assist: ${f.getString("name")}${if (forced) " (forced)" else ""} → ${r.forModel.take(160).replace('\n', ' ')}")
                 messages += JSONObject().put("role", "tool").put("name", f.getString("name")).put("tool_call_id", c.optString("id")).put("content", r.forModel)
             }
         }
@@ -901,7 +910,7 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
 
     companion object {
         const val ROUNDS = 5 // tool rounds in one turn at most: find, then act, with room to spare
-        private val MP3 = Regex("\\bmp3\\b|εκπομπ|radio show|διάβασ[εέ] (?:το|μου)|read it to me", RegexOption.IGNORE_CASE)
+        private val MP3 = Regex("\\bmp3\\b|\\bm4a\\b|ήχο|εκπομπ|radio show|διάβασ[εέ] (?:το|μου)|read it to me", RegexOption.IGNORE_CASE)
 
         /** A message's text: a string, or Mistral's chunks (text pieces among others). */
         fun text(m: JSONObject): String = words(m).trim()

@@ -152,8 +152,8 @@
     <string name="assistant_attach_pill_show">🎙 Fă-l emisiune radio</string>
     <string name="assistant_attach_pill_live">💬 Discuție live despre document</string>
     <string name="assistant_attach_pill_read">🔊 Citește-mi-l</string>
-    <string name="assistant_attach_show_prompt">Fă din «%1$s» o emisiune radio în MP3: un prezentator și un expert, circa 15 minute, cu un exemplu și un rezumat pentru fiecare secțiune.</string>
-    <string name="assistant_attach_read_prompt">Citește-mi «%1$s» întreg, în MP3, cu o singură voce.</string>
+    <string name="assistant_attach_show_prompt">Fă din «%1$s» o emisiune radio ca fișier audio: un prezentator și un expert, circa 15 minute, cu un exemplu și un rezumat pentru fiecare secțiune.</string>
+    <string name="assistant_attach_read_prompt">Citește-mi «%1$s» întreg, ca fișier audio, cu o singură voce.</string>
     <string name="assistant_attach_live_prompt">Să vorbim despre documentul «%1$s». Spune-mi în două propoziții ce spune și întreabă-mă de unde vreau să încep.</string>
     <string name="assistant_attach_show">Emisiune radio</string>
     <string name="assistant_attach_read">Citire</string>
@@ -171,9 +171,7 @@
     <string name="assistant_attach_ready_body">%1$s: %2$d minute. Apasă ca să asculți.</string>
     <string name="assistant_attach_failed_title">Audio-ul nu a putut fi făcut</string>
     <string name="assistant_cap_file_show">Emisiune dintr-un fișier</string>
-    <string name="assistant_cap_file_show_prompt">Fă din fișierul atașat o emisiune radio în MP3, de circa 15 minute.</string>
-    <string name="assistant_attach_waiting">Aștept calculatorul tău</string>
-    <string name="assistant_attach_stalled">Nimic încă: calculatorul care îl face trebuie să fie pornit, cu Tetra deschis.</string>
+    <string name="assistant_cap_file_show_prompt">Fă din fișierul atașat o emisiune radio ca fișier audio, de circa 15 minute.</string>
     <plurals name="assistant_attach_pages">
         <item quantity="one">%d pagină</item>
         <item quantity="few">%d pagini</item>
