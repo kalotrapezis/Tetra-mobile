@@ -696,6 +696,7 @@
     <string name="files_save_tags">Enregistrer les étiquettes</string>
     <string name="files_back_to_actions">Retour aux actions</string>
     <string name="files_open_with">Ouvrir avec…</string>
+    <string name="files_open_beside">Ouvrir à côté</string>
     <string name="files_favorite_remove">Retirer des favoris</string>
     <string name="files_favorite_add">Ajouter aux favoris</string>
     <string name="files_tags">Étiquettes</string>

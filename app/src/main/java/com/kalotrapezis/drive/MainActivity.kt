@@ -245,6 +245,7 @@ internal fun photoPermissions() = when {
 }
 
 class MainActivity : ComponentActivity() {
+    private companion object { var resumed = 0 }
     override fun attachBaseContext(base: android.content.Context) = super.attachBaseContext(AppLocale.wrap(base))
     /** The part an applet icon asked for (Settings › App icons), until Tetra has turned to it. */
     private val applet = mutableStateOf<String?>(null)
@@ -291,9 +292,10 @@ class MainActivity : ComponentActivity() {
         type in setOf("text/calendar", "text/x-vcalendar", "application/ics") || u.lastPathSegment.orEmpty().endsWith(".ics", true)
     }
 
-    override fun onResume() { super.onResume(); CalendarAlarms.front = true }
+    // two windows side by side (Beside): Tetra leaves the front when the last one pauses
+    override fun onResume() { super.onResume(); resumed++; CalendarAlarms.front = true }
     override fun onPause() {
-        super.onPause(); CalendarAlarms.front = false
+        super.onPause(); resumed--; CalendarAlarms.front = resumed > 0
         Thread { runCatching { AlarmPlan.plan(this) } }.start() // the next alarm posted again out of the front, where HyperOS gives it its island
     }
 
@@ -762,11 +764,12 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
             screen = Screen.Contacts; return@LaunchedEffect
         }
         // AI Assist's tools (AssistantTools): a note it found, directions in Maps, or Maps' search on a place it could not find
-        applet.value?.takeIf { (it.startsWith("note:") || it.startsWith("maps-go:") || it.startsWith("maps-search:") || it.startsWith("mail:") || it.startsWith("mail-write:")) && screen != Screen.Guide }?.let { v ->
+        applet.value?.takeIf { (it.startsWith("note:") || it.startsWith("file:") || it.startsWith("maps-go:") || it.startsWith("maps-search:") || it.startsWith("mail:") || it.startsWith("mail-write:")) && screen != Screen.Guide }?.let { v ->
             applet.value = null
             when {
                 v.startsWith("mail") -> { mailStart = v; screen = Screen.Mail } // a mail AI Assist found, or one it wrote for the user to send
                 v.startsWith("note:") -> { notesStart = null; notesOpen = v.removePrefix("note:"); screen = Screen.Notes }
+                v.startsWith("file:") -> openDriveFile(v.removePrefix("file:"), false)?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() } // opened beside (Beside)
                 v.startsWith("maps-go:") -> v.removePrefix("maps-go:").split(",", limit = 3).takeIf { it.size == 3 }?.let { (lat, lng, name) ->
                     mapsGo = Place("", name, lat.toDouble(), lng.toDouble()); mapsSearch = null; mapsBack = Screen.Home; screen = Screen.Maps }
                 else -> { mapsGo = null; mapsSearch = v.removePrefix("maps-search:"); mapsBack = Screen.Home; screen = Screen.Maps }
@@ -2724,6 +2727,7 @@ private fun DriveItemMoreSheet(item: DriveItem, metadata: DriveMetadata, open: (
                         if (!item.isDirectory) DriveActionTile(R.drawable.ic_share, stringResource(R.string.common_share)) { dismiss(); shareDriveFile(context, item.file) }
                     }
                     if (!item.isDirectory) DriveWideAction(R.drawable.ic_open_with, stringResource(R.string.files_open_with)) { dismiss(); openWith() }
+                    if (!item.isDirectory && Beside.can(context)) DriveWideAction(R.drawable.ic_call_split, stringResource(R.string.files_open_beside)) { dismiss(); Beside.open(context, "file:${item.relativePath}") }
                     DriveWideAction(if (metadata.isFavorite(item.relativePath)) R.drawable.ic_remove_favorite else R.drawable.ic_favorite_border, stringResource(if (metadata.isFavorite(item.relativePath)) R.string.files_favorite_remove else R.string.files_favorite_add)) { submit(DriveItemAction.Favorite(!metadata.isFavorite(item.relativePath))) }
                     DriveWideAction(R.drawable.ic_tag, stringResource(R.string.files_tags)) { panel = DriveItemSheetPanel.Tags }
                     DriveWideAction(R.drawable.ic_info, stringResource(R.string.files_properties)) { panel = DriveItemSheetPanel.Properties }

@@ -679,6 +679,7 @@
     <string name="files_save_tags">Salva tag</string>
     <string name="files_back_to_actions">Torna alle azioni dell\'elemento</string>
     <string name="files_open_with">Apri con…</string>
+    <string name="files_open_beside">Apri accanto</string>
     <string name="files_favorite_remove">Rimuovi dai Preferiti</string>
     <string name="files_favorite_add">Aggiungi ai Preferiti</string>
     <string name="files_tags">Tag</string>

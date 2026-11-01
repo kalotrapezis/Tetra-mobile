@@ -170,6 +170,7 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
         hush()
         val speech = if (aloud || inLive) AnswerVoice(context, reader, chat.bill, scope).also { voice = it } else null
         val cut = Sentences()
+        AssistantTools.beside = Beside.can(context)
         val r = withContext(Dispatchers.IO) { runCatching { chat.ask(text) { words ->
             cut.push(words).forEach { speech?.say(it) }
             if (inLive) scope.launch { liveAi += words; if (speech != null) livePhase = LivePhase.Speaking }
@@ -181,11 +182,13 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
         bubbles += Bubble(false, reply.text, reply.choices, reply.call, reply.images)
         keep()
         pending = reply.call
-        reply.open?.let(::open)
+        // beside (open_beside): a second Tetra window in split screen, this one staying as it is; a file outside the library opens as usual
+        if (reply.beside) { reply.open?.let { f -> runCatching { DriveRules.relative(driveRoot(), f) }.getOrNull()?.let { Beside.open(context, "file:$it") } ?: open(f) }; reply.go?.let { Beside.open(context, it) } }
+        else reply.open?.let(::open)
         if (inLive && liveAi.isBlank()) liveAi = reply.text
         speech?.await(); spent = chat.bill.usd // Mistral's voice is billed as it reads
         // Maps, a note, YouTube: once the answer is said, there (live ends: it is paid by the minute)
-        reply.go?.let { if (inLive) endLive(); go(it); if (sheet) close(); return@launch }
+        reply.go?.takeIf { !reply.beside }?.let { if (inLive) endLive(); go(it); if (sheet) close(); return@launch }
         if (inLive) { listenAgain(); return@launch }
         if (!sheet) return@launch
         // the sheet: a question or a list waits for the answer by voice (a few seconds); anything else is done

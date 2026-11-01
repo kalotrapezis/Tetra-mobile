@@ -679,6 +679,7 @@
     <string name="files_save_tags">Gem tags</string>
     <string name="files_back_to_actions">Tilbage til elementhandlinger</string>
     <string name="files_open_with">Åbn med…</string>
+    <string name="files_open_beside">Åbn ved siden af</string>
     <string name="files_favorite_remove">Fjern fra Favoritter</string>
     <string name="files_favorite_add">Føj til Favoritter</string>
     <string name="files_tags">Tags</string>

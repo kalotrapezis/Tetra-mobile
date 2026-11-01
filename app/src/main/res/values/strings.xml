@@ -680,6 +680,7 @@
     <string name="files_save_tags">Save tags</string>
     <string name="files_back_to_actions">Back to item actions</string>
     <string name="files_open_with">Open with…</string>
+    <string name="files_open_beside">Open beside</string>
     <string name="files_favorite_remove">Remove from Favorites</string>
     <string name="files_favorite_add">Add to Favorites</string>
     <string name="files_tags">Tags</string>

@@ -679,6 +679,7 @@
     <string name="files_save_tags">Tags opslaan</string>
     <string name="files_back_to_actions">Terug naar itemacties</string>
     <string name="files_open_with">Openen met…</string>
+    <string name="files_open_beside">Ernaast openen</string>
     <string name="files_favorite_remove">Verwijderen uit Favorieten</string>
     <string name="files_favorite_add">Toevoegen aan Favorieten</string>
     <string name="files_tags">Tags</string>

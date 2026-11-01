@@ -12,6 +12,10 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [x] (open-beside session, 1 Nov; branch `claude/jovial-noether-00d351`, not merged) **Open beside** in Android's split screen
+      (12L+, tablet): Beside.open starts a second MainActivity adjacent in its own task; Files › ⋮ › «Άνοιγμα δίπλα»; AI Assist's
+      `open_beside` tool (note/file/mail, offered only when split screen is there). Checked on a tablet emulator, not on the user's
+      tablet, and the AI tool not against Mistral (no key here).
 - [~] (system-userspace session, 29 Oct; branches `claude/system-userspace` here and `system-userspace` in Drive; not merged, not pushed,
       not installed, the move not run on the real folders) **Files and Photos are the user's own** (the user: "Make Tetra process
       everything from the system folder; Files and Photos to be userspace only"). Calendar, Contacts, Data, Phone, Timer, Maps (all

@@ -679,6 +679,7 @@
     <string name="files_save_tags">Запиши етикетите</string>
     <string name="files_back_to_actions">Назад към действията</string>
     <string name="files_open_with">Отваряне с…</string>
+    <string name="files_open_beside">Отваряне отстрани</string>
     <string name="files_favorite_remove">Премахни от Любими</string>
     <string name="files_favorite_add">Добави в Любими</string>
     <string name="files_tags">Етикети</string>

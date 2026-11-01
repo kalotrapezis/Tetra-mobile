@@ -679,6 +679,7 @@
     <string name="files_save_tags">Salvesta sildid</string>
     <string name="files_back_to_actions">Tagasi üksuse toimingute juurde</string>
     <string name="files_open_with">Ava rakendusega…</string>
+    <string name="files_open_beside">Ava kõrvale</string>
     <string name="files_favorite_remove">Eemalda lemmikutest</string>
     <string name="files_favorite_add">Lisa lemmikutesse</string>
     <string name="files_tags">Sildid</string>
