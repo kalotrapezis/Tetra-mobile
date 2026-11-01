@@ -39,6 +39,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -66,6 +67,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
@@ -125,6 +132,16 @@ internal object TextFileRules {
         if (name.isEmpty() || '/' in name || '\\' in name || name == "." || name == "..") return null
         return if ('.' in name.drop(1)) name else "$name.txt"
     }
+
+    /** A Markdown file opens in View (rendered as in Notes) until Edit is chosen for it. */
+    fun isMarkdown(name: String) = name.substringAfterLast('.', "").lowercase() in setOf("md", "markdown")
+
+    /** Where each line starts: line k's number goes beside the row that holds offset [k]. */
+    fun lineStarts(text: String): IntArray {
+        val out = ArrayList<Int>().apply { add(0) }
+        text.forEachIndexed { i, c -> if (c == '\n') out += i + 1 }
+        return out.toIntArray()
+    }
 }
 
 /**
@@ -169,11 +186,21 @@ internal class TextEditorStore(context: Context) {
     private val prefs = context.applicationContext.getSharedPreferences("office_editor", Context.MODE_PRIVATE)
     private val drafts = File(context.applicationContext.filesDir, "editor-drafts")
 
-    data class Tab(val id: String, val uri: String?, val name: String, val crlf: Boolean = false, val bom: Boolean = false)
+    /** [view]: rendered Markdown (true) or the text (false), as last chosen for this tab; null is the file kind's default. */
+    data class Tab(val id: String, val uri: String?, val name: String, val crlf: Boolean = false, val bom: Boolean = false, val view: Boolean? = null)
 
     var wordWrap: Boolean
         get() = prefs.getBoolean("word_wrap", true)
         set(on) { prefs.edit().putBoolean("word_wrap", on).apply() }
+
+    var lineNumbers: Boolean
+        get() = prefs.getBoolean("line_numbers", false)
+        set(on) { prefs.edit().putBoolean("line_numbers", on).apply() }
+
+    /** The striped theme (asked 1 Nov, to follow a line across): every other line a shade lighter or darker. */
+    var stripes: Boolean
+        get() = prefs.getBoolean("line_stripes", false)
+        set(on) { prefs.edit().putBoolean("line_stripes", on).apply() }
 
     /** Files opens a .txt here rather than in the app last chosen for it (asked 2026-09-28). */
     var opensTxt: Boolean
@@ -219,12 +246,12 @@ internal class TextEditorStore(context: Context) {
 
     fun tabs(): List<Tab> = runCatching {
         val a = JSONArray(prefs.getString("tabs", "[]"))
-        List(a.length()) { i -> a.getJSONObject(i).let { Tab(it.getString("id"), it.optString("uri").ifEmpty { null }, it.getString("name"), it.optBoolean("crlf"), it.optBoolean("bom")) } }
+        List(a.length()) { i -> a.getJSONObject(i).let { Tab(it.getString("id"), it.optString("uri").ifEmpty { null }, it.getString("name"), it.optBoolean("crlf"), it.optBoolean("bom"), if (it.has("view")) it.getBoolean("view") else null) } }
     }.getOrDefault(emptyList())
 
     fun setTabs(tabs: List<Tab>, current: String?) {
         val a = JSONArray()
-        tabs.forEach { a.put(JSONObject().put("id", it.id).put("uri", it.uri ?: "").put("name", it.name).put("crlf", it.crlf).put("bom", it.bom)) }
+        tabs.forEach { a.put(JSONObject().put("id", it.id).put("uri", it.uri ?: "").put("name", it.name).put("crlf", it.crlf).put("bom", it.bom).put("view", it.view)) }
         prefs.edit().putString("tabs", a.toString()).putString("current", current).apply()
         drafts.listFiles()?.forEach { f -> if (tabs.none { it.id == f.name }) f.delete() } // a closed tab's draft goes with it
     }
@@ -314,6 +341,8 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
     var loaded by remember { mutableStateOf(false) }
     OpenTiming("Text editor", loaded)
     var wrap by remember { mutableStateOf(store.wordWrap) }
+    var numbers by remember { mutableStateOf(store.lineNumbers) }
+    var stripes by remember { mutableStateOf(store.stripes) }
     var tools by remember { mutableStateOf(false) }
     var symbols by remember { mutableStateOf(false) } // the bar shows the symbols row instead of the controls
     var naming by remember { mutableStateOf<String?>(null) } // a tab being saved under a new name
@@ -355,6 +384,8 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
         if (start == "open") picker.launch(arrayOf("*/*"))
     }
     val tab = tabs.firstOrNull { it.id == current }
+    val viewing = tab != null && (tab.view ?: TextFileRules.isMarkdown(tab.name))
+    fun setViewing(on: Boolean) { val i = tabs.indexOfFirst { it.id == current }; if (i >= 0) { tabs[i] = tabs[i].copy(view = on); persist() } }
     val value = tab?.let { text[it.id] } ?: TextFieldValue("")
     fun dirty(id: String) = text[id]?.text != saved[id]
     // Unsaved text is kept as you type (a short pause), so closing the app never loses it.
@@ -450,12 +481,28 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
             val ink = MaterialTheme.colorScheme.onSurface
             val style = TextStyle(color = ink, fontSize = 15.sp, lineHeight = 22.sp, fontFamily = FontFamily.Monospace)
             val screen = LocalConfiguration.current.screenWidthDp.dp
-            if (tab != null) Box(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).then(if (wrap) Modifier else Modifier.horizontalScroll(rememberScrollState()))) {
-                BasicTextField(value, ::edit, textStyle = style, cursorBrush = SolidColor(ink),
-                    decorationBox = { inner -> Box { if (value.text.isEmpty()) Text(stringResource(R.string.text_type_here), style = style.copy(color = ink.copy(alpha = 0.4f))); inner() } },
-                    // As tall as the page, so a tap anywhere below the text starts typing, like a notepad.
-                    modifier = (if (wrap) Modifier.fillMaxWidth() else Modifier.widthIn(min = screen)).heightIn(min = LocalConfiguration.current.screenHeightDp.dp - 140.dp)
-                        .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 120.dp))
+            val scroll = rememberScrollState()
+            // View: the Markdown rendered by Notes' own renderer, from the same text Edit changes.
+            if (tab != null && viewing) Box(Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll)) {
+                // The renderer keeps one output line per source line, so the stripes follow the file's lines here too.
+                var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+                val read = TextStyle(color = ink, fontSize = 16.sp, lineHeight = 24.sp)
+                val shown = renderMarkdown(value.text)
+                Box(if (stripes) lineDecor(shown.text, layout, scroll, read, numbers = false, stripes = true) else Modifier) {
+                    Text(shown, style = read, onTextLayout = { layout = it },
+                        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 120.dp))
+                }
+            } else if (tab != null) Box(Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll)) {
+                var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+                Row(if (numbers || stripes) lineDecor(value.text, layout, scroll, style, numbers, stripes) else Modifier) {
+                    Box(if (wrap) Modifier.weight(1f) else Modifier.weight(1f).horizontalScroll(rememberScrollState())) {
+                        BasicTextField(value, ::edit, textStyle = style, cursorBrush = SolidColor(ink), onTextLayout = { layout = it },
+                            decorationBox = { inner -> Box { if (value.text.isEmpty()) Text(stringResource(R.string.text_type_here), style = style.copy(color = ink.copy(alpha = 0.4f))); inner() } },
+                            // As tall as the page, so a tap anywhere below the text starts typing, like a notepad.
+                            modifier = (if (wrap) Modifier.fillMaxWidth() else Modifier.widthIn(min = screen)).heightIn(min = LocalConfiguration.current.screenHeightDp.dp - 140.dp)
+                                .padding(start = if (numbers) 8.dp else 16.dp, end = 16.dp, top = 4.dp, bottom = 120.dp))
+                    }
+                }
             }
         }
         // One island, fewer buttons than Notes (asked 2026-09-27): back, undo, redo, save, open. Pulled up: the rest.
@@ -473,6 +520,7 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
             Tool(R.drawable.ic_redo, stringResource(R.string.common_redo), w, enabled = u?.canRedo == true) { restore(u?.redo()) }
             Tool(R.drawable.ic_save, stringResource(R.string.common_save), w, enabled = tab != null && (tab.uri == null || dirty(tab.id))) { tab?.let { save(it) } }
             Tool(R.drawable.ic_folder, stringResource(R.string.text_open_file), w) { picker.launch(arrayOf("*/*")) }
+            Tool(if (viewing) R.drawable.ic_edit else R.drawable.ic_visibility, stringResource(if (viewing) R.string.text_edit_mode else R.string.text_view_mode), w, enabled = tab != null) { setViewing(!viewing) }
         }
         // The swap key and the 31 symbols: two rows of 16, each key an equal share of the width.
         val keys: @Composable () -> Unit = {
@@ -503,13 +551,16 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
     if (tools) ModalBottomSheet(onDismissRequest = { tools = false }, containerColor = Color(0xFF16191A), contentColor = w) {
         Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             tab?.let { t -> DriveWideAction(R.drawable.ic_save, stringResource(R.string.text_save_as_more)) { tools = false; naming = t.id } }
-            Row(Modifier.fillMaxWidth().clickable { wrap = !wrap; store.wordWrap = wrap }, verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.text_word_wrap), style = MaterialTheme.typography.titleSmall)
-                    Text(stringResource(if (wrap) R.string.text_wrap_on else R.string.text_wrap_off), style = MaterialTheme.typography.bodySmall)
+            SwitchRow(stringResource(R.string.text_word_wrap), stringResource(if (wrap) R.string.text_wrap_on else R.string.text_wrap_off), wrap) { wrap = it; store.wordWrap = it }
+            SwitchRow(stringResource(R.string.text_line_numbers), stringResource(R.string.text_line_numbers_info), numbers) { numbers = it; store.lineNumbers = it }
+            Column {
+                Text(stringResource(R.string.text_theme), style = MaterialTheme.typography.titleSmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(!stripes, { stripes = false; store.stripes = false }, { Text(stringResource(R.string.text_theme_plain)) })
+                    FilterChip(stripes, { stripes = true; store.stripes = true }, { Text(stringResource(R.string.text_theme_stripes)) })
                 }
-                Switch(checked = wrap, onCheckedChange = { wrap = it; store.wordWrap = it })
             }
+            if (tab != null) SwitchRow(stringResource(R.string.text_markdown_view), stringResource(R.string.text_markdown_view_info), viewing) { setViewing(it) }
             tab?.let { t -> Text(if (t.uri == null) stringResource(R.string.text_not_saved, store.saveFolder)
                 else stringResource(if (t.crlf) R.string.text_crlf else R.string.text_lf), style = MaterialTheme.typography.bodySmall) }
         }
@@ -545,6 +596,55 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
             },
         )
     }
+}
+
+@Composable private fun SwitchRow(title: String, info: String, on: Boolean, set: (Boolean) -> Unit) =
+    Row(Modifier.fillMaxWidth().clickable { set(!on) }, verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleSmall)
+            Text(info, style = MaterialTheme.typography.bodySmall)
+        }
+        Switch(checked = on, onCheckedChange = set)
+    }
+
+/**
+ * Line numbers and stripes, drawn behind the row that holds the text: each file line's number beside the first row it
+ * occupies, and its stripe over all its rows, so a soft-wrapped line gets one number and one shade. Only what is on
+ * screen is drawn, from [scroll]. With [numbers] the row is padded on the left for the gutter.
+ */
+@Composable private fun lineDecor(text: String, layout: TextLayoutResult?, scroll: androidx.compose.foundation.ScrollState, style: TextStyle, numbers: Boolean, stripes: Boolean): Modifier {
+    val measurer = rememberTextMeasurer()
+    val starts = remember(text) { TextFileRules.lineStarts(text) }
+    val numberStyle = style.copy(color = style.color.copy(alpha = 0.55f))
+    val digits = starts.size.toString().length.coerceAtLeast(2)
+    val widest = remember(digits, style) { measurer.measure("9".repeat(digits), numberStyle).size }
+    val density = LocalDensity.current
+    val pad = with(density) { 8.dp.toPx() }
+    val top = with(density) { 4.dp.toPx() } // the text's own top padding
+    val rule = style.color.copy(alpha = 0.12f)
+    // The ink at 7%: on black a dark grey, on white a light grey; the text keeps well over AA contrast on both.
+    val shade = style.color.copy(alpha = 0.07f)
+    val gutter = if (numbers) widest.width + 2 * pad else 0f
+    return Modifier.drawBehind {
+        val l = layout ?: return@drawBehind
+        val end = l.layoutInput.text.length
+        val from = scroll.value.toFloat()
+        val until = scroll.value + scroll.viewportSize
+        fun rowTop(k: Int) = if (k < starts.size) l.getLineTop(l.getLineForOffset(starts[k].coerceAtMost(end))) + top
+            else l.getLineBottom(l.lineCount - 1) + top
+        for (k in starts.indices) {
+            val y = rowTop(k)
+            if (y > until) break
+            val next = rowTop(k + 1)
+            if (next < from) continue
+            if (stripes && k % 2 == 1) drawRect(shade, Offset(0f, y), androidx.compose.ui.geometry.Size(size.width, next - y))
+            if (numbers) {
+                val n = measurer.measure((k + 1).toString(), numberStyle)
+                drawText(n, topLeft = Offset(pad + widest.width - n.size.width, y))
+            }
+        }
+        if (numbers) drawLine(rule, Offset(gutter, 0f), Offset(gutter, size.height))
+    }.padding(start = with(density) { gutter.toDp() })
 }
 
 /** A key of the symbols row: its character, the size of a Tool. */

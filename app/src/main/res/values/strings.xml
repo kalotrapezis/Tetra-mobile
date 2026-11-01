@@ -1132,6 +1132,15 @@
     <string name="text_word_wrap">Word wrap</string>
     <string name="text_wrap_on">Long lines continue on the next line.</string>
     <string name="text_wrap_off">Long lines keep going; scroll sideways.</string>
+    <string name="text_line_numbers">Line numbers</string>
+    <string name="text_line_numbers_info">A number at the start of each line; a wrapped line keeps one.</string>
+    <string name="text_theme">Theme</string>
+    <string name="text_theme_plain">Plain</string>
+    <string name="text_theme_stripes">Stripes</string>
+    <string name="text_markdown_view">Markdown view</string>
+    <string name="text_markdown_view_info">This file shown formatted, as in Notes. .md files open this way.</string>
+    <string name="text_view_mode">View</string>
+    <string name="text_edit_mode">Edit</string>
     <string name="text_not_saved">Not saved yet · Save puts it in %1$s</string>
     <string name="text_crlf">Windows line endings (CRLF), kept</string>
     <string name="text_lf">Line endings: LF</string>

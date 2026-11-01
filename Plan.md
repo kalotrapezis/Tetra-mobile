@@ -12,10 +12,15 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
-- [x] (alarm-buttons session, 1 Nov; branch `claude/peaceful-visvesvaraya-db9254`, not merged) **Timer notifications: icon-only buttons**
+- [x] (alarm-buttons session, 1 Nov; merged 1 Nov) **Timer notifications: icon-only buttons**
       (the user: "buttons like the X on the calendar … no text just the buttons"). Ringing alarm: zzz (snooze 10 min) and ×; ringing
       timer: zzz (+1 min) and ×; running timer/stopwatch: ‖ (▶ when paused) and ×; the coming alarm (12 h before): zzz and × (skip); same icons in the island and AlarmRingActivity.
       Running/paused/stop checked on the phone; the ringing alarm not (it would ring on the tablet too).
+- [x] (text-editor session, 1 Nov; merged 1 Nov) **Text editor: Markdown View, line numbers,
+      stripes** (the user: "A Markdown viewing mode (like the notes) and numbers at the start of each line"; then a striped theme,
+      "I have trouble with line following"). .md opens in View (Notes' renderer, now with links and pipe tables), ✎/👁 on the island,
+      remembered per tab; ⋯ › Line numbers (a wrapped line keeps one) and Theme: Plain / Stripes (by file line, also in View).
+      Checked on an emulator; not on the phone (the Mail/AI session had just installed there). Desktop has no text editor.
 - [x] (scanner-pdf session, 1 Nov; merged 1 Nov) **PDF editor ↔ scanner and straightening**: PDF
       Pages › Open in scanner; Files ⋮ › Open in scanner; scanner + › From file (PDF pages, JPG/PNG/HEIC); Adjust › Perspective
       (for every page), Tilt ±45° with grid and Auto straighten, Flatten curve (DOCUMENT_SCANNER.md 12–14). Checked on an
