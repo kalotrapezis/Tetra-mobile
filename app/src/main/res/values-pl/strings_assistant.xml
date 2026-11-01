@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Wyłączonej aplikacji AI Assist nie może ani czytać, ani w niej działać, a jej przyciski AI są ukryte.</string>
     <string name="ai_is_off">AI Assist jest wyłączony (Ustawienia › AI Assist).</string>
     <string name="ai_app_web">Wyszukiwanie w sieci i obrazy</string>
+    <string name="assistant_briefs_channel">Przegląd dnia</string>
+    <string name="assistant_briefs">Poprzednie raporty</string>
+    <string name="assistant_briefs_none">Jeszcze brak.</string>
+    <string name="assistant_chip_image">Obraz</string>
+    <string name="assistant_chip_image_prompt">Stwórz obraz: [co przedstawia], w stylu [obrazu / zdjęcia / komiksu].</string>
+    <string name="assistant_chip_research">Dogłębne badanie</string>
+    <string name="assistant_chip_research_prompt">Przeprowadź dogłębne badanie w sieci na temat [temat] i napisz mi raport ze źródłami.</string>
 </resources>

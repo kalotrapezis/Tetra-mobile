@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Pois kytkettyä sovellusta AI Assist ei voi lukea eikä toimia siinä, ja sen AI-painikkeet ovat piilossa.</string>
     <string name="ai_is_off">AI Assist on pois päältä (Asetukset › AI Assist).</string>
     <string name="ai_app_web">Verkkohaku ja kuvat</string>
+    <string name="assistant_briefs_channel">Päivän katsaus</string>
+    <string name="assistant_briefs">Aiemmat raportit</string>
+    <string name="assistant_briefs_none">Ei vielä.</string>
+    <string name="assistant_chip_image">Kuva</string>
+    <string name="assistant_chip_image_prompt">Tee kuva: [mitä siinä on], tyyliltään [maalaus / valokuva / sarjakuva].</string>
+    <string name="assistant_chip_research">Syvällinen tutkimus</string>
+    <string name="assistant_chip_research_prompt">Tutki syvällisesti verkosta aihetta [aihe] ja kirjoita minulle raportti lähteineen.</string>
 </resources>

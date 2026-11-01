@@ -76,4 +76,11 @@
     <string name="ai_apps_note">An app switched off is one AI Assist can neither read nor act in, and its AI buttons are hidden.</string>
     <string name="ai_is_off">AI Assist is off (Settings › AI Assist).</string>
     <string name="ai_app_web">Web search and pictures</string>
+    <string name="assistant_briefs_channel">Daily brief</string>
+    <string name="assistant_briefs">Past reports</string>
+    <string name="assistant_briefs_none">None yet.</string>
+    <string name="assistant_chip_image">Image</string>
+    <string name="assistant_chip_image_prompt">Make a picture: [what it shows], in the style of [a painting / a photo / a comic].</string>
+    <string name="assistant_chip_research">Deep research</string>
+    <string name="assistant_chip_research_prompt">Do deep research on the web about [subject] and write me a report with sources.</string>
 </resources>

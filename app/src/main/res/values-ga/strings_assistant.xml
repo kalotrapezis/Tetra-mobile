@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Aip atá múchta, ní féidir le AI Assist í a léamh ná aon rud a dhéanamh inti, agus tá a cnaipí AI i bhfolach.</string>
     <string name="ai_is_off">Tá AI Assist as (Socruithe › AI Assist).</string>
     <string name="ai_app_web">Cuardach gréasáin agus pictiúir</string>
+    <string name="assistant_briefs_channel">Achoimre an lae</string>
+    <string name="assistant_briefs">Tuairiscí roimhe seo</string>
+    <string name="assistant_briefs_none">Níl aon cheann fós.</string>
+    <string name="assistant_chip_image">Íomhá</string>
+    <string name="assistant_chip_image_prompt">Déan pictiúr: [cad a thaispeánann sé], i stíl [péintéireachta / grianghraf / greannáin].</string>
+    <string name="assistant_chip_research">Taighde domhain</string>
+    <string name="assistant_chip_research_prompt">Déan taighde domhain ar an ngréasán faoi [ábhar] agus scríobh tuairisc le foinsí dom.</string>
 </resources>

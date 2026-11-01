@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Μια εφαρμογή κλειστή εδώ ο Βοηθός AI ούτε τη διαβάζει ούτε κάνει κάτι σε αυτήν, και τα κουμπιά AI της κρύβονται.</string>
     <string name="ai_is_off">Ο Βοηθός AI είναι κλειστός (Ρυθμίσεις › Βοηθός AI).</string>
     <string name="ai_app_web">Αναζήτηση στο internet και εικόνες</string>
+    <string name="assistant_briefs_channel">Η ενημέρωση της ημέρας</string>
+    <string name="assistant_briefs">Προηγούμενες αναφορές</string>
+    <string name="assistant_briefs_none">Καμία ακόμα.</string>
+    <string name="assistant_chip_image">Εικόνα</string>
+    <string name="assistant_chip_image_prompt">Φτιάξε μια εικόνα: [τι δείχνει], σε στυλ [ζωγραφιά / φωτογραφία / κόμικ].</string>
+    <string name="assistant_chip_research">Έρευνα σε βάθος</string>
+    <string name="assistant_chip_research_prompt">Κάνε έρευνα σε βάθος στο διαδίκτυο για [θέμα] και γράψε μου αναφορά με πηγές.</string>
 </resources>

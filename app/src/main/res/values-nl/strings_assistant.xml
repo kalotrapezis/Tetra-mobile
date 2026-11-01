@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Een uitgeschakelde app kan AI Assist niet lezen en er niets in doen, en de AI-knoppen ervan zijn verborgen.</string>
     <string name="ai_is_off">AI Assist staat uit (Instellingen › AI Assist).</string>
     <string name="ai_app_web">Zoeken op het web en afbeeldingen</string>
+    <string name="assistant_briefs_channel">Dagoverzicht</string>
+    <string name="assistant_briefs">Eerdere rapporten</string>
+    <string name="assistant_briefs_none">Nog geen.</string>
+    <string name="assistant_chip_image">Afbeelding</string>
+    <string name="assistant_chip_image_prompt">Maak een afbeelding: [wat het toont], in de stijl van [een schilderij / een foto / een strip].</string>
+    <string name="assistant_chip_research">Diepgaand onderzoek</string>
+    <string name="assistant_chip_research_prompt">Doe diepgaand onderzoek op het web naar [onderwerp] en schrijf een rapport met bronnen.</string>
 </resources>

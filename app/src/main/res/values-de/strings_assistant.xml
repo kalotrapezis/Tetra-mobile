@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Eine ausgeschaltete App kann AI Assist weder lesen noch darin handeln, und ihre AI-Schaltflächen sind ausgeblendet.</string>
     <string name="ai_is_off">AI Assist ist aus (Einstellungen › AI Assist).</string>
     <string name="ai_app_web">Websuche und Bilder</string>
+    <string name="assistant_briefs_channel">Tagesüberblick</string>
+    <string name="assistant_briefs">Frühere Berichte</string>
+    <string name="assistant_briefs_none">Noch keine.</string>
+    <string name="assistant_chip_image">Bild</string>
+    <string name="assistant_chip_image_prompt">Mach ein Bild: [was es zeigt], im Stil [eines Gemäldes / eines Fotos / eines Comics].</string>
+    <string name="assistant_chip_research">Tiefe Recherche</string>
+    <string name="assistant_chip_research_prompt">Recherchiere gründlich im Web zu [Thema] und schreib mir einen Bericht mit Quellen.</string>
 </resources>

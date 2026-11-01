@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Uma app desligada é uma que o AI Assist não pode ler nem usar, e os seus botões de AI ficam ocultos.</string>
     <string name="ai_is_off">O AI Assist está desligado (Definições › AI Assist).</string>
     <string name="ai_app_web">Pesquisa na web e imagens</string>
+    <string name="assistant_briefs_channel">Resumo do dia</string>
+    <string name="assistant_briefs">Relatórios anteriores</string>
+    <string name="assistant_briefs_none">Nenhum ainda.</string>
+    <string name="assistant_chip_image">Imagem</string>
+    <string name="assistant_chip_image_prompt">Faz uma imagem: [o que mostra], no estilo de [uma pintura / uma foto / uma banda desenhada].</string>
+    <string name="assistant_chip_research">Pesquisa aprofundada</string>
+    <string name="assistant_chip_research_prompt">Faz uma pesquisa aprofundada na web sobre [tema] e escreve-me um relatório com fontes.</string>
 </resources>

@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Egy kikapcsolt alkalmazást az AI Assist nem olvashat, és nem tehet benne semmit, az AI-gombjai pedig rejtve vannak.</string>
     <string name="ai_is_off">Az AI Assist ki van kapcsolva (Beállítások › AI Assist).</string>
     <string name="ai_app_web">Webes keresés és képek</string>
+    <string name="assistant_briefs_channel">Napi összefoglaló</string>
+    <string name="assistant_briefs">Korábbi jelentések</string>
+    <string name="assistant_briefs_none">Még nincs.</string>
+    <string name="assistant_chip_image">Kép</string>
+    <string name="assistant_chip_image_prompt">Készíts képet: [mit ábrázol], [festmény / fotó / képregény] stílusban.</string>
+    <string name="assistant_chip_research">Alapos kutatás</string>
+    <string name="assistant_chip_research_prompt">Végezz alapos kutatást a weben erről: [téma], és írj jelentést forrásokkal.</string>
 </resources>

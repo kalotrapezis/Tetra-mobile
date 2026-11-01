@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Изключено приложение AI Assist не може нито да чете, нито да действа в него, а AI бутоните му са скрити.</string>
     <string name="ai_is_off">AI Assist е изключен (Настройки › AI Assist).</string>
     <string name="ai_app_web">Търсене в мрежата и снимки</string>
+    <string name="assistant_briefs_channel">Дневен обзор</string>
+    <string name="assistant_briefs">Предишни отчети</string>
+    <string name="assistant_briefs_none">Още няма.</string>
+    <string name="assistant_chip_image">Изображение</string>
+    <string name="assistant_chip_image_prompt">Направи картина: [какво показва], в стил [рисунка / снимка / комикс].</string>
+    <string name="assistant_chip_research">Задълбочено проучване</string>
+    <string name="assistant_chip_research_prompt">Направи задълбочено проучване в интернет за [тема] и ми напиши отчет с източници.</string>
 </resources>

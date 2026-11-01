@@ -73,4 +73,11 @@
     <string name="ai_apps_note">App mitfija AI Assist la jista’ jaqraha u lanqas jagħmel xi ħaġa fiha, u l-buttuni AI tagħha huma moħbija.</string>
     <string name="ai_is_off">AI Assist huwa mitfi (Settings › AI Assist).</string>
     <string name="ai_app_web">Tfittxija fuq il-web u stampi</string>
+    <string name="assistant_briefs_channel">Sommarju tal-ġurnata</string>
+    <string name="assistant_briefs">Rapporti preċedenti</string>
+    <string name="assistant_briefs_none">Għad m’hemm xejn.</string>
+    <string name="assistant_chip_image">Stampa</string>
+    <string name="assistant_chip_image_prompt">Agħmel stampa: [x’turi], fl-istil ta’ [pittura / ritratt / komiks].</string>
+    <string name="assistant_chip_research">Riċerka profonda</string>
+    <string name="assistant_chip_research_prompt">Agħmel riċerka profonda fuq il-web dwar [suġġett] u iktibli rapport bis-sorsi.</string>
 </resources>

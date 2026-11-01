@@ -73,4 +73,11 @@
     <string name="ai_apps_note">En app, der er slået fra, kan AI Assist hverken læse eller handle i, og dens AI-knapper er skjult.</string>
     <string name="ai_is_off">AI Assist er slået fra (Indstillinger › AI Assist).</string>
     <string name="ai_app_web">Websøgning og billeder</string>
+    <string name="assistant_briefs_channel">Dagens overblik</string>
+    <string name="assistant_briefs">Tidligere rapporter</string>
+    <string name="assistant_briefs_none">Ingen endnu.</string>
+    <string name="assistant_chip_image">Billede</string>
+    <string name="assistant_chip_image_prompt">Lav et billede: [hvad det viser], i stil som [et maleri / et foto / en tegneserie].</string>
+    <string name="assistant_chip_research">Dybdegående research</string>
+    <string name="assistant_chip_research_prompt">Lav dybdegående research på nettet om [emne] og skriv en rapport med kilder.</string>
 </resources>

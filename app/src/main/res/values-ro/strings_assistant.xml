@@ -73,4 +73,11 @@
     <string name="ai_apps_note">O aplicație oprită este una pe care AI Assist nu o poate nici citi, nici folosi, iar butoanele ei AI sunt ascunse.</string>
     <string name="ai_is_off">AI Assist este oprit (Setări › AI Assist).</string>
     <string name="ai_app_web">Căutare web și imagini</string>
+    <string name="assistant_briefs_channel">Rezumatul zilei</string>
+    <string name="assistant_briefs">Rapoarte anterioare</string>
+    <string name="assistant_briefs_none">Niciunul încă.</string>
+    <string name="assistant_chip_image">Imagine</string>
+    <string name="assistant_chip_image_prompt">Fă o imagine: [ce arată], în stilul [unei picturi / unei fotografii / unei benzi desenate].</string>
+    <string name="assistant_chip_research">Cercetare amănunțită</string>
+    <string name="assistant_chip_research_prompt">Fă o cercetare amănunțită pe web despre [subiect] și scrie-mi un raport cu surse.</string>
 </resources>

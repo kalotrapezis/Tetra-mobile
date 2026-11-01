@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Un\'app disattivata, AI Assist non può né leggerla né agire in essa, e i suoi pulsanti AI sono nascosti.</string>
     <string name="ai_is_off">AI Assist è disattivato (Impostazioni › AI Assist).</string>
     <string name="ai_app_web">Ricerca web e immagini</string>
+    <string name="assistant_briefs_channel">Riepilogo del giorno</string>
+    <string name="assistant_briefs">Rapporti precedenti</string>
+    <string name="assistant_briefs_none">Nessuno ancora.</string>
+    <string name="assistant_chip_image">Immagine</string>
+    <string name="assistant_chip_image_prompt">Crea un’immagine: [cosa mostra], in stile [dipinto / foto / fumetto].</string>
+    <string name="assistant_chip_research">Ricerca approfondita</string>
+    <string name="assistant_chip_research_prompt">Fai una ricerca approfondita sul web su [argomento] e scrivimi un rapporto con le fonti.</string>
 </resources>

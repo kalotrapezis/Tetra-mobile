@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Väljalülitatud rakendust ei saa AI Assist lugeda ega selles midagi teha ning selle AI-nupud on peidetud.</string>
     <string name="ai_is_off">AI Assist on väljas (Seaded › AI Assist).</string>
     <string name="ai_app_web">Veebiotsing ja pildid</string>
+    <string name="assistant_briefs_channel">Päeva ülevaade</string>
+    <string name="assistant_briefs">Varasemad aruanded</string>
+    <string name="assistant_briefs_none">Veel pole.</string>
+    <string name="assistant_chip_image">Pilt</string>
+    <string name="assistant_chip_image_prompt">Tee pilt: [mida see näitab], [maali / foto / koomiksi] stiilis.</string>
+    <string name="assistant_chip_research">Põhjalik uurimus</string>
+    <string name="assistant_chip_research_prompt">Tee veebis põhjalik uurimus teemal [teema] ja kirjuta mulle aruanne koos allikatega.</string>
 </resources>

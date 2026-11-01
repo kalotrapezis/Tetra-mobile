@@ -73,4 +73,11 @@
     <string name="ai_apps_note">En app som är avstängd kan AI Assist varken läsa eller agera i, och dess AI-knappar är dolda.</string>
     <string name="ai_is_off">AI Assist är av (Inställningar › AI Assist).</string>
     <string name="ai_app_web">Webbsökning och bilder</string>
+    <string name="assistant_briefs_channel">Dagens översikt</string>
+    <string name="assistant_briefs">Tidigare rapporter</string>
+    <string name="assistant_briefs_none">Inga ännu.</string>
+    <string name="assistant_chip_image">Bild</string>
+    <string name="assistant_chip_image_prompt">Gör en bild: [vad den visar], i stil med [en målning / ett foto / en serie].</string>
+    <string name="assistant_chip_research">Djupgående research</string>
+    <string name="assistant_chip_research_prompt">Gör djupgående research på webben om [ämne] och skriv en rapport med källor.</string>
 </resources>

@@ -15,9 +15,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -282,6 +285,27 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
             status?.let { Text(it, Modifier.padding(horizontal = 20.dp), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
             var typed by remember { mutableStateOf("") }
             fun sendTyped() { val t = typed.trim(); typed = ""; send(t) }
+            // bubbles that fill the input with a ready prompt to edit, never sent by the tap (the user, 1 Nov); the
+            // computer's scheduled reports: set up there, read here
+            var briefs by remember { mutableStateOf<List<java.io.File>?>(null) }
+            if (hasKey && typed.isEmpty()) Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(R.string.assistant_chip_image to R.string.assistant_chip_image_prompt, R.string.assistant_chip_research to R.string.assistant_chip_research_prompt).forEach { (label, prompt) ->
+                    val text = stringResource(prompt)
+                    SuggestionChip(onClick = { typed = text }, label = { Text(stringResource(label)) })
+                }
+                SuggestionChip(onClick = { briefs = AssistantBriefs.pages() }, label = { Text(stringResource(R.string.assistant_briefs)) })
+            }
+            briefs?.let { pages ->
+                AlertDialog(onDismissRequest = { briefs = null }, confirmButton = { TextButton({ briefs = null }) { Text(stringResource(R.string.common_close)) } },
+                    title = { Text(stringResource(R.string.assistant_briefs)) },
+                    text = {
+                        if (pages.isEmpty()) Text(stringResource(R.string.assistant_briefs_none))
+                        else LazyColumn { items(pages.size) { i -> val f = pages[i]
+                            Text("${java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(java.util.Date(f.lastModified()))} · ${AssistantBriefs.title(f)}",
+                                Modifier.fillMaxWidth().clickable { context.startActivity(android.content.Intent(context, BriefActivity::class.java).putExtra("file", f.absolutePath)) }.padding(vertical = 10.dp))
+                        } }
+                    })
+            }
             Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(typed, { typed = it }, Modifier.weight(1f), placeholder = { Text(stringResource(R.string.assistant_hint), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                     shape = RoundedCornerShape(24.dp), maxLines = 5, enabled = hasKey,

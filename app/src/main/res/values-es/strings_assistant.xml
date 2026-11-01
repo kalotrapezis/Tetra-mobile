@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Una app desactivada, AI Assist no puede leerla ni actuar en ella, y sus botones de AI se ocultan.</string>
     <string name="ai_is_off">AI Assist está desactivado (Ajustes › AI Assist).</string>
     <string name="ai_app_web">Búsqueda web e imágenes</string>
+    <string name="assistant_briefs_channel">Resumen del día</string>
+    <string name="assistant_briefs">Informes anteriores</string>
+    <string name="assistant_briefs_none">Ninguno aún.</string>
+    <string name="assistant_chip_image">Imagen</string>
+    <string name="assistant_chip_image_prompt">Haz una imagen: [qué muestra], al estilo de [una pintura / una foto / un cómic].</string>
+    <string name="assistant_chip_research">Investigación a fondo</string>
+    <string name="assistant_chip_research_prompt">Investiga a fondo en la web sobre [tema] y escríbeme un informe con fuentes.</string>
 </resources>

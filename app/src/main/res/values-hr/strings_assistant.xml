@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Isključenu aplikaciju AI Assist ne može ni čitati ni u njoj djelovati, a njezini AI gumbi su skriveni.</string>
     <string name="ai_is_off">AI Assist je isključen (Postavke › AI Assist).</string>
     <string name="ai_app_web">Pretraživanje weba i slike</string>
+    <string name="assistant_briefs_channel">Dnevni pregled</string>
+    <string name="assistant_briefs">Prijašnja izvješća</string>
+    <string name="assistant_briefs_none">Još nema.</string>
+    <string name="assistant_chip_image">Slika</string>
+    <string name="assistant_chip_image_prompt">Napravi sliku: [što prikazuje], u stilu [slike / fotografije / stripa].</string>
+    <string name="assistant_chip_research">Dubinsko istraživanje</string>
+    <string name="assistant_chip_research_prompt">Napravi dubinsko istraživanje na webu o [tema] i napiši mi izvješće s izvorima.</string>
 </resources>

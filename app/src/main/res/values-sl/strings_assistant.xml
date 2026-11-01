@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Izklopljene aplikacije AI Assist ne more ne brati ne v njej ukrepati, njeni gumbi AI pa so skriti.</string>
     <string name="ai_is_off">AI Assist je izklopljen (Nastavitve › AI Assist).</string>
     <string name="ai_app_web">Iskanje po spletu in slike</string>
+    <string name="assistant_briefs_channel">Dnevni pregled</string>
+    <string name="assistant_briefs">Prejšnja poročila</string>
+    <string name="assistant_briefs_none">Še nobenega.</string>
+    <string name="assistant_chip_image">Slika</string>
+    <string name="assistant_chip_image_prompt">Naredi sliko: [kaj prikazuje], v slogu [slike / fotografije / stripa].</string>
+    <string name="assistant_chip_research">Poglobljena raziskava</string>
+    <string name="assistant_chip_research_prompt">Naredi poglobljeno raziskavo na spletu o [tema] in mi napiši poročilo z viri.</string>
 </resources>

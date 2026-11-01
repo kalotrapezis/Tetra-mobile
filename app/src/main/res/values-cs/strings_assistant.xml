@@ -73,4 +73,11 @@
     <string name="ai_apps_note">Vypnutou aplikaci AI Assist nemůže číst ani v ní nic dělat a její tlačítka AI jsou skrytá.</string>
     <string name="ai_is_off">AI Assist je vypnutý (Nastavení › AI Assist).</string>
     <string name="ai_app_web">Hledání na webu a obrázky</string>
+    <string name="assistant_briefs_channel">Denní přehled</string>
+    <string name="assistant_briefs">Předchozí zprávy</string>
+    <string name="assistant_briefs_none">Zatím žádné.</string>
+    <string name="assistant_chip_image">Obrázek</string>
+    <string name="assistant_chip_image_prompt">Vytvoř obrázek: [co ukazuje], ve stylu [malby / fotky / komiksu].</string>
+    <string name="assistant_chip_research">Hloubkový průzkum</string>
+    <string name="assistant_chip_research_prompt">Udělej hloubkový průzkum na webu o [téma] a napiš mi zprávu se zdroji.</string>
 </resources>

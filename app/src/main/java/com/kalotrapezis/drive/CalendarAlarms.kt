@@ -34,7 +34,7 @@ internal object CalendarAlarms {
     private const val ACTION_RING = "com.kalotrapezis.drive.CALENDAR_RING"
     private const val ACTION_SNOOZE = "com.kalotrapezis.drive.CALENDAR_SNOOZE"
     private const val ACTION_AGAIN = "com.kalotrapezis.drive.CALENDAR_AGAIN"
-    private const val ACTION_DONE = "com.kalotrapezis.drive.CALENDAR_DONE"
+    const val ACTION_DONE = "com.kalotrapezis.drive.CALENDAR_DONE" // AssistantBriefs' ✕ too
     private const val ACTION_TEST = "com.kalotrapezis.drive.CALENDAR_TEST"
     // shortcut: a reminder set more than 120 days before its event is not rung; a longer look when someone needs it.
     private val LEAD: Duration = Duration.ofDays(120)
