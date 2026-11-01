@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Gör en bild: [vad den visar], i stil med [en målning / ett foto / en serie].</string>
     <string name="assistant_chip_research">Djupgående research</string>
     <string name="assistant_chip_research_prompt">Gör djupgående research på webben om [ämne] och skriv en rapport med källor.</string>
+    <string name="ai_memory">Personliga uppgifter</string>
+    <string name="ai_memory_note">Det AI Assist minns om dig: säg ”kom ihåg att…” i en chatt, eller skriv det här. Det används i varje chatt och schemalagd åtgärd, på alla enheter.</string>
+    <string name="ai_memory_hint">t.ex. Jag undervisar på 3:e grundskolan</string>
 </resources>

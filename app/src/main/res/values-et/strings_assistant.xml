@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Tee pilt: [mida see näitab], [maali / foto / koomiksi] stiilis.</string>
     <string name="assistant_chip_research">Põhjalik uurimus</string>
     <string name="assistant_chip_research_prompt">Tee veebis põhjalik uurimus teemal [teema] ja kirjuta mulle aruanne koos allikatega.</string>
+    <string name="ai_memory">Isikuandmed</string>
+    <string name="ai_memory_note">Mida AI Assist sinu kohta mäletab: ütle vestluses „pea meeles, et…“ või kirjuta see siia. Seda kasutatakse igas vestluses ja ajastatud toimingus, kõigis seadmetes.</string>
+    <string name="ai_memory_hint">nt Õpetan 3. põhikoolis</string>
 </resources>

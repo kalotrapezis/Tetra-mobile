@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Tee kuva: [mitä siinä on], tyyliltään [maalaus / valokuva / sarjakuva].</string>
     <string name="assistant_chip_research">Syvällinen tutkimus</string>
     <string name="assistant_chip_research_prompt">Tutki syvällisesti verkosta aihetta [aihe] ja kirjoita minulle raportti lähteineen.</string>
+    <string name="ai_memory">Henkilötiedot</string>
+    <string name="ai_memory_note">Mitä AI Assist muistaa sinusta: sano keskustelussa ”muista, että…” tai kirjoita se tähän. Sitä käytetään jokaisessa keskustelussa ja ajastetussa toiminnossa kaikilla laitteilla.</string>
+    <string name="ai_memory_hint">esim. Opetan 3. alakoulussa</string>
 </resources>

@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Sukurk paveikslėlį: [ką jis rodo], [paveikslo / nuotraukos / komikso] stiliumi.</string>
     <string name="assistant_chip_research">Išsamus tyrimas</string>
     <string name="assistant_chip_research_prompt">Atlik išsamų tyrimą internete apie [tema] ir parašyk ataskaitą su šaltiniais.</string>
+    <string name="ai_memory">Asmeniniai duomenys</string>
+    <string name="ai_memory_note">Ką AI Assist prisimena apie jus: pokalbyje sakykite „įsimink, kad…“ arba parašykite čia. Tai naudojama kiekviename pokalbyje ir suplanuotame veiksme, visuose įrenginiuose.</string>
+    <string name="ai_memory_hint">pvz. Mokau 3-ioje pradinėje mokykloje</string>
 </resources>

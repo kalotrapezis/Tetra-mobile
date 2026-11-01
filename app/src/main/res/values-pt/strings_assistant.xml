@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Faz uma imagem: [o que mostra], no estilo de [uma pintura / uma foto / uma banda desenhada].</string>
     <string name="assistant_chip_research">Pesquisa aprofundada</string>
     <string name="assistant_chip_research_prompt">Faz uma pesquisa aprofundada na web sobre [tema] e escreve-me um relatório com fontes.</string>
+    <string name="ai_memory">Dados pessoais</string>
+    <string name="ai_memory_note">O que o AI Assist guarda sobre si: diga «lembra-te de que…» numa conversa ou escreva aqui. É usado em cada conversa e ação agendada, em todos os dispositivos.</string>
+    <string name="ai_memory_hint">p. ex. Dou aulas na 3.ª escola primária</string>
 </resources>

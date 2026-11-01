@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Lav et billede: [hvad det viser], i stil som [et maleri / et foto / en tegneserie].</string>
     <string name="assistant_chip_research">Dybdegående research</string>
     <string name="assistant_chip_research_prompt">Lav dybdegående research på nettet om [emne] og skriv en rapport med kilder.</string>
+    <string name="ai_memory">Personlige oplysninger</string>
+    <string name="ai_memory_note">Hvad AI Assist husker om dig: sig «husk at…» i en chat, eller skriv det her. Det bruges i hver chat og planlagt handling på alle enheder.</string>
+    <string name="ai_memory_hint">f.eks. Jeg underviser på 3. folkeskole</string>
 </resources>

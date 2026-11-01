@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Izveido attēlu: [ko tas rāda], [gleznas / fotogrāfijas / komiksa] stilā.</string>
     <string name="assistant_chip_research">Padziļināta izpēte</string>
     <string name="assistant_chip_research_prompt">Veic padziļinātu izpēti tīmeklī par [tēma] un uzraksti man pārskatu ar avotiem.</string>
+    <string name="ai_memory">Personas dati</string>
+    <string name="ai_memory_note">Ko AI Assist par jums atceras: sarunā sakiet “atceries, ka…” vai ierakstiet to šeit. Tas tiek izmantots katrā sarunā un plānotajā darbībā visās ierīcēs.</string>
+    <string name="ai_memory_hint">piem. Es mācu 3. pamatskolā</string>
 </resources>

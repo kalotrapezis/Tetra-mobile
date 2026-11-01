@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Déan pictiúr: [cad a thaispeánann sé], i stíl [péintéireachta / grianghraf / greannáin].</string>
     <string name="assistant_chip_research">Taighde domhain</string>
     <string name="assistant_chip_research_prompt">Déan taighde domhain ar an ngréasán faoi [ábhar] agus scríobh tuairisc le foinsí dom.</string>
+    <string name="ai_memory">Sonraí pearsanta</string>
+    <string name="ai_memory_note">An méid a choinníonn AI Assist fút: abair «cuimhnigh go…» i gcomhrá, nó scríobh anseo é. Úsáidtear é i ngach comhrá agus gníomh sceidealta, ar gach gléas.</string>
+    <string name="ai_memory_hint">m.sh. Múinim i mbunscoil 3</string>
 </resources>

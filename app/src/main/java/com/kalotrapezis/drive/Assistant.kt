@@ -187,6 +187,10 @@ internal class AssistantTools(
     private var mailsShown = emptyList<MailEntry>()
 
     fun run(name: String, args: JSONObject): ToolResult = runCatching {
+    private var factsShown = emptyList<AssistantMemory.Fact>()
+
+    /** The personal details (AssistantMemory): in every chat's instructions. */
+    fun facts() = AssistantMemory.list(tetra)
         // an app the user keeps the assistant out of (Settings › Βοηθός AI): neither read nor acted in
         APP_OF[name]?.takeIf { !AiGate.state.keeps(it) }?.let { return@runCatching ToolResult("The user does not let the assistant use their $it (Settings › AI Assist). Say so; do not try another way.") }
         when (name) {
@@ -225,6 +229,9 @@ internal class AssistantTools(
             "web_search" -> ToolResult(search(args.getString("query")))
             "make_image" -> image(args.getString("prompt")).let { ToolResult("The picture is on the screen, saved as ${it.name}.", image = it) }
             else -> ToolResult("No tool called $name.")
+            "memory_add" -> AssistantMemory.add(tetra, args.getString("text"), device).let { changed("memory"); ToolResult("Kept: \"${it.text}\". Settings › AI Assist › Personal details shows it.") }
+            "memory_list" -> facts().also { factsShown = it }.let { l -> ToolResult(if (l.isEmpty()) "Nothing is kept." else l.mapIndexed { i, f -> "${i + 1}. ${f.text}" }.joinToString("\n")) }
+            "memory_forget" -> pick(factsShown, args) { f -> AssistantMemory.change(tetra, f.id, "", device); factsShown = factsShown - f; changed("memory"); ToolResult("Forgot \"${f.text}\".") }
         }
     }.getOrElse { ToolResult("Failed: ${it.message}") }
 
@@ -687,7 +694,7 @@ internal class AssistantTools(
             fn("make_image", "Draw a picture from a description.", listOf("prompt"), "prompt" to p("string", "What the picture shows, in detail.")),
         ))
 
-        fun system(now: ZonedDateTime) = """
+        fun system(now: ZonedDateTime, facts: List<AssistantMemory.Fact> = emptyList()) = """
             You are Tetra Assistant, on the user's Android phone, inside the app Tetra (calendar, timers, alarms, stopwatch, notes, files, contacts, mail, maps, photos).
             Now: ${now.format(DateTimeFormatter.ofPattern("EEEE yyyy-MM-dd HH:mm"))} (${now.zone}).
             Answer in the user's language (usually Greek), in one or two short plain sentences: answers are often read aloud. No markdown.
@@ -706,9 +713,14 @@ internal class AssistantTools(
             only those that need an answer or an action and in a few words why (a deadline, a question to the user, a payment). "Βρες το mail από τη Μαρία": mail_find.
             "Στείλε mail στον …": mail_write, written as a proper e-mail in the language the user speaks; after it, say it waits for their Send.
             An old or deleted mail, a file someone sent long ago: mail_stored_find. "Αντέγραψέ το / βγάλε το συνημμένο στα Έγγραφα": mail_export,
+            fn("memory_add", "Keep a lasting fact about the user that they asked you to remember («θυμήσου ότι…»): it is given to you in every later chat, on every device.", listOf("text"),
+                "text" to p("string", "The fact, short, in the user's language and in the third person (\"Διδάσκει στο 3ο Δημοτικό Καβάλας\").")),
+            fn("memory_list", "The facts kept about the user, a numbered list.", emptyList()),
+            fn("memory_forget", "Forget a fact from the last memory_list.", listOf("choice"), CHOICE),
             then say where it went (Tetra/Documents/…). Copy only when asked.
             Work out dates yourself from today's date ("αύριο", "την Πέμπτη").
-        """.trimIndent()
+            «Θυμήσου ότι…», a lasting fact about the user or what they like: memory_add, then say it is kept. «Ξέχασε ότι…»: memory_list, then memory_forget.
+        """.trimIndent() + if (facts.isEmpty()) "" else "\nWhat the user asked you to remember about them (use it when it helps; never read it out unasked):\n" + facts.joinToString("\n") { "- ${it.text}" }
     }
 }
 
@@ -730,7 +742,7 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
         val choices = mutableListOf<AssistantChoice>(); val images = mutableListOf<File>()
         var call: PendingCall? = null; var open: File? = null; var go: String? = null
         repeat(ROUNDS) {
-            val m = api.chat(JSONArray(listOf(JSONObject().put("role", "system").put("content", AssistantTools.system(now()))) + messages), AssistantTools.allowed(), onText)
+            val m = api.chat(JSONArray(listOf(JSONObject().put("role", "system").put("content", AssistantTools.system(now(), tools.facts()))) + messages), AssistantTools.allowed(), onText)
             val calls = m.optJSONArray("tool_calls")
             messages += JSONObject().put("role", "assistant").put("content", m.opt("content")?.takeIf { it != JSONObject.NULL } ?: "")
                 .apply { if (calls != null && calls.length() > 0) put("tool_calls", calls) }

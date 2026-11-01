@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Направи картина: [какво показва], в стил [рисунка / снимка / комикс].</string>
     <string name="assistant_chip_research">Задълбочено проучване</string>
     <string name="assistant_chip_research_prompt">Направи задълбочено проучване в интернет за [тема] и ми напиши отчет с източници.</string>
+    <string name="ai_memory">Лични данни</string>
+    <string name="ai_memory_note">Какво AI Assist помни за вас: кажете «запомни, че…» в разговор или го напишете тук. Използва се във всеки разговор и планирано действие, на всички устройства.</string>
+    <string name="ai_memory_hint">напр. Преподавам в 3-то основно училище</string>
 </resources>

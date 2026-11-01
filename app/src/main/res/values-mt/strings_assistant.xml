@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Agħmel stampa: [x’turi], fl-istil ta’ [pittura / ritratt / komiks].</string>
     <string name="assistant_chip_research">Riċerka profonda</string>
     <string name="assistant_chip_research_prompt">Agħmel riċerka profonda fuq il-web dwar [suġġett] u iktibli rapport bis-sorsi.</string>
+    <string name="ai_memory">Dettalji personali</string>
+    <string name="ai_memory_note">Dak li AI Assist jiftakar dwarek: għid «ftakar li…» f’chat, jew iktbu hawn. Jintuża f’kull chat u azzjoni skedata, fuq kull apparat.</string>
+    <string name="ai_memory_hint">eż. Ngħallem fit-3 skola primarja</string>
 </resources>

@@ -89,6 +89,22 @@ class AssistantTest {
         assertEquals("No choice 1: the last list had 0.", tools().run("contact_call", JSONObject().put("choice", 1)).forModel)
     }
 
+    @Test fun aFactToRememberIsKeptAndToldToEveryLaterChat() {
+        val s = Script(calls("memory_add" to """{"text":"Η κόρη του λέγεται Ελένη"}"""), says("Το κράτησα."), says("Ελένη."))
+        AssistantChat(s.api, tools(), now = { now }).ask("θυμήσου ότι η κόρη μου λέγεται Ελένη")
+        assertEquals("Η κόρη του λέγεται Ελένη", AssistantMemory.list(tetra).single().text)
+        assertEquals("Η κόρη του λέγεται Ελένη", AssistantMemory.add(tetra, " η κόρη του  λέγεται Ελένη ", "Phone").text) // the same words: not twice
+        assertEquals(1, AssistantMemory.list(tetra).size)
+        // a new chat (another day, or the computer's, which reads the same synced file) is told it
+        AssistantChat(s.api, tools(), now = { now }).ask("πώς λέγεται η κόρη μου;")
+        assertTrue(s.sent[2].getJSONArray("messages").getJSONObject(0).getString("content").endsWith("- Η κόρη του λέγεται Ελένη"))
+        val t = tools()
+        assertEquals("1. Η κόρη του λέγεται Ελένη", t.run("memory_list", JSONObject()).forModel)
+        assertTrue(t.run("memory_forget", JSONObject().put("choice", 1)).forModel.startsWith("Forgot"))
+        assertTrue(AssistantMemory.list(tetra).isEmpty())
+        assertFalse(AssistantTools.system(now).contains("remember about them"))
+    }
+
     @Test fun theSheetForgetsAfterAMinute() {
         val s = Script(says("Γεια."), says("Γεια ξανά."), says("Ναι;"))
         val chat = AssistantChat(s.api, tools(), forgetMs = 60_000, now = { now })

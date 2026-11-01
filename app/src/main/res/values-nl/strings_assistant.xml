@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Maak een afbeelding: [wat het toont], in de stijl van [een schilderij / een foto / een strip].</string>
     <string name="assistant_chip_research">Diepgaand onderzoek</string>
     <string name="assistant_chip_research_prompt">Doe diepgaand onderzoek op het web naar [onderwerp] en schrijf een rapport met bronnen.</string>
+    <string name="ai_memory">Persoonlijke gegevens</string>
+    <string name="ai_memory_note">Wat AI Assist over je onthoudt: zeg „onthoud dat…” in een chat, of schrijf het hier. Het wordt gebruikt in elke chat en geplande actie, op al je apparaten.</string>
+    <string name="ai_memory_hint">bijv. Ik geef les op de 3e basisschool</string>
 </resources>

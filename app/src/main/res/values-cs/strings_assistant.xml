@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Vytvoř obrázek: [co ukazuje], ve stylu [malby / fotky / komiksu].</string>
     <string name="assistant_chip_research">Hloubkový průzkum</string>
     <string name="assistant_chip_research_prompt">Udělej hloubkový průzkum na webu o [téma] a napiš mi zprávu se zdroji.</string>
+    <string name="ai_memory">Osobní údaje</string>
+    <string name="ai_memory_note">Co si AI Assist o vás pamatuje: řekněte v chatu „zapamatuj si, že…“ nebo to napište sem. Používá se v každém chatu a naplánované akci na všech zařízeních.</string>
+    <string name="ai_memory_hint">např. Učím na 3. základní škole</string>
 </resources>

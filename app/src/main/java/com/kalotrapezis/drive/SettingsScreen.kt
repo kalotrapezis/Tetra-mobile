@@ -24,6 +24,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -70,7 +71,7 @@ internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, 
         R.string.settings_silence_unknown, R.string.settings_decline_hidden, R.string.settings_pc_calls, R.string.settings_phone_permission, R.string.settings_open_phone)),
     Data(R.string.app_data, Category.Data.icon, Category.Data.color, R.string.settings_data_summary, listOf(R.string.settings_data_setup, R.string.settings_usage_access, R.string.settings_your_plan, R.string.settings_warnings, R.string.settings_roaming,
         R.string.settings_live_speed, R.string.settings_signal_drops, R.string.settings_wifi_around, R.string.settings_open_data)),
-    Assistant(R.string.app_assistant, R.drawable.ic_chat, ASSISTANT_COLOR, R.string.settings_assistant_summary, listOf(R.string.ai_master, R.string.ai_apps, R.string.assistant_key, R.string.assistant_words, R.string.assistant_contact_words, R.string.assistant_default, R.string.assistant_open)),
+    Assistant(R.string.app_assistant, R.drawable.ic_chat, ASSISTANT_COLOR, R.string.settings_assistant_summary, listOf(R.string.ai_master, R.string.ai_apps, R.string.ai_memory, R.string.assistant_key, R.string.assistant_words, R.string.assistant_contact_words, R.string.assistant_default, R.string.assistant_open)),
 }
 
 @Composable
@@ -192,6 +193,31 @@ internal fun SettingsTab(
  * so Contacts, Google and the computer show the same; which card is the user's is the assistant's "me" on this phone.
  */
 @OptIn(ExperimentalLayoutApi::class)
+/** Personal details (AssistantMemory): what the assistant was told to remember, each fact editable; the same on every device. */
+@Composable private fun AssistantMemorySection(version: Int) {
+    var facts by remember(version) { mutableStateOf(AssistantMemory.list(driveRoot())) }
+    var adding by remember { mutableStateOf("") }
+    var problem by remember { mutableStateOf<String?>(null) }
+    fun change(id: String, text: String) { runCatching { facts = AssistantMemory.change(driveRoot(), id, text, MailEngine.device()) }.onFailure { WriterLog.e("Assistant: personal details", it) } }
+    SettingsSection(stringResource(R.string.ai_memory), stringResource(R.string.ai_memory_note)) {
+        facts.forEach { f ->
+            var text by remember(f.id, f.text) { mutableStateOf(f.text) }
+            Row(Modifier.fillMaxWidth().background(rowColor()).padding(start = 12.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                // saved when the field is left, not on every letter (the file syncs)
+                OutlinedTextField(text, { text = it }, Modifier.weight(1f).onFocusChanged { if (!it.isFocused && text.trim() != f.text) change(f.id, text) })
+                IconButton(onClick = { change(f.id, "") }) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_remove)) }
+            }
+        }
+        Row(Modifier.fillMaxWidth().background(rowColor()).padding(start = 12.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(adding, { adding = it }, Modifier.weight(1f), placeholder = { Text(stringResource(R.string.ai_memory_hint)) })
+            IconButton(enabled = adding.isNotBlank(), onClick = {
+                runCatching { AssistantMemory.add(driveRoot(), adding, MailEngine.device()) }.onSuccess { facts = AssistantMemory.list(driveRoot()); adding = ""; problem = null }.onFailure { problem = it.message }
+            }) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.common_add)) }
+        }
+        problem?.let { Text(it, Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+    }
+}
+
 @Composable private fun AssistantRelations() {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("assistant", android.content.Context.MODE_PRIVATE) }
@@ -486,6 +512,7 @@ internal fun SettingsTab(
             SwitchRow(stringResource(name), null, AiGate.allows(app)) { on -> runCatching { AiGate.set(AiGate.state.copy(apps = AiGate.state.apps + (app to on))) }.onFailure { WriterLog.e("AI: an app's switch", it) } }
         }
     }
+    if (AiGate.on) AssistantMemorySection(version.intValue)
     SettingsSection { AssistantKeyField() }
     // Voxtral's context_bias (the VOICE app's terms): the user's own spellings, and the favourites' names only when switched on
     var words by remember { mutableStateOf(AssistantWords.words(context)) }

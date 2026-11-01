@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Napravi sliku: [što prikazuje], u stilu [slike / fotografije / stripa].</string>
     <string name="assistant_chip_research">Dubinsko istraživanje</string>
     <string name="assistant_chip_research_prompt">Napravi dubinsko istraživanje na webu o [tema] i napiši mi izvješće s izvorima.</string>
+    <string name="ai_memory">Osobni podaci</string>
+    <string name="ai_memory_note">Što AI Assist pamti o vama: recite „zapamti da…” u razgovoru ili to napišite ovdje. Koristi se u svakom razgovoru i zakazanoj radnji, na svim uređajima.</string>
+    <string name="ai_memory_hint">npr. Predajem u 3. osnovnoj školi</string>
 </resources>

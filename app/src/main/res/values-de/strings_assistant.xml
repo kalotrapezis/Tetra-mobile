@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Mach ein Bild: [was es zeigt], im Stil [eines Gemäldes / eines Fotos / eines Comics].</string>
     <string name="assistant_chip_research">Tiefe Recherche</string>
     <string name="assistant_chip_research_prompt">Recherchiere gründlich im Web zu [Thema] und schreib mir einen Bericht mit Quellen.</string>
+    <string name="ai_memory">Persönliche Angaben</string>
+    <string name="ai_memory_note">Was AI Assist über Sie behält: Sagen Sie im Chat „merk dir, dass…“ oder schreiben Sie es hier. Es gilt in jedem Chat und jeder geplanten Aktion, auf allen Geräten.</string>
+    <string name="ai_memory_hint">z. B. Ich unterrichte an der 3. Grundschule</string>
 </resources>

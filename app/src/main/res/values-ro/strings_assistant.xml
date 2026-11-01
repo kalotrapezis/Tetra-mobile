@@ -80,4 +80,7 @@
     <string name="assistant_chip_image_prompt">Fă o imagine: [ce arată], în stilul [unei picturi / unei fotografii / unei benzi desenate].</string>
     <string name="assistant_chip_research">Cercetare amănunțită</string>
     <string name="assistant_chip_research_prompt">Fă o cercetare amănunțită pe web despre [subiect] și scrie-mi un raport cu surse.</string>
+    <string name="ai_memory">Date personale</string>
+    <string name="ai_memory_note">Ce reține AI Assist despre tine: spune „ține minte că…” într-o conversație sau scrie aici. Se folosește în fiecare conversație și acțiune programată, pe toate dispozitivele.</string>
+    <string name="ai_memory_hint">ex. Predau la Școala Primară nr. 3</string>
 </resources>
