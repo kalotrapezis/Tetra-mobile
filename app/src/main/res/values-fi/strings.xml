@@ -4663,7 +4663,6 @@
     <string name="sync_others">Muut</string>
     <string name="sync_keep_auto" formatted="false">kaikki, kunnes se on 90 % täynnä</string>
     <string name="pdf_open_in_scanner">Avaa skannerissa</string>
-    <string name="scanner_add_camera">Kamera</string>
     <string name="scanner_add_from_file">Tiedostosta</string>
     <string name="scanner_perspective">Perspektiivi</string>
     <string name="scanner_tilt">Kallistus</string>

@@ -4662,7 +4662,6 @@
     <string name="sync_others">Άλλα</string>
     <string name="sync_keep_auto" formatted="false">όλα, μέχρι να γεμίσει στο 90%</string>
     <string name="pdf_open_in_scanner">Άνοιγμα στον σαρωτή</string>
-    <string name="scanner_add_camera">Κάμερα</string>
     <string name="scanner_add_from_file">Από αρχείο</string>
     <string name="scanner_perspective">Προοπτική</string>
     <string name="scanner_tilt">Κλίση</string>

@@ -4865,7 +4865,6 @@
     <string name="sync_others">Ostatné</string>
     <string name="sync_keep_auto" formatted="false">všetko, kým sa nezaplní na 90 %</string>
     <string name="pdf_open_in_scanner">Otvoriť v skeneri</string>
-    <string name="scanner_add_camera">Fotoaparát</string>
     <string name="scanner_add_from_file">Zo súboru</string>
     <string name="scanner_perspective">Perspektíva</string>
     <string name="scanner_tilt">Náklon</string>

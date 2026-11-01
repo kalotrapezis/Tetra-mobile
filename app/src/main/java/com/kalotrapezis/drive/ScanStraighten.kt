@@ -140,3 +140,20 @@ internal object ScanStraighten {
         return (det(t2, s3, s2, t1, s2, s1, t0, s1, s0) / d).toFloat()
     }
 }
+
+/**
+ * The auto fix's straightening (runs off the main thread, a second or two): [page]'s curve flattened, then its tilt
+ * taken out, both measured from its text lines. A page already flat and level, or with no text to go by, is left so.
+ */
+internal fun autoStraightened(page: CapturedPage): CapturedPage {
+    fun render(p: CapturedPage) = renderScanPage(p.copy(filter = ScanFilter.Original, strokes = emptyList()), 2, 2000f)
+    val base = page.copy(bend = null, tilt = 0f)
+    val first = render(base) ?: return page
+    val lines = ScanStraighten.textLines(first)
+    // a bend under a third of a percent of the height is a straight page read slightly unevenly: leave it
+    val grid = ScanStraighten.bend(lines.map { l -> l.map { ScanPoint(it.x / first.width, it.y / first.height) } })?.takeIf { it.max() - it.min() > 0.003f }
+    first.recycle()
+    // the tilt is measured on the flattened page: a curve's ends would pull a straight-line fit
+    val slope = if (grid == null) ScanStraighten.slope(lines) else render(base.copy(bend = grid))?.let { b -> ScanStraighten.slope(ScanStraighten.textLines(b)).also { b.recycle() } }
+    return page.copy(bend = grid, tilt = slope?.takeIf { abs(it) >= 0.3f }?.let { -it } ?: 0f)
+}

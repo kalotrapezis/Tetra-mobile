@@ -4663,7 +4663,6 @@
     <string name="sync_others">Muud</string>
     <string name="sync_keep_auto" formatted="false">kõik, kuni see on 90% täis</string>
     <string name="pdf_open_in_scanner">Ava skanneris</string>
-    <string name="scanner_add_camera">Kaamera</string>
     <string name="scanner_add_from_file">Failist</string>
     <string name="scanner_perspective">Perspektiiv</string>
     <string name="scanner_tilt">Kalle</string>

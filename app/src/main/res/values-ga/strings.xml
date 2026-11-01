@@ -4966,7 +4966,6 @@
     <string name="sync_others">Eile</string>
     <string name="sync_keep_auto" formatted="false">gach rud, go dtí go mbíonn sé 90% lán</string>
     <string name="pdf_open_in_scanner">Oscail sa scanóir</string>
-    <string name="scanner_add_camera">Ceamara</string>
     <string name="scanner_add_from_file">Ó chomhad</string>
     <string name="scanner_perspective">Peirspictíocht</string>
     <string name="scanner_tilt">Claonadh</string>

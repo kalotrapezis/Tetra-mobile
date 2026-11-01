@@ -4663,7 +4663,6 @@
     <string name="sync_others">Egyéb</string>
     <string name="sync_keep_auto" formatted="false">minden, amíg 90%-ban tele nem lesz</string>
     <string name="pdf_open_in_scanner">Megnyitás a szkennerben</string>
-    <string name="scanner_add_camera">Kamera</string>
     <string name="scanner_add_from_file">Fájlból</string>
     <string name="scanner_perspective">Perspektíva</string>
     <string name="scanner_tilt">Dőlés</string>

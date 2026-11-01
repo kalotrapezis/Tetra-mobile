@@ -825,7 +825,12 @@ internal fun ScanDocumentTab(
                 }
             }
             Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape) {
-                IconButton(onClick = { update(current, page.copy(autoFix = !page.autoFix)) }) {
+                // the auto fix is the whole automatic flow: off takes its straightening off too, on measures it again
+                IconButton(onClick = {
+                    if (page.autoFix) update(current, page.copy(autoFix = false, tilt = 0f, bend = null))
+                    else page.copy(autoFix = true).let { on -> val at = current; update(at, on)
+                        scope.launch { withContext(Dispatchers.Default) { runCatching { autoStraightened(on) }.getOrNull() }?.let { update(at, it) } } }
+                }) {
                     Icon(
                         painterResource(R.drawable.ic_auto_fix),
                         contentDescription = stringResource(if (page.autoFix) R.string.scanner_auto_fix_on else R.string.scanner_auto_fix_off),
@@ -895,23 +900,25 @@ internal fun ScanDocumentTab(
                 }
             }
         }
-        LazyRow(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), state = filmstrip, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            itemsIndexed(pages, key = { _, item -> item.key }) { index, item ->
-                Box(Modifier.size(48.dp, 64.dp).clip(MaterialTheme.shapes.small).clickable { select(index) }) {
-                    ScanThumbnail(item, Modifier.fillMaxSize())
-                    Text("${index + 1}", style = MaterialTheme.typography.labelSmall, color = Color.White, modifier = Modifier.align(Alignment.BottomEnd).background(Color.Black.copy(alpha = 0.6f), CircleShape).padding(horizontal = 5.dp))
-                    if (index == current) Box(Modifier.fillMaxSize().border(2.dp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.small))
-                }
-            }
-            item {
-                var adding by remember { mutableStateOf(false) }
-                Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.size(48.dp, 64.dp).clickable { adding = true }) {
-                    Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.scanner_add_page)) }
-                    androidx.compose.material3.DropdownMenu(adding, { adding = false }) {
-                        androidx.compose.material3.DropdownMenuItem({ Text(stringResource(R.string.scanner_add_camera)) }, { adding = false; addPage() }, leadingIcon = { Icon(painterResource(R.drawable.ic_retake), null) })
-                        androidx.compose.material3.DropdownMenuItem({ Text(stringResource(R.string.scanner_add_from_file)) }, { adding = false; pickFiles.launch(arrayOf("application/pdf", "image/*")) }, leadingIcon = { Icon(painterResource(R.drawable.ic_file_upload), null) })
+        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            LazyRow(Modifier.weight(1f), state = filmstrip, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                itemsIndexed(pages, key = { _, item -> item.key }) { index, item ->
+                    Box(Modifier.size(48.dp, 64.dp).clip(MaterialTheme.shapes.small).clickable { select(index) }) {
+                        ScanThumbnail(item, Modifier.fillMaxSize())
+                        Text("${index + 1}", style = MaterialTheme.typography.labelSmall, color = Color.White, modifier = Modifier.align(Alignment.BottomEnd).background(Color.Black.copy(alpha = 0.6f), CircleShape).padding(horizontal = 5.dp))
+                        if (index == current) Box(Modifier.fillMaxSize().border(2.dp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.small))
                     }
                 }
+                item {
+                    Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.size(48.dp, 64.dp).clickable(onClick = addPage)) {
+                        Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.scanner_add_page)) }
+                    }
+                }
+            }
+            // pages from a file: one tap, kept at the right edge however many pages there are
+            Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.size(48.dp, 64.dp).clickable { pickFiles.launch(arrayOf("application/pdf", "image/*")) }) {
+                Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.ic_file_upload), contentDescription = stringResource(R.string.scanner_add_from_file)) }
             }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 16.dp)) }

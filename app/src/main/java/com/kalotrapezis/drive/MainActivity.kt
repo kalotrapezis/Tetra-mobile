@@ -730,6 +730,19 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
      * Pages from files into the scanner ([load] writes them in [into], the scanner's cache): added to the scan open
      * now, or a new scan when [fresh] (the PDF editor's Open in scanner, Files' own).
      */
+    /** The auto fix's straightening of [pages], in the background; a page changed by hand meanwhile keeps the hand's. */
+    fun straightenScans(pages: List<CapturedPage>) {
+        val todo = pages.filter { it.autoFix }
+        if (todo.isEmpty()) return
+        Thread {
+            todo.forEach { before ->
+                val after = runCatching { autoStraightened(before) }.onFailure { WriterLog.w("Scanner: straighten", it) }.getOrNull() ?: return@forEach
+                (context as MainActivity).runOnUiThread {
+                    scanPages = scanPages.map { if (it == before) after else it }
+                }
+            }
+        }.start()
+    }
     fun importScan(fresh: Boolean, load: (File) -> List<File>) {
         if (fresh) { clearScanPages(); lockScannerPortrait() }
         scannerError = null
@@ -741,6 +754,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                     if (added.isEmpty()) return@onSuccess
                     scanSelected = scanPages.size
                     scanPages = scanPages + added
+                    straightenScans(added)
                 }.onFailure { WriterLog.e("Scanner: import", it); scannerError = context.getString(R.string.scanner_import_failed) }
                 if (scanPages.isNotEmpty()) screen = Screen.ScanDocument
                 else if (fresh) Toast.makeText(context, R.string.scanner_import_failed, Toast.LENGTH_LONG).show()
@@ -1034,6 +1048,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                             scanSelected = scanPages.lastIndex
                         }
                         scannerError = null
+                        straightenScans(listOf(scanPages[scanSelected]))
                         // A retake returns to its page; normal captures stay in the camera for the next page.
                         if (retakeIndex != null) screen = Screen.ScanDocument
                         scanRetake = null

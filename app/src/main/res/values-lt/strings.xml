@@ -4865,7 +4865,6 @@
     <string name="sync_others">Kiti</string>
     <string name="sync_keep_auto" formatted="false">viską, kol užsipildys 90 %</string>
     <string name="pdf_open_in_scanner">Atidaryti skaitytuve</string>
-    <string name="scanner_add_camera">Kamera</string>
     <string name="scanner_add_from_file">Iš failo</string>
     <string name="scanner_perspective">Perspektyva</string>
     <string name="scanner_tilt">Pokrypis</string>

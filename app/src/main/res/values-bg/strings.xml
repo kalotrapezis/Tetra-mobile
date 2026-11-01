@@ -4663,7 +4663,6 @@
     <string name="sync_others">Други</string>
     <string name="sync_keep_auto" formatted="false">всичко, докато се напълни на 90%</string>
     <string name="pdf_open_in_scanner">Отвори в скенера</string>
-    <string name="scanner_add_camera">Камера</string>
     <string name="scanner_add_from_file">От файл</string>
     <string name="scanner_perspective">Перспектива</string>
     <string name="scanner_tilt">Наклон</string>

@@ -4764,7 +4764,6 @@
     <string name="sync_others">Outras</string>
     <string name="sync_keep_auto" formatted="false">tudo, até ficar 90% cheio</string>
     <string name="pdf_open_in_scanner">Abrir no digitalizador</string>
-    <string name="scanner_add_camera">Câmara</string>
     <string name="scanner_add_from_file">De um ficheiro</string>
     <string name="scanner_perspective">Perspetiva</string>
     <string name="scanner_tilt">Inclinação</string>

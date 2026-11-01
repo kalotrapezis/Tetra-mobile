@@ -4663,7 +4663,6 @@
     <string name="sync_others">Andre</string>
     <string name="sync_keep_auto" formatted="false">alt, indtil den er 90 % fuld</string>
     <string name="pdf_open_in_scanner">Åbn i scanner</string>
-    <string name="scanner_add_camera">Kamera</string>
     <string name="scanner_add_from_file">Fra fil</string>
     <string name="scanner_perspective">Perspektiv</string>
     <string name="scanner_tilt">Hældning</string>

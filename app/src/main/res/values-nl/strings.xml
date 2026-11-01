@@ -4663,7 +4663,6 @@
     <string name="sync_others">Overige</string>
     <string name="sync_keep_auto" formatted="false">alles, tot hij 90% vol is</string>
     <string name="pdf_open_in_scanner">Openen in scanner</string>
-    <string name="scanner_add_camera">Camera</string>
     <string name="scanner_add_from_file">Uit bestand</string>
     <string name="scanner_perspective">Perspectief</string>
     <string name="scanner_tilt">Kanteling</string>

@@ -4663,7 +4663,6 @@
     <string name="sync_others">Övrigt</string>
     <string name="sync_keep_auto" formatted="false">allt, tills den är 90 % full</string>
     <string name="pdf_open_in_scanner">Öppna i skannern</string>
-    <string name="scanner_add_camera">Kamera</string>
     <string name="scanner_add_from_file">Från fil</string>
     <string name="scanner_perspective">Perspektiv</string>
     <string name="scanner_tilt">Lutning</string>

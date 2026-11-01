@@ -4865,7 +4865,6 @@
     <string name="sync_others">Oħrajn</string>
     <string name="sync_keep_auto" formatted="false">kollox, sakemm jimtela 90%</string>
     <string name="pdf_open_in_scanner">Iftaħ fl-iskaner</string>
-    <string name="scanner_add_camera">Kamera</string>
     <string name="scanner_add_from_file">Minn fajl</string>
     <string name="scanner_perspective">Perspettiva</string>
     <string name="scanner_tilt">Inklinazzjoni</string>

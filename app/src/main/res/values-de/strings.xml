@@ -4663,7 +4663,6 @@
     <string name="sync_others">Andere</string>
     <string name="sync_keep_auto" formatted="false">alles, bis es zu 90 % voll ist</string>
     <string name="pdf_open_in_scanner">Im Scanner öffnen</string>
-    <string name="scanner_add_camera">Kamera</string>
     <string name="scanner_add_from_file">Aus Datei</string>
     <string name="scanner_perspective">Perspektive</string>
     <string name="scanner_tilt">Neigung</string>

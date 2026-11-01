@@ -4865,7 +4865,6 @@
     <string name="sync_others">Drugo</string>
     <string name="sync_keep_auto" formatted="false">vse, dokler ni 90 % polno</string>
     <string name="pdf_open_in_scanner">Odpri v optičnem bralniku</string>
-    <string name="scanner_add_camera">Kamera</string>
     <string name="scanner_add_from_file">Iz datoteke</string>
     <string name="scanner_perspective">Perspektiva</string>
     <string name="scanner_tilt">Nagib</string>

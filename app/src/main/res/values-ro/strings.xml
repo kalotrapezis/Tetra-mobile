@@ -4764,7 +4764,6 @@
     <string name="sync_others">Altele</string>
     <string name="sync_keep_auto" formatted="false">tot, până se umple 90%</string>
     <string name="pdf_open_in_scanner">Deschide în scaner</string>
-    <string name="scanner_add_camera">Cameră</string>
     <string name="scanner_add_from_file">Din fișier</string>
     <string name="scanner_perspective">Perspectivă</string>
     <string name="scanner_tilt">Înclinare</string>

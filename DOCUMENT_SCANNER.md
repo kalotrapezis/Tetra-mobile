@@ -92,8 +92,8 @@ records how it works and the rules it must keep.
     toner all sit above 170, and a fixed line turned those pages blank.
 
 12. **Pages from files.** The PDF editor's Pages › Open in scanner, Files' ⋮ › Open
-    in scanner and the scanner's + › From file (Android's picker, opening in the
-    Tetra folder) turn a PDF's every page (about 300 dpi, unsaved edits included)
+    in scanner and the scanner's file tile (its own, at the filmstrip's right
+    edge; Android's picker, opening in the Tetra folder) turn a PDF's every page (about 300 dpi, unsaved edits included)
     or a picture (JPG, PNG, HEIC, upright by its EXIF) into pages. They have no
     outline: Perspective starts at the picture's edges.
 13. **Tilt** turns the page about its centre and enlarges it just enough that no
@@ -109,6 +109,12 @@ records how it works and the rules it must keep.
     straightens lines, not the squeeze of letters near the spine — that needs a 3-D
     page model (OpenCV-heavy optimisation), not worth it on a phone yet. Best order:
     flatten first, then auto straighten.
+15. **Auto fix straightens too.** Every page added (captured, retaken, imported)
+    with auto fix on is flattened and levelled in the background, the same two
+    measurements in that order; a bend under 0.3% of the height or a tilt under
+    0.3° counts as none, so a straight page is left alone. A page changed by hand
+    meanwhile keeps the hand's. The auto-fix switch takes the straightening off
+    with it, and measures it again when switched back on.
 
 ## Rules
 

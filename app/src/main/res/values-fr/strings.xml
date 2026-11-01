@@ -4764,7 +4764,6 @@
     <string name="sync_others">Autres</string>
     <string name="sync_keep_auto" formatted="false">tout, jusqu’à ce qu’il soit plein à 90 %</string>
     <string name="pdf_open_in_scanner">Ouvrir dans le scanner</string>
-    <string name="scanner_add_camera">Appareil photo</string>
     <string name="scanner_add_from_file">Depuis un fichier</string>
     <string name="scanner_perspective">Perspective</string>
     <string name="scanner_tilt">Inclinaison</string>

@@ -4764,7 +4764,6 @@
     <string name="sync_others">Ostalo</string>
     <string name="sync_keep_auto" formatted="false">sve, dok se ne napuni 90 %</string>
     <string name="pdf_open_in_scanner">Otvori u skeneru</string>
-    <string name="scanner_add_camera">Kamera</string>
     <string name="scanner_add_from_file">Iz datoteke</string>
     <string name="scanner_perspective">Perspektiva</string>
     <string name="scanner_tilt">Nagib</string>
