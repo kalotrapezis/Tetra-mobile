@@ -45,6 +45,8 @@ internal data class TimerRecord(
 
     fun pause(now: Instant, by: String) = if (state != RUNNING) this else copy(state = PAUSED, left = leftMs(now) / 1000.0, ends = null, rev = rev + 1, by = by)
     fun resume(now: Instant, by: String) = if (state != PAUSED) this else copy(state = RUNNING, ends = now.plusMillis((left * 1000).toLong()), left = 0.0, rev = rev + 1, by = by)
+    /** A ringing timer's zzz (as an alarm's Snooze, 1 Nov): it rings again in a minute. */
+    fun snooze(now: Instant, by: String) = if (!ringing(now)) this else copy(ends = now.plusSeconds(60), rev = rev + 1, by = by)
     fun stop(by: String) = copy(state = STOPPED, ends = null, left = 0.0, rev = rev + 1, by = by)
     /** A pinned card's ▶: the same timer from the start again. */
     fun restart(now: Instant, by: String) = copy(state = RUNNING, ends = now.plusSeconds(seconds), left = 0.0, rev = rev + 1, by = by)

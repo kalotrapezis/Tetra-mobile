@@ -117,15 +117,20 @@ internal object HyperIsland {
     /**
      * A timer in the island (the user, 18 Oct: "active notification on the hyper island with pause and stop buttons"):
      * running, the island counts down by itself to [ends] (HyperOS's countdown, timerType -1, as Xiaomi's own Clock);
-     * paused or rung, it shows [shown]. [buttons] are the notification's own actions, linked by key as the reminder's. The
+     * paused or rung, it shows [shown]. [buttons] are linked by key as the reminder's; with [icons] each is an icon only (type 0, as
+     * the reminder's ✕) with its label kept for TalkBack. The
  * stopwatch counts up from [ends] (its start: timerType 1); an alarm shows its time.
      */
     fun timer(builder: NotificationCompat.Builder, title: String, text: String, ends: Long?, shown: String, announce: Boolean,
-              buttons: List<Triple<String, String, android.app.PendingIntent>>, business: String = TIMER, countUp: Boolean = false) {
+              buttons: List<Triple<String, String, android.app.PendingIntent>>, business: String = TIMER, countUp: Boolean = false, icons: List<Int> = emptyList()) {
         runCatching {
             val now = System.currentTimeMillis()
+            @android.annotation.SuppressLint("RestrictedApi") val c = builder.mContext
             val actions = Bundle().apply {
-                buttons.forEach { (key, label, pi) -> putParcelable("miui.focus.action_$key", android.app.Notification.Action.Builder(null as android.graphics.drawable.Icon?, label, pi).build()) }
+                buttons.forEachIndexed { i, (key, label, pi) ->
+                    val icon = icons.getOrNull(i)?.let { android.graphics.drawable.Icon.createWithResource(c, it) }
+                    putParcelable("miui.focus.action_$key", android.app.Notification.Action.Builder(icon, label, pi).build())
+                }
             }
             val right = if (ends != null) JSONObject().put("sameWidthDigitInfo", JSONObject()
                 .put("timerInfo", JSONObject().put("timerType", if (countUp) 1 else -1).put("timerWhen", ends).put("timerTotal", now).put("timerSystemCurrent", now)))
@@ -139,7 +144,7 @@ internal object HyperIsland {
                 .put("isShowNotification", true)
                 .put("baseInfo", JSONObject().put("type", 1).put("title", title).put("content", text))
                 .put("actions", org.json.JSONArray().apply {
-                    buttons.forEachIndexed { i, (key, label, _) -> put(JSONObject().put("type", if (i == 0) 0 else 2).put("action", "miui.focus.action_$key").put("actionTitle", label).put("actionIntentType", 2)) }
+                    buttons.forEachIndexed { i, (key, label, _) -> put(JSONObject().put("type", if (i == 0 || icons.isNotEmpty()) 0 else 2).put("action", "miui.focus.action_$key").put("actionTitle", label).put("actionIntentType", 2)) }
                 })
                 .put("param_island", JSONObject()
                     .put("islandProperty", 1)

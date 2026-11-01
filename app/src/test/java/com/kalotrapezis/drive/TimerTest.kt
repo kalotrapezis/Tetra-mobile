@@ -26,6 +26,14 @@ class TimerTest {
         f.copyTo(File(to, f.name), overwrite = true)
     }
 
+    @Test fun aRingingTimerSnoozesAMinute() {
+        val r = TimerFiles.start(tablet, 300, "Tablet", t0)
+        assertTrue(r.snooze(t0.plusSeconds(100), "Phone") === r) // not ringing: nothing to snooze
+        val s = r.snooze(t0.plusSeconds(310), "Phone")
+        assertTrue(!s.ringing(t0.plusSeconds(310)))
+        assertTrue(s.ringing(t0.plusSeconds(370)))
+    }
+
     @Test fun timeLeftCountsDownToTheEnd() {
         val r = TimerFiles.start(tablet, 300, "Tablet", t0)
         assertEquals(300_000, r.leftMs(t0))

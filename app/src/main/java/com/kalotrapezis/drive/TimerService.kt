@@ -51,6 +51,7 @@ internal object TimerControl {
         val next = when (action) {
             TimerService.PAUSE -> r.pause(now, device())
             TimerService.RESUME -> r.resume(now, device())
+            TimerService.SNOOZE -> r.snooze(now, device())
             TimerService.STOP, TimerService.OK -> if (r.state == TimerRecord.STOPPED) r else r.stop(device())
             TimerService.RESTART -> r.restart(now, device()).also { used(c, r.seconds) }
             TimerService.PIN -> if (r.pinned) r else r.pin(true, device())
@@ -224,15 +225,16 @@ class TimerService : Service() {
     private fun alarmNotification(a: AlarmRecord, at: Instant): Notification {
         val time = hhmm(this, at)
         val title = a.label.ifEmpty { getString(R.string.alarm_named) }
-        val buttons = listOf(Triple(ALARM_SNOOZE, getString(R.string.alarm_snooze), action(a.id, ALARM_SNOOZE)), Triple(ALARM_DISMISS, getString(R.string.alarm_dismiss), action(a.id, ALARM_DISMISS)))
+        val buttons = listOf(Triple(ALARM_SNOOZE, getString(R.string.calendar_snooze), action(a.id, ALARM_SNOOZE)), Triple(ALARM_DISMISS, getString(R.string.common_stop), action(a.id, ALARM_DISMISS)))
+        val icons = listOf(R.drawable.ic_timer_snooze, R.drawable.ic_timer_stop)
         val screen = PendingIntent.getActivity(this, 6, Intent(this, AlarmRingActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val b = NotificationCompat.Builder(this, CHANNEL_DONE).setSmallIcon(R.drawable.ic_timer).setColor(COLOR)
             .setContentTitle("$time · $title").setContentText(getString(R.string.alarm_ringing)).setContentIntent(screen).setFullScreenIntent(screen, true)
             .setCategory(NotificationCompat.CATEGORY_ALARM).setPriority(NotificationCompat.PRIORITY_MAX).setOngoing(true).setAutoCancel(false).setSilent(true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC).setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-        buttons.forEach { (_, label, pi) -> b.addAction(0, label, pi) }
-        if (HyperIsland.isSupported(this)) HyperIsland.timer(b, title, time, null, time, true, buttons, HyperIsland.ALARM)
+        iconButtons(this, b, "$time · $title", getString(R.string.alarm_ringing), buttons, icons)
+        if (HyperIsland.isSupported(this)) HyperIsland.timer(b, title, time, null, time, true, buttons, HyperIsland.ALARM, icons = icons)
         return b.build()
     }
 
@@ -243,13 +245,14 @@ class TimerService : Service() {
         val shown = stopwatchText(w.elapsedMs(now), tenths = false)
         val text = if (counting) getString(R.string.stopwatch_counting) else getString(R.string.stopwatch_held, shown)
         val buttons = listOf(if (counting) Triple(WATCH_HOLD, getString(R.string.common_pause), watchAction(WATCH_HOLD)) else Triple(WATCH_START, getString(R.string.common_resume), watchAction(WATCH_START)),
-            Triple(WATCH_RESET, getString(R.string.stopwatch_reset), watchAction(WATCH_RESET)))
+            Triple(WATCH_RESET, getString(R.string.common_stop), watchAction(WATCH_RESET)))
+        val icons = listOf(if (counting) R.drawable.ic_timer_pause else R.drawable.ic_timer_play, R.drawable.ic_timer_stop)
         val b = NotificationCompat.Builder(this, CHANNEL).setSmallIcon(R.drawable.ic_timer).setColor(COLOR).setContentTitle(title).setContentText(text)
             .setContentIntent(openTimer()).setCategory(NotificationCompat.CATEGORY_STOPWATCH).setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true).setSilent(true).setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
         if (counting && w.started != null) b.setWhen(w.started.toEpochMilli()).setShowWhen(true).setUsesChronometer(true)
-        buttons.forEach { (_, label, pi) -> b.addAction(0, label, pi) }
-        if (HyperIsland.isSupported(this)) HyperIsland.timer(b, title, text, w.started?.toEpochMilli()?.takeIf { counting }, shown, announce, buttons, HyperIsland.STOPWATCH, countUp = true)
+        iconButtons(this, b, title, text, buttons, icons)
+        if (HyperIsland.isSupported(this)) HyperIsland.timer(b, title, text, w.started?.toEpochMilli()?.takeIf { counting }, shown, announce, buttons, HyperIsland.STOPWATCH, countUp = true, icons = icons)
         return b.build()
     }
 
@@ -266,10 +269,11 @@ class TimerService : Service() {
         val title = when { ringing -> getString(R.string.timer_times_up); r.state == TimerRecord.PAUSED -> getString(R.string.timer_paused_left, clockText(r.leftMs(now))); else -> name }
         val text = when { ringing -> name; r.state == TimerRecord.PAUSED -> name; else -> getString(R.string.timer_ends_at, endsAt.toString()) }
         val buttons = when {
-            ringing -> listOf(Triple(OK, getString(R.string.common_ok), action(r.id, OK)))
+            ringing -> listOf(Triple(SNOOZE, getString(R.string.alarm_snooze), action(r.id, SNOOZE)), Triple(OK, getString(R.string.common_stop), action(r.id, OK)))
             r.state == TimerRecord.PAUSED -> listOf(Triple(RESUME, getString(R.string.common_resume), action(r.id, RESUME)), Triple(STOP, getString(R.string.common_stop), action(r.id, STOP)))
             else -> listOf(Triple(PAUSE, getString(R.string.common_pause), action(r.id, PAUSE)), Triple(STOP, getString(R.string.common_stop), action(r.id, STOP)))
         }
+        val icons = listOf(when { ringing -> R.drawable.ic_timer_snooze; r.state == TimerRecord.PAUSED -> R.drawable.ic_timer_play; else -> R.drawable.ic_timer_pause }, R.drawable.ic_timer_stop)
         val open = openTimer()
         val b = NotificationCompat.Builder(this, if (ringing) CHANNEL_DONE else CHANNEL)
             .setSmallIcon(R.drawable.ic_timer)
@@ -285,9 +289,9 @@ class TimerService : Service() {
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
         if (r.state == TimerRecord.RUNNING && !ringing && r.ends != null) // a countdown Android draws itself, no update each second
             b.setWhen(r.ends.toEpochMilli()).setShowWhen(true).setUsesChronometer(true).setChronometerCountDown(true)
-        buttons.forEach { (_, label, pi) -> b.addAction(0, label, pi) }
+        iconButtons(this, b, title, text, buttons, icons)
         if (HyperIsland.isSupported(this)) HyperIsland.timer(b, title, text, r.ends?.toEpochMilli()?.takeIf { r.state == TimerRecord.RUNNING && !ringing },
-            if (ringing) getString(R.string.timer_times_up) else clockText(r.leftMs(now)), announce, buttons)
+            if (ringing) getString(R.string.timer_times_up) else clockText(r.leftMs(now)), announce, buttons, icons = icons)
         return b.build()
     }
 
@@ -331,6 +335,7 @@ class TimerService : Service() {
         const val RESUME = "com.kalotrapezis.drive.TIMER_RESUME"
         const val STOP = "com.kalotrapezis.drive.TIMER_STOP"
         const val OK = "com.kalotrapezis.drive.TIMER_OK"
+        const val SNOOZE = "com.kalotrapezis.drive.TIMER_SNOOZE"
         const val RESTART = "com.kalotrapezis.drive.TIMER_RESTART"
         const val PIN = "com.kalotrapezis.drive.TIMER_PIN"
         const val UNPIN = "com.kalotrapezis.drive.TIMER_UNPIN"
@@ -403,6 +408,20 @@ class TimerService : Service() {
 internal fun hhmm(c: Context, at: Instant): String = at.atZone(ZoneId.systemDefault())
     .format(DateTimeFormatter.ofPattern(if (android.text.format.DateFormat.is24HourFormat(c)) "HH:mm" else "h:mm a", c.uiLocale()))
 
+/**
+ * The buttons as icons only, zzz or ‖ or ▶, and × (the user, 1 Nov: "no text just the buttons", as Calendar's island ✕): Android draws an
+ * action's words, so the body is Tetra's own view; each icon carries its [buttons] label for TalkBack.
+ */
+internal fun iconButtons(c: Context, b: NotificationCompat.Builder, title: String, text: String, buttons: List<Triple<String, String, PendingIntent>>, icons: List<Int>) {
+    val v = android.widget.RemoteViews(c.packageName, R.layout.timer_notification)
+    v.setTextViewText(R.id.title, title); v.setTextViewText(R.id.text, text)
+    listOf(R.id.button1, R.id.button2).forEachIndexed { i, id ->
+        val (_, label, pi) = buttons[i]
+        v.setImageViewResource(id, icons[i]); v.setOnClickPendingIntent(id, pi); v.setContentDescription(id, label)
+    }
+    b.setStyle(NotificationCompat.DecoratedCustomViewStyle()).setCustomContentView(v).setCustomBigContentView(v).setCustomHeadsUpContentView(v)
+}
+
 /** "1:02.3", "12:05:41": the stopwatch's time, tenths while it is on the screen. */
 internal fun stopwatchText(ms: Long, tenths: Boolean = true): String {
     val t = ms / 1000
@@ -414,7 +433,7 @@ internal fun stopwatchText(ms: Long, tenths: Boolean = true): String {
 /**
  * The next alarm, whether or not the Timer runs (Plan.md § Timer › Alarms): its alarm clock (on time in Doze, the screen
  * off; it starts [TimerService], which rings it), and from [SOON_MS] before it a quiet notification — the island on a
- * Xiaomi — with the time and Skip; from [ASK_MS] before, the same popping up once with Skip and Snooze (the user, 30 Oct:
+ * Xiaomi — with the time, zzz Snooze and × Skip; from [ASK_MS] before, the same popping up once (the user, 30 Oct:
  * "30 min before and ask if I want to skip or snooze"). Both answers are written in the alarm's file, so they sync and
  * outlive a reboot. Made again at each change, sync, boot, clock or zone change, and at each ring.
  */
@@ -450,7 +469,9 @@ internal object AlarmPlan {
         val time = hhmm(app, at)
         val title = app.getString(if (ask) R.string.alarm_soon else R.string.alarm_next, time)
         fun answer(what: String) = PendingIntent.getBroadcast(app, (a.id + what).hashCode(), Intent(app, CalendarAlarmReceiver::class.java).setAction(what).putExtra("id", a.id), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val buttons = listOfNotNull(Triple("skip", app.getString(R.string.alarm_skip), answer(SKIP)), if (ask) Triple("snooze", app.getString(R.string.alarm_snooze), answer(SNOOZE)) else null)
+        // zzz and ×, as the ringing alarm's (the user, 1 Nov: the buttons on the coming alarm too); × skips this one
+        val buttons = listOf(Triple("snooze", app.getString(R.string.calendar_snooze), answer(SNOOZE)), Triple("skip", app.getString(R.string.alarm_skip), answer(SKIP)))
+        val icons = listOf(R.drawable.ic_timer_snooze, R.drawable.ic_timer_stop)
         // pops up once per ring: not again when planned anew (a sync, a reboot) for the same one
         val prefs = app.getSharedPreferences("timer", Context.MODE_PRIVATE)
         val asked = "${a.id}|$at"
@@ -460,9 +481,9 @@ internal object AlarmPlan {
             .setContentTitle(title).setContentText(a.label.ifEmpty { app.getString(R.string.alarm_named) }).setContentIntent(show)
             .setCategory(NotificationCompat.CATEGORY_REMINDER).setPriority(if (ask) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_LOW)
             .setOngoing(true).setSilent(!pop).setOnlyAlertOnce(true)
-        buttons.forEach { (_, label, pi) -> b.addAction(0, label, pi) }
+        iconButtons(app, b, title, a.label.ifEmpty { app.getString(R.string.alarm_named) }, buttons, icons)
         // the notice is a plain one: HyperOS's card draws one button of the two (seen on the Xiaomi 15, 30 Oct)
-        if (!ask && HyperIsland.isSupported(app)) HyperIsland.timer(b, title, a.label, null, time, false, buttons, HyperIsland.ALARM)
+        if (!ask && HyperIsland.isSupported(app)) HyperIsland.timer(b, title, a.label, null, time, false, buttons, HyperIsland.ALARM, icons = icons)
         runCatching { nm.notify(NEXT_ID, b.build()) }
     }
 }
