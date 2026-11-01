@@ -153,6 +153,7 @@ name on purpose: changing it would make every existing install a different app.
 | [SYNC_PLAN.md](SYNC_PLAN.md) | Sync design and every rule's reason (the same file in both repos) |
 | [Plan.md](Plan.md) | The work plan and its measurements |
 | [HANDOFF.md](HANDOFF.md) | Where work stands |
+| [HYPERISLAND.md](HYPERISLAND.md) | How to put notifications in Xiaomi's Hyper Island (HyperOS): the JSON, buttons, and what is not documented |
 | [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) | Bundled models and library licences |
 
 ## Licence
