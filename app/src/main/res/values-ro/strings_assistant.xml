@@ -220,4 +220,13 @@
         <item quantity="few">%d apeluri</item>
         <item quantity="other">%d de apeluri</item>
     </plurals>
+    <string name="assistant_card_default">implicit</string>
+    <string name="assistant_card_recent">Apeluri recente</string>
+    <string name="assistant_card_chat">Discută despre el</string>
+    <string name="assistant_card_from">De la</string>
+    <string name="assistant_card_to">Către</string>
+    <string name="assistant_card_more">mai mult</string>
+    <string name="assistant_calling">Îl sun pe %1$s</string>
+    <string name="assistant_calling_in">Apel în %1$d s…</string>
+    <string name="assistant_mail_kept">Bine, nu s-a trimis.</string>
 </resources>

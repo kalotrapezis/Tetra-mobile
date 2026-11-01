@@ -222,4 +222,13 @@
         <item quantity="many">%d volaní</item>
         <item quantity="other">%d volaní</item>
     </plurals>
+    <string name="assistant_card_default">predvolené</string>
+    <string name="assistant_card_recent">Posledné hovory</string>
+    <string name="assistant_card_chat">Konverzácia o ňom</string>
+    <string name="assistant_card_from">Od</string>
+    <string name="assistant_card_to">Komu</string>
+    <string name="assistant_card_more">viac</string>
+    <string name="assistant_calling">Volám %1$s</string>
+    <string name="assistant_calling_in">Hovor o %1$d s…</string>
+    <string name="assistant_mail_kept">Dobre, neodoslané.</string>
 </resources>

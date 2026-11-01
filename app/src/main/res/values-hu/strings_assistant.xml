@@ -218,4 +218,13 @@
         <item quantity="one">%d hívás</item>
         <item quantity="other">%d hívás</item>
     </plurals>
+    <string name="assistant_card_default">alapértelmezett</string>
+    <string name="assistant_card_recent">Legutóbbi hívások</string>
+    <string name="assistant_card_chat">Beszélgetés róla</string>
+    <string name="assistant_card_from">Feladó</string>
+    <string name="assistant_card_to">Címzett</string>
+    <string name="assistant_card_more">több</string>
+    <string name="assistant_calling">Hívom: %1$s</string>
+    <string name="assistant_calling_in">Hívás %1$d mp múlva…</string>
+    <string name="assistant_mail_kept">Rendben, nincs elküldve.</string>
 </resources>

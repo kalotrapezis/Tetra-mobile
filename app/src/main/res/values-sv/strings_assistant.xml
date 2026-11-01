@@ -218,4 +218,13 @@
         <item quantity="one">%d anrop</item>
         <item quantity="other">%d anrop</item>
     </plurals>
+    <string name="assistant_card_default">standard</string>
+    <string name="assistant_card_recent">Senaste samtal</string>
+    <string name="assistant_card_chat">Chatta om den</string>
+    <string name="assistant_card_from">Från</string>
+    <string name="assistant_card_to">Till</string>
+    <string name="assistant_card_more">mer</string>
+    <string name="assistant_calling">Ringer %1$s</string>
+    <string name="assistant_calling_in">Samtal om %1$d s…</string>
+    <string name="assistant_mail_kept">Okej, inte skickat.</string>
 </resources>

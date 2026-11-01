@@ -218,4 +218,13 @@
         <item quantity="one">%d κλήση</item>
         <item quantity="other">%d κλήσεις</item>
     </plurals>
+    <string name="assistant_card_default">προεπιλογή</string>
+    <string name="assistant_card_recent">Πρόσφατες κλήσεις</string>
+    <string name="assistant_card_chat">Συνομιλία με αυτό</string>
+    <string name="assistant_card_from">Από</string>
+    <string name="assistant_card_to">Προς</string>
+    <string name="assistant_card_more">περισσότερα</string>
+    <string name="assistant_calling">Καλώ %1$s</string>
+    <string name="assistant_calling_in">Κλήση σε %1$d″…</string>
+    <string name="assistant_mail_kept">Εντάξει, δεν στάλθηκε.</string>
 </resources>

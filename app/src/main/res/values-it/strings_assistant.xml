@@ -220,4 +220,13 @@
         <item quantity="many">%d chiamate</item>
         <item quantity="other">%d chiamate</item>
     </plurals>
+    <string name="assistant_card_default">predefinito</string>
+    <string name="assistant_card_recent">Chiamate recenti</string>
+    <string name="assistant_card_chat">Parlane</string>
+    <string name="assistant_card_from">Da</string>
+    <string name="assistant_card_to">A</string>
+    <string name="assistant_card_more">altro</string>
+    <string name="assistant_calling">Chiamo %1$s</string>
+    <string name="assistant_calling_in">Chiamata tra %1$d s…</string>
+    <string name="assistant_mail_kept">Va bene, non inviato.</string>
 </resources>

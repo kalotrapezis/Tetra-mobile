@@ -256,13 +256,13 @@ class MailTest {
         val t = AssistantTools(tetra, "Phone", zone, { java.time.ZonedDateTime.of(2026, 10, 31, 12, 0, 0, 0, zone) })
         val fresh = t.run("mail_new", org.json.JSONObject())
         assertTrue(fresh.forModel.contains("Γραμματεία ΜΠΣ")); assertFalse(fresh.forModel.contains("Ταχυδρομείο")) // three days old and read
-        assertTrue(fresh.choices.first().go!!.startsWith("mail:"))
+        assertTrue((fresh.cards.single() as ResultCard.Mails).mails.isNotEmpty()) // a row each, a tap opens it
         val attention = t.run("mail_attention", org.json.JSONObject())
         assertTrue(attention.forModel.contains("unread")); assertTrue(attention.forModel.contains("♥")); assertFalse(attention.forModel.contains("Skroutz")) // read, no ♥
-        assertEquals(listOf("GitHub"), t.run("mail_find", org.json.JSONObject().put("from", "github")).choices.map { it.label.substringBefore(':') })
+        assertEquals(listOf("GitHub"), (t.run("mail_find", org.json.JSONObject().put("from", "github")).cards.single() as ResultCard.Mails).mails.map { it.from })
         assertEquals("mail:" + mails.first { it.from == "GitHub" }.id, t.run("mail_open", org.json.JSONObject().put("choice", 1)).go)
         val w = t.run("mail_write", org.json.JSONObject().put("to", "a@b.gr").put("subject", "Θέμα").put("body", "Καλημέρα"))
-        assertEquals("a@b.gr", org.json.JSONObject(w.go!!.removePrefix("mail-write:")).getString("to"))
+        assertEquals("a@b.gr", (w.cards.single() as ResultCard.Mail).to) // a card with its sender, waiting for Send
         assertTrue(t.run("mail_write", org.json.JSONObject().put("to", "Κανείς").put("subject", "x").put("body", "y")).forModel.contains("no e-mail address"))
         tetra.deleteRecursively()
     }

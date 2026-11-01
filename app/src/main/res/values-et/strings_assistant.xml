@@ -218,4 +218,13 @@
         <item quantity="one">%d päring</item>
         <item quantity="other">%d päringut</item>
     </plurals>
+    <string name="assistant_card_default">vaikimisi</string>
+    <string name="assistant_card_recent">Viimased kõned</string>
+    <string name="assistant_card_chat">Vestle sellest</string>
+    <string name="assistant_card_from">Saatja</string>
+    <string name="assistant_card_to">Saaja</string>
+    <string name="assistant_card_more">rohkem</string>
+    <string name="assistant_calling">Helistan: %1$s</string>
+    <string name="assistant_calling_in">Kõne %1$d s pärast…</string>
+    <string name="assistant_mail_kept">Hea küll, ei saadetud.</string>
 </resources>

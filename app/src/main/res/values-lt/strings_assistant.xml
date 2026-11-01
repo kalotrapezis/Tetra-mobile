@@ -222,4 +222,13 @@
         <item quantity="many">%d užklausos</item>
         <item quantity="other">%d užklausų</item>
     </plurals>
+    <string name="assistant_card_default">numatytasis</string>
+    <string name="assistant_card_recent">Paskutiniai skambučiai</string>
+    <string name="assistant_card_chat">Pokalbis apie tai</string>
+    <string name="assistant_card_from">Nuo</string>
+    <string name="assistant_card_to">Kam</string>
+    <string name="assistant_card_more">daugiau</string>
+    <string name="assistant_calling">Skambinu: %1$s</string>
+    <string name="assistant_calling_in">Skambutis po %1$d s…</string>
+    <string name="assistant_mail_kept">Gerai, neišsiųsta.</string>
 </resources>

@@ -218,4 +218,13 @@
         <item quantity="one">%d заявка</item>
         <item quantity="other">%d заявки</item>
     </plurals>
+    <string name="assistant_card_default">по подразбиране</string>
+    <string name="assistant_card_recent">Последни обаждания</string>
+    <string name="assistant_card_chat">Разговор за него</string>
+    <string name="assistant_card_from">От</string>
+    <string name="assistant_card_to">До</string>
+    <string name="assistant_card_more">още</string>
+    <string name="assistant_calling">Звъня на %1$s</string>
+    <string name="assistant_calling_in">Обаждане след %1$d s…</string>
+    <string name="assistant_mail_kept">Добре, не е изпратено.</string>
 </resources>

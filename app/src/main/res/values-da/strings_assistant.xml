@@ -218,4 +218,13 @@
         <item quantity="one">%d kald</item>
         <item quantity="other">%d kald</item>
     </plurals>
+    <string name="assistant_card_default">standard</string>
+    <string name="assistant_card_recent">Seneste opkald</string>
+    <string name="assistant_card_chat">Chat om den</string>
+    <string name="assistant_card_from">Fra</string>
+    <string name="assistant_card_to">Til</string>
+    <string name="assistant_card_more">mere</string>
+    <string name="assistant_calling">Ringer til %1$s</string>
+    <string name="assistant_calling_in">Ringer om %1$d s…</string>
+    <string name="assistant_mail_kept">Okay, ikke sendt.</string>
 </resources>

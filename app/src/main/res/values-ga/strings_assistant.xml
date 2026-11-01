@@ -224,4 +224,13 @@
         <item quantity="many">%d nglao</item>
         <item quantity="other">%d glao</item>
     </plurals>
+    <string name="assistant_card_default">réamhshocrú</string>
+    <string name="assistant_card_recent">Glaonna le déanaí</string>
+    <string name="assistant_card_chat">Comhrá faoi</string>
+    <string name="assistant_card_from">Ó</string>
+    <string name="assistant_card_to">Chuig</string>
+    <string name="assistant_card_more">tuilleadh</string>
+    <string name="assistant_calling">Ag glaoch ar %1$s</string>
+    <string name="assistant_calling_in">Glao i gceann %1$d s…</string>
+    <string name="assistant_mail_kept">Ceart go leor, níor seoladh é.</string>
 </resources>

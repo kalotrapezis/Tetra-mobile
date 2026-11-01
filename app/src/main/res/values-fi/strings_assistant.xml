@@ -218,4 +218,13 @@
         <item quantity="one">%d kutsu</item>
         <item quantity="other">%d kutsua</item>
     </plurals>
+    <string name="assistant_card_default">oletus</string>
+    <string name="assistant_card_recent">Viimeisimmät puhelut</string>
+    <string name="assistant_card_chat">Keskustele tästä</string>
+    <string name="assistant_card_from">Lähettäjä</string>
+    <string name="assistant_card_to">Vastaanottaja</string>
+    <string name="assistant_card_more">lisää</string>
+    <string name="assistant_calling">Soitan: %1$s</string>
+    <string name="assistant_calling_in">Puhelu %1$d s kuluttua…</string>
+    <string name="assistant_mail_kept">Selvä, ei lähetetty.</string>
 </resources>

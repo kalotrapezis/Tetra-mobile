@@ -27,13 +27,40 @@ internal data class PendingCall(val name: String, val number: String)
 /** Something the screen offers to tap: a contact to call, a file to open, or a place in Tetra to go ([go]). */
 internal data class AssistantChoice(val label: String, val call: PendingCall? = null, val file: File? = null, val go: String? = null)
 
+/**
+ * What an action found or will do, shown as a card under the answer (the user, 1 Nov 2026: "show the info in a card instead:
+ * if it's a contact, … name, number, recent calls and the option to open or call … the email, the receiver and my account as
+ * the sender, to spot any wrong info"); the model's words stay short.
+ */
+internal sealed class ResultCard {
+    data class Number(val label: String, val value: String, val default: Boolean)
+    data class Contact(val uid: String, val name: String, val photo: String?, val numbers: List<Number>) : ResultCard()
+    data class Source(val title: String, val url: String)
+    data class Web(val sources: List<Source>) : ResultCard()
+    data class Files(val files: List<File>, val root: File) : ResultCard()
+    /** A mail written, waiting for Send: from the user's [account] ([from], its address), to [to]. */
+    data class Mail(val account: String, val from: String, val to: String, val subject: String, val body: String) : ResultCard()
+    data class Mails(val mails: List<MailEntry>) : ResultCard()
+    data class Event(val title: String, val start: ZonedDateTime, val end: ZonedDateTime, val allDay: Boolean, val calendar: String, val place: String) : ResultCard()
+    data class Note(val id: String, val title: String, val lines: List<String>) : ResultCard()
+    data class Timer(val label: String, val endsAt: Long) : ResultCard()
+
+    companion object {
+        /** A contact's numbers, the default marked (none marked: the first, when it has one only). */
+        fun numbers(i: ContactInfo) = i.phones.map { Number(it.label, it.value, it.value == i.defaultPhone || (i.phones.size == 1)) }
+        fun contact(i: ContactInfo) = Contact(i.uid, i.name, i.photo, numbers(i))
+    }
+}
+
 /** What a tool hands back: words for the model (as few as it needs), and what the screen shows besides. */
 internal data class ToolResult(val forModel: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
-    val image: File? = null, val open: File? = null, val go: String? = null, val photos: List<File> = emptyList(), val beside: Boolean = false, val audio: AudioAsk? = null)
+    val image: File? = null, val open: File? = null, val go: String? = null, val photos: List<File> = emptyList(), val beside: Boolean = false, val audio: AudioAsk? = null,
+    val cards: List<ResultCard> = emptyList())
 
 /** The model's answer to one turn, with everything the tools left for the screen. */
 internal data class AssistantReply(val text: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
-    val images: List<File> = emptyList(), val open: File? = null, val go: String? = null, val beside: Boolean = false, val audio: AudioAsk? = null)
+    val images: List<File> = emptyList(), val open: File? = null, val go: String? = null, val beside: Boolean = false, val audio: AudioAsk? = null,
+    val cards: List<ResultCard> = emptyList())
 
 /**
  * What a conversation has cost so far, by Mistral's list prices (the user: "the bill came"; shown in the chat's top bar and
@@ -202,7 +229,8 @@ internal class AssistantTools(
     private val zone: ZoneId = ZoneId.systemDefault(),
     private val now: () -> ZonedDateTime = { ZonedDateTime.now(zone) },
     private val changed: (String) -> Unit = {},
-    private val search: (String) -> String = { error("No web search here.") },
+    /** The answer's text and its sources (title, link). */
+    private val search: (String) -> Pair<String, List<ResultCard.Source>> = { error("No web search here.") },
     private val image: (String) -> File = { error("No pictures here.") },
     /** The UID of the user's own card in Contacts (Apple's "My Card"), where their relations are kept; asked once. */
     private val me: () -> String? = { null },
@@ -222,6 +250,7 @@ internal class AssistantTools(
     private fun attached(): Attach.Doc? = doc ?: docFile?.let(extract)?.also { doc = it }
 
     private var contacts = emptyList<PendingCall>()
+    private var found = emptyList<ContactInfo>()
     private var files = emptyList<File>()
     private var notesFound = emptyList<Note>()
     private var alarmsShown = emptyList<AlarmRecord>()
@@ -255,12 +284,13 @@ internal class AssistantTools(
             "youtube" -> args.getString("query").trim().let { q -> ToolResult("YouTube is open on a search for \"$q\".", go = "youtube:$q") }
             "shopping_list" -> shoppingList(args)
             "files_find" -> filesFind(args)
-            "file_open" -> pick(files, args) { f -> ToolResult("Opened ${f.name}.", open = f) }
+            "file_open" -> pick(files, args) { f -> ToolResult("Opened ${f.name}.", open = f, cards = listOf(ResultCard.Files(listOf(f), tetra))) }
             "contacts_find" -> contactsFind(args)
             "my_card" -> myCard(args)
             "relation_remember" -> relationRemember(args)
             "relation_forget" -> relationForget(args)
-            "contact_call" -> pick(contacts, args) { c -> ToolResult("The call to ${c.name} waits for the user's yes (a button on the screen).", call = c) }
+            "contact_call" -> pick(contacts, args) { c -> ToolResult("Tetra says \"${c.name}\" and calls in 3 seconds unless the user stops it. Say nothing more.", call = c,
+                cards = found.firstOrNull { i -> i.phones.any { it.value == c.number } }?.let { listOf(ResultCard.contact(it)) }.orEmpty()) }
             "mail_new" -> mailNew(args)
             "mail_attention" -> mailAttention(args)
             "mail_find" -> mailFind(args)
@@ -285,7 +315,8 @@ internal class AssistantTools(
             "schedule_delete" -> pick(schedulesShown, args) { x ->
                 if (x.optString("kind") == "brief") ToolResult("The daily brief cannot be deleted; pause it instead (schedule_change with paused).")
                 else { AssistantSchedules.remove(tetra, x.getString("id")); schedulesShown = schedulesShown - x; changed("schedules"); ToolResult("Deleted \"${x.optString("title")}\".") } }
-            "web_search" -> ToolResult(search(args.getString("query")))
+            "web_search" -> search(args.getString("query")).let { (text, sources) ->
+                ToolResult(text + if (sources.isEmpty()) "" else "\nSources: " + sources.take(3).joinToString("; ") { it.title }, cards = if (sources.isEmpty()) emptyList() else listOf(ResultCard.Web(sources))) }
             "make_image" -> image(args.getString("prompt")).let { ToolResult("The picture is on the screen, saved as ${it.name}.", image = it) }
             "attachment_read" -> ToolResult(attached()?.let { Attach.read(it, args.optInt("part", 0).takeIf { n -> n > 0 }, args.optString("query")) } ?: "No file is attached in this chat.")
             "audio_make" -> audioMake(args)
@@ -315,7 +346,8 @@ internal class AssistantTools(
         CalendarFiles.save(CalendarFiles.newFile(cal.dir, title, uid),
             CalEvent(uid, title, a.optString("place"), "", allDay, start, end, alarms = defaultAlarms(allDay, start)))
         changed("calendar")
-        return ToolResult("Added \"$title\" on ${start.format(SHOWN)} to the calendar ${cal.name}.")
+        return ToolResult("Added \"$title\" on ${start.format(SHOWN)} to the calendar ${cal.name}.", go = null,
+            cards = listOf(ResultCard.Event(title, start, end, allDay, cal.name, a.optString("place"))))
     }
 
     private fun calendarList(a: JSONObject): ToolResult {
@@ -353,7 +385,8 @@ internal class AssistantTools(
         if (seconds <= 0) return ToolResult("Say how long.")
         val r = TimerFiles.start(timers(), seconds, device, now().toInstant(), a.optString("label"))
         changed("timer")
-        return ToolResult("Started a timer of ${seconds / 60} min ${seconds % 60} s" + r.label.let { if (it.isBlank()) "." else " ($it)." })
+        return ToolResult("Started a timer of ${seconds / 60} min ${seconds % 60} s" + r.label.let { if (it.isBlank()) "." else " ($it)." },
+            cards = listOf(ResultCard.Timer(r.label, now().toInstant().toEpochMilli() + seconds * 1000)))
     }
 
     private fun timerList(): ToolResult {
@@ -434,7 +467,7 @@ internal class AssistantTools(
         val n = store.create(checklist = false)
         store.setText(n.id, a.optString("title").trim(), text, null)
         changed("notes")
-        return ToolResult("Saved the note in Notes.", choices = listOf(AssistantChoice(a.optString("title").ifBlank { text.take(40) }, go = "note:${n.id}")))
+        return ToolResult("Saved the note in Notes.", cards = listOf(ResultCard.Note(n.id, a.optString("title").trim(), text.lines().filter { it.isNotBlank() }.take(4))))
     }
 
     // ---- Maps and Photos: the installed map, offline ----
@@ -490,7 +523,8 @@ internal class AssistantTools(
         val n = store.create(checklist = true)
         store.setText(n.id, a.optString("title").ifBlank { "Ψώνια" }, "", items.mapIndexed { i, t -> CheckItem(java.util.UUID.randomUUID().toString(), t, false, i) })
         changed("notes")
-        return ToolResult("Made the list \"${a.optString("title").ifBlank { "Ψώνια" }}\" with ${items.size} items in Notes.")
+        return ToolResult("Made the list \"${a.optString("title").ifBlank { "Ψώνια" }}\" with ${items.size} items in Notes.",
+            cards = listOf(ResultCard.Note(n.id, a.optString("title").ifBlank { "Ψώνια" }, items.take(6).map { "☐ $it" })))
     }
 
     // ---- Files ----
@@ -500,8 +534,7 @@ internal class AssistantTools(
             .sortedByDescending { it.lastModified }.take(8)
         files = found.map { it.file }
         if (found.isEmpty()) return ToolResult("No file's name has that.")
-        return ToolResult(found.mapIndexed { i, it -> "${i + 1}. ${it.relativePath}" }.joinToString("\n"),
-            choices = found.map { AssistantChoice(it.file.name, file = it.file) })
+        return ToolResult(found.mapIndexed { i, it -> "${i + 1}. ${it.relativePath}" }.joinToString("\n"), cards = listOf(ResultCard.Files(found.map { it.file }, tetra)))
     }
 
     /** An estimate and a card that waits for the user's yes: nothing is spent until then (the computer makes it: AudioJobs). */
@@ -529,8 +562,7 @@ internal class AssistantTools(
                 // the stored ones: their attachments by name, to export one
                 (if (stored) MailFiles.attachments(root, e).takeIf { it.isNotEmpty() }?.joinToString(", ", " 📎 ") { it.name }.orEmpty() else if (e.attachments > 0) " 📎" else "") +
                 e.snippet.take(160).let { if (it.isBlank()) "" else ": $it" }
-        }.joinToString("\n"), choices = found.map { e -> AssistantChoice("${e.from.ifEmpty { e.fromAddress }}: ${e.subject}",
-            go = if (e.gone) null else "mail:${e.id}", file = if (e.gone) MailFiles.eml(root, e) else null) })
+        }.joinToString("\n"), cards = listOf(ResultCard.Mails(found)))
     }
 
     /**
@@ -589,8 +621,10 @@ internal class AssistantTools(
         val to = if ('@' in said) said else named(said).flatMap { it.emails }.firstOrNull()?.value
             ?: return ToolResult(if (!AiGate.state.keeps("contacts")) "The assistant may not look in Contacts. Ask the user for $said's address."
                 else "$said has no e-mail address in Contacts. Ask the user for the address.")
-        val draft = JSONObject().put("to", to).put("subject", a.optString("subject")).put("body", a.optString("body"))
-        return ToolResult("The mail to $to is open on the screen, written; it waits for the user to check it and press Send.", go = "mail-write:$draft")
+        val acc = MailFiles.accounts(MailFiles.root(tetra), MailEngine.ownAccounts(MailFiles.root(tetra)).map { it.optString("id") }.toSet()).let { all -> all.firstOrNull { it.own } ?: all.firstOrNull() }
+            ?: return ToolResult("There is no mail account in Tetra's Mail. Say so.")
+        return ToolResult("The mail to $to is on the screen, written, from ${acc.address}; it waits for the user to check it and press Send.",
+            cards = listOf(ResultCard.Mail(acc.id, acc.address, to, a.optString("subject"), a.optString("body"))))
     }
 
     // ---- Contacts ----
@@ -621,8 +655,8 @@ internal class AssistantTools(
             phones.map { p -> PendingCall(if (phones.size > 1) "${i.name} (${p.label.ifBlank { "phone" }})" else i.name, p.value) }
         }
         if (contacts.isEmpty()) return ToolResult("No contact like that with a phone number.")
-        return ToolResult(contacts.mapIndexed { n, c -> "${n + 1}. ${c.name}" }.joinToString("\n"),
-            choices = contacts.map { AssistantChoice(it.name, call = it) })
+        this.found = found
+        return ToolResult(contacts.mapIndexed { n, c -> "${n + 1}. ${c.name}" }.joinToString("\n"), cards = found.map(ResultCard::contact))
     }
 
     // ---- Relations: on the user's own card, as Apple and Google write them (X-ABRELATEDNAMES with its X-ABLabel), so they
@@ -772,7 +806,7 @@ internal class AssistantTools(
                 "relation" to p("string", RELATION), "name" to p("string", "The contact's name.")),
             fn("relation_forget", "Forget a saved relation.", listOf("relation"), "relation" to p("string", RELATION), "name" to p("string", "Only this person, when several have the relation.")),
             fn("my_card", "Say which contact is the user themself, once, when a relation tool asks for it.", listOf("name"), "name" to p("string", "The user's own name as in Contacts; a card with just that name is made if they have none.")),
-            fn("contact_call", "Ask to call a contact from the last contacts_find list. The phone asks the user to confirm; it does not call by itself.", listOf("choice"), CHOICE),
+            fn("contact_call", "Call a contact from the last contacts_find list, only when the user asked to call («πάρε», «κάλεσε», «τηλεφώνησε»), never after a request only to find or show one. Tetra says the name and dials by itself a moment later; do not ask «να καλέσω;» first.", listOf("choice"), CHOICE),
             fn("navigate", "Start driving directions in Tetra Maps (offline map), to a place or to a contact's saved address.", emptyList(),
                 "place" to p("string", "A place, a town or an address (\"Ερμού 10, Αθήνα\")."), "contact" to p("string", "A contact's name, to go to their address.")),
             fn("place_reminder", "Show a checklist from Notes when the user arrives at a place: any shop of a kind (every supermarket), or one place.", emptyList(),
@@ -824,7 +858,8 @@ internal class AssistantTools(
             Answer in the user's language (usually Greek), in one or two short plain sentences: answers are often read aloud. No markdown.
             Use the tools for anything about the user's own calendar, timers, notes, files or contacts; never invent what they hold.
             When a search finds several, say how many and ask which one (the screen shows the numbered list); "the first", "η δεύτερη" mean that list's numbers.
-            A call is never placed by you: after contact_call say that the call waits for their yes.
+            «Πάρε / κάλεσε / τηλεφώνησε τον …»: contacts_find, then contact_call at once (one match, or the one the user picks); Tetra says the name and dials, so say nothing after it and never ask «να καλέσω;». Several matches: ask which one in a few words («τη Μαρία Κ. ή τη Μαρία Π.;»).
+            «Βρες / δείξε την επαφή …»: contacts_find only; the screen shows the contact. Never contact_call after a find.
             "My sister", "ο μπαμπάς μου", "η γυναίκα μου": contacts_find with that relation. When the user says who someone is to them, relation_remember it.
             Someone known by a job or role ("πάρε την κομμώτρια"): contacts_find by relation, and if none, by keywords.
             "Ψάξε στο internet", "google it", news, prices, opening hours, anything current: always web_search.
@@ -856,6 +891,7 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
     private val now: () -> ZonedDateTime = { ZonedDateTime.now() }) {
     private val messages = mutableListOf<JSONObject>()
     private var lastAt = 0L
+    private var findOnly = false
     val bill get() = api.bill
 
     /** The user's [text] answered, the tools run on the way; [onText] gets the answer's words as they come; [file] goes with it, this turn only. */
@@ -867,6 +903,8 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
         messages += JSONObject().put("role", "user").put("content", if (file != null) "$text\n\n${Attach.forModel(file)}" else text)
         // an MP3 of the file asked for: mistral-small sometimes makes up the estimate instead of asking audio_make, so it is made to
         val must = if (tools.docFile != null && MP3.containsMatchIn(text)) "audio_make" else null
+        // «βρες την επαφή»: shown, never called (the user: "it found the contact, and the only option was to call")
+        findOnly = FIND.containsMatchIn(text) && !HandsFree.asked(text)
         try { return turn(onText, must) } finally {
             // the file's text goes once: after the turn only its name stays, for the next request and the kept chat
             if (file != null) messages[from].put("content", "$text\n\n${Attach.kept(file)}")
@@ -877,16 +915,17 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
     private fun turn(onText: ((String) -> Unit)?, must: String?): AssistantReply {
         val choices = mutableListOf<AssistantChoice>(); val images = mutableListOf<File>()
         var call: PendingCall? = null; var open: File? = null; var go: String? = null; var beside = false; var audio: AudioAsk? = null
+        var cards = emptyList<ResultCard>()
         repeat(ROUNDS) { round ->
             // forced: only that tool, and a call is a must ("any")
-            val offered = AssistantTools.allowed()
+            val offered = AssistantTools.allowed().let { all -> if (!findOnly) all else JSONArray((0 until all.length()).map { all.getJSONObject(it) }.filter { it.getJSONObject("function").getString("name") != "contact_call" }) }
             val only = if (must != null && round == 0) JSONArray((0 until offered.length()).map { offered.getJSONObject(it) }.filter { it.getJSONObject("function").getString("name") == must }) else null
             val forced = only != null && only.length() > 0
             val m = api.chat(JSONArray(listOf(JSONObject().put("role", "system").put("content", AssistantTools.system(now(), tools.facts()))) + messages), if (forced) only!! else offered, onText, if (forced) "any" else "auto")
             val calls = m.optJSONArray("tool_calls")
             messages += JSONObject().put("role", "assistant").put("content", m.opt("content")?.takeIf { it != JSONObject.NULL } ?: "")
                 .apply { if (calls != null && calls.length() > 0) put("tool_calls", calls) }
-            if (calls == null || calls.length() == 0) return AssistantReply(text(m), choices, call, images, open, go, beside, audio)
+            if (calls == null || calls.length() == 0) return AssistantReply(text(m), choices, call, images, open, go, beside, audio, cards)
             for (i in 0 until calls.length()) {
                 val c = calls.getJSONObject(i); val f = c.getJSONObject("function")
                 val args = when (val a = f.opt("arguments")) { is JSONObject -> a; is String -> runCatching { JSONObject(a.ifBlank { "{}" }) }.getOrDefault(JSONObject()); else -> JSONObject() }
@@ -894,11 +933,12 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
                 if (r.choices.isNotEmpty()) { choices.clear(); choices += r.choices }
                 r.call?.let { call = it }; r.image?.let { images += it }; images += r.photos; r.open?.let { open = it }; r.go?.let { go = it }; if (r.open != null || r.go != null) beside = r.beside
                 r.audio?.let { audio = it }
+                if (r.cards.isNotEmpty()) cards = cards.filter { c -> r.cards.none { it::class == c::class } } + r.cards // a later card of a kind stands for the earlier one
                 WriterLog.i("AI Assist: ${f.getString("name")}${if (forced) " (forced)" else ""} → ${r.forModel.take(160).replace('\n', ' ')}")
                 messages += JSONObject().put("role", "tool").put("name", f.getString("name")).put("tool_call_id", c.optString("id")).put("content", r.forModel)
             }
         }
-        return AssistantReply("", choices, call, images, open, go, beside, audio)
+        return AssistantReply("", choices, call, images, open, go, beside, audio, cards)
     }
 
     /** A kept chat's file, read again only if it is asked about. */
@@ -910,6 +950,7 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
 
     companion object {
         const val ROUNDS = 5 // tool rounds in one turn at most: find, then act, with room to spare
+        private val FIND = Regex("βρ[εέ]ς|δε[ιί]ξε|ψ[αά]ξε|\\bfind\\b|\\bshow\\b", RegexOption.IGNORE_CASE)
         private val MP3 = Regex("\\bmp3\\b|\\bm4a\\b|ήχο|εκπομπ|radio show|διάβασ[εέ] (?:το|μου)|read it to me", RegexOption.IGNORE_CASE)
 
         /** A message's text: a string, or Mistral's chunks (text pieces among others). */
@@ -927,7 +968,32 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
             return when (first) { in YES -> true; in NO -> false; else -> null }
         }
         private val YES = setOf("ναι", "οκ", "εντάξει", "ντάξει", "κάλεσε", "πάρε", "ok", "okay", "yes").map(ContactsFiles::plain).toSet()
-        private val NO = setOf("όχι", "άκυρο", "ακύρωσε", "σταμάτα", "no", "cancel").map(ContactsFiles::plain).toSet()
+        private val NO = setOf("όχι", "άκυρο", "ακύρωσε", "σταμάτα", "μη", "μην", "no", "cancel", "stop").map(ContactsFiles::plain).toSet()
+    }
+}
+
+/**
+ * A call asked for by voice, placed without a tap (the user, 1 Nov 2026: "it finds the contact, says the name and calls. I
+ * don't want a button there; I may be in the car"): Tetra says the name, then [place]s it [DELAY] ms later unless cancelled
+ * («όχι», «άκυρο», the card's Άκυρο). [tick] dials once the time is up and nothing is being heard.
+ */
+internal class HandsFree(private val place: (PendingCall) -> Unit) {
+    var waiting: PendingCall? = null; private set
+    private var at = 0L
+    fun start(p: PendingCall, now: Long) { waiting = p; at = now + DELAY }
+    fun cancel() { waiting = null }
+    fun left(now: Long) = Math.ceil((at - now).coerceAtLeast(0) / 1000.0).toInt()
+    /** True when it dialled now. */
+    fun tick(now: Long, busy: Boolean = false): Boolean {
+        val p = waiting ?: return false
+        if (now < at || busy) return false
+        waiting = null; place(p); return true
+    }
+    companion object {
+        const val DELAY = 3_000L
+        private val CALL = Regex("π[αά]ρε|κ[αά]λεσε|τηλεφ[ωώ]ν|\\bcall\\b|\\bring\\b|\\bphone\\b", RegexOption.IGNORE_CASE)
+        /** The user asked to call (not only to find). */
+        fun asked(text: String) = CALL.containsMatchIn(text)
     }
 }
 

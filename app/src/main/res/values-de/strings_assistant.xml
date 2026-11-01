@@ -218,4 +218,13 @@
         <item quantity="one">%d Aufruf</item>
         <item quantity="other">%d Aufrufe</item>
     </plurals>
+    <string name="assistant_card_default">Standard</string>
+    <string name="assistant_card_recent">Letzte Anrufe</string>
+    <string name="assistant_card_chat">Darüber chatten</string>
+    <string name="assistant_card_from">Von</string>
+    <string name="assistant_card_to">An</string>
+    <string name="assistant_card_more">mehr</string>
+    <string name="assistant_calling">Rufe %1$s an</string>
+    <string name="assistant_calling_in">Anruf in %1$d s…</string>
+    <string name="assistant_mail_kept">Gut, nicht gesendet.</string>
 </resources>

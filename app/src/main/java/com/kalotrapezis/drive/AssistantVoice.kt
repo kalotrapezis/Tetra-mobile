@@ -173,7 +173,7 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
         } },
         search = { q ->
             val (text, sources, _) = Mistral.output(api.tagged("web").conversation(q, "web_search", "Search the web and answer briefly with the facts found."))
-            text + if (sources.isEmpty()) "" else "\nSources: " + sources.take(3).joinToString("; ")
+            text to sources.map { it.split(" — ").let { p -> ResultCard.Source(p.first(), p.last()) } }.filter { it.url.startsWith("http") }
         },
         image = { prompt ->
             val id = Mistral.output(api.tagged("image").conversation(prompt, "image_generation", "Draw the picture asked for.")).third.firstOrNull() ?: error("No picture came back.")

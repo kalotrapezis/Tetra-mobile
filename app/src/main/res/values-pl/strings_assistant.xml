@@ -222,4 +222,13 @@
         <item quantity="many">%d wywołań</item>
         <item quantity="other">%d wywołań</item>
     </plurals>
+    <string name="assistant_card_default">domyślny</string>
+    <string name="assistant_card_recent">Ostatnie połączenia</string>
+    <string name="assistant_card_chat">Rozmowa o tym</string>
+    <string name="assistant_card_from">Od</string>
+    <string name="assistant_card_to">Do</string>
+    <string name="assistant_card_more">więcej</string>
+    <string name="assistant_calling">Dzwonię do: %1$s</string>
+    <string name="assistant_calling_in">Połączenie za %1$d s…</string>
+    <string name="assistant_mail_kept">Dobrze, nie wysłano.</string>
 </resources>

@@ -221,4 +221,13 @@
         <item quantity="one">%d call</item>
         <item quantity="other">%d calls</item>
     </plurals>
+    <string name="assistant_card_default">default</string>
+    <string name="assistant_card_recent">Recent calls</string>
+    <string name="assistant_card_chat">Chat about it</string>
+    <string name="assistant_card_from">From</string>
+    <string name="assistant_card_to">To</string>
+    <string name="assistant_card_more">more</string>
+    <string name="assistant_calling">Calling %1$s</string>
+    <string name="assistant_calling_in">Calling in %1$d s…</string>
+    <string name="assistant_mail_kept">All right, not sent.</string>
 </resources>

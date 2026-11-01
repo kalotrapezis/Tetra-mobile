@@ -222,4 +222,13 @@
         <item quantity="few">%d zahteve</item>
         <item quantity="other">%d zahtev</item>
     </plurals>
+    <string name="assistant_card_default">privzeto</string>
+    <string name="assistant_card_recent">Nedavni klici</string>
+    <string name="assistant_card_chat">Pogovor o tem</string>
+    <string name="assistant_card_from">Od</string>
+    <string name="assistant_card_to">Za</string>
+    <string name="assistant_card_more">več</string>
+    <string name="assistant_calling">Kličem %1$s</string>
+    <string name="assistant_calling_in">Klic čez %1$d s…</string>
+    <string name="assistant_mail_kept">V redu, ni poslano.</string>
 </resources>

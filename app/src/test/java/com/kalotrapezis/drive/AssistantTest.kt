@@ -52,7 +52,10 @@ class AssistantTest {
             calls("contact_call" to """{"choice":2}"""), says("Η κλήση περιμένει το ναι σου."))
         val chat = AssistantChat(s.api, tools(), now = { now })
         val first = chat.ask("βρες τη Μαρία και πάρε τηλέφωνο")
-        assertEquals(listOf("Μαρία Κωστοπούλου", "Μαρία Παπαδάκη (Mobile)", "Μαρία Παπαδάκη (Work)"), first.choices.map { it.label })
+        // shown as contact cards, a number each and none marked the default for the one with two
+        val shown = first.cards.filterIsInstance<ResultCard.Contact>()
+        assertEquals(listOf("Μαρία Κωστοπούλου", "Μαρία Παπαδάκη"), shown.map { it.name })
+        assertEquals(listOf(true), shown[0].numbers.map { it.default }); assertEquals(listOf(false, false), shown[1].numbers.map { it.default })
         assertNull(first.call)
         // the model saw names only, never a number
         val toModel = s.sent[1].getJSONArray("messages").let { m -> m.getJSONObject(m.length() - 1).getString("content") }
@@ -234,8 +237,7 @@ class AssistantTest {
         fun find(vararg k: String) = t.run("contacts_find", JSONObject().put("keywords", JSONArray(k.toList()))).forModel
         assertEquals("1. Στέλλα κούρεμα", find("κομμωτ", "κουρε", "hair")) // only the default number: no "which one"
         assertEquals("1. Νίκος Παπάς (Mobile)\n2. Νίκος Παπάς (Home)", find("υδραυλ")) // none marked: both offered
-        assertEquals("The call to Στέλλα κούρεμα waits for the user's yes (a button on the screen).",
-            t.run("contacts_find", JSONObject().put("keywords", JSONArray(listOf("κουρε")))).let { t.run("contact_call", JSONObject().put("choice", 1)).forModel })
+        assertTrue(t.run("contacts_find", JSONObject().put("keywords", JSONArray(listOf("κουρε")))).let { t.run("contact_call", JSONObject().put("choice", 1)).forModel }.startsWith("Tetra says \"Στέλλα κούρεμα\" and calls"))
         assertEquals(PendingCall("Στέλλα κούρεμα", "+302100000011"), t.run("contact_call", JSONObject().put("choice", 1)).call)
     }
 
@@ -270,5 +272,45 @@ class AssistantTest {
         assertEquals(64, wav.size)
         assertEquals("RIFF", String(wav, 0, 4)); assertEquals("data", String(wav, 36, 4))
         assertEquals(0, Vad().phrase().size) // nothing said
+    }
+
+    @Test fun aContactCardMarksTheDefaultNumber() {
+        val i = ContactInfo(formatted = "Νίκος", phones = listOf(VField("Work", "2310000001"), VField("Mobile", "+306900000003")), defaultPhone = "+306900000003")
+        assertEquals(listOf(ResultCard.Number("Work", "2310000001", false), ResultCard.Number("Mobile", "+306900000003", true)), ResultCard.numbers(i))
+    }
+
+    @Test fun aFindShowsTheContactAndNeverCalls() {
+        ContactsFiles.save(ContactsFiles.root(tetra), null, ContactInfo(formatted = "Νίκος Αλεξίου", phones = listOf(VField("Mobile", "+306900000003"))))
+        val s = Script(calls("contacts_find" to """{"name":"Νίκος"}"""), says("Βρήκα τον Νίκο Αλεξίου."))
+        val reply = AssistantChat(s.api, tools(), now = { now }).ask("βρες την επαφή Νίκος")
+        assertNull(reply.call)
+        assertEquals("Νίκος Αλεξίου", reply.cards.filterIsInstance<ResultCard.Contact>().single().name)
+        // after a find, contact_call is not even offered
+        val names = s.sent[1].getJSONArray("tools").let { t -> (0 until t.length()).map { t.getJSONObject(it).getJSONObject("function").getString("name") } }
+        assertFalse("contact_call" in names); assertTrue("contacts_find" in names)
+    }
+
+    @Test fun aCallAskedByVoiceGoesAfterTheDelayUnlessCancelled() {
+        val placed = mutableListOf<PendingCall>()
+        val p = PendingCall("Νίκος", "+306900000003")
+        val h = HandsFree { placed += it }
+        h.start(p, 1_000)
+        assertEquals(3, h.left(1_000))
+        assertFalse(h.tick(3_999)); assertTrue(placed.isEmpty())
+        assertFalse(h.tick(4_000, busy = true)) // «άκυρο» may be being said: heard out first
+        assertTrue(h.tick(4_200)); assertEquals(listOf(p), placed)
+        assertFalse(h.tick(9_000)) // once
+        h.start(p, 10_000); h.cancel()
+        assertFalse(h.tick(20_000)); assertEquals(1, placed.size)
+        assertTrue(HandsFree.asked("πάρε τον Νίκο")); assertTrue(HandsFree.asked("Κάλεσε τη μαμά")); assertFalse(HandsFree.asked("βρες την επαφή Νίκος"))
+        assertEquals(false, AssistantChat.yesNo("μη")); assertEquals(false, AssistantChat.yesNo("άκυρο"))
+    }
+
+    @Test fun aMailWrittenShowsItsSenderAndReceiver() {
+        val root = MailFiles.root(tetra).apply { mkdirs() }
+        File(root, "accounts.json").writeText("""[{"id":"gmail","address":"me@example.com","name":"Εγώ"}]""")
+        val r = tools().run("mail_write", JSONObject().put("to", "maria@example.com").put("subject", "Αύριο").put("body", "Γεια σου Μαρία,\nτα λέμε αύριο."))
+        assertNull(r.go) // not sent, not opened: the card waits for Send
+        assertEquals(ResultCard.Mail("gmail", "me@example.com", "maria@example.com", "Αύριο", "Γεια σου Μαρία,\nτα λέμε αύριο."), r.cards.single())
     }
 }

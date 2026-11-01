@@ -222,4 +222,13 @@
         <item quantity="many">%d sejħa</item>
         <item quantity="other">%d sejħa</item>
     </plurals>
+    <string name="assistant_card_default">default</string>
+    <string name="assistant_card_recent">Sejħiet riċenti</string>
+    <string name="assistant_card_chat">Kellem dwaru</string>
+    <string name="assistant_card_from">Minn</string>
+    <string name="assistant_card_to">Lil</string>
+    <string name="assistant_card_more">aktar</string>
+    <string name="assistant_calling">Qed inċempel lil %1$s</string>
+    <string name="assistant_calling_in">Sejħa f\'%1$d s…</string>
+    <string name="assistant_mail_kept">Tajjeb, ma ntbagħatx.</string>
 </resources>

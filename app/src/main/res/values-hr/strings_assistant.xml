@@ -220,4 +220,13 @@
         <item quantity="few">%d poziva</item>
         <item quantity="other">%d poziva</item>
     </plurals>
+    <string name="assistant_card_default">zadano</string>
+    <string name="assistant_card_recent">Nedavni pozivi</string>
+    <string name="assistant_card_chat">Razgovor o tome</string>
+    <string name="assistant_card_from">Od</string>
+    <string name="assistant_card_to">Za</string>
+    <string name="assistant_card_more">više</string>
+    <string name="assistant_calling">Zovem %1$s</string>
+    <string name="assistant_calling_in">Poziv za %1$d s…</string>
+    <string name="assistant_mail_kept">U redu, nije poslano.</string>
 </resources>

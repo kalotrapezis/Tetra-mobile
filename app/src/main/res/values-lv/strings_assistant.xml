@@ -220,4 +220,13 @@
         <item quantity="one">%d izsaukums</item>
         <item quantity="other">%d izsaukumi</item>
     </plurals>
+    <string name="assistant_card_default">noklusējuma</string>
+    <string name="assistant_card_recent">Pēdējie zvani</string>
+    <string name="assistant_card_chat">Sarunāties par to</string>
+    <string name="assistant_card_from">No</string>
+    <string name="assistant_card_to">Kam</string>
+    <string name="assistant_card_more">vairāk</string>
+    <string name="assistant_calling">Zvanu: %1$s</string>
+    <string name="assistant_calling_in">Zvans pēc %1$d s…</string>
+    <string name="assistant_mail_kept">Labi, nav nosūtīts.</string>
 </resources>

@@ -73,7 +73,8 @@ open class AssistantActivity : ComponentActivity() {
         if (!sheet) androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = TetraLook.light
         // a tap on "your audio is ready" (AudioJobs): the chat opens on its card
         val job = intent.getStringExtra(AudioJobs.EXTRA)
-        setContent { TetraTheme { AssistantApp(sheet, job) { finish() } } }
+        // the sheet: the app the user was in shows behind it, dimmed (the user: "the rest of the screen is black")
+        setContent { TetraTheme(backdrop = !sheet) { AssistantApp(sheet, job) { finish() } } }
     }
 }
 
@@ -88,7 +89,8 @@ internal fun openAssistant(c: Context) = c.startActivity(Intent(c, AssistantActi
 private object SheetMemory { var chat: AssistantChat? = null }
 
 private data class Bubble(val mine: Boolean, val text: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
-    val images: List<File> = emptyList(), val error: Boolean = false, val files: List<Attach.Ref> = emptyList(), val audio: AudioAsk? = null, val job: String? = null) {
+    val images: List<File> = emptyList(), val error: Boolean = false, val files: List<Attach.Ref> = emptyList(), val audio: AudioAsk? = null, val job: String? = null,
+    val cards: List<ResultCard> = emptyList()) {
     /** As History keeps it: the file's name and path, never its text. */
     fun json(): org.json.JSONObject = org.json.JSONObject().put("mine", mine).put("text", text).put("error", error).apply {
         if (files.isNotEmpty()) put("files", org.json.JSONArray(files.map { org.json.JSONObject().put("name", it.name).put("path", it.path).put("pages", it.pages) }))
@@ -164,10 +166,13 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         else context.startActivity(Intent(context, MainActivity::class.java).putExtra(Applet.EXTRA, v)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP))
     }.onFailure { WriterLog.e("Assistant: could not open $v", it); say(context.getString(R.string.assistant_cannot_open), true) }
+    var dialing by remember { mutableStateOf<PendingCall?>(null) } // a call asked by voice, placed after its name is said
+    var dialLeft by remember { mutableIntStateOf(0) }
+    var wantCall by remember { mutableStateOf(false) } // the user asked to call: the contact picked next is called too
     fun call(p: PendingCall) {
-        pending = null
+        pending = null; dialing = null; wantCall = false
         endLive()
-        WriterLog.i("Assistant: calling at the user's yes")
+        WriterLog.i("Assistant: calling ${p.name}")
         if (!placePhoneCall(context, p.number)) context.startActivity(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", p.number, null)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         if (sheet) close()
     }
@@ -193,8 +198,29 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         r.onSuccess { attached = it }.onFailure { WriterLog.w("AI Assist: the file was not attached", it); say(it.shownMessage(context) ?: "", true) }
     }
 
+    val handsFree = remember { HandsFree { p -> scope.launch { call(p) } } }
+    fun cancelDial() { if (dialing == null) return; handsFree.cancel(); dialing = null; wantCall = false; say(context.getString(R.string.assistant_call_cancelled)); WriterLog.i("AI Assist: the call was cancelled") }
+    /** The name said aloud (even with the voice off: the user may be driving), then the call by itself unless cancelled. */
+    fun dial(p: PendingCall, inLive: Boolean) = scope.launch {
+        pending = null; dialing = p
+        WriterLog.i("AI Assist: calling ${p.name} in ${HandsFree.DELAY} ms unless cancelled")
+        hush()
+        AnswerVoice(context, reader, chat.bill.part("voice"), scope).also { voice = it }.apply { say(context.getString(R.string.assistant_calling, p.name)); finish(); await() }
+        if (dialing != p) return@launch
+        handsFree.start(p, System.currentTimeMillis())
+        if (!inLive) hear(3_500) // «όχι», «άκυρο» within those seconds
+        while (dialing == p) {
+            dialLeft = handsFree.left(System.currentTimeMillis())
+            // what is being said is heard out first: it may be «άκυρο»
+            if (handsFree.tick(System.currentTimeMillis(), busy = phase == Phase.Thinking || (phase == Phase.Listening && hearing))) break
+            delay(200)
+        }
+    }
+
     fun send(text: String) = scope.launch {
         if (text.isBlank()) return@launch
+        // a call about to go: «όχι», «άκυρο», «σταμάτα», «μη» stop it; anything else lets it go
+        dialing?.let { if (AssistantChat.yesNo(text) == false) cancelDial(); return@launch }
         val file = attached; attached = null
         bubbles += Bubble(true, text, files = listOfNotNull(file?.let { Attach.Ref(it.name, it.path, it.pages.size) }))
         val inLive = live != null
@@ -217,10 +243,12 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         speech?.say(cut.rest()); speech?.finish()
         phase = Phase.Idle; spent = chat.bill.usd
         val reply = r.getOrElse { speech?.stop(); say(it.shownMessage(context) ?: context.getString(R.string.assistant_server, 0), true); WriterLog.w("Assistant: ${it.message}"); listenAgain(); return@launch }
-        bubbles += Bubble(false, reply.text, reply.choices, reply.call, reply.images, audio = reply.audio)
+        bubbles += Bubble(false, reply.text, reply.choices, reply.call, reply.images, audio = reply.audio, cards = reply.cards)
         keep()
-        pending = reply.call
         pendingAudio = reply.audio
+        // a call asked for by voice goes without a tap; one only found waits for the card's Call
+        wantCall = HandsFree.asked(text) || (wantCall && reply.call == null && reply.cards.any { it is ResultCard.Contact })
+        reply.call?.let { p -> if (wantCall) { speech?.await(); dial(p, inLive); return@launch } else pending = p }
         // beside (open_beside): a second Tetra window in split screen, this one staying as it is; a file outside the library opens as usual
         if (reply.beside) { reply.open?.let { f -> runCatching { DriveRules.relative(driveRoot(), f) }.getOrNull()?.let { Beside.open(context, "file:$it") } ?: open(f) }; reply.go?.let { Beside.open(context, it) } }
         else reply.open?.let(::open)
@@ -233,7 +261,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         // the sheet: a question or a list waits for the answer by voice (a few seconds); anything else is done
         when {
             reply.open != null -> close()
-            reply.text.trimEnd().endsWith('?') || reply.choices.isNotEmpty() || reply.call != null -> hear(6_000)
+            reply.text.trimEnd().endsWith('?') || reply.choices.isNotEmpty() || reply.cards.isNotEmpty() || reply.call != null -> hear(6_000)
             reply.images.isEmpty() -> { delay(1_500); close() }
         }
     }
@@ -253,7 +281,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         hush(); stopNow.set(false); phase = Phase.Listening
         val pcm = withContext(Dispatchers.IO) { runCatching { listen(waitMs, { stopNow.get() || !isActive }, { hearing = it }, AssistantPause.ms(context), AssistantAudio.mic(context)) }.getOrNull() }
         hearing = false
-        if (pcm == null) { phase = Phase.Idle; if (sheet && pending == null && bubbles.lastOrNull()?.images.isNullOrEmpty()) close(); return@launch }
+        if (pcm == null) { phase = Phase.Idle; if (sheet && pending == null && dialing == null && bubbles.lastOrNull()?.images.isNullOrEmpty() && bubbles.lastOrNull()?.cards.isNullOrEmpty()) close(); return@launch }
         phase = Phase.Thinking
         val text = withContext(Dispatchers.IO) { runCatching { AssistantNet.transcribe(AssistantNet.key(context), pcm, AssistantWords.terms(context), chat.bill.part("dictation")) } }
         phase = Phase.Idle; spent = chat.bill.usd
@@ -311,13 +339,16 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
                     androidx.compose.animation.AnimatedVisibility(typed.isEmpty() && attached == null && !attaching, enter = androidx.compose.animation.fadeIn(), exit = androidx.compose.animation.fadeOut()) { WordCloud(::offer) }
                 }
             }
+            val actions = CardActions({ go(it); if (sheet) close() }, { open(it); if (sheet) close() }, ::call,
+                { f -> scope.launch { attaching = true; withContext(Dispatchers.IO) { runCatching { Attach.reader(context)(f) } }.onSuccess { attached = it }.onFailure { say(it.shownMessage(context) ?: "", true) }; attaching = false } },
+                ::say, dialing, dialLeft, ::cancelDial)
             itemsIndexed(bubbles) { i, b -> BubbleView(b, pending.takeIf { i == bubbles.size - 1 }, ::choose, ::call, { pending = null; say(context.getString(R.string.assistant_call_cancelled)) }, ::open,
-                pendingAudio.takeIf { i == bubbles.size - 1 }, { startAudio(it) }, ::skipAudio) }
+                pendingAudio.takeIf { i == bubbles.size - 1 }, { startAudio(it) }, ::skipAudio, actions) }
         }
     }
 
     if (sheet) {
-        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.35f)).clickable(remember { MutableInteractionSource() }, null) { close() }, contentAlignment = Alignment.BottomCenter) {
+        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.45f)).clickable(remember { MutableInteractionSource() }, null) { close() }, contentAlignment = Alignment.BottomCenter) {
             Surface(Modifier.fillMaxWidth().widthIn(max = 640.dp).clickable(remember { MutableInteractionSource() }, null) {}, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp), tonalElevation = 6.dp) {
                 Column(Modifier.navigationBarsPadding().imePadding()) {
                     Row(Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -448,7 +479,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         }
         if (liveShown) LiveScreen(livePhase, liveLevel, liveYou, liveAi,
             Bill.text(spent + Bill.perMinute(Mistral.REALTIME) * (liveNow - liveStart).coerceAtLeast(0) / 60_000.0), clockOf(liveNow - liveStart),
-            pending, bubbles.lastOrNull()?.choices.orEmpty(), ::choose, ::call, { pending = null; say(context.getString(R.string.assistant_call_cancelled)) }, { endLive() })
+            pending, bubbles.lastOrNull()?.choices.orEmpty(), ::choose, ::call, { pending = null; say(context.getString(R.string.assistant_call_cancelled)) }, { endLive() }, dialing, dialLeft, ::cancelDial)
     }
 }
 
@@ -464,7 +495,8 @@ private fun clockOf(ms: Long) = (ms.coerceAtLeast(0) / 1000).let { "%d:%02d:%02d
  */
 @Composable
 private fun LiveScreen(phase: LivePhase, level: Float, you: String, ai: String, cost: String, clock: String, pending: PendingCall?,
-    choices: List<AssistantChoice>, choose: (AssistantChoice) -> Unit, call: (PendingCall) -> Unit, cancel: () -> Unit, end: () -> Unit) {
+    choices: List<AssistantChoice>, choose: (AssistantChoice) -> Unit, call: (PendingCall) -> Unit, cancel: () -> Unit, end: () -> Unit,
+    dialing: PendingCall?, dialLeft: Int, cancelDial: () -> Unit) {
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(stringResource(R.string.app_assistant), style = MaterialTheme.typography.titleLarge)
@@ -483,6 +515,10 @@ private fun LiveScreen(phase: LivePhase, level: Float, you: String, ai: String, 
                     if (ai.isNotBlank() || phase == LivePhase.Thinking) Text(caption(stringResource(R.string.assistant_ai), ai.ifBlank { stringResource(R.string.assistant_thinking) }),
                         style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, maxLines = 6, overflow = TextOverflow.Ellipsis)
                     choices.take(5).forEachIndexed { i, c -> Text("${i + 1}. ${c.label}", Modifier.fillMaxWidth().clickable { choose(c) }.padding(vertical = 4.dp), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    if (dialing != null) {
+                        Text(stringResource(R.string.assistant_calling, dialing.name) + " · " + stringResource(R.string.assistant_calling_in, dialLeft), style = MaterialTheme.typography.titleMedium)
+                        Button(onClick = cancelDial, Modifier.fillMaxWidth().height(56.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) { Text(stringResource(R.string.common_cancel)) }
+                    }
                     if (pending != null) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = { call(pending) }) { Text(stringResource(R.string.assistant_call, pending.name), maxLines = 1, overflow = TextOverflow.Ellipsis) }
                         TextButton(onClick = cancel) { Text(stringResource(R.string.common_cancel), maxLines = 1) }
@@ -652,7 +688,7 @@ private fun MicButton(phase: Phase, hearing: Boolean, tap: () -> Unit) {
 
 @Composable
 private fun BubbleView(b: Bubble, pending: PendingCall?, choose: (AssistantChoice) -> Unit, call: (PendingCall) -> Unit, cancel: () -> Unit, open: (File) -> Unit,
-    audio: AudioAsk?, startAudio: (AudioAsk) -> Unit, skipAudio: () -> Unit) {
+    audio: AudioAsk?, startAudio: (AudioAsk) -> Unit, skipAudio: () -> Unit, actions: CardActions) {
     Column(Modifier.fillMaxWidth(), horizontalAlignment = if (b.mine) Alignment.End else Alignment.Start) {
         // the file that went with it: its name and pages, never its text
         b.files.forEach { f -> Surface(Modifier.padding(bottom = 4.dp).widthIn(max = 560.dp), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
@@ -697,6 +733,7 @@ private fun BubbleView(b: Bubble, pending: PendingCall?, choose: (AssistantChoic
             }
         }
         b.job?.let { AudioJobCard(it) }
+        if (b.cards.isNotEmpty()) ResultCards(b.cards, actions)
         if (pending != null && b.call == pending) Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = { call(pending) }) {
                 Icon(painterResource(R.drawable.ic_call), contentDescription = null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))

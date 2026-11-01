@@ -218,4 +218,13 @@
         <item quantity="one">%d aanroep</item>
         <item quantity="other">%d aanroepen</item>
     </plurals>
+    <string name="assistant_card_default">standaard</string>
+    <string name="assistant_card_recent">Recente oproepen</string>
+    <string name="assistant_card_chat">Erover chatten</string>
+    <string name="assistant_card_from">Van</string>
+    <string name="assistant_card_to">Aan</string>
+    <string name="assistant_card_more">meer</string>
+    <string name="assistant_calling">Ik bel %1$s</string>
+    <string name="assistant_calling_in">Gesprek over %1$d s…</string>
+    <string name="assistant_mail_kept">Goed, niet verzonden.</string>
 </resources>

@@ -377,8 +377,9 @@ internal val TetraColors = darkColorScheme(
 )
 
 /** Tetra's look, for a screen outside the main app (the text editor opened from another app). */
-@Composable internal fun TetraTheme(content: @Composable () -> Unit) = MaterialTheme(colorScheme = TetraLook.colors) {
-    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) { content() }
+@Composable internal fun TetraTheme(backdrop: Boolean = true, content: @Composable () -> Unit) = MaterialTheme(colorScheme = TetraLook.colors) {
+    // [backdrop] false: see-through, for a window over another app (AI Assist's sheet)
+    Surface(Modifier.fillMaxSize(), color = if (backdrop) MaterialTheme.colorScheme.background else Color.Transparent, contentColor = MaterialTheme.colorScheme.onBackground) { content() }
 }
 
 /** A photo or video another app asked us to show. */
