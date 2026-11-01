@@ -4661,4 +4661,15 @@
     <string name="maps_welcome_steps">1. Στον υπολογιστή, ανοίξτε το Tetra › Ρυθμίσεις › Χάρτες › Προσθήκη χάρτη.\n2. Διαλέξτε τη χώρα σας. Ο υπολογιστής χρειάζεται διαδίκτυο γι\' αυτό.\n3. Κρατήστε τον υπολογιστή ανοιχτό και στην πρίζα όσο φτιάχνεται ο χάρτης: λίγα λεπτά για μια μικρή χώρα, μία ώρα ή περισσότερο για μια μεγάλη.\n4. Κρατήστε ανοιχτό το Tetra σε αυτή τη συσκευή, στο ίδιο Wi-Fi με τον υπολογιστή: ο χάρτης έρχεται εδώ μόνος του.</string>
     <string name="sync_others">Άλλα</string>
     <string name="sync_keep_auto" formatted="false">όλα, μέχρι να γεμίσει στο 90%</string>
+    <string name="pdf_open_in_scanner">Άνοιγμα στον σαρωτή</string>
+    <string name="scanner_add_camera">Κάμερα</string>
+    <string name="scanner_add_from_file">Από αρχείο</string>
+    <string name="scanner_perspective">Προοπτική</string>
+    <string name="scanner_tilt">Κλίση</string>
+    <string name="scanner_tilt_degrees">Κλίση %1$.1f°</string>
+    <string name="scanner_auto_straighten">Αυτόματο ίσιωμα</string>
+    <string name="scanner_flatten_curve">Ίσιωμα καμπύλης</string>
+    <string name="scanner_no_text_lines">Δεν βρέθηκαν αρκετές γραμμές κειμένου σε αυτή τη σελίδα.</string>
+    <string name="scanner_import_failed">Δεν άνοιξαν αυτές οι σελίδες.</string>
+    <string name="scanner_importing">Άνοιγμα σελίδων…</string>
 </resources>

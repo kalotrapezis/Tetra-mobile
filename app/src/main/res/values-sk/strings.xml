@@ -4864,4 +4864,15 @@
     <string name="maps_welcome_steps">1. Na počítači otvorte Tetra › Nastavenia › Mapy › Pridať mapu.\n2. Vyberte svoju krajinu. Počítač na to potrebuje internet.\n3. Nechajte počítač zapnutý a pripojený do zásuvky, kým sa mapa vytvára: niekoľko minút pri malej krajine, hodinu alebo dlhšie pri veľkej.\n4. Nechajte na tomto zariadení otvorenú aplikáciu Tetra, v rovnakej sieti Wi-Fi ako počítač: mapa sa sem dostane sama.</string>
     <string name="sync_others">Ostatné</string>
     <string name="sync_keep_auto" formatted="false">všetko, kým sa nezaplní na 90 %</string>
+    <string name="pdf_open_in_scanner">Otvoriť v skeneri</string>
+    <string name="scanner_add_camera">Fotoaparát</string>
+    <string name="scanner_add_from_file">Zo súboru</string>
+    <string name="scanner_perspective">Perspektíva</string>
+    <string name="scanner_tilt">Náklon</string>
+    <string name="scanner_tilt_degrees">Náklon %1$.1f°</string>
+    <string name="scanner_auto_straighten">Automaticky vyrovnať</string>
+    <string name="scanner_flatten_curve">Vyrovnať zakrivenie</string>
+    <string name="scanner_no_text_lines">Na tejto strane nie je dosť riadkov textu.</string>
+    <string name="scanner_import_failed">Tieto strany sa nepodarilo otvoriť.</string>
+    <string name="scanner_importing">Otvárajú sa strany…</string>
 </resources>

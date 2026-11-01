@@ -726,6 +726,27 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
             }
         }.start()
     }
+    /**
+     * Pages from files into the scanner ([load] writes them in [into], the scanner's cache): added to the scan open
+     * now, or a new scan when [fresh] (the PDF editor's Open in scanner, Files' own).
+     */
+    fun importScan(fresh: Boolean, load: (File) -> List<File>) {
+        if (fresh) { clearScanPages(); lockScannerPortrait() }
+        scannerError = null
+        Toast.makeText(context, R.string.scanner_importing, Toast.LENGTH_SHORT).show()
+        Thread {
+            val result = runCatching { load(File(context.cacheDir, "scans")).map { CapturedPage(it) } }
+            (context as MainActivity).runOnUiThread {
+                result.onSuccess { added ->
+                    if (added.isEmpty()) return@onSuccess
+                    scanSelected = scanPages.size
+                    scanPages = scanPages + added
+                }.onFailure { WriterLog.e("Scanner: import", it); scannerError = context.getString(R.string.scanner_import_failed) }
+                if (scanPages.isNotEmpty()) screen = Screen.ScanDocument
+                else if (fresh) Toast.makeText(context, R.string.scanner_import_failed, Toast.LENGTH_LONG).show()
+            }
+        }.start()
+    }
     // Back from the camera returns to the document while it has pages; only an empty scan leaves the scanner.
     fun leaveScanner() {
         scanRetake = null
@@ -925,6 +946,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                 )
                 Screen.Drive -> DriveTab(
                     home = { screen = Screen.Home },
+                    openInScanner = { f -> importScan(true) { into -> ScanFiles.importPages(context, Uri.fromFile(f), into) } },
                     pane = drivePane,
                     setPane = { drivePane = it },
                     folder = driveFolder,
@@ -975,7 +997,8 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                 Screen.Writer -> WriterScreen(back = { officeVersion++; screen = writerBack }, open = writerOpen)
                 Screen.Sheet -> sheetOpen?.let { androidx.compose.runtime.key(it) { SheetScreen(back = { screen = writerBack }, open = it) } }
                 Screen.Slides -> slidesOpen?.let { androidx.compose.runtime.key(it) { SlidesScreen(back = { screen = writerBack }, open = it) } }
-                Screen.Pdf -> pdfOpen?.let { androidx.compose.runtime.key(it) { PdfScreen(back = { screen = writerBack }, open = it, openWords = { w -> writerOpen = w; screen = Screen.Writer }) } }
+                Screen.Pdf -> pdfOpen?.let { androidx.compose.runtime.key(it) { PdfScreen(back = { screen = writerBack }, open = it, openWords = { w -> writerOpen = w; screen = Screen.Writer },
+                    openInScanner = { d -> importScan(true) { into -> ScanFiles.pdfPages(d, into.also { f -> f.mkdirs() }) } }) } }
                 Screen.Calendar -> CalendarScreen(back = { screen = Screen.Home }, hasAccess = hasAllFilesAccess(), grant = {
                     context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                 }, startKind = calendarNew, openContact = { uid -> contactsOpen = uid; screen = Screen.Contacts })
@@ -1027,6 +1050,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                     },
                     retake = { index -> scanRetake = index; screen = Screen.Scanner },
                     addPage = { scanRetake = null; screen = Screen.Scanner },
+                    importFiles = { uris -> importScan(false) { into -> uris.flatMap { ScanFiles.importPages(context, it, into) } } },
                     discard = { clearScanPages(); unlockScannerOrientation(); screen = Screen.Home },
                     saving = scanSaving,
                     error = scannerError,
@@ -2204,6 +2228,7 @@ internal enum class Category(val color: Color, val icon: Int) {
 @Composable
 private fun DriveTab(
     home: () -> Unit,
+    openInScanner: (File) -> Unit,
     pane: DrivePane,
     setPane: (DrivePane) -> Unit,
     folder: String,
@@ -2255,6 +2280,7 @@ private fun DriveTab(
         value = if (toolsOpen && hasAccess) withContext(Dispatchers.IO) { runCatching { DriveRules.spaceUsage(root) }.getOrNull() } else null
     }
     fun perform(item: DriveItem, action: DriveItemAction) {
+        if (action == DriveItemAction.Scan) { openInScanner(item.file); return }
         Thread {
             val result = runCatching {
                 when (action) {
@@ -2265,6 +2291,7 @@ private fun DriveTab(
                     is DriveItemAction.Color -> metadata.setColor(item.relativePath, action.color)
                     is DriveItemAction.Tags -> metadata.setTags(item.relativePath, action.names)
                     DriveItemAction.Trash -> DriveRules.moveToTrash(root, item.relativePath).also { metadata.rewritePath(item.relativePath, it); driveOpeners.rewritePath(item.relativePath, it) }
+                    DriveItemAction.Scan -> Unit
                 }
             }
             Handler(Looper.getMainLooper()).post {
@@ -2639,6 +2666,8 @@ private sealed interface DriveItemAction {
     data class Color(val color: DriveFolderColor?) : DriveItemAction
     data class Tags(val names: Set<String>) : DriveItemAction
     data object Trash : DriveItemAction
+    /** A PDF's pages or a picture into the scanner, to edit as a scan. */
+    data object Scan : DriveItemAction
 }
 
 private enum class DriveItemSheetPanel { Menu, Rename, Copy, Move, Tags, Color, Properties, Trash, Sync }
@@ -2724,6 +2753,7 @@ private fun DriveItemMoreSheet(item: DriveItem, metadata: DriveMetadata, open: (
                         if (!item.isDirectory) DriveActionTile(R.drawable.ic_share, stringResource(R.string.common_share)) { dismiss(); shareDriveFile(context, item.file) }
                     }
                     if (!item.isDirectory) DriveWideAction(R.drawable.ic_open_with, stringResource(R.string.files_open_with)) { dismiss(); openWith() }
+                    if (!item.isDirectory && item.file.extension.lowercase() in setOf("pdf", "jpg", "jpeg", "png", "heic", "heif", "webp")) DriveWideAction(R.drawable.ic_perspective, stringResource(R.string.pdf_open_in_scanner)) { submit(DriveItemAction.Scan) }
                     DriveWideAction(if (metadata.isFavorite(item.relativePath)) R.drawable.ic_remove_favorite else R.drawable.ic_favorite_border, stringResource(if (metadata.isFavorite(item.relativePath)) R.string.files_favorite_remove else R.string.files_favorite_add)) { submit(DriveItemAction.Favorite(!metadata.isFavorite(item.relativePath))) }
                     DriveWideAction(R.drawable.ic_tag, stringResource(R.string.files_tags)) { panel = DriveItemSheetPanel.Tags }
                     DriveWideAction(R.drawable.ic_info, stringResource(R.string.files_properties)) { panel = DriveItemSheetPanel.Properties }

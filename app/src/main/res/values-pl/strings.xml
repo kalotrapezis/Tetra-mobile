@@ -4864,4 +4864,15 @@
     <string name="maps_welcome_steps">1. Na komputerze otwórz Tetra › Ustawienia › Mapy › Dodaj mapę.\n2. Wybierz swój kraj. Komputer potrzebuje do tego internetu.\n3. Zostaw komputer włączony i podłączony do prądu, gdy mapa jest tworzona: kilka minut dla małego kraju, godzinę lub dłużej dla dużego.\n4. Zostaw na tym urządzeniu otwartą aplikację Tetra, w tej samej sieci Wi-Fi co komputer: mapa trafi tu sama.</string>
     <string name="sync_others">Pozostałe</string>
     <string name="sync_keep_auto" formatted="false">wszystko, aż zapełni się w 90%</string>
+    <string name="pdf_open_in_scanner">Otwórz w skanerze</string>
+    <string name="scanner_add_camera">Aparat</string>
+    <string name="scanner_add_from_file">Z pliku</string>
+    <string name="scanner_perspective">Perspektywa</string>
+    <string name="scanner_tilt">Nachylenie</string>
+    <string name="scanner_tilt_degrees">Nachylenie %1$.1f°</string>
+    <string name="scanner_auto_straighten">Wyprostuj automatycznie</string>
+    <string name="scanner_flatten_curve">Wyrównaj wygięcie</string>
+    <string name="scanner_no_text_lines">Na tej stronie jest za mało wierszy tekstu.</string>
+    <string name="scanner_import_failed">Nie udało się otworzyć tych stron.</string>
+    <string name="scanner_importing">Otwieranie stron…</string>
 </resources>

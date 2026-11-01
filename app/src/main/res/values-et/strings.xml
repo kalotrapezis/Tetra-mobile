@@ -4662,4 +4662,15 @@
     <string name="maps_welcome_steps">1. Avage oma arvutis Tetra › Seaded › Kaardid › Lisa kaart.\n2. Valige oma riik. Selleks vajab arvuti internetti.\n3. Hoidke arvuti sisse lülitatud ja vooluvõrku ühendatud, kuni kaarti tehakse: väikese riigi puhul paar minutit, suure puhul tund või rohkem.\n4. Hoidke Tetra selles seadmes avatuna, samas Wi-Fi-võrgus kui arvuti: kaart jõuab siia ise.</string>
     <string name="sync_others">Muud</string>
     <string name="sync_keep_auto" formatted="false">kõik, kuni see on 90% täis</string>
+    <string name="pdf_open_in_scanner">Ava skanneris</string>
+    <string name="scanner_add_camera">Kaamera</string>
+    <string name="scanner_add_from_file">Failist</string>
+    <string name="scanner_perspective">Perspektiiv</string>
+    <string name="scanner_tilt">Kalle</string>
+    <string name="scanner_tilt_degrees">Kalle %1$.1f°</string>
+    <string name="scanner_auto_straighten">Sirgu automaatselt</string>
+    <string name="scanner_flatten_curve">Silu kumerus</string>
+    <string name="scanner_no_text_lines">Sellel lehel pole piisavalt tekstiridu.</string>
+    <string name="scanner_import_failed">Neid lehti ei saanud avada.</string>
+    <string name="scanner_importing">Lehtede avamine…</string>
 </resources>

@@ -4662,4 +4662,15 @@
     <string name="maps_welcome_steps">1. Avaa tietokoneellasi Tetra › Asetukset › Kartat › Lisää kartta.\n2. Valitse maasi. Tietokone tarvitsee siihen internetin.\n3. Pidä tietokone päällä ja kiinni virtalähteessä, kun karttaa tehdään: muutama minuutti pienelle maalle, tunti tai enemmän isolle.\n4. Pidä Tetra auki tässä laitteessa, samassa Wi-Fi-verkossa kuin tietokone: kartta tulee tänne itsestään.</string>
     <string name="sync_others">Muut</string>
     <string name="sync_keep_auto" formatted="false">kaikki, kunnes se on 90 % täynnä</string>
+    <string name="pdf_open_in_scanner">Avaa skannerissa</string>
+    <string name="scanner_add_camera">Kamera</string>
+    <string name="scanner_add_from_file">Tiedostosta</string>
+    <string name="scanner_perspective">Perspektiivi</string>
+    <string name="scanner_tilt">Kallistus</string>
+    <string name="scanner_tilt_degrees">Kallistus %1$.1f°</string>
+    <string name="scanner_auto_straighten">Suorista automaattisesti</string>
+    <string name="scanner_flatten_curve">Oikaise kaarevuus</string>
+    <string name="scanner_no_text_lines">Sivulla ei ole tarpeeksi tekstirivejä.</string>
+    <string name="scanner_import_failed">Sivuja ei voitu avata.</string>
+    <string name="scanner_importing">Avataan sivuja…</string>
 </resources>

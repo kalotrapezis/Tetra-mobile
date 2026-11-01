@@ -4662,4 +4662,15 @@
     <string name="maps_welcome_steps">1. Open op je computer Tetra › Instellingen › Kaarten › Kaart toevoegen.\n2. Kies je land. De computer heeft hiervoor internet nodig.\n3. Laat de computer aan en op het stopcontact aangesloten terwijl de kaart wordt gemaakt: een paar minuten voor een klein land, een uur of langer voor een groot land.\n4. Houd Tetra open op dit apparaat, op hetzelfde Wi-Fi als de computer: de kaart komt vanzelf hierheen.</string>
     <string name="sync_others">Overige</string>
     <string name="sync_keep_auto" formatted="false">alles, tot hij 90% vol is</string>
+    <string name="pdf_open_in_scanner">Openen in scanner</string>
+    <string name="scanner_add_camera">Camera</string>
+    <string name="scanner_add_from_file">Uit bestand</string>
+    <string name="scanner_perspective">Perspectief</string>
+    <string name="scanner_tilt">Kanteling</string>
+    <string name="scanner_tilt_degrees">Kanteling %1$.1f°</string>
+    <string name="scanner_auto_straighten">Automatisch rechtzetten</string>
+    <string name="scanner_flatten_curve">Kromming afvlakken</string>
+    <string name="scanner_no_text_lines">Te weinig tekstregels op deze pagina.</string>
+    <string name="scanner_import_failed">Deze pagina’s konden niet worden geopend.</string>
+    <string name="scanner_importing">Pagina’s openen…</string>
 </resources>

@@ -14,7 +14,8 @@ records how it works and the rules it must keep.
 | `ScanScreens.kt` | Camera, document viewer, actions island, corner editor, reorder grid, paint layer; page rendering |
 | `ScanDetection.kt` | OpenCV page outline, the rules that refuse a candidate, straight-edge fitting, letters-decide-the-cut, trim to paper, live-to-capture mapping, edge gap fill |
 | `ScanFilters.kt` | Lighting flattening, the four filters, adaptive ink threshold, sharpening, paper swatches, shared paper tone |
-| `ScanFiles.kt` | Safe PDF naming and multi-page A4-width PDF writing |
+| `ScanFiles.kt` | Safe PDF naming and multi-page A4-width PDF writing; PDFs and pictures turned into pages (import) |
+| `ScanStraighten.kt` | Fine tilt (±45°, auto from the text lines) and the curved-page bend, measured once and kept as a grid |
 | `PhotoEditor.kt` | Reuses `CornerEditor`, `PaintPanel`, `ScanStrokeLayer` for photo editing |
 
 ## Pipeline
@@ -66,7 +67,7 @@ records how it works and the rules it must keep.
    covering everything looks exactly like no crop at all.
 7. **Render on demand** from the photo plus stored edits (`CapturedPage`):
    perspective warp → trim to paper → sharpen → optional gap fill → rotation →
-   filter → painted strokes. Edits are data, so nothing is lossy until Save; the
+   curve flattening → tilt → filter → painted strokes. Edits are data, so nothing is lossy until Save; the
    viewer renders at ~2000 px, thumbnails at 1/8, the PDF at 3508 px (300 dpi)
    or 2339 (200), chosen in Settings › PDF scanner.
 8. **Trim to paper**: square to the frame now, so any band the outline kept can
@@ -89,6 +90,25 @@ records how it works and the rules it must keep.
     B&W then splits ink from paper at a line taken from the page's own
     brightness (Otsu), not a fixed one: grey thermal print, pencil and tired
     toner all sit above 170, and a fixed line turned those pages blank.
+
+12. **Pages from files.** The PDF editor's Pages › Open in scanner, Files' ⋮ › Open
+    in scanner and the scanner's + › From file (Android's picker, opening in the
+    Tetra folder) turn a PDF's every page (about 300 dpi, unsaved edits included)
+    or a picture (JPG, PNG, HEIC, upright by its EXIF) into pages. They have no
+    outline: Perspective starts at the picture's edges.
+13. **Tilt** turns the page about its centre and enlarges it just enough that no
+    corner is left empty, as a gallery straightens. While the slider moves, the
+    untilted page is turned live under a grid; the page keeps the angle when the
+    finger lifts. Auto straighten reads the text lines (ML Kit) and takes the
+    length-weighted median of their slopes.
+14. **Flatten curve** (a book's page bending towards the spine): each text line's
+    words give a parabola; the curvature down the page is one smooth curve fitted
+    to them (a median first outvotes odd lines), and the page is remapped with a
+    17×17 mesh (`drawBitmapMesh`) so each line comes out straight. Measured once,
+    stored with the page; changing the crop or turning the page drops it. It
+    straightens lines, not the squeeze of letters near the spine — that needs a 3-D
+    page model (OpenCV-heavy optimisation), not worth it on a phone yet. Best order:
+    flatten first, then auto straighten.
 
 ## Rules
 

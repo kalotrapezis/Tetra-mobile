@@ -4763,4 +4763,15 @@
     <string name="maps_welcome_steps">1. Na računalu otvorite Tetra › Postavke › Karte › Dodaj kartu.\n2. Odaberite svoju zemlju. Računalu je za to potreban internet.\n3. Neka računalo ostane uključeno i priključeno na struju dok se karta izrađuje: nekoliko minuta za malu zemlju, sat vremena ili više za veliku.\n4. Neka Tetra ostane otvorena na ovom uređaju, na istoj Wi-Fi mreži kao i računalo: karta dolazi ovamo sama.</string>
     <string name="sync_others">Ostalo</string>
     <string name="sync_keep_auto" formatted="false">sve, dok se ne napuni 90 %</string>
+    <string name="pdf_open_in_scanner">Otvori u skeneru</string>
+    <string name="scanner_add_camera">Kamera</string>
+    <string name="scanner_add_from_file">Iz datoteke</string>
+    <string name="scanner_perspective">Perspektiva</string>
+    <string name="scanner_tilt">Nagib</string>
+    <string name="scanner_tilt_degrees">Nagib %1$.1f°</string>
+    <string name="scanner_auto_straighten">Automatski izravnaj</string>
+    <string name="scanner_flatten_curve">Izravnaj zakrivljenost</string>
+    <string name="scanner_no_text_lines">Na ovoj stranici nema dovoljno redaka teksta.</string>
+    <string name="scanner_import_failed">Ove stranice nije moguće otvoriti.</string>
+    <string name="scanner_importing">Otvaranje stranica…</string>
 </resources>

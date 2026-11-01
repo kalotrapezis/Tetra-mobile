@@ -4864,4 +4864,15 @@
     <string name="maps_welcome_steps">1. Fuq il-kompjuter tiegħek, iftaħ Tetra › Settings › Mapep › Żid mappa.\n2. Agħżel pajjiżek. Il-kompjuter jeħtieġ l-internet għal dan.\n3. Żomm il-kompjuter mixgħul u mqabbad mal-kurrent waqt li l-mappa tkun qed issir: ftit minuti għal pajjiż żgħir, siegħa jew aktar għal wieħed kbir.\n4. Żomm Tetra miftuħa fuq dan l-apparat, fuq l-istess Wi-Fi tal-kompjuter: il-mappa tasal hawn waħedha.</string>
     <string name="sync_others">Oħrajn</string>
     <string name="sync_keep_auto" formatted="false">kollox, sakemm jimtela 90%</string>
+    <string name="pdf_open_in_scanner">Iftaħ fl-iskaner</string>
+    <string name="scanner_add_camera">Kamera</string>
+    <string name="scanner_add_from_file">Minn fajl</string>
+    <string name="scanner_perspective">Perspettiva</string>
+    <string name="scanner_tilt">Inklinazzjoni</string>
+    <string name="scanner_tilt_degrees">Inklinazzjoni %1$.1f°</string>
+    <string name="scanner_auto_straighten">Iddritta awtomatikament</string>
+    <string name="scanner_flatten_curve">Iċċattja l-kurva</string>
+    <string name="scanner_no_text_lines">M’hemmx biżżejjed linji ta’ test f’din il-paġna.</string>
+    <string name="scanner_import_failed">Ma setgħux jinfetħu dawn il-paġni.</string>
+    <string name="scanner_importing">Qed jinfetħu l-paġni…</string>
 </resources>

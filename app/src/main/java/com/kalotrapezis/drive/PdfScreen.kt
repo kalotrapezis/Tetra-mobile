@@ -1076,7 +1076,7 @@ internal class PdfDoc(private val file: File, password: String? = null) {
  * Android reads a PDF's words; Share, Print, Open in another app. View only.
  */
 @Composable
-internal fun PdfScreen(back: () -> Unit, open: String, openWords: (String) -> Unit = {}) {
+internal fun PdfScreen(back: () -> Unit, open: String, openWords: (String) -> Unit = {}, openInScanner: (PdfDoc) -> Unit = {}) {
     val context = LocalContext.current
     remember { OfficeFonts.assets = context.applicationContext.assets } // Words' fonts (Times' and Calibri's twins) for its texts, as Words' and Slides'
     val scope = rememberCoroutineScope()
@@ -2465,6 +2465,8 @@ internal fun PdfScreen(back: () -> Unit, open: String, openWords: (String) -> Un
                                 .onFailure { WriterLog.e("PDF: extract", it); Toast.makeText(context, pdfSays(context, it, R.string.pdf_extract_failed), Toast.LENGTH_LONG).show() }
                         }
                     }
+                    // every page (as it is now, unsaved changes too) a picture in the scanner: filters, perspective, tilt, paint
+                    RibbonButton(stringResource(R.string.pdf_open_in_scanner), w, R.drawable.ic_perspective) { openInScanner(d) }
                     RibbonMenu(stringResource(R.string.pdf_split), w, R.drawable.ic_view_column, preset = false, choices = listOf(
                         MenuChoice(stringResource(R.string.pdf_split_every)) { splitFile(true) },
                         MenuChoice(stringResource(R.string.pdf_split_here), enabled = page > 0) { splitFile(false) }))

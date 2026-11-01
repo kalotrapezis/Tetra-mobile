@@ -4763,4 +4763,15 @@
     <string name="maps_welcome_steps">1. Savā datorā atveriet Tetra › Iestatījumi › Kartes › Pievienot karti.\n2. Izvēlieties savu valsti. Datoram tam vajadzīgs internets.\n3. Turiet datoru ieslēgtu un pieslēgtu elektrībai, kamēr karte tiek veidota: dažas minūtes mazai valstij, stunda vai ilgāk lielai.\n4. Turiet Tetra atvērtu šajā ierīcē, tajā pašā Wi-Fi tīklā, kurā ir dators: karte nonāk šeit pati.</string>
     <string name="sync_others">Citas</string>
     <string name="sync_keep_auto" formatted="false">visu, līdz tā ir 90 % pilna</string>
+    <string name="pdf_open_in_scanner">Atvērt skenerī</string>
+    <string name="scanner_add_camera">Kamera</string>
+    <string name="scanner_add_from_file">No faila</string>
+    <string name="scanner_perspective">Perspektīva</string>
+    <string name="scanner_tilt">Slīpums</string>
+    <string name="scanner_tilt_degrees">Slīpums %1$.1f°</string>
+    <string name="scanner_auto_straighten">Iztaisnot automātiski</string>
+    <string name="scanner_flatten_curve">Izlīdzināt izliekumu</string>
+    <string name="scanner_no_text_lines">Šajā lapā nav pietiekami daudz teksta rindu.</string>
+    <string name="scanner_import_failed">Šīs lapas nevarēja atvērt.</string>
+    <string name="scanner_importing">Atver lapas…</string>
 </resources>

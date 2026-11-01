@@ -4763,4 +4763,15 @@
     <string name="maps_welcome_steps">1. Pe computer, deschide Tetra › Setări › Hărți › Adaugă o hartă.\n2. Alege-ți țara. Computerul are nevoie de internet pentru asta.\n3. Ține computerul pornit și conectat la priză cât timp se face harta: câteva minute pentru o țară mică, o oră sau mai mult pentru una mare.\n4. Ține Tetra deschisă pe acest dispozitiv, pe același Wi-Fi ca computerul: harta ajunge aici singură.</string>
     <string name="sync_others">Altele</string>
     <string name="sync_keep_auto" formatted="false">tot, până se umple 90%</string>
+    <string name="pdf_open_in_scanner">Deschide în scaner</string>
+    <string name="scanner_add_camera">Cameră</string>
+    <string name="scanner_add_from_file">Din fișier</string>
+    <string name="scanner_perspective">Perspectivă</string>
+    <string name="scanner_tilt">Înclinare</string>
+    <string name="scanner_tilt_degrees">Înclinare %1$.1f°</string>
+    <string name="scanner_auto_straighten">Îndreptare automată</string>
+    <string name="scanner_flatten_curve">Aplatizează curbura</string>
+    <string name="scanner_no_text_lines">Nu sunt destule rânduri de text pe această pagină.</string>
+    <string name="scanner_import_failed">Aceste pagini nu au putut fi deschise.</string>
+    <string name="scanner_importing">Se deschid paginile…</string>
 </resources>

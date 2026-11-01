@@ -4763,4 +4763,15 @@
     <string name="maps_welcome_steps">1. Sur votre ordinateur, ouvrez Tetra › Paramètres › Cartes › Ajouter une carte.\n2. Choisissez votre pays. L’ordinateur a besoin d’internet pour cela.\n3. Gardez l’ordinateur allumé et branché pendant la création de la carte : quelques minutes pour un petit pays, une heure ou plus pour un grand.\n4. Gardez Tetra ouvert sur cet appareil, sur le même Wi-Fi que l’ordinateur : la carte arrive ici toute seule.</string>
     <string name="sync_others">Autres</string>
     <string name="sync_keep_auto" formatted="false">tout, jusqu’à ce qu’il soit plein à 90 %</string>
+    <string name="pdf_open_in_scanner">Ouvrir dans le scanner</string>
+    <string name="scanner_add_camera">Appareil photo</string>
+    <string name="scanner_add_from_file">Depuis un fichier</string>
+    <string name="scanner_perspective">Perspective</string>
+    <string name="scanner_tilt">Inclinaison</string>
+    <string name="scanner_tilt_degrees">Inclinaison %1$.1f°</string>
+    <string name="scanner_auto_straighten">Redresser automatiquement</string>
+    <string name="scanner_flatten_curve">Aplanir la courbure</string>
+    <string name="scanner_no_text_lines">Pas assez de lignes de texte sur cette page.</string>
+    <string name="scanner_import_failed">Impossible d’ouvrir ces pages.</string>
+    <string name="scanner_importing">Ouverture des pages…</string>
 </resources>

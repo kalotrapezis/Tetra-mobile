@@ -12,6 +12,10 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [x] (scanner-pdf session, 1 Nov; branch `claude/mystifying-bell-e1946f`, not merged) **PDF editor ↔ scanner and straightening**: PDF
+      Pages › Open in scanner; Files ⋮ › Open in scanner; scanner + › From file (PDF pages, JPG/PNG/HEIC); Adjust › Perspective
+      (for every page), Tilt ±45° with grid and Auto straighten, Flatten curve (DOCUMENT_SCANNER.md 12–14). Checked on an
+      emulator; not on the phone (locked).
 - [~] (system-userspace session, 29 Oct; branches `claude/system-userspace` here and `system-userspace` in Drive; not merged, not pushed,
       not installed, the move not run on the real folders) **Files and Photos are the user's own** (the user: "Make Tetra process
       everything from the system folder; Files and Photos to be userspace only"). Calendar, Contacts, Data, Phone, Timer, Maps (all

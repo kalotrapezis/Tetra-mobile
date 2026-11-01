@@ -4864,4 +4864,15 @@
     <string name="maps_welcome_steps">1. Savo kompiuteryje atidarykite Tetra › Nustatymai › Žemėlapiai › Pridėti žemėlapį.\n2. Pasirinkite savo šalį. Tam kompiuteriui reikia interneto.\n3. Laikykite kompiuterį įjungtą ir prijungtą prie elektros tinklo, kol kuriamas žemėlapis: kelios minutės mažai šaliai, valanda ar ilgiau didelei.\n4. Laikykite Tetra atvirą šiame įrenginyje, tame pačiame Wi-Fi tinkle kaip ir kompiuteris: žemėlapis čia atkeliauja pats.</string>
     <string name="sync_others">Kiti</string>
     <string name="sync_keep_auto" formatted="false">viską, kol užsipildys 90 %</string>
+    <string name="pdf_open_in_scanner">Atidaryti skaitytuve</string>
+    <string name="scanner_add_camera">Kamera</string>
+    <string name="scanner_add_from_file">Iš failo</string>
+    <string name="scanner_perspective">Perspektyva</string>
+    <string name="scanner_tilt">Pokrypis</string>
+    <string name="scanner_tilt_degrees">Pokrypis %1$.1f°</string>
+    <string name="scanner_auto_straighten">Ištiesinti automatiškai</string>
+    <string name="scanner_flatten_curve">Ištiesinti išlinkimą</string>
+    <string name="scanner_no_text_lines">Šiame puslapyje nepakanka teksto eilučių.</string>
+    <string name="scanner_import_failed">Nepavyko atidaryti šių puslapių.</string>
+    <string name="scanner_importing">Atidaromi puslapiai…</string>
 </resources>

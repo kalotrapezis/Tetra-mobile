@@ -1,6 +1,9 @@
 package com.kalotrapezis.drive
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
 import android.graphics.pdf.PdfDocument
 import java.io.File
 
@@ -44,6 +47,39 @@ object ScanFiles {
             document.close()
         }
         return DriveRules.relative(root, target)
+    }
+
+    /** Every page of [doc] (unsaved changes too) drawn at about 300 dpi, as JPGs in [into]: pages for the scanner. */
+    internal fun pdfPages(doc: PdfDoc, into: File): List<File> = doc.sizes.indices.map { i -> jpg(doc.scanOf(i).first, into) }
+
+    /**
+     * [uri] as pages for the scanner, JPGs in [into]: a PDF's every page, or one picture (JPG, PNG, HEIC…) upright.
+     * A file:// uri is Tetra's own Files, a content:// one Android's picker.
+     */
+    fun importPages(context: Context, uri: Uri, into: File): List<File> {
+        into.mkdirs()
+        val type = context.contentResolver.getType(uri)
+        if (type == "application/pdf" || uri.path.orEmpty().endsWith(".pdf", true)) {
+            val copy = File(into, "${java.util.UUID.randomUUID()}.pdf")
+            try {
+                context.contentResolver.openInputStream(uri)?.use { input -> copy.outputStream().use { input.copyTo(it) } } ?: error("unreadable")
+                val doc = PdfDoc(copy)
+                try { return pdfPages(doc, into) } finally { doc.close() }
+            } finally { copy.delete() }
+        }
+        // ImageDecoder turns a photo upright by its EXIF and reads HEIC; a huge picture is halved until it fits a page
+        val bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri)) { decoder, info, _ ->
+            decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+            var sample = 1
+            while (maxOf(info.size.width, info.size.height) / sample > 4200) sample *= 2
+            decoder.setTargetSampleSize(sample)
+        }
+        return listOf(jpg(bitmap, into))
+    }
+
+    private fun jpg(bitmap: Bitmap, into: File): File = File(into, "${java.util.UUID.randomUUID()}.jpg").also { f ->
+        f.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+        bitmap.recycle()
     }
 
     private const val A4_WIDTH_POINTS = 595

@@ -4864,4 +4864,15 @@
     <string name="maps_welcome_steps">1. Na računalniku odprite Tetra › Nastavitve › Zemljevidi › Dodaj zemljevid.\n2. Izberite svojo državo. Računalnik za to potrebuje internet.\n3. Računalnik naj ostane vklopljen in priključen na električno omrežje, medtem ko se zemljevid ustvarja: nekaj minut za majhno državo, ura ali več za veliko.\n4. Tetra naj ostane odprta na tej napravi, v istem omrežju Wi-Fi kot računalnik: zemljevid pride sem sam.</string>
     <string name="sync_others">Drugo</string>
     <string name="sync_keep_auto" formatted="false">vse, dokler ni 90 % polno</string>
+    <string name="pdf_open_in_scanner">Odpri v optičnem bralniku</string>
+    <string name="scanner_add_camera">Kamera</string>
+    <string name="scanner_add_from_file">Iz datoteke</string>
+    <string name="scanner_perspective">Perspektiva</string>
+    <string name="scanner_tilt">Nagib</string>
+    <string name="scanner_tilt_degrees">Nagib %1$.1f°</string>
+    <string name="scanner_auto_straighten">Samodejno poravnaj</string>
+    <string name="scanner_flatten_curve">Zravnaj ukrivljenost</string>
+    <string name="scanner_no_text_lines">Na tej strani ni dovolj vrstic besedila.</string>
+    <string name="scanner_import_failed">Teh strani ni bilo mogoče odpreti.</string>
+    <string name="scanner_importing">Odpiranje strani…</string>
 </resources>

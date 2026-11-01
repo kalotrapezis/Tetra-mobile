@@ -93,6 +93,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -143,6 +144,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -223,6 +225,10 @@ internal data class CapturedPage(
     val autoFix: Boolean = true,
     val paperTone: Int = ScanFilters.WHITE,
     val strokes: List<ScanStroke> = emptyList(),
+    /** Fine straightening after the 90° turns, degrees clockwise (ScanStraighten.tilt). */
+    val tilt: Float = 0f,
+    /** A curved page's bend, measured from its lines once (ScanStraighten.bend); dropped when the crop or turn changes. */
+    val bend: List<Float>? = null,
 ) {
     val key: String get() = file.name
 }
@@ -243,7 +249,7 @@ internal fun ScanStroke.rotated(degrees: Int): ScanStroke = copy(points = points
 })
 
 /** Rotates the page and its painted strokes together. */
-private fun CapturedPage.rotatedBy(degrees: Int) = copy(rotation = (rotation + degrees + 360) % 360, strokes = strokes.map { it.rotated(degrees) })
+private fun CapturedPage.rotatedBy(degrees: Int) = copy(rotation = (rotation + degrees + 360) % 360, strokes = strokes.map { it.rotated(degrees) }, bend = null)
 
 @Composable
 @androidx.annotation.OptIn(markerClass = [ExperimentalGetImage::class])
@@ -571,11 +577,12 @@ internal fun rotateScan(source: Bitmap, degrees: Int): Bitmap = if (degrees % 36
     Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
 }
 
-/** Renders a page from its photo and stored edits: straighten + gap fill, rotation, then filter. */
+/** Renders a page from its photo and stored edits: straighten + gap fill, rotation, bend and tilt, then filter. */
 internal fun renderScanPage(page: CapturedPage, sampleSize: Int, maxEdge: Float = SCAN_MAX_EDGE): Bitmap? {
     val source = decodeCapturedScan(page.file, sampleSize) ?: return null
     val straightened = page.quad?.let { autoFixScan(source, it, maxEdge, page.autoFix) } ?: source
-    val result = rotateScan(straightened, page.rotation).let { if (it.isMutable) it else it.copy(Bitmap.Config.ARGB_8888, true) }
+    val turned = rotateScan(straightened, page.rotation).let { page.bend?.let { b -> ScanStraighten.flatten(it, b) } ?: it }
+    val result = ScanStraighten.tilt(turned, page.tilt).let { if (it.isMutable) it else it.copy(Bitmap.Config.ARGB_8888, true) }
     if (page.filter != ScanFilter.Original) {
         val pixels = IntArray(result.width * result.height)
         result.getPixels(pixels, 0, result.width, 0, 0, result.width, result.height)
@@ -726,7 +733,7 @@ private fun DocumentQuad.isValidCrop(): Boolean {
 }
 
 
-private enum class ScanPanel { Adjust, Filters, Paint }
+private enum class ScanPanel { Adjust, Tilt, Filters, Paint }
 private enum class ScanDocumentMode { Pages, Corners, Reorder }
 
 /** The scanned document: page viewer, filmstrip and an actions island, following the gallery viewer layout. */
@@ -739,6 +746,7 @@ internal fun ScanDocumentTab(
     move: (Int, Int) -> Unit,
     retake: (Int) -> Unit,
     addPage: () -> Unit,
+    importFiles: (List<Uri>) -> Unit,
     discard: () -> Unit,
     saving: Boolean,
     error: String?,
@@ -757,6 +765,23 @@ internal fun ScanDocumentTab(
     var paintColor by remember { mutableStateOf(android.graphics.Color.WHITE) }
     var brushWidth by remember { mutableStateOf(0.03f) }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val context = LocalContext.current
+    // the slider's angle while it moves; the page keeps it when the finger lifts (one render, not one per step)
+    var liveTilt by remember(current, page.tilt) { mutableStateOf(page.tilt) }
+    var measuring by remember { mutableStateOf(false) }
+    /** Reads the page's text lines (rendered as [what] leaves it) and gives them to [use]; a page without lines says so. */
+    fun measure(what: CapturedPage, use: (List<List<ScanPoint>>, Int, Int) -> CapturedPage?) {
+        if (measuring) return
+        measuring = true
+        scope.launch {
+            val done = withContext(Dispatchers.Default) {
+                runCatching { renderScanPage(what.copy(filter = ScanFilter.Original, strokes = emptyList()), 2, 2000f)?.let { b -> use(ScanStraighten.textLines(b), b.width, b.height) } }.getOrNull()
+            }
+            measuring = false
+            if (done == null) Toast.makeText(context, R.string.scanner_no_text_lines, Toast.LENGTH_LONG).show()
+            else update(current, done)
+        }
+    }
     BackHandler {
         when {
             mode != ScanDocumentMode.Pages -> mode = ScanDocumentMode.Pages
@@ -766,7 +791,7 @@ internal fun ScanDocumentTab(
     }
     when (mode) {
         ScanDocumentMode.Corners -> {
-            ScanCornerEditor(page, done = { quad -> update(current, page.copy(quad = quad)); mode = ScanDocumentMode.Pages }, cancel = { mode = ScanDocumentMode.Pages })
+            ScanCornerEditor(page, done = { quad -> update(current, page.copy(quad = quad, bend = null)); mode = ScanDocumentMode.Pages }, cancel = { mode = ScanDocumentMode.Pages })
             return
         }
         ScanDocumentMode.Reorder -> {
@@ -780,6 +805,11 @@ internal fun ScanDocumentTab(
     LaunchedEffect(current, pages.size) { if (pagerState.currentPage != current) pagerState.scrollToPage(current) }
     LaunchedEffect(pagerState.currentPage) { if (pagerState.currentPage != current) select(pagerState.currentPage) }
     val filmstrip = rememberLazyListState()
+    // Android's picker, opening in Tetra's own folder: PDFs (every page) and pictures become pages of this scan
+    val pickFiles = androidx.activity.compose.rememberLauncherForActivityResult(object : ActivityResultContracts.OpenMultipleDocuments() {
+        override fun createIntent(context: Context, input: Array<String>) = super.createIntent(context, input).putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI,
+            android.provider.DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", "primary:" + TetraFolder.root(Environment.getExternalStorageDirectory()).relativeTo(Environment.getExternalStorageDirectory()).path))
+    }) { uris -> if (uris.isNotEmpty()) importFiles(uris) }
     LaunchedEffect(current) { filmstrip.animateScrollToItem(current) }
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -816,8 +846,10 @@ internal fun ScanDocumentTab(
             key = { pages[it].key },
         ) { index ->
             val item = pages[index]
+            // the tilt is shown live over the untilted page while its slider is open, exactly as the render turns it
+            val tilting = index == current && panel == ScanPanel.Tilt
             // Strokes are drawn as a live overlay, so painting never waits for a re-render.
-            val bitmap = rememberScanRender(item.copy(strokes = emptyList()), 2, 2000f)
+            val bitmap = rememberScanRender(item.copy(strokes = emptyList(), tilt = if (tilting) 0f else item.tilt), 2, 2000f)
             val zoomed = index == current && panel != ScanPanel.Paint
             var viewSize by remember { mutableStateOf(IntSize.Zero) }
             Box(
@@ -845,7 +877,18 @@ internal fun ScanDocumentTab(
                     },
                     contentAlignment = Alignment.Center,
                 ) {
-                    Image(bitmap.asImageBitmap(), contentDescription = stringResource(R.string.scanner_page_n, index + 1), contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
+                    if (tilting) Box(Modifier.aspectRatio(bitmap.width / bitmap.height.toFloat()).clipToBounds()) {
+                        Image(bitmap.asImageBitmap(), contentDescription = stringResource(R.string.scanner_page_n, index + 1), contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize().graphicsLayer { rotationZ = liveTilt; ScanStraighten.cover(bitmap.width, bitmap.height, liveTilt).let { scaleX = it; scaleY = it } })
+                        // a grid to line the text up against
+                        Canvas(Modifier.fillMaxSize()) {
+                            for (k in 1 until 8) {
+                                drawLine(Color.White.copy(alpha = 0.6f), Offset(size.width * k / 8, 0f), Offset(size.width * k / 8, size.height), 1.5f)
+                                drawLine(Color.White.copy(alpha = 0.6f), Offset(0f, size.height * k / 8), Offset(size.width, size.height * k / 8), 1.5f)
+                            }
+                        }
+                    }
+                    else Image(bitmap.asImageBitmap(), contentDescription = stringResource(R.string.scanner_page_n, index + 1), contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
                     ScanStrokeLayer(bitmap.width, bitmap.height, item.strokes, panel == ScanPanel.Paint && index == current, paintColor, brushWidth) { stroke ->
                         update(index, item.copy(strokes = item.strokes + stroke))
                     }
@@ -861,8 +904,13 @@ internal fun ScanDocumentTab(
                 }
             }
             item {
-                Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.size(48.dp, 64.dp).clickable(onClick = addPage)) {
+                var adding by remember { mutableStateOf(false) }
+                Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.size(48.dp, 64.dp).clickable { adding = true }) {
                     Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.scanner_add_page)) }
+                    androidx.compose.material3.DropdownMenu(adding, { adding = false }) {
+                        androidx.compose.material3.DropdownMenuItem({ Text(stringResource(R.string.scanner_add_camera)) }, { adding = false; addPage() }, leadingIcon = { Icon(painterResource(R.drawable.ic_retake), null) })
+                        androidx.compose.material3.DropdownMenuItem({ Text(stringResource(R.string.scanner_add_from_file)) }, { adding = false; pickFiles.launch(arrayOf("application/pdf", "image/*")) }, leadingIcon = { Icon(painterResource(R.drawable.ic_file_upload), null) })
+                    }
                 }
             }
         }
@@ -887,6 +935,15 @@ internal fun ScanDocumentTab(
             setBrushWidth = { brushWidth = it },
             retake = { retake(current) },
             crop = { panel = null; mode = ScanDocumentMode.Corners },
+            tilt = liveTilt,
+            setTilt = { liveTilt = it },
+            keepTilt = { update(current, page.copy(tilt = liveTilt)) },
+            autoTilt = { measure(page.copy(tilt = 0f)) { lines, _, _ -> ScanStraighten.slope(lines)?.let { page.copy(tilt = -it) } } },
+            flatten = {
+                if (page.bend != null) update(current, page.copy(bend = null))
+                else measure(page.copy(bend = null, tilt = 0f)) { lines, w, h -> ScanStraighten.bend(lines.map { l -> l.map { ScanPoint(it.x / w, it.y / h) } })?.let { page.copy(bend = it) } }
+            },
+            measuring = measuring,
             reorder = { panel = null; mode = ScanDocumentMode.Reorder },
             save = { panel = null; saveOpen = true },
             modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
@@ -924,6 +981,7 @@ private fun ScanActionsIsland(
     applyFilterToAll: (ScanFilter) -> Unit, matchPages: () -> Unit,
     paintColor: Int, setPaintColor: (Int) -> Unit, brushWidth: Float, setBrushWidth: (Float) -> Unit,
     retake: () -> Unit, crop: () -> Unit, reorder: () -> Unit, save: () -> Unit,
+    tilt: Float, setTilt: (Float) -> Unit, keepTilt: () -> Unit, autoTilt: () -> Unit, flatten: () -> Unit, measuring: Boolean,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(true) }
@@ -949,12 +1007,26 @@ private fun ScanActionsIsland(
                 Column {
                     AnimatedVisibility(panel == ScanPanel.Adjust) {
                         LazyRow(contentPadding = PaddingValues(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            item { ScanPill(stringResource(R.string.scanner_crop), R.drawable.ic_crop, false, crop) }
+                            item { ScanPill(stringResource(R.string.scanner_perspective), R.drawable.ic_perspective, false, crop) }
                             item { ScanPill(stringResource(R.string.scanner_left), R.drawable.ic_rotate_left, false) { update(page.rotatedBy(270)) } }
                             item { ScanPill(stringResource(R.string.scanner_right), R.drawable.ic_rotate_right, false) { update(page.rotatedBy(90)) } }
-                            item { ScanPill(stringResource(R.string.photos_reset), R.drawable.ic_refresh, false) { update(page.rotatedBy(-page.rotation).copy(quad = page.autoQuad)) } }
+                            item { ScanPill(stringResource(R.string.scanner_tilt), R.drawable.ic_straighten, page.tilt != 0f) { showPanel(ScanPanel.Tilt) } }
+                            item { ScanPill(stringResource(R.string.scanner_flatten_curve), R.drawable.ic_curve, page.bend != null) { if (!measuring) flatten() } }
+                            item { ScanPill(stringResource(R.string.photos_reset), R.drawable.ic_refresh, false) { update(page.rotatedBy(-page.rotation).copy(quad = page.autoQuad, tilt = 0f, bend = null)) } }
                         }
                     }
+                    AnimatedVisibility(panel == ScanPanel.Tilt) {
+                        Column(Modifier.padding(horizontal = 16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                IconButton(onClick = { showPanel(ScanPanel.Adjust) }) { Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.common_back)) }
+                                Text(stringResource(R.string.scanner_tilt_degrees, tilt), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+                                ScanPill(stringResource(R.string.scanner_auto_straighten), R.drawable.ic_auto_fix, false) { if (!measuring) autoTilt() }
+                                if (tilt != 0f) IconButton(onClick = { setTilt(0f); keepTilt() }) { Icon(painterResource(R.drawable.ic_refresh), contentDescription = stringResource(R.string.photos_reset)) }
+                            }
+                            Slider(tilt, { setTilt((it * 10).roundToInt() / 10f) }, valueRange = -ScanStraighten.MAX_TILT..ScanStraighten.MAX_TILT, onValueChangeFinished = keepTilt)
+                        }
+                    }
+                    if (measuring) LinearProgressIndicator(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp))
                     AnimatedVisibility(panel == ScanPanel.Filters) {
                         LazyRow(contentPadding = PaddingValues(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             item { ScanPill(stringResource(R.string.scanner_match_pages), R.drawable.ic_contrast, page.filter == ScanFilter.SamePaper, matchPages) }
@@ -967,7 +1039,7 @@ private fun ScanActionsIsland(
                     }
                     Row(Modifier.fillMaxWidth().padding(bottom = 4.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
                         IconButton(onClick = retake) { Icon(painterResource(R.drawable.ic_retake), contentDescription = stringResource(R.string.scanner_retake)) }
-                        ScanIslandToggle(R.drawable.ic_tune, stringResource(R.string.photos_adjust), panel == ScanPanel.Adjust) { toggle(ScanPanel.Adjust) }
+                        ScanIslandToggle(R.drawable.ic_tune, stringResource(R.string.photos_adjust), panel == ScanPanel.Adjust || panel == ScanPanel.Tilt) { toggle(ScanPanel.Adjust) }
                         ScanIslandToggle(R.drawable.ic_contrast, stringResource(R.string.scanner_filters), panel == ScanPanel.Filters) { toggle(ScanPanel.Filters) }
                         IconButton(onClick = reorder) { Icon(painterResource(R.drawable.ic_view_grid), contentDescription = stringResource(R.string.scanner_reorder)) }
                         IconButton(onClick = save) { Icon(painterResource(R.drawable.ic_save), contentDescription = stringResource(R.string.scanner_save_pdf)) }
@@ -1101,6 +1173,7 @@ internal fun CornerEditor(source: Bitmap?, initial: DocumentQuad, reset: Documen
         ScanPoint(q.points.maxOf { it.x }, q.points.maxOf { it.y }), ScanPoint(q.points.minOf { it.x }, q.points.maxOf { it.y }))
     var draggedHandle by remember { mutableStateOf(-1) }
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
+    val handleReach = with(LocalDensity.current) { 48.dp.toPx() }
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(Modifier.fillMaxSize().padding(top = 112.dp, start = 12.dp, end = 12.dp).navigationBarsPadding().padding(bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             val image = source
@@ -1115,6 +1188,13 @@ internal fun CornerEditor(source: Bitmap?, initial: DocumentQuad, reset: Documen
                 }
                 Canvas(
                     Modifier.fillMaxWidth().weight(1f).background(Color(0xFF303030)).onSizeChanged { canvasSize = it }
+                        // a corner at the screen's edge (a whole picture's, an imported page's) is dragged, not taken for Back:
+                        // only round each handle, as Android allows a few such places, not a whole edge
+                        .then(crop.points.fold(Modifier as Modifier) { m, point -> m.systemGestureExclusion {
+                            val scale = minOf(canvasSize.width / image.width.toFloat(), canvasSize.height / image.height.toFloat())
+                            val c = Offset((canvasSize.width - image.width * scale) / 2f + point.x * image.width * scale, (canvasSize.height - image.height * scale) / 2f + point.y * image.height * scale)
+                            androidx.compose.ui.geometry.Rect(c, handleReach)
+                        } })
                         .pointerInput(image) {
                             detectDragGestures(
                                 onDragStart = { position ->

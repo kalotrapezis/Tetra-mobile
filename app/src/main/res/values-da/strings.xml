@@ -4662,4 +4662,15 @@
     <string name="maps_welcome_steps">1. Åbn Tetra › Indstillinger › Kort › Tilføj et kort på din computer.\n2. Vælg dit land. Computeren skal bruge internet til det.\n3. Lad computeren være tændt og sat i stikkontakten, mens kortet laves: nogle få minutter for et lille land, en time eller mere for et stort.\n4. Hold Tetra åben på denne enhed, på samme Wi-Fi som computeren: kortet kommer hertil af sig selv.</string>
     <string name="sync_others">Andre</string>
     <string name="sync_keep_auto" formatted="false">alt, indtil den er 90 % fuld</string>
+    <string name="pdf_open_in_scanner">Åbn i scanner</string>
+    <string name="scanner_add_camera">Kamera</string>
+    <string name="scanner_add_from_file">Fra fil</string>
+    <string name="scanner_perspective">Perspektiv</string>
+    <string name="scanner_tilt">Hældning</string>
+    <string name="scanner_tilt_degrees">Hældning %1$.1f°</string>
+    <string name="scanner_auto_straighten">Ret automatisk op</string>
+    <string name="scanner_flatten_curve">Udglat bue</string>
+    <string name="scanner_no_text_lines">Ikke nok tekstlinjer på denne side.</string>
+    <string name="scanner_import_failed">Siderne kunne ikke åbnes.</string>
+    <string name="scanner_importing">Åbner sider…</string>
 </resources>
