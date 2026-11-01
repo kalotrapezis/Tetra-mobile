@@ -4774,4 +4774,13 @@
     <string name="scanner_no_text_lines">No hay suficientes líneas de texto en esta página.</string>
     <string name="scanner_import_failed">No se pudieron abrir estas páginas.</string>
     <string name="scanner_importing">Abriendo páginas…</string>
+    <string name="text_line_numbers">Números de línea</string>
+    <string name="text_line_numbers_info">Un número al inicio de cada línea; una línea ajustada conserva uno.</string>
+    <string name="text_theme">Tema</string>
+    <string name="text_theme_plain">Simple</string>
+    <string name="text_theme_stripes">Rayas</string>
+    <string name="text_markdown_view">Vista Markdown</string>
+    <string name="text_markdown_view_info">Archivo mostrado con formato, como en Notas. Los .md se abren así.</string>
+    <string name="text_view_mode">Ver</string>
+    <string name="text_edit_mode">Editar</string>
 </resources>

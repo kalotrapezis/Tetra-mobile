@@ -4875,4 +4875,13 @@
     <string name="scanner_no_text_lines">Na tejto strane nie je dosť riadkov textu.</string>
     <string name="scanner_import_failed">Tieto strany sa nepodarilo otvoriť.</string>
     <string name="scanner_importing">Otvárajú sa strany…</string>
+    <string name="text_line_numbers">Čísla riadkov</string>
+    <string name="text_line_numbers_info">Číslo na začiatku každého riadka; zalomený riadok si ponechá jedno.</string>
+    <string name="text_theme">Téma</string>
+    <string name="text_theme_plain">Jednoduchá</string>
+    <string name="text_theme_stripes">Pruhy</string>
+    <string name="text_markdown_view">Zobrazenie Markdown</string>
+    <string name="text_markdown_view_info">Súbor zobrazený formátovane, ako v Poznámkach. Súbory .md sa takto otvárajú.</string>
+    <string name="text_view_mode">Zobrazenie</string>
+    <string name="text_edit_mode">Upraviť</string>
 </resources>

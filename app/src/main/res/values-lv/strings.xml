@@ -4774,4 +4774,13 @@
     <string name="scanner_no_text_lines">Šajā lapā nav pietiekami daudz teksta rindu.</string>
     <string name="scanner_import_failed">Šīs lapas nevarēja atvērt.</string>
     <string name="scanner_importing">Atver lapas…</string>
+    <string name="text_line_numbers">Rindu numuri</string>
+    <string name="text_line_numbers_info">Numurs katras rindas sākumā; pārnesta rinda saglabā vienu numuru.</string>
+    <string name="text_theme">Motīvs</string>
+    <string name="text_theme_plain">Vienkāršs</string>
+    <string name="text_theme_stripes">Svītras</string>
+    <string name="text_markdown_view">Markdown skats</string>
+    <string name="text_markdown_view_info">Fails parādīts formatēts, kā Piezīmēs. .md faili tā arī atveras.</string>
+    <string name="text_view_mode">Skats</string>
+    <string name="text_edit_mode">Rediģēt</string>
 </resources>

@@ -4673,4 +4673,13 @@
     <string name="scanner_no_text_lines">На тази страница няма достатъчно редове текст.</string>
     <string name="scanner_import_failed">Страниците не можаха да се отворят.</string>
     <string name="scanner_importing">Отваряне на страниците…</string>
+    <string name="text_line_numbers">Номера на редовете</string>
+    <string name="text_line_numbers_info">Номер в началото на всеки ред; пренесеният ред запазва един номер.</string>
+    <string name="text_theme">Тема</string>
+    <string name="text_theme_plain">Обикновена</string>
+    <string name="text_theme_stripes">Ивици</string>
+    <string name="text_markdown_view">Markdown изглед</string>
+    <string name="text_markdown_view_info">Файлът е показан форматиран, както в Бележки. .md файловете се отварят така.</string>
+    <string name="text_view_mode">Преглед</string>
+    <string name="text_edit_mode">Редактиране</string>
 </resources>

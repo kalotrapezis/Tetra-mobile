@@ -4875,4 +4875,13 @@
     <string name="scanner_no_text_lines">Na tej stronie jest za mało wierszy tekstu.</string>
     <string name="scanner_import_failed">Nie udało się otworzyć tych stron.</string>
     <string name="scanner_importing">Otwieranie stron…</string>
+    <string name="text_line_numbers">Numery wierszy</string>
+    <string name="text_line_numbers_info">Numer na początku każdego wiersza; zawinięty wiersz zachowuje jeden.</string>
+    <string name="text_theme">Motyw</string>
+    <string name="text_theme_plain">Prosty</string>
+    <string name="text_theme_stripes">Paski</string>
+    <string name="text_markdown_view">Widok Markdown</string>
+    <string name="text_markdown_view_info">Plik wyświetlony z formatowaniem, jak w Notatkach. Pliki .md otwierają się tak.</string>
+    <string name="text_view_mode">Widok</string>
+    <string name="text_edit_mode">Edycja</string>
 </resources>

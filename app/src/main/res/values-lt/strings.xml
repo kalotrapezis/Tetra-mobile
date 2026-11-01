@@ -4875,4 +4875,13 @@
     <string name="scanner_no_text_lines">Šiame puslapyje nepakanka teksto eilučių.</string>
     <string name="scanner_import_failed">Nepavyko atidaryti šių puslapių.</string>
     <string name="scanner_importing">Atidaromi puslapiai…</string>
+    <string name="text_line_numbers">Eilučių numeriai</string>
+    <string name="text_line_numbers_info">Numeris kiekvienos eilutės pradžioje; perkelta eilutė išlaiko vieną numerį.</string>
+    <string name="text_theme">Tema</string>
+    <string name="text_theme_plain">Paprasta</string>
+    <string name="text_theme_stripes">Juostos</string>
+    <string name="text_markdown_view">Markdown rodinys</string>
+    <string name="text_markdown_view_info">Failas rodomas suformatuotas, kaip Užrašuose. .md failai atidaromi taip.</string>
+    <string name="text_view_mode">Rodinys</string>
+    <string name="text_edit_mode">Redaguoti</string>
 </resources>

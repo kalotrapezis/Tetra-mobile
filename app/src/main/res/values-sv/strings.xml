@@ -4673,4 +4673,13 @@
     <string name="scanner_no_text_lines">För få textrader på den här sidan.</string>
     <string name="scanner_import_failed">Sidorna kunde inte öppnas.</string>
     <string name="scanner_importing">Öppnar sidor…</string>
+    <string name="text_line_numbers">Radnummer</string>
+    <string name="text_line_numbers_info">Ett nummer i början av varje rad; en bruten rad behåller ett.</string>
+    <string name="text_theme">Tema</string>
+    <string name="text_theme_plain">Enkel</string>
+    <string name="text_theme_stripes">Ränder</string>
+    <string name="text_markdown_view">Markdown-vy</string>
+    <string name="text_markdown_view_info">Filen visas formaterad, som i Anteckningar. .md-filer öppnas så.</string>
+    <string name="text_view_mode">Visa</string>
+    <string name="text_edit_mode">Redigera</string>
 </resources>

@@ -4774,4 +4774,13 @@
     <string name="scanner_no_text_lines">Na ovoj stranici nema dovoljno redaka teksta.</string>
     <string name="scanner_import_failed">Ove stranice nije moguće otvoriti.</string>
     <string name="scanner_importing">Otvaranje stranica…</string>
+    <string name="text_line_numbers">Brojevi redaka</string>
+    <string name="text_line_numbers_info">Broj na početku svakog retka; prelomljeni redak zadržava jedan broj.</string>
+    <string name="text_theme">Tema</string>
+    <string name="text_theme_plain">Jednostavna</string>
+    <string name="text_theme_stripes">Pruge</string>
+    <string name="text_markdown_view">Markdown prikaz</string>
+    <string name="text_markdown_view_info">Datoteka prikazana oblikovano, kao u Bilješkama. .md datoteke se otvaraju tako.</string>
+    <string name="text_view_mode">Prikaz</string>
+    <string name="text_edit_mode">Uredi</string>
 </resources>

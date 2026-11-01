@@ -4875,4 +4875,13 @@
     <string name="scanner_no_text_lines">Na této stránce není dost řádků textu.</string>
     <string name="scanner_import_failed">Tyto stránky nelze otevřít.</string>
     <string name="scanner_importing">Otevírání stránek…</string>
+    <string name="text_line_numbers">Čísla řádků</string>
+    <string name="text_line_numbers_info">Číslo na začátku každého řádku; zalomený řádek si ponechá jedno.</string>
+    <string name="text_theme">Motiv</string>
+    <string name="text_theme_plain">Prostý</string>
+    <string name="text_theme_stripes">Pruhy</string>
+    <string name="text_markdown_view">Zobrazení Markdown</string>
+    <string name="text_markdown_view_info">Soubor zobrazený formátovaně, jako v Poznámkách. Soubory .md se takto otevírají.</string>
+    <string name="text_view_mode">Zobrazení</string>
+    <string name="text_edit_mode">Upravit</string>
 </resources>

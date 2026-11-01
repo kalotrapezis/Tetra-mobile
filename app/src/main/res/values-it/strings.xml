@@ -4673,4 +4673,13 @@
     <string name="scanner_no_text_lines">Non ci sono abbastanza righe di testo in questa pagina.</string>
     <string name="scanner_import_failed">Impossibile aprire queste pagine.</string>
     <string name="scanner_importing">Apertura delle pagine…</string>
+    <string name="text_line_numbers">Numeri di riga</string>
+    <string name="text_line_numbers_info">Un numero all\'inizio di ogni riga; una riga a capo ne mantiene uno.</string>
+    <string name="text_theme">Tema</string>
+    <string name="text_theme_plain">Semplice</string>
+    <string name="text_theme_stripes">Righe</string>
+    <string name="text_markdown_view">Vista Markdown</string>
+    <string name="text_markdown_view_info">File mostrato formattato, come in Note. I file .md si aprono così.</string>
+    <string name="text_view_mode">Visualizza</string>
+    <string name="text_edit_mode">Modifica</string>
 </resources>

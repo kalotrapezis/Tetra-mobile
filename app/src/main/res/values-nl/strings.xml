@@ -4673,4 +4673,13 @@
     <string name="scanner_no_text_lines">Te weinig tekstregels op deze pagina.</string>
     <string name="scanner_import_failed">Deze pagina’s konden niet worden geopend.</string>
     <string name="scanner_importing">Pagina’s openen…</string>
+    <string name="text_line_numbers">Regelnummers</string>
+    <string name="text_line_numbers_info">Een nummer aan het begin van elke regel; een teruggeloopen regel houdt één nummer.</string>
+    <string name="text_theme">Thema</string>
+    <string name="text_theme_plain">Effen</string>
+    <string name="text_theme_stripes">Strepen</string>
+    <string name="text_markdown_view">Markdown-weergave</string>
+    <string name="text_markdown_view_info">Bestand opgemaakt getoond, zoals in Notities. .md-bestanden openen zo.</string>
+    <string name="text_view_mode">Weergave</string>
+    <string name="text_edit_mode">Bewerken</string>
 </resources>

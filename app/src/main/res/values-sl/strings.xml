@@ -4875,4 +4875,13 @@
     <string name="scanner_no_text_lines">Na tej strani ni dovolj vrstic besedila.</string>
     <string name="scanner_import_failed">Teh strani ni bilo mogoče odpreti.</string>
     <string name="scanner_importing">Odpiranje strani…</string>
+    <string name="text_line_numbers">Številke vrstic</string>
+    <string name="text_line_numbers_info">Številka na začetku vsake vrstice; prelomljena vrstica ohrani eno.</string>
+    <string name="text_theme">Tema</string>
+    <string name="text_theme_plain">Preprosta</string>
+    <string name="text_theme_stripes">Črte</string>
+    <string name="text_markdown_view">Prikaz Markdown</string>
+    <string name="text_markdown_view_info">Datoteka prikazana oblikovano, kot v Zapiskih. Datoteke .md se tako odprejo.</string>
+    <string name="text_view_mode">Prikaz</string>
+    <string name="text_edit_mode">Uredi</string>
 </resources>

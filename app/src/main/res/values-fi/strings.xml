@@ -4673,4 +4673,13 @@
     <string name="scanner_no_text_lines">Sivulla ei ole tarpeeksi tekstirivejä.</string>
     <string name="scanner_import_failed">Sivuja ei voitu avata.</string>
     <string name="scanner_importing">Avataan sivuja…</string>
+    <string name="text_line_numbers">Rivinumerot</string>
+    <string name="text_line_numbers_info">Numero jokaisen rivin alussa; rivitetty rivi säilyttää yhden numeron.</string>
+    <string name="text_theme">Teema</string>
+    <string name="text_theme_plain">Tasainen</string>
+    <string name="text_theme_stripes">Raidat</string>
+    <string name="text_markdown_view">Markdown-näkymä</string>
+    <string name="text_markdown_view_info">Tiedosto muotoiltuna, kuten Muistiinpanoissa. .md-tiedostot avautuvat näin.</string>
+    <string name="text_view_mode">Näytä</string>
+    <string name="text_edit_mode">Muokkaa</string>
 </resources>

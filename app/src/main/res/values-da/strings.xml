@@ -4673,4 +4673,13 @@
     <string name="scanner_no_text_lines">Ikke nok tekstlinjer på denne side.</string>
     <string name="scanner_import_failed">Siderne kunne ikke åbnes.</string>
     <string name="scanner_importing">Åbner sider…</string>
+    <string name="text_line_numbers">Linjenumre</string>
+    <string name="text_line_numbers_info">Et nummer i starten af hver linje; en ombrudt linje beholder ét.</string>
+    <string name="text_theme">Tema</string>
+    <string name="text_theme_plain">Simpel</string>
+    <string name="text_theme_stripes">Striber</string>
+    <string name="text_markdown_view">Markdown-visning</string>
+    <string name="text_markdown_view_info">Filen vist formateret, som i Noter. .md-filer åbnes sådan.</string>
+    <string name="text_view_mode">Vis</string>
+    <string name="text_edit_mode">Rediger</string>
 </resources>

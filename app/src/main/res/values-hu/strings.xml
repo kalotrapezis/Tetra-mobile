@@ -4673,4 +4673,13 @@
     <string name="scanner_no_text_lines">Nincs elég szövegsor ezen az oldalon.</string>
     <string name="scanner_import_failed">Az oldalakat nem sikerült megnyitni.</string>
     <string name="scanner_importing">Oldalak megnyitása…</string>
+    <string name="text_line_numbers">Sorszámok</string>
+    <string name="text_line_numbers_info">Szám minden sor elején; a tördelt sor egy számot kap.</string>
+    <string name="text_theme">Téma</string>
+    <string name="text_theme_plain">Egyszerű</string>
+    <string name="text_theme_stripes">Csíkos</string>
+    <string name="text_markdown_view">Markdown nézet</string>
+    <string name="text_markdown_view_info">A fájl formázva, ahogy a Jegyzetekben. Az .md fájlok így nyílnak meg.</string>
+    <string name="text_view_mode">Nézet</string>
+    <string name="text_edit_mode">Szerkesztés</string>
 </resources>

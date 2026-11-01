@@ -4774,4 +4774,13 @@
     <string name="scanner_no_text_lines">Nu sunt destule rânduri de text pe această pagină.</string>
     <string name="scanner_import_failed">Aceste pagini nu au putut fi deschise.</string>
     <string name="scanner_importing">Se deschid paginile…</string>
+    <string name="text_line_numbers">Numere de rând</string>
+    <string name="text_line_numbers_info">Un număr la începutul fiecărui rând; un rând rupt păstrează unul.</string>
+    <string name="text_theme">Temă</string>
+    <string name="text_theme_plain">Simplă</string>
+    <string name="text_theme_stripes">Dungi</string>
+    <string name="text_markdown_view">Vizualizare Markdown</string>
+    <string name="text_markdown_view_info">Fișier afișat formatat, ca în Note. Fișierele .md se deschid așa.</string>
+    <string name="text_view_mode">Vizualizare</string>
+    <string name="text_edit_mode">Editare</string>
 </resources>

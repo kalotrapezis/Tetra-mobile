@@ -4673,4 +4673,13 @@
     <string name="scanner_no_text_lines">Zu wenige Textzeilen auf dieser Seite.</string>
     <string name="scanner_import_failed">Diese Seiten konnten nicht geöffnet werden.</string>
     <string name="scanner_importing">Seiten werden geöffnet…</string>
+    <string name="text_line_numbers">Zeilennummern</string>
+    <string name="text_line_numbers_info">Eine Nummer am Anfang jeder Zeile; eine umgebrochene Zeile behält eine.</string>
+    <string name="text_theme">Thema</string>
+    <string name="text_theme_plain">Schlicht</string>
+    <string name="text_theme_stripes">Streifen</string>
+    <string name="text_markdown_view">Markdown-Ansicht</string>
+    <string name="text_markdown_view_info">Datei formatiert angezeigt, wie in Notizen. .md-Dateien öffnen sich so.</string>
+    <string name="text_view_mode">Ansicht</string>
+    <string name="text_edit_mode">Bearbeiten</string>
 </resources>

@@ -4976,4 +4976,13 @@
     <string name="scanner_no_text_lines">Níl go leor línte téacs ar an leathanach seo.</string>
     <string name="scanner_import_failed">Níorbh fhéidir na leathanaigh seo a oscailt.</string>
     <string name="scanner_importing">Leathanaigh á n-oscailt…</string>
+    <string name="text_line_numbers">Uimhreacha líne</string>
+    <string name="text_line_numbers_info">Uimhir ag tús gach líne; coinníonn líne fillte uimhir amháin.</string>
+    <string name="text_theme">Téama</string>
+    <string name="text_theme_plain">Simplí</string>
+    <string name="text_theme_stripes">Stríocaí</string>
+    <string name="text_markdown_view">Radharc Markdown</string>
+    <string name="text_markdown_view_info">Comhad formáidithe ar taispeáint, mar i Nótaí. Oscailtear comhaid .md mar seo.</string>
+    <string name="text_view_mode">Radharc</string>
+    <string name="text_edit_mode">Cuir in eagar</string>
 </resources>

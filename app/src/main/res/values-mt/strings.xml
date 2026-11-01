@@ -4875,4 +4875,13 @@
     <string name="scanner_no_text_lines">M’hemmx biżżejjed linji ta’ test f’din il-paġna.</string>
     <string name="scanner_import_failed">Ma setgħux jinfetħu dawn il-paġni.</string>
     <string name="scanner_importing">Qed jinfetħu l-paġni…</string>
+    <string name="text_line_numbers">Numri tal-linji</string>
+    <string name="text_line_numbers_info">Numru fil-bidu ta\' kull linja; linja mqassma żżomm numru wieħed.</string>
+    <string name="text_theme">Tema</string>
+    <string name="text_theme_plain">Sempliċi</string>
+    <string name="text_theme_stripes">Strixxi</string>
+    <string name="text_markdown_view">Ħarsa Markdown</string>
+    <string name="text_markdown_view_info">Il-fajl muri ffurmattjat, bħal f\'Noti. Il-fajls .md jinfetħu b\'dan il-mod.</string>
+    <string name="text_view_mode">Ara</string>
+    <string name="text_edit_mode">Editja</string>
 </resources>

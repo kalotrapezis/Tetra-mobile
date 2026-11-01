@@ -4673,4 +4673,13 @@
     <string name="scanner_no_text_lines">Sellel lehel pole piisavalt tekstiridu.</string>
     <string name="scanner_import_failed">Neid lehti ei saanud avada.</string>
     <string name="scanner_importing">Lehtede avamine…</string>
+    <string name="text_line_numbers">Reanumbrid</string>
+    <string name="text_line_numbers_info">Number rea alguses; murdunud rida säilitab ühe numbri.</string>
+    <string name="text_theme">Teema</string>
+    <string name="text_theme_plain">Lihtne</string>
+    <string name="text_theme_stripes">Triibud</string>
+    <string name="text_markdown_view">Markdowni vaade</string>
+    <string name="text_markdown_view_info">Fail kuvatud vormindatult, nagu Märkmetes. .md-failid avanevad nii.</string>
+    <string name="text_view_mode">Vaade</string>
+    <string name="text_edit_mode">Muuda</string>
 </resources>
