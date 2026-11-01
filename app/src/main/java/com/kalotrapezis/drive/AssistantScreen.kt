@@ -98,6 +98,7 @@ private fun AssistantApp(sheet: Boolean, close: () -> Unit) {
     val scope = rememberCoroutineScope()
     val chat = remember { if (sheet) SheetMemory.chat ?: assistantChat(context, 60_000).also { SheetMemory.chat = it } else assistantChat(context) }
     val bubbles = remember { mutableStateListOf<Bubble>() }
+    OpenTiming("AI Assist", true)
     var typed by remember { mutableStateOf("") }
     var chatId by remember { mutableStateOf(java.util.UUID.randomUUID().toString()) }
     var expanded by remember { mutableStateOf(false) } // the island opened by its handle (the phone)

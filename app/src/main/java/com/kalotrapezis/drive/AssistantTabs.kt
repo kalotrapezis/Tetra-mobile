@@ -127,6 +127,7 @@ private val dateTime: DateFormat get() = DateFormat.getDateTimeInstance(DateForm
 @Composable
 internal fun HistoryTab(offer: (String) -> Unit, open: (AssistantChats.Saved) -> Unit) {
     val c = LocalContext.current
+    OpenTiming("AI History", true)
     var chats by remember { mutableStateOf(AssistantChats.list(c)) }
     if (chats.isEmpty()) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -152,6 +153,7 @@ internal fun HistoryTab(offer: (String) -> Unit, open: (AssistantChats.Saved) ->
 
 @Composable
 internal fun MemoryTab() {
+    OpenTiming("AI Memory", true)
     val tetra = remember { driveRoot() }
     val device = remember { TimerControl.device() }
     var facts by remember { mutableStateOf(AssistantMemory.list(tetra)) }
@@ -201,6 +203,7 @@ private fun weekday(c: Context, n: Int) = DayOfWeek.of(if (n == 0) 7 else n).get
 @Composable
 internal fun ScheduledTab(offer: (String) -> Unit) {
     val c = LocalContext.current
+    OpenTiming("AI Scheduled", true)
     val tetra = remember { driveRoot() }
     var list by remember { mutableStateOf(AssistantSchedules.list(tetra)) }
     var editing by remember { mutableStateOf<JSONObject?>(null) }
