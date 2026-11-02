@@ -447,6 +447,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
     var screen by remember { mutableStateOf(if (AppLocale.reopenSettings) Screen.Settings.also { AppLocale.reopenSettings = false } else if (preferences.getBoolean(PHOTO_SETUP_COMPLETED, false)) Screen.Home else Screen.Guide) }
     var settingsStart by remember { mutableStateOf<SettingsPage?>(null) }
     var mailStart by remember { mutableStateOf<String?>(null) } // AI Assist's "mail:<id>" or "mail-write:<json>" // a notification's Settings page (MapsAge)
+    var smsStart by remember { mutableStateOf<String?>(null) } // AI Assist's "sms:<json>": a message it wrote, in its conversation
     var guideAt by remember { mutableStateOf(if (screen == Screen.Guide) 0 else null) } // the guide's step; docked under the screen when screen isn't Guide
     var notesStart by remember { mutableStateOf<Boolean?>(null) }
     var notesOpen by remember { mutableStateOf<String?>(null) } // a note AI Assist found: open on it
@@ -800,6 +801,8 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
             if (v.startsWith("contact:")) { contactsOpen = v.removePrefix("contact:"); contactsNew = null } else { contactsOpen = null; contactsNew = v.removePrefix("contact-new:") }
             screen = Screen.Contacts; return@LaunchedEffect
         }
+        // AI Assist's SMS card, Edit: Messages on that conversation, the text in the field
+        applet.value?.takeIf { it.startsWith("sms:") && screen != Screen.Guide }?.let { v -> applet.value = null; smsStart = v; screen = Screen.Sms; return@LaunchedEffect }
         // AI Assist's tools (AssistantTools): a note it found, directions in Maps, or Maps' search on a place it could not find
         applet.value?.takeIf { (it.startsWith("note:") || it.startsWith("file:") || it.startsWith("maps-go:") || it.startsWith("maps-search:") || it.startsWith("mail:") || it.startsWith("mail-write:")) && screen != Screen.Guide }?.let { v ->
             applet.value = null
@@ -833,6 +836,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
             Applet.Data -> openData(context)
             Applet.Assistant -> openAssistant(context)
             Applet.Mail -> screen = Screen.Mail
+            Applet.Messages -> { smsStart = null; screen = Screen.Sms }
         }
     }
     // a file another app opened here: in Words, Tables, Slides or the PDF viewer, its back to Office
@@ -905,6 +909,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                 Screen.Maps -> Unit
                 Screen.Contacts -> Unit
                 Screen.Mail -> Unit
+                Screen.Sms -> Unit
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -962,6 +967,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                     openMaps = { place -> mapsGo = place; mapsSearch = null; mapsBack = Screen.Home; screen = Screen.Maps },
                     openContacts = { uid -> contactsOpen = uid; screen = Screen.Contacts },
                     openMail = { screen = Screen.Mail },
+                    openSms = { smsStart = null; screen = Screen.Sms },
                 )
                 Screen.Drive -> DriveTab(
                     home = { screen = Screen.Home },
@@ -1030,6 +1036,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                 Screen.Contacts -> androidx.compose.runtime.key(contactsOpen, contactsNew) { ContactsScreen(back = { screen = Screen.Home }, hasAccess = hasAllFilesAccess(), grant = {
                     context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                 }, start = contactsOpen, newNumber = contactsNew, openMaps = { q -> mapsGo = null; mapsSearch = q; mapsBack = Screen.Contacts; screen = Screen.Maps }) }
+                Screen.Sms -> androidx.compose.runtime.key(smsStart) { SmsScreen(back = { smsStart = null; screen = Screen.Home }, start = smsStart) }
                 Screen.Timer -> TimerScreen(back = { screen = Screen.Home }, hasAccess = hasAllFilesAccess(), grant = {
                     context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                 })
@@ -1116,6 +1123,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                         "phone" -> openPhone(context)
                         "data" -> openData(context)
                         "mail" -> screen = Screen.Mail
+                        "sms" -> { smsStart = null; screen = Screen.Sms }
                         // «Αποθήκη» › «Άνοιγμα φακέλου»: Mail's folder in Files, though it is under .System
                         else -> if (id == MailFiles.FOLDER || id.startsWith(MailFiles.FOLDER + "/")) { screen = Screen.Drive; drivePane = DrivePane.Files; driveFolder = id; loadDrive(id) }
                     } },
@@ -1127,7 +1135,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
     }
 }
 
-private enum class Screen { Guide, Home, Drive, Photos, Sync, Settings, Scanner, ScanDocument, Codes, Notes, TextEditor, Office, Writer, Sheet, Slides, Pdf, Calendar, Timer, Maps, Contacts, Mail }
+private enum class Screen { Guide, Home, Drive, Photos, Sync, Settings, Scanner, ScanDocument, Codes, Notes, TextEditor, Office, Writer, Sheet, Slides, Pdf, Calendar, Timer, Maps, Contacts, Mail, Sms }
 private enum class DrivePane { Home, Favorites, Files }
 private enum class DriveSort { Name, Modified }
 private enum class PhotosPane { Timeline, Collections }
@@ -1171,6 +1179,7 @@ private fun Home(
     openMaps: (Place?) -> Unit,
     openContacts: (String?) -> Unit,
     openMail: () -> Unit,
+    openSms: () -> Unit,
 ) {
     // A tablet shows the groups two by two (asked 2026-09-26); a phone one under another.
     val wide = LocalConfiguration.current.screenWidthDp >= 700
@@ -1284,6 +1293,7 @@ private fun Home(
         "data" -> HomeDataGroup()
         "assistant" -> if (AiGate.on) HomeWideCard(stringResource(R.string.app_assistant), stringResource(R.string.assistant_home_detail), R.drawable.assistant_art, { openAssistant(context) })
         "mail" -> HomeWideCard(stringResource(R.string.app_mail), stringResource(R.string.mail_home_detail), R.drawable.mail_art, openMail)
+        "sms" -> HomeWideCard(stringResource(R.string.app_sms), stringResource(R.string.sms_home_detail), R.drawable.sms_art, openSms)
         "maps" -> HomeMapsGroup(wide, openMaps)
     } }
     // each part small: just its icon, as a launcher's (Scanner and Codes are two apps, so two icons)
@@ -1303,6 +1313,7 @@ private fun Home(
         "data" -> listOf(HomeIcon(R.string.app_data, R.drawable.data_art, { openData(context) }))
         "assistant" -> if (AiGate.on) listOf(HomeIcon(R.string.app_assistant, R.drawable.assistant_art, { openAssistant(context) })) else emptyList() // AI off: not on Home
         "mail" -> listOf(HomeIcon(R.string.app_mail, R.drawable.mail_art, openMail))
+        "sms" -> listOf(HomeIcon(R.string.app_sms, R.drawable.sms_art, openSms))
         "maps" -> listOf(HomeIcon(R.string.app_maps, R.drawable.maps_art, { openMaps(null) }))
         else -> emptyList()
     }
@@ -2243,6 +2254,7 @@ internal enum class Category(val color: Color, val icon: Int) {
     Phone(PHONE_COLOR, R.drawable.ic_call),
     Data(DATA_COLOR, R.drawable.ic_data_usage),
     Mail(MAIL_COLOR, R.drawable.ic_mail),
+    Sms(SMS_COLOR, R.drawable.ic_chat),
 }
 
 @Composable

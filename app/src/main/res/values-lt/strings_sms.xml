@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_sms">Žinutės</string>
+    <string name="home_label_sms">Tetra Žinutės</string>
+    <string name="sms_home_detail">Tavo telefono SMS žinutės</string>
+    <string name="sms_permission_needed">Kad galėtų čia rodyti ir siųsti tavo SMS, Tetra reikia leidimo skaityti ir siųsti žinutes.</string>
+    <string name="sms_none">Žinučių dar nėra</string>
+    <string name="sms_none_archived">Nieko nesuarchyvuota</string>
+    <string name="sms_none_here">Žinučių dar nėra. Parašyk pirmąją.</string>
+    <string name="sms_archived">Suarchyvuotos</string>
+    <string name="sms_archive">Archyvuoti</string>
+    <string name="sms_unarchive">Grąžinti iš archyvo</string>
+    <string name="sms_did_archive">Suarchyvuota</string>
+    <string name="sms_did_unarchive">Vėl tarp tavo žinučių</string>
+    <string name="sms_choose_first">Palaikyk pokalbį, kad jį pasirinktum</string>
+    <string name="sms_new_message">Nauja žinutė</string>
+    <string name="sms_to">Vardas arba numeris</string>
+    <string name="sms_send_to">Siųsti %1$s</string>
+    <string name="sms_write">Žinutė</string>
+    <string name="sms_not_sent">Neišsiųsta</string>
+    <string name="sms_sending">Siunčiama…</string>
+    <string name="sms_send_failed">Žinutė neišsiųsta: %1$s</string>
+    <string name="sms_sent">Išsiųsta.</string>
+    <string name="sms_you">Tu</string>
+    <string name="sms_delete_ask">Ištrinti pasirinktus pokalbius?</string>
+    <string name="sms_delete_note">Jų žinutės bus ištrintos iš šio telefono.</string>
+    <string name="sms_default_only">Žinutes ištrinti gali tik tavo numatytoji žinučių programa.</string>
+    <string name="sms_open_default">Atidaryti ten</string>
+    <string name="sms_deleted">Ištrinta</string>
+</resources>

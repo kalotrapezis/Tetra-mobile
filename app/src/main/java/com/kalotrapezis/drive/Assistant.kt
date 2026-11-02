@@ -45,6 +45,8 @@ internal sealed class ResultCard {
     data class Event(val title: String, val start: ZonedDateTime, val end: ZonedDateTime, val allDay: Boolean, val calendar: String, val place: String) : ResultCard()
     data class Note(val id: String, val title: String, val lines: List<String>) : ResultCard()
     data class Timer(val label: String, val endsAt: Long) : ResultCard()
+    /** An SMS written, waiting for Send: to [name] ([number] itself when it is no contact). */
+    data class Sms(val name: String, val number: String, val text: String) : ResultCard()
 
     companion object {
         /** A contact's numbers, the default marked (none marked: the first, when it has one only). */
@@ -242,6 +244,8 @@ internal class AssistantTools(
     private val placesOn: () -> Boolean = { false },
     /** A file's text (Attach.extract; the phone's with its PDF and OCR): the attached one read again when a kept chat asks. */
     private val extract: (File) -> Attach.Doc = { Attach.extract(it) },
+    /** The phone's SMS (SmsBox.read), newest first; null while Tetra may not read them. */
+    private val texts: () -> List<SmsText>? = { null },
 ) {
     /** The file attached in this chat: read, or only its path until attachment_read needs it again (a chat from History). */
     private var doc: Attach.Doc? = null
@@ -258,6 +262,7 @@ internal class AssistantTools(
     private var mailsShown = emptyList<MailEntry>()
     private var factsShown = emptyList<AssistantMemory.Fact>()
     private var schedulesShown = emptyList<JSONObject>()
+    private var smsShown = emptyList<SmsThread>()
 
     /** The personal details (AssistantMemory): in every chat's instructions. */
     fun facts() = AssistantMemory.list(tetra)
@@ -304,6 +309,9 @@ internal class AssistantTools(
             "mail_stored_find" -> mailStoredFind(args)
             "mail_export" -> pick(mailsShown, args) { e -> mailExport(e, args.optString("attachment").trim()) }
             "mail_write" -> mailWrite(args)
+            "sms_list" -> smsList(args)
+            "sms_read" -> smsRead(args)
+            "sms_write" -> smsWrite(args)
             "memory_add" -> AssistantMemory.add(tetra, args.getString("text"), device).let { changed("memory"); ToolResult("Kept: \"${it.text}\". Settings › AI Assist › Personal details shows it.") }
             "memory_list" -> facts().also { factsShown = it }.let { l -> ToolResult(if (l.isEmpty()) "Nothing is kept." else l.mapIndexed { i, f -> "${i + 1}. ${f.text}" }.joinToString("\n")) }
             "memory_forget" -> pick(factsShown, args) { f -> AssistantMemory.change(tetra, f.id, "", device); factsShown = factsShown - f; changed("memory"); ToolResult("Forgot \"${f.text}\".") }
@@ -628,6 +636,48 @@ internal class AssistantTools(
             cards = listOf(ResultCard.Mail(acc.id, acc.address, to, a.optString("subject"), a.optString("body"))))
     }
 
+    // ---- Messages (SMS): read for the model, never sent by it; the card's Send is the user's ----
+    private fun smsThreads() = texts()?.let { SmsRules.threads(it) }
+    /** The contact's name for a number, or the number (the names only while the assistant may look in Contacts). */
+    private fun nameOf(number: String) = allContacts().firstOrNull { c -> c.info.phones.any { PhoneLog.same(it.value, number) } }?.info?.name ?: number
+    private fun smsWhen(at: Long) = Instant.ofEpochMilli(at).atZone(zone).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+    private val SMS_OFF = "Tetra may not read the SMS yet: the user opens Messages in Tetra once and allows it. Say so."
+
+    private fun smsList(a: JSONObject): ToolResult {
+        val all = smsThreads() ?: return ToolResult(SMS_OFF)
+        smsShown = all.filter { !a.optBoolean("unread") || it.unread > 0 }.take(a.optInt("count", 10).coerceIn(1, 30))
+        if (smsShown.isEmpty()) return ToolResult(if (a.optBoolean("unread")) "No unread SMS." else "No SMS on this phone.")
+        return ToolResult(smsShown.mapIndexed { n, t -> "${n + 1}. ${nameOf(t.address)}${if (t.unread > 0) " (${t.unread} unread)" else ""}, ${smsWhen(t.last.at)}: ${if (t.last.mine) "you: " else ""}${t.last.body.take(120)}" }.joinToString("\n"))
+    }
+
+    /** A conversation's last messages, oldest first, from the last list or by a contact's name or a number. */
+    private fun smsRead(a: JSONObject): ToolResult {
+        val all = smsThreads() ?: return ToolResult(SMS_OFF)
+        val who = a.optString("contact").trim()
+        val thread = if (a.optInt("choice", 0) > 0) smsShown.getOrNull(a.optInt("choice") - 1) ?: return ToolResult("No choice ${a.optInt("choice")}: the last list had ${smsShown.size}.")
+            else if (who.isEmpty()) return ToolResult("Say whose messages, or a number from the last sms_list.")
+            else (if (SmsRules.isNumber(who)) listOf(who) else named(who).flatMap { c -> c.phones.map { it.value } }).firstNotNullOfOrNull { SmsRules.threadOf(all, it) }
+                ?: return ToolResult("No SMS with $who.")
+        val name = nameOf(thread.address)
+        val texts = texts().orEmpty().filter { it.thread == thread.id }.take(a.optInt("count", 15).coerceIn(1, 50)).reversed()
+        return ToolResult("SMS with $name, oldest first:\n" + texts.joinToString("\n") { "${smsWhen(it.at)} ${if (it.mine) "you" else name}: ${it.body}" })
+    }
+
+    private fun smsWrite(a: JSONObject): ToolResult {
+        val to = a.getString("to").trim()
+        val text = a.getString("text").trim().ifEmpty { return ToolResult("Say what the message says.") }
+        if (SmsRules.isNumber(to)) return ToolResult("The SMS to $to is on the screen; it waits for the user to check it and press Send.", cards = listOf(ResultCard.Sms(nameOf(to), to, text)))
+        val found = named(to).filter { it.phones.isNotEmpty() }
+        val c = when (found.size) {
+            0 -> return ToolResult(if (!AiGate.state.keeps("contacts")) "The assistant may not look in Contacts. Ask the user for $to's number." else "No contact called $to with a phone number. Ask for the number.")
+            1 -> found[0]
+            else -> return ToolResult("Several contacts match $to: ${found.take(9).joinToString("; ") { it.name }}. Ask which, then call again with the full name.")
+        }
+        // the default number, else the mobile, else the first (the user picks another in Messages with Edit)
+        val number = c.defaultPhone ?: c.phones.firstOrNull { it.label.contains("cell", true) || it.label.contains("mobile", true) || it.label.contains("κινητ", true) }?.value ?: c.phones.first().value
+        return ToolResult("The SMS to ${c.name} is on the screen; it waits for the user to check it and press Send.", cards = listOf(ResultCard.Sms(c.name, number, text)))
+    }
+
     // ---- Contacts ----
     /** Each match's name and the label of each of its numbers: the numbers themselves stay on the phone. */
     private fun contactsFind(a: JSONObject): ToolResult {
@@ -759,6 +809,7 @@ internal class AssistantTools(
             "notes_search" to "notes", "note_new" to "notes", "note_open" to "notes", "shopping_list" to "notes", "files_find" to "files", "file_open" to "files",
             "contacts_find" to "contacts", "my_card" to "contacts", "relation_remember" to "contacts", "relation_forget" to "contacts", "contact_call" to "phone",
             "navigate" to "maps", "place_reminder" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail", "mail_stored_find" to "mail", "mail_export" to "mail",
+            "sms_list" to "sms", "sms_read" to "sms", "sms_write" to "sms",
             "web_search" to "web", "make_image" to "web", "youtube" to "web", "attachment_read" to "files", "audio_make" to "files")
         /** The tools of the apps the assistant may use now: the others are not even offered. */
         fun allowed(): JSONArray = JSONArray((0 until SCHEMA.length()).map { SCHEMA.getJSONObject(it) }
@@ -832,6 +883,12 @@ internal class AssistantTools(
             fn("mail_write", "Write an e-mail: Tetra's compose page opens with it filled in, and the user sends it. It is never sent by you.", listOf("to", "subject", "body"),
                 "to" to p("string", "An e-mail address, or a contact's name as said."), "subject" to p("string", "A short subject."),
                 "body" to p("string", "The whole text as a proper e-mail: a greeting, what the user wants said, a closing line; no signature (Tetra adds it).")),
+            fn("sms_list", "The SMS conversations on this phone, newest first: a numbered list with who, how many unread, and the last message.", emptyList(),
+                "unread" to p("boolean", "Only those with unread messages."), "count" to p("integer", "How many; 10 if not said.")),
+            fn("sms_read", "Read the last SMS with someone, oldest first: by a contact's name or a number, or a conversation from the last sms_list.", emptyList(),
+                "contact" to p("string", "A contact's name as said, or a phone number."), "choice" to p("integer", "Its number in the last sms_list."), "count" to p("integer", "How many messages; 15 if not said.")),
+            fn("sms_write", "Write an SMS: a card shows it with its receiver and the user sends it with Send. It is never sent by you.", listOf("to", "text"),
+                "to" to p("string", "A contact's name as said, or a phone number."), "text" to p("string", "The message, short, in the user's words and language; no greeting unless they said one.")),
             fn("memory_add", "Keep a lasting fact about the user that they asked you to remember («θυμήσου ότι…»): it is given to you in every later chat, on every device.", listOf("text"),
                 "text" to p("string", "The fact, short, in the user's language and in the third person (\"Διδάσκει στο 3ο Δημοτικό Καβάλας\").")),
             fn("memory_list", "The facts kept about the user, a numbered list.", emptyList()),
@@ -855,7 +912,7 @@ internal class AssistantTools(
         ))
 
         fun system(now: ZonedDateTime, facts: List<AssistantMemory.Fact> = emptyList()) = """
-            You are Tetra Assistant, on the user's Android phone, inside the app Tetra (calendar, timers, alarms, stopwatch, notes, files, contacts, mail, maps, photos).
+            You are Tetra Assistant, on the user's Android phone, inside the app Tetra (calendar, timers, alarms, stopwatch, notes, files, contacts, mail, SMS messages, maps, photos).
             Now: ${now.format(DateTimeFormatter.ofPattern("EEEE yyyy-MM-dd HH:mm"))} (${now.zone}).
             Answer in the user's language (usually Greek), in one or two short plain sentences: answers are often read aloud. No markdown.
             Use the tools for anything about the user's own calendar, timers, notes, files or contacts; never invent what they hold.
@@ -874,6 +931,8 @@ internal class AssistantTools(
             Mail: "νέα μηνύματα;", "ήρθε κάτι;": mail_new, then say how many and from whom. "Τι χρειάζεται απάντηση;", "σημαντικά mail": mail_attention, then name
             only those that need an answer or an action and in a few words why (a deadline, a question to the user, a payment). "Βρες το mail από τη Μαρία": mail_find.
             "Στείλε mail στον …": mail_write, written as a proper e-mail in the language the user speaks; after it, say it waits for their Send.
+            SMS (the phone's text messages; mail is something else): «στείλε μήνυμα / SMS / γράψε στον …» without "mail": sms_write, then say it waits for their Send.
+            «Τι μου έγραψε ο …», «διάβασέ μου τα μηνύματα του …»: sms_read. «Έχω SMS;», «νέα SMS», «ήρθε μήνυμα στο κινητό;»: sms_list with unread, then who wrote and in a few words what.
             An old or deleted mail, a file someone sent long ago: mail_stored_find. "Αντέγραψέ το / βγάλε το συνημμένο στα Έγγραφα": mail_export,
             then say where it went (Tetra/Documents/…). Copy only when asked.
             Work out dates yourself from today's date ("αύριο", "την Πέμπτη").

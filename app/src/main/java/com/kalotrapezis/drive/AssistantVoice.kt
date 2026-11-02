@@ -182,7 +182,8 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
         // shortcut: which card is the user's is kept on this phone only (Contacts has no "me" mark yet); move it into the card when the computer needs it
         me = { prefs.getString("me", null) }, setMe = { prefs.edit().putString("me", it).apply() },
         photos = { place, at -> AssistantPhotos.at(app, place, at) },
-        placesOn = { LocationReminders.ready(app) }, extract = Attach.reader(app))
+        placesOn = { LocationReminders.ready(app) }, extract = Attach.reader(app),
+        texts = { if (SmsBox.canRead(app)) SmsBox.read(app) else null })
     return AssistantChat(api, tools, forgetMs)
 }
 

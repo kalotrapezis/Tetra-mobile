@@ -12,10 +12,10 @@ class HomeLayoutTest {
         val tablet = HomeLayout.place(HomeLayout.parse(null, HomeLayout.WIDE), 8)
         assertEquals(true, tablet.all { it.small })
         assertEquals(mapOf("sync" to (0 to 0), "settings" to (1 to 0), "scanner" to (5 to 0), "office" to (7 to 0), "text" to (0 to 1)), at(tablet).filterKeys { it in setOf("sync", "settings", "scanner", "office", "text") })
-        assertEquals(3, HomeLayout.height(tablet, 8)) // Mail (31 Oct) the 17th cell, on a third row
+        assertEquals(3, HomeLayout.height(tablet, 8)) // Mail (31 Oct) and Messages (2 Nov) on a third row
         // a phone: four across, Settings last
         val phone = HomeLayout.place(HomeLayout.parse(null, HomeLayout.NARROW), 4)
-        assertEquals(0 to 0, at(phone)["sync"]); assertEquals(1 to 0, at(phone)["gallery"]); assertEquals(0 to 4, at(phone)["settings"]) // Mail (31 Oct) before it
+        assertEquals(0 to 0, at(phone)["sync"]); assertEquals(1 to 0, at(phone)["gallery"]); assertEquals(1 to 4, at(phone)["settings"]) // Mail (31 Oct) and Messages (2 Nov) before it
     }
 
     @Test fun aSavedLayoutComesBackAsItWas() {

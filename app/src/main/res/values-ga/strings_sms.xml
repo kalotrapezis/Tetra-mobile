@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_sms">Teachtaireachtaí</string>
+    <string name="home_label_sms">Tetra Teachtaireachtaí</string>
+    <string name="sms_home_detail">Téacsanna do ghutháin</string>
+    <string name="sms_permission_needed">Chun do chuid SMS a thaispeáint agus a sheoladh anseo, teastaíonn cead ó Tetra teachtaireachtaí a léamh agus a sheoladh.</string>
+    <string name="sms_none">Níl aon teachtaireacht fós</string>
+    <string name="sms_none_archived">Níl aon rud cartlannaithe</string>
+    <string name="sms_none_here">Níl aon teachtaireacht fós. Scríobh an chéad cheann.</string>
+    <string name="sms_archived">Cartlannaithe</string>
+    <string name="sms_archive">Cartlannaigh</string>
+    <string name="sms_unarchive">Bain den chartlann</string>
+    <string name="sms_did_archive">Cartlannaithe</string>
+    <string name="sms_did_unarchive">Ar ais i do theachtaireachtaí</string>
+    <string name="sms_choose_first">Coinnigh comhrá brúite chun é a roghnú</string>
+    <string name="sms_new_message">Teachtaireacht nua</string>
+    <string name="sms_to">Ainm nó uimhir</string>
+    <string name="sms_send_to">Seol chuig %1$s</string>
+    <string name="sms_write">Teachtaireacht</string>
+    <string name="sms_not_sent">Níor seoladh</string>
+    <string name="sms_sending">Á sheoladh…</string>
+    <string name="sms_send_failed">Níor seoladh an teachtaireacht: %1$s</string>
+    <string name="sms_sent">Seolta.</string>
+    <string name="sms_you">Tusa</string>
+    <string name="sms_delete_ask">Scrios na comhráite roghnaithe?</string>
+    <string name="sms_delete_note">Scriosfar a dteachtaireachtaí ón bhfón seo.</string>
+    <string name="sms_default_only">Ní féidir ach le d’aip réamhshocraithe teachtaireachtaí teachtaireachtaí a scriosadh.</string>
+    <string name="sms_open_default">Oscail ansin é</string>
+    <string name="sms_deleted">Scriosta</string>
+</resources>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Messages (SmsScreen.kt): the phone's SMS, read and sent in Tetra. -->
+<resources>
+    <string name="app_sms">Messages</string>
+    <string name="home_label_sms">Tetra Messages</string>
+    <string name="sms_home_detail">Your phone\'s text messages</string>
+    <string name="sms_permission_needed">To show your SMS here and send them, Tetra needs permission to read and send messages.</string>
+    <string name="sms_none">No messages yet</string>
+    <string name="sms_none_archived">Nothing archived</string>
+    <string name="sms_none_here">No messages yet. Write the first one.</string>
+    <string name="sms_archived">Archived</string>
+    <string name="sms_archive">Archive</string>
+    <string name="sms_unarchive">Unarchive</string>
+    <string name="sms_did_archive">Archived</string>
+    <string name="sms_did_unarchive">Back in your messages</string>
+    <string name="sms_choose_first">Hold a conversation to choose it</string>
+    <string name="sms_new_message">New message</string>
+    <string name="sms_to">Name or number</string>
+    <string name="sms_send_to">Send to %1$s</string>
+    <string name="sms_write">Message</string>
+    <string name="sms_not_sent">Not sent</string>
+    <string name="sms_sending">Sending…</string>
+    <string name="sms_send_failed">The message was not sent: %1$s</string>
+    <string name="sms_sent">Sent.</string>
+    <string name="sms_you">You</string>
+    <string name="sms_delete_ask">Delete the chosen conversations?</string>
+    <string name="sms_delete_note">Their messages are deleted from this phone.</string>
+    <string name="sms_default_only">Only your default messaging app can delete messages.</string>
+    <string name="sms_open_default">Open it there</string>
+    <string name="sms_deleted">Deleted</string>
+</resources>

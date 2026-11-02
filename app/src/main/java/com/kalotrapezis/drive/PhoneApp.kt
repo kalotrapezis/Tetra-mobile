@@ -472,7 +472,7 @@ private fun RecordingRow(f: java.io.File, modifier: Modifier = Modifier) {
     }
 }
 
-private fun whenText(at: Long, zone: ZoneId, today: LocalDate, locale: Locale): String {
+internal fun whenText(at: Long, zone: ZoneId, today: LocalDate, locale: Locale): String {
     val t = Instant.ofEpochMilli(at).atZone(zone)
     val d = t.toLocalDate()
     return when {

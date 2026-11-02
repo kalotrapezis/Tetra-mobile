@@ -34,7 +34,7 @@ import java.time.format.FormatStyle
 /*
  * What an action found or will do, as compact cards under the answer (the user, 1 Nov 2026: "show the info in a card instead"):
  * a contact with its numbers and last calls, the web's sources, files, a mail with its sender and receiver before it goes,
- * the event, note or timer made. Each in its app's colour, as the skill bubbles are.
+ * an SMS before it goes, the event, note or timer made. Each in its app's colour, as the skill bubbles are.
  */
 
 /** What the cards can do, the chat's own ways (open, go, call, attach). */
@@ -53,6 +53,7 @@ internal fun ResultCards(cards: List<ResultCard>, a: CardActions) {
             is ResultCard.Files -> FilesCard(c, a)
             is ResultCard.Mail -> MailCard(c, a)
             is ResultCard.Mails -> MailsCard(c, a)
+            is ResultCard.Sms -> SmsCard(c, a)
             is ResultCard.Event -> CardBox(AppColor.calendar) {
                 Text(c.title, style = MaterialTheme.typography.titleSmall)
                 val day = c.start.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
@@ -180,6 +181,33 @@ private fun MailCard(c: ResultCard.Mail, a: CardActions) {
                 r.onSuccess { a.say(context.getString(it), false) }.onFailure { WriterLog.w("AI Assist: the mail was not sent", it); state = 0; a.say(context.getString(R.string.mail_not_sent, it.message.orEmpty()), true) }
             } }) { Text(stringResource(R.string.common_send)) }
             TextButton(onClick = { state = 2; a.go("mail-write:" + org.json.JSONObject().put("to", c.to).put("subject", c.subject).put("body", c.body)) }) { Text(stringResource(R.string.common_edit)) }
+            TextButton(onClick = { state = 2; a.say(context.getString(R.string.assistant_mail_kept), false) }) { Text(stringResource(R.string.common_cancel)) }
+        } else if (state == 1) LinearProgressIndicator(Modifier.fillMaxWidth())
+    }
+}
+
+/** An SMS written: To (the name and the number), the text; Send · Edit · Cancel. Sent only by the user's Send. */
+@Composable
+private fun SmsCard(c: ResultCard.Sms, a: CardActions) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var state by remember(c) { mutableStateOf(0) } // 0 waiting, 1 sending, 2 done (sent or cancelled)
+    fun send() { state = 1; scope.launch {
+        val r = withContext(Dispatchers.IO) { runCatching { SmsBox.send(context.applicationContext, c.number, c.text) } }
+        state = 2
+        r.onSuccess { a.say(context.getString(R.string.sms_sent), false) }.onFailure { WriterLog.w("AI Assist: the SMS was not sent", it); state = 0; a.say(context.getString(R.string.sms_send_failed, it.message.orEmpty()), true) }
+    } }
+    val ask = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { ok ->
+        if (ok) send() else a.say(context.getString(R.string.sms_permission_needed), true) }
+    CardBox(SMS_COLOR) {
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.assistant_card_to), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(if (c.name == c.number) c.number else "${c.name} · ${c.number}", style = MaterialTheme.typography.bodyMedium)
+        }
+        Text(c.text, style = MaterialTheme.typography.bodyMedium)
+        if (state == 0) Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Button(onClick = { if (SmsBox.canSend(context)) send() else ask.launch(android.Manifest.permission.SEND_SMS) }) { Text(stringResource(R.string.common_send)) }
+            TextButton(onClick = { state = 2; a.go("sms:" + org.json.JSONObject().put("to", c.number).put("text", c.text)) }) { Text(stringResource(R.string.common_edit)) }
             TextButton(onClick = { state = 2; a.say(context.getString(R.string.assistant_mail_kept), false) }) { Text(stringResource(R.string.common_cancel)) }
         } else if (state == 1) LinearProgressIndicator(Modifier.fillMaxWidth())
     }
