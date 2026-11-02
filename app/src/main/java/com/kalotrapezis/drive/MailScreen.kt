@@ -860,7 +860,11 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
                 MailHint(failed?.let { stringResource(R.string.mail_fetch_failed, it) } ?: stringResource(R.string.mail_not_here))
                 if (e.snippet.isNotEmpty()) Text(e.snippet, Modifier.padding(horizontal = 24.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            message == null -> MailHint(stringResource(if (MailFiles.eml(root, e) == null) R.string.mail_fetching else R.string.mail_reading))
+            // its first lines at once while the rest comes from the computer (the user, 2 Nov: «load the text as soon as available»)
+            message == null -> {
+                MailHint(stringResource(if (MailFiles.eml(root, e) == null) R.string.mail_fetching else R.string.mail_reading))
+                if (e.snippet.isNotEmpty()) Text(e.snippet, Modifier.padding(horizontal = 24.dp), style = MaterialTheme.typography.bodyLarge)
+            }
             message!!.html == null -> SelectionContainer(Modifier.weight(1f)) {
                 Text(message!!.text.orEmpty(), Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 110.dp), style = MaterialTheme.typography.bodyLarge)
             }

@@ -449,16 +449,16 @@ private fun NoteEditor(store: NotesStore, initial: Note, onClose: (Note?, String
         }
     }
 
-    // Saved as you type (a short pause), the whole text each time.
+    // Saved when typing stops for half a second, the whole text each time; synced only on leaving, since a sync
+    // while typing made the keyboard lag (asked 2026-11-02).
     LaunchedEffect(title, body.text, items) {
         if (!changed) return@LaunchedEffect
-        delay(400)
+        delay(500)
         withContext(Dispatchers.IO) {
             // The note as it was when opened goes to its history before the first change is written over it.
             if (!snapped) { store.snapshot(initial.id); snapped = true }
             store.setText(initial.id, title, body.text, if (initial.checklist) items else null)
         }
-        NotesSync.soon(context)
     }
     fun edit(t: String = title, b: TextFieldValue = body, i: List<CheckItem> = items, step: Boolean = false) {
         val snap = Snap(t, b.text, i)
