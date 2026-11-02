@@ -27,4 +27,11 @@
     <string name="sms_default_only">Bara din standardapp för meddelanden kan radera meddelanden.</string>
     <string name="sms_open_default">Öppna där</string>
     <string name="sms_deleted">Raderad</string>
+    <string name="sms_pick">Välj en konversation</string>
+    <string name="sms_is_default">Tetra är sms-appen</string>
+    <string name="sms_not_default">Tetra är inte sms-appen</string>
+    <string name="sms_is_default_summary">Meddelanden kommer till Tetra och Tetra sparar dem. För att byta tillbaka: Androids standardappar › Sms-app.</string>
+    <string name="sms_not_default_summary">Gör den till standard för att få nya meddelanden i Tetra och kunna radera dem. Bildmeddelanden (mms) aviseras bara, de visas inte.</string>
+    <string name="sms_mms_title">Bildmeddelande (mms)</string>
+    <string name="sms_mms_note">Tetra kan inte visa bildmeddelanden. Välj en annan sms-app för att ta emot dem.</string>
 </resources>

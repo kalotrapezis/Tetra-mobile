@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Jak na komputerze: karty i adres u góry, pozostałe narzędzia w ☰ na końcu.</string>
     <string name="browser_pin_favorite">Przypnij do strony startowej</string>
     <string name="browser_unpin_favorite">Odepnij od strony startowej</string>
+    <string name="maps_music">Muzyka</string>
+    <string name="maps_music_none">Brak stacji: w odtwarzaczu przeglądarki dotknij samochodu przy wybranej stacji.</string>
+    <string name="browser_for_maps">Graj w Mapach</string>
+    <string name="browser_for_maps_set">Przycisk muzyki w Mapach gra to</string>
+    <string name="browser_no_folder">Bez folderu</string>
+    <string name="browser_new_folder">Nowy folder</string>
+    <string name="browser_to_folder">Do folderu</string>
+    <string name="browser_tabs_run">Karty działają dalej</string>
+    <string name="browser_tabs_run_on">Opuszczone karty działają i grają dalej</string>
+    <string name="browser_tabs_run_off">Opuszczona karta się zatrzymuje</string>
 </resources>

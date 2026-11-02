@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Ako na počítači: karty a adresa hore, ostatné nástroje v ☰ na konci.</string>
     <string name="browser_pin_favorite">Pripnúť na úvodnú stránku</string>
     <string name="browser_unpin_favorite">Odopnúť z úvodnej stránky</string>
+    <string name="maps_music">Hudba</string>
+    <string name="maps_music_none">Zatiaľ žiadna stanica: v prehrávači prehliadača ťuknite na auto pri želanej stanici.</string>
+    <string name="browser_for_maps">Prehrať v Mapách</string>
+    <string name="browser_for_maps_set">Tlačidlo hudby v Mapách prehrá toto</string>
+    <string name="browser_no_folder">Bez priečinka</string>
+    <string name="browser_new_folder">Nový priečinok</string>
+    <string name="browser_to_folder">Do priečinka</string>
+    <string name="browser_tabs_run">Karty bežia ďalej</string>
+    <string name="browser_tabs_run_on">Karty, ktoré opustíte, ďalej bežia a hrajú</string>
+    <string name="browser_tabs_run_off">Opustená karta sa pozastaví</string>
 </resources>

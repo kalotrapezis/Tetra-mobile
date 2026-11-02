@@ -27,4 +27,11 @@
     <string name="sms_default_only">Kun din standardapp til beskeder kan slette beskeder.</string>
     <string name="sms_open_default">Åbn den der</string>
     <string name="sms_deleted">Slettet</string>
+    <string name="sms_pick">Vælg en samtale</string>
+    <string name="sms_is_default">Tetra er SMS-appen</string>
+    <string name="sms_not_default">Tetra er ikke SMS-appen</string>
+    <string name="sms_is_default_summary">Beskeder kommer i Tetra, og Tetra gemmer dem. For at skifte tilbage: Androids Standardapps › SMS-app.</string>
+    <string name="sms_not_default_summary">Gør den til standard for at få nye beskeder i Tetra og kunne slette dem. Billedbeskeder (MMS) bliver kun meldt, ikke vist.</string>
+    <string name="sms_mms_title">Billedbesked (MMS)</string>
+    <string name="sms_mms_note">Tetra kan ikke vise billedbeskeder. Vælg en anden SMS-app for at modtage dem.</string>
 </resources>

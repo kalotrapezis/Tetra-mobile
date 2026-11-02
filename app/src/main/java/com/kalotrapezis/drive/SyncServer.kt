@@ -238,6 +238,14 @@ internal class SyncServer(private val context: Context, private val store: SyncS
             val r = PhoneCall.act(context, android.net.Uri.parse("https://x$path").getQueryParameter("do").orEmpty().take(9)) // "unspeaker", the longest
             return reply(output, if (r.has("error")) 409 else 200, r)
         }
+        // Messages on the computer (the user, 2 Nov): the newest SMS, sent and marked read by this phone. Only a paired device.
+        if (method == "POST" && path.startsWith("/sms/")) {
+            val known = bearer != null && store.peers().any { it.theirToken == bearer }
+            if (!known) return reply(output, 401, JSONObject().put("error", "Not paired."))
+            if (PhoneRelay.noCalls(context)) return reply(output, 404, JSONObject().put("error", "No SMS here."))
+            val r = SmsBox.forComputer(context, android.net.Uri.parse("https://x$path"))
+            return reply(output, if (r.has("error")) 409 else 200, r)
+        }
         // Send to phone: a file from the computer, into Files › From computer (FromComputer). Only a paired device.
         if (method == "PUT" && path.startsWith("/send/")) {
             val peer = bearer?.let { b -> store.peers().firstOrNull { it.theirToken == b } } ?: return reply(output, 401, JSONObject().put("error", "Not paired."))

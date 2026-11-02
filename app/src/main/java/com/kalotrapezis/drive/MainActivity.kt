@@ -253,7 +253,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         mailWrite(intent)
-        intent.getStringExtra(Applet.EXTRA)?.let { applet.value = it }
+        (intent.getStringExtra(Applet.EXTRA) ?: SmsRole.compose(intent))?.let { applet.value = it }
         calendarFile(intent)?.let { CalendarInbox.pending.value = it; applet.value = Applet.Calendar.name }
     }
 
@@ -328,12 +328,12 @@ class MainActivity : ComponentActivity() {
             ?.takeIf { OfficeOpen.extensionOf(type) != null || OfficeOpen.isOffice(it.lastPathSegment.orEmpty()) }?.let { ExternalMedia(it, type) }
         val calendar = calendarFile(intent)?.also { CalendarInbox.pending.value = it }
         val mail = savedInstanceState == null && mailWrite(intent)
-        val external = intent.takeIf { !mail && it.data?.scheme?.equals("mailto", true) != true && office == null && calendar == null && it.action in EXTERNAL_VIEW_ACTIONS }?.data?.let { ExternalMedia(it, type) }
+        val external = intent.takeIf { !mail && it.data?.scheme?.equals("mailto", true) != true && SmsRole.compose(it) == null && office == null && calendar == null && it.action in EXTERNAL_VIEW_ACTIONS }?.data?.let { ExternalMedia(it, type) }
         OfficeUi.load(this)
         TetraLook.load(this)
         SystemFolderChoice.load(this)
         // a mouse or a finger noticed anywhere, for Office's ribbon (at the top with a mouse)
-        if (savedInstanceState == null) applet.value = intent.getStringExtra(Applet.EXTRA) ?: calendar?.let { Applet.Calendar.name } ?: applet.value // a mail to write may be there already
+        if (savedInstanceState == null) applet.value = intent.getStringExtra(Applet.EXTRA) ?: SmsRole.compose(intent) ?: calendar?.let { Applet.Calendar.name } ?: applet.value // a mail to write may be there already
         setContent { androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.noticePointer()) { LocalDriveApp(external, office, applet) } }
     }
 }
@@ -447,7 +447,6 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
     var screen by remember { mutableStateOf(if (AppLocale.reopenSettings) Screen.Settings.also { AppLocale.reopenSettings = false } else if (preferences.getBoolean(PHOTO_SETUP_COMPLETED, false)) Screen.Home else Screen.Guide) }
     var settingsStart by remember { mutableStateOf<SettingsPage?>(null) }
     var mailStart by remember { mutableStateOf<String?>(null) } // AI Assist's "mail:<id>" or "mail-write:<json>" // a notification's Settings page (MapsAge)
-    var browserPlay by remember { mutableStateOf<String?>(null) } // AI Assist's "browser-play:{site, q}"
     var smsStart by remember { mutableStateOf<String?>(null) } // AI Assist's "sms:<json>": a message it wrote, in its conversation
     var guideAt by remember { mutableStateOf(if (screen == Screen.Guide) 0 else null) } // the guide's step; docked under the screen when screen isn't Guide
     var notesStart by remember { mutableStateOf<Boolean?>(null) }
@@ -803,7 +802,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
             screen = Screen.Contacts; return@LaunchedEffect
         }
         // AI Assist's SMS card, Edit: Messages on that conversation, the text in the field
-        applet.value?.takeIf { it.startsWith("browser-play:") && screen != Screen.Guide }?.let { v -> applet.value = null; browserPlay = v; screen = Screen.Browser; return@LaunchedEffect }
+        applet.value?.takeIf { it.startsWith("browser-play:") && screen != Screen.Guide }?.let { v -> applet.value = null; openBrowser(context, v); return@LaunchedEffect }
         applet.value?.takeIf { it.startsWith("sms:") && screen != Screen.Guide }?.let { v -> applet.value = null; smsStart = v; screen = Screen.Sms; return@LaunchedEffect }
         // AI Assist's tools (AssistantTools): a note it found, directions in Maps, or Maps' search on a place it could not find
         applet.value?.takeIf { (it.startsWith("note:") || it.startsWith("file:") || it.startsWith("maps-go:") || it.startsWith("maps-search:") || it.startsWith("mail:") || it.startsWith("mail-write:")) && screen != Screen.Guide }?.let { v ->
@@ -839,7 +838,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
             Applet.Assistant -> openAssistant(context)
             Applet.Mail -> screen = Screen.Mail
             Applet.Messages -> { smsStart = null; screen = Screen.Sms }
-            Applet.Browser -> screen = Screen.Browser
+            Applet.Browser -> openBrowser(context)
         }
     }
     // a file another app opened here: in Words, Tables, Slides or the PDF viewer, its back to Office
@@ -913,7 +912,6 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                 Screen.Contacts -> Unit
                 Screen.Mail -> Unit
                 Screen.Sms -> Unit
-                Screen.Browser -> Unit
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -972,7 +970,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                     openContacts = { uid -> contactsOpen = uid; screen = Screen.Contacts },
                     openMail = { screen = Screen.Mail },
                     openSms = { smsStart = null; screen = Screen.Sms },
-                    openBrowser = { screen = Screen.Browser },
+                    openBrowser = { openBrowser(context) },
                 )
                 Screen.Drive -> DriveTab(
                     home = { screen = Screen.Home },
@@ -1042,7 +1040,6 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                     context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                 }, start = contactsOpen, newNumber = contactsNew, openMaps = { q -> mapsGo = null; mapsSearch = q; mapsBack = Screen.Contacts; screen = Screen.Maps }) }
                 Screen.Sms -> androidx.compose.runtime.key(smsStart) { SmsScreen(back = { smsStart = null; screen = Screen.Home }, start = smsStart) }
-                Screen.Browser -> BrowserScreen(back = { browserPlay = null; screen = Screen.Home }, play = browserPlay)
                 Screen.Timer -> TimerScreen(back = { screen = Screen.Home }, hasAccess = hasAllFilesAccess(), grant = {
                     context.startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                 })
@@ -1130,7 +1127,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                         "data" -> openData(context)
                         "mail" -> screen = Screen.Mail
                         "sms" -> { smsStart = null; screen = Screen.Sms }
-                        "browser" -> screen = Screen.Browser
+                        "browser" -> openBrowser(context)
                         // «Αποθήκη» › «Άνοιγμα φακέλου»: Mail's folder in Files, though it is under .System
                         else -> if (id == MailFiles.FOLDER || id.startsWith(MailFiles.FOLDER + "/")) { screen = Screen.Drive; drivePane = DrivePane.Files; driveFolder = id; loadDrive(id) }
                     } },
@@ -1142,7 +1139,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
     }
 }
 
-private enum class Screen { Guide, Home, Drive, Photos, Sync, Settings, Scanner, ScanDocument, Codes, Notes, TextEditor, Office, Writer, Sheet, Slides, Pdf, Calendar, Timer, Maps, Contacts, Mail, Sms, Browser }
+private enum class Screen { Guide, Home, Drive, Photos, Sync, Settings, Scanner, ScanDocument, Codes, Notes, TextEditor, Office, Writer, Sheet, Slides, Pdf, Calendar, Timer, Maps, Contacts, Mail, Sms }
 private enum class DrivePane { Home, Favorites, Files }
 private enum class DriveSort { Name, Modified }
 private enum class PhotosPane { Timeline, Collections }

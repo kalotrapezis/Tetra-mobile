@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Kā datorā: cilnes un adrese augšā, pārējie rīki ☰ galā.</string>
     <string name="browser_pin_favorite">Piespraust sākumlapai</string>
     <string name="browser_unpin_favorite">Atspraust no sākumlapas</string>
+    <string name="maps_music">Mūzika</string>
+    <string name="maps_music_none">Stacijas vēl nav: pārlūka atskaņotājā pieskarieties automašīnai pie vēlamās stacijas.</string>
+    <string name="browser_for_maps">Atskaņot Kartēs</string>
+    <string name="browser_for_maps_set">Karšu mūzikas poga atskaņo šo</string>
+    <string name="browser_no_folder">Bez mapes</string>
+    <string name="browser_new_folder">Jauna mape</string>
+    <string name="browser_to_folder">Mapē</string>
+    <string name="browser_tabs_run">Cilnes turpina darboties</string>
+    <string name="browser_tabs_run_on">Atstātās cilnes turpina darboties un skanēt</string>
+    <string name="browser_tabs_run_off">Atstātā cilne tiek apturēta</string>
 </resources>

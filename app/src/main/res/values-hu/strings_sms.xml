@@ -27,4 +27,11 @@
     <string name="sms_default_only">Üzeneteket csak az alapértelmezett üzenetküldő alkalmazásod törölhet.</string>
     <string name="sms_open_default">Megnyitás ott</string>
     <string name="sms_deleted">Törölve</string>
+    <string name="sms_pick">Válasszon beszélgetést</string>
+    <string name="sms_is_default">A Tetra az SMS-alkalmazás</string>
+    <string name="sms_not_default">A Tetra nem az SMS-alkalmazás</string>
+    <string name="sms_is_default_summary">Az üzenetek a Tetrába érkeznek, és a Tetra tárolja őket. Visszaállítás: Android alapértelmezett alkalmazásai › SMS-alkalmazás.</string>
+    <string name="sms_not_default_summary">Legyen alapértelmezett, hogy az új üzenetek a Tetrába érkezzenek, és törölni is tudja őket. A képes üzeneteket (MMS) csak jelzi, nem mutatja meg.</string>
+    <string name="sms_mms_title">Képes üzenet (MMS)</string>
+    <string name="sms_mms_note">A Tetra nem tud képes üzeneteket megjeleníteni. Fogadásukhoz válasszon másik SMS-alkalmazást.</string>
 </resources>

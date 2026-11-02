@@ -27,4 +27,11 @@
     <string name="sms_default_only">Só a tua aplicação de mensagens predefinida pode eliminar mensagens.</string>
     <string name="sms_open_default">Abrir lá</string>
     <string name="sms_deleted">Eliminada</string>
+    <string name="sms_pick">Escolha uma conversa</string>
+    <string name="sms_is_default">O Tetra é a app de SMS</string>
+    <string name="sms_not_default">O Tetra não é a app de SMS</string>
+    <string name="sms_is_default_summary">As mensagens chegam ao Tetra, que as guarda. Para voltar atrás: Apps predefinidas do Android › App de SMS.</string>
+    <string name="sms_not_default_summary">Torne-a predefinida para receber as mensagens novas no Tetra e poder apagá-las. As mensagens com imagem (MMS) são apenas anunciadas, não mostradas.</string>
+    <string name="sms_mms_title">Mensagem com imagem (MMS)</string>
+    <string name="sms_mms_note">O Tetra não consegue mostrar mensagens com imagem. Para as receber, escolha outra app de SMS.</string>
 </resources>

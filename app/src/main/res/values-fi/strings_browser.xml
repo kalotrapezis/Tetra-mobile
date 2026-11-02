@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Kuten tietokoneella: välilehdet ja osoite ylhäällä, muut työkalut ☰-valikossa reunassa.</string>
     <string name="browser_pin_favorite">Kiinnitä aloitussivulle</string>
     <string name="browser_unpin_favorite">Irrota aloitussivulta</string>
+    <string name="maps_music">Musiikki</string>
+    <string name="maps_music_none">Asemaa ei ole vielä: napauta selaimen soittimessa autoa haluamasi aseman kohdalla.</string>
+    <string name="browser_for_maps">Soita Kartoissa</string>
+    <string name="browser_for_maps_set">Karttojen musiikkipainike soittaa tämän</string>
+    <string name="browser_no_folder">Ei kansiota</string>
+    <string name="browser_new_folder">Uusi kansio</string>
+    <string name="browser_to_folder">Kansioon</string>
+    <string name="browser_tabs_run">Välilehdet jatkavat</string>
+    <string name="browser_tabs_run_on">Välilehdet, joilta poistut, jatkavat ja soivat</string>
+    <string name="browser_tabs_run_off">Välilehti, jolta poistut, pysähtyy</string>
 </resources>

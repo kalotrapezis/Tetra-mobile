@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Като на компютър: разделите и адресът горе, другите инструменти в ☰ в края.</string>
     <string name="browser_pin_favorite">Закачане на началната страница</string>
     <string name="browser_unpin_favorite">Откачане от началната страница</string>
+    <string name="maps_music">Музика</string>
+    <string name="maps_music_none">Още няма станция: в плейъра на браузъра докоснете колата на желаната станция.</string>
+    <string name="browser_for_maps">Пусни в Карти</string>
+    <string name="browser_for_maps_set">Бутонът за музика в Карти пуска това</string>
+    <string name="browser_no_folder">Без папка</string>
+    <string name="browser_new_folder">Нова папка</string>
+    <string name="browser_to_folder">В папка</string>
+    <string name="browser_tabs_run">Разделите продължават</string>
+    <string name="browser_tabs_run_on">Разделите, които оставяте, продължават да работят и да свирят</string>
+    <string name="browser_tabs_run_off">Разделът, който оставяте, спира</string>
 </resources>

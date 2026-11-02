@@ -108,7 +108,8 @@ internal object AdBlock {
 }
 
 internal data class Visit(val url: String, val title: String, val at: Long)
-internal data class Bookmark(val url: String, val title: String, val pinned: Boolean = false) // pinned: at the start page's front
+// pinned: at the start page's front; folder: the user's own ("Radios", 2 Nov), "" for none
+internal data class Bookmark(val url: String, val title: String, val pinned: Boolean = false, val folder: String = "")
 
 internal object BrowserRules {
     /** The history lasts 24 hours from each visit (the user: "maybe keep it for 24 hours"), so yesterday's tabs are still found today. */
@@ -140,7 +141,28 @@ internal object BrowserRules {
     fun webFont(url: String) = Regex("\\.(woff2?|ttf|otf|eot)([?#]|$)", RegexOption.IGNORE_CASE).containsMatchIn(url)
 
     /** Desktop mode (the user, 2 Nov): the WebView's own agent as desktop Chrome on Linux — no Android, no Mobile, no WebView marks. */
+    /**
+     * Mobile Chrome as it is, without WebView's marks ("; wv", "Version/4.0"): Google refuses to sign in inside an app's WebView
+     * that says so (the user, 2 Nov: "it does not let me connect to Google").
+     */
+    fun mobileAgent(webView: String) = webView.replace("; wv)", ")").replace(Regex("Version/[\\d.]+ "), "")
+
     fun desktopAgent(mobile: String) = mobile.replace(Regex("\\([^)]*Android[^)]*\\)"), "(X11; Linux x86_64)").replace(" Mobile", "").replace(Regex("Version/[\\d.]+ "), "")
+
+    /**
+     * Player mode's ‹ › on a page with none of its own (a radio station's, live24.gr's): the next or the previous favourite of
+     * the same site, round the list (the user, 2 Nov: "a favorite radios list with a heart so I am not pressing next on
+     * thousands of stations"); in a page's folder, that folder's ("Radios"), whatever their sites; null when there is none but this page.
+     */
+    fun hop(bookmarks: List<Bookmark>, url: String, forward: Boolean): String? {
+        val here = site(host(url))
+        val folder = bookmarks.firstOrNull { it.url == url }?.folder.orEmpty()
+        val list = if (folder.isNotEmpty()) bookmarks.filter { it.folder == folder }.map { it.url } else bookmarks.map { it.url }.filter { site(host(it)) == here }
+        val others = list.filter { it != url }.ifEmpty { return null }
+        val i = list.indexOf(url)
+        if (i < 0) return if (forward) others.first() else others.last()
+        return list[(i + (if (forward) 1 else -1) + list.size) % list.size]
+    }
 
     fun host(url: String?) = url?.substringAfter("://", "")?.substringBefore('/')?.substringBefore('?')?.substringAfterLast('@')?.substringBefore(':')?.lowercase().orEmpty()
 
@@ -157,8 +179,11 @@ internal object BrowserRules {
 
     fun visitsJson(v: List<Visit>) = JSONArray(v.map { JSONObject().put("url", it.url).put("title", it.title).put("at", it.at) }).toString()
     fun visits(s: String?) = runCatching { JSONArray(s).let { a -> (0 until a.length()).map { a.getJSONObject(it).run { Visit(getString("url"), optString("title"), getLong("at")) } } } }.getOrDefault(emptyList())
-    fun bookmarksJson(b: List<Bookmark>) = JSONArray(b.map { JSONObject().put("url", it.url).put("title", it.title).apply { if (it.pinned) put("pinned", true) } }).toString()
-    fun bookmarks(s: String?) = runCatching { JSONArray(s).let { a -> (0 until a.length()).map { a.getJSONObject(it).run { Bookmark(getString("url"), optString("title"), optBoolean("pinned")) } } } }.getOrDefault(emptyList())
+    fun bookmarksJson(b: List<Bookmark>) = JSONArray(b.map { JSONObject().put("url", it.url).put("title", it.title).apply { if (it.pinned) put("pinned", true); if (it.folder.isNotEmpty()) put("folder", it.folder) } }).toString()
+    fun bookmarks(s: String?) = runCatching { JSONArray(s).let { a -> (0 until a.length()).map { a.getJSONObject(it).run { Bookmark(getString("url"), optString("title"), optBoolean("pinned"), optString("folder")) } } } }.getOrDefault(emptyList())
+
+    /** The folders' names, as first used. */
+    fun folders(b: List<Bookmark>) = b.map { it.folder }.filter { it.isNotEmpty() }.distinct()
 
     /** The start page's order: the pinned at the front, then the newest first. */
     fun front(b: List<Bookmark>) = b.reversed().sortedByDescending { it.pinned }
@@ -327,7 +352,7 @@ internal object MediaSites {
  * or on the bar"); one list for a phone, one for a tablet. Order is the order chosen.
  */
 internal object BrowserTools {
-    val ALL = listOf("fill", "ads", "private", "desktop", "html", "bookmarks", "history", "saved", "copy", "share", "split", "forward", "player", "import", "autohide", "background", "close")
+    val ALL = listOf("fill", "ads", "private", "desktop", "html", "bookmarks", "history", "saved", "copy", "share", "split", "forward", "player", "import", "autohide", "background", "tabs_run", "close")
     val PHONE = listOf("fill", "ads", "private", "bookmarks", "copy", "share") // two columns of three small (the user, 2 Nov: "fit 2 more tools")
     val TABLET = listOf("fill", "ads", "private", "desktop", "html", "bookmarks", "history", "saved", "copy", "share", "split")
     fun max(wide: Boolean) = if (wide) 11 else 6
@@ -367,22 +392,27 @@ internal object BrowserTabRow {
     }
 }
 
-/** A tab kept from one time to the next (the user, 2 Nov: "groups and pinned tabs keep them"): only pinned and grouped ones, never Private's. */
-internal data class SavedTab(val url: String, val title: String, val pinned: Boolean, val group: Int?)
+/**
+ * A tab kept from one time to the next: pinned and grouped ones always (the user, 2 Nov: "groups and pinned tabs keep them");
+ * the others as long as the history is ("gone according to the setting: end of session, 24 h, never"), [at] when last kept.
+ * Never Private's.
+ */
+internal data class SavedTab(val url: String, val title: String, val pinned: Boolean, val group: Int?, val at: Long = 0)
 
 internal object SavedTabs {
-    fun json(tabs: List<SavedTab>, groups: Map<Int, String>): String = JSONObject()
-        .put("tabs", JSONArray(tabs.filter { it.url.isNotEmpty() && (it.pinned || it.group != null) }.map {
-            JSONObject().put("url", it.url).put("title", it.title).put("pinned", it.pinned).apply { it.group?.let { g -> put("group", g) } }
+    fun json(tabs: List<SavedTab>, groups: Map<Int, String>, now: Long = System.currentTimeMillis()): String = JSONObject()
+        .put("tabs", JSONArray(tabs.filter { it.url.isNotEmpty() }.map {
+            JSONObject().put("url", it.url).put("title", it.title).put("pinned", it.pinned).put("at", now).apply { it.group?.let { g -> put("group", g) } }
         }))
         .put("groups", JSONObject(groups.mapKeys { it.key.toString() }))
         .toString()
 
-    /** The kept tabs and the names of the groups they are in (a group left with no tab is dropped). */
-    fun read(s: String?): Pair<List<SavedTab>, Map<Int, String>> = runCatching {
+    /** The kept tabs [keep] lets back (BrowserRules' ON_EXIT, DAY, NEVER) and the names of the groups they are in (a group left with no tab is dropped). */
+    fun read(s: String?, keep: String = BrowserRules.ON_EXIT, now: Long = System.currentTimeMillis()): Pair<List<SavedTab>, Map<Int, String>> = runCatching {
         val o = JSONObject(s!!)
         val a = o.getJSONArray("tabs")
-        val tabs = (0 until a.length()).map { a.getJSONObject(it).run { SavedTab(getString("url"), optString("title"), optBoolean("pinned"), if (has("group")) getInt("group") else null) } }
+        val tabs = (0 until a.length()).map { a.getJSONObject(it).run { SavedTab(getString("url"), optString("title"), optBoolean("pinned"), if (has("group")) getInt("group") else null, optLong("at")) } }
+            .filter { it.pinned || it.group != null || keep == BrowserRules.NEVER || (keep == BrowserRules.DAY && now - it.at in 0 until BrowserRules.KEEP) }
         val g = o.optJSONObject("groups")
         val names = g?.keys()?.asSequence()?.associate { it.toInt() to g.getString(it) }.orEmpty().filterKeys { k -> tabs.any { it.group == k } }
         tabs to names

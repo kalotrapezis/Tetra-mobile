@@ -27,4 +27,11 @@
     <string name="sms_default_only">Sporočila lahko briše samo tvoja privzeta aplikacija za sporočila.</string>
     <string name="sms_open_default">Odpri tam</string>
     <string name="sms_deleted">Izbrisano</string>
+    <string name="sms_pick">Izberite pogovor</string>
+    <string name="sms_is_default">Tetra je aplikacija za SMS</string>
+    <string name="sms_not_default">Tetra ni aplikacija za SMS</string>
+    <string name="sms_is_default_summary">Sporočila prihajajo v Tetro in Tetra jih hrani. Za vrnitev: Privzete aplikacije Androida › Aplikacija za SMS.</string>
+    <string name="sms_not_default_summary">Nastavite jo kot privzeto, da nova sporočila prihajajo v Tetro in jih lahko brišete. Sporočila s sliko (MMS) so le napovedana, ne prikazana.</string>
+    <string name="sms_mms_title">Sporočilo s sliko (MMS)</string>
+    <string name="sms_mms_note">Tetra ne more prikazati sporočil s sliko. Če jih želite prejemati, izberite drugo aplikacijo za SMS.</string>
 </resources>

@@ -57,15 +57,21 @@ internal enum class MapsTab(@androidx.annotation.StringRes val label: Int, val i
     Navigate(R.string.maps_tab_directions, R.drawable.ic_navigation), Favorites(R.string.maps_tab_saved, R.drawable.ic_favorite), Search(R.string.maps_tab_search, R.drawable.ic_search)
 }
 
-@Composable internal fun MapsIsland(tab: MapsTab?, pick: (MapsTab) -> Unit) = Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape) {
+/** Icons, the open one named (the user, 2 Nov: "a proper island, not words in every button"); ♪ at the end plays Maps' station. */
+@Composable internal fun MapsIsland(tab: MapsTab?, music: Boolean, playMusic: () -> Unit, pick: (MapsTab) -> Unit) = Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape) {
     Row(Modifier.padding(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         MapsTab.entries.forEach { t ->
             val on = t == tab
             Surface(shape = CircleShape, color = if (on) Color.White.copy(alpha = 0.18f) else Color.Transparent, modifier = Modifier.clickable { pick(t) }) {
-                Row(Modifier.padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(painterResource(t.icon), contentDescription = null, modifier = Modifier.size(20.dp))
-                    Text(stringResource(t.label), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(painterResource(t.icon), contentDescription = stringResource(t.label), modifier = Modifier.size(22.dp))
+                    if (on) Text(stringResource(t.label), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
+            }
+        }
+        Surface(shape = CircleShape, color = if (music) Color.White.copy(alpha = 0.18f) else Color.Transparent, modifier = Modifier.clickable(onClick = playMusic)) {
+            Box(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                Icon(painterResource(R.drawable.ic_headphones), contentDescription = stringResource(R.string.maps_music), modifier = Modifier.size(22.dp))
             }
         }
     }

@@ -1113,7 +1113,10 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                         deleteTrip = { t -> scope.launch { withContext(Dispatchers.IO) { MapsFiles.deleteTrip(root, t) }; trips = withContext(Dispatchers.IO) { MapsFiles.trips(root) } } })
                     null -> Unit
                 }
-                MapsIsland(tab) { t -> tab = if (tab == t) null else t }
+                // ♪: lit while the Browser plays behind; the station is chosen in the Browser's Player (🚗)
+                var music by remember { mutableStateOf(BrowserMedia.playing && BrowserMedia.service != null) }
+                LaunchedEffect(Unit) { while (true) { music = BrowserMedia.playing && BrowserMedia.service != null; delay(1000) } }
+                MapsIsland(tab, music, playMusic = { if (!BrowserMedia.mapsMusic(context)) Toast.makeText(context, context.getString(R.string.maps_music_none), Toast.LENGTH_LONG).show() }) { t -> tab = if (tab == t) null else t }
             }
         }
     }

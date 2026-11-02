@@ -105,9 +105,13 @@ internal fun SmsScreen(back: () -> Unit, start: String? = null) {
         }
         return
     }
-    open?.let { address ->
+    // a tablet held either way: the conversations on the left, the open one beside them (the user, 2 Nov), as Mail's
+    val wide = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp >= 840
+    @Composable fun conversation(address: String) = SmsConversation(address, SmsRules.threadOf(threads, address), texts.orEmpty(), who(address), draft, { draft = it },
+        say = { message = it }, back = { open = null; draft = "" })
+    if (!wide) open?.let { address ->
         Box(Modifier.fillMaxSize()) {
-            SmsConversation(address, SmsRules.threadOf(threads, address), texts.orEmpty(), who(address), draft, { draft = it }, say = { message = it }, back = { open = null; draft = "" })
+            conversation(address)
             message?.let { SmsToast(it) }
         }
         return
@@ -118,13 +122,16 @@ internal fun SmsScreen(back: () -> Unit, start: String? = null) {
     BackHandler(selected.isNotEmpty() || picking || archivedView) { when { selected.isNotEmpty() -> selected = emptySet(); picking -> stopPicking(); else -> archivedView = false } }
     val shown = remember(threads, archive, archivedView) { threads.filter { SmsRules.archived(archive, it) == archivedView } }
     val pad = PaddingValues(top = 76.dp, bottom = 110.dp)
-    Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding()) {
+    Row(Modifier.fillMaxSize()) {
+    Box((if (wide) Modifier.width(420.dp).fillMaxHeight() else Modifier.fillMaxSize()).statusBarsPadding().navigationBarsPadding().imePadding()) {
         Box(Modifier.align(Alignment.TopCenter).widthIn(max = 640.dp).fillMaxSize()) {
             if (picking) SmsPicker(contacts, query, pad) { n -> stopPicking(); open = n }
             else LazyColumn(Modifier.fillMaxSize(), contentPadding = pad) {
                 if (texts == null) item { SmsHint(stringResource(R.string.common_loading)) }
                 else if (shown.isEmpty()) item { SmsHint(stringResource(if (archivedView) R.string.sms_none_archived else R.string.sms_none)) }
-                items(shown, key = { it.id }) { t -> SmsRow(t, who(t.address), t.id in selected, click = { if (selected.isEmpty()) open = t.address else toggle(t.id) }, hold = { toggle(t.id) }) }
+                items(shown, key = { it.id }) { t -> SmsRow(t, who(t.address), t.id in selected,
+                    click = { if (selected.isEmpty()) { if (open != t.address) draft = ""; open = t.address } else toggle(t.id) }, hold = { toggle(t.id) },
+                    current = wide && SmsRules.threadOf(threads, open ?: "")?.id == t.id) }
             }
         }
         // the pill at the top: ‹ and the title, or the chosen count; Archived is a way of viewing, so it is up here
@@ -181,7 +188,13 @@ internal fun SmsScreen(back: () -> Unit, start: String? = null) {
                 }
             }
         }
+        if (!wide) message?.let { SmsToast(it) }
+    }
+    if (wide) Box(Modifier.weight(1f).fillMaxHeight()) {
+        key(open) { open?.let { conversation(it) } }
+        if (open == null) Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { SmsHint(stringResource(R.string.sms_pick)) }
         message?.let { SmsToast(it) }
+    }
     }
 
     if (asking) AlertDialog(onDismissRequest = { asking = false },
@@ -277,10 +290,10 @@ private fun SmsBubble(t: SmsText, at: String) = Column(Modifier.fillMaxWidth(), 
 /** A conversation in the list: face, name, the last message, its time, a dot while theirs is unread; held, it is chosen. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun SmsRow(t: SmsThread, c: ContactInfo?, selected: Boolean, click: () -> Unit, hold: () -> Unit) {
+private fun SmsRow(t: SmsThread, c: ContactInfo?, selected: Boolean, click: () -> Unit, hold: () -> Unit, current: Boolean = false) {
     val unread = t.unread > 0
     Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp).clip(MaterialTheme.shapes.large)
-        .background(if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
+        .background(if (selected || current) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
         .combinedClickable(onClick = click, onLongClick = hold).padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
         if (selected) Box(Modifier.size(44.dp).clip(CircleShape).background(SMS_COLOR), contentAlignment = Alignment.Center) {

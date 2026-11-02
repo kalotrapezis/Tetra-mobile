@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Kao na računalu: kartice i adresa gore, ostali alati u ☰ na kraju.</string>
     <string name="browser_pin_favorite">Prikvači na početnu stranicu</string>
     <string name="browser_unpin_favorite">Otkvači s početne stranice</string>
+    <string name="maps_music">Glazba</string>
+    <string name="maps_music_none">Još nema postaje: u playeru preglednika dodirnite auto kod željene postaje.</string>
+    <string name="browser_for_maps">Pusti u Kartama</string>
+    <string name="browser_for_maps_set">Gumb za glazbu u Kartama pušta ovo</string>
+    <string name="browser_no_folder">Bez mape</string>
+    <string name="browser_new_folder">Nova mapa</string>
+    <string name="browser_to_folder">U mapu</string>
+    <string name="browser_tabs_run">Kartice rade dalje</string>
+    <string name="browser_tabs_run_on">Kartice koje napustite rade i sviraju dalje</string>
+    <string name="browser_tabs_run_off">Napuštena kartica se pauzira</string>
 </resources>

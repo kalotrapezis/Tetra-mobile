@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Wie am Computer: Tabs und Adresse oben, die übrigen Werkzeuge im ☰ am Ende.</string>
     <string name="browser_pin_favorite">An die Startseite heften</string>
     <string name="browser_unpin_favorite">Von der Startseite lösen</string>
+    <string name="maps_music">Musik</string>
+    <string name="maps_music_none">Noch kein Sender: Tippe im Player des Browsers beim gewünschten Sender auf das Auto.</string>
+    <string name="browser_for_maps">In Karten abspielen</string>
+    <string name="browser_for_maps_set">Die Musiktaste in Karten spielt das</string>
+    <string name="browser_no_folder">Kein Ordner</string>
+    <string name="browser_new_folder">Neuer Ordner</string>
+    <string name="browser_to_folder">In einen Ordner</string>
+    <string name="browser_tabs_run">Tabs laufen weiter</string>
+    <string name="browser_tabs_run_on">Verlassene Tabs laufen und spielen weiter</string>
+    <string name="browser_tabs_run_off">Ein verlassener Tab pausiert</string>
 </resources>

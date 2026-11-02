@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Zoals op een computer: tabbladen en adres bovenaan, de andere hulpmiddelen in de ☰ aan het eind.</string>
     <string name="browser_pin_favorite">Vastzetten op de startpagina</string>
     <string name="browser_unpin_favorite">Losmaken van de startpagina</string>
+    <string name="maps_music">Muziek</string>
+    <string name="maps_music_none">Nog geen zender: tik in de speler van de browser op de auto bij de zender die je wilt.</string>
+    <string name="browser_for_maps">Afspelen in Kaarten</string>
+    <string name="browser_for_maps_set">De muziekknop van Kaarten speelt dit</string>
+    <string name="browser_no_folder">Geen map</string>
+    <string name="browser_new_folder">Nieuwe map</string>
+    <string name="browser_to_folder">In een map</string>
+    <string name="browser_tabs_run">Tabbladen lopen door</string>
+    <string name="browser_tabs_run_on">Tabbladen die je verlaat blijven lopen en spelen</string>
+    <string name="browser_tabs_run_off">Een tabblad dat je verlaat pauzeert</string>
 </resources>

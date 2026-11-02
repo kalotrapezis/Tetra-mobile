@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Som på en dator: flikar och adress överst, övriga verktyg i ☰ längst ut.</string>
     <string name="browser_pin_favorite">Fäst på startsidan</string>
     <string name="browser_unpin_favorite">Lossa från startsidan</string>
+    <string name="maps_music">Musik</string>
+    <string name="maps_music_none">Ingen station än: tryck på bilen vid stationen du vill ha i webbläsarens spelare.</string>
+    <string name="browser_for_maps">Spela i Kartor</string>
+    <string name="browser_for_maps_set">Kartors musikknapp spelar detta</string>
+    <string name="browser_no_folder">Ingen mapp</string>
+    <string name="browser_new_folder">Ny mapp</string>
+    <string name="browser_to_folder">Till en mapp</string>
+    <string name="browser_tabs_run">Flikar körs vidare</string>
+    <string name="browser_tabs_run_on">Flikar du lämnar fortsätter köra och spela</string>
+    <string name="browser_tabs_run_off">En flik du lämnar pausas</string>
 </resources>

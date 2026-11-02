@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Come su un computer: schede e indirizzo in alto, gli altri strumenti nel ☰ in fondo.</string>
     <string name="browser_pin_favorite">Fissa nella pagina iniziale</string>
     <string name="browser_unpin_favorite">Togli dalla pagina iniziale</string>
+    <string name="maps_music">Musica</string>
+    <string name="maps_music_none">Nessuna stazione ancora: nel lettore del browser, tocca l\'auto sulla stazione che vuoi.</string>
+    <string name="browser_for_maps">Riproduci in Mappe</string>
+    <string name="browser_for_maps_set">Il pulsante musica di Mappe riproduce questo</string>
+    <string name="browser_no_folder">Nessuna cartella</string>
+    <string name="browser_new_folder">Nuova cartella</string>
+    <string name="browser_to_folder">In una cartella</string>
+    <string name="browser_tabs_run">Le schede continuano</string>
+    <string name="browser_tabs_run_on">Le schede che lasci continuano a funzionare e a suonare</string>
+    <string name="browser_tabs_run_off">La scheda che lasci va in pausa</string>
 </resources>

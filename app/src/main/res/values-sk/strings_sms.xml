@@ -27,4 +27,11 @@
     <string name="sms_default_only">Odstraňovať správy môže len tvoja predvolená aplikácia na správy.</string>
     <string name="sms_open_default">Otvoriť tam</string>
     <string name="sms_deleted">Odstránené</string>
+    <string name="sms_pick">Vyberte konverzáciu</string>
+    <string name="sms_is_default">Tetra je aplikácia na SMS</string>
+    <string name="sms_not_default">Tetra nie je aplikácia na SMS</string>
+    <string name="sms_is_default_summary">Správy prichádzajú do Tetry a tá ich uchováva. Vrátenie: Predvolené aplikácie Androidu › SMS.</string>
+    <string name="sms_not_default_summary">Nastavte ju ako predvolenú, aby nové správy prichádzali do Tetry a mohli ste ich mazať. Obrázkové správy (MMS) sa len oznámia, nezobrazia.</string>
+    <string name="sms_mms_title">Obrázková správa (MMS)</string>
+    <string name="sms_mms_note">Tetra nevie zobraziť obrázkové správy. Ak ich chcete prijímať, nastavte inú aplikáciu na SMS.</string>
 </resources>

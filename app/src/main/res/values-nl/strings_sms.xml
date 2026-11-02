@@ -27,4 +27,11 @@
     <string name="sms_default_only">Alleen je standaard-berichtenapp kan berichten verwijderen.</string>
     <string name="sms_open_default">Daar openen</string>
     <string name="sms_deleted">Verwijderd</string>
+    <string name="sms_pick">Kies een gesprek</string>
+    <string name="sms_is_default">Tetra is de sms-app</string>
+    <string name="sms_not_default">Tetra is niet de sms-app</string>
+    <string name="sms_is_default_summary">Berichten komen binnen in Tetra en Tetra bewaart ze. Terugzetten: Standaardapps van Android › Sms-app.</string>
+    <string name="sms_not_default_summary">Maak het de standaard om nieuwe berichten in Tetra te krijgen en ze te kunnen verwijderen. Fotoberichten (mms) worden alleen gemeld, niet getoond.</string>
+    <string name="sms_mms_title">Fotobericht (mms)</string>
+    <string name="sms_mms_note">Tetra kan geen fotoberichten tonen. Kies een andere sms-app om ze te ontvangen.</string>
 </resources>

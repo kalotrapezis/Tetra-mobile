@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Mint a számítógépen: lapok és cím felül, a többi eszköz a végén lévő ☰ alatt.</string>
     <string name="browser_pin_favorite">Rögzítés a kezdőlapra</string>
     <string name="browser_unpin_favorite">Levétel a kezdőlapról</string>
+    <string name="maps_music">Zene</string>
+    <string name="maps_music_none">Még nincs állomás: a böngésző lejátszójában koppintson az autóra a kívánt állomásnál.</string>
+    <string name="browser_for_maps">Lejátszás a Térképben</string>
+    <string name="browser_for_maps_set">A Térkép zene gombja ezt játssza le</string>
+    <string name="browser_no_folder">Nincs mappa</string>
+    <string name="browser_new_folder">Új mappa</string>
+    <string name="browser_to_folder">Mappába</string>
+    <string name="browser_tabs_run">A lapok futnak tovább</string>
+    <string name="browser_tabs_run_on">Az elhagyott lapok tovább futnak és szólnak</string>
+    <string name="browser_tabs_run_off">Az elhagyott lap megáll</string>
 </resources>

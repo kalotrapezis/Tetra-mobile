@@ -27,4 +27,11 @@
     <string name="sms_default_only">Ní féidir ach le d’aip réamhshocraithe teachtaireachtaí teachtaireachtaí a scriosadh.</string>
     <string name="sms_open_default">Oscail ansin é</string>
     <string name="sms_deleted">Scriosta</string>
+    <string name="sms_pick">Roghnaigh comhrá</string>
+    <string name="sms_is_default">Is é Tetra an aip SMS</string>
+    <string name="sms_not_default">Ní hé Tetra an aip SMS</string>
+    <string name="sms_is_default_summary">Tagann teachtaireachtaí go Tetra agus coinníonn Tetra iad. Chun é a athrú ar ais: Aipeanna réamhshocraithe Android › Aip SMS.</string>
+    <string name="sms_not_default_summary">Déan réamhshocrú de chun teachtaireachtaí nua a fháil in Tetra agus iad a scriosadh. Ní fhógraítear teachtaireachtaí pictiúr (MMS) ach amháin, ní thaispeántar iad.</string>
+    <string name="sms_mms_title">Teachtaireacht phictiúr (MMS)</string>
+    <string name="sms_mms_note">Ní féidir le Tetra teachtaireachtaí pictiúr a thaispeáint. Chun iad a fháil, roghnaigh aip SMS eile.</string>
 </resources>

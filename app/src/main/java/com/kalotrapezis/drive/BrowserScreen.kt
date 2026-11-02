@@ -18,6 +18,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -88,15 +89,41 @@ private const val PRIVATE_PROFILE = "tetra_private"
 
 private enum class BrowserPanel { Bookmarks, History, Saved, Import }
 
+/**
+ * The Browser in a window of its own (the user, 2 Nov: "I can't use the maps and the browser together, to play music in the
+ * back and drive with maps in the front"): its own task, as the Phone's and Data's, so Tetra's Maps stays open beside it.
+ * AI Assist's "browser-play:{site, q}" comes as [PLAY].
+ */
+class BrowserActivity : androidx.activity.ComponentActivity() {
+    private val play = mutableStateOf<String?>(null)
+    override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLocale.wrap(base))
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        TetraLook.load(this)
+        // dark window in Tetra's dark look: WebView darkens pages only under a dark theme, and loads on dark, not white
+        if (!TetraLook.light) setTheme(android.R.style.Theme_Material_NoActionBar)
+        super.onCreate(savedInstanceState)
+        WriterLog.init(this)
+        androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = TetraLook.light
+        play.value = intent.getStringExtra(PLAY)
+        setContent { TetraTheme { BrowserScreen(back = { finish() }, play = play.value, hide = { moveTaskToBack(true) }) } }
+    }
+    override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); intent.getStringExtra(PLAY)?.let { play.value = it } }
+    companion object { const val PLAY = "com.kalotrapezis.drive.browser.PLAY" }
+}
+
+internal fun openBrowser(c: Context, play: String? = null) = c.startActivity(Intent(c, BrowserActivity::class.java).putExtra(BrowserActivity.PLAY, play)
+    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+
 /** [play]: AI Assist's "browser-play:{site, q}": that site's search, its first result played, in Player mode. */
 @Composable
-internal fun BrowserScreen(back: () -> Unit, play: String? = null) {
+internal fun BrowserScreen(back: () -> Unit, play: String? = null, hide: () -> Unit = back) {
     val context = LocalContext.current
     var private by remember { mutableStateOf(false) }
     var normalUrl by remember { mutableStateOf("") } // the page Private left, opened again on its way out
     var said by remember { mutableStateOf<String?>(null) }
     key(private) {
-        BrowserPage(private, if (private) "" else normalUrl, said, if (private) null else play, back = back, setPrivate = { on, url ->
+        // leaving: behind the other apps with every tab as it is (the user, 2 Nov: "keep sites open on the other tabs"); Private closes, so it keeps nothing
+        BrowserPage(private, if (private) "" else normalUrl, said, if (private) null else play, back = if (private) back else hide, setPrivate = { on, url ->
             when {
                 on && !WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE) -> said = context.getString(R.string.browser_private_unsupported)
                 on -> { normalUrl = url; said = null; private = true }
@@ -163,8 +190,13 @@ if(a=='toggle')a=(m&&!m.paused)?'pause':'play';
 if(a=='play'){if(m)m.play();else if(H.play)H.play({action:'play'});}
 else if(a=='pause'){if(m)m.pause();else if(H.pause)H.pause({action:'pause'});}
 else if(a=='next'){if(H.nexttrack)H.nexttrack({action:'nexttrack'});else click(b.next);}
-else if(a=='prev'){if(m&&m.currentTime>5)m.currentTime=0;else if(H.previoustrack)H.previoustrack({action:'previoustrack'});else if(!click(b.prev)&&m)m.currentTime=0;}
+else if(a=='prev'){var now=Date.now(),again=now-(window.__tetraPrevAt||0)<2000;window.__tetraPrevAt=now;
+if(m&&m.currentTime>5&&!again)m.currentTime=0;else if(H.previoustrack)H.previoustrack({action:'previoustrack'});else if(!click(b.prev)){if(again&&history.length>1)history.back();else if(m)m.currentTime=0;}}
 setTimeout(report,300);};
+window.__tetraAutoplay=function(){var n=0,t=setInterval(function(){var m=cur();
+if(m&&!m.paused){clearInterval(t);return;}
+if(m&&(m.currentSrc||m.src))m.play().catch(function(){});else if(n==4)click('.jp-play,[class*=play-button],button[aria-label*=Play i],button[title*=Play i]');
+if(++n>30)clearInterval(t);},500);};
 window.__tetraFirst=function(sel){var n=0,t=setInterval(function(){var l=document.querySelectorAll(sel);
 for(var i=0;i<l.length;i++){var a=l[i];if(!a.href||a.href.indexOf('/shorts/')>=0||a.closest('[class*=promoted],[class*=ad-slot],ytm-reel-shelf-renderer'))continue;clearInterval(t);location.href=a.href;return;}
 if(++n>40)clearInterval(t);},250);};
@@ -199,6 +231,7 @@ private class BrowserTab(val id: Int) {
     var kinds by mutableStateOf(emptySet<String>())
     var media by mutableStateOf(PageMedia())
     var first by mutableStateOf<MediaSite?>(null) // AI Assist's search: its first result still to play
+    var autoplay = false // reached by Player mode's ‹ ›: its media started when it has loaded
     var pull by mutableFloatStateOf(0f) // pull to reload: how far, in dp
     var desktop by mutableStateOf(false) // the desktop site: a desktop agent, kept per tab
     var html by mutableStateOf(false) // HTML only: no JavaScript, no autoplay, no web fonts
@@ -259,7 +292,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     var splitPair by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     // tab groups (the user, 2 Nov): a tab dragged onto another makes one, named; one chip that unfolds.
     // Pinned and grouped tabs are kept from one time to the next ("keep them"); Private keeps nothing.
-    val kept = remember { if (private) emptyList<SavedTab>() to emptyMap() else SavedTabs.read(prefs.getString("kept_tabs", null)) }
+    val kept = remember { if (private) emptyList<SavedTab>() to emptyMap() else SavedTabs.read(prefs.getString("kept_tabs", null), prefs.getString("keep_history", BrowserRules.DAY) ?: BrowserRules.DAY) }
     val groups = remember { mutableStateMapOf<Int, String>().apply { putAll(kept.second) } }
     var openGroups by remember { mutableStateOf(setOf<Int>()) }
     var nextGroup by remember { mutableIntStateOf((kept.second.keys.maxOrNull() ?: 0) + 1) }
@@ -268,6 +301,11 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     var groupOptions by remember { mutableStateOf<Int?>(null) } // a long press on a group
     // auto-hide (the user, 2 Nov: "to get full screen, show it on scroll up"): off unless switched on, kept
     var autohide by remember { mutableStateOf(prefs.getBoolean("autohide", false)) }
+    var tabsRun by remember { mutableStateOf(prefs.getBoolean("tabs_run", true)) } // tabs not shown go on, sound and all (☰'s switch)
+    // a video's full screen (YouTube's ⛶): its own view over everything, turned to landscape, until its ⛶ or ‹
+    var fullView by remember { mutableStateOf<android.view.View?>(null) }
+    var fullDone by remember { mutableStateOf<WebChromeClient.CustomViewCallback?>(null) }
+    fun hostActivity() = generateSequence(context) { (it as? android.content.ContextWrapper)?.baseContext }.filterIsInstance<android.app.Activity>().firstOrNull()
     var barShown by remember { mutableStateOf(true) }
     val drift = remember { IntArray(1) } // the scroll since its last turn, in px: a small threshold, so the bar does not flicker
     // HTML only, per site (Private: for this time only, kept nowhere)
@@ -288,10 +326,19 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         if (y <= 0 || drift[0] < -12 * density) barShown = true else if (drift[0] > 48 * density) barShown = false
     }
 
-    fun newTab(id: Int, address: String, lazy: Boolean = false) = BrowserTab(id).also { tab -> tab.view = WebView(context).apply {
+    var soundId by remember { mutableStateOf<Int?>(null) } // the tab last heard: the notification's and Maps' keys go to it, whichever is shown
+    fun newTab(id: Int, address: String, lazy: Boolean = false) = BrowserTab(id).also { tab -> tab.view = object : WebView(context) {
+        // Tetra behind another app: Chromium pauses a hidden WebView's video within seconds (the user, 2 Nov: "it stops as soon
+        // as at the island"), whatever the page is told; while background play is on and this tab plays, it is never hidden
+        override fun onWindowVisibilityChanged(visibility: Int) =
+            super.onWindowVisibilityChanged(if (background && tab.media.playing) android.view.View.VISIBLE else visibility)
+    }.apply {
         if (private) { ProfileStore.getInstance().getOrCreateProfile(PRIVATE_PROFILE); WebViewCompat.setProfile(this, PRIVATE_PROFILE) }
         // Tetra's own ground, not WebView's white of a light phone: that white showed through around the bar (2 Nov, emulator)
         setBackgroundColor(pageColor)
+        // not the WRAP_CONTENT AndroidView gives a view without any: WebView then counts 100vh as 0, and pages sized in vh
+        // fold away (YouTube's consent sheet stuck at a strip, the user 2 Nov)
+        layoutParams = android.view.ViewGroup.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT)
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
         settings.builtInZoomControls = true
@@ -299,9 +346,23 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         settings.loadWithOverviewMode = true
         settings.useWideViewPort = true
         settings.mediaPlaybackRequiresUserGesture = false // Player mode's and the notification's Play come from outside the page
+        settings.userAgentString = BrowserRules.mobileAgent(settings.userAgentString)
+        // pages follow Tetra's look (the user, 2 Nov): in the dark one, sites' own dark look, else darkened (BrowserActivity's dark theme)
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) androidx.webkit.WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true)
+        // as Chrome: Google's consent sheet on YouTube and its sign-in live in frames of their own (the user, 2 Nov: stuck half open)
+        cookies().setAcceptThirdPartyCookies(this, true)
+        // nor its client hints (Sec-CH-UA, navigator.userAgentData): "Android WebView" there is Google's surest sign
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.USER_AGENT_METADATA)) runCatching {
+            val m = androidx.webkit.WebSettingsCompat.getUserAgentMetadata(settings)
+            androidx.webkit.WebSettingsCompat.setUserAgentMetadata(settings, androidx.webkit.UserAgentMetadata.Builder(m).setBrandVersionList(m.brandVersionList.map { b ->
+                if (b.brand == "Android WebView") androidx.webkit.UserAgentMetadata.BrandVersion.Builder(b).setBrand("Google Chrome").build() else b
+            }).build())
+        }.onFailure { WriterLog.w("Browser: client hints unchanged (${it.message})") }
+        // nor the X-Requested-With header naming Tetra, Google's other way of telling a WebView
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.REQUESTED_WITH_HEADER_ALLOW_LIST)) androidx.webkit.WebSettingsCompat.setRequestedWithHeaderOriginAllowList(settings, emptySet())
         if (wide && prefs.getBoolean("desktop", false)) { tab.desktop = true; settings.userAgentString = BrowserRules.desktopAgent(settings.userAgentString) } // a tablet's default
         setOnScrollChangeListener { _, _, y, _, oldY -> scrolled(tab, y, oldY) }
-        addJavascriptInterface(MediaBridge(this, { background }) { tab.media = it }, "TetraMedia")
+        addJavascriptInterface(MediaBridge(this, { background }) { tab.media = it; if (it.playing) soundId = tab.id }, "TetraMedia")
         if (early) WebViewCompat.addDocumentStartJavaScript(this, MEDIA_JS, setOf("*"))
         if (!private) addJavascriptInterface(FormBridge(this, { tab.kinds = it }) { json ->
             if (json == lastForm) return@FormBridge // a click and a submit send the same form twice
@@ -348,6 +409,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             override fun onPageFinished(view: WebView, address: String?) {
                 tab.title = view.title.orEmpty()
                 if (!early) view.evaluateJavascript(MEDIA_JS, null) // an old WebView: after the page's scripts, so some media keys are missed
+                if (tab.autoplay) { tab.autoplay = false; view.evaluateJavascript("window.__tetraAutoplay&&window.__tetraAutoplay()", null) }
                 tab.first?.let { site -> if (address.orEmpty().startsWith(site.search)) view.evaluateJavascript("window.__tetraFirst&&window.__tetraFirst(${JSONObject.quote(site.first)})", null) }
                 if (private || address.isNullOrEmpty() || !address.startsWith("http")) return
                 view.evaluateJavascript(FORMS_JS, null)
@@ -362,6 +424,14 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView, p: Int) { tab.progress = p }
             override fun onReceivedTitle(view: WebView, t: String?) { tab.title = t.orEmpty() }
+            override fun onShowCustomView(v: android.view.View, done: CustomViewCallback) {
+                fullView = v; fullDone = done
+                hostActivity()?.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            }
+            override fun onHideCustomView() {
+                fullView = null; fullDone = null
+                hostActivity()?.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
             override fun onShowFileChooser(view: WebView, callback: ValueCallback<Array<Uri>>, params: FileChooserParams): Boolean {
                 chooser?.onReceiveValue(null); chooser = callback
                 return runCatching { pick.launch(params.createIntent()); true }.getOrElse { chooser = null; false }
@@ -399,7 +469,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         val pair = splitPair
         if (pair != null && (to.id == pair.first || to.id == pair.second)) { currentId = to.id; editing = false; wake(to); return } // the other pane: only the focus moves
         if (pair != null) splitPair = if (pair.first == currentId) to.id to pair.second else pair.first to to.id // into the chosen pane
-        tabs.firstOrNull { it.id == currentId }?.view?.let { old -> old.evaluateJavascript("window.__tetraMediaDo&&window.__tetraMediaDo('pause')", null); old.onPause() } // one tab plays
+        // the tab left goes on as it was, its sound too (the user, 2 Nov: "no, tab switch stops the other page"), unless ☰ says otherwise
+        if (!tabsRun) tabs.firstOrNull { it.id == currentId }?.view?.let { old -> old.evaluateJavascript("window.__tetraMediaDo&&window.__tetraMediaDo('pause')", null); old.onPause() }
         to.view.onResume(); wake(to); currentId = to.id; editing = false; player = false; barShown = true
     }
     fun open(address: String = ""): BrowserTab = newTab(nextId++, address).also { tabs += it; switch(it) }
@@ -416,7 +487,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             val now = tabs.firstOrNull { it.id == currentId }
             // playing in the background: that tab is not paused (the notification keeps Tetra running)
             if (e == androidx.lifecycle.Lifecycle.Event.ON_PAUSE) saveTabs() // Tetra may be closed from behind: keep the pinned and grouped tabs now
-            if (e == androidx.lifecycle.Lifecycle.Event.ON_PAUSE) tabs.forEach { if (!(background && it === now && it.media.playing)) it.view.onPause() }
+            if (e == androidx.lifecycle.Lifecycle.Event.ON_PAUSE) tabs.forEach { if (!(background && it.media.playing)) it.view.onPause() }
             else if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME) now?.view?.onResume()
         }
         lifecycle.lifecycle.addObserver(o)
@@ -438,11 +509,30 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         }
     }
 
-    fun mediaKey(a: String) = webView.evaluateJavascript("window.__tetraMediaDo&&window.__tetraMediaDo('$a',${MediaSites.buttons(MediaSites.of(BrowserRules.host(webView.url)))})", null)
-    SideEffect { BrowserMedia.control = ::mediaKey }
-    LaunchedEffect(media, background) { if (background && media.has) BrowserMedia.show(context, media.title, media.playing) else BrowserMedia.stop(context) }
+    fun mediaKey(a: String, t: BrowserTab = tab) {
+        val view = t.view
+        // a page with no ‹ › of its own (a radio station's): the site's other favourites, playing as they open
+        if ((a == "next" || a == "prev") && MediaSites.of(BrowserRules.host(view.url)) == null && !t.media.queue)
+            BrowserRules.hop(bookmarks, view.url.orEmpty(), a == "next")?.let { t.autoplay = true; view.loadUrl(it); return }
+        view.evaluateJavascript("window.__tetraMediaDo&&window.__tetraMediaDo('$a',${MediaSites.buttons(MediaSites.of(BrowserRules.host(view.url)))})", null)
+    }
+    // the notification's keys: the tab heard last, else the one shown
+    val sound = tabs.firstOrNull { it.id == soundId && it.media.has } ?: tab
+    SideEffect { BrowserMedia.control = { a -> mediaKey(a, sound) } }
+    LaunchedEffect(sound.media, background) { if (background && sound.media.has) BrowserMedia.show(context, sound.media.title, sound.media.playing) else BrowserMedia.stop(context) }
     LaunchedEffect(play) {
         val o = play?.let { runCatching { JSONObject(it.removePrefix("browser-play:")) }.getOrNull() } ?: return@LaunchedEffect
+        // Maps' ♪: its station played, then this window goes behind Maps again once the sound has started (or after 8 s)
+        o.optString("url").takeIf { it.isNotEmpty() }?.let { address ->
+            val t = tabs.firstOrNull { it.url == address } ?: if (tab.url.isEmpty()) tab else open()
+            if (t.id != currentId) switch(t)
+            if (t.url == address) t.view.evaluateJavascript("window.__tetraAutoplay&&window.__tetraAutoplay()", null) else { t.autoplay = true; t.view.loadUrl(address) }
+            if (o.optBoolean("behind")) {
+                kotlinx.coroutines.withTimeoutOrNull(8000) { while (!t.media.playing) delay(250) }
+                (context as? android.app.Activity)?.moveTaskToBack(true)
+            }
+            return@LaunchedEffect
+        }
         val site = MediaSites.byId(o.optString("site"))
         val t = if (tab.url.isEmpty()) tab else open() // in a tab of its own, unless this one is empty
         t.first = site; player = true; menu = false; panel = null
@@ -457,7 +547,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     }
     fun setDesktop(t: BrowserTab, on: Boolean) {
         t.desktop = on
-        t.view.settings.userAgentString = if (on) BrowserRules.desktopAgent(android.webkit.WebSettings.getDefaultUserAgent(context)) else null
+        t.view.settings.userAgentString = if (on) BrowserRules.desktopAgent(android.webkit.WebSettings.getDefaultUserAgent(context))
+            else BrowserRules.mobileAgent(android.webkit.WebSettings.getDefaultUserAgent(context))
         if (wide) prefs.edit().putBoolean("desktop", on).apply() // a tablet: new tabs open the same way
         message = context.getString(if (on) R.string.browser_desktop else R.string.browser_mobile)
         if (t.url.isNotEmpty()) t.view.reload()
@@ -487,6 +578,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     }
     fun keep(v: BrowserVault) { vault = v; runCatching { BrowserSecrets.save(context, v) }.onFailure { WriterLog.e("Browser: the vault not saved", it) } }
     fun keepBookmarks(b: List<Bookmark>) { bookmarks = b; prefs.edit().putString("bookmarks", BrowserRules.bookmarksJson(b)).apply() }
+    var filing by remember { mutableStateOf<Bookmark?>(null) } // a favourite being put in a folder
     val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@rememberLauncherForActivityResult
         scope.launch {
@@ -499,7 +591,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         }
     }
 
-    BackHandler { when { player -> player = false; editing -> editing = false; panel != null -> panel = null; menu -> menu = false; webView.canGoBack() -> webView.goBack(); else -> back() } }
+    BackHandler { when { fullView != null -> fullDone?.onCustomViewHidden(); player -> player = false; editing -> editing = false; panel != null -> panel = null; menu -> menu = false; webView.canGoBack() -> webView.goBack(); else -> back() } }
 
     val url = tab.url
     val host = BrowserRules.host(url)
@@ -553,6 +645,10 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         "forward" -> if (wide) null else BrowserTool(R.drawable.ic_chevron_right, stringResource(R.string.browser_forward), enabled = tab.canForward) { webView.goForward() }
         "player" -> BrowserTool(R.drawable.ic_play, stringResource(R.string.browser_player), enabled = media.has) { player = true }
         "import" -> if (private) null else BrowserTool(R.drawable.ic_file_download, stringResource(R.string.browser_import)) { imported = null; panel = BrowserPanel.Import }
+        "tabs_run" -> BrowserTool(R.drawable.ic_tab, stringResource(R.string.browser_tabs_run), tabsRun) {
+            tabsRun = !tabsRun; prefs.edit().putBoolean("tabs_run", tabsRun).apply()
+            message = context.getString(if (tabsRun) R.string.browser_tabs_run_on else R.string.browser_tabs_run_off)
+        }
         "autohide" -> BrowserTool(R.drawable.ic_fullscreen, stringResource(R.string.browser_autohide), autohide) { autohide = !autohide; barShown = true; prefs.edit().putBoolean("autohide", autohide).apply() }
         "background" -> BrowserTool(R.drawable.ic_headphones, stringResource(R.string.browser_background), background) {
             background = !background; BrowserMedia.setBackground(context, background)
@@ -667,7 +763,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             @Composable fun pane(t: BrowserTab, m: Modifier) = Box(m.then(if (panes != null && t.id == currentId) Modifier.border(2.dp, BROWSER_COLOR) else Modifier)
                 .pointerInput(t.id, panes != null) { if (panes != null) awaitEachGesture { awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial); if (t.id != currentId) currentId = t.id } }) {
                 key(t.id) { AndroidView({ (t.view.parent as? android.view.ViewGroup)?.removeView(t.view); t.view }, Modifier.fillMaxSize()) }
-                if (t.url.isEmpty()) BrowserStart(private, BrowserRules.front(bookmarks)) { u -> currentId = t.id; editing = false; val target = BrowserRules.target(u); applyHtml(t, target); t.view.loadUrl(target) }
+                if (t.url.isEmpty()) BrowserStart(private, BrowserRules.front(bookmarks), file = { filing = it }) { u -> currentId = t.id; editing = false; val target = BrowserRules.target(u); applyHtml(t, target); t.view.loadUrl(target) }
                 if (t.pull > 8f) Surface(shape = CircleShape, color = if (t.pull >= PULL_DP) BROWSER_COLOR else MaterialTheme.colorScheme.surfaceContainerHigh,
                     contentColor = if (t.pull >= PULL_DP) Color.White else MaterialTheme.colorScheme.onSurface, shadowElevation = 4.dp,
                     modifier = Modifier.align(Alignment.TopCenter).offset(y = (t.pull.coerceAtMost(PULL_DP) * 0.6f).dp).size(40.dp)) {
@@ -709,7 +805,9 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             }
         }
         if (player) { HorizontalDivider(color = onBar.copy(alpha = 0.2f)); CompositionLocalProvider(LocalContentColor provides onBar) {
-            BrowserPlayer(Modifier.weight(0.4f), media, key = ::mediaKey, exit = { player = false }) }
+            BrowserPlayer(Modifier.weight(0.4f), media, key = { mediaKey(it) }, marked = marked, heart = ::heart, forMaps = BrowserMedia.station(context)?.first == url,
+                setForMaps = { BrowserMedia.setStation(context, url, webView.title.orEmpty().ifEmpty { host }); message = context.getString(R.string.browser_for_maps_set) },
+                exit = { player = false }) }
         } else if (!top) barArea()
     }
 
@@ -751,7 +849,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     // Bookmarks, History, Passwords and Import: modal sheets too
     panel?.let { p -> ModalBottomSheet(onDismissRequest = { panel = null }) {
         BrowserPanelView(p, close = { panel = null }, bookmarks = bookmarks, visits = visits, vault = vault, imported = imported,
-                    open = ::go, dropBookmark = { b -> keepBookmarks(bookmarks - b) }, pinBookmark = { b -> keepBookmarks(bookmarks.map { if (it == b) it.copy(pinned = !it.pinned) else it }) },
+                    open = ::go, dropBookmark = { b -> keepBookmarks(bookmarks - b) }, pinBookmark = { b -> keepBookmarks(bookmarks.map { if (it == b) it.copy(pinned = !it.pinned) else it }) }, fileBookmark = { filing = it },
                     keepHistory = keepHistory,
                     clearHistory = { visits = emptyList(); prefs.edit().remove("history").apply() },
                     keep = ::keep, choose = { importer.launch(arrayOf("*/*")) },
@@ -792,6 +890,19 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         // the page may have moved on while the strip was open: a password goes only to its own host
         if (forHost == null || BrowserRules.sameHost(BrowserRules.host(webView.url), forHost)) webView.evaluateJavascript("window.__tetraFill&&window.__tetraFill($data)", null)
     }
+    fullView?.let { v ->
+        androidx.compose.ui.window.Dialog(onDismissRequest = { fullDone?.onCustomViewHidden() },
+            androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+            val window = (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window
+            LaunchedEffect(window) { window?.let { w -> androidx.core.view.WindowCompat.getInsetsController(w, w.decorView).apply {
+                hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+                systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE } } }
+            AndroidView({ (v.parent as? android.view.ViewGroup)?.removeView(v); v }, Modifier.fillMaxSize().background(Color.Black))
+        }
+    }
+    filing?.let { b -> FolderDialog(b, BrowserRules.folders(bookmarks), close = { filing = null }) { f ->
+        keepBookmarks(bookmarks.map { if (it.url == b.url) it.copy(folder = f) else it }); filing = null
+    } }
 }
 
 @Composable private fun BrowserHeart(on: Boolean) =
@@ -906,26 +1017,58 @@ private class BrowserTool(val icon: Int, val label: String, val on: Boolean = fa
 
 private fun addressLabel(a: Map<String, String>) = a["name"] ?: listOfNotNull(a["given-name"], a["family-name"]).joinToString(" ").ifEmpty { a["email"] ?: a["street-address"] ?: a.values.first() }
 
-/** The first page: the favourites as tiles (the user, 2 Nov: "or nothing"); Private says what it keeps. */
-@Composable private fun BrowserStart(private: Boolean, bookmarks: List<Bookmark>, open: (String) -> Unit) =
+/**
+ * The first page: the favourites as tiles (the user, 2 Nov: "or nothing"), then their folders ("so we can have Radios", 2 Nov),
+ * a tap opening one; a tile held is put in a folder. Private says what it keeps.
+ */
+@Composable private fun BrowserStart(private: Boolean, bookmarks: List<Bookmark>, file: (Bookmark) -> Unit, open: (String) -> Unit) =
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        var folder by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("") }
+        BackHandler(folder.isNotEmpty()) { folder = "" }
         if (private) Text(stringResource(R.string.browser_private_start), Modifier.fillMaxWidth().padding(24.dp), textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        LazyVerticalGrid(GridCells.Adaptive(88.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            gridItems(bookmarks, key = { it.url }) { b -> // already in the start page's order (BrowserRules.front)
-                val host = BrowserRules.site(BrowserRules.host(b.url))
-                Column(Modifier.clip(MaterialTheme.shapes.medium).clickable { open(b.url) }.padding(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(Modifier.size(56.dp).clip(CircleShape).background(TILE_COLORS[(host.hashCode() and 0x7fffffff) % TILE_COLORS.size]), contentAlignment = Alignment.Center) {
-                        Text(host.take(1).uppercase(), color = Color.White, style = MaterialTheme.typography.titleLarge)
-                    }
-                    Text(b.title.ifBlank { host }, Modifier.padding(top = 6.dp), style = MaterialTheme.typography.labelMedium, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+        if (folder.isNotEmpty()) Row(Modifier.fillMaxWidth().padding(start = 8.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { folder = "" }) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
+            Text(folder, style = MaterialTheme.typography.titleMedium)
+        }
+        @Composable fun Tile(label: String, letter: String, color: Color, icon: Int?, click: () -> Unit, hold: (() -> Unit)?) =
+            Column(Modifier.clip(MaterialTheme.shapes.medium).combinedClickable(onClick = click, onLongClick = hold).padding(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(Modifier.size(56.dp).clip(CircleShape).background(color), contentAlignment = Alignment.Center) {
+                    if (icon != null) Icon(painterResource(icon), null, tint = Color.White) else Text(letter, color = Color.White, style = MaterialTheme.typography.titleLarge)
                 }
+                Text(label, Modifier.padding(top = 6.dp), style = MaterialTheme.typography.labelMedium, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
             }
+        val shown = bookmarks.filter { it.folder == folder } // already in the start page's order (BrowserRules.front)
+        LazyVerticalGrid(GridCells.Adaptive(88.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            gridItems(shown, key = { it.url }) { b ->
+                val host = BrowserRules.site(BrowserRules.host(b.url))
+                Tile(b.title.ifBlank { host }, host.take(1).uppercase(), TILE_COLORS[(host.hashCode() and 0x7fffffff) % TILE_COLORS.size], null, { open(b.url) }) { file(b) }
+            }
+            if (folder.isEmpty()) gridItems(BrowserRules.folders(bookmarks), key = { "folder:$it" }) { f -> Tile(f, "", BROWSER_COLOR, R.drawable.ic_folder, { folder = f }, null) }
         }
     }
 
+/** A favourite into a folder: one of those there are, a new one, or none. */
+@Composable private fun FolderDialog(b: Bookmark, folders: List<String>, close: () -> Unit, put: (String) -> Unit) {
+    var name by remember { mutableStateOf("") }
+    AlertDialog(onDismissRequest = close, title = { Text(b.title.ifBlank { BrowserRules.host(b.url) }, maxLines = 2, overflow = TextOverflow.Ellipsis) },
+        text = {
+            Column(Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())) {
+                (listOf("") + folders).forEach { f ->
+                    Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).clickable { put(f) }.padding(vertical = 10.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = b.folder == f, onClick = { put(f) })
+                        Text(f.ifEmpty { stringResource(R.string.browser_no_folder) })
+                    }
+                }
+                OutlinedTextField(name, { name = it }, singleLine = true, label = { Text(stringResource(R.string.browser_new_folder)) }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
+            }
+        },
+        confirmButton = { TextButton(onClick = { put(name.trim()) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.common_add)) } },
+        dismissButton = { TextButton(onClick = close) { Text(stringResource(R.string.common_cancel)) } })
+}
+
 private val TILE_COLORS = listOf(Color(0xFF1A87FD), Color(0xFF2E7D32), Color(0xFFC62828), Color(0xFF6A1B9A), Color(0xFFEF6C00), Color(0xFF00838F), Color(0xFF4E342E), Color(0xFFAD1457))
 
-@Composable private fun BrowserRow(title: String, url: String, click: () -> Unit, remove: (() -> Unit)? = null, pinned: Boolean = false, pin: (() -> Unit)? = null) =
+@Composable private fun BrowserRow(title: String, url: String, click: () -> Unit, remove: (() -> Unit)? = null, pinned: Boolean = false, pin: (() -> Unit)? = null, file: (() -> Unit)? = null) =
     Row(Modifier.fillMaxWidth().clickable(onClick = click).padding(start = 20.dp, end = 8.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f).padding(vertical = 4.dp)) {
             Text(title.ifEmpty { BrowserRules.host(url) }, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -934,12 +1077,13 @@ private val TILE_COLORS = listOf(Color(0xFF1A87FD), Color(0xFF2E7D32), Color(0xF
         // a favourite's pin (the user, 2 Nov): at the start page's front
         if (pin != null) IconButton(onClick = pin) { Icon(painterResource(R.drawable.ic_push_pin), stringResource(if (pinned) R.string.browser_unpin_favorite else R.string.browser_pin_favorite),
             tint = if (pinned) BROWSER_COLOR else LocalContentColor.current.copy(alpha = 0.5f)) }
+        if (file != null) IconButton(onClick = file) { Icon(painterResource(R.drawable.ic_folder), stringResource(R.string.browser_to_folder), tint = LocalContentColor.current.copy(alpha = 0.6f)) }
         if (remove != null) IconButton(onClick = remove) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_delete)) }
     }
 
 @Composable
 private fun BrowserPanelView(p: BrowserPanel, close: () -> Unit, bookmarks: List<Bookmark>, visits: List<Visit>, vault: BrowserVault, imported: Pair<String, Uri?>?,
-                             open: (String) -> Unit, dropBookmark: (Bookmark) -> Unit, pinBookmark: (Bookmark) -> Unit, keepHistory: String, clearHistory: () -> Unit, keep: (BrowserVault) -> Unit, choose: () -> Unit, deleteFile: (Uri) -> Unit) =
+                             open: (String) -> Unit, dropBookmark: (Bookmark) -> Unit, pinBookmark: (Bookmark) -> Unit, fileBookmark: (Bookmark) -> Unit, keepHistory: String, clearHistory: () -> Unit, keep: (BrowserVault) -> Unit, choose: () -> Unit, deleteFile: (Uri) -> Unit) =
     Box(Modifier.navigationBarsPadding()) {
         LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(bottom = 16.dp)) {
             item {
@@ -955,7 +1099,7 @@ private fun BrowserPanelView(p: BrowserPanel, close: () -> Unit, bookmarks: List
             when (p) {
                 BrowserPanel.Bookmarks -> {
                     if (bookmarks.isEmpty()) item { note(stringResource(R.string.browser_no_bookmarks)) }
-                    items(BrowserRules.front(bookmarks), key = { it.url }) { b -> BrowserRow(b.title, b.url, click = { open(b.url) }, remove = { dropBookmark(b) }, pinned = b.pinned, pin = { pinBookmark(b) }) }
+                    items(BrowserRules.front(bookmarks), key = { it.url }) { b -> BrowserRow(b.title.let { t -> if (b.folder.isEmpty()) t else "${b.folder} · $t" }, b.url, click = { open(b.url) }, remove = { dropBookmark(b) }, pinned = b.pinned, pin = { pinBookmark(b) }, file = { fileBookmark(b) }) }
                 }
                 BrowserPanel.History -> {
                     item { note(stringResource(when { visits.isEmpty() -> R.string.browser_no_history; keepHistory == BrowserRules.ON_EXIT -> R.string.browser_history_exit_note
@@ -1018,9 +1162,20 @@ private fun BrowserFillStrip(logins: List<SavedLogin>, addresses: List<Map<Strin
 }
 
 /** Player mode (the user's sketch, 2 Nov): under the page, ‹ a larger play › in a row, and a small exit above ›. */
-@Composable private fun BrowserPlayer(modifier: Modifier, media: PageMedia, key: (String) -> Unit, exit: () -> Unit) =
+@Composable private fun BrowserPlayer(modifier: Modifier, media: PageMedia, key: (String) -> Unit, marked: Boolean, heart: () -> Unit, forMaps: Boolean,
+    setForMaps: () -> Unit, exit: () -> Unit) =
     Column(modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
-        Text(media.title, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, style = MaterialTheme.typography.titleMedium)
+        // ♥ here too: a station kept is one ‹ › go through (BrowserRules.hop)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(media.title, Modifier.weight(1f, fill = false), maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, style = MaterialTheme.typography.titleMedium)
+            IconButton(onClick = heart) {
+                Icon(painterResource(if (marked) R.drawable.ic_favorite else R.drawable.ic_favorite_border), stringResource(R.string.browser_favorite), tint = if (marked) BROWSER_COLOR else LocalContentColor.current)
+            }
+            // 🚗: this page is what Maps' ♪ plays
+            IconButton(onClick = setForMaps) {
+                Icon(painterResource(R.drawable.ic_directions_car), stringResource(R.string.browser_for_maps), tint = if (forMaps) BROWSER_COLOR else LocalContentColor.current)
+            }
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(28.dp), verticalAlignment = Alignment.CenterVertically) {
             PlayerRound(R.drawable.ic_skip_previous, stringResource(R.string.browser_previous), 72) { key("prev") }
             PlayerRound(if (media.playing) R.drawable.ic_pause else R.drawable.ic_play, stringResource(if (media.playing) R.string.common_pause else R.string.browser_play), 96, lit = true) { key("toggle") }

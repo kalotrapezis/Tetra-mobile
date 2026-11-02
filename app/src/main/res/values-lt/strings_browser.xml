@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Kaip kompiuteryje: skirtukai ir adresas viršuje, kiti įrankiai ☰ gale.</string>
     <string name="browser_pin_favorite">Prisegti prie pradžios puslapio</string>
     <string name="browser_unpin_favorite">Atsegti nuo pradžios puslapio</string>
+    <string name="maps_music">Muzika</string>
+    <string name="maps_music_none">Stoties dar nėra: naršyklės grotuve bakstelėkite automobilį prie norimos stoties.</string>
+    <string name="browser_for_maps">Groti Žemėlapiuose</string>
+    <string name="browser_for_maps_set">Žemėlapių muzikos mygtukas groja tai</string>
+    <string name="browser_no_folder">Be aplanko</string>
+    <string name="browser_new_folder">Naujas aplankas</string>
+    <string name="browser_to_folder">Į aplanką</string>
+    <string name="browser_tabs_run">Skirtukai veikia toliau</string>
+    <string name="browser_tabs_run_on">Palikti skirtukai toliau veikia ir groja</string>
+    <string name="browser_tabs_run_off">Paliktas skirtukas sustoja</string>
 </resources>

@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">As on a computer: tabs and the address at the top, the other tools in ☰ at its end.</string>
     <string name="browser_pin_favorite">Pin to the start page</string>
     <string name="browser_unpin_favorite">Unpin from the start page</string>
+    <string name="maps_music">Music</string>
+    <string name="maps_music_none">No station yet: in the Browser\'s Player, tap the car on the station you want.</string>
+    <string name="browser_for_maps">Play in Maps</string>
+    <string name="browser_for_maps_set">Maps\' music button plays this</string>
+    <string name="browser_no_folder">No folder</string>
+    <string name="browser_new_folder">New folder</string>
+    <string name="browser_to_folder">Into a folder</string>
+    <string name="browser_tabs_run">Tabs keep running</string>
+    <string name="browser_tabs_run_on">Tabs you leave keep running and playing</string>
+    <string name="browser_tabs_run_off">A tab you leave pauses</string>
 </resources>

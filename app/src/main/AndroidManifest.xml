@@ -26,6 +26,10 @@
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
+    <!-- Tetra as the default SMS app (SmsDeliver.kt): what arrives comes to it -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_MMS" />
+    <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
@@ -102,6 +106,8 @@
         </activity>
         <activity android:name=".BriefActivity" android:exported="false" android:label="@string/assistant_briefs_channel" />
         <activity android:name=".UsageActivity" android:exported="false" android:label="@string/usage_title" />
+        <activity android:name=".BrowserActivity" android:exported="false" android:label="@string/app_browser" android:taskAffinity="com.kalotrapezis.drive.browser"
+            android:launchMode="singleTask" android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode" />
         <activity android:name=".DataActivity" android:exported="false" android:label="@string/home_label_data" android:taskAffinity="com.kalotrapezis.drive.data" />
         <receiver android:name=".PhoneCallReceiver" android:exported="false" />
         <receiver android:name=".PhoneRelayReceiver" android:exported="false" />
@@ -120,6 +126,31 @@
         <activity android:name=".AlarmRingActivity" android:exported="false" android:launchMode="singleTask" android:taskAffinity="com.kalotrapezis.drive.alarm"
             android:excludeFromRecents="true" android:showWhenLocked="true" android:turnScreenOn="true" />
         <!-- The Timer while one runs: its countdown notification, the alarm at the end, the 30 s look at the other devices -->
+        <!-- What Android asks of a default SMS app (SmsDeliver.kt): SMS and MMS in, "reply with a message", sms: links (.SmsCompose) -->
+        <receiver android:name=".SmsDeliverReceiver" android:exported="true" android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter><action android:name="android.provider.Telephony.SMS_DELIVER" /></intent-filter>
+        </receiver>
+        <receiver android:name=".MmsDeliverReceiver" android:exported="true" android:permission="android.permission.BROADCAST_WAP_PUSH">
+            <intent-filter><action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" /><data android:mimeType="application/vnd.wap.mms-message" /></intent-filter>
+        </receiver>
+        <service android:name=".SmsRespondService" android:exported="true" android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE">
+            <intent-filter>
+                <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="sms" /><data android:scheme="smsto" /><data android:scheme="mms" /><data android:scheme="mmsto" />
+            </intent-filter>
+        </service>
+        <activity-alias android:name=".SmsCompose" android:targetActivity=".MainActivity" android:exported="true"
+            android:label="@string/app_sms" android:icon="@mipmap/applet_messages" android:roundIcon="@mipmap/applet_messages">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="sms" /><data android:scheme="smsto" /><data android:scheme="mms" /><data android:scheme="mmsto" />
+            </intent-filter>
+        </activity-alias>
         <service android:name=".BrowserMediaService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
         <service android:name=".TimerService" android:exported="false" android:foregroundServiceType="specialUse">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Countdown timer, alarm or stopwatch the user started, kept in step with their other devices" />
@@ -201,7 +232,7 @@
         <activity-alias android:name=".AppMessages" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_sms" android:icon="@mipmap/applet_messages" android:roundIcon="@mipmap/applet_messages">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
-        <activity-alias android:name=".AppBrowser" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_browser" android:icon="@mipmap/applet_browser" android:roundIcon="@mipmap/applet_browser">
+        <activity-alias android:name=".AppBrowser" android:targetActivity=".BrowserActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_browser" android:icon="@mipmap/applet_browser" android:roundIcon="@mipmap/applet_browser">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <activity-alias android:name=".AppContacts" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_contacts" android:icon="@mipmap/applet_contacts" android:roundIcon="@mipmap/applet_contacts">

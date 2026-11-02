@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Como num computador: separadores e endereço em cima, as outras ferramentas no ☰ ao fundo.</string>
     <string name="browser_pin_favorite">Fixar na página inicial</string>
     <string name="browser_unpin_favorite">Tirar da página inicial</string>
+    <string name="maps_music">Música</string>
+    <string name="maps_music_none">Ainda sem estação: no leitor do navegador, toque no carro na estação que quiser.</string>
+    <string name="browser_for_maps">Tocar em Mapas</string>
+    <string name="browser_for_maps_set">O botão de música dos Mapas toca isto</string>
+    <string name="browser_no_folder">Sem pasta</string>
+    <string name="browser_new_folder">Nova pasta</string>
+    <string name="browser_to_folder">Para uma pasta</string>
+    <string name="browser_tabs_run">Os separadores continuam</string>
+    <string name="browser_tabs_run_on">Os separadores que deixa continuam a funcionar e a tocar</string>
+    <string name="browser_tabs_run_off">O separador que deixa fica em pausa</string>
 </resources>

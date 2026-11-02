@@ -27,4 +27,11 @@
     <string name="sms_default_only">Nur deine Standard-App für Nachrichten kann Nachrichten löschen.</string>
     <string name="sms_open_default">Dort öffnen</string>
     <string name="sms_deleted">Gelöscht</string>
+    <string name="sms_pick">Wähle eine Unterhaltung</string>
+    <string name="sms_is_default">Tetra ist die SMS-App</string>
+    <string name="sms_not_default">Tetra ist nicht die SMS-App</string>
+    <string name="sms_is_default_summary">Nachrichten kommen in Tetra an, und Tetra speichert sie. Zurück: Androids Standard-Apps › SMS-App.</string>
+    <string name="sms_not_default_summary">Als Standard festlegen, um neue Nachrichten in Tetra zu bekommen und sie löschen zu können. Bildnachrichten (MMS) werden nur gemeldet, nicht angezeigt.</string>
+    <string name="sms_mms_title">Bildnachricht (MMS)</string>
+    <string name="sms_mms_note">Tetra kann keine Bildnachrichten anzeigen. Um sie zu erhalten, wähle eine andere SMS-App.</string>
 </resources>

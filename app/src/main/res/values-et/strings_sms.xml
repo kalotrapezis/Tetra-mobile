@@ -27,4 +27,11 @@
     <string name="sms_default_only">Sõnumeid saab kustutada ainult sinu vaikimisi sõnumirakendus.</string>
     <string name="sms_open_default">Ava seal</string>
     <string name="sms_deleted">Kustutatud</string>
+    <string name="sms_pick">Vali vestlus</string>
+    <string name="sms_is_default">Tetra on SMS-rakendus</string>
+    <string name="sms_not_default">Tetra ei ole SMS-rakendus</string>
+    <string name="sms_is_default_summary">Sõnumid saabuvad Tetrasse ja Tetra hoiab neid. Tagasi muutmiseks: Androidi vaikerakendused › SMS-rakendus.</string>
+    <string name="sms_not_default_summary">Määra see vaikimisi, et saada uued sõnumid Tetrasse ja neid kustutada. Pildisõnumitest (MMS) ainult teatatakse, neid ei näidata.</string>
+    <string name="sms_mms_title">Pildisõnum (MMS)</string>
+    <string name="sms_mms_note">Tetra ei saa pildisõnumeid näidata. Nende saamiseks määra SMS-rakenduseks mõni teine rakendus.</string>
 </resources>

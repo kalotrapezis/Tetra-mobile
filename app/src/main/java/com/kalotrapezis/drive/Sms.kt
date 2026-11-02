@@ -12,9 +12,8 @@ import android.telephony.SmsManager
 
 /*
  * Messages (the user, 2 Nov: "SMS in Tetra: read and send them, with the AI too; a chat app's form"): the phone's own SMS,
- * read from Android's provider and sent with SmsManager. Tetra is not the default SMS app and does not ask to be: that one
- * stores what arrives, and an app that took the role without doing it well would lose messages. So Android writes what
- * Tetra sends into Sent itself (4.4 and later, for an app that is not the default), and only the default app may delete.
+ * read from Android's provider and sent with SmsManager. While another app is the default SMS app, Android writes what
+ * Tetra sends into Sent itself and only that app may delete; Tetra as the default (SmsDeliver.kt) stores both itself.
  */
 
 /** One SMS as the provider keeps it; [type] is Telephony's: 1 received, 2 sent, 4 outbox, 5 failed, 6 queued. */
@@ -78,10 +77,38 @@ internal object SmsBox {
         @Suppress("DEPRECATION") val sms = if (android.os.Build.VERSION.SDK_INT >= 31) c.getSystemService(SmsManager::class.java) else SmsManager.getDefault()
         val parts = sms.divideMessage(text)
         if (parts.size <= 1) sms.sendTextMessage(to, null, text, null, null) else sms.sendMultipartTextMessage(to, null, parts, null, null)
+        if (SmsRole.isDefault(c)) runCatching { // the default app keeps its own Sent
+            c.contentResolver.insert(Telephony.Sms.Sent.CONTENT_URI, ContentValues().apply {
+                put(Telephony.Sms.ADDRESS, to); put(Telephony.Sms.BODY, text); put(Telephony.Sms.DATE, System.currentTimeMillis()); put(Telephony.Sms.READ, 1)
+            })
+        }.onFailure { WriterLog.w("Messages: not kept in Sent", it) }
         WriterLog.i("Messages: sent ${text.length} characters in ${parts.size} part(s)")
     }
 
     /** The conversation in the phone's default messaging app (where deleting is allowed). */
+    /**
+     * The computer's Messages (SyncServer /sms/…): `list` the newest [LIMIT] (one answer, under sync's 1 MB), `send` to a
+     * number, `read` a conversation. Nothing is kept on the computer: it asks again.
+     */
+    fun forComputer(c: Context, url: Uri): org.json.JSONObject = runCatching {
+        if (!canRead(c)) return org.json.JSONObject().put("error", c.getString(R.string.sms_permission_needed))
+        when (url.path) {
+            "/sms/list" -> org.json.JSONObject().put("messages", org.json.JSONArray(read(c).take(LIMIT).map { t ->
+                org.json.JSONObject().put("id", t.id).put("thread", t.thread).put("address", t.address).put("body", t.body).put("at", t.at)
+                    .put("mine", t.mine).put("read", t.read).put("failed", t.failed).put("sending", t.sending) }))
+            "/sms/send" -> {
+                val to = url.getQueryParameter("to").orEmpty().filter { it.isDigit() || it == '+' }.take(32)
+                val text = url.getQueryParameter("text").orEmpty().take(2000)
+                if (to.count(Char::isDigit) < 3 || text.isBlank()) org.json.JSONObject().put("error", "No number or text.")
+                else if (!canSend(c)) org.json.JSONObject().put("error", c.getString(R.string.sms_permission_needed))
+                else { send(c, to, text); org.json.JSONObject().put("ok", true) }
+            }
+            "/sms/read" -> { url.getQueryParameter("thread")?.toLongOrNull()?.let { markRead(c, it) }; org.json.JSONObject().put("ok", true) }
+            else -> org.json.JSONObject().put("error", "Unknown request.")
+        }
+    }.getOrElse { WriterLog.w("Messages: the computer's request failed", it); org.json.JSONObject().put("error", it.message ?: "Failed.") }
+    private const val LIMIT = 1500
+
     fun openInDefault(c: Context, address: String) = runCatching {
         c.startActivity(Intent(Intent.ACTION_SENDTO, Uri.fromParts("smsto", address, null)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }.isSuccess

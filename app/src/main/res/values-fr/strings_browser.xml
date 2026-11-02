@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Comme sur un ordinateur : onglets et adresse en haut, les autres outils dans le ☰ au bout.</string>
     <string name="browser_pin_favorite">Épingler à la page d’accueil</string>
     <string name="browser_unpin_favorite">Détacher de la page d’accueil</string>
+    <string name="maps_music">Musique</string>
+    <string name="maps_music_none">Pas encore de station : dans le lecteur du navigateur, touchez la voiture sur la station voulue.</string>
+    <string name="browser_for_maps">Écouter dans Cartes</string>
+    <string name="browser_for_maps_set">Le bouton musique de Cartes joue ceci</string>
+    <string name="browser_no_folder">Aucun dossier</string>
+    <string name="browser_new_folder">Nouveau dossier</string>
+    <string name="browser_to_folder">Dans un dossier</string>
+    <string name="browser_tabs_run">Les onglets continuent</string>
+    <string name="browser_tabs_run_on">Les onglets quittés continuent de tourner et de jouer</string>
+    <string name="browser_tabs_run_off">Un onglet quitté se met en pause</string>
 </resources>

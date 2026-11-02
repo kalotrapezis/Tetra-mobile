@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Kot na računalniku: zavihki in naslov zgoraj, druga orodja v ☰ na koncu.</string>
     <string name="browser_pin_favorite">Pripni na začetno stran</string>
     <string name="browser_unpin_favorite">Odpni z začetne strani</string>
+    <string name="maps_music">Glasba</string>
+    <string name="maps_music_none">Postaje še ni: v predvajalniku brskalnika tapnite avto pri želeni postaji.</string>
+    <string name="browser_for_maps">Predvajaj v Zemljevidih</string>
+    <string name="browser_for_maps_set">Gumb za glasbo v Zemljevidih predvaja to</string>
+    <string name="browser_no_folder">Brez mape</string>
+    <string name="browser_new_folder">Nova mapa</string>
+    <string name="browser_to_folder">V mapo</string>
+    <string name="browser_tabs_run">Zavihki tečejo naprej</string>
+    <string name="browser_tabs_run_on">Zavihki, ki jih zapustite, tečejo in predvajajo naprej</string>
+    <string name="browser_tabs_run_off">Zapuščen zavihek se ustavi</string>
 </resources>

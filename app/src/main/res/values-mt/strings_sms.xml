@@ -27,4 +27,11 @@
     <string name="sms_default_only">L-app tal-messaġġi default tiegħek biss tista’ tħassar messaġġi.</string>
     <string name="sms_open_default">Iftaħ hemmhekk</string>
     <string name="sms_deleted">Imħassar</string>
+    <string name="sms_pick">Agħżel konversazzjoni</string>
+    <string name="sms_is_default">Tetra hija l-app tal-SMS</string>
+    <string name="sms_not_default">Tetra mhijiex l-app tal-SMS</string>
+    <string name="sms_is_default_summary">Il-messaġġi jaslu f\'Tetra u Tetra żżommhom. Biex tibdilha lura: L-apps awtomatiċi ta\' Android › App tal-SMS.</string>
+    <string name="sms_not_default_summary">Agħmilha l-awtomatika biex il-messaġġi l-ġodda jaslu f\'Tetra u tkun tista\' tħassarhom. Il-messaġġi bl-istampi (MMS) jitħabbru biss, ma jintwerewx.</string>
+    <string name="sms_mms_title">Messaġġ bi stampa (MMS)</string>
+    <string name="sms_mms_note">Tetra ma tistax turi messaġġi bl-istampi. Biex tirċevihom, agħżel app oħra tal-SMS.</string>
 </resources>

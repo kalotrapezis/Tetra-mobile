@@ -27,4 +27,11 @@
     <string name="sms_default_only">Μόνο η προεπιλεγμένη εφαρμογή μηνυμάτων μπορεί να διαγράφει μηνύματα.</string>
     <string name="sms_open_default">Άνοιγμα εκεί</string>
     <string name="sms_deleted">Έγινε διαγραφή</string>
+    <string name="sms_pick">Διάλεξε μια συζήτηση</string>
+    <string name="sms_is_default">Το Tetra είναι η εφαρμογή SMS</string>
+    <string name="sms_not_default">Το Tetra δεν είναι η εφαρμογή SMS</string>
+    <string name="sms_is_default_summary">Τα μηνύματα έρχονται στο Tetra και τα κρατά αυτό. Για να το αλλάξεις: Προεπιλεγμένες εφαρμογές του Android › Εφαρμογή SMS.</string>
+    <string name="sms_not_default_summary">Κάν\' το προεπιλογή για να έρχονται τα νέα μηνύματα στο Tetra και να μπορείς να τα διαγράφεις. Τα μηνύματα με εικόνα (MMS) μόνο ανακοινώνονται, δεν εμφανίζονται.</string>
+    <string name="sms_mms_title">Μήνυμα με εικόνα (MMS)</string>
+    <string name="sms_mms_note">Το Tetra δεν δείχνει μηνύματα με εικόνα. Για να τα λαμβάνεις, όρισε άλλη εφαρμογή ως εφαρμογή SMS.</string>
 </resources>

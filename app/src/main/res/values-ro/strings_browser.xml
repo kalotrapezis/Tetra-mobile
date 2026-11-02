@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Ca pe un computer: filele și adresa sus, celelalte unelte în ☰ de la capăt.</string>
     <string name="browser_pin_favorite">Fixează pe pagina de start</string>
     <string name="browser_unpin_favorite">Scoate de pe pagina de start</string>
+    <string name="maps_music">Muzică</string>
+    <string name="maps_music_none">Încă nu există post: în playerul browserului, atingeți mașina la postul dorit.</string>
+    <string name="browser_for_maps">Redă în Hărți</string>
+    <string name="browser_for_maps_set">Butonul de muzică din Hărți redă asta</string>
+    <string name="browser_no_folder">Fără dosar</string>
+    <string name="browser_new_folder">Dosar nou</string>
+    <string name="browser_to_folder">Într-un dosar</string>
+    <string name="browser_tabs_run">Filele continuă</string>
+    <string name="browser_tabs_run_on">Filele pe care le părăsiți continuă să ruleze și să cânte</string>
+    <string name="browser_tabs_run_off">Fila părăsită se oprește</string>
 </resources>

@@ -27,4 +27,11 @@
     <string name="sms_default_only">Само приложението ти за съобщения по подразбиране може да изтрива съобщения.</string>
     <string name="sms_open_default">Отвори го там</string>
     <string name="sms_deleted">Изтрито</string>
+    <string name="sms_pick">Изберете разговор</string>
+    <string name="sms_is_default">Tetra е приложението за SMS</string>
+    <string name="sms_not_default">Tetra не е приложението за SMS</string>
+    <string name="sms_is_default_summary">Съобщенията пристигат в Tetra и то ги пази. За да го върнете: Приложения по подразбиране в Android › SMS.</string>
+    <string name="sms_not_default_summary">Направете го по подразбиране, за да получавате нови съобщения в Tetra и да ги изтривате. Съобщенията със снимки (MMS) само се обявяват, не се показват.</string>
+    <string name="sms_mms_title">Съобщение със снимка (MMS)</string>
+    <string name="sms_mms_note">Tetra не показва съобщения със снимки. За да ги получавате, изберете друго приложение за SMS.</string>
 </resources>

@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Mar a bheadh ar ríomhaire: cluaisíní agus seoladh thuas, na huirlisí eile sa ☰ ag an deireadh.</string>
     <string name="browser_pin_favorite">Pionnáil ar an leathanach tosaigh</string>
     <string name="browser_unpin_favorite">Díphionnáil ón leathanach tosaigh</string>
+    <string name="maps_music">Ceol</string>
+    <string name="maps_music_none">Níl stáisiún ann fós: i seinnteoir an Bhrabhsálaí, tapáil an carr ar an stáisiún atá uait.</string>
+    <string name="browser_for_maps">Seinn i Léarscáileanna</string>
+    <string name="browser_for_maps_set">Seinneann cnaipe ceoil Léarscáileanna é seo</string>
+    <string name="browser_no_folder">Gan fillteán</string>
+    <string name="browser_new_folder">Fillteán nua</string>
+    <string name="browser_to_folder">I bhfillteán</string>
+    <string name="browser_tabs_run">Leanann na cluaisíní ar aghaidh</string>
+    <string name="browser_tabs_run_on">Leanann cluaisíní a fhágann tú ag rith agus ag seinm</string>
+    <string name="browser_tabs_run_off">Stopann cluaisín a fhágann tú</string>
 </resources>

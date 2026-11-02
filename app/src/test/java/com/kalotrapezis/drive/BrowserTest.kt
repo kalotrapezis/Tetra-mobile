@@ -134,6 +134,31 @@ class BrowserTest {
         assertEquals("", JSONObject(MediaSites.buttons(null)).getString("next"))
     }
 
+    @Test fun hopThroughOneSitesFavourites() {
+        val b = listOf(Bookmark("https://live24.gr/radio/derti.jsp", "Derti"), Bookmark("https://www.wikipedia.org/", "W"),
+            Bookmark("https://live24.gr/radio/sfera.jsp", "Sfera"), Bookmark("https://live24.gr/radio/melodia98.jsp", "Melodia"))
+        assertEquals("https://live24.gr/radio/sfera.jsp", BrowserRules.hop(b, "https://live24.gr/radio/derti.jsp", true))
+        assertEquals("https://live24.gr/radio/derti.jsp", BrowserRules.hop(b, "https://live24.gr/radio/melodia98.jsp", true)) // round
+        assertEquals("https://live24.gr/radio/melodia98.jsp", BrowserRules.hop(b, "https://live24.gr/radio/derti.jsp", false))
+        assertEquals("https://live24.gr/radio/derti.jsp", BrowserRules.hop(b, "https://live24.gr/radio/kissfm.jsp", true)) // not a favourite: the first
+        assertEquals(null, BrowserRules.hop(b, "https://www.wikipedia.org/", true)) // no other on that site
+    }
+
+    @Test fun folders() {
+        val b = listOf(Bookmark("https://live24.gr/radio/derti.jsp", "Derti", folder = "Radios"), Bookmark("https://www.ertecho.gr/radio/er1/", "ERT", folder = "Radios"),
+            Bookmark("https://live24.gr/radio/sfera.jsp", "Sfera"), Bookmark("https://bank.gr/", "Bank", pinned = true, folder = "Mine"))
+        assertEquals(listOf("Radios", "Mine"), BrowserRules.folders(b))
+        assertEquals(b, BrowserRules.bookmarks(BrowserRules.bookmarksJson(b)))
+        // in a folder: that folder's, whatever the site; outside one: the site's as before
+        assertEquals("https://www.ertecho.gr/radio/er1/", BrowserRules.hop(b, "https://live24.gr/radio/derti.jsp", true))
+        assertEquals("https://live24.gr/radio/derti.jsp", BrowserRules.hop(b, "https://live24.gr/radio/sfera.jsp", true))
+    }
+
+    @Test fun mobileAgent() {
+        val wv = "Mozilla/5.0 (Linux; Android 15; 24091RPADG Build/AQ3A; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/120.0.6099.230 Mobile Safari/537.36"
+        assertEquals("Mozilla/5.0 (Linux; Android 15; 24091RPADG Build/AQ3A) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.230 Mobile Safari/537.36", BrowserRules.mobileAgent(wv))
+    }
+
     @Test fun desktopAgent() {
         val phone = "Mozilla/5.0 (Linux; Android 14; sdk_gphone64_arm64 Build/UE1A.230829.036; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/120.0.6099.230 Mobile Safari/537.36"
         assertEquals("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.230 Safari/537.36", BrowserRules.desktopAgent(phone))
@@ -181,8 +206,13 @@ class BrowserTest {
 
     @Test fun keptTabs() {
         val tabs = listOf(SavedTab("https://a.gr", "A", true, null), SavedTab("https://b.gr", "B", false, 3), SavedTab("https://c.gr", "C", false, null), SavedTab("", "", true, null))
-        val (back, names) = SavedTabs.read(SavedTabs.json(tabs, mapOf(3 to "Σχολείο", 9 to "empty")))
-        assertEquals(tabs.take(2), back) // only pinned and grouped, with an address
+        val h = 3600_000L
+        val saved = SavedTabs.json(tabs, mapOf(3 to "Σχολείο", 9 to "empty"), now = 100 * h)
+        val (back, names) = SavedTabs.read(saved, BrowserRules.ON_EXIT, 100 * h)
+        assertEquals(tabs.take(2).map { it.copy(at = 100 * h) }, back) // history to the end of the session: only pinned and grouped, with an address
+        assertEquals(listOf("A", "B", "C"), SavedTabs.read(saved, BrowserRules.DAY, 110 * h).first.map { it.title }) // 24 h: all, within the day
+        assertEquals(listOf("A", "B"), SavedTabs.read(saved, BrowserRules.DAY, 125 * h).first.map { it.title }) // ... and the others gone after it
+        assertEquals(3, SavedTabs.read(saved, BrowserRules.NEVER, 900 * h).first.size) // never forgotten
         assertEquals(mapOf(3 to "Σχολείο"), names) // a group with no tab is gone
         assertEquals(emptyList<SavedTab>() to emptyMap<Int, String>(), SavedTabs.read("not json"))
     }

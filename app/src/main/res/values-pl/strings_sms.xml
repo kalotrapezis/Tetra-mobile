@@ -27,4 +27,11 @@
     <string name="sms_default_only">Tylko twoja domyślna aplikacja do wiadomości może usuwać wiadomości.</string>
     <string name="sms_open_default">Otwórz tam</string>
     <string name="sms_deleted">Usunięto</string>
+    <string name="sms_pick">Wybierz rozmowę</string>
+    <string name="sms_is_default">Tetra jest aplikacją do SMS</string>
+    <string name="sms_not_default">Tetra nie jest aplikacją do SMS</string>
+    <string name="sms_is_default_summary">Wiadomości trafiają do Tetry, która je przechowuje. Aby to zmienić: Domyślne aplikacje Androida › Aplikacja do SMS.</string>
+    <string name="sms_not_default_summary">Ustaw ją jako domyślną, aby nowe wiadomości trafiały do Tetry i aby móc je usuwać. Wiadomości z obrazem (MMS) są tylko zapowiadane, nie wyświetlane.</string>
+    <string name="sms_mms_title">Wiadomość z obrazem (MMS)</string>
+    <string name="sms_mms_note">Tetra nie wyświetla wiadomości z obrazem. Aby je odbierać, wybierz inną aplikację do SMS.</string>
 </resources>

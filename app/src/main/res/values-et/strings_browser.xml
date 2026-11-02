@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Nagu arvutis: kaardid ja aadress üleval, muud tööriistad lõpus ☰ all.</string>
     <string name="browser_pin_favorite">Kinnita avalehele</string>
     <string name="browser_unpin_favorite">Eemalda avalehelt</string>
+    <string name="maps_music">Muusika</string>
+    <string name="maps_music_none">Jaama veel pole: vajuta brauseri pleieris soovitud jaama juures autot.</string>
+    <string name="browser_for_maps">Mängi Kaartides</string>
+    <string name="browser_for_maps_set">Kaartide muusikanupp mängib seda</string>
+    <string name="browser_no_folder">Kaustata</string>
+    <string name="browser_new_folder">Uus kaust</string>
+    <string name="browser_to_folder">Kausta</string>
+    <string name="browser_tabs_run">Vahekaardid töötavad edasi</string>
+    <string name="browser_tabs_run_on">Vahekaardid, millest lahkud, töötavad ja mängivad edasi</string>
+    <string name="browser_tabs_run_off">Vahekaart, millest lahkud, peatub</string>
 </resources>

@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Som på en computer: faner og adresse øverst, de øvrige værktøjer i ☰ yderst.</string>
     <string name="browser_pin_favorite">Fastgør på startsiden</string>
     <string name="browser_unpin_favorite">Frigør fra startsiden</string>
+    <string name="maps_music">Musik</string>
+    <string name="maps_music_none">Ingen station endnu: tryk på bilen ved den ønskede station i browserens afspiller.</string>
+    <string name="browser_for_maps">Afspil i Kort</string>
+    <string name="browser_for_maps_set">Korts musikknap afspiller dette</string>
+    <string name="browser_no_folder">Ingen mappe</string>
+    <string name="browser_new_folder">Ny mappe</string>
+    <string name="browser_to_folder">I en mappe</string>
+    <string name="browser_tabs_run">Faner kører videre</string>
+    <string name="browser_tabs_run_on">Faner, du forlader, kører og spiller videre</string>
+    <string name="browser_tabs_run_off">En fane, du forlader, sættes på pause</string>
 </resources>

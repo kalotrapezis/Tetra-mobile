@@ -34,6 +34,20 @@ internal object BrowserMedia {
 
     fun act(a: String) { val c = control ?: return; Handler(Looper.getMainLooper()).post { c(a) } }
 
+    /** Maps' ♪ (the user, 2 Nov: "pick one FM from the browser as the one in maps, one link just playing music"): a page's address and name. */
+    fun station(c: Context): Pair<String, String>? = c.getSharedPreferences("browser", Context.MODE_PRIVATE).let { p ->
+        p.getString("maps_station", null)?.takeIf { it.isNotEmpty() }?.let { it to p.getString("maps_station_title", "").orEmpty() } }
+    fun setStation(c: Context, url: String, title: String) = c.getSharedPreferences("browser", Context.MODE_PRIVATE).edit()
+        .putString("maps_station", url).putString("maps_station_title", title).apply()
+
+    /** Maps' ♪: the station paused or played on; when nothing of it is open, opened behind Maps and played (BrowserActivity). */
+    fun mapsMusic(c: Context): Boolean {
+        if (service != null && control != null) { act(if (playing) "pause" else "play"); return true }
+        val (url, _) = station(c) ?: return false
+        openBrowser(c, "browser-play:" + org.json.JSONObject().put("url", url).put("behind", true).put("at", System.currentTimeMillis()))
+        return true
+    }
+
     fun background(c: Context) = c.getSharedPreferences("browser", Context.MODE_PRIVATE).getBoolean("background", true)
     fun setBackground(c: Context, on: Boolean) = c.getSharedPreferences("browser", Context.MODE_PRIVATE).edit().putBoolean("background", on).apply()
 
@@ -87,7 +101,7 @@ internal class BrowserMediaService : Service() {
             .setState(if (playing) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1f).build())
         fun key(icon: Int, label: Int, action: String) = Notification.Action.Builder(Icon.createWithResource(this, icon), getString(label),
             PendingIntent.getService(this, action.hashCode(), Intent(this, BrowserMediaService::class.java).putExtra(BrowserMedia.ACTION, action), PendingIntent.FLAG_IMMUTABLE)).build()
-        val open = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java).putExtra(Applet.EXTRA, Applet.Browser.name)
+        val open = PendingIntent.getActivity(this, 0, Intent(this, BrowserActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_IMMUTABLE)
         val n = Notification.Builder(this, CHANNEL).setSmallIcon(R.drawable.ic_play).setColor(BROWSER_COLOR.toArgb())
             .setContentTitle(BrowserMedia.title.ifEmpty { getString(R.string.app_browser) }).setContentText(getString(R.string.app_browser))

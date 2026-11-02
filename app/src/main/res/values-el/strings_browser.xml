@@ -90,4 +90,14 @@
     <string name="browser_top_bar_note">Όπως σε υπολογιστή: οι καρτέλες και η διεύθυνση επάνω, τα υπόλοιπα εργαλεία στο ☰ στην άκρη της.</string>
     <string name="browser_pin_favorite">Καρφίτσωμα στην αρχική σελίδα</string>
     <string name="browser_unpin_favorite">Ξεκαρφίτσωμα από την αρχική σελίδα</string>
+    <string name="maps_music">Μουσική</string>
+    <string name="maps_music_none">Δεν έχει οριστεί σταθμός: στο Player του Browser, πάτα το αυτοκίνητο στον σταθμό που θέλεις.</string>
+    <string name="browser_for_maps">Παίζει στους Χάρτες</string>
+    <string name="browser_for_maps_set">Το κουμπί μουσικής των Χαρτών παίζει αυτό</string>
+    <string name="browser_no_folder">Χωρίς φάκελο</string>
+    <string name="browser_new_folder">Νέος φάκελος</string>
+    <string name="browser_to_folder">Σε φάκελο</string>
+    <string name="browser_tabs_run">Οι καρτέλες συνεχίζουν</string>
+    <string name="browser_tabs_run_on">Οι καρτέλες που αφήνεις συνεχίζουν να τρέχουν και να παίζουν</string>
+    <string name="browser_tabs_run_off">Η καρτέλα που αφήνεις σταματά</string>
 </resources>

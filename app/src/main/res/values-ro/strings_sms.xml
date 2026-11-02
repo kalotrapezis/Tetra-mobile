@@ -27,4 +27,11 @@
     <string name="sms_default_only">Doar aplicația ta implicită de mesaje poate șterge mesaje.</string>
     <string name="sms_open_default">Deschide acolo</string>
     <string name="sms_deleted">Șters</string>
+    <string name="sms_pick">Alegeți o conversație</string>
+    <string name="sms_is_default">Tetra este aplicația de SMS</string>
+    <string name="sms_not_default">Tetra nu este aplicația de SMS</string>
+    <string name="sms_is_default_summary">Mesajele ajung în Tetra, care le păstrează. Pentru a reveni: Aplicațiile prestabilite din Android › Aplicația SMS.</string>
+    <string name="sms_not_default_summary">Setați-o ca prestabilită ca mesajele noi să ajungă în Tetra și să le puteți șterge. Mesajele cu imagine (MMS) sunt doar anunțate, nu afișate.</string>
+    <string name="sms_mms_title">Mesaj cu imagine (MMS)</string>
+    <string name="sms_mms_note">Tetra nu poate afișa mesaje cu imagine. Pentru a le primi, alegeți altă aplicație de SMS.</string>
 </resources>

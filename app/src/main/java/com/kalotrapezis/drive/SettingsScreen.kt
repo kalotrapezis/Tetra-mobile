@@ -1066,6 +1066,17 @@ internal fun SettingsTab(
             }
             SettingRow(stringResource(R.string.settings_open_phone), stringResource(R.string.settings_open_phone_summary), onClick = { context.startActivity(Intent(context, PhoneActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }) { Chevron() }
         }
+        // the default SMS app (SmsDeliver.kt): Android lists Tetra in its choice only since it takes in SMS itself
+        val sms = SmsRole.isDefault(context)
+        SettingsSection(stringResource(R.string.app_sms)) {
+            SettingRow(stringResource(if (sms) R.string.sms_is_default else R.string.sms_not_default),
+                stringResource(if (sms) R.string.sms_is_default_summary else R.string.sms_not_default_summary)) {
+                TextButton(onClick = {
+                    if (sms) runCatching { context.startActivity(Intent(android.provider.Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                    else askRole.launch(SmsRole.request(context))
+                }) { Text(if (sms) stringResource(R.string.settings_change) else stringResource(R.string.settings_make_it), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            }
+        }
         var answer by remember { mutableStateOf(PhonePrefs.buzzAnswer(context)) }
         var end by remember { mutableStateOf(PhonePrefs.buzzEnd(context)) }
         var unknown by remember { mutableStateOf(PhonePrefs.silenceUnknown(context)) }
