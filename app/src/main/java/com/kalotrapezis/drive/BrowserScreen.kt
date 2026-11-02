@@ -307,6 +307,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     var fullDone by remember { mutableStateOf<WebChromeClient.CustomViewCallback?>(null) }
     fun hostActivity() = generateSequence(context) { (it as? android.content.ContextWrapper)?.baseContext }.filterIsInstance<android.app.Activity>().firstOrNull()
     var barShown by remember { mutableStateOf(true) }
+    var lowered by remember { mutableStateOf(false) } // the handle pulled down: the page full screen over a thin black strip (the user, 2 Nov)
     val drift = remember { IntArray(1) } // the scroll since its last turn, in px: a small threshold, so the bar does not flicker
     // HTML only, per site (Private: for this time only, kept nowhere)
     var htmlSites by remember { mutableStateOf(if (private) emptySet() else prefs.getStringSet("html_sites", null).orEmpty().toSet()) }
@@ -319,11 +320,14 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         t.view.settings.mediaPlaybackRequiresUserGesture = on
         return true
     }
-    fun scrolled(t: BrowserTab, y: Int, oldY: Int) {
+    /**
+     * Auto-hide, by the finger (the user, 2 Nov: "it does not hide the bar"): [d] pixels the page was pushed up. Pages that
+     * scroll inside themselves (most, now that 100vh is the screen) never move the WebView, so its own scroll cannot tell.
+     */
+    fun dragged(t: BrowserTab, d: Int) {
         if (t.id != currentId || !autohide) return
-        val d = y - oldY
         drift[0] = if ((d > 0) == (drift[0] > 0)) drift[0] + d else d
-        if (y <= 0 || drift[0] < -12 * density) barShown = true else if (drift[0] > 48 * density) barShown = false
+        if (drift[0] < -12 * density) barShown = true else if (drift[0] > 48 * density) barShown = false
     }
 
     var soundId by remember { mutableStateOf<Int?>(null) } // the tab last heard: the notification's and Maps' keys go to it, whichever is shown
@@ -361,7 +365,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         // nor the X-Requested-With header naming Tetra, Google's other way of telling a WebView
         if (WebViewFeature.isFeatureSupported(WebViewFeature.REQUESTED_WITH_HEADER_ALLOW_LIST)) androidx.webkit.WebSettingsCompat.setRequestedWithHeaderOriginAllowList(settings, emptySet())
         if (wide && prefs.getBoolean("desktop", false)) { tab.desktop = true; settings.userAgentString = BrowserRules.desktopAgent(settings.userAgentString) } // a tablet's default
-        setOnScrollChangeListener { _, _, y, _, oldY -> scrolled(tab, y, oldY) }
+        setOnScrollChangeListener { _, _, y, _, _ -> if (y <= 0 && tab.id == currentId) barShown = true } // back at the top: the bar
         addJavascriptInterface(MediaBridge(this, { background }) { tab.media = it; if (it.playing) soundId = tab.id }, "TetraMedia")
         if (early) WebViewCompat.addDocumentStartJavaScript(this, MEDIA_JS, setOf("*"))
         if (!private) addJavascriptInterface(FormBridge(this, { tab.kinds = it }) { json ->
@@ -371,7 +375,10 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         }, "TetraForms")
         // pull to reload (the user, 2 Nov): a pull down while the page is at its top; the page gets the touches too
         var from = -1f
+        var lastY = 0f
         setOnTouchListener { v, e ->
+            if (e.actionMasked == android.view.MotionEvent.ACTION_DOWN) lastY = e.y
+            if (e.actionMasked == android.view.MotionEvent.ACTION_MOVE && e.pointerCount == 1) { dragged(tab, (lastY - e.y).toInt()); lastY = e.y }
             when (e.actionMasked) {
                 android.view.MotionEvent.ACTION_DOWN -> from = if (v.canScrollVertically(-1)) -1f else e.y
                 android.view.MotionEvent.ACTION_MOVE -> if (from >= 0 && e.pointerCount == 1 && !v.canScrollVertically(-1)) tab.pull = ((e.y - from) / density).coerceAtLeast(0f) else { from = -1f; tab.pull = 0f }
@@ -608,7 +615,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         message = context.getString(if (marked) R.string.browser_unbookmarked else R.string.browser_bookmarked)
     }
     val imeOpen = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
-    val showBar = !autohide || barShown || editing || imeOpen || menu || panel != null || url.isEmpty()
+    val showBar = (!lowered || editing || imeOpen || menu || panel != null) && (!autohide || barShown || editing || imeOpen || menu || panel != null || url.isEmpty())
     // full screen while the bar is away: the status bar goes too (a swipe brings it for a moment)
     val activity = remember { generateSequence(context) { (it as? android.content.ContextWrapper)?.baseContext }.filterIsInstance<android.app.Activity>().firstOrNull() }
     LaunchedEffect(showBar, player) {
@@ -679,6 +686,13 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         @Composable fun line() = if (tab.progress < 100 && url.isNotEmpty()) LinearProgressIndicator(progress = { tab.progress / 100f }, Modifier.fillMaxWidth().height(2.dp), color = BROWSER_COLOR)
             else if (showBar) HorizontalDivider(color = onBar.copy(alpha = 0.2f)) else Unit
         if (!top) line()
+        // lowered: only a black strip with the handle; a tap or a drag up brings the bar back
+        if (lowered && !showBar && !top) {
+            var up by remember { mutableFloatStateOf(0f) }
+            Box(Modifier.fillMaxWidth().height(22.dp).background(Color.Black).clickable(onClickLabel = stringResource(R.string.browser_menu)) { lowered = false }
+                .pointerInput(Unit) { detectVerticalDragGestures(onDragStart = { up = 0f }, onVerticalDrag = { _, d -> up += d }, onDragEnd = { if (up < -20) lowered = false }) },
+                contentAlignment = Alignment.Center) { Box(Modifier.size(width = 36.dp, height = 4.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.35f))) }
+        }
         androidx.compose.animation.AnimatedVisibility(showBar, enter = androidx.compose.animation.expandVertically(), exit = androidx.compose.animation.shrinkVertically()) {
         CompositionLocalProvider(LocalContentColor provides onBar) {
             val shown = onBarTools.mapNotNull { id -> toolOf(id) }
@@ -687,7 +701,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             // the handle, as Tetra's others (the user, 2 Nov): a tap or a drag up opens the sheet of the other tools
             var drag by remember { mutableFloatStateOf(0f) }
             if (!top) Box(Modifier.fillMaxWidth().clickable(onClickLabel = stringResource(R.string.browser_menu)) { menu = true; editing = false }.pointerInput(Unit) {
-                detectVerticalDragGestures(onDragStart = { drag = 0f }, onVerticalDrag = { _, d -> drag += d }, onDragEnd = { if (drag < -30) { menu = true; editing = false } })
+                detectVerticalDragGestures(onDragStart = { drag = 0f }, onVerticalDrag = { _, d -> drag += d }, onDragEnd = { if (drag < -30) { menu = true; editing = false } else if (drag > 30) { lowered = true; editing = false } })
             }.heightIn(min = 24.dp), contentAlignment = Alignment.Center) { // a finger's worth of height, though the pill is thin
                 Box(Modifier.size(width = 36.dp, height = 4.dp).clip(CircleShape).background(onBar.copy(alpha = 0.4f)))
             }
