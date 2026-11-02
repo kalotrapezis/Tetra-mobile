@@ -40,6 +40,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Data: how much each app used (the user turns on Usage access in Android's settings; Plan.md § Data) -->
@@ -119,6 +120,7 @@
         <activity android:name=".AlarmRingActivity" android:exported="false" android:launchMode="singleTask" android:taskAffinity="com.kalotrapezis.drive.alarm"
             android:excludeFromRecents="true" android:showWhenLocked="true" android:turnScreenOn="true" />
         <!-- The Timer while one runs: its countdown notification, the alarm at the end, the 30 s look at the other devices -->
+        <service android:name=".BrowserMediaService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
         <service android:name=".TimerService" android:exported="false" android:foregroundServiceType="specialUse">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Countdown timer, alarm or stopwatch the user started, kept in step with their other devices" />
         </service>
@@ -197,6 +199,9 @@
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <activity-alias android:name=".AppMessages" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_sms" android:icon="@mipmap/applet_messages" android:roundIcon="@mipmap/applet_messages">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".AppBrowser" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_browser" android:icon="@mipmap/applet_browser" android:roundIcon="@mipmap/applet_browser">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <activity-alias android:name=".AppContacts" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_contacts" android:icon="@mipmap/applet_contacts" android:roundIcon="@mipmap/applet_contacts">

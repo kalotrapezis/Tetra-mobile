@@ -54,6 +54,7 @@ internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, 
     Appearance(R.string.settings_appearance, R.drawable.ic_palette, null, R.string.settings_appearance_summary, listOf(R.string.settings_theme, R.string.settings_language, R.string.settings_photo_on_home, R.string.settings_hidden_from_home, R.string.settings_app_icons)),
     Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_check, R.string.mail_default_app, R.string.mail_threads, R.string.mail_read_shown, R.string.mail_islands, R.string.mail_security,
         R.string.mail_remote, R.string.mail_allowed, R.string.mail_tracking, R.string.mail_link_warning, R.string.mail_risky, R.string.mail_real_address, R.string.mail_receipts)),
+    Browser(R.string.app_browser, Category.Browser.icon, Category.Browser.color, R.string.settings_browser_summary, listOf(R.string.browser_history_keep, R.string.browser_top_bar)),
     Gallery(R.string.app_gallery, Category.Gallery.icon, Category.Gallery.color, R.string.settings_gallery_summary, listOf(R.string.settings_photos_videos, R.string.settings_search_quality, R.string.settings_folders)),
     Files(R.string.app_files, Category.Files.icon, Category.Files.color, R.string.settings_files_summary, listOf(R.string.settings_drive_workspace, R.string.settings_all_files)),
     Scanner(R.string.settings_pdf_scanner, Category.Scanner.icon, Category.Scanner.color, R.string.settings_resolution, listOf(R.string.settings_resolution)),
@@ -168,6 +169,7 @@ internal fun SettingsTab(
                     SettingsPage.Maps -> MapsPage()
                     SettingsPage.Contacts -> ContactsPage()
                     SettingsPage.Mail -> MailPage(openPart)
+                    SettingsPage.Browser -> BrowserSettingsPage()
                     SettingsPage.Phone -> PhonePage()
                     SettingsPage.Data -> DataPage()
                     SettingsPage.Assistant -> AssistantPage()
@@ -473,6 +475,24 @@ internal fun SettingsTab(
     }
 }
 
+/** Settings › Browser (the user, 2 Nov: "clear history on exit 24h or never"; "the UI thing is at the top … like chrome on PC"). */
+@Composable private fun BrowserSettingsPage() {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("browser", Context.MODE_PRIVATE) }
+    var keep by remember { mutableStateOf(prefs.getString("keep_history", BrowserRules.DAY) ?: BrowserRules.DAY) }
+    var top by remember { mutableStateOf(prefs.getBoolean("top_bar", false)) }
+    SettingsSection(stringResource(R.string.browser_history)) {
+        ChoiceRow(stringResource(R.string.browser_history_keep), null, listOf(BrowserRules.ON_EXIT to stringResource(R.string.browser_keep_exit),
+            BrowserRules.DAY to stringResource(R.string.browser_keep_day), BrowserRules.NEVER to stringResource(R.string.browser_keep_never)), keep) {
+            keep = it
+            prefs.edit().putString("keep_history", it).apply { if (it == BrowserRules.ON_EXIT) remove("history") }.apply() // "on leaving": nothing kept from before either
+        }
+    }
+    SettingsSection(null, stringResource(R.string.browser_top_bar_note)) {
+        SwitchRow(stringResource(R.string.browser_top_bar), null, top) { top = it; prefs.edit().putBoolean("top_bar", it).apply() }
+    }
+}
+
 @Composable private fun TextEditorPage() {
     val context = LocalContext.current
     val editor = remember { TextEditorStore(context) }
@@ -508,7 +528,7 @@ internal fun SettingsTab(
     }
     if (AiGate.on) SettingsSection(stringResource(R.string.ai_apps), stringResource(R.string.ai_apps_note)) {
         listOf("mail" to R.string.app_mail, "calendar" to R.string.app_calendar, "notes" to R.string.app_notes, "files" to R.string.app_files, "photos" to R.string.app_photos,
-            "timer" to R.string.app_timer, "contacts" to R.string.app_contacts, "phone" to R.string.app_phone, "sms" to R.string.app_sms, "maps" to R.string.app_maps, "web" to R.string.ai_app_web).forEach { (app, name) ->
+            "timer" to R.string.app_timer, "contacts" to R.string.app_contacts, "phone" to R.string.app_phone, "sms" to R.string.app_sms, "maps" to R.string.app_maps, "browser" to R.string.app_browser, "web" to R.string.ai_app_web).forEach { (app, name) ->
             SwitchRow(stringResource(name), null, AiGate.allows(app)) { on -> runCatching { AiGate.set(AiGate.state.copy(apps = AiGate.state.apps + (app to on))) }.onFailure { WriterLog.e("AI: an app's switch", it) } }
         }
     }

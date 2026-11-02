@@ -81,3 +81,18 @@ library 0.4.4), all under the Apache License 2.0: https://github.com/zxing/zxing
 
 `app/src/main/assets/maps/fonts` holds Noto Sans glyphs for the map's labels, under the SIL Open Font License 1.1
 (`app/src/main/assets/maps/fonts-OFL.txt`).
+
+## EasyList and EasyPrivacy
+
+The Browser's ad blocker uses the host rules of EasyList and EasyPrivacy
+(https://easylist.to/), by The EasyList authors. A copy taken on 2026-11-02 is
+bundled as `app/src/main/assets/adblock.txt` (host rules only); the app fetches
+the full lists from easylist.to once a week. Both lists are dual-licensed under
+the GNU General Public License v3 and Creative Commons Attribution-ShareAlike 3.0:
+https://easylist.to/pages/licence.html
+
+## AndroidX WebKit
+
+The Browser's private mode keeps its cookies and storage in a WebView profile of
+its own with `androidx.webkit:webkit` 1.14.0, licensed under Apache License 2.0:
+https://www.apache.org/licenses/LICENSE-2.0

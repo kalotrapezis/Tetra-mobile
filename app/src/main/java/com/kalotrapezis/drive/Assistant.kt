@@ -288,6 +288,9 @@ internal class AssistantTools(
             "photos_place" -> photosPlace(args)
             "place_reminder" -> placeReminder(args)
             "youtube" -> args.getString("query").trim().let { q -> ToolResult("YouTube is open on a search for \"$q\".", go = "youtube:$q") }
+            // Tetra's Browser in Player mode: the site's search, its first result played (BrowserScreen's play)
+            "media_play" -> args.getString("query").trim().let { q -> MediaSites.byId(args.optString("site")).let { site ->
+                ToolResult("Playing the first result for \"$q\" on ${site.id.replace('_', ' ')} in Tetra's Browser.", go = "browser-play:" + JSONObject().put("site", site.id).put("q", q)) } }
             "shopping_list" -> shoppingList(args)
             "files_find" -> filesFind(args)
             "file_open" -> pick(files, args) { f -> ToolResult("Opened ${f.name}.", open = f, cards = listOf(ResultCard.Files(listOf(f), tetra))) }
@@ -810,7 +813,7 @@ internal class AssistantTools(
             "contacts_find" to "contacts", "my_card" to "contacts", "relation_remember" to "contacts", "relation_forget" to "contacts", "contact_call" to "phone",
             "navigate" to "maps", "place_reminder" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail", "mail_stored_find" to "mail", "mail_export" to "mail",
             "sms_list" to "sms", "sms_read" to "sms", "sms_write" to "sms",
-            "web_search" to "web", "make_image" to "web", "youtube" to "web", "attachment_read" to "files", "audio_make" to "files")
+            "web_search" to "web", "make_image" to "web", "youtube" to "web", "media_play" to "browser", "attachment_read" to "files", "audio_make" to "files")
         /** The tools of the apps the assistant may use now: the others are not even offered. */
         fun allowed(): JSONArray = JSONArray((0 until SCHEMA.length()).map { SCHEMA.getJSONObject(it) }
             .filter { AiGate.state.keeps(APP_OF[it.getJSONObject("function").getString("name")]) && (beside || it.getJSONObject("function").getString("name") != "open_beside") })
@@ -867,7 +870,9 @@ internal class AssistantTools(
                 "place" to p("string", "One place instead: a saved place's name, a shop's name or an address."),
                 "note" to p("string", "Words of the checklist's title (Ψώνια for shopping); leave out for any checklist with items left.")),
             fn("photos_place", "Show the user's photos taken at a place.", listOf("place"), "place" to p("string", "A town or a place.")),
-            fn("youtube", "Open YouTube on a search for a song or a video.", listOf("query"), "query" to p("string", "The song or video, with the artist if said.")),
+            fn("youtube", "Open the YouTube app on a search, only when the user names the YouTube app.", listOf("query"), "query" to p("string", "The song or video, with the artist if said.")),
+            fn("media_play", "Play a song or a video in Tetra's Browser: the site's search opens and its first result plays, in Player mode.", listOf("query"),
+                "query" to p("string", "The song or video, with the artist if said."), "site" to p("string", "youtube (the default) or youtube_music when the user says YouTube Music.")),
             fn("mail_new", "The new mail in the Inbox: what came in the last hours, and anything still unread; a numbered list with senders, subjects and the start of each.", emptyList(),
                 "hours" to p("integer", "How far back; 24 if not said."), "unread" to p("boolean", "Also older mail that is still unread; true if not said.")),
             fn("mail_attention", "The recent Inbox mail that is unread or marked ♥, with the start of each, to judge which needs an answer or an action.", emptyList(),
@@ -927,7 +932,7 @@ internal class AssistantTools(
             "Χρονόμετρο" is both a timer and a stopwatch: with a length ("βάλε χρονόμετρο 10 λεπτά") timer_start; without ("ξεκίνα χρονόμετρο", "σταμάτα το χρονόμετρο", "πόση ώρα πάει") the stopwatch.
             "Ξυπνητήρι", "ξύπνα με": alarm_add ("κάθε μέρα" all seven days, "τις καθημερινές" MO–FR; "αύριο στις 6" a date). To remove one, alarm_list then alarm_delete.
             "Όταν πάω σούπερ μάρκετ δείξε μου τα ψώνια": place_reminder with kind supermarket and note Ψώνια; then say it rings on arrival.
-            A song or a video: youtube. "Κάνε σημείωση": note_new.
+            A song or a video («βάλε στο YouTube …», «παίξε …», «play … on YouTube»): media_play; «στο YouTube Music»: media_play with site youtube_music; the YouTube app only when named: youtube. "Κάνε σημείωση": note_new.
             Mail: "νέα μηνύματα;", "ήρθε κάτι;": mail_new, then say how many and from whom. "Τι χρειάζεται απάντηση;", "σημαντικά mail": mail_attention, then name
             only those that need an answer or an action and in a few words why (a deadline, a question to the user, a payment). "Βρες το mail από τη Μαρία": mail_find.
             "Στείλε mail στον …": mail_write, written as a proper e-mail in the language the user speaks; after it, say it waits for their Send.

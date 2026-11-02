@@ -21,7 +21,7 @@ import org.json.JSONObject
  */
 internal object AiGate {
     /** The apps the assistant can be kept out of, as the file names them (the desktop's ai.js the same; "web": search, pictures, YouTube). */
-    val APPS = listOf("mail", "calendar", "notes", "files", "photos", "timer", "contacts", "phone", "sms", "maps", "web")
+    val APPS = listOf("mail", "calendar", "notes", "files", "photos", "timer", "contacts", "phone", "sms", "maps", "browser", "web")
 
     data class State(val enabled: Boolean, val apps: Map<String, Boolean> = emptyMap()) {
         fun allows(app: String?) = enabled && keeps(app)

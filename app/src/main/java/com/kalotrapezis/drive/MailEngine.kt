@@ -42,14 +42,16 @@ internal data class MailServer(val host: String, val port: Int, val user: String
     }
 }
 
-/** Passwords of the accounts this device fetches, each encrypted by a key that never leaves the keystore; never synced (AssistantKey's way). */
-internal object MailSecret {
-    private const val ALIAS = "tetra_mail_key"
-    private fun prefs(c: Context) = c.getSharedPreferences("mail_secrets", Context.MODE_PRIVATE)
+/** Passwords of the accounts this device fetches. */
+internal object MailSecret : KeystoreSecrets("tetra_mail_key", "mail_secrets")
+
+/** Secrets each encrypted by a key that never leaves the keystore; never synced (AssistantKey's way): Mail's passwords, the Browser's vault. */
+internal open class KeystoreSecrets(private val alias: String, private val file: String) {
+    private fun prefs(c: Context) = c.getSharedPreferences(file, Context.MODE_PRIVATE)
     private fun key(): SecretKey {
         val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
-        return ks.getKey(ALIAS, null) as? SecretKey ?: KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").apply {
-            init(KeyGenParameterSpec.Builder(ALIAS, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+        return ks.getKey(alias, null) as? SecretKey ?: KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").apply {
+            init(KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build())
         }.generateKey()
     }
@@ -57,7 +59,7 @@ internal object MailSecret {
     fun get(c: Context, id: String): String? = prefs(c).getString(id, null)?.let { saved -> runCatching {
         val b = Base64.decode(saved, Base64.NO_WRAP)
         Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, b, 0, 12)) }.doFinal(b, 12, b.size - 12).decodeToString()
-    }.onFailure { WriterLog.e("Mail: a password could not be read", it) }.getOrNull() }
+    }.onFailure { WriterLog.e("$file: a secret could not be read", it) }.getOrNull() }
     fun set(c: Context, id: String, secret: String?) {
         if (secret == null) { prefs(c).edit().remove(id).apply(); return }
         val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, key()) }
