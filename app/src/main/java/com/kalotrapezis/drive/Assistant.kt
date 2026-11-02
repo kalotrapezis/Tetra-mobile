@@ -22,7 +22,8 @@ import java.time.format.DateTimeFormatter
  */
 
 /** A call the model asked for, waiting for the user's yes. */
-internal data class PendingCall(val name: String, val number: String)
+/** [speaker]: on the loudspeaker from the start («στο μεγάφωνο», «σε ανοιχτή ακρόαση»). */
+internal data class PendingCall(val name: String, val number: String, val speaker: Boolean = false)
 
 /** Something the screen offers to tap: a contact to call, a file to open, or a place in Tetra to go ([go]). */
 internal data class AssistantChoice(val label: String, val call: PendingCall? = null, val file: File? = null, val go: String? = null)
@@ -289,7 +290,7 @@ internal class AssistantTools(
             "my_card" -> myCard(args)
             "relation_remember" -> relationRemember(args)
             "relation_forget" -> relationForget(args)
-            "contact_call" -> pick(contacts, args) { c -> ToolResult("Tetra says \"${c.name}\" and calls in 3 seconds unless the user stops it. Say nothing more.", call = c,
+            "contact_call" -> pick(contacts, args) { c -> ToolResult("Tetra says \"${c.name}\" and calls in 3 seconds${if (args.optBoolean("speaker")) ", on the loudspeaker," else ""} unless the user stops it. Say nothing more.", call = c.copy(speaker = args.optBoolean("speaker")),
                 cards = found.firstOrNull { i -> i.phones.any { it.value == c.number } }?.let { listOf(ResultCard.contact(it)) }.orEmpty()) }
             "mail_new" -> mailNew(args)
             "mail_attention" -> mailAttention(args)
@@ -806,7 +807,8 @@ internal class AssistantTools(
                 "relation" to p("string", RELATION), "name" to p("string", "The contact's name.")),
             fn("relation_forget", "Forget a saved relation.", listOf("relation"), "relation" to p("string", RELATION), "name" to p("string", "Only this person, when several have the relation.")),
             fn("my_card", "Say which contact is the user themself, once, when a relation tool asks for it.", listOf("name"), "name" to p("string", "The user's own name as in Contacts; a card with just that name is made if they have none.")),
-            fn("contact_call", "Call a contact from the last contacts_find list, only when the user asked to call («πάρε», «κάλεσε», «τηλεφώνησε»), never after a request only to find or show one. Tetra says the name and dials by itself a moment later; do not ask «να καλέσω;» first.", listOf("choice"), CHOICE),
+            fn("contact_call", "Call a contact from the last contacts_find list, only when the user asked to call («πάρε», «κάλεσε», «τηλεφώνησε»), never after a request only to find or show one. Tetra says the name and dials by itself a moment later; do not ask «να καλέσω;» first.", listOf("choice"), CHOICE,
+                "speaker" to p("boolean", "True only when the user asked for the loudspeaker («στο μεγάφωνο», «σε ανοιχτή ακρόαση», «on speaker»).")),
             fn("navigate", "Start driving directions in Tetra Maps (offline map), to a place or to a contact's saved address.", emptyList(),
                 "place" to p("string", "A place, a town or an address (\"Ερμού 10, Αθήνα\")."), "contact" to p("string", "A contact's name, to go to their address.")),
             fn("place_reminder", "Show a checklist from Notes when the user arrives at a place: any shop of a kind (every supermarket), or one place.", emptyList(),
@@ -858,7 +860,7 @@ internal class AssistantTools(
             Answer in the user's language (usually Greek), in one or two short plain sentences: answers are often read aloud. No markdown.
             Use the tools for anything about the user's own calendar, timers, notes, files or contacts; never invent what they hold.
             When a search finds several, say how many and ask which one (the screen shows the numbered list); "the first", "η δεύτερη" mean that list's numbers.
-            «Πάρε / κάλεσε / τηλεφώνησε τον …»: contacts_find, then contact_call at once (one match, or the one the user picks); Tetra says the name and dials, so say nothing after it and never ask «να καλέσω;». Several matches: ask which one in a few words («τη Μαρία Κ. ή τη Μαρία Π.;»).
+            «Πάρε / κάλεσε / τηλεφώνησε τον …»: contacts_find, then contact_call at once (one match, or the one the user picks); Tetra says the name and dials, so say nothing after it and never ask «να καλέσω;». «… στο μεγάφωνο / σε ανοιχτή ακρόαση»: the same, with speaker true. Several matches: ask which one in a few words («τη Μαρία Κ. ή τη Μαρία Π.;»).
             «Βρες / δείξε την επαφή …»: contacts_find only; the screen shows the contact. Never contact_call after a find.
             "My sister", "ο μπαμπάς μου", "η γυναίκα μου": contacts_find with that relation. When the user says who someone is to them, relation_remember it.
             Someone known by a job or role ("πάρε την κομμώτρια"): contacts_find by relation, and if none, by keywords.
@@ -994,6 +996,9 @@ internal class HandsFree(private val place: (PendingCall) -> Unit) {
         private val CALL = Regex("π[αά]ρε|κ[αά]λεσε|τηλεφ[ωώ]ν|\\bcall\\b|\\bring\\b|\\bphone\\b", RegexOption.IGNORE_CASE)
         /** The user asked to call (not only to find). */
         fun asked(text: String) = CALL.containsMatchIn(text)
+        private val LOUD = Regex("μεγ[αά]φων|αν[οό]ιχτ[ηή] ακρ[οό]αση|ανοιχτ[οό] ακουστικ|speaker", RegexOption.IGNORE_CASE)
+        /** The user asked for the loudspeaker: heard by the phone too, the model may leave it out. */
+        fun loud(text: String) = LOUD.containsMatchIn(text)
     }
 }
 

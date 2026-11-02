@@ -52,6 +52,8 @@ internal object PhoneCalls {
     var tick by mutableIntStateOf(0); private set
     /** The call screen in front: the ringing notification then stays quiet (no heads-up over the screen itself). */
     var screenShown = false
+    /** When a call on the loudspeaker was placed here (placePhoneCall's [speaker]): the call that follows within 10 s goes there. */
+    var speakerAt = 0L
     /** Outgoing calls already answered: the buzz once, not again after Hold → Resume. */
     private val answered = mutableSetOf<Call>()
     private val names = HashMap<String, ContactInfo?>()
@@ -79,6 +81,11 @@ internal object PhoneCalls {
         WriterLog.i("Phone: a call ${if (call.state == Call.STATE_RINGING) "ringing" else "placed"} (${calls.size} now)")
         // the first call's sound: a call dialled here stays here, one the computer asked for goes there; a ringing one waits for its answer
         if (calls.size == 1) take(if (call.state == Call.STATE_RINGING) null else !PhoneCall.computerAsked(number(call)))
+        // AI Assist's «πάρε τον … στο μεγάφωνο»: Telecom's extra asks for it, and Tetra, the phone app, sees it is done once the call's sound is known
+        if (System.currentTimeMillis() - speakerAt < 10_000 && call.state != Call.STATE_RINGING) {
+            speakerAt = 0L
+            android.os.Handler(s.mainLooper).postDelayed({ if (call in calls && audio?.route != CallAudioState.ROUTE_SPEAKER) { WriterLog.i("Phone: the call on the loudspeaker, as asked"); route(CallAudioState.ROUTE_SPEAKER) } }, 600)
+        }
         report(s, call)
         number(call)?.let { n -> if (n !in names) Thread { val c = contactFor(n); synchronized(names) { names[n] = c }; android.os.Handler(s.mainLooper).post { changed(s) } }.start() }
         changed(s)

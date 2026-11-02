@@ -303,6 +303,9 @@ class AssistantTest {
         h.start(p, 10_000); h.cancel()
         assertFalse(h.tick(20_000)); assertEquals(1, placed.size)
         assertTrue(HandsFree.asked("πάρε τον Νίκο")); assertTrue(HandsFree.asked("Κάλεσε τη μαμά")); assertFalse(HandsFree.asked("βρες την επαφή Νίκος"))
+        // «… στο μεγάφωνο / σε ανοιχτή ακρόαση»: on the loudspeaker; a plain call is not
+        assertTrue(HandsFree.loud("πάρε τηλέφωνο τον Νίκο στο μεγάφωνο")); assertTrue(HandsFree.loud("Πάρε τη μαμά σε ανοιχτή ακρόαση"))
+        assertTrue(HandsFree.loud("call Nick on speaker")); assertFalse(HandsFree.loud("πάρε τηλέφωνο τον Νίκο"))
         assertEquals(false, AssistantChat.yesNo("μη")); assertEquals(false, AssistantChat.yesNo("άκυρο"))
     }
 

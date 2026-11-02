@@ -173,7 +173,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         pending = null; dialing = null; wantCall = false
         endLive()
         WriterLog.i("Assistant: calling ${p.name}")
-        if (!placePhoneCall(context, p.number)) context.startActivity(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", p.number, null)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        if (!placePhoneCall(context, p.number, p.speaker)) context.startActivity(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", p.number, null)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         if (sheet) close()
     }
     fun choose(c: AssistantChoice) { c.call?.let(::call); c.file?.let { open(it); if (sheet) close() }; c.go?.let { go(it); if (sheet) close() } }
@@ -248,7 +248,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         pendingAudio = reply.audio
         // a call asked for by voice goes without a tap; one only found waits for the card's Call
         wantCall = HandsFree.asked(text) || (wantCall && reply.call == null && reply.cards.any { it is ResultCard.Contact })
-        reply.call?.let { p -> if (wantCall) { speech?.await(); dial(p, inLive); return@launch } else pending = p }
+        reply.call?.let { it.copy(speaker = it.speaker || HandsFree.loud(text)) }?.let { p -> if (wantCall) { speech?.await(); dial(p, inLive); return@launch } else pending = p }
         // beside (open_beside): a second Tetra window in split screen, this one staying as it is; a file outside the library opens as usual
         if (reply.beside) { reply.open?.let { f -> runCatching { DriveRules.relative(driveRoot(), f) }.getOrNull()?.let { Beside.open(context, "file:$it") } ?: open(f) }; reply.go?.let { Beside.open(context, it) } }
         else reply.open?.let(::open)

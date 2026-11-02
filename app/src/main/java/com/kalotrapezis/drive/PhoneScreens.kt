@@ -77,10 +77,12 @@ class PhoneCallActivity : ComponentActivity() {
     }
 }
 
-/** Places a call (CALL_PHONE, which the Phone app role grants); false without the permission. */
-internal fun placePhoneCall(c: Context, number: String): Boolean {
+/** Places a call (CALL_PHONE, which the Phone app role grants), on the loudspeaker when [speaker]; false without the permission. */
+internal fun placePhoneCall(c: Context, number: String, speaker: Boolean = false): Boolean {
     if (c.checkSelfPermission(Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) return false
-    return runCatching { c.getSystemService(TelecomManager::class.java).placeCall(Uri.fromParts("tel", number, null), Bundle()); true }
+    PhoneCalls.speakerAt = if (speaker) System.currentTimeMillis() else 0L
+    val extras = Bundle().apply { if (speaker) putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true) }
+    return runCatching { c.getSystemService(TelecomManager::class.java).placeCall(Uri.fromParts("tel", number, null), extras); true }
         .onFailure { WriterLog.e("Phone: the call was not placed", it) }.getOrDefault(false)
 }
 
