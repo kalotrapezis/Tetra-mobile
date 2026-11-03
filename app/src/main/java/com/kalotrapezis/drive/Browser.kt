@@ -3,109 +3,10 @@ package com.kalotrapezis.drive
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.File
 import java.net.URLEncoder
 
 // Browser (the user, 2 Nov): logins, forms and cards kept encrypted; the history forgotten; Private keeps nothing;
-// an ad blocker like Firefox's with a switch; Import from Firefox. The rules here are pure (BrowserTest); BrowserScreen.kt draws.
-
-/**
- * EasyList's and EasyPrivacy's host rules, `||host…` and their `@@||host…` exceptions: almost all of both lists, and
- * what Firefox's own blocking is (whole hosts). A rule with an option it does not know (popup, redirect, csp…) is left out.
- */
-internal class AdFilter(lines: Sequence<String>) {
-    private class Rule(val path: String, val third: Boolean?, val on: List<String>, val notOn: List<String>)
-    private val block = HashMap<String, MutableList<Rule>>()
-    private val allow = HashMap<String, MutableList<Rule>>()
-    val size: Int
-
-    init { var n = 0; lines.forEach { if (add(it.trim())) n++ }; size = n }
-
-    private fun add(line: String): Boolean {
-        val exception = line.startsWith("@@||")
-        if (!exception && !line.startsWith("||")) return false
-        val body = line.removePrefix("@@").removePrefix("||").lowercase()
-        val dollar = body.lastIndexOf('$')
-        val pattern = if (dollar >= 0) body.substring(0, dollar) else body
-        var third: Boolean? = null
-        val on = mutableListOf<String>(); val notOn = mutableListOf<String>()
-        if (dollar >= 0) for (o in body.substring(dollar + 1).split(',')) when {
-            o == "third-party" || o == "3p" -> third = true
-            o == "~third-party" || o == "1p" || o == "first-party" -> third = false
-            o.startsWith("domain=") -> o.removePrefix("domain=").split('|').forEach { d -> if (d.startsWith("~")) notOn += d.drop(1) else on += d }
-            o == "important" -> Unit
-            // shortcut: a request's type is not known to shouldInterceptRequest, so a typed rule applies to every type; guess it from the Accept header if over-blocking shows
-            o.removePrefix("~") in TYPES -> Unit
-            else -> return false
-        }
-        val end = pattern.indexOfFirst { it in "^/*:|?" }
-        val host = if (end < 0) pattern else pattern.substring(0, end)
-        if (host.isEmpty() || '.' !in host) return false
-        (if (exception) allow else block).getOrPut(host) { mutableListOf() } += Rule(if (end < 0) "" else pattern.substring(end), third, on, notOn)
-        return true
-    }
-
-    /** Whether a request for [url], made by a page at [page] (its host), is an ad or a tracker. */
-    fun blocks(url: String, page: String?): Boolean {
-        val after = url.substringAfter("://", "").takeIf { it.isNotEmpty() } ?: return false
-        val cut = after.indexOfFirst { it == '/' || it == '?' || it == '#' }.let { if (it < 0) after.length else it }
-        val host = after.substring(0, cut).substringAfterLast('@').substringBefore(':').lowercase()
-        val rest = after.substring(cut).lowercase()
-        val third = page == null || BrowserRules.site(host) != BrowserRules.site(page)
-        fun on(d: String) = page != null && (page == d || page.endsWith(".$d"))
-        fun hit(rules: HashMap<String, MutableList<Rule>>): Boolean {
-            var h = host
-            while (true) {
-                if (rules[h]?.any { r -> (r.third == null || r.third == third) && (r.on.isEmpty() || r.on.any(::on)) && r.notOn.none(::on) && glob(r.path, 0, rest, 0) } == true) return true
-                h = h.substringAfter('.', "").takeIf { '.' in it } ?: return false
-            }
-        }
-        return hit(block) && !hit(allow)
-    }
-
-    companion object {
-        private val TYPES = setOf("script", "image", "stylesheet", "xmlhttprequest", "subdocument", "media", "font", "object", "ping", "websocket", "other", "document")
-        private fun separator(c: Char) = !(c.isLetterOrDigit() || c in "_-.%")
-
-        /** ABP's pattern after the host: `*` anything, `^` a separator or the end, a final `|` the end; otherwise a prefix is enough. */
-        internal fun glob(p: String, i: Int, s: String, j: Int): Boolean {
-            if (i == p.length) return true
-            return when (val c = p[i]) {
-                '*' -> (j..s.length).any { glob(p, i + 1, s, it) }
-                '^' -> if (j == s.length) glob(p, i + 1, s, j) else separator(s[j]) && glob(p, i + 1, s, j + 1)
-                '|' -> i == p.length - 1 && j == s.length
-                else -> j < s.length && s[j] == c && glob(p, i + 1, s, j + 1)
-            }
-        }
-    }
-}
-
-/** The lists: the copy that came with the app, then easylist.to's own each week (both GPLv3 / CC BY-SA 3.0, THIRD_PARTY_NOTICES.md). */
-internal object AdBlock {
-    @Volatile var filter: AdFilter? = null
-    private val SOURCES = listOf("https://easylist.to/easylist/easylist.txt", "https://easylist.to/easylist/easyprivacy.txt")
-    private const val WEEK = 7 * 24 * 3600_000L
-    private fun prefs(c: Context) = c.getSharedPreferences("browser", Context.MODE_PRIVATE)
-    fun on(c: Context) = prefs(c).getBoolean("adblock", true)
-    fun set(c: Context, on: Boolean) = prefs(c).edit().putBoolean("adblock", on).apply()
-
-    /** On a background thread: the newest lists this phone has, fetched again when a week old. */
-    fun load(c: Context) {
-        val files = SOURCES.indices.map { File(c.filesDir, "adblock$it.txt") }
-        if (filter == null) runCatching {
-            filter = AdFilter(if (files.all { it.exists() }) files.asSequence().flatMap { it.readLines() } else c.assets.open("adblock.txt").bufferedReader().lineSequence())
-            WriterLog.i("Browser: ${filter?.size} ad-blocking rules")
-        }.onFailure { WriterLog.e("Browser: the ad-blocking rules were not read", it) }
-        if (files.all { System.currentTimeMillis() - it.lastModified() < WEEK }) return
-        runCatching {
-            val got = SOURCES.map { java.net.URL(it).openStream().use { s -> s.readBytes() } }
-            require(got.all { it.size > 100_000 }) { "a list too short" }
-            got.forEachIndexed { i, b -> File(c.filesDir, "adblock$i.part").apply { writeBytes(b); renameTo(files[i]) } }
-            filter = AdFilter(files.asSequence().flatMap { it.readLines() })
-            WriterLog.i("Browser: the ad-blocking lists updated, ${filter?.size} rules")
-        }.onFailure { WriterLog.w("Browser: the ad-blocking lists not updated", it) }
-    }
-}
+// Firefox's engine and extensions (BrowserEngine.kt, uBlock Origin for the ads); Import from Firefox. The rules here are pure (BrowserTest); BrowserScreen.kt draws.
 
 internal data class Visit(val url: String, val title: String, val at: Long)
 // pinned: at the start page's front; folder: a path of folders, "Radios" or "Imported/Bookmarks Toolbar/News", "" for none
@@ -210,18 +111,6 @@ internal object BrowserRules {
 
     /** HTML only (the user, 2 Nov: "no javascript … just html Css"): kept per site, so a site's subdomains and its pages follow. */
     fun htmlOnly(sites: Set<String>, url: String?) = host(url).takeIf { it.isNotEmpty() }?.let { site(it) in sites } == true
-
-    /** A web font, which HTML only does without (the system's fonts instead). */
-    fun webFont(url: String) = Regex("\\.(woff2?|ttf|otf|eot)([?#]|$)", RegexOption.IGNORE_CASE).containsMatchIn(url)
-
-    /** Desktop mode (the user, 2 Nov): the WebView's own agent as desktop Chrome on Linux — no Android, no Mobile, no WebView marks. */
-    /**
-     * Mobile Chrome as it is, without WebView's marks ("; wv", "Version/4.0"): Google refuses to sign in inside an app's WebView
-     * that says so (the user, 2 Nov: "it does not let me connect to Google").
-     */
-    fun mobileAgent(webView: String) = webView.replace("; wv)", ")").replace(Regex("Version/[\\d.]+ "), "")
-
-    fun desktopAgent(mobile: String) = mobile.replace(Regex("\\([^)]*Android[^)]*\\)"), "(X11; Linux x86_64)").replace(" Mobile", "").replace(Regex("Version/[\\d.]+ "), "")
 
     /**
      * Player mode's ‹ › on a page with none of its own (a radio station's, live24.gr's): the next or the previous favourite of
@@ -445,12 +334,16 @@ internal object MediaSites {
  * or on the bar"); one list for a phone, one for a tablet. Order is the order chosen.
  */
 internal object BrowserTools {
-    val ALL = listOf("fill", "ads", "private", "desktop", "html", "bookmarks", "history", "saved", "copy", "share", "split", "forward", "player", "import", "autohide", "background", "tabs_run", "close")
-    val PHONE = listOf("fill", "ads", "private", "bookmarks", "copy", "share") // two columns of three small (the user, 2 Nov: "fit 2 more tools")
-    val TABLET = listOf("fill", "ads", "private", "desktop", "html", "bookmarks", "history", "saved", "copy", "share", "split")
+    val ALL = listOf("fill", "extensions", "private", "desktop", "html", "bookmarks", "history", "saved", "copy", "share", "split", "forward", "player", "import", "autohide", "background", "tabs_run", "close")
+    /** uBlock Origin's button, where the ad blocker's shield was (the user, 3 Nov): its count of the page's blocked requests. */
+    const val UBLOCK = "ext:" + BrowserEngine.UBLOCK
+    val PHONE = listOf("fill", UBLOCK, "private", "bookmarks", "copy", "share") // two columns of three small (the user, 2 Nov: "fit 2 more tools")
+    val TABLET = listOf("fill", UBLOCK, "private", "desktop", "html", "bookmarks", "history", "saved", "copy", "extensions", "split")
     fun max(wide: Boolean) = if (wide) 11 else 6
 
-    fun parse(saved: String?, wide: Boolean) = saved?.split(',')?.filter { it in ALL }?.distinct()?.take(max(wide)) ?: if (wide) TABLET else PHONE
+    /** The bar as kept; an extension's button is "ext:" and its id; the old ad blocker's place goes to uBlock Origin. */
+    fun parse(saved: String?, wide: Boolean) = saved?.split(',')?.map { if (it == "ads") UBLOCK else it }?.filter { it in ALL || it.startsWith("ext:") }?.distinct()?.take(max(wide))
+        ?: if (wide) TABLET else PHONE
 
     /** A tool tapped in edit mode: off the bar, or onto its end; null when the bar is full. */
     fun toggle(bar: List<String>, id: String, wide: Boolean): List<String>? = when {
