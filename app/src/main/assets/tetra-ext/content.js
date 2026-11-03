@@ -78,9 +78,9 @@ function mediaDo(a, b) { var m = cur(); b = b || {};
   else if (a == 'prev') { var now = Date.now(), again = now - prevAt < 2000; prevAt = now;
     if (m && m.currentTime > 5 && !again) m.currentTime = 0; else if (!click(b.prev)) { if (again && history.length > 1) history.back(); else if (m) m.currentTime = 0; } }
   setTimeout(media, 300); }
-function autoplay() { var n = 0, t = setInterval(function () { var m = cur();
+function autoplay() { var n = 0, said = 0, t = setInterval(function () { var m = cur();
   if (m && !m.paused) { clearInterval(t); return; }
-  if (m && (m.currentSrc || m.src)) m.play().catch(function () {}); else if (n == 4) click('.jp-play,[class*=play-button],button[aria-label*=Play i],button[title*=Play i]');
+  if (m && (m.currentSrc || m.src)) m.play().catch(function (e) { if (!said) { said = 1; post({ error: 'autoplay: ' + e }); } }); else if (n == 4) click('.jp-play,[class*=play-button],button[aria-label*=Play i],button[title*=Play i]');
   if (++n > 30) clearInterval(t); }, 500); }
 // AI Assist's search: its first result, past shorts and ads
 function first(sel) { var n = 0, t = setInterval(function () { var l = document.querySelectorAll(sel);

@@ -67,14 +67,28 @@ internal class BrowserPrompter(private val context: Context, private val pick: (
         val intent = Intent(Intent.ACTION_GET_CONTENT).addCategory(Intent.CATEGORY_OPENABLE).setType(types.singleOrNull() ?: "*/*")
             .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, many).apply { if (types.size > 1) putExtra(Intent.EXTRA_MIME_TYPES, types.toTypedArray()) }
         pick(intent) { uris ->
-            r.complete(when {
-                uris.isNullOrEmpty() -> prompt.dismiss()
-                many -> prompt.confirm(context, uris)
-                else -> prompt.confirm(context, uris[0])
-            })
+            if (uris.isNullOrEmpty()) { r.complete(prompt.dismiss()); return@pick }
+            // Gecko reads files, not content:// documents: each copied into the cache first, off the main thread
+            val main = android.os.Handler(android.os.Looper.getMainLooper())
+            Thread {
+                val files = runCatching { uris.map(::copy).toTypedArray() }.onFailure { WriterLog.e("Browser: a file for a page not read", it) }.getOrNull()
+                main.post { r.complete(when { files == null -> prompt.dismiss(); many -> prompt.confirm(context, files); else -> prompt.confirm(context, files[0]) }) }
+            }.start()
         }
         return r
     }
+
+    private fun copy(uri: Uri): Uri {
+        val name = context.contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
+            ?.replace('/', '_')?.takeIf { it.isNotBlank() } ?: "file"
+        val dir = java.io.File(context.cacheDir, "uploads/${System.nanoTime()}").apply { mkdirs() }
+        val f = java.io.File(dir, name)
+        context.contentResolver.openInputStream(uri)!!.use { i -> f.outputStream().use { i.copyTo(it) } }
+        WriterLog.i("Browser: ${f.length()} bytes given to a page (${name.substringAfterLast('.', "")})")
+        return Uri.fromFile(f)
+    }
+    /** What earlier uploads left in the cache (the Browser opening again). */
+    fun clean() = Thread { java.io.File(context.cacheDir, "uploads").deleteRecursively() }.start()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

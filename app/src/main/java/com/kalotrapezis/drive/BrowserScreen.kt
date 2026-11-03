@@ -151,8 +151,9 @@ private class BrowserTab(val id: Int, val session: GeckoSession, val view: Gecko
     var group by mutableStateOf<Int?>(null) // its tab group, if any
     var pending: String? = null // a kept tab's address, loaded when it is first opened
     var port: WebExtension.Port? = null
-    /** A word to the page's script (fill, a media key, autoplay); none when the page has no script (an about: page, HTML only). */
-    fun send(o: JSONObject) { port?.postMessage(o) ?: WriterLog.w("Browser: no page script for ${o.keys().asSequence().firstOrNull()}") }
+    val waiting = mutableListOf<JSONObject>() // said before this page's script was there (a small page stops loading first): given when it comes
+    /** A word to the page's script (fill, a media key, autoplay); kept for it until it connects, dropped when another page starts. */
+    fun send(o: JSONObject) { port?.postMessage(o) ?: run { waiting += o; WriterLog.i("Browser: ${o.keys().asSequence().firstOrNull()} waits for the page script") } }
 }
 
 private const val PULL_DP = 96f
@@ -204,6 +205,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         picked?.invoke(uris); picked = null
     }
     val prompter = remember { BrowserPrompter(context) { intent, done -> picked?.invoke(null); picked = done; runCatching { pick.launch(intent) }.onFailure { picked = null; done(null) } } }
+    LaunchedEffect(Unit) { prompter.clean() }
     val density = context.resources.displayMetrics.density
     val pageColor = MaterialTheme.colorScheme.background.toArgb()
     val pageText = MaterialTheme.colorScheme.onBackground.toArgb()
@@ -342,14 +344,15 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         }
         session.progressDelegate = object : GeckoSession.ProgressDelegate {
             override fun onPageStart(session: GeckoSession, url: String) {
-                tab.kinds = emptySet(); tab.media = PageMedia(); tab.progress = 0
+                tab.kinds = emptySet(); tab.media = PageMedia(); tab.progress = 0; tab.waiting.clear()
                 // extensions' buttons speak of the tab shown; told again, as a session reopened after its process was killed is a new window to them
                 if (tab.id == currentId) runtime.webExtensionController.setTabActive(session, true)
             }
             override fun onProgressChange(session: GeckoSession, progress: Int) { tab.progress = progress }
             override fun onPageStop(session: GeckoSession, success: Boolean) {
                 tab.progress = 100
-                if (tab.autoplay) { tab.autoplay = false; tab.send(JSONObject().put("autoplay", true)) }
+                if (tab.url.isEmpty()) return // a new session's about:blank, before its first page
+                if (tab.autoplay) { tab.autoplay = false; WriterLog.i("Browser: autoplay on ${BrowserRules.host(tab.url)}"); tab.send(JSONObject().put("autoplay", true)) }
                 tab.first?.let { site -> if (tab.url.startsWith(site.search)) tab.send(JSONObject().put("first", site.first)) }
                 if (private || !success || !tab.url.startsWith("http")) return
                 visits = BrowserRules.visit(visits, Visit(tab.url, tab.title, System.currentTimeMillis()), keepHistory)
@@ -399,6 +402,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                 tab.port = port
                 WriterLog.i("Browser: page script on ${BrowserRules.host(tab.url).ifEmpty { "a new page" }}")
                 port.postMessage(JSONObject().put("bg", background))
+                tab.waiting.forEach(port::postMessage); tab.waiting.clear()
                 port.setDelegate(object : WebExtension.PortDelegate {
                     override fun onPortMessage(message: Any, port: WebExtension.Port) { (message as? JSONObject)?.let { heard(tab, it) } }
                     override fun onDisconnect(port: WebExtension.Port) { if (tab.port === port) tab.port = null }
@@ -515,8 +519,10 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         // Maps' ♪: its station played, then this window goes behind Maps again once the sound has started (or after 8 s)
         o.optString("url").takeIf { it.isNotEmpty() }?.let { address ->
             val t = tabs.firstOrNull { it.url == address } ?: if (tab.url.isEmpty()) tab else open()
+            val loaded = t.url == address && t.pending == null // a kept tab not yet opened loads now, and plays once loaded
+            if (!loaded) { t.pending = null; t.autoplay = true }
             if (t.id != currentId) switch(t)
-            if (t.url == address && t.pending == null) t.send(JSONObject().put("autoplay", true)) else { t.pending = null; t.autoplay = true; load(t, address) }
+            if (loaded) t.send(JSONObject().put("autoplay", true)) else load(t, address)
             if (o.optBoolean("behind")) {
                 kotlinx.coroutines.withTimeoutOrNull(8000) { while (!t.media.playing) delay(250) }
                 (context as? android.app.Activity)?.moveTaskToBack(true)
