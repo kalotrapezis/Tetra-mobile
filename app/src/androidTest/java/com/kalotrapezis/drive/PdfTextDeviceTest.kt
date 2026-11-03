@@ -63,6 +63,35 @@ class PdfTextDeviceTest {
         dir.deleteRecursively()
     }
 
+    /**
+     * A text typed on a page turned a quarter (/Rotate 90, as a landscape scan): its look was fitted across the
+     * unturned page's Rect, its letters squeezed one way and stretched the other — a smear (3 Nov). Read back from the
+     * saved page as shown, its line runs across and its letters stand their size, inside its place; every turn.
+     */
+    @Test fun uprightOnTurnedPages() {
+        val target = InstrumentationRegistry.getInstrumentation().targetContext
+        OfficeFonts.assets = target.assets
+        for (turn in listOf(90, 180, 270)) {
+            val dir = java.io.File(target.cacheDir, "pdf-text-turned-$turn").apply { deleteRecursively() }
+            val f = Pdf.newBlank(dir)
+            PdfDoc(f).apply { rotate(listOf(0), turn); save(); close() }
+            val d = PdfDoc(f)
+            d.putText(0, 72f, 72f, PdfText("Typed on a turned page", PdfTextLook(size = 14f), framed = false), 400f)
+            val r = d.objects(0).single().rect
+            assertTrue("a line's place across ($r, $turn°)", r.width() > 3 * r.height())
+            d.save(); d.close()
+            val again = com.artifex.mupdf.fitz.Document.openDocument(f.path)
+            val line = again.loadPage(0).toDisplayList(true).toStructuredText().blocks.flatMap { it.lines.orEmpty().asList() }
+                .single { l -> l.chars.joinToString("") { String(Character.toChars(it.c)) }.contains("turned page") }
+            again.destroy()
+            assertEquals("runs across ($turn°)", 1f, line.dir.x, 0.01f)
+            val h = line.bbox.y1 - line.bbox.y0
+            assertTrue("letters their size, not squeezed ($h pt, $turn°)", h in 12f..22f)
+            assertTrue("inside its place (${line.bbox}, $r, $turn°)", line.bbox.x0 >= r.left - 2 && line.bbox.x1 <= r.right + 2)
+            dir.deleteRecursively()
+        }
+    }
+
     @Test fun turnedAndRestacked() {
         val target = InstrumentationRegistry.getInstrumentation().targetContext
         OfficeFonts.assets = target.assets

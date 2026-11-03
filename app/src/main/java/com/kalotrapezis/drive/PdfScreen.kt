@@ -932,7 +932,7 @@ internal class PdfDoc(private val file: File, password: String? = null) {
         p.createAnnotation(com.artifex.mupdf.fitz.PDFAnnotation.TYPE_FREE_TEXT).apply {
             setRect(com.artifex.mupdf.fitz.Rect(x + x0, y + y0, x + x0 + w, y + y0 + h))
             setDefaultAppearance("Helv", t.look.size, rgb(t.look.color)); setContents(t.words); setBorderWidth(0f)
-            setAppearance(com.artifex.mupdf.fitz.Rect(0f, 0f, w, h), res, com.artifex.mupdf.fitz.Buffer().apply { writeBytes(contents) })
+            setAppearance(upright(p), com.artifex.mupdf.fitz.Rect(0f, 0f, w, h), res, com.artifex.mupdf.fitz.Buffer().apply { writeBytes(contents) })
             getObject().put(TYPED_KEY, pdf!!.newString(t.json(lw to lh)))
             getObject().put(WORDS_KEY, pdfDoc.addStream(com.artifex.mupdf.fitz.Buffer().apply { writeBytes(t.docx()) }, pdfDoc.newDictionary()))
             id = id()

@@ -148,16 +148,27 @@ internal fun PdfDoc.putWords(i: Int, w: PdfWords, cx: Float, cy: Float, replacin
             // the photo itself, its JPEG kept (drawn by Android it would be written out as raw pixels, megabytes)
             val res = pdfDoc.newDictionary(); val xo = pdfDoc.newDictionary()
             xo.put("Im0", pdfDoc.addImage(com.artifex.mupdf.fitz.Image(w.bytes()!!))); res.put("XObject", xo)
-            a.setAppearance(box, res, com.artifex.mupdf.fitz.Buffer().apply { writeBytes(pictureMatrix(lw, lh, bw, bh, w.turn).toByteArray()) })
+            a.setAppearance(upright(p), box, res, com.artifex.mupdf.fitz.Buffer().apply { writeBytes(pictureMatrix(lw, lh, bw, bh, w.turn).toByteArray()) })
         } else {
             val (res, contents) = grafted(wordsPdf(w, bw, bh))
-            a.setAppearance(box, res, com.artifex.mupdf.fitz.Buffer().apply { writeBytes(contents) })
+            a.setAppearance(upright(p), box, res, com.artifex.mupdf.fitz.Buffer().apply { writeBytes(contents) })
         }
         id = a.id()
         true
     }
     return id
 }
+
+/**
+ * The look's matrix for a drawing made upright as page [p] is shown: its /Rotate undone. A PDF reader fits the look's
+ * box onto the annotation's Rect, which sits in the unturned page — on a turned page (a landscape scan) the words were
+ * squeezed one way and stretched the other into a smear (3 Nov). Only the turn: the Rect places it.
+ */
+internal fun upright(p: com.artifex.mupdf.fitz.PDFPage): com.artifex.mupdf.fitz.Matrix =
+    com.artifex.mupdf.fitz.Matrix(1f, 0f, 0f, -1f).concat(com.artifex.mupdf.fitz.Matrix.Inverted(p.transform)).let { m ->
+        fun r(v: Float) = Math.round(v * 1e4f) / 1e4f + 0f // a quarter turn exactly, no -0
+        com.artifex.mupdf.fitz.Matrix(r(m.a), r(m.b), r(m.c), r(m.d), 0f, 0f)
+    }
 
 /** [lw] × [lh] turned [turn] degrees: the size of the box round it. */
 internal fun turnedBox(lw: Float, lh: Float, turn: Float): Pair<Float, Float> {
