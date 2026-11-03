@@ -433,17 +433,25 @@ internal fun bearing(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Do
 
 /**
  * A turn's crossing as the car arrives: its roads' directions in degrees clockwise from straight ahead, sorted (the way in
- * is near ±180), [taken] the one to go on; a [roundabout]'s roads seen from its middle.
+ * is near ±180), [taken] the one to go on; a [roundabout]'s roads seen from its middle and the [exit] said (0: not known).
+ * [roads]: each road's size, [arms]' then [then]'s — 2 a main road, 1 secondary or tertiary, 0 a street, −1 a ramp, −2 a
+ * service road or track (only where the route takes one) —, empty where not known. [then]: at a staggered crossing, the
+ * second one a few metres along [taken], where the route turns again: its other roads, in the same frame, and [thenTaken]
+ * the one it leaves by.
  */
-internal data class Junction(val arms: List<Double>, val taken: Int, val roundabout: Boolean = false) {
+internal data class Junction(val arms: List<Double>, val taken: Int, val roundabout: Boolean = false, val roads: List<Int> = emptyList(),
+                             val exit: Int = 0, val then: List<Double> = emptyList(), val thenTaken: Int = -1) {
     /**
      * Worth a picture in the turn card, where the arrow alone can mislead (the user, 23 Oct: Δράμα's five streets): a
-     * roundabout, five roads or more, or another road leaving within 45° of the one to take. A plain cross is not.
+     * roundabout, five roads or more, another road leaving within 45° of the one to take, two turns a few metres apart, or
+     * a U-turn. A plain cross is not.
      */
-    val busy get() = roundabout || arms.size >= 5 ||
+    val busy get() = roundabout || arms.size >= 5 || then.isNotEmpty() || uTurn ||
         arms.indices.any { it != taken && it != way && Math.abs(((arms[it] - arms[taken]) % 360 + 540) % 360 - 180) < 45 }
     /** The way in: the road nearest straight behind. */
     val way get() = arms.indices.minBy { Math.abs(Math.abs(arms[it]) - 180) }
+    /** Back the way it came: the way on within 20° of the way in. */
+    val uTurn get() = !roundabout && Math.abs(arms[taken]) > 160
 }
 
 /** Directions' camera by car where nothing is near: zoom 16.5, tilted 45° to look ahead. */
@@ -475,34 +483,100 @@ internal fun showJunction(j: Junction?, toNext: Double) = j != null && j.busy &&
 
 /**
  * [j] drawn [px] square for the turn card (the user, 23 Oct: "a card … with arrows or a circle, blue where I must go"): its
- * roads grey from the middle out, the way in from the bottom and the way on blue with an arrow; a roundabout a grey ring,
- * gone round in blue: anticlockwise, or clockwise where traffic keeps [left] (the UK, Ireland, Cyprus, Malta…).
+ * roads grey from the middle out at their true angles, the bigger ones thicker, the way in from the bottom and the way on
+ * blue with an arrow; a roundabout a grey ring, gone round in blue — anticlockwise, or clockwise where traffic keeps [left]
+ * (the UK, Ireland, Cyprus, Malta…) — with its exit's number in the middle. As the turn arrows of Google Maps, HERE and
+ * Android Auto draw them (3 Nov): a fork as a Y, its two ways leaving together and parting; a ramp leaving a main road
+ * that goes on straight, peeling off it before the crossing; a U-turn as a hairpin on a two-way road; a staggered crossing
+ * as two crossings a short road apart.
  */
 internal fun junctionPicture(j: Junction, px: Int, left: Boolean = false): android.graphics.Bitmap {
     val b = android.graphics.Bitmap.createBitmap(px, px, android.graphics.Bitmap.Config.ARGB_8888)
     val c = android.graphics.Canvas(b)
-    val mid = px / 2f; val far = px * 0.38f; val ringR = if (j.roundabout) px * 0.15f else 0f
-    fun paint(color: Int, w: Float) = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-        this.color = color; strokeWidth = w; style = android.graphics.Paint.Style.STROKE; strokeCap = android.graphics.Paint.Cap.ROUND
+    val mid = px / 2f; val far = px * 0.38f; val ringR = if (j.roundabout) px * 0.15f else 0f; val w = px * 0.07f
+    val grey = 0xFF9AA0A6.toInt(); val blue = 0xFF4C8DF6.toInt()
+    fun paint(color: Int, width: Float, fill: Boolean = false) = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+        this.color = color; strokeWidth = width; strokeCap = android.graphics.Paint.Cap.ROUND; strokeJoin = android.graphics.Paint.Join.ROUND
+        style = if (fill) android.graphics.Paint.Style.FILL else android.graphics.Paint.Style.STROKE
     }
-    val grey = paint(0xFF9AA0A6.toInt(), px * 0.07f); val blue = paint(0xFF4C8DF6.toInt(), px * 0.07f)
-    fun at(deg: Double, r: Float) = Math.toRadians(deg).let { (mid + Math.sin(it) * r).toFloat() to (mid - Math.cos(it) * r).toFloat() }
-    fun arm(deg: Double, p: android.graphics.Paint) { val (x1, y1) = at(deg, ringR); val (x2, y2) = at(deg, far); c.drawLine(x1, y1, x2, y2, p) }
-    // roads closer than 22° drawn apart, as a fork's two ways a few degrees apart would be one line
-    val shown = j.arms.toMutableList()
-    for (k in 0 until shown.size - 1) {
-        val gap = shown[k + 1] - shown[k]
-        if (gap < 22 && k != j.way && k + 1 != j.way) { shown[k] -= (22 - gap) / 2; shown[k + 1] += (22 - gap) / 2 }
+    fun at(x: Float, y: Float, deg: Double, r: Float) = Math.toRadians(deg).let { android.graphics.PointF((x + Math.sin(it) * r).toFloat(), (y - Math.cos(it) * r).toFloat()) }
+    /** A road from [s] bending by [k] to [e], [width] px wide. */
+    class Road(val s: android.graphics.PointF, val k: android.graphics.PointF, val e: android.graphics.PointF, val width: Float)
+    fun straight(s: android.graphics.PointF, e: android.graphics.PointF, width: Float) = Road(s, android.graphics.PointF((s.x + e.x) / 2, (s.y + e.y) / 2), e, width)
+    fun draw(r: Road, color: Int) = c.drawPath(android.graphics.Path().apply { moveTo(r.s.x, r.s.y); quadTo(r.k.x, r.k.y, r.e.x, r.e.y) }, paint(color, r.width))
+    /** The arrowhead at ([x], [y]) pointing along ([dx], [dy]). */
+    fun arrow(x: Float, y: Float, dx: Float, dy: Float) {
+        val n = Math.hypot(dx.toDouble(), dy.toDouble()).toFloat().coerceAtLeast(1e-3f); val ux = dx / n; val uy = dy / n
+        val tip = px * 0.03f; val back = px * 0.1f; val half = px * 0.075f
+        c.drawPath(android.graphics.Path().apply {
+            moveTo(x + ux * tip, y + uy * tip); lineTo(x - ux * back - uy * half, y - uy * back + ux * half); lineTo(x - ux * back + uy * half, y - uy * back - ux * half); close()
+        }, paint(blue, 0f, fill = true))
     }
-    shown.forEach { arm(it, grey) }
-    if (j.roundabout) c.drawCircle(mid, mid, ringR, grey)
-    val inDeg = shown[j.way]; val outDeg = shown[j.taken]
-    arm(inDeg, blue); arm(outDeg, blue)
-    if (j.roundabout) ringSweep(inDeg, outDeg, left).let { (start, sweep) -> c.drawArc(mid - ringR, mid - ringR, mid + ringR, mid + ringR, start, sweep, false, blue) }
-    // the arrowhead at the way out's end
-    val (tx, ty) = at(outDeg, far + px * 0.03f); val (lx, ly) = at(outDeg - 16, far - px * 0.1f); val (rx, ry) = at(outDeg + 16, far - px * 0.1f)
-    c.drawPath(android.graphics.Path().apply { moveTo(tx, ty); lineTo(lx, ly); lineTo(rx, ry); close() },
-        android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = blue.color; style = android.graphics.Paint.Style.FILL })
+    fun arrow(r: Road) = arrow(r.e.x, r.e.y, r.e.x - r.k.x, r.e.y - r.k.y)
+    // the bigger roads thicker where the crossing has roads of two sizes or more
+    val sized = j.roads.size == j.arms.size + j.then.size && j.roads.distinct().size > 1
+    fun width(i: Int) = if (!sized) w else w * when (j.roads[i]) { 2 -> 1.35f; 1 -> 1.1f; -2 -> 0.7f; else -> 0.85f }
+    /** [arms] as drawn: roads closer than 22° drawn apart, as two a few degrees apart would be one line; [fixed] kept where it is. */
+    fun spread(arms: List<Double>, fixed: Int) = arms.toMutableList().also { s ->
+        for (k in 0 until s.size - 1) {
+            val gap = s[k + 1] - s[k]
+            if (gap < 22 && k != fixed && k + 1 != fixed) { s[k] -= (22 - gap) / 2; s[k + 1] += (22 - gap) / 2 }
+        }
+    }
+    val way = j.way; val t = j.taken; val shown = spread(j.arms, way)
+    if (j.then.isNotEmpty()) { // a staggered crossing: the first crossing below the middle, the second a short road on along the way on
+        val g = px * 0.24f; val r = px * 0.28f
+        val a = at(mid, mid, shown[t] + 180, g / 2); val bp = at(mid, mid, shown[t], g / 2)
+        val first = j.arms.indices.map { i -> if (i == t) straight(a, bp, width(i)) else straight(a, at(a.x, a.y, shown[i], r), width(i)) }
+        val thenShown = spread(j.then, -1)
+        val second = j.then.indices.map { k -> straight(bp, at(bp.x, bp.y, thenShown[k], r), width(j.arms.size + k)) }
+        (first + second).forEach { draw(it, grey) }
+        draw(first[way], blue); draw(first[t], blue); draw(second[j.thenTaken], blue); arrow(second[j.thenTaken])
+        return b
+    }
+    if (j.uTurn) { // a hairpin: up the right of the road, round and back down its left (the other way round where traffic keeps left)
+        val side = if (j.arms[t] < 0) -1f else 1f; val d = px * 0.08f; val top = mid - far * 0.3f
+        val band = 2 * d + width(way) * 1.4f; val bottom = mid + far - band / 2 // its round end inside the square
+        for (i in j.arms.indices) if (i != way && i != t) draw(straight(at(mid, mid, shown[i], 0f), at(mid, mid, shown[i], far), width(i)), grey)
+        c.drawLine(mid, top, mid, bottom, paint(grey, band))
+        c.drawPath(android.graphics.Path().apply {
+            moveTo(mid - side * d, bottom); lineTo(mid - side * d, top)
+            arcTo(android.graphics.RectF(mid - d, top - d, mid + d, top + d), if (side < 0) 0f else 180f, if (side < 0) -180f else 180f)
+            lineTo(mid + side * d, mid + far * 0.45f)
+        }, paint(blue, w))
+        arrow(mid + side * d, mid + far * 0.45f, 0f, 1f)
+        return b
+    }
+    val roads = j.arms.indices.map { i -> straight(at(mid, mid, shown[i], ringR), at(mid, mid, shown[i], far), width(i)) }.toMutableList()
+    var wayIn = roads[way]
+    if (!j.roundabout) {
+        val ahead = j.arms.indices.filter { it != way && Math.abs(j.arms[it]) < 60 }
+        // a ramp: a main road goes on straight and a ramp leaves it, the route taking one of the two
+        val main = ahead.filter { j.roads.getOrElse(it) { 0 } >= 0 }.minByOrNull { Math.abs(j.arms[it]) }?.takeIf { Math.abs(j.arms[it]) < 25 }
+        val ramp = ahead.filter { it != main && j.roads.getOrElse(it) { 0 } == -1 }.minByOrNull { Math.abs(j.arms[it] - j.arms[t]) }
+        val fork = ahead.filter { it != t }.minByOrNull { Math.abs(j.arms[it] - j.arms[t]) }?.takeIf { t in ahead && Math.abs(j.arms[it] - j.arms[t]) < 50 }
+        if (main != null && ramp != null && t in listOf(main, ramp)) {
+            val split = android.graphics.PointF(mid, mid + far * 0.35f)
+            roads[main] = straight(android.graphics.PointF(mid, mid), at(mid, mid, 0.0, far), width(main))
+            roads[way] = straight(android.graphics.PointF(mid, mid), at(mid, mid, 180.0, far), width(way))
+            roads[ramp] = Road(split, android.graphics.PointF(mid, mid - far * 0.15f), at(mid, mid, if (j.arms[ramp] < 0) -42.0 else 42.0, far), width(ramp))
+            if (t == ramp) wayIn = straight(split, at(mid, mid, 180.0, far), width(way)) else wayIn = roads[way]
+        } else if (fork != null) { // a Y: the two ways leave the middle together, straight on, then part at least 50°
+            val (l, r) = listOf(t, fork).sortedBy { shown[it] }
+            val m = (shown[l] + shown[r]) / 2; val half = maxOf(shown[r] - shown[l], 50.0) / 2
+            for ((i, deg) in listOf(l to (m - half).coerceAtLeast(-80.0), r to (m + half).coerceAtMost(80.0)))
+                roads[i] = Road(android.graphics.PointF(mid, mid), android.graphics.PointF(mid, mid - far * 0.4f), at(mid, mid, deg, far), width(i))
+            wayIn = roads[way]
+        }
+    }
+    roads.forEach { draw(it, grey) }
+    if (j.roundabout) c.drawCircle(mid, mid, ringR, paint(grey, w))
+    draw(wayIn, blue); draw(roads[t], blue)
+    if (j.roundabout) ringSweep(shown[way], shown[t], left).let { (start, sweep) -> c.drawArc(mid - ringR, mid - ringR, mid + ringR, mid + ringR, start, sweep, false, paint(blue, w)) }
+    arrow(roads[t])
+    if (j.roundabout && j.exit > 0) c.drawText("${j.exit}", mid, mid + px * 0.06f, android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+        color = blue; textSize = px * 0.17f; typeface = android.graphics.Typeface.DEFAULT_BOLD; textAlign = android.graphics.Paint.Align.CENTER
+    })
     return b
 }
 

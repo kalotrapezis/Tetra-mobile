@@ -10,6 +10,8 @@ import com.graphhopper.routing.ev.BooleanEncodedValue
 import com.graphhopper.routing.ev.DecimalEncodedValue
 import com.graphhopper.routing.ev.IntEncodedValue
 import com.graphhopper.routing.ev.Orientation
+import com.graphhopper.routing.ev.RoadClass
+import com.graphhopper.routing.ev.RoadClassLink
 import com.graphhopper.routing.ev.TurnRestriction
 import com.graphhopper.routing.weighting.DefaultTurnCostProvider
 import com.graphhopper.routing.weighting.TurnCostProvider
@@ -250,7 +252,8 @@ internal object MapsRouting {
                 }
             }
             // a car's turn: its crossing, for the turn card's picture (the user, 23 Oct: Δράμα's five streets)
-            val cross = if (mode == "car" && at > 0 && ins.sign !in setOf(0, 4, 5)) runCatching { junction(gh, best.points, at, at + ins.points.size(), ins.sign == 6) }.getOrNull() else null
+            val cross = if (mode == "car" && at > 0 && ins.sign !in setOf(0, 4, 5)) runCatching { junction(gh, best.points, at, at + ins.points.size(), ins.sign == 6,
+                (ins as? com.graphhopper.util.RoundaboutInstruction)?.exitNumber ?: 0, when (ins.sign) { -8, -98 -> -1; 8 -> 1; else -> 0 }) }.getOrNull() else null
             Step(text.replaceFirstChar { it.uppercase() }, ins.sign, ins.distance, at, street, ref, cross, toward = toward).also { at += ins.points.size() }
         }
         val pts = best.points
@@ -275,23 +278,43 @@ internal object MapsRouting {
 
     /**
      * The crossing where a route's turn is, at point [at] of [pts] (the next turn's at [next]), as the car arrives: the car
-     * roads leaving it from the graph, each one's direction ~20 m out; a [roundabout]'s from its ring's middle. Null where
-     * the turn is not at a crossing the graph has.
+     * roads leaving it from the graph, each one's direction ~20 m out; a [roundabout]'s from its ring's middle, with the
+     * [exit] GraphHopper says; a [uTurn] (−1 left, 1 right) back along the way in. Null where the turn is not at a crossing
+     * the graph has.
      */
-    private fun junction(gh: GraphHopper, pts: com.graphhopper.util.PointList, at: Int, next: Int, roundabout: Boolean): Junction? {
-        val g = gh.baseGraph; val na = g.nodeAccess; val em = gh.encodingManager
-        val access = em.getBooleanEncodedValue("car_access"); val ring = em.getBooleanEncodedValue("roundabout")
-        fun car(e: EdgeIteratorState) = e.get(access) || e.getReverse(access)
+    private fun junction(gh: GraphHopper, pts: com.graphhopper.util.PointList, at: Int, next: Int, roundabout: Boolean, exit: Int, uTurn: Int): Junction? {
+        val na = gh.baseGraph.nodeAccess; val access = gh.encodingManager.getBooleanEncodedValue("car_access")
         if (at < 1) return null
-        val snap = gh.locationIndex.findClosest(pts.getLat(at), pts.getLon(at)) { car(it) }
+        val snap = gh.locationIndex.findClosest(pts.getLat(at), pts.getLon(at)) { it.get(access) || it.getReverse(access) }
         if (!snap.isValid) return null
         val node = if (snap.snappedPosition == com.graphhopper.storage.index.Snap.Position.TOWER) snap.closestNode
             else listOf(snap.closestEdge.baseNode, snap.closestEdge.adjNode).minBy { metresBetween(na.getLat(it), na.getLon(it), pts.getLat(at), pts.getLon(at)) }
         if (metresBetween(na.getLat(node), na.getLon(node), pts.getLat(at), pts.getLon(at)) > 15) return null
+        return crossing(gh.baseGraph, gh.encodingManager, node, pts, at, next, roundabout, exit, uTurn)
+    }
+
+    /** [junction] at the graph's [node]: apart from finding the node, so a test can give it a small graph of its own. */
+    internal fun crossing(g: com.graphhopper.storage.BaseGraph, em: com.graphhopper.routing.util.EncodingManager, node: Int,
+                          pts: com.graphhopper.util.PointList, at: Int, next: Int, roundabout: Boolean, exit: Int = 0, uTurn: Int = 0): Junction? {
+        val na = g.nodeAccess
+        val access = em.getBooleanEncodedValue("car_access"); val ring = em.getBooleanEncodedValue("roundabout")
+        val kind = if (em.hasEncodedValue(RoadClass.KEY)) em.getEnumEncodedValue(RoadClass.KEY, RoadClass::class.java) else null
+        val ramp = if (em.hasEncodedValue(RoadClassLink.KEY)) em.getBooleanEncodedValue(RoadClassLink.KEY) else null
+        fun car(e: EdgeIteratorState) = e.get(access) || e.getReverse(access)
+        /** A road's size, for the picture's thickness: 2 a main road, 1 secondary or tertiary, 0 a street, −1 a ramp, −2 a service
+         *  road or track — a car park's aisle, a driveway, a field's track: not a road the driver counts (the user, 3 Nov). */
+        fun size(e: EdgeIteratorState): Int = if (ramp != null && e.get(ramp)) -1 else when (kind?.let { e.get(it) }) {
+            RoadClass.MOTORWAY, RoadClass.TRUNK, RoadClass.PRIMARY -> 2
+            RoadClass.SECONDARY, RoadClass.TERTIARY -> 1
+            null, RoadClass.RESIDENTIAL, RoadClass.UNCLASSIFIED, RoadClass.LIVING_STREET, RoadClass.ROAD -> 0
+            else -> -2
+        }
         val explorer = g.createEdgeExplorer()
-        /** The car roads at [n] (but [skip]ped ones): each one's first stretch, its point ~40 m along to draw, and whether
-         *  a car may leave [n] by it ([out]) and come to [n] by it ([into]). */
-        class Arm(val first: Double, val lat: Double, val lng: Double, val out: Boolean, val into: Boolean)
+        fun apart(a: Double, b: Double) = Math.abs(((a - b) % 360 + 540) % 360 - 180)
+        /** A car road at [node]: its first stretch, its point ~40 m along to draw, whether a car may leave by it ([out]) and
+         *  come by it ([into]), its [size] and name; [to] the node at its other end, [length] in metres. */
+        class Arm(val node: Int, val to: Int, val length: Double, val first: Double, val lat: Double, val lng: Double,
+                  val out: Boolean, val into: Boolean, val size: Int, val name: String)
         fun arms(n: Int, skip: (EdgeIteratorState) -> Boolean): List<Arm> {
             val out = ArrayList<Arm>()
             val it = explorer.setBaseNode(n)
@@ -301,65 +324,100 @@ internal object MapsRouting {
                 if (geo.size() < 2) continue
                 var k = 1
                 while (k < geo.size() - 1 && metresBetween(geo.getLat(0), geo.getLon(0), geo.getLat(k), geo.getLon(k)) < 40) k++
-                out += Arm(bearing(geo.getLat(0), geo.getLon(0), geo.getLat(1), geo.getLon(1)), geo.getLat(k), geo.getLon(k), it.get(access), it.getReverse(access))
+                val first = bearing(geo.getLat(0), geo.getLon(0), geo.getLat(1), geo.getLon(1))
+                // OpenStreetMap at times has two ways between the same two nodes (Δράμα's Καραϊσκάκη at Εθνικής Αμύνης): one road
+                if (out.any { a -> a.to == it.adjNode && apart(a.first, first) < 5 }) continue
+                out += Arm(n, it.adjNode, it.distance, first, geo.getLat(k), geo.getLon(k), it.get(access), it.getReverse(access), size(it), it.name.orEmpty())
             }
             return out
         }
-        fun apart(a: Double, b: Double) = Math.abs(((a - b) % 360 + 540) % 360 - 180)
-        /** The way in, the way on, then each other road once: a dual carriageway's two halves — 15° apart, one only to the
-         *  crossing and one only from it — are one road; two ways out of a fork, however close, are two. */
-        fun oneEach(d: List<Double>, arms: List<Arm>, inArm: Int, outArm: Int): List<Double> {
+        /** Whether [n] is a crossing: three roads or more meet there, not counting service roads and tracks. */
+        fun crossingAt(n: Int) = arms(n) { false }.count { it.size > -2 } >= 3
+        /** The way in, the way on, then each other road once (service roads and tracks not: only when the route takes them).
+         *  Two arms within 30° are one road where both have its name, or within 20° where neither has a name, one only comes to
+         *  the crossing and the other only leaves it: a dual carriageway's halves. A fork's two ways out, however close, are two;
+         *  two one-way streets of their own names (Σταδίου and Πανεπιστημίου at Ομόνοια) too. */
+        fun oneEach(d: List<Double>, arms: List<Arm>, inArm: Int, outArm: Int): List<Int> {
             val keep = arrayListOf(inArm, outArm)
-            fun halves(i: Int, j: Int) = apart(d[i], d[j]) < 15 && ((arms[i].out && !arms[i].into && arms[j].into && !arms[j].out) ||
-                (arms[i].into && !arms[i].out && arms[j].out && !arms[j].into))
-            for (i in d.indices) if (i !in keep && keep.none { halves(i, it) }) keep += i
-            return keep.map { d[it] }
+            fun same(i: Int, j: Int) = (arms[i].name.isNotEmpty() && arms[i].name == arms[j].name && apart(d[i], d[j]) < 30) ||
+                (arms[i].name == arms[j].name && apart(d[i], d[j]) < 20 && ((arms[i].out && !arms[i].into && arms[j].into && !arms[j].out) ||
+                    (arms[i].into && !arms[i].out && arms[j].out && !arms[j].into)))
+            for (i in d.indices) if (i !in keep && arms[i].size > -2 && keep.none { same(i, it) }) keep += i
+            return keep
         }
-        val dirs: List<Double>; val taken: Int
-        // the crossing's nodes: this one and those a short road away — OpenStreetMap often draws one big crossing as two or
-        // three small ones a few metres apart (Νικήσιανη's 5–6 streets: no node there has five roads)
+        fun turned(b: Double, ref: Double) = ((b - ref) % 360 + 540) % 360 - 180
+        val dirs: List<Double>; val sizes: List<Int>
+        var then = emptyList<Double>(); var thenSizes = emptyList<Int>(); var thenTaken = -1
+        // the crossing's nodes: this one and those a short link away that are crossings too — OpenStreetMap often draws one big
+        // crossing as two or three small ones a few metres apart (Νικήσιανη's 5–6 streets: no node there has five roads). A link
+        // of 12 m at most, or 20 m where it is one-way (a dual carriageway's side); never a bend or one along a road to the next
+        // crossing 20 m on (the user, 3 Nov: a sharp left at three roads drawn with five)
         val group = LinkedHashSet<Int>()
         if (!roundabout) {
-            val todo = ArrayDeque(listOf(node))
+            val todo = ArrayDeque(listOf(node)); val links = g.createEdgeExplorer() // its own: crossingAt walks the other
             while (todo.isNotEmpty() && group.size < 8) {
                 val n = todo.removeFirst(); if (!group.add(n)) continue
-                val it = explorer.setBaseNode(n)
-                while (it.next()) if (car(it) && it.distance <= 25 && it.adjNode !in group &&
-                    metresBetween(na.getLat(it.adjNode), na.getLon(it.adjNode), na.getLat(node), na.getLon(node)) <= 30) todo += it.adjNode
+                val it = links.setBaseNode(n)
+                while (it.next()) if (car(it) && size(it) > -2 && it.adjNode !in group &&
+                    it.distance <= (if (it.get(access) != it.getReverse(access)) 20.0 else 12.0) &&
+                    metresBetween(na.getLat(it.adjNode), na.getLon(it.adjNode), na.getLat(node), na.getLon(node)) <= 25 && crossingAt(it.adjNode)) todo += it.adjNode
             }
         }
-        /** The roads at the route's own node: the way in, the way on, the rest. */
-        fun one(): List<Double>? {
+        /** The roads at the route's own node: the way in, the way on, the rest; and where the route turns again at a crossing
+         *  a short road on (a staggered crossing), that one's roads too. */
+        fun one(): List<Pair<Double, Int>>? {
             // the way in and the way on are the roads the route itself runs along: its points next to the crossing lie on them
             val nLat = na.getLat(node); val nLng = na.getLon(node)
             val all = arms(node) { false }
-            if (all.size < 3 || at + 1 >= pts.size()) return null
+            if (at + 1 >= pts.size()) return null
             val back = bearing(nLat, nLng, pts.getLat(at - 1), pts.getLon(at - 1)); val on = bearing(nLat, nLng, pts.getLat(at + 1), pts.getLon(at + 1))
-            val inArm = all.indices.minBy { apart(all[it].first, back) }; val outArm = all.indices.minBy { apart(all[it].first, on) }
-            if (inArm == outArm) return null
+            val inArm = all.indices.minByOrNull { apart(all[it].first, back) } ?: return null
+            val outArm = all.indices.minBy { apart(all[it].first, on) }
             val ref = bearing(nLat, nLng, all[inArm].lat, all[inArm].lng) + 180 // the way in straight down
-            val d = all.map { ((bearing(nLat, nLng, it.lat, it.lng) - ref) % 360 + 540) % 360 - 180 }
-            return oneEach(d, all, inArm, outArm)
+            val d = all.map { turned(bearing(nLat, nLng, it.lat, it.lng), ref) }
+            if (inArm == outArm) { // back the way it came: drawn beside the way in, on the side it turns
+                if (uTurn == 0) return null
+                return listOf(-180.0 to all[inArm].size, (if (uTurn < 0) -179.0 else 179.0) to all[inArm].size) +
+                    oneEach(d, all, inArm, inArm).drop(2).map { d[it] to all[it].size }
+            }
+            val kept = oneEach(d, all, inArm, outArm)
+            if (kept.size < 3) return null
+            // a staggered crossing: the way on is a short link to another crossing where the next turn is
+            val link = all[outArm]; val b = link.to
+            if (link.length <= 30 && next + 1 < pts.size() && b != node && crossingAt(b) &&
+                metresBetween(na.getLat(b), na.getLon(b), pts.getLat(next), pts.getLon(next)) < 5) {
+                val bLat = na.getLat(b); val bLng = na.getLon(b)
+                val there = arms(b) { it.adjNode == node }
+                val leave = bearing(bLat, bLng, pts.getLat(next + 1), pts.getLon(next + 1))
+                val bOut = there.indices.minByOrNull { apart(there[it].first, leave) }
+                if (bOut != null) {
+                    val bd = there.map { turned(bearing(bLat, bLng, it.lat, it.lng), ref) }
+                    val bKept = oneEach(bd, there, bOut, bOut).drop(1)
+                    val order = bKept.sortedBy { bd[it] }
+                    then = order.map { bd[it] }; thenSizes = order.map { there[it].size }; thenTaken = order.indexOf(bOut)
+                }
+            }
+            return kept.map { d[it] to all[it].size }
         }
         /** The roads leaving a crossing of several nodes, seen from its middle; the way on is where the route leaves it. */
-        fun many(): List<Double>? {
+        fun many(): List<Pair<Double, Int>>? {
             val cLat = group.map { na.getLat(it) }.average(); val cLng = group.map { na.getLon(it) }.average()
             val all = group.flatMap { n -> arms(n) { it.adjNode in group } }
             // the route ~30 m from the middle before and after: which roads it comes in and goes on by
             fun leave(by: Int): Int? { var k = at; while (k + by in 0 until pts.size()) { k += by; if (metresBetween(cLat, cLng, pts.getLat(k), pts.getLon(k)) >= 30) return k }; return null }
             val j = leave(-1) ?: return null; val k = leave(1) ?: return null
             val far = all.map { bearing(cLat, cLng, it.lat, it.lng) }
-            val inArm = far.indices.minBy { apart(far[it], bearing(cLat, cLng, pts.getLat(j), pts.getLon(j))) }
+            val inArm = far.indices.minByOrNull { apart(far[it], bearing(cLat, cLng, pts.getLat(j), pts.getLon(j))) } ?: return null
             val outArm = far.indices.minBy { apart(far[it], bearing(cLat, cLng, pts.getLat(k), pts.getLon(k))) }
             if (inArm == outArm) return null
             val ref = far[inArm] + 180
-            val d = far.map { ((it - ref) % 360 + 540) % 360 - 180 }
-            return oneEach(d, all, inArm, outArm)
+            val d = far.map { turned(it, ref) }
+            return oneEach(d, all, inArm, outArm).map { d[it] to all[it].size }
         }
         if (!roundabout) {
             // the crossing as several nodes only where that makes five roads or more; else the turn's own node, exactly
             val d = (if (group.size > 1) many()?.takeIf { it.size >= 5 } else null) ?: one() ?: return null
-            dirs = d; taken = 1
+            dirs = d.map { it.first }; sizes = d.map { it.second }
         } else { // a roundabout: round the ring from the way in, its middle, the roads leaving it, seen from there
             val nodes = LinkedHashSet<Int>(); val todo = ArrayDeque(listOf(node))
             while (todo.isNotEmpty() && nodes.size < 60) {
@@ -368,20 +426,23 @@ internal object MapsRouting {
             }
             if (nodes.size < 3 || next + 1 >= pts.size()) return null
             val cLat = nodes.map { na.getLat(it) }.average(); val cLng = nodes.map { na.getLon(it) }.average()
-            val all = nodes.flatMap { n -> arms(n) { it.get(ring) }.map { n to it } }
+            val all = nodes.flatMap { n -> arms(n) { it.get(ring) } }
             // the way in at the entry node, the way out at the ring node where the next direction starts: the route runs on both
-            val exit = nodes.minBy { metresBetween(na.getLat(it), na.getLon(it), pts.getLat(next), pts.getLon(next)) }
-            fun road(n: Int, k: Int) = all.indices.filter { all[it].first == n }
-                .minByOrNull { apart(all[it].second.first, bearing(na.getLat(n), na.getLon(n), pts.getLat(k), pts.getLon(k))) }
-            val inArm = road(node, at - 1) ?: return null; val outArm = road(exit, next + 1) ?: return null
+            val exitNode = nodes.minBy { metresBetween(na.getLat(it), na.getLon(it), pts.getLat(next), pts.getLon(next)) }
+            fun road(n: Int, k: Int) = all.indices.filter { all[it].node == n }
+                .minByOrNull { apart(all[it].first, bearing(na.getLat(n), na.getLon(n), pts.getLat(k), pts.getLon(k))) }
+            val inArm = road(node, at - 1) ?: return null; val outArm = road(exitNode, next + 1) ?: return null
             if (inArm == outArm) return null
-            val far = all.map { (_, a) -> bearing(cLat, cLng, a.lat, a.lng) }
+            val far = all.map { bearing(cLat, cLng, it.lat, it.lng) }
             val ref = far[inArm] + 180
-            dirs = oneEach(far.map { ((it - ref) % 360 + 540) % 360 - 180 }, all.map { it.second }, inArm, outArm); taken = 1
+            val d = far.map { turned(it, ref) }
+            val kept = oneEach(d, all, inArm, outArm)
+            dirs = kept.map { d[it] }; sizes = kept.map { all[it].size }
         }
-        if (dirs.size < 3) return null
-        val sorted = dirs.sorted()
-        return Junction(sorted, sorted.indexOf(dirs[taken]), roundabout)
+        if (dirs.size < 3 && !(uTurn != 0 && dirs.size == 2)) return null
+        val order = dirs.indices.sortedBy { dirs[it] }
+        return Junction(order.map { dirs[it] }, order.indexOf(1), roundabout, order.map { sizes[it] } + thenSizes,
+            if (roundabout) exit else 0, then, thenTaken)
     }
 
     /**

@@ -478,6 +478,10 @@ class MapsJunctionTest {
                 println("$name: ${s.text} — ${j.arms.map { it.toInt() }}, taken ${j.arms[j.taken].toInt()}${if (j.roundabout) " (roundabout)" else ""}")
                 assertTrue("the way in is behind", Math.abs(Math.abs(j.arms[j.way]) - 180) < 40)
                 assertTrue("the way on is not back", j.taken != j.way)
+                // the user, 3 Nov: a sharp left at a few roads drawn with five — a dual carriageway's halves and a street drawn
+                // twice between them counted as roads (Εθνικής Αμύνης: 4), a crossing 20 m on pulled in (5 Δρόμοι's Γαληνού: 3)
+                if ("Εθνικής Αμύνης" in s.text) assertEquals(4, j.arms.size)
+                if ("Γαληνού" in s.text) assertEquals(3, j.arms.size)
                 // the way on on the side the directions say (GraphHopper's sign: + right, − left) — at a crossing of several
                 // nodes the picture shows the way through it all, which can differ from its first turn
                 if (j.arms.size >= 5) continue
