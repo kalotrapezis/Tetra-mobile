@@ -23,8 +23,8 @@ android {
         minSdk = 30
         targetSdk = 36
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionCode = 20
-        versionName = "0.8.0-beta.4"
+        versionCode = 21
+        versionName = "0.8.0-beta.5"
         // The languages Settings offers: English (res/values) and each res/values-<tag> with a strings.xml, so adding a
         // language is that one file. Android's own App languages page reads the same folders (generateLocaleConfig).
         val languages = listOf("en") + file("src/main/res").listFiles().orEmpty()
@@ -64,7 +64,12 @@ android {
     // architectures, and together they were 346 MB of a 423 MB APK — two thirds of it for emulators nobody
     // installs this on. Split, an arm64 phone downloads only its own.
     // Angus Mail's four jars each carry the same licence texts; one is enough (its META-INF/javamail.* stay)
-    packaging { resources { excludes += setOf("META-INF/LICENSE.md", "META-INF/NOTICE.md") } }
+    packaging {
+        resources { excludes += setOf("META-INF/LICENSE.md", "META-INF/NOTICE.md") }
+        // Native libraries compressed (the user, 3 Nov): GeckoView's libxul is 154 MB stored, so the download is ~120 MB
+        // smaller; the phone unpacks them at install, which costs that much storage there instead.
+        jniLibs { useLegacyPackaging = true }
+    }
     splits {
         abi {
             isEnable = true
