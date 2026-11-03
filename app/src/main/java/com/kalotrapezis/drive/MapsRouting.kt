@@ -10,6 +10,7 @@ import com.graphhopper.routing.ev.BooleanEncodedValue
 import com.graphhopper.routing.ev.DecimalEncodedValue
 import com.graphhopper.routing.ev.IntEncodedValue
 import com.graphhopper.routing.ev.Orientation
+import com.graphhopper.routing.ev.MaxSpeed
 import com.graphhopper.routing.ev.TurnRestriction
 import com.graphhopper.routing.weighting.DefaultTurnCostProvider
 import com.graphhopper.routing.weighting.TurnCostProvider
@@ -395,9 +396,16 @@ internal object MapsRouting {
         val snap = gh.locationIndex.findClosest(lat, lng) { e -> e.get(access) || e.getReverse(access) }
         if (!snap.isValid || snap.queryDistance > 40) return null
         val e = snap.closestEdge
-        val v = listOf(e.get(max), e.getReverse(max)).filter { it.isFinite() && it > 0 }.minOrNull() ?: return null
-        return Math.round(v).toInt()
+        return posted(e.get(max), e.getReverse(max))
     }
+
+    /**
+     * The sign's number from the graph's two directions of max_speed: GraphHopper keeps ∞ where OSM has no number
+     * ("GR:urban", none tagged) and 150 for "none" or more — neither is a sign, so null, never a guess. It stores in 2 km/h
+     * steps (a 25 comes back 26), and signs go by fives, so the nearest five.
+     */
+    fun posted(vararg kmh: Double): Int? =
+        kmh.filter { it.isFinite() && it > 0 && it < MaxSpeed.UNLIMITED_SIGN_SPEED }.minOrNull()?.let { Math.round(it / 5).toInt() * 5 }
 
     private class TetraHopper : GraphHopper() {
         override fun createWeightingFactory() = WeightingFactory { profile, hints, noTurns -> weighting(profile, hints, noTurns) }
