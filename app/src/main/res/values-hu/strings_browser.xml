@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">A Térkép zene gombja ezt játssza le</string>
     <string name="browser_no_folder">Nincs mappa</string>
     <string name="browser_new_folder">Új mappa</string>
-    <string name="browser_to_folder">Mappába</string>
     <string name="browser_tabs_run">A lapok futnak tovább</string>
     <string name="browser_tabs_run_on">Az elhagyott lapok tovább futnak és szólnak</string>
     <string name="browser_tabs_run_off">Az elhagyott lap megáll</string>
+    <string name="browser_select">Kijelölés</string>
+    <string name="browser_folder_empty">Ebben a mappában nincs semmi</string>
+    <string name="browser_edit_bookmark">Könyvjelző szerkesztése</string>
+    <string name="browser_bookmark_url">Cím</string>
+    <string name="browser_move_to">Áthelyezés ide</string>
+    <string name="browser_delete_chosen">Törlés? Könyvjelzők: %1$d, mappák: %2$d</string>
+    <string name="browser_search_bookmarks">Keresés a könyvjelzőkben</string>
+    <string name="browser_pin_short">Kitűzés</string>
+    <string name="browser_unpin_short">Levétel</string>
 </resources>

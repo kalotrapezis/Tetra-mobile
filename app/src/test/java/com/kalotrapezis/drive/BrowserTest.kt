@@ -96,10 +96,82 @@ class BrowserTest {
             <DT><A HREF="https://www.sch.gr/" ADD_DATE="1" ICON="data:x">Πανελλήνιο &amp; Σχολικό</A>
             <DT><A HREF="place:sort=8">Recent</A>
             </DL><p></DL>"""
-        assertEquals(listOf(Bookmark("https://www.sch.gr/", "Πανελλήνιο & Σχολικό")), FirefoxImport.read(html)!!.bookmarks)
+        assertEquals(listOf(Bookmark("https://www.sch.gr/", "Πανελλήνιο & Σχολικό", folder = "Toolbar")), FirefoxImport.read(html)!!.bookmarks)
         val json = """{"title":"","children":[{"title":"menu","children":[{"title":"Tetra","type":"text/x-moz-place","uri":"https://tetra.example/"},
             {"title":"sep","type":"text/x-moz-place-separator"}]},{"title":"toolbar","children":[{"title":"Kathimerini","uri":"https://kathimerini.gr"}]}]}"""
-        assertEquals(listOf(Bookmark("https://tetra.example/", "Tetra"), Bookmark("https://kathimerini.gr", "Kathimerini")), FirefoxImport.read(json)!!.bookmarks)
+        assertEquals(listOf(Bookmark("https://tetra.example/", "Tetra"), Bookmark("https://kathimerini.gr", "Kathimerini", folder = "Bookmarks Toolbar")), FirefoxImport.read(json)!!.bookmarks)
+    }
+
+    /** Firefox's own export, its shape kept: the menu's pages at the top, the toolbar's folders nested, a "/" in a name not a level. */
+    @Test fun importKeepsTheFolderTree() {
+        val html = """<!DOCTYPE NETSCAPE-Bookmark-file-1>
+            <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+            <TITLE>Bookmarks</TITLE>
+            <H1>Bookmarks Menu</H1>
+            <DL><p>
+                <DT><A HREF="https://menu.gr/" ADD_DATE="1">Menu page</A>
+                <DT><H3 ADD_DATE="1" PERSONAL_TOOLBAR_FOLDER="true">Bookmarks Toolbar</H3>
+                <DL><p>
+                    <DT><H3>News</H3>
+                    <DL><p>
+                        <DT><A HREF="https://kathimerini.gr/">Kathimerini</A>
+                        <DT><H3>Sport / Local</H3>
+                        <DL><p><DT><A HREF="https://sport.gr/">Sport</A></DL><p>
+                    </DL><p>
+                    <DT><A HREF="https://toolbar.gr/">On the bar</A>
+                    <DT><H3>Empty</H3>
+                    <DL><p></DL><p>
+                </DL><p>
+                <DT><A HREF="https://after.gr/">After the toolbar</A>
+            </DL>"""
+        val got = FirefoxImport.read(html)!!.bookmarks.map { it.url to it.folder }
+        assertEquals(listOf("https://menu.gr/" to "", "https://kathimerini.gr/" to "Bookmarks Toolbar/News", "https://sport.gr/" to "Bookmarks Toolbar/News/Sport ∕ Local",
+            "https://toolbar.gr/" to "Bookmarks Toolbar", "https://after.gr/" to ""), got)
+
+        // into the library: all under Imported, the start page as it was
+        val mine = BookmarkLibrary(listOf(Bookmark("https://radio.gr/", "Radio", folder = "Radios"), Bookmark("https://menu.gr/", "Mine")))
+        val lib = mine.imported(FirefoxImport.read(html)!!.bookmarks)
+        assertEquals(listOf("Radios", "", "Imported/Bookmarks Toolbar/News", "Imported/Bookmarks Toolbar/News/Sport ∕ Local", "Imported/Bookmarks Toolbar", "Imported"), lib.marks.map { it.folder })
+        assertEquals("Mine", lib.marks[1].title) // a page already kept stays where it was
+        assertEquals(mine.start(""), lib.start(""))
+        assertEquals(listOf("Imported/Bookmarks Toolbar", "Imported/Bookmarks Toolbar/News", "Imported/Bookmarks Toolbar/News/Sport ∕ Local"),
+            lib.tree().filter { it.startsWith("Imported/") })
+        assertEquals(listOf("Radios", "Imported"), lib.subfolders(""))
+        assertEquals(4, lib.count("Imported"))
+    }
+
+    @Test fun folderPaths() {
+        assertEquals("Imported/Toolbar", BookmarkLibrary.parentOf("Imported/Toolbar/News"))
+        assertEquals("", BookmarkLibrary.parentOf("Radios"))
+        assertEquals("News", BookmarkLibrary.nameOf("Imported/Toolbar/News"))
+        assertTrue(BookmarkLibrary.under("Radios/Greek", "Radios"))
+        assertFalse(BookmarkLibrary.under("Radios2", "Radios"))
+        assertEquals("Radios/Greek", BookmarkLibrary.path(" /Radios// Greek /"))
+        val lib = BookmarkLibrary(listOf(Bookmark("https://a.gr", "A", folder = "X/Y/Z"), Bookmark("https://b.gr", "B", folder = "X"), Bookmark("https://c.gr", "C")), listOf("W"))
+        assertEquals(listOf("X", "X/Y", "X/Y/Z", "W"), lib.folders)
+        assertEquals(listOf("X", "X/Y", "X/Y/Z", "W"), lib.tree())
+
+        val renamed = lib.rename("X/Y", "Q/R") // a "/" typed in a name is not a level
+        assertEquals(listOf("X/Q∕R/Z", "X", ""), renamed.marks.map { it.folder })
+        val moved = lib.move(setOf("https://c.gr"), setOf("X/Y"), "W")
+        assertEquals(listOf("W/Y/Z", "X", "W"), moved.marks.map { it.folder })
+        assertTrue("X/Y" !in moved.folders && "W/Y" in moved.folders)
+        assertEquals(lib.marks, lib.move(emptySet(), setOf("X"), "X/Y").marks) // not into itself
+        val emptied = lib.delete(setOf("https://b.gr"), setOf("X/Y"))
+        assertEquals(listOf("https://c.gr"), emptied.marks.map { it.url })
+        assertEquals(listOf("X", "W"), emptied.folders) // X kept, though empty now
+        assertEquals(listOf(true, true), lib.pin(setOf("https://a.gr", "https://b.gr")).marks.take(2).map { it.pinned })
+        assertEquals(emptied.extra, BookmarkLibrary.folders(BookmarkLibrary.json(emptied.extra)))
+    }
+
+    /** What 0.8.0 saved (flat folder names, some fields left out) reads as it was. */
+    @Test fun oldBookmarksStillLoad() {
+        val saved = """[{"url":"https://live24.gr/radio/derti.jsp","title":"Derti","folder":"Radios"},{"url":"https://bank.gr/","title":"Bank","pinned":true},{"url":"https://x.gr/"}]"""
+        val b = BrowserRules.bookmarks(saved)
+        assertEquals(listOf(Bookmark("https://live24.gr/radio/derti.jsp", "Derti", folder = "Radios"), Bookmark("https://bank.gr/", "Bank", pinned = true), Bookmark("https://x.gr/", "")), b)
+        val lib = BookmarkLibrary(b, BookmarkLibrary.folders(null))
+        assertEquals(listOf("Radios"), lib.folders)
+        assertEquals(listOf("https://bank.gr/", "https://x.gr/") to listOf("Radios"), lib.start("").let { (m, f) -> m.map { it.url } to f })
     }
 
     @Test fun vault() {
@@ -147,7 +219,7 @@ class BrowserTest {
     @Test fun folders() {
         val b = listOf(Bookmark("https://live24.gr/radio/derti.jsp", "Derti", folder = "Radios"), Bookmark("https://www.ertecho.gr/radio/er1/", "ERT", folder = "Radios"),
             Bookmark("https://live24.gr/radio/sfera.jsp", "Sfera"), Bookmark("https://bank.gr/", "Bank", pinned = true, folder = "Mine"))
-        assertEquals(listOf("Radios", "Mine"), BrowserRules.folders(b))
+        assertEquals(listOf("Radios", "Mine"), BookmarkLibrary(b).folders)
         assertEquals(b, BrowserRules.bookmarks(BrowserRules.bookmarksJson(b)))
         // in a folder: that folder's, whatever the site; outside one: the site's as before
         assertEquals("https://www.ertecho.gr/radio/er1/", BrowserRules.hop(b, "https://live24.gr/radio/derti.jsp", true))

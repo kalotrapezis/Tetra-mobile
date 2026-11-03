@@ -258,6 +258,9 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     // the bar at the top, as on a computer (the user, 2 Nov: "like chrome on PC"): ☰ at its end instead of the handle's sheet
     val top = remember { prefs.getBoolean("top_bar", false) }
     var bookmarks by remember { mutableStateOf(BrowserRules.bookmarks(prefs.getString("bookmarks", null))) }
+    val managerFolder = remember { mutableStateOf("") } // the manager opens where it was left
+    var bookFolders by remember { mutableStateOf(BookmarkLibrary.folders(prefs.getString("bookmark_folders", null))) } // the folders, empty ones too
+    val library = BookmarkLibrary(bookmarks, bookFolders)
     var editing by remember { mutableStateOf(false) }
     var typed by remember { mutableStateOf(TextFieldValue("")) }
     var menu by remember { mutableStateOf(false) } // the handle's sheet: the tools not on the bar
@@ -585,6 +588,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     }
     fun keep(v: BrowserVault) { vault = v; runCatching { BrowserSecrets.save(context, v) }.onFailure { WriterLog.e("Browser: the vault not saved", it) } }
     fun keepBookmarks(b: List<Bookmark>) { bookmarks = b; prefs.edit().putString("bookmarks", BrowserRules.bookmarksJson(b)).apply() }
+    fun keepLibrary(l: BookmarkLibrary) { keepBookmarks(l.marks); bookFolders = l.extra; prefs.edit().putString("bookmark_folders", BookmarkLibrary.json(l.extra)).apply() }
     var filing by remember { mutableStateOf<Bookmark?>(null) } // a favourite being put in a folder
     val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@rememberLauncherForActivityResult
@@ -592,7 +596,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             val r = withContext(Dispatchers.IO) { runCatching { context.contentResolver.openInputStream(uri)?.use { s -> FirefoxImport.read(s.readBytes().decodeToString()) } }.getOrNull() }
             if (r == null) { imported = context.getString(R.string.browser_import_unknown) to null; return@launch }
             keep(vault.with(BrowserVault(logins = r.logins)))
-            keepBookmarks((bookmarks + r.bookmarks).distinctBy { it.url })
+            keepLibrary(library.imported(r.bookmarks))
             WriterLog.i("Browser: imported ${r.logins.size} logins, ${r.bookmarks.size} bookmarks")
             imported = context.getString(R.string.browser_imported, r.logins.size, r.bookmarks.size) to uri.takeIf { r.logins.isNotEmpty() }
         }
@@ -777,7 +781,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             @Composable fun pane(t: BrowserTab, m: Modifier) = Box(m.then(if (panes != null && t.id == currentId) Modifier.border(2.dp, BROWSER_COLOR) else Modifier)
                 .pointerInput(t.id, panes != null) { if (panes != null) awaitEachGesture { awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial); if (t.id != currentId) currentId = t.id } }) {
                 key(t.id) { AndroidView({ (t.view.parent as? android.view.ViewGroup)?.removeView(t.view); t.view }, Modifier.fillMaxSize()) }
-                if (t.url.isEmpty()) BrowserStart(private, BrowserRules.front(bookmarks), file = { filing = it }) { u -> currentId = t.id; editing = false; val target = BrowserRules.target(u); applyHtml(t, target); t.view.loadUrl(target) }
+                if (t.url.isEmpty()) BrowserStart(private, library, file = { filing = it }) { u -> currentId = t.id; editing = false; val target = BrowserRules.target(u); applyHtml(t, target); t.view.loadUrl(target) }
                 if (t.pull > 8f) Surface(shape = CircleShape, color = if (t.pull >= PULL_DP) BROWSER_COLOR else MaterialTheme.colorScheme.surfaceContainerHigh,
                     contentColor = if (t.pull >= PULL_DP) Color.White else MaterialTheme.colorScheme.onSurface, shadowElevation = 4.dp,
                     modifier = Modifier.align(Alignment.TopCenter).offset(y = (t.pull.coerceAtMost(PULL_DP) * 0.6f).dp).size(40.dp)) {
@@ -793,7 +797,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             if (editing) {
                 val q = typed.text.trim()
                 val found = remember(q, visits, bookmarks) {
-                    (bookmarks.map { it.url to it.title } + visits.map { it.url to it.title }).distinctBy { it.first }
+                    // nothing typed: the start page's favourites, not every page an import brought
+                    (bookmarks.filter { q.isNotEmpty() || !BookmarkLibrary.under(it.folder, BookmarkLibrary.IMPORTED) }.map { it.url to it.title } + visits.map { it.url to it.title }).distinctBy { it.first }
                         .filter { q.isEmpty() || it.first.contains(q, true) || it.second.contains(q, true) }.take(8)
                 }
                 if (found.isNotEmpty()) Surface(Modifier.align(Alignment.BottomCenter).fillMaxWidth(), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
@@ -861,9 +866,9 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         }
     }
     // Bookmarks, History, Passwords and Import: modal sheets too
-    panel?.let { p -> ModalBottomSheet(onDismissRequest = { panel = null }) {
-        BrowserPanelView(p, close = { panel = null }, bookmarks = bookmarks, visits = visits, vault = vault, imported = imported,
-                    open = ::go, dropBookmark = { b -> keepBookmarks(bookmarks - b) }, pinBookmark = { b -> keepBookmarks(bookmarks.map { if (it == b) it.copy(pinned = !it.pinned) else it }) }, fileBookmark = { filing = it },
+    if (panel == BrowserPanel.Bookmarks) BookmarksManager(library, wide, managerFolder, keep = ::keepLibrary, close = { panel = null }) { u -> panel = null; go(u) }
+    else panel?.let { p -> ModalBottomSheet(onDismissRequest = { panel = null }) {
+        BrowserPanelView(p, close = { panel = null }, visits = visits, vault = vault, imported = imported, open = ::go,
                     keepHistory = keepHistory,
                     clearHistory = { visits = emptyList(); prefs.edit().remove("history").apply() },
                     keep = ::keep, choose = { importer.launch(arrayOf("*/*")) },
@@ -914,8 +919,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             AndroidView({ (v.parent as? android.view.ViewGroup)?.removeView(v); v }, Modifier.fillMaxSize().background(Color.Black))
         }
     }
-    filing?.let { b -> FolderDialog(b, BrowserRules.folders(bookmarks), close = { filing = null }) { f ->
-        keepBookmarks(bookmarks.map { if (it.url == b.url) it.copy(folder = f) else it }); filing = null
+    filing?.let { b -> FolderDialog(b.title.ifBlank { BrowserRules.host(b.url) }, b.folder, library.tree(), close = { filing = null }) { f ->
+        keepLibrary(library.move(setOf(b.url), emptySet(), f)); filing = null
     } }
 }
 
@@ -1035,14 +1040,14 @@ private fun addressLabel(a: Map<String, String>) = a["name"] ?: listOfNotNull(a[
  * The first page: the favourites as tiles (the user, 2 Nov: "or nothing"), then their folders ("so we can have Radios", 2 Nov),
  * a tap opening one; a tile held is put in a folder. Private says what it keeps.
  */
-@Composable private fun BrowserStart(private: Boolean, bookmarks: List<Bookmark>, file: (Bookmark) -> Unit, open: (String) -> Unit) =
+@Composable private fun BrowserStart(private: Boolean, library: BookmarkLibrary, file: (Bookmark) -> Unit, open: (String) -> Unit) =
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         var folder by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("") }
-        BackHandler(folder.isNotEmpty()) { folder = "" }
+        BackHandler(folder.isNotEmpty()) { folder = BookmarkLibrary.parentOf(folder) }
         if (private) Text(stringResource(R.string.browser_private_start), Modifier.fillMaxWidth().padding(24.dp), textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
         if (folder.isNotEmpty()) Row(Modifier.fillMaxWidth().padding(start = 8.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { folder = "" }) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
-            Text(folder, style = MaterialTheme.typography.titleMedium)
+            IconButton(onClick = { folder = BookmarkLibrary.parentOf(folder) }) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
+            Text(BookmarkLibrary.nameOf(folder), style = MaterialTheme.typography.titleMedium)
         }
         @Composable fun Tile(label: String, letter: String, color: Color, icon: Int?, click: () -> Unit, hold: (() -> Unit)?) =
             Column(Modifier.clip(MaterialTheme.shapes.medium).combinedClickable(onClick = click, onLongClick = hold).padding(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -1051,53 +1056,54 @@ private fun addressLabel(a: Map<String, String>) = a["name"] ?: listOfNotNull(a[
                 }
                 Text(label, Modifier.padding(top = 6.dp), style = MaterialTheme.typography.labelMedium, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
             }
-        val shown = bookmarks.filter { it.folder == folder } // already in the start page's order (BrowserRules.front)
+        val (shown, folders) = library.start(folder)
         LazyVerticalGrid(GridCells.Adaptive(88.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             gridItems(shown, key = { it.url }) { b ->
                 val host = BrowserRules.site(BrowserRules.host(b.url))
                 Tile(b.title.ifBlank { host }, host.take(1).uppercase(), TILE_COLORS[(host.hashCode() and 0x7fffffff) % TILE_COLORS.size], null, { open(b.url) }) { file(b) }
             }
-            if (folder.isEmpty()) gridItems(BrowserRules.folders(bookmarks), key = { "folder:$it" }) { f -> Tile(f, "", BROWSER_COLOR, R.drawable.ic_folder, { folder = f }, null) }
+            gridItems(folders, key = { "folder:$it" }) { f -> Tile(BookmarkLibrary.nameOf(f), "", BROWSER_COLOR, R.drawable.ic_folder, { folder = f }, null) }
         }
     }
 
-/** A favourite into a folder: one of those there are, a new one, or none. */
-@Composable private fun FolderDialog(b: Bookmark, folders: List<String>, close: () -> Unit, put: (String) -> Unit) {
+/**
+ * Into a folder: one of those there are (the tree, each under its parent), a new one, or none. [tree] is
+ * BookmarkLibrary.tree(), less what may not be chosen (a folder moved, and those in it); a new one is made in [current].
+ */
+@Composable internal fun FolderDialog(title: String, current: String, tree: List<String>, close: () -> Unit, put: (String) -> Unit) {
     var name by remember { mutableStateOf("") }
-    AlertDialog(onDismissRequest = close, title = { Text(b.title.ifBlank { BrowserRules.host(b.url) }, maxLines = 2, overflow = TextOverflow.Ellipsis) },
+    AlertDialog(onDismissRequest = close, title = { Text(title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
         text = {
             Column(Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())) {
-                (listOf("") + folders).forEach { f ->
-                    Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).clickable { put(f) }.padding(vertical = 10.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(selected = b.folder == f, onClick = { put(f) })
-                        Text(f.ifEmpty { stringResource(R.string.browser_no_folder) })
+                (listOf("") + tree).forEach { f ->
+                    Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).clickable { put(f) }.padding(start = (4 + 20 * f.count { it == '/' }).dp, top = 2.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = current == f, onClick = { put(f) })
+                        if (f.isNotEmpty()) Icon(painterResource(R.drawable.ic_folder), null, Modifier.padding(end = 8.dp).size(18.dp), tint = BROWSER_COLOR)
+                        Text(if (f.isEmpty()) stringResource(R.string.browser_no_folder) else BookmarkLibrary.nameOf(f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
+                // "Radios/Greek" makes both; a new folder goes in the one this is in now
                 OutlinedTextField(name, { name = it }, singleLine = true, label = { Text(stringResource(R.string.browser_new_folder)) }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
             }
         },
-        confirmButton = { TextButton(onClick = { put(name.trim()) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.common_add)) } },
+        confirmButton = { TextButton(onClick = { put(BookmarkLibrary.join(current, BookmarkLibrary.path(name))) }, enabled = BookmarkLibrary.path(name).isNotEmpty()) { Text(stringResource(R.string.common_add)) } },
         dismissButton = { TextButton(onClick = close) { Text(stringResource(R.string.common_cancel)) } })
 }
 
-private val TILE_COLORS = listOf(Color(0xFF1A87FD), Color(0xFF2E7D32), Color(0xFFC62828), Color(0xFF6A1B9A), Color(0xFFEF6C00), Color(0xFF00838F), Color(0xFF4E342E), Color(0xFFAD1457))
+internal val TILE_COLORS = listOf(Color(0xFF1A87FD), Color(0xFF2E7D32), Color(0xFFC62828), Color(0xFF6A1B9A), Color(0xFFEF6C00), Color(0xFF00838F), Color(0xFF4E342E), Color(0xFFAD1457))
 
-@Composable private fun BrowserRow(title: String, url: String, click: () -> Unit, remove: (() -> Unit)? = null, pinned: Boolean = false, pin: (() -> Unit)? = null, file: (() -> Unit)? = null) =
+@Composable private fun BrowserRow(title: String, url: String, click: () -> Unit, remove: (() -> Unit)? = null) =
     Row(Modifier.fillMaxWidth().clickable(onClick = click).padding(start = 20.dp, end = 8.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f).padding(vertical = 4.dp)) {
             Text(title.ifEmpty { BrowserRules.host(url) }, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(url, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        // a favourite's pin (the user, 2 Nov): at the start page's front
-        if (pin != null) IconButton(onClick = pin) { Icon(painterResource(R.drawable.ic_push_pin), stringResource(if (pinned) R.string.browser_unpin_favorite else R.string.browser_pin_favorite),
-            tint = if (pinned) BROWSER_COLOR else LocalContentColor.current.copy(alpha = 0.5f)) }
-        if (file != null) IconButton(onClick = file) { Icon(painterResource(R.drawable.ic_folder), stringResource(R.string.browser_to_folder), tint = LocalContentColor.current.copy(alpha = 0.6f)) }
         if (remove != null) IconButton(onClick = remove) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_delete)) }
     }
 
 @Composable
-private fun BrowserPanelView(p: BrowserPanel, close: () -> Unit, bookmarks: List<Bookmark>, visits: List<Visit>, vault: BrowserVault, imported: Pair<String, Uri?>?,
-                             open: (String) -> Unit, dropBookmark: (Bookmark) -> Unit, pinBookmark: (Bookmark) -> Unit, fileBookmark: (Bookmark) -> Unit, keepHistory: String, clearHistory: () -> Unit, keep: (BrowserVault) -> Unit, choose: () -> Unit, deleteFile: (Uri) -> Unit) =
+private fun BrowserPanelView(p: BrowserPanel, close: () -> Unit, visits: List<Visit>, vault: BrowserVault, imported: Pair<String, Uri?>?,
+                             open: (String) -> Unit, keepHistory: String, clearHistory: () -> Unit, keep: (BrowserVault) -> Unit, choose: () -> Unit, deleteFile: (Uri) -> Unit) =
     Box(Modifier.navigationBarsPadding()) {
         LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(bottom = 16.dp)) {
             item {
@@ -1111,10 +1117,7 @@ private fun BrowserPanelView(p: BrowserPanel, close: () -> Unit, bookmarks: List
             @Composable fun note(text: String) = Text(text, Modifier.padding(horizontal = 20.dp, vertical = 8.dp), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             @Composable fun head(text: String) = Text(text, Modifier.padding(start = 20.dp, top = 16.dp, bottom = 4.dp), style = MaterialTheme.typography.titleSmall, color = BROWSER_COLOR)
             when (p) {
-                BrowserPanel.Bookmarks -> {
-                    if (bookmarks.isEmpty()) item { note(stringResource(R.string.browser_no_bookmarks)) }
-                    items(BrowserRules.front(bookmarks), key = { it.url }) { b -> BrowserRow(b.title.let { t -> if (b.folder.isEmpty()) t else "${b.folder} · $t" }, b.url, click = { open(b.url) }, remove = { dropBookmark(b) }, pinned = b.pinned, pin = { pinBookmark(b) }, file = { fileBookmark(b) }) }
-                }
+                BrowserPanel.Bookmarks -> Unit // BookmarksManager
                 BrowserPanel.History -> {
                     item { note(stringResource(when { visits.isEmpty() -> R.string.browser_no_history; keepHistory == BrowserRules.ON_EXIT -> R.string.browser_history_exit_note
                         keepHistory == BrowserRules.NEVER -> R.string.browser_history_never_note; else -> R.string.browser_history_note })) }

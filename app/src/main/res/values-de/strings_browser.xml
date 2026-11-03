@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Die Musiktaste in Karten spielt das</string>
     <string name="browser_no_folder">Kein Ordner</string>
     <string name="browser_new_folder">Neuer Ordner</string>
-    <string name="browser_to_folder">In einen Ordner</string>
     <string name="browser_tabs_run">Tabs laufen weiter</string>
     <string name="browser_tabs_run_on">Verlassene Tabs laufen und spielen weiter</string>
     <string name="browser_tabs_run_off">Ein verlassener Tab pausiert</string>
+    <string name="browser_select">Auswählen</string>
+    <string name="browser_folder_empty">Nichts in diesem Ordner</string>
+    <string name="browser_edit_bookmark">Lesezeichen bearbeiten</string>
+    <string name="browser_bookmark_url">Adresse</string>
+    <string name="browser_move_to">Verschieben nach</string>
+    <string name="browser_delete_chosen">Löschen? Lesezeichen: %1$d, Ordner: %2$d</string>
+    <string name="browser_search_bookmarks">Lesezeichen durchsuchen</string>
+    <string name="browser_pin_short">Anheften</string>
+    <string name="browser_unpin_short">Lösen</string>
 </resources>

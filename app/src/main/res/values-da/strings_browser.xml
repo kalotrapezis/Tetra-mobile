@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Korts musikknap afspiller dette</string>
     <string name="browser_no_folder">Ingen mappe</string>
     <string name="browser_new_folder">Ny mappe</string>
-    <string name="browser_to_folder">I en mappe</string>
     <string name="browser_tabs_run">Faner kører videre</string>
     <string name="browser_tabs_run_on">Faner, du forlader, kører og spiller videre</string>
     <string name="browser_tabs_run_off">En fane, du forlader, sættes på pause</string>
+    <string name="browser_select">Vælg</string>
+    <string name="browser_folder_empty">Intet i denne mappe</string>
+    <string name="browser_edit_bookmark">Rediger bogmærke</string>
+    <string name="browser_bookmark_url">Adresse</string>
+    <string name="browser_move_to">Flyt til</string>
+    <string name="browser_delete_chosen">Slet? Bogmærker: %1$d, mapper: %2$d</string>
+    <string name="browser_search_bookmarks">Søg i bogmærkerne</string>
+    <string name="browser_pin_short">Fastgør</string>
+    <string name="browser_unpin_short">Frigør</string>
 </resources>

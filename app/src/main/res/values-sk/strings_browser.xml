@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Tlačidlo hudby v Mapách prehrá toto</string>
     <string name="browser_no_folder">Bez priečinka</string>
     <string name="browser_new_folder">Nový priečinok</string>
-    <string name="browser_to_folder">Do priečinka</string>
     <string name="browser_tabs_run">Karty bežia ďalej</string>
     <string name="browser_tabs_run_on">Karty, ktoré opustíte, ďalej bežia a hrajú</string>
     <string name="browser_tabs_run_off">Opustená karta sa pozastaví</string>
+    <string name="browser_select">Vybrať</string>
+    <string name="browser_folder_empty">V tomto priečinku nič nie je</string>
+    <string name="browser_edit_bookmark">Upraviť záložku</string>
+    <string name="browser_bookmark_url">Adresa</string>
+    <string name="browser_move_to">Presunúť do</string>
+    <string name="browser_delete_chosen">Odstrániť? Záložky: %1$d, priečinky: %2$d</string>
+    <string name="browser_search_bookmarks">Hľadať v záložkách</string>
+    <string name="browser_pin_short">Pripnúť</string>
+    <string name="browser_unpin_short">Odopnúť</string>
 </resources>

@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">De muziekknop van Kaarten speelt dit</string>
     <string name="browser_no_folder">Geen map</string>
     <string name="browser_new_folder">Nieuwe map</string>
-    <string name="browser_to_folder">In een map</string>
     <string name="browser_tabs_run">Tabbladen lopen door</string>
     <string name="browser_tabs_run_on">Tabbladen die je verlaat blijven lopen en spelen</string>
     <string name="browser_tabs_run_off">Een tabblad dat je verlaat pauzeert</string>
+    <string name="browser_select">Selecteren</string>
+    <string name="browser_folder_empty">Niets in deze map</string>
+    <string name="browser_edit_bookmark">Bladwijzer bewerken</string>
+    <string name="browser_bookmark_url">Adres</string>
+    <string name="browser_move_to">Verplaatsen naar</string>
+    <string name="browser_delete_chosen">Verwijderen? Bladwijzers: %1$d, mappen: %2$d</string>
+    <string name="browser_search_bookmarks">Zoeken in bladwijzers</string>
+    <string name="browser_pin_short">Vastzetten</string>
+    <string name="browser_unpin_short">Losmaken</string>
 </resources>

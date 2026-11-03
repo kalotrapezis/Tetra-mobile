@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Gumb za glazbu u Kartama pušta ovo</string>
     <string name="browser_no_folder">Bez mape</string>
     <string name="browser_new_folder">Nova mapa</string>
-    <string name="browser_to_folder">U mapu</string>
     <string name="browser_tabs_run">Kartice rade dalje</string>
     <string name="browser_tabs_run_on">Kartice koje napustite rade i sviraju dalje</string>
     <string name="browser_tabs_run_off">Napuštena kartica se pauzira</string>
+    <string name="browser_select">Odaberi</string>
+    <string name="browser_folder_empty">U ovoj mapi nema ničega</string>
+    <string name="browser_edit_bookmark">Uredi oznaku</string>
+    <string name="browser_bookmark_url">Adresa</string>
+    <string name="browser_move_to">Premjesti u</string>
+    <string name="browser_delete_chosen">Izbrisati? Oznake: %1$d, mape: %2$d</string>
+    <string name="browser_search_bookmarks">Pretraži oznake</string>
+    <string name="browser_pin_short">Prikvači</string>
+    <string name="browser_unpin_short">Otkvači</string>
 </resources>

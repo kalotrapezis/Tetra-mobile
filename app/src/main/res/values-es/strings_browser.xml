@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">El botón de música de Mapas reproduce esto</string>
     <string name="browser_no_folder">Sin carpeta</string>
     <string name="browser_new_folder">Carpeta nueva</string>
-    <string name="browser_to_folder">A una carpeta</string>
     <string name="browser_tabs_run">Las pestañas siguen</string>
     <string name="browser_tabs_run_on">Las pestañas que dejas siguen funcionando y sonando</string>
     <string name="browser_tabs_run_off">La pestaña que dejas se pausa</string>
+    <string name="browser_select">Seleccionar</string>
+    <string name="browser_folder_empty">Nada en esta carpeta</string>
+    <string name="browser_edit_bookmark">Editar marcador</string>
+    <string name="browser_bookmark_url">Dirección</string>
+    <string name="browser_move_to">Mover a</string>
+    <string name="browser_delete_chosen">¿Eliminar? Marcadores: %1$d, carpetas: %2$d</string>
+    <string name="browser_search_bookmarks">Buscar en los marcadores</string>
+    <string name="browser_pin_short">Fijar</string>
+    <string name="browser_unpin_short">Desfijar</string>
 </resources>

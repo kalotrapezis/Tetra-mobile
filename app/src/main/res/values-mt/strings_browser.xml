@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Il-buttuna tal-mużika tal-Mapep idoqq dan</string>
     <string name="browser_no_folder">L-ebda folder</string>
     <string name="browser_new_folder">Folder ġdid</string>
-    <string name="browser_to_folder">F\'folder</string>
     <string name="browser_tabs_run">It-tabs ikomplu</string>
     <string name="browser_tabs_run_on">It-tabs li tħalli jibqgħu jaħdmu u jdoqqu</string>
     <string name="browser_tabs_run_off">It-tab li tħalli tieqaf</string>
+    <string name="browser_select">Agħżel</string>
+    <string name="browser_folder_empty">Xejn f\'dan il-folder</string>
+    <string name="browser_edit_bookmark">Editja l-bookmark</string>
+    <string name="browser_bookmark_url">Indirizz</string>
+    <string name="browser_move_to">Ċaqlaq għal</string>
+    <string name="browser_delete_chosen">Tħassar? Bookmarks: %1$d, folders: %2$d</string>
+    <string name="browser_search_bookmarks">Fittex fil-bookmarks</string>
+    <string name="browser_pin_short">Waħħal</string>
+    <string name="browser_unpin_short">Neħħi</string>
 </resources>

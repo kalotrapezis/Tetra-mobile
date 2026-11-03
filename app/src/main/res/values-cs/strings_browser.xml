@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Tlačítko hudby v Mapách přehraje toto</string>
     <string name="browser_no_folder">Bez složky</string>
     <string name="browser_new_folder">Nová složka</string>
-    <string name="browser_to_folder">Do složky</string>
     <string name="browser_tabs_run">Karty běží dál</string>
     <string name="browser_tabs_run_on">Karty, které opustíte, dál běží a hrají</string>
     <string name="browser_tabs_run_off">Opuštěná karta se pozastaví</string>
+    <string name="browser_select">Vybrat</string>
+    <string name="browser_folder_empty">V této složce nic není</string>
+    <string name="browser_edit_bookmark">Upravit záložku</string>
+    <string name="browser_bookmark_url">Adresa</string>
+    <string name="browser_move_to">Přesunout do</string>
+    <string name="browser_delete_chosen">Smazat? Záložky: %1$d, složky: %2$d</string>
+    <string name="browser_search_bookmarks">Hledat v záložkách</string>
+    <string name="browser_pin_short">Připnout</string>
+    <string name="browser_unpin_short">Odepnout</string>
 </resources>

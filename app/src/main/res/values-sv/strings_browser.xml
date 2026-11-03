@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Kartors musikknapp spelar detta</string>
     <string name="browser_no_folder">Ingen mapp</string>
     <string name="browser_new_folder">Ny mapp</string>
-    <string name="browser_to_folder">Till en mapp</string>
     <string name="browser_tabs_run">Flikar körs vidare</string>
     <string name="browser_tabs_run_on">Flikar du lämnar fortsätter köra och spela</string>
     <string name="browser_tabs_run_off">En flik du lämnar pausas</string>
+    <string name="browser_select">Markera</string>
+    <string name="browser_folder_empty">Inget i den här mappen</string>
+    <string name="browser_edit_bookmark">Redigera bokmärke</string>
+    <string name="browser_bookmark_url">Adress</string>
+    <string name="browser_move_to">Flytta till</string>
+    <string name="browser_delete_chosen">Ta bort? Bokmärken: %1$d, mappar: %2$d</string>
+    <string name="browser_search_bookmarks">Sök i bokmärkena</string>
+    <string name="browser_pin_short">Fäst</string>
+    <string name="browser_unpin_short">Lossa</string>
 </resources>

@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Kaartide muusikanupp mängib seda</string>
     <string name="browser_no_folder">Kaustata</string>
     <string name="browser_new_folder">Uus kaust</string>
-    <string name="browser_to_folder">Kausta</string>
     <string name="browser_tabs_run">Vahekaardid töötavad edasi</string>
     <string name="browser_tabs_run_on">Vahekaardid, millest lahkud, töötavad ja mängivad edasi</string>
     <string name="browser_tabs_run_off">Vahekaart, millest lahkud, peatub</string>
+    <string name="browser_select">Vali</string>
+    <string name="browser_folder_empty">Selles kaustas pole midagi</string>
+    <string name="browser_edit_bookmark">Muuda järjehoidjat</string>
+    <string name="browser_bookmark_url">Aadress</string>
+    <string name="browser_move_to">Teisalda kausta</string>
+    <string name="browser_delete_chosen">Kustutada? Järjehoidjad: %1$d, kaustad: %2$d</string>
+    <string name="browser_search_bookmarks">Otsi järjehoidjatest</string>
+    <string name="browser_pin_short">Kinnita</string>
+    <string name="browser_unpin_short">Vabasta</string>
 </resources>

@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Το κουμπί μουσικής των Χαρτών παίζει αυτό</string>
     <string name="browser_no_folder">Χωρίς φάκελο</string>
     <string name="browser_new_folder">Νέος φάκελος</string>
-    <string name="browser_to_folder">Σε φάκελο</string>
     <string name="browser_tabs_run">Οι καρτέλες συνεχίζουν</string>
     <string name="browser_tabs_run_on">Οι καρτέλες που αφήνεις συνεχίζουν να τρέχουν και να παίζουν</string>
     <string name="browser_tabs_run_off">Η καρτέλα που αφήνεις σταματά</string>
+    <string name="browser_select">Επιλογή</string>
+    <string name="browser_folder_empty">Τίποτα σε αυτόν τον φάκελο</string>
+    <string name="browser_edit_bookmark">Επεξεργασία σελιδοδείκτη</string>
+    <string name="browser_bookmark_url">Διεύθυνση</string>
+    <string name="browser_move_to">Μετακίνηση σε</string>
+    <string name="browser_delete_chosen">Διαγραφή; Σελιδοδείκτες: %1$d, φάκελοι: %2$d</string>
+    <string name="browser_search_bookmarks">Αναζήτηση στους σελιδοδείκτες</string>
+    <string name="browser_pin_short">Καρφίτσωμα</string>
+    <string name="browser_unpin_short">Ξεκαρφίτσωμα</string>
 </resources>

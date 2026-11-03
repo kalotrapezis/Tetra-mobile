@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Il pulsante musica di Mappe riproduce questo</string>
     <string name="browser_no_folder">Nessuna cartella</string>
     <string name="browser_new_folder">Nuova cartella</string>
-    <string name="browser_to_folder">In una cartella</string>
     <string name="browser_tabs_run">Le schede continuano</string>
     <string name="browser_tabs_run_on">Le schede che lasci continuano a funzionare e a suonare</string>
     <string name="browser_tabs_run_off">La scheda che lasci va in pausa</string>
+    <string name="browser_select">Seleziona</string>
+    <string name="browser_folder_empty">Niente in questa cartella</string>
+    <string name="browser_edit_bookmark">Modifica segnalibro</string>
+    <string name="browser_bookmark_url">Indirizzo</string>
+    <string name="browser_move_to">Sposta in</string>
+    <string name="browser_delete_chosen">Eliminare? Segnalibri: %1$d, cartelle: %2$d</string>
+    <string name="browser_search_bookmarks">Cerca nei segnalibri</string>
+    <string name="browser_pin_short">Fissa</string>
+    <string name="browser_unpin_short">Sblocca</string>
 </resources>

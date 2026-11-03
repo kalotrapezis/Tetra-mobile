@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Бутонът за музика в Карти пуска това</string>
     <string name="browser_no_folder">Без папка</string>
     <string name="browser_new_folder">Нова папка</string>
-    <string name="browser_to_folder">В папка</string>
     <string name="browser_tabs_run">Разделите продължават</string>
     <string name="browser_tabs_run_on">Разделите, които оставяте, продължават да работят и да свирят</string>
     <string name="browser_tabs_run_off">Разделът, който оставяте, спира</string>
+    <string name="browser_select">Избор</string>
+    <string name="browser_folder_empty">Няма нищо в тази папка</string>
+    <string name="browser_edit_bookmark">Редактиране на отметка</string>
+    <string name="browser_bookmark_url">Адрес</string>
+    <string name="browser_move_to">Преместване в</string>
+    <string name="browser_delete_chosen">Изтриване? Отметки: %1$d, папки: %2$d</string>
+    <string name="browser_search_bookmarks">Търсене в отметките</string>
+    <string name="browser_pin_short">Закачи</string>
+    <string name="browser_unpin_short">Откачи</string>
 </resources>

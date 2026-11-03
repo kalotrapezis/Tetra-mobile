@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Gumb za glasbo v Zemljevidih predvaja to</string>
     <string name="browser_no_folder">Brez mape</string>
     <string name="browser_new_folder">Nova mapa</string>
-    <string name="browser_to_folder">V mapo</string>
     <string name="browser_tabs_run">Zavihki tečejo naprej</string>
     <string name="browser_tabs_run_on">Zavihki, ki jih zapustite, tečejo in predvajajo naprej</string>
     <string name="browser_tabs_run_off">Zapuščen zavihek se ustavi</string>
+    <string name="browser_select">Izberi</string>
+    <string name="browser_folder_empty">V tej mapi ni ničesar</string>
+    <string name="browser_edit_bookmark">Uredi zaznamek</string>
+    <string name="browser_bookmark_url">Naslov</string>
+    <string name="browser_move_to">Premakni v</string>
+    <string name="browser_delete_chosen">Izbrišem? Zaznamki: %1$d, mape: %2$d</string>
+    <string name="browser_search_bookmarks">Išči po zaznamkih</string>
+    <string name="browser_pin_short">Pripni</string>
+    <string name="browser_unpin_short">Odpni</string>
 </resources>

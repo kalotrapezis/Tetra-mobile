@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Karttojen musiikkipainike soittaa tämän</string>
     <string name="browser_no_folder">Ei kansiota</string>
     <string name="browser_new_folder">Uusi kansio</string>
-    <string name="browser_to_folder">Kansioon</string>
     <string name="browser_tabs_run">Välilehdet jatkavat</string>
     <string name="browser_tabs_run_on">Välilehdet, joilta poistut, jatkavat ja soivat</string>
     <string name="browser_tabs_run_off">Välilehti, jolta poistut, pysähtyy</string>
+    <string name="browser_select">Valitse</string>
+    <string name="browser_folder_empty">Tässä kansiossa ei ole mitään</string>
+    <string name="browser_edit_bookmark">Muokkaa kirjanmerkkiä</string>
+    <string name="browser_bookmark_url">Osoite</string>
+    <string name="browser_move_to">Siirrä kohteeseen</string>
+    <string name="browser_delete_chosen">Poistetaanko? Kirjanmerkit: %1$d, kansiot: %2$d</string>
+    <string name="browser_search_bookmarks">Hae kirjanmerkeistä</string>
+    <string name="browser_pin_short">Kiinnitä</string>
+    <string name="browser_unpin_short">Irrota</string>
 </resources>

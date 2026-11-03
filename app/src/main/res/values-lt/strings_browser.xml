@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Žemėlapių muzikos mygtukas groja tai</string>
     <string name="browser_no_folder">Be aplanko</string>
     <string name="browser_new_folder">Naujas aplankas</string>
-    <string name="browser_to_folder">Į aplanką</string>
     <string name="browser_tabs_run">Skirtukai veikia toliau</string>
     <string name="browser_tabs_run_on">Palikti skirtukai toliau veikia ir groja</string>
     <string name="browser_tabs_run_off">Paliktas skirtukas sustoja</string>
+    <string name="browser_select">Pasirinkti</string>
+    <string name="browser_folder_empty">Šiame aplanke nieko nėra</string>
+    <string name="browser_edit_bookmark">Redaguoti žymę</string>
+    <string name="browser_bookmark_url">Adresas</string>
+    <string name="browser_move_to">Perkelti į</string>
+    <string name="browser_delete_chosen">Ištrinti? Žymės: %1$d, aplankai: %2$d</string>
+    <string name="browser_search_bookmarks">Ieškoti žymėse</string>
+    <string name="browser_pin_short">Prisegti</string>
+    <string name="browser_unpin_short">Atsegti</string>
 </resources>

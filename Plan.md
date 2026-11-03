@@ -12,6 +12,12 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [x] (browser-bookmarks session, 3 Nov; branch `browser-bookmarks`, not merged) **Browser: a bookmarks manager** (the user: "proper
+      bookmarks manager (Firefox-like, in a modal). Right now if I import, it dumps everything on the front page"). Import keeps the file's
+      folders under "Imported" (Firefox/Chrome HTML, Firefox .json), off the start page; ☰ › Bookmarks is a full-screen manager: nested
+      folders (a path in `Bookmark.folder`, old saves read as before), search, long press to choose, the bar at the bottom: New folder,
+      Edit/Rename, Move, Pin, Delete; a tablet has the tree at the side. `BrowserTest`; checked on notes_phone (phone and tablet size).
+      Not done: reorder. Who imported before keeps those at the top: Select › All › Move to a folder, or delete and import again.
 - [x] (alarm-buttons session, 1 Nov; merged 1 Nov) **Timer notifications: icon-only buttons**
       (the user: "buttons like the X on the calendar … no text just the buttons"). Ringing alarm: zzz (snooze 10 min) and ×; ringing
       timer: zzz (+1 min) and ×; running timer/stopwatch: ‖ (▶ when paused) and ×; the coming alarm (12 h before): zzz and × (skip); same icons in the island and AlarmRingActivity.

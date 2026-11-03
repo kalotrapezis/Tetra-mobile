@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Butonul de muzică din Hărți redă asta</string>
     <string name="browser_no_folder">Fără dosar</string>
     <string name="browser_new_folder">Dosar nou</string>
-    <string name="browser_to_folder">Într-un dosar</string>
     <string name="browser_tabs_run">Filele continuă</string>
     <string name="browser_tabs_run_on">Filele pe care le părăsiți continuă să ruleze și să cânte</string>
     <string name="browser_tabs_run_off">Fila părăsită se oprește</string>
+    <string name="browser_select">Selectează</string>
+    <string name="browser_folder_empty">Nimic în acest dosar</string>
+    <string name="browser_edit_bookmark">Editează marcajul</string>
+    <string name="browser_bookmark_url">Adresă</string>
+    <string name="browser_move_to">Mută în</string>
+    <string name="browser_delete_chosen">Ștergi? Marcaje: %1$d, dosare: %2$d</string>
+    <string name="browser_search_bookmarks">Caută în marcaje</string>
+    <string name="browser_pin_short">Fixează</string>
+    <string name="browser_unpin_short">Anulează fixarea</string>
 </resources>

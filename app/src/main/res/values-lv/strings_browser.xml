@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Karšu mūzikas poga atskaņo šo</string>
     <string name="browser_no_folder">Bez mapes</string>
     <string name="browser_new_folder">Jauna mape</string>
-    <string name="browser_to_folder">Mapē</string>
     <string name="browser_tabs_run">Cilnes turpina darboties</string>
     <string name="browser_tabs_run_on">Atstātās cilnes turpina darboties un skanēt</string>
     <string name="browser_tabs_run_off">Atstātā cilne tiek apturēta</string>
+    <string name="browser_select">Atlasīt</string>
+    <string name="browser_folder_empty">Šajā mapē nekā nav</string>
+    <string name="browser_edit_bookmark">Rediģēt grāmatzīmi</string>
+    <string name="browser_bookmark_url">Adrese</string>
+    <string name="browser_move_to">Pārvietot uz</string>
+    <string name="browser_delete_chosen">Dzēst? Grāmatzīmes: %1$d, mapes: %2$d</string>
+    <string name="browser_search_bookmarks">Meklēt grāmatzīmēs</string>
+    <string name="browser_pin_short">Piespraust</string>
+    <string name="browser_unpin_short">Atspraust</string>
 </resources>

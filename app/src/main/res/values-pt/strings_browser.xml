@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">O botão de música dos Mapas toca isto</string>
     <string name="browser_no_folder">Sem pasta</string>
     <string name="browser_new_folder">Nova pasta</string>
-    <string name="browser_to_folder">Para uma pasta</string>
     <string name="browser_tabs_run">Os separadores continuam</string>
     <string name="browser_tabs_run_on">Os separadores que deixa continuam a funcionar e a tocar</string>
     <string name="browser_tabs_run_off">O separador que deixa fica em pausa</string>
+    <string name="browser_select">Selecionar</string>
+    <string name="browser_folder_empty">Nada nesta pasta</string>
+    <string name="browser_edit_bookmark">Editar marcador</string>
+    <string name="browser_bookmark_url">Endereço</string>
+    <string name="browser_move_to">Mover para</string>
+    <string name="browser_delete_chosen">Eliminar? Marcadores: %1$d, pastas: %2$d</string>
+    <string name="browser_search_bookmarks">Pesquisar nos marcadores</string>
+    <string name="browser_pin_short">Fixar</string>
+    <string name="browser_unpin_short">Desafixar</string>
 </resources>

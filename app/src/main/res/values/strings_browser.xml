@@ -96,8 +96,16 @@
     <string name="browser_for_maps_set">Maps\' music button plays this</string>
     <string name="browser_no_folder">No folder</string>
     <string name="browser_new_folder">New folder</string>
-    <string name="browser_to_folder">Into a folder</string>
     <string name="browser_tabs_run">Tabs keep running</string>
     <string name="browser_tabs_run_on">Tabs you leave keep running and playing</string>
     <string name="browser_tabs_run_off">A tab you leave pauses</string>
+    <string name="browser_select">Select</string>
+    <string name="browser_folder_empty">Nothing in this folder</string>
+    <string name="browser_edit_bookmark">Edit bookmark</string>
+    <string name="browser_bookmark_url">Address</string>
+    <string name="browser_move_to">Move to</string>
+    <string name="browser_delete_chosen">Delete? Bookmarks: %1$d, folders: %2$d</string>
+    <string name="browser_search_bookmarks">Search the bookmarks</string>
+    <string name="browser_pin_short">Pin</string>
+    <string name="browser_unpin_short">Unpin</string>
 </resources>
