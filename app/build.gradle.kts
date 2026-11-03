@@ -16,7 +16,7 @@ val signing = File(System.getProperty("user.home"), ".android/tetra-release.prop
 
 android {
     namespace = "com.kalotrapezis.drive"
-    compileSdk = 37
+    compileSdk { version = release(37) { minorApiLevel = 2 } } // 37.2: GeckoView 159 asks for it
 
     defaultConfig {
         applicationId = "com.kalotrapezis.drive"
@@ -70,6 +70,8 @@ android {
             isEnable = true
             reset()
             include("arm64-v8a", "armeabi-v7a")
+            // `-Pemulator`: an x86_64 APK too, for the AVDs; releases stay arm-only
+            if (project.hasProperty("emulator")) include("x86_64")
             isUniversalApk = false
         }
     }
@@ -102,7 +104,7 @@ dependencies {
     implementation("com.github.adaptech-cz.Tesseract4Android:tesseract4android:4.8.0") // PDF › Recognize text: Greek and English OCR (Apache 2.0)
     implementation("com.squareup.okhttp3:okhttp:4.12.0") // AI Assist live: Voxtral realtime's WebSocket (already in the app through MapLibre)
     implementation("org.dmfs:lib-recur:0.17.1") // Calendar: iCalendar RRULE repeats (Apache 2.0)
-    implementation("androidx.webkit:webkit:1.14.0") // Browser › Private: a WebView profile of its own, cookies and all (Apache 2.0)
+    implementation("org.mozilla.geckoview:geckoview:159.0.20261102144711") // Browser: Firefox's engine and its extensions (MPL 2.0)
     implementation("com.googlecode.libphonenumber:libphonenumber:9.0.42") // Phone: a number read in the SIM's country (Apache 2.0)
     implementation("org.eclipse.angus:angus-mail:2.0.3") // Mail: IMAP and SMTP for the accounts the phone fetches itself (EPL 2.0 / GPL 2.0 + Classpath Exception)
     // Maps: offline routing on the graph the computer builds (Apache 2.0). Only what reading a graph needs: Janino (run-time

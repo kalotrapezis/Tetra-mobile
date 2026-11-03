@@ -43,6 +43,19 @@ How to write here:
       is not pulled in. New pictures: true angles (sharp/slight), forks as a Y, a ramp leaving a main road, U-turns, staggered
       crossings drawn as two, the roundabout's exit number, main roads thicker. JunctionGraphTest (small graphs), MapsJunctionTest
       (real graph), JunctionPictureDeviceTest draws them all (on an emulator). Not checked on today's drive (the phone's log).
+- [x] (browser-gecko session, 3 Nov; branch `browser-gecko` on `browser-bookmarks`, not merged) **Browser on Firefox's engine (GeckoView)
+      with Firefox extensions** (the user: "a puzzle piece as an extension manager as the other browsers do"; engine switched, size accepted).
+      uBlock Origin and Dark Reader come on the first start (once; a removed one stays removed), Enhanced Tracking Protection on; uBlock's
+      button with its count where the shield was; the puzzle piece lists the extensions (switch, popup, Options, Pin to the toolbar, Allow in
+      Private, Remove); addons.mozilla.org's "Add to Firefox" works in-page. Page prompts, downloads, Private, background play, forms all
+      on Gecko (BrowserEngine.kt, BrowserPrompts.kt, BrowserExtensions.kt, assets/tetra-ext). Dropped: the EasyList blocker, per-site
+      web-font blocking. Checked on notes_phone and books_tablet; background audio on a real phone not yet. `-Pemulator` adds x86_64.
+- [x] (browser-bookmarks session, 3 Nov; branch `browser-bookmarks`, not merged) **Browser: a bookmarks manager** (the user: "proper
+      bookmarks manager (Firefox-like, in a modal). Right now if I import, it dumps everything on the front page"). Import keeps the file's
+      folders under "Imported" (Firefox/Chrome HTML, Firefox .json), off the start page; ☰ › Bookmarks is a full-screen manager: nested
+      folders (a path in `Bookmark.folder`, old saves read as before), search, long press to choose, the bar at the bottom: New folder,
+      Edit/Rename, Move, Pin, Delete; a tablet has the tree at the side. `BrowserTest`; checked on notes_phone (phone and tablet size).
+      Not done: reorder. Who imported before keeps those at the top: Select › All › Move to a folder, or delete and import again.
 - [x] (alarm-buttons session, 1 Nov; merged 1 Nov) **Timer notifications: icon-only buttons**
       (the user: "buttons like the X on the calendar … no text just the buttons"). Ringing alarm: zzz (snooze 10 min) and ×; ringing
       timer: zzz (+1 min) and ×; running timer/stopwatch: ‖ (▶ when paused) and ×; the coming alarm (12 h before): zzz and × (skip); same icons in the island and AlarmRingActivity.

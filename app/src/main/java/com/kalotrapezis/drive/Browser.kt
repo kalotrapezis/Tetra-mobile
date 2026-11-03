@@ -3,113 +3,88 @@ package com.kalotrapezis.drive
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.File
 import java.net.URLEncoder
 
 // Browser (the user, 2 Nov): logins, forms and cards kept encrypted; the history forgotten; Private keeps nothing;
-// an ad blocker like Firefox's with a switch; Import from Firefox. The rules here are pure (BrowserTest); BrowserScreen.kt draws.
+// Firefox's engine and extensions (BrowserEngine.kt, uBlock Origin for the ads); Import from Firefox. The rules here are pure (BrowserTest); BrowserScreen.kt draws.
+
+internal data class Visit(val url: String, val title: String, val at: Long)
+// pinned: at the start page's front; folder: a path of folders, "Radios" or "Imported/Bookmarks Toolbar/News", "" for none
+// (a saved name with no "/" is a top-level folder, as before)
+internal data class Bookmark(val url: String, val title: String, val pinned: Boolean = false, val folder: String = "")
 
 /**
- * EasyList's and EasyPrivacy's host rules, `||host…` and their `@@||host…` exceptions: almost all of both lists, and
- * what Firefox's own blocking is (whole hosts). A rule with an option it does not know (popup, redirect, csp…) is left out.
+ * The bookmarks and the folders kept even when empty (the manager's, 3 Nov: "a proper bookmarks manager, Firefox-like"):
+ * a folder is a path, its parents before it. What the start page shows is [start]; imports go under [IMPORTED].
  */
-internal class AdFilter(lines: Sequence<String>) {
-    private class Rule(val path: String, val third: Boolean?, val on: List<String>, val notOn: List<String>)
-    private val block = HashMap<String, MutableList<Rule>>()
-    private val allow = HashMap<String, MutableList<Rule>>()
-    val size: Int
+internal data class BookmarkLibrary(val marks: List<Bookmark>, val extra: List<String> = emptyList()) {
+    /** Every folder, its parents too, in the order first met. */
+    val folders: List<String> get() = (marks.map { it.folder } + extra).filter { it.isNotEmpty() }
+        .flatMap { p -> p.split('/').let { s -> s.indices.map { s.take(it + 1).joinToString("/") } } }.distinct()
 
-    init { var n = 0; lines.forEach { if (add(it.trim())) n++ }; size = n }
+    fun subfolders(parent: String) = folders.filter { parentOf(it) == parent }
 
-    private fun add(line: String): Boolean {
-        val exception = line.startsWith("@@||")
-        if (!exception && !line.startsWith("||")) return false
-        val body = line.removePrefix("@@").removePrefix("||").lowercase()
-        val dollar = body.lastIndexOf('$')
-        val pattern = if (dollar >= 0) body.substring(0, dollar) else body
-        var third: Boolean? = null
-        val on = mutableListOf<String>(); val notOn = mutableListOf<String>()
-        if (dollar >= 0) for (o in body.substring(dollar + 1).split(',')) when {
-            o == "third-party" || o == "3p" -> third = true
-            o == "~third-party" || o == "1p" || o == "first-party" -> third = false
-            o.startsWith("domain=") -> o.removePrefix("domain=").split('|').forEach { d -> if (d.startsWith("~")) notOn += d.drop(1) else on += d }
-            o == "important" -> Unit
-            // shortcut: a request's type is not known to shouldInterceptRequest, so a typed rule applies to every type; guess it from the Accept header if over-blocking shows
-            o.removePrefix("~") in TYPES -> Unit
-            else -> return false
-        }
-        val end = pattern.indexOfFirst { it in "^/*:|?" }
-        val host = if (end < 0) pattern else pattern.substring(0, end)
-        if (host.isEmpty() || '.' !in host) return false
-        (if (exception) allow else block).getOrPut(host) { mutableListOf() } += Rule(if (end < 0) "" else pattern.substring(end), third, on, notOn)
-        return true
+    /** Every folder depth first, each under its parent: the manager's tree and the Move list. */
+    fun tree(): List<String> {
+        val all = folders
+        fun walk(p: String): List<String> = all.filter { parentOf(it) == p }.flatMap { listOf(it) + walk(it) }
+        return walk("")
     }
 
-    /** Whether a request for [url], made by a page at [page] (its host), is an ad or a tracker. */
-    fun blocks(url: String, page: String?): Boolean {
-        val after = url.substringAfter("://", "").takeIf { it.isNotEmpty() } ?: return false
-        val cut = after.indexOfFirst { it == '/' || it == '?' || it == '#' }.let { if (it < 0) after.length else it }
-        val host = after.substring(0, cut).substringAfterLast('@').substringBefore(':').lowercase()
-        val rest = after.substring(cut).lowercase()
-        val third = page == null || BrowserRules.site(host) != BrowserRules.site(page)
-        fun on(d: String) = page != null && (page == d || page.endsWith(".$d"))
-        fun hit(rules: HashMap<String, MutableList<Rule>>): Boolean {
-            var h = host
-            while (true) {
-                if (rules[h]?.any { r -> (r.third == null || r.third == third) && (r.on.isEmpty() || r.on.any(::on)) && r.notOn.none(::on) && glob(r.path, 0, rest, 0) } == true) return true
-                h = h.substringAfter('.', "").takeIf { '.' in it } ?: return false
-            }
-        }
-        return hit(block) && !hit(allow)
+    fun count(folder: String) = marks.count { under(it.folder, folder) }
+
+    /**
+     * The start page in [folder]: its favourites in the start page's order and its folders; at the top the imported ones
+     * stay out (the user: "if I import, it dumps everything on the front page"), save those pinned.
+     */
+    fun start(folder: String): Pair<List<Bookmark>, List<String>> =
+        BrowserRules.front(marks).filter { it.folder == folder || (folder.isEmpty() && it.pinned && under(it.folder, IMPORTED)) } to
+            subfolders(folder).filter { it != IMPORTED }
+
+    /** An import: the file's folders under Imported, a page already kept left where it is. */
+    fun imported(news: List<Bookmark>) = copy(marks = (marks + news.map { it.copy(folder = join(IMPORTED, it.folder)) }).distinctBy { it.url })
+
+    fun find(q: String) = q.trim().let { t -> marks.filter { it.title.contains(t, true) || it.url.contains(t, true) } to folders.filter { nameOf(it).contains(t, true) } }
+
+    /** The chosen pages and folders into [to]; a folder into itself or its own is left. Their folders stay, though empty. */
+    fun move(urls: Set<String>, dirs: Set<String>, to: String): BookmarkLibrary {
+        var l = BookmarkLibrary(marks.map { if (it.url in urls) it.copy(folder = to) else it }, (folders + to).filter { it.isNotEmpty() }.distinct())
+        for (d in dirs) if (!under(to, d)) l = l.relocate(d, join(to, nameOf(d)))
+        return l
+    }
+
+    fun rename(dir: String, name: String) = clean(name).let { if (it.isEmpty()) this else relocate(dir, join(parentOf(dir), it)) }
+
+    fun delete(urls: Set<String>, dirs: Set<String>) = BookmarkLibrary(marks.filter { it.url !in urls && dirs.none { d -> under(it.folder, d) } },
+        folders.filter { p -> dirs.none { under(p, it) } })
+
+    fun add(folder: String) = if (folder.isEmpty() || folder in folders) this else copy(extra = extra + folder)
+
+    /** All the chosen pinned, or all unpinned when they all were. */
+    fun pin(urls: Set<String>) = marks.filter { it.url in urls }.all { it.pinned }.let { was -> copy(marks = marks.map { if (it.url in urls) it.copy(pinned = !was) else it }) }
+
+    fun edit(url: String, title: String, to: String) = copy(marks = marks.map { if (it.url == url) it.copy(title = title, url = to) else it })
+
+    private fun relocate(from: String, to: String): BookmarkLibrary {
+        fun re(p: String) = if (under(p, from)) to + p.removePrefix(from) else p
+        return BookmarkLibrary(marks.map { it.copy(folder = re(it.folder)) }, folders.map(::re).distinct())
     }
 
     companion object {
-        private val TYPES = setOf("script", "image", "stylesheet", "xmlhttprequest", "subdocument", "media", "font", "object", "ping", "websocket", "other", "document")
-        private fun separator(c: Char) = !(c.isLetterOrDigit() || c in "_-.%")
-
-        /** ABP's pattern after the host: `*` anything, `^` a separator or the end, a final `|` the end; otherwise a prefix is enough. */
-        internal fun glob(p: String, i: Int, s: String, j: Int): Boolean {
-            if (i == p.length) return true
-            return when (val c = p[i]) {
-                '*' -> (j..s.length).any { glob(p, i + 1, s, it) }
-                '^' -> if (j == s.length) glob(p, i + 1, s, j) else separator(s[j]) && glob(p, i + 1, s, j + 1)
-                '|' -> i == p.length - 1 && j == s.length
-                else -> j < s.length && s[j] == c && glob(p, i + 1, s, j + 1)
-            }
-        }
+        const val IMPORTED = "Imported"
+        fun parentOf(p: String) = p.substringBeforeLast('/', "")
+        fun nameOf(p: String) = p.substringAfterLast('/')
+        fun join(a: String, b: String) = if (a.isEmpty()) b else if (b.isEmpty()) a else "$a/$b"
+        /** [p] is [folder] or in it, however deep. */
+        fun under(p: String, folder: String) = p == folder || p.startsWith("$folder/")
+        /** A folder's one name: no "/", which divides a path. */
+        fun clean(name: String) = name.replace('/', '∕').trim()
+        /** A path typed ("Radios/Greek"): its names cleaned, empty ones out. */
+        fun path(typed: String) = typed.split('/').map(String::trim).filter(String::isNotEmpty).joinToString("/")
+        fun json(folders: List<String>) = JSONArray(folders).toString()
+        fun folders(s: String?) = runCatching { JSONArray(s).let { a -> (0 until a.length()).map(a::getString) } }.getOrDefault(emptyList())
     }
 }
-
-/** The lists: the copy that came with the app, then easylist.to's own each week (both GPLv3 / CC BY-SA 3.0, THIRD_PARTY_NOTICES.md). */
-internal object AdBlock {
-    @Volatile var filter: AdFilter? = null
-    private val SOURCES = listOf("https://easylist.to/easylist/easylist.txt", "https://easylist.to/easylist/easyprivacy.txt")
-    private const val WEEK = 7 * 24 * 3600_000L
-    private fun prefs(c: Context) = c.getSharedPreferences("browser", Context.MODE_PRIVATE)
-    fun on(c: Context) = prefs(c).getBoolean("adblock", true)
-    fun set(c: Context, on: Boolean) = prefs(c).edit().putBoolean("adblock", on).apply()
-
-    /** On a background thread: the newest lists this phone has, fetched again when a week old. */
-    fun load(c: Context) {
-        val files = SOURCES.indices.map { File(c.filesDir, "adblock$it.txt") }
-        if (filter == null) runCatching {
-            filter = AdFilter(if (files.all { it.exists() }) files.asSequence().flatMap { it.readLines() } else c.assets.open("adblock.txt").bufferedReader().lineSequence())
-            WriterLog.i("Browser: ${filter?.size} ad-blocking rules")
-        }.onFailure { WriterLog.e("Browser: the ad-blocking rules were not read", it) }
-        if (files.all { System.currentTimeMillis() - it.lastModified() < WEEK }) return
-        runCatching {
-            val got = SOURCES.map { java.net.URL(it).openStream().use { s -> s.readBytes() } }
-            require(got.all { it.size > 100_000 }) { "a list too short" }
-            got.forEachIndexed { i, b -> File(c.filesDir, "adblock$i.part").apply { writeBytes(b); renameTo(files[i]) } }
-            filter = AdFilter(files.asSequence().flatMap { it.readLines() })
-            WriterLog.i("Browser: the ad-blocking lists updated, ${filter?.size} rules")
-        }.onFailure { WriterLog.w("Browser: the ad-blocking lists not updated", it) }
-    }
-}
-
-internal data class Visit(val url: String, val title: String, val at: Long)
-// pinned: at the start page's front; folder: the user's own ("Radios", 2 Nov), "" for none
-internal data class Bookmark(val url: String, val title: String, val pinned: Boolean = false, val folder: String = "")
 
 internal object BrowserRules {
     /** The history lasts 24 hours from each visit (the user: "maybe keep it for 24 hours"), so yesterday's tabs are still found today. */
@@ -136,18 +111,6 @@ internal object BrowserRules {
 
     /** HTML only (the user, 2 Nov: "no javascript … just html Css"): kept per site, so a site's subdomains and its pages follow. */
     fun htmlOnly(sites: Set<String>, url: String?) = host(url).takeIf { it.isNotEmpty() }?.let { site(it) in sites } == true
-
-    /** A web font, which HTML only does without (the system's fonts instead). */
-    fun webFont(url: String) = Regex("\\.(woff2?|ttf|otf|eot)([?#]|$)", RegexOption.IGNORE_CASE).containsMatchIn(url)
-
-    /** Desktop mode (the user, 2 Nov): the WebView's own agent as desktop Chrome on Linux — no Android, no Mobile, no WebView marks. */
-    /**
-     * Mobile Chrome as it is, without WebView's marks ("; wv", "Version/4.0"): Google refuses to sign in inside an app's WebView
-     * that says so (the user, 2 Nov: "it does not let me connect to Google").
-     */
-    fun mobileAgent(webView: String) = webView.replace("; wv)", ")").replace(Regex("Version/[\\d.]+ "), "")
-
-    fun desktopAgent(mobile: String) = mobile.replace(Regex("\\([^)]*Android[^)]*\\)"), "(X11; Linux x86_64)").replace(" Mobile", "").replace(Regex("Version/[\\d.]+ "), "")
 
     /**
      * Player mode's ‹ › on a page with none of its own (a radio station's, live24.gr's): the next or the previous favourite of
@@ -181,9 +144,6 @@ internal object BrowserRules {
     fun visits(s: String?) = runCatching { JSONArray(s).let { a -> (0 until a.length()).map { a.getJSONObject(it).run { Visit(getString("url"), optString("title"), getLong("at")) } } } }.getOrDefault(emptyList())
     fun bookmarksJson(b: List<Bookmark>) = JSONArray(b.map { JSONObject().put("url", it.url).put("title", it.title).apply { if (it.pinned) put("pinned", true); if (it.folder.isNotEmpty()) put("folder", it.folder) } }).toString()
     fun bookmarks(s: String?) = runCatching { JSONArray(s).let { a -> (0 until a.length()).map { a.getJSONObject(it).run { Bookmark(getString("url"), optString("title"), optBoolean("pinned"), optString("folder")) } } } }.getOrDefault(emptyList())
-
-    /** The folders' names, as first used. */
-    fun folders(b: List<Bookmark>) = b.map { it.folder }.filter { it.isNotEmpty() }.distinct()
 
     /** The start page's order: the pinned at the front, then the newest first. */
     fun front(b: List<Bookmark>) = b.reversed().sortedByDescending { it.pinned }
@@ -302,19 +262,41 @@ internal object FirefoxImport {
         return rows
     }
 
-    fun bookmarksHtml(html: String) = Regex("<A\\s[^>]*HREF=\"([^\"]+)\"[^>]*>(.*?)</A>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)).findAll(html)
-        .map { Bookmark(entities(it.groupValues[1]), entities(it.groupValues[2]).trim()) }.filter { it.url.startsWith("http", true) }.toList()
+    /**
+     * The HTML export (Firefox's, Chrome's, Edge's: Netscape's format), its folders kept: an `<H3>` names the `<DL>` after it,
+     * each page in the folders it is in. Firefox's Bookmarks Menu is the file's own list, so its pages are at the top.
+     */
+    fun bookmarksHtml(html: String): List<Bookmark> {
+        val out = mutableListOf<Bookmark>()
+        val open = mutableListOf<String?>() // one per <DL> open: the folder it is, or null for the file's own list
+        var named: String? = null
+        Regex("<H3\\b[^>]*>(.*?)</H3>|<A\\s([^>]*)>(.*?)</A>|<DL\\b[^>]*>|</DL\\s*>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)).findAll(html).forEach { m ->
+            val tag = m.value.take(3).uppercase()
+            when {
+                tag == "<H3" -> named = BookmarkLibrary.clean(entities(m.groupValues[1]))
+                tag == "<DL" -> { open += named; named = null }
+                tag == "</D" -> open.removeLastOrNull()
+                else -> Regex("HREF=\"([^\"]+)\"", RegexOption.IGNORE_CASE).find(m.groupValues[2])?.let { h ->
+                    out += Bookmark(entities(h.groupValues[1]), entities(m.groupValues[3]).trim(), folder = open.filterNotNull().filter { it.isNotEmpty() }.joinToString("/"))
+                }
+            }
+        }
+        return out.filter { it.url.startsWith("http", true) }
+    }
 
-    /** Firefox's backup: folders of children, each bookmark a "text/x-moz-place" with its uri. */
+    /** Firefox's backup: folders of children, each bookmark a "text/x-moz-place" with its uri; the four roots named as the HTML names them. */
     fun bookmarksJson(json: String): List<Bookmark> {
         val out = mutableListOf<Bookmark>()
-        fun walk(o: JSONObject) {
-            o.optString("uri").takeIf { it.startsWith("http", true) }?.let { out += Bookmark(it, o.optString("title")) }
-            o.optJSONArray("children")?.let { a -> for (i in 0 until a.length()) walk(a.getJSONObject(i)) }
+        fun walk(o: JSONObject, path: String, depth: Int) {
+            o.optString("uri").takeIf { it.startsWith("http", true) }?.let { out += Bookmark(it, o.optString("title"), folder = path) }
+            val title = o.optString("title")
+            val name = when { depth == 0 -> ""; depth == 1 -> ROOTS[title] ?: BookmarkLibrary.clean(title); else -> BookmarkLibrary.clean(title) }
+            o.optJSONArray("children")?.let { a -> for (i in 0 until a.length()) walk(a.getJSONObject(i), BookmarkLibrary.join(path, name), depth + 1) }
         }
-        walk(JSONObject(json))
+        walk(JSONObject(json), "", 0)
         return out
     }
+    private val ROOTS = mapOf("menu" to "", "toolbar" to "Bookmarks Toolbar", "unfiled" to "Other Bookmarks", "mobile" to "Mobile Bookmarks")
 
     private fun entities(s: String) = s.replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&#39;", "'").replace("&amp;", "&")
 }
@@ -352,12 +334,16 @@ internal object MediaSites {
  * or on the bar"); one list for a phone, one for a tablet. Order is the order chosen.
  */
 internal object BrowserTools {
-    val ALL = listOf("fill", "ads", "private", "desktop", "html", "bookmarks", "history", "saved", "copy", "share", "split", "forward", "player", "import", "autohide", "background", "tabs_run", "close")
-    val PHONE = listOf("fill", "ads", "private", "bookmarks", "copy", "share") // two columns of three small (the user, 2 Nov: "fit 2 more tools")
-    val TABLET = listOf("fill", "ads", "private", "desktop", "html", "bookmarks", "history", "saved", "copy", "share", "split")
+    val ALL = listOf("fill", "extensions", "private", "desktop", "html", "bookmarks", "history", "saved", "copy", "share", "split", "forward", "player", "import", "autohide", "background", "tabs_run", "close")
+    /** uBlock Origin's button, where the ad blocker's shield was (the user, 3 Nov): its count of the page's blocked requests. */
+    const val UBLOCK = "ext:" + BrowserEngine.UBLOCK
+    val PHONE = listOf("fill", UBLOCK, "private", "bookmarks", "copy", "share") // two columns of three small (the user, 2 Nov: "fit 2 more tools")
+    val TABLET = listOf("fill", UBLOCK, "private", "desktop", "html", "bookmarks", "history", "saved", "copy", "extensions", "split")
     fun max(wide: Boolean) = if (wide) 11 else 6
 
-    fun parse(saved: String?, wide: Boolean) = saved?.split(',')?.filter { it in ALL }?.distinct()?.take(max(wide)) ?: if (wide) TABLET else PHONE
+    /** The bar as kept; an extension's button is "ext:" and its id; the old ad blocker's place goes to uBlock Origin. */
+    fun parse(saved: String?, wide: Boolean) = saved?.split(',')?.map { if (it == "ads") UBLOCK else it }?.filter { it in ALL || it.startsWith("ext:") }?.distinct()?.take(max(wide))
+        ?: if (wide) TABLET else PHONE
 
     /** A tool tapped in edit mode: off the bar, or onto its end; null when the bar is full. */
     fun toggle(bar: List<String>, id: String, wide: Boolean): List<String>? = when {

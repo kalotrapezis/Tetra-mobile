@@ -9,6 +9,8 @@ dependencyResolutionManagement {
         maven("https://maven.ghostscript.com") { content { includeGroup("com.artifex.mupdf") } }
         // Tesseract4Android (Apache 2.0): Greek and English OCR for scanned PDFs, offline
         maven("https://jitpack.io") { content { includeGroup("com.github.adaptech-cz.Tesseract4Android") } }
+        // GeckoView (MPL 2.0): the Browser's engine, Firefox's, so Firefox's extensions run in it
+        maven("https://maven.mozilla.org/maven2/") { content { includeGroup("org.mozilla.geckoview") } }
     }
 }
 rootProject.name = "Local Drive"

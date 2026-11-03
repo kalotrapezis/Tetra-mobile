@@ -6,50 +6,8 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.File
 
 class BrowserTest {
-    private val filter = AdFilter(sequenceOf(
-        "! a comment", "example.com##.ad", "/banner/ads.",
-        "||ads.example^", "||tracker.net^\$third-party", "||cdn.site.com/ads/*.js",
-        "||pop.net^\$popup", "||only.io^\$domain=news.gr|~sport.news.gr", "@@||ads.example/ok^",
-    ))
-
-    @Test fun hostRules() {
-        assertEquals(5, filter.size) // the popup rule, cosmetic and generic ones left out
-        assertTrue(filter.blocks("https://ads.example/x.js", "news.gr"))
-        assertTrue(filter.blocks("https://a.b.ads.example/", "news.gr")) // a subdomain too
-        assertFalse(filter.blocks("https://ads.example.org/x", "news.gr")) // not another host that only begins so
-        assertFalse(filter.blocks("https://badads.example/x", "news.gr"))
-        assertFalse(filter.blocks("https://ads.example/ok/1.png", "news.gr")) // the exception
-        assertFalse(filter.blocks("https://pop.net/", "news.gr"))
-    }
-
-    @Test fun options() {
-        assertTrue(filter.blocks("https://px.tracker.net/p.gif", "news.gr"))
-        assertFalse(filter.blocks("https://px.tracker.net/p.gif", "www.tracker.net")) // its own site: first party
-        assertTrue(filter.blocks("https://only.io/a", "www.news.gr"))
-        assertFalse(filter.blocks("https://only.io/a", "sport.news.gr"))
-        assertFalse(filter.blocks("https://only.io/a", "other.gr"))
-    }
-
-    @Test fun paths() {
-        assertTrue(filter.blocks("https://cdn.site.com/ads/top.js", "x.gr"))
-        assertFalse(filter.blocks("https://cdn.site.com/img/top.js", "x.gr"))
-        assertTrue(AdFilter.glob("^", 0, "", 0))
-        assertTrue(AdFilter.glob("^", 0, "/a", 0))
-        assertFalse(AdFilter.glob("^", 0, "x", 0))
-        assertTrue(AdFilter.glob("/a.js|", 0, "/a.js", 0))
-        assertFalse(AdFilter.glob("/a.js|", 0, "/a.js?v=1", 0))
-    }
-
-    @Test fun theBundledList() {
-        val f = AdFilter(File("src/main/assets/adblock.txt").readLines().asSequence())
-        assertTrue(f.size > 50_000)
-        assertTrue(f.blocks("https://securepubads.g.doubleclick.net/tag/js/gpt.js", "www.kathimerini.gr"))
-        assertFalse(f.blocks("https://www.kathimerini.gr/style.css", "www.kathimerini.gr"))
-    }
-
     @Test fun site() {
         assertEquals("example.com", BrowserRules.site("a.b.example.com"))
         assertEquals("kathimerini.com.gr", BrowserRules.site("www.kathimerini.com.gr"))
@@ -96,10 +54,82 @@ class BrowserTest {
             <DT><A HREF="https://www.sch.gr/" ADD_DATE="1" ICON="data:x">Πανελλήνιο &amp; Σχολικό</A>
             <DT><A HREF="place:sort=8">Recent</A>
             </DL><p></DL>"""
-        assertEquals(listOf(Bookmark("https://www.sch.gr/", "Πανελλήνιο & Σχολικό")), FirefoxImport.read(html)!!.bookmarks)
+        assertEquals(listOf(Bookmark("https://www.sch.gr/", "Πανελλήνιο & Σχολικό", folder = "Toolbar")), FirefoxImport.read(html)!!.bookmarks)
         val json = """{"title":"","children":[{"title":"menu","children":[{"title":"Tetra","type":"text/x-moz-place","uri":"https://tetra.example/"},
             {"title":"sep","type":"text/x-moz-place-separator"}]},{"title":"toolbar","children":[{"title":"Kathimerini","uri":"https://kathimerini.gr"}]}]}"""
-        assertEquals(listOf(Bookmark("https://tetra.example/", "Tetra"), Bookmark("https://kathimerini.gr", "Kathimerini")), FirefoxImport.read(json)!!.bookmarks)
+        assertEquals(listOf(Bookmark("https://tetra.example/", "Tetra"), Bookmark("https://kathimerini.gr", "Kathimerini", folder = "Bookmarks Toolbar")), FirefoxImport.read(json)!!.bookmarks)
+    }
+
+    /** Firefox's own export, its shape kept: the menu's pages at the top, the toolbar's folders nested, a "/" in a name not a level. */
+    @Test fun importKeepsTheFolderTree() {
+        val html = """<!DOCTYPE NETSCAPE-Bookmark-file-1>
+            <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+            <TITLE>Bookmarks</TITLE>
+            <H1>Bookmarks Menu</H1>
+            <DL><p>
+                <DT><A HREF="https://menu.gr/" ADD_DATE="1">Menu page</A>
+                <DT><H3 ADD_DATE="1" PERSONAL_TOOLBAR_FOLDER="true">Bookmarks Toolbar</H3>
+                <DL><p>
+                    <DT><H3>News</H3>
+                    <DL><p>
+                        <DT><A HREF="https://kathimerini.gr/">Kathimerini</A>
+                        <DT><H3>Sport / Local</H3>
+                        <DL><p><DT><A HREF="https://sport.gr/">Sport</A></DL><p>
+                    </DL><p>
+                    <DT><A HREF="https://toolbar.gr/">On the bar</A>
+                    <DT><H3>Empty</H3>
+                    <DL><p></DL><p>
+                </DL><p>
+                <DT><A HREF="https://after.gr/">After the toolbar</A>
+            </DL>"""
+        val got = FirefoxImport.read(html)!!.bookmarks.map { it.url to it.folder }
+        assertEquals(listOf("https://menu.gr/" to "", "https://kathimerini.gr/" to "Bookmarks Toolbar/News", "https://sport.gr/" to "Bookmarks Toolbar/News/Sport ∕ Local",
+            "https://toolbar.gr/" to "Bookmarks Toolbar", "https://after.gr/" to ""), got)
+
+        // into the library: all under Imported, the start page as it was
+        val mine = BookmarkLibrary(listOf(Bookmark("https://radio.gr/", "Radio", folder = "Radios"), Bookmark("https://menu.gr/", "Mine")))
+        val lib = mine.imported(FirefoxImport.read(html)!!.bookmarks)
+        assertEquals(listOf("Radios", "", "Imported/Bookmarks Toolbar/News", "Imported/Bookmarks Toolbar/News/Sport ∕ Local", "Imported/Bookmarks Toolbar", "Imported"), lib.marks.map { it.folder })
+        assertEquals("Mine", lib.marks[1].title) // a page already kept stays where it was
+        assertEquals(mine.start(""), lib.start(""))
+        assertEquals(listOf("Imported/Bookmarks Toolbar", "Imported/Bookmarks Toolbar/News", "Imported/Bookmarks Toolbar/News/Sport ∕ Local"),
+            lib.tree().filter { it.startsWith("Imported/") })
+        assertEquals(listOf("Radios", "Imported"), lib.subfolders(""))
+        assertEquals(4, lib.count("Imported"))
+    }
+
+    @Test fun folderPaths() {
+        assertEquals("Imported/Toolbar", BookmarkLibrary.parentOf("Imported/Toolbar/News"))
+        assertEquals("", BookmarkLibrary.parentOf("Radios"))
+        assertEquals("News", BookmarkLibrary.nameOf("Imported/Toolbar/News"))
+        assertTrue(BookmarkLibrary.under("Radios/Greek", "Radios"))
+        assertFalse(BookmarkLibrary.under("Radios2", "Radios"))
+        assertEquals("Radios/Greek", BookmarkLibrary.path(" /Radios// Greek /"))
+        val lib = BookmarkLibrary(listOf(Bookmark("https://a.gr", "A", folder = "X/Y/Z"), Bookmark("https://b.gr", "B", folder = "X"), Bookmark("https://c.gr", "C")), listOf("W"))
+        assertEquals(listOf("X", "X/Y", "X/Y/Z", "W"), lib.folders)
+        assertEquals(listOf("X", "X/Y", "X/Y/Z", "W"), lib.tree())
+
+        val renamed = lib.rename("X/Y", "Q/R") // a "/" typed in a name is not a level
+        assertEquals(listOf("X/Q∕R/Z", "X", ""), renamed.marks.map { it.folder })
+        val moved = lib.move(setOf("https://c.gr"), setOf("X/Y"), "W")
+        assertEquals(listOf("W/Y/Z", "X", "W"), moved.marks.map { it.folder })
+        assertTrue("X/Y" !in moved.folders && "W/Y" in moved.folders)
+        assertEquals(lib.marks, lib.move(emptySet(), setOf("X"), "X/Y").marks) // not into itself
+        val emptied = lib.delete(setOf("https://b.gr"), setOf("X/Y"))
+        assertEquals(listOf("https://c.gr"), emptied.marks.map { it.url })
+        assertEquals(listOf("X", "W"), emptied.folders) // X kept, though empty now
+        assertEquals(listOf(true, true), lib.pin(setOf("https://a.gr", "https://b.gr")).marks.take(2).map { it.pinned })
+        assertEquals(emptied.extra, BookmarkLibrary.folders(BookmarkLibrary.json(emptied.extra)))
+    }
+
+    /** What 0.8.0 saved (flat folder names, some fields left out) reads as it was. */
+    @Test fun oldBookmarksStillLoad() {
+        val saved = """[{"url":"https://live24.gr/radio/derti.jsp","title":"Derti","folder":"Radios"},{"url":"https://bank.gr/","title":"Bank","pinned":true},{"url":"https://x.gr/"}]"""
+        val b = BrowserRules.bookmarks(saved)
+        assertEquals(listOf(Bookmark("https://live24.gr/radio/derti.jsp", "Derti", folder = "Radios"), Bookmark("https://bank.gr/", "Bank", pinned = true), Bookmark("https://x.gr/", "")), b)
+        val lib = BookmarkLibrary(b, BookmarkLibrary.folders(null))
+        assertEquals(listOf("Radios"), lib.folders)
+        assertEquals(listOf("https://bank.gr/", "https://x.gr/") to listOf("Radios"), lib.start("").let { (m, f) -> m.map { it.url } to f })
     }
 
     @Test fun vault() {
@@ -147,21 +177,11 @@ class BrowserTest {
     @Test fun folders() {
         val b = listOf(Bookmark("https://live24.gr/radio/derti.jsp", "Derti", folder = "Radios"), Bookmark("https://www.ertecho.gr/radio/er1/", "ERT", folder = "Radios"),
             Bookmark("https://live24.gr/radio/sfera.jsp", "Sfera"), Bookmark("https://bank.gr/", "Bank", pinned = true, folder = "Mine"))
-        assertEquals(listOf("Radios", "Mine"), BrowserRules.folders(b))
+        assertEquals(listOf("Radios", "Mine"), BookmarkLibrary(b).folders)
         assertEquals(b, BrowserRules.bookmarks(BrowserRules.bookmarksJson(b)))
         // in a folder: that folder's, whatever the site; outside one: the site's as before
         assertEquals("https://www.ertecho.gr/radio/er1/", BrowserRules.hop(b, "https://live24.gr/radio/derti.jsp", true))
         assertEquals("https://live24.gr/radio/derti.jsp", BrowserRules.hop(b, "https://live24.gr/radio/sfera.jsp", true))
-    }
-
-    @Test fun mobileAgent() {
-        val wv = "Mozilla/5.0 (Linux; Android 15; 24091RPADG Build/AQ3A; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/120.0.6099.230 Mobile Safari/537.36"
-        assertEquals("Mozilla/5.0 (Linux; Android 15; 24091RPADG Build/AQ3A) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.230 Mobile Safari/537.36", BrowserRules.mobileAgent(wv))
-    }
-
-    @Test fun desktopAgent() {
-        val phone = "Mozilla/5.0 (Linux; Android 14; sdk_gphone64_arm64 Build/UE1A.230829.036; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/120.0.6099.230 Mobile Safari/537.36"
-        assertEquals("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.230 Safari/537.36", BrowserRules.desktopAgent(phone))
     }
 
     @Test fun htmlOnly() {
@@ -169,9 +189,6 @@ class BrowserTest {
         assertTrue(BrowserRules.htmlOnly(sites, "https://www.kathimerini.gr/politics/x"))
         assertFalse(BrowserRules.htmlOnly(sites, "https://news.gr/"))
         assertFalse(BrowserRules.htmlOnly(sites, ""))
-        assertTrue(BrowserRules.webFont("https://fonts.gstatic.com/s/roboto/v30/a.woff2"))
-        assertTrue(BrowserRules.webFont("https://x.gr/f.TTF?v=2"))
-        assertFalse(BrowserRules.webFont("https://x.gr/style.css"))
     }
 
     @Test fun toolsOnTheBar() {
@@ -179,7 +196,9 @@ class BrowserTest {
         assertEquals(listOf("copy", "fill"), BrowserTools.parse("copy,nonsense,fill,copy", wide = false)) // unknown and twice dropped
         val bar = BrowserTools.PHONE
         assertNull(BrowserTools.toggle(bar, "player", wide = false)) // six on a phone: full
-        assertEquals(listOf("fill", "ads", "private", "copy", "share"), BrowserTools.toggle(bar, "bookmarks", wide = false))
+        assertEquals(listOf("fill", BrowserTools.UBLOCK, "private", "copy", "share"), BrowserTools.toggle(bar, "bookmarks", wide = false))
+        // the old ad blocker's place goes to uBlock Origin's button; an extension's button is kept as "ext:" and its id
+        assertEquals(listOf("fill", BrowserTools.UBLOCK, "ext:addon@darkreader.org"), BrowserTools.parse("fill,ads,ext:addon@darkreader.org", wide = false))
         assertNull(BrowserTools.toggle(BrowserTools.TABLET, "player", wide = true)) // a tablet's defaults fill its line
         assertEquals(BrowserTools.TABLET - "split" + "player", BrowserTools.toggle(BrowserTools.TABLET - "split", "player", wide = true))
     }
@@ -215,5 +234,22 @@ class BrowserTest {
         assertEquals(3, SavedTabs.read(saved, BrowserRules.NEVER, 900 * h).first.size) // never forgotten
         assertEquals(mapOf(3 to "Σχολείο"), names) // a group with no tab is gone
         assertEquals(emptyList<SavedTab>() to emptyMap<Int, String>(), SavedTabs.read("not json"))
+    }
+
+    @Test fun dateInputs() {
+        val d = java.time.LocalDate.of(2026, 11, 3)
+        val T = org.mozilla.geckoview.GeckoSession.PromptDelegate.DateTimePrompt.Type::class.java
+        fun t(name: String) = T.getField(name).getInt(null)
+        assertEquals("2026-11-03", BrowserDates.format(t("DATE"), d, 0, 0))
+        assertEquals("2026-11", BrowserDates.format(t("MONTH"), d, 0, 0))
+        assertEquals("2026-W45", BrowserDates.format(t("WEEK"), d, 0, 0))
+        assertEquals("07:05", BrowserDates.format(t("TIME"), null, 7, 5))
+        assertEquals("2026-11-03T21:30", BrowserDates.format(t("DATETIME_LOCAL"), d, 21, 30))
+        assertEquals(java.time.LocalDate.of(2026, 11, 2), BrowserDates.date("2026-W45", t("WEEK"))) // its Monday
+        assertEquals(java.time.LocalDate.of(2026, 11, 1), BrowserDates.date("2026-11", t("MONTH")))
+        assertEquals(d, BrowserDates.date("2026-11-03T08:00", t("DATETIME_LOCAL")))
+        assertNull(BrowserDates.date("", t("DATE")))
+        assertEquals(8 to 0, BrowserDates.time("2026-11-03T08:00"))
+        assertEquals(12 to 0, BrowserDates.time(""))
     }
 }
