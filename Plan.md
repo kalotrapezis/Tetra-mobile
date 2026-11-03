@@ -12,6 +12,11 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [x] (maps-speed session, 3 Nov; branch `maps-speed`) **Directions by car: the camera follows the speed** (the user: "tilt a bit
+      forward while at high speed so I can see more of the road, and close to me with more zoom as I slow down"). `carView`:
+      zoom 17.25 at a crawl easing to 15 at 110 km/h (not past 16.5 with the next turn under ~40 s ahead), tilt 45° up to 60° from
+      50 to 110 km/h; quarter and 5° steps; busy crossings and slow turns as before, a busy crossing never zooming out first. The
+      car sits lower at speed (camera padding up to 40 % of the screen at 60°). `MapsCarViewTest`; on an emulator at 30, 70, 120 km/h.
 - [x] (maps-speed session, 3 Nov; branch `maps-speed`, not merged) **Directions: a speedometer and the limit's sign** (the user: "maps — No
       speed limit or speedometer. Wrong graphics, we need more"). By car my speed is its own round badge (red over the limit by
       more than 3 km/h, a dash before the GPS gives a speed, hidden while the GPS is lost), the limit a red-ringed sign beside it;

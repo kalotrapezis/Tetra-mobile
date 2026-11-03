@@ -451,23 +451,25 @@ internal val DRIVING_VIEW = 16.5 to 45.0
 
 /**
  * Directions' camera by car, as zoom and tilt (the user, 23 Oct: "zoom in when we have to, zoom out when the car gains speed
- * on a straight road"; "zoom in and pitch to look more forward as it gets closer to a complicated road"): further out at
- * speed with the next turn far (15 over 90 km/h and 1.5 km, 15.75 over 60 km/h and 800 m); closer step by step towards a
- * busy crossing from ~12 s or 250 m before it (to 17.75 at it), and at any turn slowed for (under 150 m and 32 km/h),
- * tilted further there to look along the road. In quarter steps, so the camera moves only now and then.
+ * on a straight road"; "zoom in and pitch to look more forward as it gets closer to a complicated road"; 3 Nov: "tilt a bit
+ * forward while at high speed so I can see more of the road, and close to me with more zoom as I slow down"):
+ * the zoom eases from 17.25 at a crawl to 15 at 110 km/h, though not further out than 16.5 while the next turn is under
+ * ~40 s ahead; the tilt rises from 45° at 50 km/h to 60° (MapLibre's most) at 110 km/h. Closer step by step towards a busy
+ * crossing from ~12 s or 250 m before it (to 17.75 at it), and at any turn slowed for (under 150 m and 32 km/h), tilted 55°
+ * there to look along the road. Zoom in quarter steps, tilt in 5° ones, so the camera moves only now and then.
  */
 internal fun carView(j: Junction?, sign: Int, toNext: Double, speed: Double): Pair<Double, Double> {
     val reach = maxOf(250.0, speed * 12)
     val busy = j != null && j.busy && toNext < reach
     val slowTurn = sign in setOf(-98, -3, -2, -1, 1, 2, 3, 6) && toNext < 150 && speed < 9
+    val kmh = speed * 3.6
+    val bySpeed = (17.25 - 2.25 * ((kmh - 10) / 100).coerceIn(0.0, 1.0)).let { if (toNext < speed * 40) maxOf(it, DRIVING_VIEW.first) else it }
     val (zoom, tilt) = when {
-        busy -> 16.5 + 1.25 * (1 - toNext / reach).coerceIn(0.0, 1.0) to 55.0
+        busy -> maxOf(bySpeed, 16.5 + 1.25 * (1 - toNext / reach).coerceIn(0.0, 1.0)) to 55.0 // only ever closer, not out first
         slowTurn -> 17.5 to 55.0
-        speed > 25 && toNext > 1500 -> 15.0 to 45.0
-        speed > 17 && toNext > 800 -> 15.75 to 45.0
-        else -> DRIVING_VIEW
+        else -> bySpeed to 45.0 + 15 * ((kmh - 50) / 60).coerceIn(0.0, 1.0)
     }
-    return Math.round(zoom * 4) / 4.0 to tilt
+    return Math.round(zoom * 4) / 4.0 to Math.round(tilt / 5) * 5.0
 }
 
 /** Whether the turn card shows [j]'s picture now, [toNext] metres before it. */
