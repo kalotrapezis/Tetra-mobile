@@ -61,11 +61,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.io.File
 import org.mozilla.geckoview.AllowOrDeny
 import org.mozilla.geckoview.BasicSelectionActionDelegate
 import org.mozilla.geckoview.GeckoResult
@@ -157,6 +162,9 @@ private class BrowserTab(val id: Int, val session: GeckoSession, val view: Gecko
 }
 
 private const val PULL_DP = 96f
+/** Sync's reads and writes of the Browser's files, one at a time, and on past the screen (the tabs written as it closes). */
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+private val BROWSER_SYNC = CoroutineScope(SupervisorJob() + Dispatchers.IO.limitedParallelism(1))
 private val WEB_SCHEMES = setOf("http", "https", "about", "data", "blob", "file", "moz-extension", "resource", "view-source")
 
 @SuppressLint("ClickableViewAccessibility")
@@ -178,6 +186,13 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     val managerFolder = remember { mutableStateOf("") } // the manager opens where it was left
     var bookFolders by remember { mutableStateOf(BookmarkLibrary.folders(prefs.getString("bookmark_folders", null))) } // the folders, empty ones too
     val library = BookmarkLibrary(bookmarks, bookFolders)
+    // sync (BrowserSync.kt): this device's files in .System/Browser/Shared; Private sends no tabs
+    val syncRoot = remember { BrowserSync.root() }
+    val me = remember { BrowserSync.device(context) }
+    val syncBookmarks = remember { BrowserSync.on(context, BrowserSync.BOOKMARKS) }
+    val syncTabs = remember { !private && BrowserSync.on(context, BrowserSync.TABS) }
+    val marksRun = remember { IntArray(1) }
+    var others by remember { mutableStateOf(emptyList<DeviceTabs>()) } // the other devices' tabs
     var editing by remember { mutableStateOf(false) }
     var typed by remember { mutableStateOf(TextFieldValue("")) }
     var menu by remember { mutableStateOf(false) } // the handle's sheet: the tools not on the bar
@@ -439,9 +454,22 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     }
     /** A kept tab opened for the first time: its page now. */
     fun wake(t: BrowserTab) { t.pending?.let { u -> t.pending = null; load(t, u) } }
+    /** The open tabs as the other devices see them (Private's never). */
+    fun remoteTabs() = tabs.map { RemoteTab(it.pending ?: it.url, it.title, it.pinned, it.group?.let { g -> groups[g] }.orEmpty()) }.filter { it.url.isNotEmpty() }
+    fun shareTabs(list: List<RemoteTab> = remoteTabs()) {
+        if (!syncTabs) return
+        val app = context.applicationContext
+        BROWSER_SYNC.launch {
+            runCatching { if (BrowserSync.writeTabs(syncRoot, me, DataFiles.deviceName(app), list)) { WriterLog.i("Browser sync: ${list.size} tabs written"); ScopedSync.soon(app, "browser", orWhole = true) } }
+                .onFailure { WriterLog.e("Browser sync: tabs not written", it) }
+        }
+    }
     fun saveTabs() {
         if (!private) prefs.edit().putString("kept_tabs", SavedTabs.json(tabs.map { SavedTab(it.pending ?: it.url, it.title, it.pinned, it.group) }, groups)).apply()
+        shareTabs() // and to the other devices, when the Browser is left
     }
+    // a change of the tabs (opened, closed, a page, a name, pinned, grouped): to the other devices 2 s after the last
+    LaunchedEffect(Unit) { if (syncTabs) snapshotFlow { remoteTabs() }.distinctUntilChanged().collectLatest { delay(2000); shareTabs(it) } }
     val tab = tabs.firstOrNull { it.id == currentId } ?: tabs.first()
     val media = tab.media
     fun switch(to: BrowserTab) {
@@ -571,8 +599,45 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         splitPair = currentId to other.id
     }
     fun keep(v: BrowserVault) { vault = v; runCatching { BrowserSecrets.save(context, v) }.onFailure { WriterLog.e("Browser: the vault not saved", it) } }
-    fun keepBookmarks(b: List<Bookmark>) { bookmarks = b; prefs.edit().putString("bookmarks", BrowserRules.bookmarksJson(b)).apply() }
-    fun keepLibrary(l: BookmarkLibrary) { keepBookmarks(l.marks); bookFolders = l.extra; prefs.edit().putString("bookmark_folders", BookmarkLibrary.json(l.extra)).apply() }
+    fun store(l: BookmarkLibrary) {
+        bookmarks = l.marks; bookFolders = l.extra
+        prefs.edit().putString("bookmarks", BrowserRules.bookmarksJson(l.marks)).putString("bookmark_folders", BookmarkLibrary.json(l.extra)).apply()
+    }
+    /**
+     * Bookmarks between devices (BrowserSync, Settings › Browser › Sync): what changed here recorded, the others' merged in,
+     * shown if it differs; [pushed] a change made here, sent at once. A merge answered after a newer change here is dropped.
+     */
+    fun syncMarks(l: BookmarkLibrary, pushed: Boolean) {
+        if (!syncBookmarks) return
+        val n = ++marksRun[0]
+        BROWSER_SYNC.launch {
+            val r = runCatching { BrowserSync.bookmarks(syncRoot, me, l, File(context.filesDir, "browser-sync/bookmarks.json")) }.onFailure { WriterLog.e("Browser sync: bookmarks not merged", it) }.getOrNull()
+            if (pushed) ScopedSync.soon(context.applicationContext, "browser", orWhole = true)
+            withContext(Dispatchers.Main) { if (r != null && n == marksRun[0] && (r.marks != bookmarks || r.extra != bookFolders)) store(r) }
+        }
+    }
+    fun keepLibrary(l: BookmarkLibrary) { store(l); syncMarks(l, true) }
+    fun keepBookmarks(b: List<Bookmark>) = keepLibrary(BookmarkLibrary(b, bookFolders))
+    // the other devices' bookmarks and tabs: read now, and again when sync brings a file of theirs
+    fun readOthers() { if (syncTabs) BROWSER_SYNC.launch { val o = runCatching { BrowserSync.otherTabs(syncRoot, me) }.getOrDefault(emptyList()); withContext(Dispatchers.Main) { others = o } } }
+    DisposableEffect(Unit) {
+        syncMarks(library, false); readOthers()
+        val main = android.os.Handler(android.os.Looper.getMainLooper())
+        val marksSoon = Runnable { syncMarks(BookmarkLibrary(bookmarks, bookFolders), false) }
+        val tabsSoon = Runnable { readOthers() }
+        val dirs = listOf(File(syncRoot, "Bookmarks"), File(syncRoot, "Tabs")).onEach { runCatching { it.mkdirs() } }
+        val watch = object : android.os.FileObserver(dirs, CLOSE_WRITE or MOVED_TO or DELETE) {
+            override fun onEvent(event: Int, path: String?) {
+                if (path == null || path.startsWith(".") || path == "$me.json" || !path.endsWith(".json")) return
+                // which folder is not said: both looked at, each half a second after the last
+                main.removeCallbacks(marksSoon); main.removeCallbacks(tabsSoon)
+                if (syncBookmarks) main.postDelayed(marksSoon, 500)
+                main.postDelayed(tabsSoon, 500)
+            }
+        }
+        if (syncBookmarks || syncTabs) watch.startWatching()
+        onDispose { watch.stopWatching(); main.removeCallbacks(marksSoon); main.removeCallbacks(tabsSoon) }
+    }
     var filing by remember { mutableStateOf<Bookmark?>(null) } // a favourite being put in a folder
     val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@rememberLauncherForActivityResult
@@ -858,7 +923,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         }
     }
     // Bookmarks, History, Passwords and Import: modal sheets too
-    if (panel == BrowserPanel.Bookmarks) BookmarksManager(library, wide, managerFolder, keep = ::keepLibrary, close = { panel = null }) { u -> panel = null; go(u) }
+    if (panel == BrowserPanel.Bookmarks) BookmarksManager(library, wide, managerFolder, keep = ::keepLibrary, close = { panel = null }, others = others,
+        openNew = { u -> panel = null; open(u) }) { u -> panel = null; go(u) }
     else panel?.let { p -> ModalBottomSheet(onDismissRequest = { panel = null }) {
         BrowserPanelView(p, close = { panel = null }, visits = visits, vault = vault, imported = imported, open = ::go,
                     keepHistory = keepHistory,

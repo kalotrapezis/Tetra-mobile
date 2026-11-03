@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Onglets des autres appareils</string>
+    <string name="browser_sync_title">Synchronisation</string>
+    <string name="browser_sync_note">Ce que cet appareil partage avec vos autres appareils grâce à la synchronisation de Tetra. Chaque interrupteur ne concerne que cet appareil ; le désactiver garde ce qui est ici.</string>
+    <string name="browser_sync_bookmarks">Marque-pages</string>
+    <string name="browser_sync_tabs">Onglets ouverts</string>
+</resources>

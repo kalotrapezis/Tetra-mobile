@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Flikar från andra enheter</string>
+    <string name="browser_sync_title">Synkronisering</string>
+    <string name="browser_sync_note">Vad den här enheten delar med dina andra enheter via Tetras synkronisering. Varje reglage gäller bara den här enheten; avstängt behålls det som finns här.</string>
+    <string name="browser_sync_bookmarks">Bokmärken</string>
+    <string name="browser_sync_tabs">Öppna flikar</string>
+</resources>

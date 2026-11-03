@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Faner fra andre enheder</string>
+    <string name="browser_sync_title">Synkronisering</string>
+    <string name="browser_sync_note">Hvad denne enhed deler med dine andre enheder via Tetras synkronisering. Hver kontakt gælder kun denne enhed; slås en fra, beholdes det, der er her.</string>
+    <string name="browser_sync_bookmarks">Bogmærker</string>
+    <string name="browser_sync_tabs">Åbne faner</string>
+</resources>

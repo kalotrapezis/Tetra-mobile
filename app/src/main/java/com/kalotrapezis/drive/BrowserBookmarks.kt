@@ -28,7 +28,8 @@ import androidx.compose.ui.window.DialogProperties
  * press chooses (then a tap chooses more) and the bar at the bottom acts on what is chosen: edit, move, pin, delete.
  */
 @OptIn(ExperimentalFoundationApi::class)
-@Composable internal fun BookmarksManager(library: BookmarkLibrary, wide: Boolean, at: MutableState<String>, keep: (BookmarkLibrary) -> Unit, close: () -> Unit, open: (String) -> Unit) =
+@Composable internal fun BookmarksManager(library: BookmarkLibrary, wide: Boolean, at: MutableState<String>, keep: (BookmarkLibrary) -> Unit, close: () -> Unit,
+    others: List<DeviceTabs> = emptyList(), openNew: (String) -> Unit = {}, open: (String) -> Unit) =
     Dialog(onDismissRequest = close, properties = DialogProperties(usePlatformDefaultWidth = false)) {
     var folder by at
     var query by remember { mutableStateOf("") }
@@ -36,12 +37,15 @@ import androidx.compose.ui.window.DialogProperties
     var dirs by remember { mutableStateOf(setOf<String>()) } // chosen folders
     var ask by remember { mutableStateOf<String?>(null) } // "new", "edit", "rename", "move", "delete"
     var selecting by remember { mutableStateOf(false) } // Select tapped, nothing chosen yet
+    // Tabs from other devices (as Firefox's): a place at the top of the bookmarks, each device by its name, read only
+    var devices by remember { mutableStateOf(false) }
+    if (others.isEmpty()) devices = false
     val choosing = selecting || urls.isNotEmpty() || dirs.isNotEmpty()
     val n = urls.size + dirs.size
     fun clear() { urls = emptySet(); dirs = emptySet(); selecting = false }
     fun go(f: String) { folder = f; query = ""; clear() }
     if (folder.isNotEmpty() && folder !in library.folders) folder = "" // renamed or deleted from under us
-    BackHandler { when { choosing -> clear(); query.isNotEmpty() -> query = ""; folder.isNotEmpty() -> go(BookmarkLibrary.parentOf(folder)); else -> close() } }
+    BackHandler { when { devices -> devices = false; choosing -> clear(); query.isNotEmpty() -> query = ""; folder.isNotEmpty() -> go(BookmarkLibrary.parentOf(folder)); else -> close() } }
 
     val (marks, subs) = if (query.isBlank()) library.marks.filter { it.folder == folder } to library.subfolders(folder) else library.find(query)
     Surface(if (wide) Modifier.widthIn(max = 900.dp).fillMaxWidth(0.92f).fillMaxHeight(0.88f) else Modifier.fillMaxSize(),
@@ -49,17 +53,18 @@ import androidx.compose.ui.window.DialogProperties
         Column(Modifier.then(if (wide) Modifier else Modifier.systemBarsPadding()).imePadding()) {
             // the top: where we are and the search (viewing); the actions are at the bottom
             Row(Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                if (folder.isNotEmpty() && query.isBlank()) IconButton(onClick = { go(BookmarkLibrary.parentOf(folder)) }) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
+                if (devices) IconButton(onClick = { devices = false }) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
+                else if (folder.isNotEmpty() && query.isBlank()) IconButton(onClick = { go(BookmarkLibrary.parentOf(folder)) }) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
                 else Spacer(Modifier.width(16.dp))
                 Column(Modifier.weight(1f)) {
-                    Text(if (folder.isEmpty() || query.isNotBlank()) stringResource(R.string.browser_bookmarks) else BookmarkLibrary.nameOf(folder),
+                    Text(if (devices) stringResource(R.string.browser_other_devices) else if (folder.isEmpty() || query.isNotBlank()) stringResource(R.string.browser_bookmarks) else BookmarkLibrary.nameOf(folder),
                         style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (query.isBlank() && '/' in folder) Text(BookmarkLibrary.parentOf(folder).replace("/", " › "), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 IconButton(onClick = close) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_close)) }
             }
-            OutlinedTextField(query, { query = it; clear() }, Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), singleLine = true,
+            if (!devices) OutlinedTextField(query, { query = it; clear() }, Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), singleLine = true,
                 placeholder = { Text(stringResource(R.string.browser_search_bookmarks)) }, shape = CircleShape,
                 leadingIcon = { Icon(painterResource(R.drawable.ic_search), null) },
                 trailingIcon = { if (query.isNotEmpty()) IconButton(onClick = { query = "" }) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_clear)) } })
@@ -79,8 +84,37 @@ import androidx.compose.ui.window.DialogProperties
                     }
                     VerticalDivider()
                 }
-                LazyColumn(Modifier.weight(1f).fillMaxHeight(), contentPadding = PaddingValues(vertical = 4.dp)) {
-                    if (marks.isEmpty() && subs.isEmpty()) item {
+                if (devices) LazyColumn(Modifier.weight(1f).fillMaxHeight(), contentPadding = PaddingValues(vertical = 4.dp)) {
+                    // each device, its tabs under it; a tap opens the page in a new tab here
+                    others.forEach { d ->
+                        item(key = "d/${d.id}") {
+                            Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(painterResource(R.drawable.ic_devices), null, Modifier.size(18.dp), tint = BROWSER_COLOR)
+                                Text(d.name, Modifier.weight(1f).padding(start = 10.dp), style = MaterialTheme.typography.titleSmall, color = BROWSER_COLOR, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text("${d.tabs.size}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
+                            }
+                        }
+                        items(d.tabs, key = { "d/${d.id}/${it.url}/${it.title}" }) { t ->
+                            val host = BrowserRules.site(BrowserRules.host(t.url))
+                            ManagerRow(false, false, {}, { openNew(t.url) }, {
+                                Box(Modifier.size(40.dp).clip(CircleShape).background(TILE_COLORS[(host.hashCode() and 0x7fffffff) % TILE_COLORS.size]), contentAlignment = Alignment.Center) {
+                                    Text(host.take(1).uppercase(), color = Color.White, style = MaterialTheme.typography.titleMedium)
+                                }
+                            }, t.title.ifBlank { host }, listOf(t.group, t.url).filter { it.isNotEmpty() }.joinToString(" · ")) {
+                                if (t.pinned) Icon(painterResource(R.drawable.ic_push_pin), null, Modifier.size(18.dp), tint = BROWSER_COLOR)
+                            }
+                        }
+                    }
+                } else LazyColumn(Modifier.weight(1f).fillMaxHeight(), contentPadding = PaddingValues(vertical = 4.dp)) {
+                    if (folder.isEmpty() && query.isBlank() && others.isNotEmpty()) item(key = "devices") {
+                        ManagerRow(false, false, {}, { devices = true; clear() }, {
+                            Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.ic_devices), null, tint = BROWSER_COLOR) }
+                        }, stringResource(R.string.browser_other_devices), others.joinToString(", ") { it.name }) {
+                            Text("${others.sumOf { it.tabs.size }}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
+                            Icon(painterResource(R.drawable.ic_chevron_right), null, Modifier.padding(start = 4.dp).size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    if (marks.isEmpty() && subs.isEmpty() && !(folder.isEmpty() && query.isBlank() && others.isNotEmpty())) item {
                         Text(stringResource(if (library.marks.isEmpty() && folder.isEmpty()) R.string.browser_no_bookmarks else R.string.browser_folder_empty),
                             Modifier.padding(20.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
@@ -107,8 +141,8 @@ import androidx.compose.ui.window.DialogProperties
                 }
             }
             // the bar at the bottom: New folder and Select, or what is chosen and what can be done with it
-            HorizontalDivider()
-            Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (!devices) HorizontalDivider()
+            if (!devices) Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (!choosing) {
                     BarButton(R.drawable.ic_add, stringResource(R.string.browser_new_folder)) { ask = "new" }
                     BarButton(R.drawable.ic_checklist, stringResource(R.string.browser_select), enabled = marks.isNotEmpty() || subs.isNotEmpty()) { selecting = true }

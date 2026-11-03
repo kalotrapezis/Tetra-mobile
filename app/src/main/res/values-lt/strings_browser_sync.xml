@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Kortelės iš kitų įrenginių</string>
+    <string name="browser_sync_title">Sinchronizavimas</string>
+    <string name="browser_sync_note">Ką šis įrenginys bendrina su kitais jūsų įrenginiais per Tetra sinchronizavimą. Kiekvienas jungiklis galioja tik šiam įrenginiui; išjungus tai, kas čia yra, lieka.</string>
+    <string name="browser_sync_bookmarks">Žymės</string>
+    <string name="browser_sync_tabs">Atvertos kortelės</string>
+</resources>

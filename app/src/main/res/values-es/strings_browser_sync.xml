@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Pestañas de otros dispositivos</string>
+    <string name="browser_sync_title">Sincronización</string>
+    <string name="browser_sync_note">Lo que este dispositivo comparte con tus otros dispositivos mediante la sincronización de Tetra. Cada interruptor es solo de este dispositivo; al desactivarlo se conserva lo que hay aquí.</string>
+    <string name="browser_sync_bookmarks">Marcadores</string>
+    <string name="browser_sync_tabs">Pestañas abiertas</string>
+</resources>

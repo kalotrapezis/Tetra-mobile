@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Tabs von anderen Geräten</string>
+    <string name="browser_sync_title">Synchronisieren</string>
+    <string name="browser_sync_note">Was dieses Gerät über Tetras Synchronisierung mit deinen anderen Geräten teilt. Jeder Schalter gilt nur für dieses Gerät; ausgeschaltet bleibt, was hier ist.</string>
+    <string name="browser_sync_bookmarks">Lesezeichen</string>
+    <string name="browser_sync_tabs">Offene Tabs</string>
+</resources>

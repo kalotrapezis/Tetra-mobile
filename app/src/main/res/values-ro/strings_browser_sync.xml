@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">File de pe alte dispozitive</string>
+    <string name="browser_sync_title">Sincronizare</string>
+    <string name="browser_sync_note">Ce partajează acest dispozitiv cu celelalte dispozitive ale tale prin sincronizarea Tetra. Fiecare comutator este doar al acestui dispozitiv; oprit, păstrează ce este aici.</string>
+    <string name="browser_sync_bookmarks">Marcaje</string>
+    <string name="browser_sync_tabs">File deschise</string>
+</resources>

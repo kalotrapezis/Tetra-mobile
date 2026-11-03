@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Tabs minn apparati oħra</string>
+    <string name="browser_sync_title">Sinkronizzazzjoni</string>
+    <string name="browser_sync_note">X\'jaqsam dan l-apparat mal-apparati l-oħra tiegħek permezz tas-sinkronizzazzjoni ta\' Tetra. Kull swiċċ huwa għal dan l-apparat biss; jekk tintefa, dak li hawn jibqa\'.</string>
+    <string name="browser_sync_bookmarks">Bookmarks</string>
+    <string name="browser_sync_tabs">Tabs miftuħa</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Separadores de outros dispositivos</string>
+    <string name="browser_sync_title">Sincronização</string>
+    <string name="browser_sync_note">O que este dispositivo partilha com os seus outros dispositivos através da sincronização do Tetra. Cada interruptor é só deste dispositivo; desligá-lo mantém o que está aqui.</string>
+    <string name="browser_sync_bookmarks">Marcadores</string>
+    <string name="browser_sync_tabs">Separadores abertos</string>
+</resources>

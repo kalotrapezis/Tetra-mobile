@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Cluaisíní ó ghléasanna eile</string>
+    <string name="browser_sync_title">Sioncrónú</string>
+    <string name="browser_sync_note">An méid a roinneann an gléas seo le do ghléasanna eile trí shioncrónú Tetra. Baineann gach lasc leis an ngléas seo amháin; má mhúchtar í, fanann a bhfuil anseo.</string>
+    <string name="browser_sync_bookmarks">Leabharmharcanna</string>
+    <string name="browser_sync_tabs">Cluaisíní oscailte</string>
+</resources>

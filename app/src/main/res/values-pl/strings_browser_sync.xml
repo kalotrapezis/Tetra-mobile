@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Karty z innych urządzeń</string>
+    <string name="browser_sync_title">Synchronizacja</string>
+    <string name="browser_sync_note">Co to urządzenie udostępnia innym twoim urządzeniom przez synchronizację Tetry. Każdy przełącznik dotyczy tylko tego urządzenia; wyłączenie zachowuje to, co tu jest.</string>
+    <string name="browser_sync_bookmarks">Zakładki</string>
+    <string name="browser_sync_tabs">Otwarte karty</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Tabs from other devices</string>
+    <string name="browser_sync_title">Sync</string>
+    <string name="browser_sync_note">What this device shares with your other devices through Tetra\'s sync. Each switch is this device\'s own; turning one off keeps what is here.</string>
+    <string name="browser_sync_bookmarks">Bookmarks</string>
+    <string name="browser_sync_tabs">Open tabs</string>
+</resources>

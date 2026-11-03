@@ -54,7 +54,7 @@ internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, 
     Appearance(R.string.settings_appearance, R.drawable.ic_palette, null, R.string.settings_appearance_summary, listOf(R.string.settings_theme, R.string.settings_language, R.string.settings_photo_on_home, R.string.settings_hidden_from_home, R.string.settings_app_icons)),
     Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_check, R.string.mail_default_app, R.string.mail_threads, R.string.mail_read_shown, R.string.mail_islands, R.string.mail_security,
         R.string.mail_remote, R.string.mail_allowed, R.string.mail_tracking, R.string.mail_link_warning, R.string.mail_risky, R.string.mail_real_address, R.string.mail_receipts)),
-    Browser(R.string.app_browser, Category.Browser.icon, Category.Browser.color, R.string.settings_browser_summary, listOf(R.string.browser_history_keep, R.string.browser_top_bar)),
+    Browser(R.string.app_browser, Category.Browser.icon, Category.Browser.color, R.string.settings_browser_summary, listOf(R.string.browser_history_keep, R.string.browser_top_bar, R.string.browser_sync_bookmarks, R.string.browser_sync_tabs)),
     Gallery(R.string.app_gallery, Category.Gallery.icon, Category.Gallery.color, R.string.settings_gallery_summary, listOf(R.string.settings_photos_videos, R.string.settings_search_quality, R.string.settings_folders)),
     Files(R.string.app_files, Category.Files.icon, Category.Files.color, R.string.settings_files_summary, listOf(R.string.settings_drive_workspace, R.string.settings_all_files)),
     Scanner(R.string.settings_pdf_scanner, Category.Scanner.icon, Category.Scanner.color, R.string.settings_resolution, listOf(R.string.settings_resolution)),
@@ -490,6 +490,23 @@ internal fun SettingsTab(
     }
     SettingsSection(null, stringResource(R.string.browser_top_bar_note)) {
         SwitchRow(stringResource(R.string.browser_top_bar), null, top) { top = it; prefs.edit().putBoolean("top_bar", it).apply() }
+    }
+    // what this device shares with the others through Tetra's sync (the user, 3 Nov: "options in the settings what to sync in the
+    // browser"); each switch is this device's own, and off keeps what is here (BrowserSync.kt)
+    var marks by remember { mutableStateOf(BrowserSync.on(context, BrowserSync.BOOKMARKS)) }
+    var tabs by remember { mutableStateOf(BrowserSync.on(context, BrowserSync.TABS)) }
+    SettingsSection(stringResource(R.string.browser_sync_title), stringResource(R.string.browser_sync_note)) {
+        SwitchRow(stringResource(R.string.browser_sync_bookmarks), null, marks) {
+            marks = it; prefs.edit().putBoolean(BrowserSync.BOOKMARKS, it).apply(); WriterLog.i("Browser sync: bookmarks ${if (it) "on" else "off"}")
+        }
+        SwitchRow(stringResource(R.string.browser_sync_tabs), null, tabs) { on ->
+            tabs = on; prefs.edit().putBoolean(BrowserSync.TABS, on).apply(); WriterLog.i("Browser sync: tabs ${if (on) "on" else "off"}")
+            // off: the others stop showing this device's tabs (an empty list, where a list was); on: written when the Browser next opens
+            if (!on) Thread { runCatching {
+                val root = BrowserSync.root(); val me = BrowserSync.device(context)
+                if (java.io.File(root, "Tabs/$me.json").isFile && BrowserSync.writeTabs(root, me, DataFiles.deviceName(context), emptyList())) ScopedSync.soon(context.applicationContext, "browser", orWhole = true)
+            } }.start()
+        }
     }
 }
 

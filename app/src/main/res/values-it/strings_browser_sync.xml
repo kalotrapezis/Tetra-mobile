@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Schede da altri dispositivi</string>
+    <string name="browser_sync_title">Sincronizzazione</string>
+    <string name="browser_sync_note">Ciò che questo dispositivo condivide con gli altri tuoi dispositivi tramite la sincronizzazione di Tetra. Ogni interruttore vale solo per questo dispositivo; spegnendolo resta ciò che c\'è qui.</string>
+    <string name="browser_sync_bookmarks">Segnalibri</string>
+    <string name="browser_sync_tabs">Schede aperte</string>
+</resources>

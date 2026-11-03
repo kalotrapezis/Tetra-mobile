@@ -70,7 +70,7 @@ object TetraFolder {
  */
 object TetraSystem {
     const val NAME = ".System"
-    val SHARED = mapOf("Calendar" to "Calendar", "Contacts" to "Contacts", "Data" to "Data", "Phone" to "Phone", "Timer" to "Timer", "Maps" to "Maps", "Mail" to "Mail", "AI Assist" to "Assistant", "Trash" to "Trash")
+    val SHARED = mapOf("Calendar" to "Calendar", "Contacts" to "Contacts", "Data" to "Data", "Phone" to "Phone", "Timer" to "Timer", "Maps" to "Maps", "Mail" to "Mail", "AI Assist" to "Assistant", "Browser" to "Browser", "Trash" to "Trash")
 
     /** `<tetra>/.System/<app>/<kind>`, kind one of Data, Tools, Cache, Temp, Shared. */
     fun dir(tetra: File, app: String, kind: String) = File(tetra, "$NAME/$app/$kind")
@@ -765,7 +765,8 @@ data class DriveFileEntry(val relativePath: String, val sizeBytes: Long, val mod
 internal object DriveScope {
     private val scopes = mapOf("calendar" to (listOf("Calendar") to listOf(".ics")), "timer" to (listOf(TimerFiles.FOLDER) to emptyList<String>()),
         "contacts" to (listOf(ContactsFiles.FOLDER) to listOf(".vcf")), "phone" to (listOf(PhoneHistory.FOLDER) to emptyList<String>()), "data" to (listOf(DataFiles.FOLDER) to emptyList<String>()),
-        "mail" to (listOf("Mail/requests", "Mail/outbox") to emptyList<String>()), "assistant" to (listOf("AI Assist") to emptyList<String>()))
+        "mail" to (listOf("Mail/requests", "Mail/outbox") to emptyList<String>()), "assistant" to (listOf("AI Assist") to emptyList<String>()),
+        "browser" to (listOf(BrowserSync.FOLDER) to emptyList<String>()))
     fun contains(scope: String, relative: String): Boolean {
         val (dirs, trashExts) = scopes[scope] ?: return false
         return dirs.any { relative.startsWith("$it/") } || (relative.startsWith("Trash/") && trashExts.any { relative.lowercase().endsWith(it) })

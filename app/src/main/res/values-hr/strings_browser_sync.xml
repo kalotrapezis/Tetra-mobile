@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Kartice s drugih uređaja</string>
+    <string name="browser_sync_title">Sinkronizacija</string>
+    <string name="browser_sync_note">Što ovaj uređaj dijeli s vašim drugim uređajima putem Tetrine sinkronizacije. Svaki prekidač vrijedi samo za ovaj uređaj; isključivanjem ostaje ono što je ovdje.</string>
+    <string name="browser_sync_bookmarks">Oznake</string>
+    <string name="browser_sync_tabs">Otvorene kartice</string>
+</resources>

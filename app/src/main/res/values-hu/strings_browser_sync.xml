@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Más eszközök lapjai</string>
+    <string name="browser_sync_title">Szinkronizálás</string>
+    <string name="browser_sync_note">Amit ez az eszköz megoszt a többi eszközével a Tetra szinkronizálásán keresztül. Minden kapcsoló csak erre az eszközre vonatkozik; kikapcsolva megmarad, ami itt van.</string>
+    <string name="browser_sync_bookmarks">Könyvjelzők</string>
+    <string name="browser_sync_tabs">Megnyitott lapok</string>
+</resources>

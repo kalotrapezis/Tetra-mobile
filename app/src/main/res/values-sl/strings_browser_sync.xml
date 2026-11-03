@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Zavihki z drugih naprav</string>
+    <string name="browser_sync_title">Sinhronizacija</string>
+    <string name="browser_sync_note">Kaj ta naprava deli z vašimi drugimi napravami prek Tetrine sinhronizacije. Vsako stikalo velja le za to napravo; ko ga izklopite, ostane, kar je tukaj.</string>
+    <string name="browser_sync_bookmarks">Zaznamki</string>
+    <string name="browser_sync_tabs">Odprti zavihki</string>
+</resources>

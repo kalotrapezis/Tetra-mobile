@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Раздели от други устройства</string>
+    <string name="browser_sync_title">Синхронизиране</string>
+    <string name="browser_sync_note">Какво споделя това устройство с другите ви устройства чрез синхронизирането на Tetra. Всеки превключвател е само за това устройство; изключването запазва наличното тук.</string>
+    <string name="browser_sync_bookmarks">Отметки</string>
+    <string name="browser_sync_tabs">Отворени раздели</string>
+</resources>

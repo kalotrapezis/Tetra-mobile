@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Tabbladen van andere apparaten</string>
+    <string name="browser_sync_title">Synchronisatie</string>
+    <string name="browser_sync_note">Wat dit apparaat via de synchronisatie van Tetra met je andere apparaten deelt. Elke schakelaar geldt alleen voor dit apparaat; uitzetten houdt wat hier is.</string>
+    <string name="browser_sync_bookmarks">Bladwijzers</string>
+    <string name="browser_sync_tabs">Open tabbladen</string>
+</resources>

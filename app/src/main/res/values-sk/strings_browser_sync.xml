@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Karty z iných zariadení</string>
+    <string name="browser_sync_title">Synchronizácia</string>
+    <string name="browser_sync_note">Čo toto zariadenie zdieľa s vašimi ďalšími zariadeniami cez synchronizáciu Tetra. Každý prepínač platí len pre toto zariadenie; vypnutie ponechá, čo tu je.</string>
+    <string name="browser_sync_bookmarks">Záložky</string>
+    <string name="browser_sync_tabs">Otvorené karty</string>
+</resources>

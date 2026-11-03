@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Panely z jiných zařízení</string>
+    <string name="browser_sync_title">Synchronizace</string>
+    <string name="browser_sync_note">Co toto zařízení sdílí s vašimi dalšími zařízeními přes synchronizaci Tetra. Každý přepínač platí jen pro toto zařízení; vypnutí ponechá, co tu je.</string>
+    <string name="browser_sync_bookmarks">Záložky</string>
+    <string name="browser_sync_tabs">Otevřené panely</string>
+</resources>

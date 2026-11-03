@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Καρτέλες από άλλες συσκευές</string>
+    <string name="browser_sync_title">Συγχρονισμός</string>
+    <string name="browser_sync_note">Τι μοιράζεται αυτή η συσκευή με τις άλλες σας μέσω του συγχρονισμού του Tetra. Κάθε διακόπτης αφορά μόνο αυτή τη συσκευή· όταν κλείνει, ό,τι υπάρχει εδώ μένει.</string>
+    <string name="browser_sync_bookmarks">Σελιδοδείκτες</string>
+    <string name="browser_sync_tabs">Ανοιχτές καρτέλες</string>
+</resources>

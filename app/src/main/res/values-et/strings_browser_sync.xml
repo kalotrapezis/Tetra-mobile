@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Browser's sync between devices (BrowserSync.kt) -->
+<resources>
+    <string name="browser_other_devices">Teiste seadmete kaardid</string>
+    <string name="browser_sync_title">Sünkroonimine</string>
+    <string name="browser_sync_note">Mida see seade jagab Tetra sünkroonimise kaudu teie teiste seadmetega. Iga lüliti kehtib ainult selles seadmes; väljalülitamisel jääb siin olev alles.</string>
+    <string name="browser_sync_bookmarks">Järjehoidjad</string>
+    <string name="browser_sync_tabs">Avatud kaardid</string>
+</resources>

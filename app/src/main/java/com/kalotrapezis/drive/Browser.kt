@@ -16,8 +16,9 @@ internal data class Bookmark(val url: String, val title: String, val pinned: Boo
 /**
  * The bookmarks and the folders kept even when empty (the manager's, 3 Nov: "a proper bookmarks manager, Firefox-like"):
  * a folder is a path, its parents before it. What the start page shows is [start]; imports go under [IMPORTED].
+ * [moves]: the folders this change renamed or moved (from → to), so sync keeps each folder's id (BrowserSync).
  */
-internal data class BookmarkLibrary(val marks: List<Bookmark>, val extra: List<String> = emptyList()) {
+internal data class BookmarkLibrary(val marks: List<Bookmark>, val extra: List<String> = emptyList(), val moves: List<Pair<String, String>> = emptyList()) {
     /** Every folder, its parents too, in the order first met. */
     val folders: List<String> get() = (marks.map { it.folder } + extra).filter { it.isNotEmpty() }
         .flatMap { p -> p.split('/').let { s -> s.indices.map { s.take(it + 1).joinToString("/") } } }.distinct()
@@ -48,7 +49,7 @@ internal data class BookmarkLibrary(val marks: List<Bookmark>, val extra: List<S
 
     /** The chosen pages and folders into [to]; a folder into itself or its own is left. Their folders stay, though empty. */
     fun move(urls: Set<String>, dirs: Set<String>, to: String): BookmarkLibrary {
-        var l = BookmarkLibrary(marks.map { if (it.url in urls) it.copy(folder = to) else it }, (folders + to).filter { it.isNotEmpty() }.distinct())
+        var l = BookmarkLibrary(marks.map { if (it.url in urls) it.copy(folder = to) else it }, (folders + to).filter { it.isNotEmpty() }.distinct(), moves)
         for (d in dirs) if (!under(to, d)) l = l.relocate(d, join(to, nameOf(d)))
         return l
     }
@@ -67,7 +68,7 @@ internal data class BookmarkLibrary(val marks: List<Bookmark>, val extra: List<S
 
     private fun relocate(from: String, to: String): BookmarkLibrary {
         fun re(p: String) = if (under(p, from)) to + p.removePrefix(from) else p
-        return BookmarkLibrary(marks.map { it.copy(folder = re(it.folder)) }, folders.map(::re).distinct())
+        return BookmarkLibrary(marks.map { it.copy(folder = re(it.folder)) }, folders.map(::re).distinct(), moves + (from to to))
     }
 
     companion object {
