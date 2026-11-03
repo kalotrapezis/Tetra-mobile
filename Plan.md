@@ -18,6 +18,13 @@ How to write here:
       no sign where OSM has no number (GR:urban, none, untagged — `MapsRouting.posted`, never guessed; 2 km/h storage steps
       back to fives). Before, nothing showed where the limit was unknown. `MapsLimitTest`; driven on an emulator in
       Thessaloniki (44 under 50, 75 red, 56 alone). Units: km/h even when Settings say miles (the signs are km/h).
+- [x] (maps-junctions session, 3 Nov; branch maps-junctions, not merged) **Maps: the crossing pictures honest, and more of them**
+      (the user: "a sharp left turn with 3 roads but it showed 5"). Counted no more: service roads, driveways, car parks' aisles and
+      tracks (unless the route takes one), a street OSM draws twice between the same nodes, a dual carriageway's two halves (same name
+      within 30°); a crossing's nodes grouped only 12 m apart (20 m one-way) and only where each is a crossing itself, so a T 20 m on
+      is not pulled in. New pictures: true angles (sharp/slight), forks as a Y, a ramp leaving a main road, U-turns, staggered
+      crossings drawn as two, the roundabout's exit number, main roads thicker. JunctionGraphTest (small graphs), MapsJunctionTest
+      (real graph), JunctionPictureDeviceTest draws them all (on an emulator). Not checked on today's drive (the phone's log).
 - [x] (alarm-buttons session, 1 Nov; merged 1 Nov) **Timer notifications: icon-only buttons**
       (the user: "buttons like the X on the calendar … no text just the buttons"). Ringing alarm: zzz (snooze 10 min) and ×; ringing
       timer: zzz (+1 min) and ×; running timer/stopwatch: ‖ (▶ when paused) and ×; the coming alarm (12 h before): zzz and × (skip); same icons in the island and AlarmRingActivity.
