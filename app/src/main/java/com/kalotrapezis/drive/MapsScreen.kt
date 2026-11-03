@@ -525,8 +525,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         // the limit at most every two seconds, off the main thread (the graph is opened the first time)
         if (System.currentTimeMillis() - limitAsked > 2000) {
             limitAsked = System.currentTimeMillis()
-            scope.launch { limit = withContext(Dispatchers.IO) { runCatching { MapsFiles.graphAt(root, loc.latitude, loc.longitude).takeIf { File(it, "properties").isFile }
-                ?.let { MapsRouting.limitAt(it, loc.latitude, loc.longitude) } }.getOrNull() } }
+            scope.launch { limit = withContext(Dispatchers.IO) { runCatching { MapsRouting.limitAt(MapsFiles.graphAt(root, loc.latitude, loc.longitude), loc.latitude, loc.longitude) }.getOrNull() } }
         }
         // a trip's next leg: once moving (15 km/h) or 150 m from the stop
         nextStop?.let { ns ->

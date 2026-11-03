@@ -95,10 +95,30 @@ internal object MapsRouting {
     /** The graphs open, the last used last: up to three, so a route across borders and the limits on its way open none again. */
     private val hoppers = LinkedHashMap<File, GraphHopper>(4, 0.75f, true)
 
+    /** How many threads read each graph now (a route, a limit): one put out of [hoppers] is closed when its last reader is done. */
+    private val readers = HashMap<GraphHopper, Int>()
+    private val retired = HashSet<GraphHopper>()
+
+    /** [block] on the graph in [dir], which no other thread closes meanwhile. */
+    private inline fun <T> reading(dir: File, block: (GraphHopper) -> T): T {
+        val gh = synchronized(this) { open(dir).also { readers[it] = (readers[it] ?: 0) + 1 } }
+        try { return block(gh) } finally {
+            synchronized(this) { val n = readers.getValue(gh) - 1; if (n > 0) readers[gh] = n else { readers.remove(gh); if (retired.remove(gh)) gh.close() } }
+        }
+    }
+
+    private val said = HashSet<String>()
+    /** A failure written to the log once per cause, not at each fix (the limit is asked every 2 s, and it failed without a word). */
+    fun once(what: String, e: Throwable) { if (synchronized(said) { said.add("$what: $e") }) WriterLog.e("Maps: $what", e) }
+
     /** The graph in [dir], opened once and kept (opening maps the files, it reads nothing much). */
     @Synchronized fun open(dir: File): GraphHopper {
         hoppers[dir]?.let { return it }
-        hoppers.entries.firstOrNull()?.takeIf { hoppers.size >= 3 }?.let { it.value.close(); hoppers.remove(it.key) }
+        hoppers.entries.firstOrNull()?.takeIf { hoppers.size >= 3 }?.let { (d, old) -> hoppers.remove(d); if (old in readers) retired += old else old.close() }
+        try { return load(dir) } catch (e: Throwable) { once("graph ${dir.name} not opened", e); throw e }
+    }
+
+    private fun load(dir: File): GraphHopper {
         val names = profiles(dir)
         val json = """{"profiles":[${names.joinToString(",") { PROFILES.getValue(it) }}],"profiles_ch":[${names.joinToString(",") { "{\"profile\":\"$it\"}" }}],"profiles_lm":[]}"""
         val config = Jackson.newObjectMapper().readValue(json, GraphHopperConfig::class.java)
@@ -160,7 +180,7 @@ internal object MapsRouting {
         val mode = if (mode == "wheelchair" && "wheelchair" !in profiles(dir)) "foot" else mode
         val req = GHRequest(fromLat, fromLng, toLat, toLng).setProfile(mode)
         req.hints.putObject(Parameters.Routing.INSTRUCTIONS, false).putObject(Parameters.Routing.CALC_POINTS, false)
-        val r = open(dir).route(req)
+        val r = reading(dir) { it.route(req) }
         return if (r.hasErrors()) null else r.best.time / 1000.0
     }
 
@@ -177,8 +197,7 @@ internal object MapsRouting {
 
     /** [routes] on the one graph [dir]; without [alternatives], the fastest alone (a leg across a border). */
     private fun direct(dir: File, fromLat: Double, fromLng: Double, toLat: Double, toLng: Double, mode: String, w: Words,
-                       heading: Double, main: Boolean, alternatives: Boolean = true): List<Route> {
-        val gh = open(dir)
+                       heading: Double, main: Boolean, alternatives: Boolean = true): List<Route> = reading(dir) { gh ->
         val main = main && mode == "car"
         val tr = translation(w.lang); val locale = tr.locale
         val mode = if (mode == "wheelchair" && "wheelchair" !in profiles(dir)) "foot" else mode // a graph from before Rolling
@@ -194,7 +213,7 @@ internal object MapsRouting {
             ahead.hints.putObject(Parameters.CH.DISABLE, true).putObject(Parameters.Routing.MAX_VISITED_NODES, MAX_HEADED_NODES)
                 .putObject(Parameters.Routing.HEADING_PENALTY, TURN_BACK_SECONDS).putObject(MAIN_ROADS, main)
             val r = gh.route(ahead)
-            if (!r.hasErrors()) return listOf(MapsLanes.on(build(gh, r.best, tr, w, mode), dir.absoluteFile.parentFile, w))
+            if (!r.hasErrors()) return@reading listOf(MapsLanes.on(build(gh, r.best, tr, w, mode), dir.absoluteFile.parentFile, w))
         }
         val t0 = System.nanoTime()
         var rsp = gh.route(req)
@@ -208,7 +227,7 @@ internal object MapsRouting {
         val all = rsp.all.map { MapsLanes.on(build(gh, it, tr, w, mode), dir.absoluteFile.parentFile, w) }
         WriterLog.i("Maps: route found in ${(t1 - t0) / 1_000_000} ms${if (main) " on main roads" else ""}, its crossings and lanes in ${(System.nanoTime() - t1) / 1_000_000} ms")
         val usable = all.filter { r -> mode != "car" || r.roads != "track" }.ifEmpty { all }
-        return usable.sortedBy { it.millis }
+        usable.sortedBy { it.millis }
     }
 
     /** GraphHopper's error in the user's words (it said "Cannot find point 0: 37.9,23.55" for a spot at sea). */
@@ -452,15 +471,27 @@ internal object MapsRouting {
      * The speed limit of the road nearest [lat],[lng] in km/h, from OSM's maxspeed in the graph (the user, 21 Oct: "ξέρουμε και
      * όρια ταχύτητας; να το βάλουμε να κοκκινίζει όταν το περνάω;"); null where it is not known or no road is near.
      */
-    fun limitAt(dir: File, lat: Double, lng: Double): Int? {
-        val gh = open(dir)
-        val em = gh.encodingManager
-        val access = em.getBooleanEncodedValue("car_access"); val max = em.getDecimalEncodedValue("max_speed")
-        val snap = gh.locationIndex.findClosest(lat, lng) { e -> e.get(access) || e.getReverse(access) }
-        if (!snap.isValid || snap.queryDistance > 40) return null
-        val e = snap.closestEdge
-        return posted(e.get(max), e.getReverse(max))
+    fun limitAt(dir: File, lat: Double, lng: Double): Int? = runCatching {
+        if (!File(dir, "properties").isFile) error("no graph in ${dir.name}")
+        reading(dir) { gh ->
+            val e = car(gh, lat, lng) ?: return@reading null
+            val max = gh.encodingManager.getDecimalEncodedValue("max_speed")
+            posted(e.get(max), e.getReverse(max))
+        }
+    }.onFailure { once("no speed limit from ${dir.name}", it) }.getOrNull()
+
+    /** How far the nearest car road of the graph in [dir] is from [lat],[lng], in metres (∞: none near, or no graph): where maps' bounds overlap, whose roads these are. */
+    fun roadMetres(dir: File, lat: Double, lng: Double): Double = if (!File(dir, "properties").isFile) Double.POSITIVE_INFINITY else
+        runCatching { reading(dir) { snap(it, lat, lng).let { s -> if (s.isValid) s.queryDistance else Double.POSITIVE_INFINITY } } }
+            .onFailure { once("roads of ${dir.name} not read", it) }.getOrDefault(Double.POSITIVE_INFINITY)
+
+    private fun snap(gh: GraphHopper, lat: Double, lng: Double): com.graphhopper.storage.index.Snap {
+        val access = gh.encodingManager.getBooleanEncodedValue("car_access")
+        return gh.locationIndex.findClosest(lat, lng) { e -> e.get(access) || e.getReverse(access) }
     }
+
+    /** The car road nearest [lat],[lng] in [gh], within 40 m. */
+    private fun car(gh: GraphHopper, lat: Double, lng: Double) = snap(gh, lat, lng).let { s -> s.closestEdge.takeIf { s.isValid && s.queryDistance <= 40 } }
 
     /**
      * The sign's number from the graph's two directions of max_speed: GraphHopper keeps ∞ where OSM has no number

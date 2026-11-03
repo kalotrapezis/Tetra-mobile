@@ -788,6 +788,25 @@ class MapsBorderTest {
     }
 }
 
+/** Where maps' bounds overlap, the map whose roads are at the point (3 Nov: Greece's box holds south Bulgaria, Bulgaria's the Evros villages). */
+class MapsOverlapTest {
+    @Test fun theMapWhoseRoadsAreThere() {
+        val root = System.getenv("TETRA_MAPS")?.let(::File) ?: userMaps()
+        assumeTrue(listOf("greece", "bulgaria", "macedonia").all { File(root, "$it-gh/properties").isFile })
+        val orestiada = 41.5032 to 26.5316 // Greece, inside Bulgaria's box too, which comes first by name
+        assertTrue(MapsFiles.maps(root).first { it.id == "bulgaria" }.has(orestiada.first, orestiada.second))
+        assertEquals("greece-gh", MapsFiles.graphAt(root, orestiada.first, orestiada.second).name)
+        assertEquals("macedonia-gh", MapsFiles.graphAt(root, 41.0314, 21.3347).name) // Bitola, inside Greece's box
+        assertEquals("greece-gh", MapsFiles.graphAt(root, 40.9920, 22.8730).name) // Kilkis, inside North Macedonia's box
+        // a route from Orestiada into Bulgaria starts on Greece's roads and crosses at the border, not on Bulgaria's graph from a field
+        if (MapsFiles.crossings(root, "bulgaria", "greece").isNotEmpty()) {
+            val legs = MapsFiles.legs(MapsFiles.graphAt(root, orestiada.first, orestiada.second), orestiada.first, orestiada.second, 41.7650, 26.1990, testWords("en"))
+                { g, aLat, aLng, bLat, bLng -> MapsRouting.seconds(g, aLat, aLng, bLat, bLng, "car") } // to Svilengrad
+            assertEquals(listOf("greece-gh", "bulgaria-gh"), legs.map { it.dir.name })
+        }
+    }
+}
+
 /**
  * Directions in every language Tetra has (the user, 27 Oct: "Why it's only Greek? … It shouldn't be hard to be in all the
  * languages we have"): Tetra's own words from the string resources, GraphHopper's turn words beside them (Tetra's own where

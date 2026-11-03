@@ -12,6 +12,12 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [x] (maps-speed session, 3 Nov; branch `maps-speed`) **Maps: the right country's roads where maps overlap; graph failures logged**.
+      `MapsFiles.graphAt` and `legs` took the first map (by name) whose box holds the point: Greece's box holds south Bulgaria and
+      Bitola, Bulgaria's the Evros villages, so limits (and a route from Orestiada into Bulgaria) went to the wrong graph.
+      Now `mapsAt`: of the boxes, the maps with a car road within 40 m, else the nearest road's; kept per ~200 m square.
+      `MapsRouting.open`/`limitAt` failures go to the log once per cause; a graph put out of the three kept is closed only when
+      no thread still reads it. `MapsOverlapTest` (real graphs: Orestiada, Bitola, Kilkis, Orestiada → Svilengrad).
 - [x] (maps-speed session, 3 Nov; branch `maps-speed`) **Directions by car: the camera follows the speed** (the user: "tilt a bit
       forward while at high speed so I can see more of the road, and close to me with more zoom as I slow down"). `carView`:
       zoom 17.25 at a crawl easing to 15 at 110 km/h (not past 16.5 with the next turn under ~40 s ahead), tilt 45° up to 60° from

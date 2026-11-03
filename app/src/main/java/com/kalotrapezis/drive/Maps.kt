@@ -151,9 +151,25 @@ internal object MapsFiles {
     }.getOrNull()
 
     /** The roads of the map [lat],[lng] is on, else the first map's. */
-    fun graphAt(root: File, lat: Double, lng: Double): File {
-        val all = maps(root)
-        return (all.firstOrNull { it.has(lat, lng) } ?: all.firstOrNull())?.let { File(root, "${it.id}-gh") } ?: graph(root)
+    fun graphAt(root: File, lat: Double, lng: Double): File =
+        (mapsAt(root, lat, lng).firstOrNull() ?: maps(root).firstOrNull())?.let { File(root, "${it.id}-gh") } ?: graph(root)
+
+    /**
+     * The maps whose bounds have [lat],[lng]; where bounds overlap (Greece's box holds south Bulgaria, Bulgaria's the Evros
+     * villages), only those with a car road within 40 m, else the one whose road is nearest. Kept per ~200 m square: limits
+     * are asked every 2 s.
+     */
+    fun mapsAt(root: File, lat: Double, lng: Double, all: List<MapPack> = maps(root)): List<MapPack> {
+        val boxes = all.filter { it.has(lat, lng) }
+        if (boxes.size < 2) return boxes
+        val key = "$root ${Math.round(lat * 500)} ${Math.round(lng * 500)} ${boxes.joinToString { it.id }}"
+        val ids = synchronized(onRoads) { onRoads[key] } ?: boxes.map { it.id to MapsRouting.roadMetres(File(root, "${it.id}-gh"), lat, lng) }
+            .let { m -> m.filter { it.second <= 40 }.ifEmpty { listOfNotNull(m.filter { it.second.isFinite() }.minByOrNull { it.second }) } }.map { it.first }
+            .also { synchronized(onRoads) { onRoads[key] = it } }
+        return boxes.filter { it.id in ids }.ifEmpty { boxes }
+    }
+    private val onRoads = object : LinkedHashMap<String, List<String>>(64, 0.75f, true) {
+        override fun removeEldestEntry(e: MutableMap.MutableEntry<String, List<String>>) = size > 256
     }
 
     /** A point where the roads cross between two maps; [n]: the crossing it is of (a station's lanes are a point each). */
@@ -183,7 +199,7 @@ internal object MapsFiles {
              seconds: (File, Double, Double, Double, Double) -> Double?): List<Leg> {
         val root = dir.absoluteFile.parentFile ?: return listOf(Leg(dir, fromLat, fromLng, toLat, toLng))
         val all = maps(root)
-        val a = all.filter { it.has(fromLat, fromLng) }; val b = all.filter { it.has(toLat, toLng) }
+        val a = mapsAt(root, fromLat, fromLng, all); val b = mapsAt(root, toLat, toLng, all)
         fun gh(m: MapPack) = File(root, "${m.id}-gh")
         val one = { g: File -> listOf(Leg(g, fromLat, fromLng, toLat, toLng)) }
         if (a.isEmpty() || b.isEmpty()) return one(dir) // off the maps: GraphHopper says which end

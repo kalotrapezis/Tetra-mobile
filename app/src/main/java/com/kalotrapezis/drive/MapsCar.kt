@@ -802,8 +802,7 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
         // the limit at most every two seconds, off the main thread (the graph is opened the first time)
         if (System.currentTimeMillis() - limitAsked > 2000) {
             limitAsked = System.currentTimeMillis()
-            lifecycleScope.launch { limit = withContext(Dispatchers.IO) { runCatching { graphAt(loc.latitude, loc.longitude).takeIf { File(it, "properties").isFile }
-                ?.let { MapsRouting.limitAt(it, loc.latitude, loc.longitude) } }.getOrNull() }; showSpeed() }
+            lifecycleScope.launch { limit = withContext(Dispatchers.IO) { runCatching { MapsRouting.limitAt(graphAt(loc.latitude, loc.longitude), loc.latitude, loc.longitude) }.getOrNull() }; showSpeed() }
         }
         showSpeed()
         waitNext?.let { next ->
