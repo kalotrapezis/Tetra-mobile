@@ -74,6 +74,12 @@ records how it works and the rules it must keep.
    be cut off — walk in from each side while what is in front is not the paper's
    colour. A line of text is mostly paper with ink in it, so only a line almost
    entirely unlike the paper qualifies; text is never mistaken for background.
+   "The paper" is the paper beside that side (a strip just inside the 6% limit,
+   as deep again), not the middle of the page, and the cut goes to the sharpest
+   step the walk crossed, only if it is one: a band of table ends in a step,
+   shading fades in. Measured against the middle (until 3 Nov 2026), a phone's
+   shadow along the bottom or a hand's down one side read as table, and the walk
+   took up to 6% of real page on top of the letters' 1.5% (`ScanPhotoTest`).
 9. **Sharpen**: straightening resamples every pixel from between four others,
    which softens small print. A gentle unsharp mask puts back what the
    interpolation took and no more — a hard one turns paper grain into speckle.
@@ -81,8 +87,10 @@ records how it works and the rules it must keep.
     else. It starts only where the border really is background — a run of pixels
     along an edge must be unlike the paper for a stretch, so a corner of table
     qualifies and a printed rule touching the edge does not — and it paints one
-    flat colour, the paper's own, taken from the middle of the page with the
-    darkest quarter dropped so ink cannot darken it. A page whose crop came out
+    flat colour, the paper's own beside the nearest side, with the darkest
+    quarter dropped so ink cannot darken it. A pixel is background only when it
+    is like the paper along none of the four sides, so a shadow over one end of
+    a side is not painted out with its letters. A page whose crop came out
     right is left byte for byte as it was.
 11. **Filters** divide each pixel by an estimated paper background (brightest
     tenth per grid cell, borrowed from a neighbour when a cell is mostly ink),
@@ -115,6 +123,19 @@ records how it works and the rules it must keep.
     0.3° counts as none, so a straight page is left alone. A page changed by hand
     meanwhile keeps the hand's. The auto-fix switch takes the straightening off
     with it, and measures it again when switched back on.
+16. **Auto fix chooses Fix lighting** for a dark or unevenly lit page, measured
+    in the same pass on the page as auto fix leaves it (600 px): the paper under
+    the ink (`paperBackground`), its median brightness and its darkest and
+    brightest twentieth (`ScanFilters.paperLight`). Too dark is a median under
+    185, or the darkest twentieth under 3/4 of the brightest (`tooDark`). The
+    line: 26 of the user's own camera pages (Scanned Documents)
+    have paper at 177–208, the dimmest four at 177–182 and then a gap to 187;
+    their darkest/brightest ratio is 0.77–0.99. A phone's shadow, a hand's, a lamp
+    and dim cream paper in `ScanPhotoTest` measure 0.55–0.70 or a median of 138.
+    Each call is written to the log ("Scanner: paper median …"). A filter
+    chosen by hand (`CapturedPage.filterByHand`: the pills, Apply to all, Match
+    pages) is never changed; auto fix off returns only an auto-chosen filter to
+    Original, and on measures again.
 
 ## Rules
 

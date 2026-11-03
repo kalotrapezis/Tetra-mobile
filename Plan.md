@@ -12,6 +12,13 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [x] (scan-fix session, 3 Nov; branch `scan-fix`, not merged) **Scanner: no cut into shadowed paper; auto fix picks Fix lighting for a dark page**
+      (the user: "does it use filters automatically when the paper is too dark? … sometimes it cuts too much inside the paper").
+      Trim to paper compared each side with the middle of the page, so a phone's or hand's shadow read as table and lost up to
+      7.5% of page (the gap fill painted its letters out too); now the paper beside each side, and a cut only at a real step.
+      Auto fix measures the paper's light (median under 185 or darkest twentieth under 3/4 of the brightest → Fix lighting,
+      logged); a filter chosen by hand is never changed. `ScanPhotoTest` (Scanner_test's page on a table, shadowed, lamp, cream,
+      bands; Curved_page), `ScanShadowTrimTest`. Not checked on the phone.
 - [x] (maps-speed session, 3 Nov; branch `maps-speed`) **Maps: the right country's roads where maps overlap; graph failures logged**.
       `MapsFiles.graphAt` and `legs` took the first map (by name) whose box holds the point: Greece's box holds south Bulgaria and
       Bitola, Bulgaria's the Evros villages, so limits (and a route from Orestiada into Bulgaria) went to the wrong graph.

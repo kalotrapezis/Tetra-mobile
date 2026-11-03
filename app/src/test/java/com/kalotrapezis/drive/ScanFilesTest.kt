@@ -290,6 +290,42 @@ class ScanAimAndTrimTest {
     }
 }
 
+class ScanShadowTrimTest {
+    /** Paper at 230 with the phone's shadow over the bottom: fading in from row 150, flat at 130 below 175, a line of text in it. */
+    private fun shadowed(width: Int = 200, height: Int = 200) = IntArray(width * height) { index ->
+        val x = index % width
+        val y = index / width
+        val shade = 230 - (100 * ((y - 150) / 25f).coerceIn(0f, 1f)).toInt()
+        if (y in 186..190 && x in 20..180) 0xFF101010.toInt() else (0xFF shl 24) or (shade shl 16) or (shade shl 8) or shade
+    }
+
+    @Test fun `a shadow along one side is paper, not table`() {
+        assertEquals(listOf(0, 0, 0, 0), ScanDetection.trimToPaper(shadowed(), 200, 200).toList())
+    }
+
+    @Test fun `the gap fill leaves the shadow and its letters alone`() {
+        val pixels = shadowed()
+        val before = pixels.copyOf()
+        ScanDetection.fillPageGaps(pixels, 200, 200)
+        assertEquals(before.toList(), pixels.toList())
+    }
+
+    @Test fun `a band of table beside dark cream paper is still cut, and only the band`() {
+        val width = 200
+        val height = 200
+        val pixels = IntArray(width * height) { index ->
+            val x = index % width
+            val y = index / width
+            when {
+                x < 7 -> 0xFF3C3C3E.toInt()                       // a dark desk the outline kept
+                y in 60..64 && x in 20..180 -> 0xFF141414.toInt() // a line of text
+                else -> 0xFF968A6E.toInt()                        // cream paper in a dim room, luma about 138
+            }
+        }
+        assertEquals(listOf(7, 0, 0, 0), ScanDetection.trimToPaper(pixels, width, height).toList())
+    }
+}
+
 class ScanFillRestraintTest {
     private val paper = 0xFFF0F0EC.toInt()
 

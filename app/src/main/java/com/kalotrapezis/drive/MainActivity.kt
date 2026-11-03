@@ -1056,7 +1056,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                         if (retakeIndex != null) {
                             val replaced = scanPages[retakeIndex]
                             quarantineScanFiles(replaced)
-                            scanPages = scanPages.toMutableList().also { it[retakeIndex] = page.copy(filter = replaced.filter) }
+                            scanPages = scanPages.toMutableList().also { it[retakeIndex] = if (replaced.filterByHand) page.copy(filter = replaced.filter, filterByHand = true) else page }
                             scanSelected = retakeIndex
                         } else {
                             scanPages = scanPages + page

@@ -144,16 +144,30 @@ internal object ScanStraighten {
 /**
  * The auto fix's straightening (runs off the main thread, a second or two): [page]'s curve flattened, then its tilt
  * taken out, both measured from its text lines. A page already flat and level, or with no text to go by, is left so.
+ * Its light is measured too: a dark or unevenly lit page gets Fix lighting, unless a filter was chosen by hand.
  */
 internal fun autoStraightened(page: CapturedPage): CapturedPage {
     fun render(p: CapturedPage) = renderScanPage(p.copy(filter = ScanFilter.Original, strokes = emptyList()), 2, 2000f)
     val base = page.copy(bend = null, tilt = 0f)
     val first = render(base) ?: return page
+    val filter = if (page.filterByHand) page.filter else autoFilter(first)
     val lines = ScanStraighten.textLines(first)
     // a bend under a third of a percent of the height is a straight page read slightly unevenly: leave it
     val grid = ScanStraighten.bend(lines.map { l -> l.map { ScanPoint(it.x / first.width, it.y / first.height) } })?.takeIf { it.max() - it.min() > 0.003f }
     first.recycle()
     // the tilt is measured on the flattened page: a curve's ends would pull a straight-line fit
     val slope = if (grid == null) ScanStraighten.slope(lines) else render(base.copy(bend = grid))?.let { b -> ScanStraighten.slope(ScanStraighten.textLines(b)).also { b.recycle() } }
-    return page.copy(bend = grid, tilt = slope?.takeIf { abs(it) >= 0.3f }?.let { -it } ?: 0f)
+    return page.copy(bend = grid, tilt = slope?.takeIf { abs(it) >= 0.3f }?.let { -it } ?: 0f, filter = filter)
+}
+
+/** Fix lighting for a page whose paper is dark or unevenly lit ([ScanFilters.tooDark]), else Original; measured small. */
+private fun autoFilter(page: Bitmap): ScanFilter {
+    val scale = minOf(1f, 600f / maxOf(page.width, page.height))
+    val small = Bitmap.createScaledBitmap(page, maxOf(1, (page.width * scale).toInt()), maxOf(1, (page.height * scale).toInt()), true)
+    val pixels = IntArray(small.width * small.height).also { small.getPixels(it, 0, small.width, 0, 0, small.width, small.height) }
+    val light = ScanFilters.paperLight(pixels, small.width, small.height)
+    if (small !== page) small.recycle()
+    val dark = ScanFilters.tooDark(light)
+    WriterLog.i("Scanner: paper median ${light[0]}, darkest twentieth ${light[1]}, brightest ${light[2]} (dark under ${ScanFilters.DARK_PAPER}, uneven under ${ScanFilters.UNEVEN_PAPER} of the brightest) → ${if (dark) "Fix lighting" else "Original"}")
+    return if (dark) ScanFilter.Lighting else ScanFilter.Original
 }

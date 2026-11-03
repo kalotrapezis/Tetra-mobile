@@ -222,6 +222,8 @@ internal data class CapturedPage(
     val autoQuad: DocumentQuad? = quad,
     val rotation: Int = 0,
     val filter: ScanFilter = ScanFilter.Original,
+    /** The filter was chosen by hand: the auto fix never changes it. Otherwise the auto fix picks it (Fix lighting for a dark page). */
+    val filterByHand: Boolean = false,
     val autoFix: Boolean = true,
     val paperTone: Int = ScanFilters.WHITE,
     val strokes: List<ScanStroke> = emptyList(),
@@ -827,7 +829,7 @@ internal fun ScanDocumentTab(
             Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape) {
                 // the auto fix is the whole automatic flow: off takes its straightening off too, on measures it again
                 IconButton(onClick = {
-                    if (page.autoFix) update(current, page.copy(autoFix = false, tilt = 0f, bend = null))
+                    if (page.autoFix) update(current, page.copy(autoFix = false, tilt = 0f, bend = null, filter = if (page.filterByHand) page.filter else ScanFilter.Original))
                     else page.copy(autoFix = true).let { on -> val at = current; update(at, on)
                         scope.launch { withContext(Dispatchers.Default) { runCatching { autoStraightened(on) }.getOrNull() }?.let { update(at, it) } } }
                 }) {
@@ -927,13 +929,13 @@ internal fun ScanDocumentTab(
             showPanel = { panel = it },
             page = page,
             update = { update(current, it) },
-            applyFilterToAll = { filter -> pages.forEachIndexed { index, item -> update(index, item.copy(filter = filter, paperTone = page.paperTone)) } },
+            applyFilterToAll = { filter -> pages.forEachIndexed { index, item -> update(index, item.copy(filter = filter, paperTone = page.paperTone, filterByHand = true)) } },
             matchPages = {
                 scope.launch {
                     val tone = withContext(Dispatchers.Default) {
                         ScanFilters.average(pages.mapNotNull { item -> renderScanPage(item.copy(filter = ScanFilter.Original, strokes = emptyList()), SCAN_THUMBNAIL_SAMPLE, SCAN_THUMBNAIL_EDGE)?.let { paperSwatchesOf(it)[1] } })
                     }
-                    pages.forEachIndexed { index, item -> update(index, item.copy(filter = ScanFilter.SamePaper, paperTone = tone)) }
+                    pages.forEachIndexed { index, item -> update(index, item.copy(filter = ScanFilter.SamePaper, paperTone = tone, filterByHand = true)) }
                 }
             },
             paintColor = paintColor,
@@ -1037,7 +1039,7 @@ private fun ScanActionsIsland(
                     AnimatedVisibility(panel == ScanPanel.Filters) {
                         LazyRow(contentPadding = PaddingValues(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             item { ScanPill(stringResource(R.string.scanner_match_pages), R.drawable.ic_contrast, page.filter == ScanFilter.SamePaper, matchPages) }
-                            items(ScanFilter.entries.filter { it != ScanFilter.SamePaper }) { filter -> ScanPill(stringResource(filter.label), null, page.filter == filter) { update(page.copy(filter = filter)) } }
+                            items(ScanFilter.entries.filter { it != ScanFilter.SamePaper }) { filter -> ScanPill(stringResource(filter.label), null, page.filter == filter) { update(page.copy(filter = filter, filterByHand = true)) } }
                             item { ScanPill(stringResource(R.string.scanner_apply_all), R.drawable.ic_check, false) { applyFilterToAll(page.filter) } }
                         }
                     }

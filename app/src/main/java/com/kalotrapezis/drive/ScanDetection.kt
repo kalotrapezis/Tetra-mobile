@@ -520,8 +520,13 @@ object ScanDetection {
      * the frame, so the question is simple: walk in from each side while the line in front of you is not paper.
      *
      * A line of text is mostly paper with some ink in it, so it never qualifies — only a line that is *almost
-     * entirely* unlike the paper does, which is what a band of background looks like. Returns how many pixels to
-     * take off the left, top, right and bottom.
+     * entirely* unlike the paper does, which is what a band of background looks like.
+     *
+     * "The paper" is the paper beside that side, not the middle of the page. Measured in the middle, the phone's
+     * shadow along the bottom, a lamp's fall-off or a hand's shade down one side all read as "not paper", and the
+     * walk ate up to 6% of real page there (on top of the letters' 1.5% step in). And a band of table ends where
+     * the paper begins, in a step; shading fades in. So the cut goes to the sharpest step in what the walk crossed,
+     * and only when it is one — no step, no cut. Returns how many pixels to take off the left, top, right and bottom.
      */
     internal fun trimToPaper(
         pixels: IntArray,
@@ -532,50 +537,65 @@ object ScanDetection {
         notPaperShare: Float = 0.7f,
     ): IntArray {
         if (width < 16 || height < 16) return IntArray(4)
-        val paper = paperColour(pixels, width, height) ?: return IntArray(4)
-        fun lineIsBackground(side: Int, depth: Int): Boolean {
+        fun lineIsBackground(side: Int, depth: Int, paper: Int): Boolean {
             val length = if (side % 2 == 0) height else width
             val step = maxOf(1, length / 64)
             var differing = 0
             var counted = 0
             var position = 0
             while (position < length) {
-                val pixel = when (side) {
-                    0 -> pixels[position * width + depth]                       // left
-                    1 -> pixels[depth * width + position]                       // top
-                    2 -> pixels[position * width + (width - 1 - depth)]         // right
-                    else -> pixels[(height - 1 - depth) * width + position]     // bottom
-                }
-                if (differsFrom(pixel, paper, tolerance)) differing++
+                if (differsFrom(pixelAt(pixels, width, height, side, position, depth), paper, tolerance)) differing++
                 counted++
                 position += step
             }
             return counted > 0 && differing.toFloat() / counted >= notPaperShare
         }
         return IntArray(4) { side ->
-            val limit = (maxFraction * if (side % 2 == 0) width else height).toInt()
+            val across = if (side % 2 == 0) width else height
+            val limit = (maxFraction * across).toInt()
+            // just inside the furthest the trim may reach, and as deep again: a band deeper than the limit still
+            // leaves the paper the larger share there
+            val local = sideColour(pixels, width, height, side, limit, 2 * limit) ?: return@IntArray 0
             var depth = 0
-            while (depth < limit && lineIsBackground(side, depth)) depth++
-            depth
+            while (depth < limit && lineIsBackground(side, depth, local)) depth++
+            if (depth == 0) return@IntArray 0
+            val reach = maxOf(1, across / 200) // half a percent each way: wider than a blurred edge, narrower than a shadow's fall
+            fun line(at: Int) = at.coerceIn(0, across - 1).let { sideColour(pixels, width, height, side, it, it + 1)!! }
+            fun stepAt(at: Int) = difference(line(at - 1 - reach), line(at + reach))
+            val edge = (1..depth).maxBy(::stepAt)
+            if (stepAt(edge) <= tolerance) return@IntArray 0
+            // past the fringe where paper meets table, to the first line that is the paper just inside the step
+            val inside = line(edge + reach)
+            var cut = edge
+            while (cut < depth && lineIsBackground(side, cut, inside)) cut++
+            cut
         }
     }
 
-    /** The page's own colour: the middle of the picture, with the darkest quarter dropped so ink cannot darken it. */
-    internal fun paperColour(pixels: IntArray, width: Int, height: Int): Int? {
-        val channels = Array(3) { mutableListOf<Int>() }
-        val lumas = mutableListOf<Pair<Int, Int>>()
-        var index = 0
-        for (y in height / 4 until height * 3 / 4 step maxOf(1, height / 64)) {
-            for (x in width / 4 until width * 3 / 4 step maxOf(1, width / 64)) {
-                val pixel = pixels[y * width + x]
-                val r = (pixel shr 16) and 0xFF; val g = (pixel shr 8) and 0xFF; val b = pixel and 0xFF
-                channels[0].add(r); channels[1].add(g); channels[2].add(b)
-                lumas.add((r * 299 + g * 587 + b * 114) / 1000 to index++)
-            }
+    /** The pixel [position] along a side and [depth] in from it: 0 left, 1 top, 2 right, 3 bottom. */
+    private fun pixelAt(pixels: IntArray, width: Int, height: Int, side: Int, position: Int, depth: Int) = when (side) {
+        0 -> pixels[position * width + depth]
+        1 -> pixels[depth * width + position]
+        2 -> pixels[position * width + (width - 1 - depth)]
+        else -> pixels[(height - 1 - depth) * width + position]
+    }
+
+    /** The paper's colour in the strip [from] to [until] pixels in from a side, the darkest quarter dropped so ink cannot darken it. */
+    private fun sideColour(pixels: IntArray, width: Int, height: Int, side: Int, from: Int, until: Int): Int? {
+        val length = if (side % 2 == 0) height else width
+        val across = if (side % 2 == 0) width else height
+        val samples = ArrayList<Int>()
+        for (depth in from.coerceIn(0, across - 1) until until.coerceIn(from + 1, across)) {
+            for (position in 0 until length step maxOf(1, length / 64)) samples.add(pixelAt(pixels, width, height, side, position, depth))
         }
-        if (lumas.isEmpty()) return null
-        val keep = lumas.sortedBy { it.first }.drop(lumas.size / 4).map { it.second }
-        val median = channels.map { channel -> keep.map { channel[it] }.sorted().let { it[it.size / 2] } }
+        return medianPaper(samples)
+    }
+
+    private fun medianPaper(samples: List<Int>): Int? {
+        if (samples.isEmpty()) return null
+        fun luma(p: Int) = ((p shr 16 and 0xFF) * 299 + (p shr 8 and 0xFF) * 587 + (p and 0xFF) * 114) / 1000
+        val keep = samples.sortedBy(::luma).drop(samples.size / 4)
+        val median = intArrayOf(16, 8, 0).map { shift -> keep.map { it shr shift and 0xFF }.sorted()[keep.size / 2] }
         return (0xFF shl 24) or (median[0] shl 16) or (median[1] shl 8) or median[2]
     }
 
@@ -592,13 +612,25 @@ object ScanDetection {
      *  - **it paints one colour: the paper's own.** Sampling a different colour for every position was what made
      *    the streaks, because half those samples were of the very background being painted over.
      *
+     * "The paper" is the paper beside each side, measured just inside the band as the trim measures it, and a
+     * pixel is background only when it is like none of the four: against the middle of the page alone, a shadow
+     * along one edge was "background" and its letters were painted out with it.
+     *
      * [pixels] are ARGB and are modified in place.
      */
     internal fun fillPageGaps(pixels: IntArray, width: Int, height: Int, bandFraction: Float = 0.06f, tolerance: Int = 48) {
         val band = maxOf(4, (minOf(width, height) * bandFraction).toInt())
         if (width <= band * 3 || height <= band * 3) return
-        val paper = paperColour(pixels, width, height) ?: return
-        fun isGap(index: Int) = differsFrom(pixels[index], paper, tolerance)
+        val paper = IntArray(4) { side -> sideColour(pixels, width, height, side, band, 2 * band) ?: return }
+        // the nearest side's paper: left, top, right, bottom
+        fun paperAt(index: Int): Int {
+            val x = index % width; val y = index / width
+            val near = intArrayOf(x, y, width - 1 - x, height - 1 - y)
+            return paper[near.indices.minBy { near[it] }]
+        }
+        // background is what the paper is nowhere along the border: a shadow over one end of a side is still the
+        // colour the paper has at the end of the next
+        fun isGap(index: Int) = paper.all { differsFrom(pixels[index], it, tolerance) }
         fun inBand(x: Int, y: Int) = x < band || y < band || x >= width - band || y >= height - band
 
         val filled = BooleanArray(width * height)
@@ -643,11 +675,13 @@ object ScanDetection {
             }
             grown.copyInto(filled)
         }
-        for (index in filled.indices) if (filled[index]) pixels[index] = paper
+        for (index in filled.indices) if (filled[index]) pixels[index] = paperAt(index)
     }
 
-    private fun differsFrom(pixel: Int, reference: Int, tolerance: Int) =
-        intArrayOf(16, 8, 0).any { shift -> abs(((pixel shr shift) and 0xFF) - ((reference shr shift) and 0xFF)) > tolerance }
+    private fun differsFrom(pixel: Int, reference: Int, tolerance: Int) = difference(pixel, reference) > tolerance
+
+    private fun difference(first: Int, second: Int) =
+        intArrayOf(16, 8, 0).maxOf { shift -> abs(((first shr shift) and 0xFF) - ((second shr shift) and 0xFF)) }
 
     private fun distance(first: ScanPoint, second: ScanPoint): Float = kotlin.math.hypot(first.x - second.x, first.y - second.y)
 

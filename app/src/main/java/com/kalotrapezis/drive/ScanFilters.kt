@@ -190,6 +190,26 @@ object ScanFilters {
     }
 
     /**
+     * The page's paper light, for the auto fix to choose Fix lighting by: the median brightness of the paper under
+     * the ink ([paperBackground]), and its darkest and brightest twentieth — a shadow or a lamp's fall-off pulls the
+     * one away from the other. Written to the log, so a page that got the wrong call can be traced.
+     */
+    internal fun paperLight(pixels: IntArray, width: Int, height: Int): IntArray {
+        val paper = paperBackground(pixels, width, height)
+        val levels = (paper.indices step max(1, paper.size / 4096)).map { luminance(paper[it]) }.sorted()
+        return intArrayOf(levels[levels.size / 2], levels[levels.size / 20], levels[levels.size * 19 / 20])
+    }
+
+    /**
+     * Too dark to leave as it is: paper under [DARK_PAPER] (a phone's photo of white paper in an ordinary room is
+     * 190–210), or lit so unevenly that its darkest twentieth is under [UNEVEN_PAPER] of its brightest.
+     */
+    internal fun tooDark(light: IntArray) = light[0] < DARK_PAPER || light[1] < light[2] * UNEVEN_PAPER
+
+    internal const val DARK_PAPER = 185
+    internal const val UNEVEN_PAPER = 0.75f
+
+    /**
      * Four paper colours of a page, brightest first: lit paper, typical paper, light shadow, shadow.
      * Ink is excluded by only looking at the brightest 60% of the page.
      */

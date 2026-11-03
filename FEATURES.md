@@ -237,9 +237,13 @@ Home → red tools group → **Scanner**. Details and design notes:
   outline, then the **letters decide each edge** — nothing written near it and
   the cut steps 1.5% into the paper, letters close to it and the cut goes
   outside instead, leaving them room. Any band of table the outline still kept
-  is trimmed off, the resampling is sharpened back, and only a genuine gap is
-  painted, flat, in the paper's own colour. A page whose crop came out right is
-  left exactly as it was. The header's wand toggles it per page.
+  is trimmed off — only where the paper's edge makes a step, so a shadow along a
+  side is never taken for table — the resampling is sharpened back, and only a
+  genuine gap is painted, flat, in the paper's own colour. A page whose crop came
+  out right is left exactly as it was. A dark or unevenly lit page gets **Fix
+  lighting** (the header names it); a filter chosen by hand is never changed, and
+  switching the auto fix off takes only its own choice back to Original. The
+  header's wand toggles it per page.
 - **Document viewer** (gallery-style): page pager, numbered filmstrip with
   **+** to add a page, and an actions island:
   - **Retake** replaces that page in place.
