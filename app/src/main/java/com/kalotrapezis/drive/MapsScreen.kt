@@ -434,7 +434,11 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         nav = null
         view = DRIVING_VIEW
         mapRef?.locationComponent?.takeIf { it.isLocationComponentActivated }?.apply { cameraMode = CameraMode.NONE; renderMode = RenderMode.COMPASS }
+        mapRef?.moveCamera(org.maplibre.android.camera.CameraUpdateFactory.paddingTo(0.0, 0.0, 0.0, 0.0)) // me in the middle again
     }
+
+    /** The camera's padding for [tilt]: tilted further at speed, the car lower on the screen (up to 70 % down), the road ahead above it. */
+    fun ahead(tilt: Double) = doubleArrayOf(0.0, context.resources.displayMetrics.heightPixels * 0.4 * ((tilt - 45) / 15).coerceIn(0.0, 1.0), 0.0, 0.0)
 
     /** The camera on me, turned the way I go; zoom and tilt through the tracking itself (a camera move of ours would end it). */
     fun follow(mode: String) {
@@ -443,7 +447,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         lc.setCameraMode(CameraMode.TRACKING_GPS, object : org.maplibre.android.location.OnLocationCameraTransitionListener {
             override fun onLocationCameraTransitionFinished(cameraMode: Int) {
                 val (z, t) = if (mode == "car") view else 17.5 to 0.0
-                lc.zoomWhileTracking(z); lc.tiltWhileTracking(t)
+                lc.zoomWhileTracking(z); lc.tiltWhileTracking(t); lc.paddingWhileTracking(if (mode == "car") ahead(t) else ahead(0.0))
             }
             override fun onLocationCameraTransitionCanceled(cameraMode: Int) = Unit
         })
@@ -561,7 +565,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         if (car && g.view != view) {
             view = g.view
             WriterLog.i("Maps: camera zoom ${view.first} tilt ${view.second.toInt()} (step ${p.next} ${p.toNext.toInt()} m ahead, ${Math.round(speedMs * 3.6)} km/h)")
-            lc?.takeIf { it.cameraMode == CameraMode.TRACKING_GPS }?.let { it.zoomWhileTracking(view.first, 1500); it.tiltWhileTracking(view.second, 1500) }
+            lc?.takeIf { it.cameraMode == CameraMode.TRACKING_GPS }?.let { it.zoomWhileTracking(view.first, 1500); it.tiltWhileTracking(view.second, 1500); it.paddingWhileTracking(ahead(view.second), 1500) }
         }
         g.words(words, car)?.let { say(it, why = g.why()) }
         g.bend?.let { b -> say(MapsPrefs.bendWords(words, n.bends[b].right), why = "bend ${(n.bends[b].along - p.along).toInt()} m ahead, ${Math.round(speedMs * 3.6)} km/h") }
