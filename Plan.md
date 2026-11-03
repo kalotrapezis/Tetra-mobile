@@ -12,6 +12,14 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [x] (browser-sync session, 3 Nov; branch `browser-sync`, not merged; desktop bc9f2b4 on main) **Browser: bookmarks, open tabs and
+      (chosen) passwords between the phone and the tablet** (the user: "bookmarks and tabs"; "sync passwords as well but have some
+      encryption"; "options in the settings what to sync"). `.System/Browser/Shared` (synced as `Browser/…`, part `browser`; the desktop
+      only carries it): each device writes only its own `Bookmarks/<device>.json` (records with times and 30-day tombstones, merged on
+      read: newer wins, folders by id), `Tabs/<device>.json` (shown as "Tabs from other devices" in the bookmarks manager), and with
+      Passwords on `Passwords/<device>.enc` (AES-256-GCM, key = Argon2id of a sync passphrase, `key.json` with a check box). Settings ›
+      Browser › Sync: Bookmarks, Open tabs (on), Passwords (off). SYNC_PLAN 6aw. Checked on notes_phone + books_tablet with the files
+      copied by adb (not Tetra's own sync).
 - [x] (scan-fix session, 3 Nov; branch `scan-fix`, not merged) **Scanner: no cut into shadowed paper; auto fix picks Fix lighting for a dark page**
       (the user: "does it use filters automatically when the paper is too dark? … sometimes it cuts too much inside the paper").
       Trim to paper compared each side with the middle of the page, so a phone's or hand's shadow read as table and lost up to

@@ -2643,3 +2643,27 @@ and speaker); 159 desktop tests; the screens on two hidden instances. **Not with
 **Checked:** `desktop/test/system.test.js`, `files.test.js`, `sync.test.js` (a device naming `Calendar/…` lands in .System,
 no Files/Calendar made, a leftover one not offered), `client.test.js` (reset); Android `TetraSystemTest`. Not yet on the
 real devices.
+
+### 6aw. The Browser's bookmarks, tabs and (chosen) passwords (built 2026-11-03, branch `browser-sync`; desktop bc9f2b4)
+
+- **Where**: `.System/Browser/Shared`, synced as `Browser/…` (TetraSystem.SHARED and system.SHARED; part `browser`, a change goes at
+  once, the computer's watcher nudges the others). The computer only carries the files; no desktop browser reads them.
+- **Each device writes only its own files** (the Timer's rule), so sync never has two versions of one: `Bookmarks/<device>.json`,
+  `Tabs/<device>.json`, `Passwords/<device>.enc`. `<device>` is the model and six characters of Android's id (two of one model differ).
+- **Bookmarks**: every bookmark (by address) and folder (by id; a first id from its path, so two devices' "Radios" are one) with the
+  time it last changed; deletions are tombstones, cleaned after 30 days. Read: all files merged, the newer change wins, at a tie the
+  living one. A rename keeps the folder's id: renamed on one device while a page in it moves on the other, both stand. A page added
+  to a folder deleted elsewhere keeps the folder. The first sync is the union. What changed here is measured against a base kept in
+  the app's own storage, not the shared file (an older copy of it brought back must not make every page "new").
+- **Tabs**: a device's open tabs (url, title, pinned, group name), never Private's; written 2 s after a change and when the Browser
+  is left. Others show them read only; a tap opens a new tab.
+- **Passwords** (off until chosen; Settings › Browser › Sync): logins (site + user), cards (number), addresses (all fields) with the
+  same records and merge, encrypted end to end. `Passwords/key.json`: Argon2id (m 46 MiB, t 1, p 1) salt and a check box; the key
+  under the Keystore on each device (asked once). `<device>.enc`: AES-256-GCM, fresh nonce, device name as AAD. "Forgot it": a new
+  key.json, made later, wins; the others ask again; vaults stay. Off: the vault stays, the key is forgotten.
+- **Switches** are each device's own: off stops reading and writing that part; Open tabs off writes an empty list.
+
+**Checked:** BrowserSyncTest, BrowserPasswordsTest (RFC 9106 vector, wrong passphrase, tampering, merge, no plaintext), desktop
+files.test.js. On two emulators with the folder copied by adb: union, add, rename vs move, delete, tabs by device name, the
+passphrase on the second device and the login filled there, each switch. Not between real devices through Tetra's sync.
+

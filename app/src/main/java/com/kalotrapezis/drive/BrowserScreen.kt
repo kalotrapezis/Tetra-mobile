@@ -189,8 +189,10 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     // sync (BrowserSync.kt): this device's files in .System/Browser/Shared; Private sends no tabs
     val syncRoot = remember { BrowserSync.root() }
     val me = remember { BrowserSync.device(context) }
-    val syncBookmarks = remember { BrowserSync.on(context, BrowserSync.BOOKMARKS) }
-    val syncTabs = remember { !private && BrowserSync.on(context, BrowserSync.TABS) }
+    // Settings › Browser › Sync, asked each time: the Browser stays open behind Settings
+    fun syncBookmarks() = BrowserSync.on(context, BrowserSync.BOOKMARKS)
+    fun syncTabs() = !private && BrowserSync.on(context, BrowserSync.TABS)
+    fun syncPasswords() = !private && BrowserSync.on(context, BrowserSync.PASSWORDS)
     val marksRun = remember { IntArray(1) }
     var others by remember { mutableStateOf(emptyList<DeviceTabs>()) } // the other devices' tabs
     var editing by remember { mutableStateOf(false) }
@@ -457,7 +459,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     /** The open tabs as the other devices see them (Private's never). */
     fun remoteTabs() = tabs.map { RemoteTab(it.pending ?: it.url, it.title, it.pinned, it.group?.let { g -> groups[g] }.orEmpty()) }.filter { it.url.isNotEmpty() }
     fun shareTabs(list: List<RemoteTab> = remoteTabs()) {
-        if (!syncTabs) return
+        if (!syncTabs()) return
         val app = context.applicationContext
         BROWSER_SYNC.launch {
             runCatching { if (BrowserSync.writeTabs(syncRoot, me, DataFiles.deviceName(app), list)) { WriterLog.i("Browser sync: ${list.size} tabs written"); ScopedSync.soon(app, "browser", orWhole = true) } }
@@ -469,7 +471,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         shareTabs() // and to the other devices, when the Browser is left
     }
     // a change of the tabs (opened, closed, a page, a name, pinned, grouped): to the other devices 2 s after the last
-    LaunchedEffect(Unit) { if (syncTabs) snapshotFlow { remoteTabs() }.distinctUntilChanged().collectLatest { delay(2000); shareTabs(it) } }
+    LaunchedEffect(Unit) { if (!private) snapshotFlow { remoteTabs() }.distinctUntilChanged().collectLatest { delay(2000); shareTabs(it) } }
     val tab = tabs.firstOrNull { it.id == currentId } ?: tabs.first()
     val media = tab.media
     fun switch(to: BrowserTab) {
@@ -598,7 +600,19 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         other.session.setActive(true); wake(other)
         splitPair = currentId to other.id
     }
-    fun keep(v: BrowserVault) { vault = v; runCatching { BrowserSecrets.save(context, v) }.onFailure { WriterLog.e("Browser: the vault not saved", it) } }
+    /** Passwords, addresses and cards between devices, encrypted, when chosen (PasswordSync); a merge after a newer change here is dropped. */
+    val vaultRun = remember { IntArray(1) }
+    fun syncVault(v: BrowserVault, pushed: Boolean) {
+        if (!syncPasswords()) return
+        val n = ++vaultRun[0]
+        val app = context.applicationContext
+        BROWSER_SYNC.launch {
+            val r = runCatching { PasswordSync.run(app, v) }.onFailure { WriterLog.e("Browser sync: passwords not merged", it) }.getOrNull()
+            if (pushed && r != null) ScopedSync.soon(app, "browser", orWhole = true)
+            withContext(Dispatchers.Main) { if (r != null && n == vaultRun[0] && r != vault) { vault = r; runCatching { BrowserSecrets.save(app, r) } } }
+        }
+    }
+    fun keep(v: BrowserVault) { vault = v; runCatching { BrowserSecrets.save(context, v) }.onFailure { WriterLog.e("Browser: the vault not saved", it) }; syncVault(v, true) }
     fun store(l: BookmarkLibrary) {
         bookmarks = l.marks; bookFolders = l.extra
         prefs.edit().putString("bookmarks", BrowserRules.bookmarksJson(l.marks)).putString("bookmark_folders", BookmarkLibrary.json(l.extra)).apply()
@@ -608,7 +622,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
      * shown if it differs; [pushed] a change made here, sent at once. A merge answered after a newer change here is dropped.
      */
     fun syncMarks(l: BookmarkLibrary, pushed: Boolean) {
-        if (!syncBookmarks) return
+        if (!syncBookmarks()) return
         val n = ++marksRun[0]
         BROWSER_SYNC.launch {
             val r = runCatching { BrowserSync.bookmarks(syncRoot, me, l, File(context.filesDir, "browser-sync/bookmarks.json")) }.onFailure { WriterLog.e("Browser sync: bookmarks not merged", it) }.getOrNull()
@@ -619,24 +633,29 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     fun keepLibrary(l: BookmarkLibrary) { store(l); syncMarks(l, true) }
     fun keepBookmarks(b: List<Bookmark>) = keepLibrary(BookmarkLibrary(b, bookFolders))
     // the other devices' bookmarks and tabs: read now, and again when sync brings a file of theirs
-    fun readOthers() { if (syncTabs) BROWSER_SYNC.launch { val o = runCatching { BrowserSync.otherTabs(syncRoot, me) }.getOrDefault(emptyList()); withContext(Dispatchers.Main) { others = o } } }
+    fun readOthers() { if (!syncTabs()) others = emptyList() else BROWSER_SYNC.launch { val o = runCatching { BrowserSync.otherTabs(syncRoot, me) }.getOrDefault(emptyList()); withContext(Dispatchers.Main) { others = o } } }
     DisposableEffect(Unit) {
-        syncMarks(library, false); readOthers()
         val main = android.os.Handler(android.os.Looper.getMainLooper())
         val marksSoon = Runnable { syncMarks(BookmarkLibrary(bookmarks, bookFolders), false) }
+        val vaultSoon = Runnable { syncVault(vault, false) }
         val tabsSoon = Runnable { readOthers() }
-        val dirs = listOf(File(syncRoot, "Bookmarks"), File(syncRoot, "Tabs")).onEach { runCatching { it.mkdirs() } }
+        val dirs = listOf(File(syncRoot, "Bookmarks"), File(syncRoot, "Tabs"), File(syncRoot, BrowserPasswords.DIR)).onEach { runCatching { it.mkdirs() } }
         val watch = object : android.os.FileObserver(dirs, CLOSE_WRITE or MOVED_TO or DELETE) {
             override fun onEvent(event: Int, path: String?) {
-                if (path == null || path.startsWith(".") || path == "$me.json" || !path.endsWith(".json")) return
-                // which folder is not said: both looked at, each half a second after the last
-                main.removeCallbacks(marksSoon); main.removeCallbacks(tabsSoon)
-                if (syncBookmarks) main.postDelayed(marksSoon, 500)
+                if (path == null || path.startsWith(".") || path.substringBeforeLast('.') == me || !(path.endsWith(".json") || path.endsWith(".enc"))) return
+                // which folder is not said: each looked at, half a second after the last
+                main.removeCallbacks(marksSoon); main.removeCallbacks(tabsSoon); main.removeCallbacks(vaultSoon)
+                if (syncBookmarks()) main.postDelayed(marksSoon, 500)
                 main.postDelayed(tabsSoon, 500)
+                if (syncPasswords()) main.postDelayed(vaultSoon, 500)
             }
         }
-        if (syncBookmarks || syncTabs) watch.startWatching()
-        onDispose { watch.stopWatching(); main.removeCallbacks(marksSoon); main.removeCallbacks(tabsSoon) }
+        watch.startWatching()
+        // opened, and back from elsewhere (Settings › Browser › Sync, a while away): looked at again, the switches as they are now
+        // (an observer added now is told ON_RESUME at once)
+        val back = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME) { syncMarks(BookmarkLibrary(bookmarks, bookFolders), false); readOthers(); syncVault(vault, false); shareTabs() } }
+        lifecycle.lifecycle.addObserver(back)
+        onDispose { lifecycle.lifecycle.removeObserver(back); watch.stopWatching(); main.removeCallbacks(marksSoon); main.removeCallbacks(tabsSoon); main.removeCallbacks(vaultSoon) }
     }
     var filing by remember { mutableStateOf<Bookmark?>(null) } // a favourite being put in a folder
     val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -892,7 +911,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                 o.logins.forEach { Text(stringResource(R.string.browser_save_login, it.host, it.user.ifEmpty { "—" })) }
                 o.addresses.forEach { Text(stringResource(R.string.browser_save_address, addressLabel(it))) }
                 o.cards.forEach { Text(stringResource(R.string.browser_save_card, it.last4)) }
-                Text(stringResource(R.string.browser_saved_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(if (syncPasswords()) R.string.browser_saved_note_synced else R.string.browser_saved_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             } },
             confirmButton = { TextButton(onClick = { keep(vault.with(o)); offer = null }) { Text(stringResource(R.string.common_save)) } },
             dismissButton = { TextButton(onClick = { offer = null }) { Text(stringResource(R.string.browser_not_now)) } })
@@ -1183,7 +1202,7 @@ private fun BrowserPanelView(p: BrowserPanel, close: () -> Unit, visits: List<Vi
                     items(visits, key = { it.url }) { v -> BrowserRow(v.title, v.url, click = { open(v.url) }) }
                 }
                 BrowserPanel.Saved -> {
-                    item { note(stringResource(if (vault.empty) R.string.browser_none_saved else R.string.browser_saved_note)) }
+                    item { note(stringResource(if (vault.empty) R.string.browser_none_saved else if (BrowserSync.on(LocalContext.current, BrowserSync.PASSWORDS)) R.string.browser_saved_note_synced else R.string.browser_saved_note)) }
                     if (vault.logins.isNotEmpty()) item { head(stringResource(R.string.browser_passwords)) }
                     items(vault.logins, key = { "l" + it.host + "\u0000" + it.user }) { l -> BrowserRow(l.user.ifEmpty { "—" }, l.host, click = {}, remove = { keep(vault.copy(logins = vault.logins - l)) }) }
                     if (vault.addresses.isNotEmpty()) item { head(stringResource(R.string.browser_addresses)) }

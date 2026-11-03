@@ -54,7 +54,7 @@ internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, 
     Appearance(R.string.settings_appearance, R.drawable.ic_palette, null, R.string.settings_appearance_summary, listOf(R.string.settings_theme, R.string.settings_language, R.string.settings_photo_on_home, R.string.settings_hidden_from_home, R.string.settings_app_icons)),
     Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_check, R.string.mail_default_app, R.string.mail_threads, R.string.mail_read_shown, R.string.mail_islands, R.string.mail_security,
         R.string.mail_remote, R.string.mail_allowed, R.string.mail_tracking, R.string.mail_link_warning, R.string.mail_risky, R.string.mail_real_address, R.string.mail_receipts)),
-    Browser(R.string.app_browser, Category.Browser.icon, Category.Browser.color, R.string.settings_browser_summary, listOf(R.string.browser_history_keep, R.string.browser_top_bar, R.string.browser_sync_bookmarks, R.string.browser_sync_tabs)),
+    Browser(R.string.app_browser, Category.Browser.icon, Category.Browser.color, R.string.settings_browser_summary, listOf(R.string.browser_history_keep, R.string.browser_top_bar, R.string.browser_sync_bookmarks, R.string.browser_sync_tabs, R.string.browser_sync_passwords)),
     Gallery(R.string.app_gallery, Category.Gallery.icon, Category.Gallery.color, R.string.settings_gallery_summary, listOf(R.string.settings_photos_videos, R.string.settings_search_quality, R.string.settings_folders)),
     Files(R.string.app_files, Category.Files.icon, Category.Files.color, R.string.settings_files_summary, listOf(R.string.settings_drive_workspace, R.string.settings_all_files)),
     Scanner(R.string.settings_pdf_scanner, Category.Scanner.icon, Category.Scanner.color, R.string.settings_resolution, listOf(R.string.settings_resolution)),
@@ -507,7 +507,76 @@ internal fun SettingsTab(
                 if (java.io.File(root, "Tabs/$me.json").isFile && BrowserSync.writeTabs(root, me, DataFiles.deviceName(context), emptyList())) ScopedSync.soon(context.applicationContext, "browser", orWhole = true)
             } }.start()
         }
+        // passwords (the user, 3 Nov: "sync passwords as well but have some encryption"): off until a passphrase is given here
+        val scope = rememberCoroutineScope()
+        var pw by remember { mutableStateOf(PasswordSync.State.OFF) }
+        var ask by remember { mutableStateOf<String?>(null) } // "new", "enter", "forgot"
+        var recipe by remember { mutableStateOf<BrowserPasswords.Recipe?>(null) }
+        LaunchedEffect(ask) { if (ask == null) pw = withContext(Dispatchers.IO) { runCatching { PasswordSync.state(context) }.getOrDefault(PasswordSync.State.OFF) } }
+        fun begin() = scope.launch { recipe = withContext(Dispatchers.IO) { runCatching { PasswordSync.recipe() }.getOrNull() }; ask = if (recipe == null) "new" else "enter" }
+        SettingRow(stringResource(R.string.browser_sync_passwords), stringResource(when (pw) {
+            PasswordSync.State.OFF -> R.string.browser_sync_passwords_off; PasswordSync.State.ON -> R.string.browser_sync_passwords_on; else -> R.string.browser_sync_passwords_need }),
+            onClick = { if (pw == PasswordSync.State.OFF) begin() else if (pw == PasswordSync.State.NEED) begin() }, warn = pw == PasswordSync.State.NEED) {
+            Switch(checked = pw != PasswordSync.State.OFF, onCheckedChange = { on ->
+                if (on) begin() else { PasswordSync.disable(context); pw = PasswordSync.State.OFF }
+            })
+        }
+        when (ask) {
+            "new", "enter" -> PassphraseDialog(if (ask == "new") null else recipe, close = { ask = null }, forgot = { ask = "forgot" }) { r, key, isNew ->
+                withContext(Dispatchers.IO) { PasswordSync.enable(context.applicationContext, r, key, isNew) }
+                key.fill(0)
+                ScopedSync.soon(context.applicationContext, "browser", orWhole = true)
+                ask = null
+            }
+            "forgot" -> AlertDialog(onDismissRequest = { ask = null }, title = { Text(stringResource(R.string.browser_pass_reset_title)) },
+                text = { Text(stringResource(R.string.browser_pass_reset_note)) },
+                confirmButton = { TextButton(onClick = { WriterLog.i("Browser sync: passwords started again with a new passphrase"); ask = "new" }) { Text(stringResource(R.string.browser_pass_reset)) } },
+                dismissButton = { TextButton(onClick = { ask = null }) { Text(stringResource(R.string.common_cancel)) } })
+        }
     }
+}
+
+/**
+ * The sync passphrase: a new one twice ([existing] null: no device has one, or "forgot it"), or the one in force once,
+ * refused when its check box does not open. Argon2id takes a moment: worked out away from the screen's thread.
+ */
+@Composable private fun PassphraseDialog(existing: BrowserPasswords.Recipe?, close: () -> Unit, forgot: () -> Unit,
+    done: suspend (BrowserPasswords.Recipe, ByteArray, Boolean) -> Unit) {
+    val scope = rememberCoroutineScope()
+    var one by remember { mutableStateOf("") }
+    var two by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<Int?>(null) }
+    var working by remember { mutableStateOf(false) }
+    val hidden = androidx.compose.ui.text.input.PasswordVisualTransformation()
+    val keys = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Password)
+    fun go() {
+        error = when { one.length < 8 -> R.string.browser_pass_short; existing == null && one != two -> R.string.browser_pass_mismatch; else -> null }
+        if (error != null) return
+        working = true
+        scope.launch {
+            val chars = one.toCharArray()
+            val made = withContext(Dispatchers.Default) { runCatching { if (existing == null) BrowserPasswords.create(chars) else existing to BrowserPasswords.unlock(chars, existing) } }
+            chars.fill(' ')
+            made.onSuccess { (r, key) -> done(r, key, existing == null) }
+                .onFailure { error = if (it is BrowserPasswords.WrongPassphrase) R.string.browser_pass_wrong else R.string.browser_pass_failed
+                    if (it !is BrowserPasswords.WrongPassphrase) WriterLog.e("Browser sync: the passphrase not taken", it) else WriterLog.i("Browser sync: a wrong passphrase refused") }
+            working = false
+        }
+    }
+    AlertDialog(onDismissRequest = { if (!working) close() },
+        title = { Text(stringResource(if (existing == null) R.string.browser_pass_new_title else R.string.browser_pass_enter_title)) },
+        text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(if (existing == null) R.string.browser_pass_new_note else R.string.browser_pass_enter_note), style = MaterialTheme.typography.bodyMedium)
+            OutlinedTextField(one, { one = it; error = null }, singleLine = true, label = { Text(stringResource(R.string.browser_pass_field)) },
+                visualTransformation = hidden, keyboardOptions = keys, isError = error != null, enabled = !working)
+            if (existing == null) OutlinedTextField(two, { two = it; error = null }, singleLine = true, label = { Text(stringResource(R.string.browser_pass_repeat)) },
+                visualTransformation = hidden, keyboardOptions = keys, isError = error == R.string.browser_pass_mismatch, enabled = !working)
+            error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+            if (working) LinearProgressIndicator(Modifier.fillMaxWidth())
+            if (existing != null) TextButton(onClick = forgot, enabled = !working) { Text(stringResource(R.string.browser_pass_forgot)) }
+        } },
+        confirmButton = { TextButton(onClick = ::go, enabled = !working && one.isNotEmpty()) { Text(stringResource(R.string.common_ok)) } },
+        dismissButton = { TextButton(onClick = close, enabled = !working) { Text(stringResource(R.string.common_cancel)) } })
 }
 
 @Composable private fun TextEditorPage() {

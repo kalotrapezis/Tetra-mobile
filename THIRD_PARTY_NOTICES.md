@@ -77,6 +77,11 @@ Apache License 2.0: https://github.com/graphhopper/graphhopper
 QR codes are drawn with ZXing 3.5.3 and on-device models run on TensorFlow Lite 2.16.1 (with the Task Vision
 library 0.4.4), all under the Apache License 2.0: https://github.com/zxing/zxing, https://github.com/tensorflow/tensorflow
 
+## Bouncy Castle
+
+The Browser's password sync derives its key from the sync passphrase with Argon2id from the Bouncy Castle Crypto
+APIs (`org.bouncycastle:bcprov-jdk18on` 1.80.2), MIT licence: https://www.bouncycastle.org/licence.html
+
 ## Noto Sans (map labels)
 
 `app/src/main/assets/maps/fonts` holds Noto Sans glyphs for the map's labels, under the SIL Open Font License 1.1
