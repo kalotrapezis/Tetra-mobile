@@ -482,6 +482,8 @@ class MapsJunctionTest {
                 // twice between them counted as roads (Εθνικής Αμύνης: 4), a crossing 20 m on pulled in (5 Δρόμοι's Γαληνού: 3)
                 if ("Εθνικής Αμύνης" in s.text) assertEquals(4, j.arms.size)
                 if ("Γαληνού" in s.text) assertEquals(3, j.arms.size)
+                // 5 Δρόμοι: Παλαιολόγου only into the ring, the first road on the right, so Στρατού is exit 2 (3 Nov)
+                if ("Στρατού" in s.text && j.roundabout) { assertEquals(2, j.exit); assertEquals(setOf(j.arms.indexOfFirst { it > 90 }), j.entries) }
                 // the way on on the side the directions say (GraphHopper's sign: + right, − left) — at a crossing of several
                 // nodes the picture shows the way through it all, which can differ from its first turn
                 if (j.arms.size >= 5) continue

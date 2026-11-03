@@ -32,8 +32,9 @@ class JunctionPictureDeviceTest {
             "u-turn-left" to Junction(listOf(-180.0, -179.0, -90.0, 90.0), 1),
             "u-turn-dual" to Junction(listOf(-180.0, -166.0, 0.0), 1, roads = listOf(2, 2, 1)),
             "staggered-left-right" to Junction(listOf(-180.0, -90.0, 90.0), 1, roads = listOf(0, 2, 2, 2, 0), then = listOf(-90.0, 0.0), thenTaken = 1),
-            "5dromoi-exit2" to Junction(listOf(-180.0, -122.0, -37.0, 45.0, 107.0), 2, roundabout = true, exit = 2),
-            "karaiskaki-exit2" to Junction(listOf(-180.0, -93.0, -5.0, 0.0, 89.0), 3, roundabout = true, exit = 2),
+            // the lower right road (Παλαιολόγου) and Αγίου Κωνσταντίνου only into the ring: thin and dim, not counted
+            "5dromoi-exit2" to Junction(listOf(-180.0, -122.0, -37.0, 45.0, 107.0), 2, roundabout = true, exit = 2, entries = setOf(4)),
+            "karaiskaki-exit2" to Junction(listOf(-180.0, -93.0, -5.0, 0.0, 89.0), 3, roundabout = true, exit = 2, entries = setOf(2)),
             "roundabout-exit4" to Junction(listOf(-180.0, -90.0, 0.0, 90.0), 0, roundabout = true, exit = 4),
             "roundabout-left-traffic" to Junction(listOf(-180.0, -90.0, 0.0, 90.0), 1, roundabout = true, exit = 1),
         )
