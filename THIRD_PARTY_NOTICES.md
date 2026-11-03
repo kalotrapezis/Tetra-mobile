@@ -82,17 +82,14 @@ library 0.4.4), all under the Apache License 2.0: https://github.com/zxing/zxing
 `app/src/main/assets/maps/fonts` holds Noto Sans glyphs for the map's labels, under the SIL Open Font License 1.1
 (`app/src/main/assets/maps/fonts-OFL.txt`).
 
-## EasyList and EasyPrivacy
+## GeckoView (Mozilla)
 
-The Browser's ad blocker uses the host rules of EasyList and EasyPrivacy
-(https://easylist.to/), by The EasyList authors. A copy taken on 2026-11-02 is
-bundled as `app/src/main/assets/adblock.txt` (host rules only); the app fetches
-the full lists from easylist.to once a week. Both lists are dual-licensed under
-the GNU General Public License v3 and Creative Commons Attribution-ShareAlike 3.0:
-https://easylist.to/pages/licence.html
+The Browser's engine is GeckoView (`org.mozilla.geckoview:geckoview` 159), Firefox's
+engine for Android, by the Mozilla Foundation and its contributors, licensed under the
+Mozilla Public License 2.0: https://www.mozilla.org/MPL/2.0/ — its source is at
+https://hg.mozilla.org/mozilla-central and https://github.com/mozilla-firefox/firefox.
+Tetra uses GeckoView unmodified, as a library from Mozilla's Maven repository. The notices
+of the components GeckoView is built from are in its source, `toolkit/content/license.html`.
 
-## AndroidX WebKit
-
-The Browser's private mode keeps its cookies and storage in a WebView profile of
-its own with `androidx.webkit:webkit` 1.14.0, licensed under Apache License 2.0:
-https://www.apache.org/licenses/LICENSE-2.0
+The Browser installs, on its first start, uBlock Origin (GPL v3, Raymond Hill) and Dark
+Reader (MIT, Dark Reader Ltd) from addons.mozilla.org; they are not part of Tetra's package.
