@@ -12,6 +12,12 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [x] (maps-speed session, 3 Nov; branch `maps-speed`, not merged) **Directions: a speedometer and the limit's sign** (the user: "maps — No
+      speed limit or speedometer. Wrong graphics, we need more"). By car my speed is its own round badge (red over the limit by
+      more than 3 km/h, a dash before the GPS gives a speed, hidden while the GPS is lost), the limit a red-ringed sign beside it;
+      no sign where OSM has no number (GR:urban, none, untagged — `MapsRouting.posted`, never guessed; 2 km/h storage steps
+      back to fives). Before, nothing showed where the limit was unknown. `MapsLimitTest`; driven on an emulator in
+      Thessaloniki (44 under 50, 75 red, 56 alone). Units: km/h even when Settings say miles (the signs are km/h).
 - [x] (alarm-buttons session, 1 Nov; merged 1 Nov) **Timer notifications: icon-only buttons**
       (the user: "buttons like the X on the calendar … no text just the buttons"). Ringing alarm: zzz (snooze 10 min) and ×; ringing
       timer: zzz (+1 min) and ×; running timer/stopwatch: ‖ (▶ when paused) and ×; the coming alarm (12 h before): zzz and × (skip); same icons in the island and AlarmRingActivity.

@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.clip
@@ -68,6 +69,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -867,21 +869,17 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
             Text(stringResource(R.string.maps_welcome_steps), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        // bottom left: the speed limit as its sign, red when I am over it (by more than 3 km/h), my speed under it
-        limit?.takeIf { live }?.let { l ->
-            val over = (speed ?: 0) > l + 3
+        // bottom left, by car: my speed in its badge, red when over the limit by more than 3 km/h, and the limit's sign beside it
+        // (the user, 3 Nov: "No speed limit or speedometer. Wrong graphics"); the sign only where the road has a number, never guessed
+        val driving = (nav ?: carNav)?.mode.let { it == null || it == "car" }
+        val shownSpeed = speed?.takeIf { driving && !reckoning } // not the guess made while the GPS is lost
+        val badge = (nav ?: carNav)?.mode == "car" || (shownSpeed != null && limit != null) // without directions: beside a sign, as before
+        if (live && (limit != null || badge)) {
             // clear of the island and the bars below it (the user, 21 Oct: "ακουμπάει πάνω στο νησί … δώσε λίγο αέρα")
-            Column(Modifier.align(Alignment.BottomStart).navigationBarsPadding().padding(start = 12.dp, bottom = if (nav != null) 150.dp else 100.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Surface(shape = CircleShape, color = if (over) androidx.compose.ui.graphics.Color(0xFFD32F2F) else androidx.compose.ui.graphics.Color.White,
-                    border = androidx.compose.foundation.BorderStroke(5.dp, androidx.compose.ui.graphics.Color(0xFFD32F2F)), modifier = Modifier.size(58.dp)) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text("$l", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge,
-                            color = if (over) androidx.compose.ui.graphics.Color.White else androidx.compose.ui.graphics.Color.Black)
-                    }
-                }
-                speed?.let { Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape, modifier = Modifier.padding(top = 4.dp)) {
-                    Text("$it km/h", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
-                } }
+            Row(Modifier.align(Alignment.BottomStart).navigationBarsPadding().padding(start = 12.dp, bottom = if (nav != null) 150.dp else 100.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (badge) SpeedBadge(shownSpeed, limit?.let { l -> (shownSpeed ?: 0) > l + 3 } == true)
+                limit?.let { LimitSign(it) }
             }
         }
 
@@ -1244,6 +1242,23 @@ private fun roadAt(map: MapLibreMap?, loc: Location, lang: String): Pair<String,
     color = if (code.startsWith("A") || code.startsWith("Α")) androidx.compose.ui.graphics.Color(0xFF1B7F3B) else androidx.compose.ui.graphics.Color(0xFF1565C0)) {
     Text(code, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = androidx.compose.ui.graphics.Color.White,
         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+}
+
+/** My speed as a round badge (Google Maps', Waze's): the number big, km/h under it; red with white letters when [over]. A dash before the GPS gives one. */
+@Composable private fun SpeedBadge(kmh: Int?, over: Boolean) = Surface(shape = CircleShape, shadowElevation = 6.dp, modifier = Modifier.size(64.dp),
+    color = if (over) androidx.compose.ui.graphics.Color(0xFFD32F2F) else androidx.compose.ui.graphics.Color.White,
+    contentColor = if (over) androidx.compose.ui.graphics.Color.White else androidx.compose.ui.graphics.Color(0xFF202124)) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Text(kmh?.toString() ?: "–", fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 24.sp)
+        Text("km/h", fontSize = 11.sp, lineHeight = 11.sp)
+    }
+}
+
+/** The road's limit as the sign itself: a white disc in a red ring, the number in black (three digits a size smaller). */
+@Composable private fun LimitSign(kmh: Int) = Surface(shape = CircleShape, shadowElevation = 6.dp, color = androidx.compose.ui.graphics.Color.White, modifier = Modifier.size(64.dp)) {
+    Box(Modifier.padding(2.dp).border(7.dp, androidx.compose.ui.graphics.Color(0xFFD32F2F), CircleShape), contentAlignment = Alignment.Center) {
+        Text("$kmh", fontWeight = FontWeight.Bold, fontSize = if (kmh >= 100) 20.sp else 24.sp, color = androidx.compose.ui.graphics.Color.Black)
+    }
 }
 
 @Composable private fun Island(icon: Int, label: String, click: () -> Unit) = Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape) {
