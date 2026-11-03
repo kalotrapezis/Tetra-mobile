@@ -282,9 +282,12 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     var soundId by remember { mutableStateOf<Int?>(null) } // the tab last heard: the notification's and Maps' keys go to it, whichever is shown
     /** A page's script said something (assets/tetra-ext/content.js): the form fields there, a form sent, the media's state. */
     fun heard(tab: BrowserTab, o: JSONObject) {
+        o.optString("error", null)?.let { WriterLog.w("Browser: page script, ${it.take(200)}") }
         o.optString("kinds", null)?.let { s -> tab.kinds = s.split(',').filter { it.isNotBlank() }.toSet() }
         o.optString("media", null)?.let { s -> runCatching { JSONObject(s) }.getOrNull()?.let { m ->
+            val was = tab.media
             tab.media = PageMedia(m.optBoolean("has"), m.optBoolean("playing"), m.optString("title").take(200), tab.queue)
+            if (was.has != tab.media.has || was.playing != tab.media.playing) WriterLog.i("Browser: media on ${BrowserRules.host(tab.url)}: ${if (tab.media.playing) "playing" else if (tab.media.has) "paused" else "none"}")
             if (tab.media.playing) soundId = tab.id
         } }
         // Private keeps nothing: a form there is not offered to the vault
@@ -394,6 +397,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         BrowserEngine.withBuiltIn { ext -> session.webExtensionController.setMessageDelegate(ext, object : WebExtension.MessageDelegate {
             override fun onConnect(port: WebExtension.Port) {
                 tab.port = port
+                WriterLog.i("Browser: page script on ${BrowserRules.host(tab.url).ifEmpty { "a new page" }}")
+                port.postMessage(JSONObject().put("bg", background))
                 port.setDelegate(object : WebExtension.PortDelegate {
                     override fun onPortMessage(message: Any, port: WebExtension.Port) { (message as? JSONObject)?.let { heard(tab, it) } }
                     override fun onDisconnect(port: WebExtension.Port) { if (tab.port === port) tab.port = null }
@@ -635,6 +640,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         "autohide" -> BrowserTool(R.drawable.ic_fullscreen, stringResource(R.string.browser_autohide), autohide) { autohide = !autohide; barShown = true; prefs.edit().putBoolean("autohide", autohide).apply() }
         "background" -> BrowserTool(R.drawable.ic_headphones, stringResource(R.string.browser_background), background) {
             background = !background; BrowserMedia.setBackground(context, background)
+            tabs.forEach { it.port?.postMessage(JSONObject().put("bg", background)) }
             message = context.getString(if (background) R.string.browser_background_on else R.string.browser_background_off)
         }
         "close" -> BrowserTool(R.drawable.ic_close, stringResource(R.string.common_close)) { back() }

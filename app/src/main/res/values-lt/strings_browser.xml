@@ -135,4 +135,5 @@
     <string name="browser_stay">Likti</string>
     <string name="browser_repost">Siųsti formą dar kartą?</string>
     <string name="browser_resend">Siųsti dar kartą</string>
+    <string name="browser_ext_added">%1$s pridėtas</string>
 </resources>

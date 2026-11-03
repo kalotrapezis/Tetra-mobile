@@ -135,4 +135,5 @@
     <string name="browser_stay">Fan</string>
     <string name="browser_repost">An fhoirm a sheoladh arís?</string>
     <string name="browser_resend">Seol arís</string>
+    <string name="browser_ext_added">Cuireadh %1$s leis</string>
 </resources>

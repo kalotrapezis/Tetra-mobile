@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -101,13 +102,18 @@ internal fun ExtensionsSheet(pinned: List<String>, private: Boolean, close: () -
 internal fun ExtAskDialog(a: ExtAsk) {
     var private by remember(a) { mutableStateOf(false) }
     val name = a.ext.metaData.name ?: a.ext.id
+    LaunchedEffect(a) { if (a.ext.id !in BrowserEngine.icons) a.ext.metaData.icon.getBitmap(96).accept({ b -> b?.let { BrowserEngine.icons[a.ext.id] = it.asImageBitmap() } }, { }) }
+    // every site said once, not each of the sites it also names (Privacy Badger's hundred Google domains)
+    val all = a.permissions.any { it == "<all_urls>" || it == "*://*/*" }
+    val sites = a.permissions.filter { "://" in it || it == "<all_urls>" }
+    val shown = a.permissions.filter { "://" !in it && it != "<all_urls>" } + if (all) listOf("<all_urls>") else sites.take(5) + listOfNotNull("…".takeIf { sites.size > 5 })
     AlertDialog(onDismissRequest = { a.answer(false, false) },
         icon = { ExtIcon(a.ext.id, 40) },
         title = { Text(stringResource(if (a.update) R.string.browser_ext_update_title else R.string.browser_ext_add_title, name)) },
         text = { Column(Modifier.verticalScroll(rememberScrollState())) {
             if (a.permissions.isNotEmpty()) {
                 Text(stringResource(R.string.browser_ext_can), style = MaterialTheme.typography.titleSmall)
-                a.permissions.take(30).forEach { Text("• " + permission(it), style = MaterialTheme.typography.bodyMedium) }
+                shown.forEach { Text("• " + permission(it), style = MaterialTheme.typography.bodyMedium) }
             }
             if (!a.update) Row(Modifier.fillMaxWidth().clickable { private = !private }.padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(private, { private = it }); Text(stringResource(R.string.browser_ext_private))

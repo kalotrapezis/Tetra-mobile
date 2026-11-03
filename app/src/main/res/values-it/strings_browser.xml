@@ -135,4 +135,5 @@
     <string name="browser_stay">Resta</string>
     <string name="browser_repost">Inviare di nuovo il modulo?</string>
     <string name="browser_resend">Invia di nuovo</string>
+    <string name="browser_ext_added">%1$s aggiunto</string>
 </resources>

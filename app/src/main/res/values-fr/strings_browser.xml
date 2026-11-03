@@ -135,4 +135,5 @@
     <string name="browser_stay">Rester</string>
     <string name="browser_repost">Renvoyer le formulaire ?</string>
     <string name="browser_resend">Renvoyer</string>
+    <string name="browser_ext_added">%1$s ajouté</string>
 </resources>

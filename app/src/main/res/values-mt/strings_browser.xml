@@ -135,4 +135,5 @@
     <string name="browser_stay">Ibqa’</string>
     <string name="browser_repost">Tibgħat il-formola mill-ġdid?</string>
     <string name="browser_resend">Ibgħat mill-ġdid</string>
+    <string name="browser_ext_added">%1$s miżjud</string>
 </resources>

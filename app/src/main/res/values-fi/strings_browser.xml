@@ -135,4 +135,5 @@
     <string name="browser_stay">Pysy</string>
     <string name="browser_repost">Lähetetäänkö lomake uudelleen?</string>
     <string name="browser_resend">Lähetä uudelleen</string>
+    <string name="browser_ext_added">%1$s lisätty</string>
 </resources>

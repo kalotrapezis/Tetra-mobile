@@ -135,4 +135,5 @@
     <string name="browser_stay">Zostať</string>
     <string name="browser_repost">Odoslať formulár znova?</string>
     <string name="browser_resend">Odoslať znova</string>
+    <string name="browser_ext_added">%1$s pridané</string>
 </resources>

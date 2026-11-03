@@ -135,4 +135,5 @@
     <string name="browser_stay">Maradás</string>
     <string name="browser_repost">Újra elküldi az űrlapot?</string>
     <string name="browser_resend">Újraküldés</string>
+    <string name="browser_ext_added">%1$s hozzáadva</string>
 </resources>

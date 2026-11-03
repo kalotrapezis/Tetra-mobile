@@ -63,6 +63,7 @@ internal object BrowserEngine {
     private var builtIn: WebExtension? = null
     private val waiting = mutableListOf<(WebExtension) -> Unit>()
     private val silent = mutableSetOf<String>() // being installed by Tetra itself: no question
+    private val quiet = mutableMapOf<String, Long>() // installed by Tetra itself, when: its welcome tab is not opened
     private val sessions = mutableSetOf<GeckoSession>() // the tabs' sessions, each told every extension's delegates
 
     /** Tetra's own extension, once Gecko has it (at once after the first time). */
@@ -97,7 +98,10 @@ internal object BrowserEngine {
         val ctl = r.webExtensionController
         ctl.promptDelegate = prompts
         ctl.setAddonManagerDelegate(object : WebExtensionController.AddonManagerDelegate {
-            override fun onInstalled(extension: WebExtension) { WriterLog.i("Browser: extension installed ${extension.id} ${extension.metaData.version}"); refresh() }
+            override fun onInstalled(extension: WebExtension) {
+                WriterLog.i("Browser: extension installed ${extension.id} ${extension.metaData.version}"); refresh()
+                if (extension.id !in silent && extension.id != BUILT_IN && !extension.isBuiltIn) note = c.getString(R.string.browser_ext_added, extension.metaData.name ?: extension.id)
+            }
             override fun onUninstalled(extension: WebExtension) { WriterLog.i("Browser: extension removed ${extension.id}"); refresh() }
             override fun onEnabled(extension: WebExtension) = refresh()
             override fun onDisabled(extension: WebExtension) = refresh()
@@ -173,6 +177,8 @@ internal object BrowserEngine {
 
     private val tabDelegate = object : WebExtension.TabDelegate {
         override fun onNewTab(source: WebExtension, createDetails: WebExtension.CreateTabDetails): GeckoResult<GeckoSession>? {
+            // Dark Reader's help page right after Tetra installed it on its own: the first start stays where the user is
+            if (System.currentTimeMillis() - (quiet[source.id] ?: 0) < 30_000) { WriterLog.i("Browser: ${source.id}'s welcome tab not opened"); return null }
             closePopup()
             return tabs?.newTab(createDetails.url)?.let { GeckoResult.fromValue(it) }
         }
@@ -211,12 +217,14 @@ internal object BrowserEngine {
      */
     fun firstStart(c: Context) {
         val ctl = runtime(c).webExtensionController
+        followLook() // the look may have changed since the runtime was made
         val done = prefs().getStringSet("ext_auto", null).orEmpty()
         AUTO.filter { it.first !in done && it.first !in silent }.forEach { (id, slug) ->
-            silent += id
+            silent += id; quiet[id] = System.currentTimeMillis()
             WriterLog.i("Browser: installing $slug")
             ctl.install("https://addons.mozilla.org/firefox/downloads/latest/$slug/latest.xpi", WebExtensionController.INSTALLATION_METHOD_MANAGER).accept({ ext ->
                 silent -= id
+                quiet[id] = System.currentTimeMillis()
                 prefs().edit().putStringSet("ext_auto", prefs().getStringSet("ext_auto", null).orEmpty() + id).apply()
                 WriterLog.i("Browser: $slug ${ext?.metaData?.version} installed")
             }, { e -> silent -= id; WriterLog.w("Browser: $slug not installed, again next time", e); null })

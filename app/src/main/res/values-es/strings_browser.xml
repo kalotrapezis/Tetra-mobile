@@ -135,4 +135,5 @@
     <string name="browser_stay">Quedarse</string>
     <string name="browser_repost">¿Enviar el formulario de nuevo?</string>
     <string name="browser_resend">Enviar de nuevo</string>
+    <string name="browser_ext_added">%1$s añadido</string>
 </resources>

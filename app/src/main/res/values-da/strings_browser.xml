@@ -135,4 +135,5 @@
     <string name="browser_stay">Bliv</string>
     <string name="browser_repost">Send formularen igen?</string>
     <string name="browser_resend">Send igen</string>
+    <string name="browser_ext_added">%1$s er tilføjet</string>
 </resources>

@@ -135,4 +135,5 @@
     <string name="browser_stay">Bleiben</string>
     <string name="browser_repost">Formular erneut senden?</string>
     <string name="browser_resend">Erneut senden</string>
+    <string name="browser_ext_added">%1$s hinzugefügt</string>
 </resources>

@@ -135,4 +135,5 @@
     <string name="browser_stay">Jää</string>
     <string name="browser_repost">Kas saata vorm uuesti?</string>
     <string name="browser_resend">Saada uuesti</string>
+    <string name="browser_ext_added">%1$s lisatud</string>
 </resources>

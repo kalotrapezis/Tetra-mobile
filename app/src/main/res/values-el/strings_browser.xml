@@ -135,4 +135,5 @@
     <string name="browser_stay">Παραμονή</string>
     <string name="browser_repost">Αποστολή της φόρμας ξανά;</string>
     <string name="browser_resend">Αποστολή ξανά</string>
+    <string name="browser_ext_added">Προστέθηκε το %1$s</string>
 </resources>

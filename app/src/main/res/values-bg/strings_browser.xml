@@ -135,4 +135,5 @@
     <string name="browser_stay">Остани</string>
     <string name="browser_repost">Да се изпрати ли формулярът отново?</string>
     <string name="browser_resend">Изпрати отново</string>
+    <string name="browser_ext_added">%1$s е добавено</string>
 </resources>

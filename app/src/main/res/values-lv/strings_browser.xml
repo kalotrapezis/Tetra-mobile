@@ -135,4 +135,5 @@
     <string name="browser_stay">Palikt</string>
     <string name="browser_repost">Vai sūtīt veidlapu vēlreiz?</string>
     <string name="browser_resend">Sūtīt vēlreiz</string>
+    <string name="browser_ext_added">%1$s pievienots</string>
 </resources>

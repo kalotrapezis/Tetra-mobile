@@ -135,4 +135,5 @@
     <string name="browser_stay">Rămâi</string>
     <string name="browser_repost">Trimiți formularul din nou?</string>
     <string name="browser_resend">Trimite din nou</string>
+    <string name="browser_ext_added">%1$s adăugat</string>
 </resources>

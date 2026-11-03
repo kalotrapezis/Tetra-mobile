@@ -11,6 +11,13 @@ function connect() {
   port.onMessage.addListener(heard);
 }
 function post(o) { try { if (!port) connect(); port.postMessage(o); } catch (e) {} }
+// background play: while the Browser says so, the page always believes it is shown (YouTube stops a hidden video);
+// the page's own document is changed through Firefox's Xray waiver, the content script's view stays the true one
+var bg = false;
+try { [['visibilityState', 'visible'], ['webkitVisibilityState', 'visible'], ['hidden', false], ['webkitHidden', false]].forEach(function (p) {
+  Object.defineProperty(document.wrappedJSObject, p[0], { configurable: true, get: exportFunction(function () { return bg ? p[1] : document[p[0]]; }, window) }); }); } catch (e) {}
+['visibilitychange', 'webkitvisibilitychange'].forEach(function (t) { window.addEventListener(t, function (e) {
+  if (bg) e.stopImmediatePropagation(); }, true); });
 window.addEventListener('pageshow', function (e) { if (e.persisted) { last = null; lastMedia = ''; report(); media(); } });
 
 // forms: which kinds of fields there are, a form's values on its way, a fill
@@ -55,9 +62,10 @@ function fill(d) { var list = inputs(); list.forEach(function (e) { var k = tok(
 function els() { return Array.prototype.slice.call(document.querySelectorAll('video,audio')); }
 function cur() { var l = els(); return l.filter(function (m) { return !m.paused; })[0] || l.filter(function (m) { return m.currentSrc && m.duration > 0; })[0] || l[0]; }
 var lastMedia = '';
-function media() { var m = cur(), ms = navigator.mediaSession;
-  var s = JSON.stringify({ has: !!(m && m.currentSrc), playing: !!(m && !m.paused && !m.ended), title: (ms && ms.metadata && ms.metadata.title) || document.title || '' });
-  if (s !== lastMedia) { lastMedia = s; post({ media: s }); } }
+function media() { try { var m = cur(), title = '';
+  try { var ms = navigator.mediaSession; title = (ms && ms.metadata && ms.metadata.title) || ''; } catch (e) {}
+  var s = JSON.stringify({ has: !!(m && (m.currentSrc || m.src)), playing: !!(m && !m.paused && !m.ended), title: title || document.title || '' });
+  if (s !== lastMedia) { lastMedia = s; post({ media: s }); } } catch (e) { post({ error: 'media: ' + e }); } }
 ['play','playing','pause','ended','loadedmetadata','emptied'].forEach(function (t) { document.addEventListener(t, media, true); });
 setInterval(media, 2000);
 function click(sel) { var e = sel && document.querySelector(sel); if (!e) return false; e.click(); return true; }
@@ -80,6 +88,7 @@ function first(sel) { var n = 0, t = setInterval(function () { var l = document.
   if (++n > 40) clearInterval(t); }, 250); }
 
 function heard(m) {
+  if ('bg' in m) bg = !!m.bg;
   if (m.fill) fill(m.fill);
   if (m.media) mediaDo(m.media, m.buttons);
   if (m.autoplay) autoplay();

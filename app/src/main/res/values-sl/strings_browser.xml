@@ -135,4 +135,5 @@
     <string name="browser_stay">Ostani</string>
     <string name="browser_repost">Znova pošljem obrazec?</string>
     <string name="browser_resend">Pošlji znova</string>
+    <string name="browser_ext_added">%1$s dodano</string>
 </resources>
