@@ -111,9 +111,11 @@ class JunctionGraphTest {
         node(1, 0.0, -15.0); node(2, 15.0, 0.0); node(3, 0.0, 15.0); node(4, -15.0, 0.0)
         for ((a, b) in listOf(1 to 2, 2 to 3, 3 to 4, 4 to 1)) road(a, b, oneWay = true, round = true)
         val s = end(0.0, -100.0); val n = end(0.0, 100.0)
-        road(s, 1); road(2, end(100.0, 0.0)); road(3, n); road(4, end(-100.0, 0.0))
-        val j = MapsRouting.crossing(g, em, 1, route(s, 1, 2, 3, n), 1, 3, true, exit = 2)!!
+        road(s, 1); road(end(100.0, 0.0), 2, oneWay = true); road(3, n); road(4, end(-100.0, 0.0))
+        // the east road only into the ring: drawn, not an exit — exit 1 is north (5 Δρόμοι's Παλαιολόγου, 3 Nov)
+        val j = MapsRouting.crossing(g, em, 1, route(s, 1, 2, 3, n), 1, 3, true, exit = 1)!!
         println("roundabout: $j")
-        assertEquals(4, j.arms.size); assertEquals(2, j.exit); assertEquals(0.0, j.arms[j.taken], 5.0)
+        assertEquals(4, j.arms.size); assertEquals(1, j.exit); assertEquals(0.0, j.arms[j.taken], 5.0)
+        assertEquals(setOf(j.arms.indexOfFirst { it > 45 }), j.entries)
     }
 }

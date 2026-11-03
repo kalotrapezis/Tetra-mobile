@@ -437,10 +437,10 @@ internal fun bearing(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Do
  * [roads]: each road's size, [arms]' then [then]'s — 2 a main road, 1 secondary or tertiary, 0 a street, −1 a ramp, −2 a
  * service road or track (only where the route takes one) —, empty where not known. [then]: at a staggered crossing, the
  * second one a few metres along [taken], where the route turns again: its other roads, in the same frame, and [thenTaken]
- * the one it leaves by.
+ * the one it leaves by. [entries]: a roundabout's roads only into it, not exits (not counted in [exit]).
  */
 internal data class Junction(val arms: List<Double>, val taken: Int, val roundabout: Boolean = false, val roads: List<Int> = emptyList(),
-                             val exit: Int = 0, val then: List<Double> = emptyList(), val thenTaken: Int = -1) {
+                             val exit: Int = 0, val then: List<Double> = emptyList(), val thenTaken: Int = -1, val entries: Set<Int> = emptySet()) {
     /**
      * Worth a picture in the turn card, where the arrow alone can mislead (the user, 23 Oct: Δράμα's five streets): a
      * roundabout, five roads or more, another road leaving within 45° of the one to take, two turns a few metres apart, or
@@ -485,7 +485,7 @@ internal fun showJunction(j: Junction?, toNext: Double) = j != null && j.busy &&
  * [j] drawn [px] square for the turn card (the user, 23 Oct: "a card … with arrows or a circle, blue where I must go"): its
  * roads grey from the middle out at their true angles, the bigger ones thicker, the way in from the bottom and the way on
  * blue with an arrow; a roundabout a grey ring, gone round in blue — anticlockwise, or clockwise where traffic keeps [left]
- * (the UK, Ireland, Cyprus, Malta…) — with its exit's number in the middle. As the turn arrows of Google Maps, HERE and
+ * (the UK, Ireland, Cyprus, Malta…) — with its exit's number in the middle, its roads only into it thin and dim. As the turn arrows of Google Maps, HERE and
  * Android Auto draw them (3 Nov): a fork as a Y, its two ways leaving together and parting; a ramp leaving a main road
  * that goes on straight, peeling off it before the crossing; a U-turn as a hairpin on a two-way road; a staggered crossing
  * as two crossings a short road apart.
@@ -569,7 +569,8 @@ internal fun junctionPicture(j: Junction, px: Int, left: Boolean = false): andro
             wayIn = roads[way]
         }
     }
-    roads.forEach { draw(it, grey) }
+    // a roundabout's roads only into it thinner and dimmer: still roads, but not exits to count (the coordinator, 3 Nov)
+    roads.forEachIndexed { i, r -> if (i in j.entries) draw(Road(r.s, r.k, r.e, r.width * 0.6f), 0xFF6E7377.toInt()) else draw(r, grey) }
     if (j.roundabout) c.drawCircle(mid, mid, ringR, paint(grey, w))
     draw(wayIn, blue); draw(roads[t], blue)
     if (j.roundabout) ringSweep(shown[way], shown[t], left).let { (start, sweep) -> c.drawArc(mid - ringR, mid - ringR, mid + ringR, mid + ringR, start, sweep, false, paint(blue, w)) }

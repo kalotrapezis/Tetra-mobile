@@ -337,17 +337,17 @@ internal object MapsRouting {
          *  Two arms within 30° are one road where both have its name, or within 20° where neither has a name, one only comes to
          *  the crossing and the other only leaves it: a dual carriageway's halves. A fork's two ways out, however close, are two;
          *  two one-way streets of their own names (Σταδίου and Πανεπιστημίου at Ομόνοια) too. */
+        fun same(d: List<Double>, arms: List<Arm>, i: Int, j: Int) = (arms[i].name.isNotEmpty() && arms[i].name == arms[j].name && apart(d[i], d[j]) < 30) ||
+            (arms[i].name == arms[j].name && apart(d[i], d[j]) < 20 && ((arms[i].out && !arms[i].into && arms[j].into && !arms[j].out) ||
+                (arms[i].into && !arms[i].out && arms[j].out && !arms[j].into)))
         fun oneEach(d: List<Double>, arms: List<Arm>, inArm: Int, outArm: Int): List<Int> {
             val keep = arrayListOf(inArm, outArm)
-            fun same(i: Int, j: Int) = (arms[i].name.isNotEmpty() && arms[i].name == arms[j].name && apart(d[i], d[j]) < 30) ||
-                (arms[i].name == arms[j].name && apart(d[i], d[j]) < 20 && ((arms[i].out && !arms[i].into && arms[j].into && !arms[j].out) ||
-                    (arms[i].into && !arms[i].out && arms[j].out && !arms[j].into)))
-            for (i in d.indices) if (i !in keep && arms[i].size > -2 && keep.none { same(i, it) }) keep += i
+            for (i in d.indices) if (i !in keep && arms[i].size > -2 && keep.none { same(d, arms, i, it) }) keep += i
             return keep
         }
         fun turned(b: Double, ref: Double) = ((b - ref) % 360 + 540) % 360 - 180
         val dirs: List<Double>; val sizes: List<Int>
-        var then = emptyList<Double>(); var thenSizes = emptyList<Int>(); var thenTaken = -1
+        var then = emptyList<Double>(); var thenSizes = emptyList<Int>(); var thenTaken = -1; var entries = emptySet<Int>()
         // the crossing's nodes: this one and those a short link away that are crossings too — OpenStreetMap often draws one big
         // crossing as two or three small ones a few metres apart (Νικήσιανη's 5–6 streets: no node there has five roads). A link
         // of 12 m at most, or 20 m where it is one-way (a dual carriageway's side); never a bend or one along a road to the next
@@ -438,11 +438,13 @@ internal object MapsRouting {
             val d = far.map { turned(it, ref) }
             val kept = oneEach(d, all, inArm, outArm)
             dirs = kept.map { d[it] }; sizes = kept.map { all[it].size }
+            // the roads only into the ring (no half of them leaves it): GraphHopper does not count them as exits, so neither may the picture
+            entries = kept.indices.drop(2).filter { k -> all.indices.none { all[it].out && (it == kept[k] || same(d, all, it, kept[k])) } }.toSet()
         }
         if (dirs.size < 3 && !(uTurn != 0 && dirs.size == 2)) return null
         val order = dirs.indices.sortedBy { dirs[it] }
         return Junction(order.map { dirs[it] }, order.indexOf(1), roundabout, order.map { sizes[it] } + thenSizes,
-            if (roundabout) exit else 0, then, thenTaken)
+            if (roundabout) exit else 0, then, thenTaken, entries.map { order.indexOf(it) }.toSet())
     }
 
     /**
