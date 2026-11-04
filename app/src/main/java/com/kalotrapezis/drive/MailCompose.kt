@@ -206,15 +206,23 @@ internal object MailSend {
                 addBodyPart(text)
                 m.attachments.forEach { a ->
                     val bytes = a.file?.readBytes() ?: c.contentResolver.openInputStream(a.uri!!)!!.use { it.readBytes() }
-                    addBodyPart(MimeBodyPart().apply {
-                        dataHandler = jakarta.activation.DataHandler(jakarta.mail.util.ByteArrayDataSource(bytes, c.contentResolver.getType(a.uri ?: Uri.EMPTY) ?: "application/octet-stream"))
-                        fileName = jakarta.mail.internet.MimeUtility.encodeText(a.name, "UTF-8", null)
-                    })
+                    addBodyPart(attachment(a.name, bytes, a.uri?.let { c.contentResolver.getType(it) }))
                 }
             })
             saveChanges()
             setHeader("Message-ID", "<${java.util.UUID.randomUUID()}@${acc.optString("address", m.account).substringAfter('@')}>") // not "@localhost"
         }
+    }
+
+    /**
+     * One attached file. The name goes in as it is: the library writes a Greek name as RFC 2231 (filename*=UTF-8''…), as
+     * Thunderbird does. Encoding it first (=?UTF-8?B?…?=) had the library cut that in two, and the PDF arrived nameless (4 Nov).
+     */
+    fun attachment(name: String, bytes: ByteArray, type: String?) = MimeBodyPart().apply {
+        val t = type ?: java.net.URLConnection.guessContentTypeFromName(name) ?: if (name.endsWith(".pdf", true)) "application/pdf" else "application/octet-stream"
+        dataHandler = jakarta.activation.DataHandler(jakarta.mail.util.ByteArrayDataSource(bytes, t))
+        fileName = name
+        disposition = jakarta.mail.Part.ATTACHMENT
     }
 
     private fun appendTo(c: Context, root: File, account: String, role: String, msg: MimeMessage, flags: Flags) {

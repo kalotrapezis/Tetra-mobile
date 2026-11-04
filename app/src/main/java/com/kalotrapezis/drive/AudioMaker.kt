@@ -228,7 +228,7 @@ class AudioService : Service() {
 
     private fun note(text: String, done: Int, total: Int): Notification {
         val nm = getSystemService(NotificationManager::class.java)
-        if (nm?.getNotificationChannel(CHANNEL) == null) nm?.createNotificationChannel(NotificationChannel(CHANNEL, getString(R.string.assistant_attach_show), NotificationManager.IMPORTANCE_LOW))
+        if (nm?.getNotificationChannel(CHANNEL) == null) nm?.createNotificationChannel(NotificationChannel(CHANNEL, getString(R.string.assistant_attach_show), NotificationManager.IMPORTANCE_LOW).apply { setShowBadge(false) })
         val open = PendingIntent.getActivity(this, NOTE, Intent(this, AssistantActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_IMMUTABLE)
         return NotificationCompat.Builder(this, CHANNEL).setSmallIcon(R.drawable.ic_auto_fix).setContentTitle(getString(R.string.app_assistant)).setContentText(text)
             .setProgress(maxOf(total, 1), done, total == 0).setOngoing(true).setOnlyAlertOnce(true).setContentIntent(open).build()
@@ -237,7 +237,7 @@ class AudioService : Service() {
     override fun onDestroy() { work.shutdown(); super.onDestroy() }
 
     companion object {
-        private const val CHANNEL = "assistant_audio"
+        private const val CHANNEL = "assistant_audio_nobadge" // progress is no count on the icon (4 Nov)
         private const val NOTE = 7360
         fun start(c: Context, id: String) = ContextCompat.startForegroundService(c, Intent(c, AudioService::class.java).putExtra(AudioJobs.EXTRA, id))
     }

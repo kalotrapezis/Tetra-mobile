@@ -4682,4 +4682,12 @@
     <string name="text_markdown_view_info">Tiedosto muotoiltuna, kuten Muistiinpanoissa. .md-tiedostot avautuvat näin.</string>
     <string name="text_view_mode">Näytä</string>
     <string name="text_edit_mode">Muokkaa</string>
+    <string name="notices_empty">Ei mitään uutta</string>
+    <string name="remote_from">Laitteesta %1$s</string>
+    <string name="remote_channel">Muista laitteistasi</string>
+    <string name="brief_place">Sään paikka</string>
+    <string name="brief_place_hint">Kaupunki tai kylä</string>
+    <string name="brief_place_phone">missä puhelin on</string>
+    <string name="brief_place_not_found">Paikkaa ei löytynyt.</string>
+    <string name="brief_place_use_phone">Missä puhelin on</string>
 </resources>

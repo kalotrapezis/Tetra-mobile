@@ -4783,4 +4783,12 @@
     <string name="text_markdown_view_info">Fails parādīts formatēts, kā Piezīmēs. .md faili tā arī atveras.</string>
     <string name="text_view_mode">Skats</string>
     <string name="text_edit_mode">Rediģēt</string>
+    <string name="notices_empty">Nekā jauna</string>
+    <string name="remote_from">No %1$s</string>
+    <string name="remote_channel">No jūsu citām ierīcēm</string>
+    <string name="brief_place">Laikapstākļu vieta</string>
+    <string name="brief_place_hint">Pilsēta vai ciems</string>
+    <string name="brief_place_phone">tur, kur ir tālrunis</string>
+    <string name="brief_place_not_found">Šāda vieta nav atrasta.</string>
+    <string name="brief_place_use_phone">Tur, kur ir tālrunis</string>
 </resources>

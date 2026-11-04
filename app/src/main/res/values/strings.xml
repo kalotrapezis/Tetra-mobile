@@ -4683,4 +4683,12 @@
     <string name="scanner_no_text_lines">Not enough lines of text on this page to measure.</string>
     <string name="scanner_import_failed">Could not open these pages.</string>
     <string name="scanner_importing">Opening pages…</string>
+    <string name="notices_empty">Nothing new</string>
+    <string name="remote_from">From %1$s</string>
+    <string name="remote_channel">From your other devices</string>
+    <string name="brief_place">Weather location</string>
+    <string name="brief_place_hint">A town or village</string>
+    <string name="brief_place_phone">where the phone is</string>
+    <string name="brief_place_not_found">No such place found.</string>
+    <string name="brief_place_use_phone">Use where the phone is</string>
 </resources>

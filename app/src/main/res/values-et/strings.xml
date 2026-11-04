@@ -4682,4 +4682,12 @@
     <string name="text_markdown_view_info">Fail kuvatud vormindatult, nagu Märkmetes. .md-failid avanevad nii.</string>
     <string name="text_view_mode">Vaade</string>
     <string name="text_edit_mode">Muuda</string>
+    <string name="notices_empty">Midagi uut pole</string>
+    <string name="remote_from">Seadmest %1$s</string>
+    <string name="remote_channel">Teie teistest seadmetest</string>
+    <string name="brief_place">Ilma asukoht</string>
+    <string name="brief_place_hint">Linn või küla</string>
+    <string name="brief_place_phone">seal, kus on telefon</string>
+    <string name="brief_place_not_found">Sellist kohta ei leitud.</string>
+    <string name="brief_place_use_phone">Seal, kus on telefon</string>
 </resources>

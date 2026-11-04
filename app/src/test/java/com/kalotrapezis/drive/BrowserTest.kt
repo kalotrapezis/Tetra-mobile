@@ -252,4 +252,31 @@ class BrowserTest {
         assertEquals(8 to 0, BrowserDates.time("2026-11-03T08:00"))
         assertEquals(12 to 0, BrowserDates.time(""))
     }
+
+    @Test fun aSitesResultsPageIsKnownByItsPathNotTheAddressSent() {
+        val yt = MediaSites.byId("youtube")
+        assertTrue(MediaSites.isSearch(yt, MediaSites.searchUrl(yt, "imagine dragons believer")))
+        assertTrue(MediaSites.isSearch(yt, "https://www.youtube.com/results?app=desktop&search_query=imagine+dragons")) // a tablet's desktop site
+        assertFalse(MediaSites.isSearch(yt, "https://m.youtube.com/watch?v=7wtfhZwyrcc"))
+        assertFalse(MediaSites.isSearch(yt, "https://consent.youtube.com/m?continue=https://m.youtube.com/results?search_query=x"))
+        val music = MediaSites.byId("youtube_music")
+        assertTrue(MediaSites.isSearch(music, MediaSites.searchUrl(music, "adele")))
+        assertFalse(MediaSites.isSearch(music, "https://m.youtube.com/results?search_query=adele"))
+        // a kind of music: YouTube's playlists; YouTube Music has no such search here, so its plain one
+        val lists = MediaSites.searchUrl(yt, "disco", list = true)
+        assertEquals("https://m.youtube.com/results?sp=EgIQAw%3D%3D&search_query=disco", lists)
+        assertTrue(MediaSites.isSearch(yt, lists))
+        assertEquals("https://music.youtube.com/search?q=disco", MediaSites.searchUrl(music, "disco", list = true))
+    }
+
+    @Test fun aSavedStationIsFoundByTheWordsSaid() {
+        val marks = listOf(Bookmark("https://www.ertecho.gr/radio/trito/", "Τρίτο Πρόγραμμα", folder = "Ραδιόφωνο"),
+            Bookmark("https://kosmos.ertecho.gr/live", "ERT Kosmos 93.6"), Bookmark("https://news.example.com", "News"),
+            Bookmark("https://www.melodiafm.gr/live", "Μελωδία 99.2", folder = "Ραδιόφωνο"))
+        assertEquals("ERT Kosmos 93.6", MediaSites.station(marks, "βάλε Kosmos")?.title)
+        assertEquals("Μελωδία 99.2", MediaSites.station(marks, "Μελωδία FM")?.title)
+        assertEquals("Τρίτο Πρόγραμμα", MediaSites.station(marks, "το τρίτο πρόγραμμα")?.title)
+        assertNull(MediaSites.station(marks, "radio"))
+        assertNull(MediaSites.station(marks, "Sfera"))
+    }
 }

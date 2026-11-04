@@ -4884,4 +4884,12 @@
     <string name="text_markdown_view_info">Soubor zobrazený formátovaně, jako v Poznámkách. Soubory .md se takto otevírají.</string>
     <string name="text_view_mode">Zobrazení</string>
     <string name="text_edit_mode">Upravit</string>
+    <string name="notices_empty">Nic nového</string>
+    <string name="remote_from">Od %1$s</string>
+    <string name="remote_channel">Z vašich dalších zařízení</string>
+    <string name="brief_place">Místo počasí</string>
+    <string name="brief_place_hint">Město nebo vesnice</string>
+    <string name="brief_place_phone">kde je telefon</string>
+    <string name="brief_place_not_found">Takové místo nenalezeno.</string>
+    <string name="brief_place_use_phone">Kde je telefon</string>
 </resources>

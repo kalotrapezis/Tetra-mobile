@@ -1,5 +1,6 @@
 package com.kalotrapezis.drive
 
+import kotlinx.coroutines.launch
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
@@ -210,7 +211,9 @@ internal fun ScheduledTab(offer: (String) -> Unit) {
     var editing by remember { mutableStateOf<JSONObject?>(null) }
     var said by remember { mutableStateOf<String?>(null) }
     var pages by remember { mutableStateOf(AssistantBriefs.pages()) }
-    fun reload() { list = AssistantSchedules.list(tetra); pages = AssistantBriefs.pages() }
+    var place by remember { mutableStateOf(AssistantSchedules.place(tetra)) }
+    var placing by remember { mutableStateOf(false) }
+    fun reload() { list = AssistantSchedules.list(tetra); pages = AssistantBriefs.pages(); place = AssistantSchedules.place(tetra) }
     fun sync() = ScopedSync.soon(c, "assistant", 0, orWhole = true)
     fun change(id: String, x: JSONObject) = runCatching { AssistantSchedules.change(tetra, id, x) }.onSuccess { sync(); reload() }.onFailure { said = it.message }
     val title = { s: JSONObject -> if (s.optString("kind") == "brief") c.getString(R.string.assistant_briefs_channel) else s.optString("title") }
@@ -245,10 +248,14 @@ internal fun ScheduledTab(offer: (String) -> Unit) {
                         Text(title(s), style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     }
                     Text("$how · $state", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    // the weather's place, in sight (the user, 4 Nov: "where do I declare location"); unset, where the phone is
+                    if (s.optString("kind") == "brief") Text(stringResource(R.string.brief_place) + ": " + (place?.optString("name") ?: stringResource(R.string.brief_place_phone)),
+                        style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(0.dp)) {
                         TextButton({ change(id, JSONObject().put("runNow", true)).onSuccess { said = c.getString(R.string.assistant_sched_asked) } }) { Text(stringResource(R.string.assistant_sched_run_now)) }
                         TextButton({ change(id, JSONObject().put("paused", !s.optBoolean("paused"))) }) { Text(stringResource(if (s.optBoolean("paused")) R.string.common_resume else R.string.common_pause)) }
                         TextButton({ editing = JSONObject(s.toString()) }) { Text(stringResource(R.string.common_edit)) }
+                        if (s.optString("kind") == "brief") TextButton({ placing = true }) { Text(stringResource(R.string.brief_place)) }
                         if (s.optString("kind") != "brief") TextButton({ AssistantSchedules.remove(tetra, id); sync(); reload() }) { Text(stringResource(R.string.common_delete)) }
                     }
                 }
@@ -265,6 +272,7 @@ internal fun ScheduledTab(offer: (String) -> Unit) {
             }
         }
     }
+    if (placing) PlaceDialog(place, close = { placing = false }) { p -> runCatching { AssistantSchedules.setPlace(tetra, p) }.onSuccess { placing = false; sync(); reload() }.onFailure { said = it.message } }
     editing?.let { e -> ScheduleDialog(e, close = { editing = null }) { x, sections ->
         runCatching {
             if (e.has("id")) { sections?.let { AssistantSchedules.setSections(tetra, it) }; AssistantSchedules.change(tetra, e.getString("id"), x) } else AssistantSchedules.add(tetra, x)
@@ -322,4 +330,34 @@ private fun ScheduleDialog(s: JSONObject, close: () -> Unit, save: (JSONObject, 
 @Composable
 internal fun SkillsTab(offer: (String) -> Unit) = Column(Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState()).padding(12.dp)) {
     AppChips(capabilities().map { cap -> val p = stringResource(cap.prompt); Triple(stringResource(cap.label), cap.color) { offer(p) } })
+}
+
+/** The brief's weather place: a town searched for, or none (where the phone is when the brief is made). */
+@Composable
+private fun PlaceDialog(now: JSONObject?, close: () -> Unit, set: (JSONObject?) -> Unit) {
+    val c = LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var name by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var missing by remember { mutableStateOf(false) }
+    fun find() {
+        if (name.isBlank() || busy) return
+        busy = true; missing = false
+        scope.launch {
+            val p = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { runCatching { AssistantSchedules.findPlace(name, c.uiLocale().language) }.getOrNull() }
+            busy = false
+            if (p == null) missing = true else set(p)
+        }
+    }
+    AlertDialog(onDismissRequest = close, title = { Text(stringResource(R.string.brief_place)) },
+        text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(now?.optString("name") ?: stringResource(R.string.brief_place_phone), style = MaterialTheme.typography.bodyMedium)
+            OutlinedTextField(name, { name = it; missing = false }, Modifier.fillMaxWidth(), singleLine = true, placeholder = { Text(stringResource(R.string.brief_place_hint)) },
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Search),
+                keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSearch = { find() }))
+            if (missing) Text(stringResource(R.string.brief_place_not_found), color = MaterialTheme.colorScheme.error)
+            if (now != null) TextButton({ set(null) }) { Text(stringResource(R.string.brief_place_use_phone)) }
+        } },
+        confirmButton = { TextButton(::find, enabled = name.isNotBlank() && !busy) { Text(stringResource(R.string.common_search)) } },
+        dismissButton = { TextButton(close) { Text(stringResource(R.string.common_cancel)) } })
 }

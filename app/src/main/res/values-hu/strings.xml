@@ -4682,4 +4682,12 @@
     <string name="text_markdown_view_info">A fájl formázva, ahogy a Jegyzetekben. Az .md fájlok így nyílnak meg.</string>
     <string name="text_view_mode">Nézet</string>
     <string name="text_edit_mode">Szerkesztés</string>
+    <string name="notices_empty">Nincs újdonság</string>
+    <string name="remote_from">Innen: %1$s</string>
+    <string name="remote_channel">A többi eszközödről</string>
+    <string name="brief_place">Időjárás helye</string>
+    <string name="brief_place_hint">Város vagy falu</string>
+    <string name="brief_place_phone">ahol a telefon van</string>
+    <string name="brief_place_not_found">Nincs ilyen hely.</string>
+    <string name="brief_place_use_phone">Ahol a telefon van</string>
 </resources>

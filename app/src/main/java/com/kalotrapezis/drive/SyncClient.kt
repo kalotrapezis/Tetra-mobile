@@ -430,6 +430,8 @@ internal class SyncClient(private val context: Context, private val store: SyncS
     }
 
     /** A call's state for the computer's call bubble (PhoneCall.Watcher): ringing, active, ended. */
+    /** AI Assist's send_to_device: to the computer, which does it or passes it on (sync.js assistDo). */
+    fun assistDo(c: JSONObject): JSONObject { val p = reach(store.pairing() ?: throw SyncException(context.getString(R.string.sync_not_paired))); return postJson(p.hosts.first(), p, "/assist/do", c) }
     fun callState(state: JSONObject) { val p = reach(store.pairing() ?: return); postJson(p.hosts.first(), p, "/call/state", state.put("country", PhoneCountry.of(context))) }
 
     /** First address that answers wins; a changed network may still reach one of the others. */

@@ -307,13 +307,17 @@ internal object FirefoxImport {
  * that plays media works through its video/audio and its own navigator.mediaSession keys; a site here only when it needs its
  * own buttons, or for AI Assist's search-and-play. A new site is one line.
  */
-internal data class MediaSite(val id: String, val hosts: Set<String>, val next: String = "", val prev: String = "", val search: String = "", val first: String = "")
+internal data class MediaSite(val id: String, val hosts: Set<String>, val next: String = "", val prev: String = "", val search: String = "", val first: String = "",
+    /** Its search for playlists only, and a playlist's link that starts it playing (empty: the plain search). */
+    val lists: String = "", val firstList: String = "")
 
 internal object MediaSites {
     // shortcut: these selectors are YouTube's and YouTube Music's own markup as of Nov 2026, untried on a phone; mend them when a click misses
     val ALL = listOf(
         MediaSite("youtube", setOf("youtube.com", "m.youtube.com", "www.youtube.com"), ".ytp-next-button, .player-controls-next-button, ytm-playlist-panel-renderer [aria-selected=true] + * a",
-            ".ytp-prev-button, .player-controls-previous-button", "https://m.youtube.com/results?search_query=", "a[href*=\"/watch?v=\"]"),
+            ".ytp-prev-button, .player-controls-previous-button", "https://m.youtube.com/results?search_query=", "a[href*=\"/watch?v=\"]",
+            // sp=EgIQAw: YouTube's "Playlists" filter; each result's /watch?v=…&list=… plays the list from its first song (4 Nov)
+            "https://m.youtube.com/results?sp=EgIQAw%3D%3D&search_query=", "a[href*=\"/watch?v=\"][href*=\"list=\"]"),
         MediaSite("youtube_music", setOf("music.youtube.com"), ".next-button", ".previous-button", "https://music.youtube.com/search?q=", "a[href*=\"watch?v=\"]"),
     )
 
@@ -321,7 +325,24 @@ internal object MediaSites {
     fun byId(id: String?) = ALL.firstOrNull { it.id == id } ?: ALL.first() // plain YouTube is the default
 
     /** AI Assist's search on [site]: its results page, the first result played from there. */
-    fun searchUrl(site: MediaSite, query: String) = site.search + URLEncoder.encode(query.trim(), "UTF-8")
+    fun searchUrl(site: MediaSite, query: String, list: Boolean = false) = (if (list && site.lists.isNotEmpty()) site.lists else site.search) + URLEncoder.encode(query.trim(), "UTF-8")
+
+    /**
+     * [url] is [site]'s results page: by its host and path, not the address it was sent to — a tablet's desktop site
+     * (www.youtube.com/results?app=desktop…) and the way back from the consent page change the address (4 Nov).
+     */
+    fun isSearch(site: MediaSite, url: String) = runCatching { java.net.URI(url).let { u -> u.host?.lowercase() in site.hosts && u.path in setOf("/results", "/search") } }.getOrDefault(false)
+
+    /**
+     * A saved station (a ♥ in Player mode is a bookmark) by the words said: the one whose name or address has the most
+     * of them, a radio folder's first on a tie; null when none has any (AI Assist's "play Kosmos").
+     */
+    fun station(marks: List<Bookmark>, said: String): Bookmark? {
+        val words = said.lowercase().split(Regex("[^\\p{L}\\p{N}]+")).filter { it.length > 1 && it !in setOf("fm", "radio", "ράδιο", "ραδιόφωνο", "the", "το") }
+        if (words.isEmpty()) return null
+        fun hits(b: Bookmark) = (b.title + " " + b.url).lowercase().let { t -> words.count { it in t } }
+        return marks.filter { hits(it) > 0 }.maxWithOrNull(compareBy<Bookmark> { hits(it) }.thenBy { "radio" in it.folder.lowercase() || "ραδιό" in it.folder.lowercase() })
+    }
 
     /** A playlist or a queue in the address (YouTube's `list=`; a radio mix too): Player mode is offered, once per list. */
     fun listId(url: String?) = url?.let { Regex("[?&]list=([^&#]+)").find(it)?.groupValues?.get(1) }

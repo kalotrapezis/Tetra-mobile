@@ -147,6 +147,7 @@ private class BrowserTab(val id: Int, val session: GeckoSession, val view: Gecko
     var mediaSession: MediaSession? = null // the page's media keys (its own ‹ ›), from Gecko
     var queue = false // the page has ‹ and › of its own
     var first by mutableStateOf<MediaSite?>(null) // AI Assist's search: its first result still to play
+    var firstList = false // and that search was for playlists: a playlist's first song, the list going on after it
     var autoplay = false // reached by Player mode's ‹ ›: its media started when it has loaded
     var pull by mutableFloatStateOf(0f) // pull to reload: how far, in dp
     var scrollY = 0 // the page's scroll, from Gecko: pull to reload only at its top
@@ -302,6 +303,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     /** A page's script said something (assets/tetra-ext/content.js): the form fields there, a form sent, the media's state. */
     fun heard(tab: BrowserTab, o: JSONObject) {
         o.optString("error", null)?.let { WriterLog.w("Browser: page script, ${it.take(200)}") }
+        o.optString("first", null)?.let { WriterLog.i("Browser: AI Assist plays ${it.take(120)}") }
         o.optString("kinds", null)?.let { s -> tab.kinds = s.split(',').filter { it.isNotBlank() }.toSet() }
         o.optString("media", null)?.let { s -> runCatching { JSONObject(s) }.getOrNull()?.let { m ->
             val was = tab.media
@@ -370,7 +372,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                 tab.progress = 100
                 if (tab.url.isEmpty()) return // a new session's about:blank, before its first page
                 if (tab.autoplay) { tab.autoplay = false; WriterLog.i("Browser: autoplay on ${BrowserRules.host(tab.url)}"); tab.send(JSONObject().put("autoplay", true)) }
-                tab.first?.let { site -> if (tab.url.startsWith(site.search)) tab.send(JSONObject().put("first", site.first)) }
+                tab.first?.let { site -> if (MediaSites.isSearch(site, tab.url)) { WriterLog.i("Browser: AI Assist's first result looked for on ${BrowserRules.host(tab.url)}"); tab.send(JSONObject().put("first", if (tab.firstList && site.firstList.isNotEmpty()) site.firstList else site.first)) } }
                 if (private || !success || !tab.url.startsWith("http")) return
                 visits = BrowserRules.visit(visits, Visit(tab.url, tab.title, System.currentTimeMillis()), keepHistory)
                 prefs.edit().putString("history", BrowserRules.visitsJson(visits)).apply()
@@ -561,8 +563,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         }
         val site = MediaSites.byId(o.optString("site"))
         val t = if (tab.url.isEmpty()) tab else open() // in a tab of its own, unless this one is empty
-        t.first = site; player = true; menu = false; panel = null
-        load(t, MediaSites.searchUrl(site, o.optString("q")))
+        t.first = site; t.firstList = o.optBoolean("list"); player = true; menu = false; panel = null
+        load(t, MediaSites.searchUrl(site, o.optString("q"), t.firstList))
     }
 
     fun go(input: String) {
@@ -687,7 +689,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         message = context.getString(if (marked) R.string.browser_unbookmarked else R.string.browser_bookmarked)
     }
     val imeOpen = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
-    val showBar = (!lowered || editing || imeOpen || menu || panel != null) && (!autohide || barShown || editing || imeOpen || menu || panel != null || url.isEmpty())
+    // lowered stays lowered while typing in the page (the user, 4 Nov): the strip's tap brings the bar, and Fill, back
+    val showBar = (!lowered || editing || menu || panel != null) && (!autohide || barShown || editing || imeOpen || menu || panel != null || url.isEmpty())
     // full screen while the bar is away: the status bar goes too (a swipe brings it for a moment)
     val activity = remember { generateSequence(context) { (it as? android.content.ContextWrapper)?.baseContext }.filterIsInstance<android.app.Activity>().firstOrNull() }
     val full = fullTab != null // a video's full screen: no bar, no system bars

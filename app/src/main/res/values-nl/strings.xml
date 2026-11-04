@@ -4682,4 +4682,12 @@
     <string name="text_markdown_view_info">Bestand opgemaakt getoond, zoals in Notities. .md-bestanden openen zo.</string>
     <string name="text_view_mode">Weergave</string>
     <string name="text_edit_mode">Bewerken</string>
+    <string name="notices_empty">Niets nieuws</string>
+    <string name="remote_from">Van %1$s</string>
+    <string name="remote_channel">Van je andere apparaten</string>
+    <string name="brief_place">Weerlocatie</string>
+    <string name="brief_place_hint">Een stad of dorp</string>
+    <string name="brief_place_phone">waar de telefoon is</string>
+    <string name="brief_place_not_found">Zo\'n plaats niet gevonden.</string>
+    <string name="brief_place_use_phone">Waar de telefoon is</string>
 </resources>

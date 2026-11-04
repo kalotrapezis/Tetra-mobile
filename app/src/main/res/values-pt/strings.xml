@@ -4783,4 +4783,12 @@
     <string name="text_markdown_view_info">Ficheiro mostrado formatado, como em Notas. Os ficheiros .md abrem-se assim.</string>
     <string name="text_view_mode">Ver</string>
     <string name="text_edit_mode">Editar</string>
+    <string name="notices_empty">Nada de novo</string>
+    <string name="remote_from">De %1$s</string>
+    <string name="remote_channel">Dos seus outros dispositivos</string>
+    <string name="brief_place">Local do tempo</string>
+    <string name="brief_place_hint">Uma cidade ou aldeia</string>
+    <string name="brief_place_phone">onde está o telemóvel</string>
+    <string name="brief_place_not_found">Não foi encontrado esse local.</string>
+    <string name="brief_place_use_phone">Onde está o telemóvel</string>
 </resources>

@@ -4783,4 +4783,12 @@
     <string name="text_markdown_view_info">Fișier afișat formatat, ca în Note. Fișierele .md se deschid așa.</string>
     <string name="text_view_mode">Vizualizare</string>
     <string name="text_edit_mode">Editare</string>
+    <string name="notices_empty">Nimic nou</string>
+    <string name="remote_from">De la %1$s</string>
+    <string name="remote_channel">De pe celelalte dispozitive</string>
+    <string name="brief_place">Locul vremii</string>
+    <string name="brief_place_hint">Un oraș sau un sat</string>
+    <string name="brief_place_phone">unde este telefonul</string>
+    <string name="brief_place_not_found">Niciun loc găsit.</string>
+    <string name="brief_place_use_phone">Unde este telefonul</string>
 </resources>

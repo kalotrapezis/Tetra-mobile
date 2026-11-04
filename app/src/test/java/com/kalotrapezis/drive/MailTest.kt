@@ -419,5 +419,23 @@ class MailTest {
         assertEquals(MailFiles.INSTEAD, MailFiles.notMagenta(0xFFFD0DA4)) // Mail's own
         for (c in listOf(0xFFE5534B, 0xFF4F8FF7, 0xFFE0A43A, 0xFF3FB27F, 0xFFB77CE6, 0xFF3BB8C4, 0xFF9E9E9E)) assertEquals(c, MailFiles.notMagenta(c)) // the others stay
     }
-}
 
+    @Test fun aGreekAttachmentNameArrivesWholeWithItsBytes() {
+        // 4 Nov: a PDF sent from the phone arrived as "=?UTF-8?B?zp…" with no .pdf
+        val name = "ΟΔΟΙΠΟΡΙΚΑ ΟΡΘΗ ΕΠΑΝΑΛΗΨΗ Υπογεγραμμένο από τον διευθυντή.pdf"
+        val pdf = "%PDF-1.7\n".toByteArray() + ByteArray(5000) { (it * 31).toByte() }
+        val msg = jakarta.mail.internet.MimeMessage(jakarta.mail.Session.getInstance(java.util.Properties())).apply {
+            setContent(jakarta.mail.internet.MimeMultipart().apply {
+                addBodyPart(jakarta.mail.internet.MimeBodyPart().apply { setText("γεια", "UTF-8") })
+                addBodyPart(MailSend.attachment(name, pdf, null))
+            })
+            saveChanges()
+        }
+        val raw = java.io.ByteArrayOutputStream().also { msg.writeTo(it) }.toByteArray()
+        assertFalse(String(raw, Charsets.ISO_8859_1).contains("=?UTF-8?"))
+        assertTrue(String(raw, Charsets.ISO_8859_1).contains("application/pdf"))
+        val (got, bytes) = Mime.attachments(raw).single()
+        assertEquals(name, got)
+        assertTrue(pdf.contentEquals(bytes))
+    }
+}

@@ -183,7 +183,11 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
         me = { prefs.getString("me", null) }, setMe = { prefs.edit().putString("me", it).apply() },
         photos = { place, at -> AssistantPhotos.at(app, place, at) },
         placesOn = { LocationReminders.ready(app) }, extract = Attach.reader(app),
-        texts = { if (SmsBox.canRead(app)) SmsBox.read(app) else null })
+        texts = { if (SmsBox.canRead(app)) SmsBox.read(app) else null },
+        stations = { BrowserRules.bookmarks(app.getSharedPreferences("browser", Context.MODE_PRIVATE).getString("bookmarks", null)) },
+        mapsStation = { BrowserMedia.station(app) },
+        volume = { change, percent -> AssistantVolume.change(app, change, percent) },
+        send = { c -> SyncClient(app, SyncStore(app)).assistDo(c) })
     return AssistantChat(api, tools, forgetMs)
 }
 
@@ -522,5 +526,21 @@ internal class AnswerVoice(private val c: Context, private val reader: ReadAloud
     private companion object {
         const val RATE = 24_000 // Mistral's voice: 24 kHz float samples
         val ATTRIBUTES: AudioAttributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANT).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build()
+    }
+}
+
+/** AI Assist's «δυνάμωσε», «χαμήλωσε», «ένταση στο 30» (the user, 4 Nov): the media volume, shown as Android shows a key press. */
+internal object AssistantVolume {
+    fun change(c: Context, change: String, percent: Int?): Int {
+        val am = c.getSystemService(AudioManager::class.java); val s = AudioManager.STREAM_MUSIC; val max = am.getStreamMaxVolume(s)
+        val ui = AudioManager.FLAG_SHOW_UI
+        when (change.lowercase()) {
+            "down" -> repeat(2) { am.adjustStreamVolume(s, AudioManager.ADJUST_LOWER, ui) }
+            "mute" -> am.adjustStreamVolume(s, AudioManager.ADJUST_MUTE, ui)
+            "unmute" -> am.adjustStreamVolume(s, AudioManager.ADJUST_UNMUTE, ui)
+            "set" -> am.setStreamVolume(s, ((percent ?: 50).coerceIn(0, 100) * max + 50) / 100, ui)
+            else -> repeat(2) { am.adjustStreamVolume(s, AudioManager.ADJUST_RAISE, ui) }
+        }
+        return if (am.isStreamMute(s)) 0 else am.getStreamVolume(s) * 100 / max
     }
 }

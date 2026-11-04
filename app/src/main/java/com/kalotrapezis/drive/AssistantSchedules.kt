@@ -93,6 +93,23 @@ internal object AssistantSchedules {
         write(tetra, o)
     }
 
+    /** The brief's weather place ({ name, lat, lon }); null: where the phone is when it runs (the computer asks it). */
+    fun place(tetra: File): JSONObject? = read(tetra).optJSONObject("brief")?.optJSONObject("place")
+    fun setPlace(tetra: File, place: JSONObject?) {
+        val o = read(tetra); val b = o.optJSONObject("brief") ?: JSONObject().also { o.put("brief", it) }
+        b.put("place", place ?: JSONObject.NULL)
+        write(tetra, o)
+    }
+
+    /** A town by name, as the computer's Settings finds it (Open-Meteo's geocoding): { name, lat, lon }, or null. Off the main thread. */
+    fun findPlace(name: String, lang: String): JSONObject? {
+        val url = "https://geocoding-api.open-meteo.com/v1/search?count=1&language=${java.net.URLEncoder.encode(lang, "UTF-8")}&name=${java.net.URLEncoder.encode(name.trim().take(100), "UTF-8")}"
+        val c = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply { connectTimeout = 10_000; readTimeout = 10_000 }
+        val p = try { JSONObject(c.inputStream.bufferedReader().readText()).optJSONArray("results")?.optJSONObject(0) } finally { c.disconnect() } ?: return null
+        return JSONObject().put("name", listOf(p.optString("name"), p.optString("country")).filter { it.isNotBlank() }.joinToString(", "))
+            .put("lat", p.getDouble("latitude")).put("lon", p.getDouble("longitude"))
+    }
+
     /** The first run after [after], as the computer works it out (schedule.js nextRun): local time, a 31st on a short month's last day. */
     fun nextRun(s: JSONObject, after: Long, zone: ZoneId = ZoneId.systemDefault()): Long? {
         val m = Regex("^(\\d{1,2}):(\\d{2})$").find(s.optString("time")) ?: return null

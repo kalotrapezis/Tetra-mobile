@@ -4682,4 +4682,12 @@
     <string name="text_markdown_view_info">Filen visas formaterad, som i Anteckningar. .md-filer öppnas så.</string>
     <string name="text_view_mode">Visa</string>
     <string name="text_edit_mode">Redigera</string>
+    <string name="notices_empty">Inget nytt</string>
+    <string name="remote_from">Från %1$s</string>
+    <string name="remote_channel">Från dina andra enheter</string>
+    <string name="brief_place">Väderort</string>
+    <string name="brief_place_hint">En stad eller by</string>
+    <string name="brief_place_phone">där telefonen är</string>
+    <string name="brief_place_not_found">Ingen sådan plats hittades.</string>
+    <string name="brief_place_use_phone">Där telefonen är</string>
 </resources>

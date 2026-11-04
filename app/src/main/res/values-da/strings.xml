@@ -4682,4 +4682,12 @@
     <string name="text_markdown_view_info">Filen vist formateret, som i Noter. .md-filer åbnes sådan.</string>
     <string name="text_view_mode">Vis</string>
     <string name="text_edit_mode">Rediger</string>
+    <string name="notices_empty">Intet nyt</string>
+    <string name="remote_from">Fra %1$s</string>
+    <string name="remote_channel">Fra dine andre enheder</string>
+    <string name="brief_place">Vejrsted</string>
+    <string name="brief_place_hint">En by eller landsby</string>
+    <string name="brief_place_phone">hvor telefonen er</string>
+    <string name="brief_place_not_found">Intet sådant sted fundet.</string>
+    <string name="brief_place_use_phone">Hvor telefonen er</string>
 </resources>

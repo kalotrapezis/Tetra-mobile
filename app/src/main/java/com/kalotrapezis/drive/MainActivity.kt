@@ -102,6 +102,8 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -309,6 +311,7 @@ class MainActivity : ComponentActivity() {
         PhoneLog.warm(this) // and the Phone's Recents
         NotesStore.indexDir = cacheDir
         HomeArt.warm(this) // Home's pictures made small before Home is drawn
+        Notices.dropOld(this) // the old channels that put a count on every icon (4 Nov)
         // the Calendar's events and Notes once Home's first frame is drawn, at a background priority: started with it, they
         // slowed that frame on the phone (25 Oct)
         android.view.Choreographer.getInstance().postFrameCallback { window.decorView.post {
@@ -1268,6 +1271,9 @@ private fun Home(
     var before by remember(wide) { mutableStateOf(layout) }
     LaunchedEffect(editing) { if (editing) before = layout }
     BackHandler(editing) { editing = false }
+    var showNotices by remember { mutableStateOf(false) }
+    val noticeCounts = Notices.counts(rememberNotices(!showNotices))
+    val noticeTotal = noticeCounts.values.sum()
     val scroll = rememberScrollState()
     Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(scroll).padding(start = 10.dp, top = 16.dp, end = 10.dp, bottom = 22.dp)) {
         Row(Modifier.fillMaxWidth().padding(start = 6.dp, end = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -1288,14 +1294,21 @@ private fun Home(
                 // ✓ and × (the user, 30 Oct: the two text buttons left the title no room)
                 IconButton(onClick = { change(before); editing = false }) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_cancel)) }
                 FilledIconButton(onClick = { editing = false }) { Icon(painterResource(R.drawable.ic_check), contentDescription = stringResource(R.string.common_done)) }
-            } else IconButton(onClick = { editing = true }) { Icon(painterResource(R.drawable.ic_edit), contentDescription = stringResource(R.string.home_edit)) }
+            } else {
+                // the bell: Tetra's notifications by applet (4 Nov), its number what is there to read
+                BadgedBox(badge = { if (noticeTotal > 0) Badge { Text("$noticeTotal") } }) {
+                    IconButton(onClick = { showNotices = true }) { Icon(painterResource(R.drawable.ic_notifications), contentDescription = stringResource(R.string.settings_notifications)) }
+                }
+                IconButton(onClick = { editing = true }) { Icon(painterResource(R.drawable.ic_edit), contentDescription = stringResource(R.string.home_edit)) }
+            }
         }
+        if (showNotices) NoticeCenter { showNotices = false }
         if (editing) {
             Text(stringResource(R.string.home_edit_hint),
                 style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 6.dp, end = 6.dp))
             TextButton(onClick = { HomeLayout.reset(context, wide); layout = HomeLayout.load(context, wide) }) { Text(stringResource(R.string.home_reset)) }
         }
-        HomeGrid(layout, cols, editing, { editing = true }, ::change, scroll, large, ::icons)
+        HomeGrid(layout, cols, editing, { editing = true }, ::change, scroll, large, ::icons, noticeCounts)
         if (editing) {
             val hidden = layout.filter { it.hidden }
             Text(if (hidden.isEmpty()) stringResource(R.string.home_hidden_none) else stringResource(R.string.home_hidden_tap),
@@ -1314,7 +1327,7 @@ private fun Home(
  */
 @Composable private fun HomeGrid(
     layout: List<HomeItem>, cols: Int, editing: Boolean, edit: () -> Unit, set: (List<HomeItem>) -> Unit, scroll: androidx.compose.foundation.ScrollState,
-    large: @Composable (String) -> Unit, icons: (String) -> List<HomeIcon>,
+    large: @Composable (String) -> Unit, icons: (String) -> List<HomeIcon>, counts: Map<String, Int> = emptyMap(),
 ) = BoxWithConstraints(Modifier.fillMaxWidth()) {
     val density = LocalDensity.current
     val cellW = maxWidth / cols; val cellH = 94.dp // a group's 176 dp and the 12 dp between parts, in two rows
@@ -1369,6 +1382,8 @@ private fun Home(
             ) {
                 if (item.size == HomeSize.Large) large(item.id)
                 else Row(Modifier.fillMaxSize()) { icons(item.id).forEach { HomeSmallIcon(it, Modifier.weight(1f).fillMaxHeight(), if (item.small) 52.dp else 112.dp) } }
+                // its own count, not the whole app's (the user, 4 Nov)
+                counts[item.id]?.let { n -> if (!editing) Badge(Modifier.align(Alignment.TopEnd)) { Text("$n") } }
                 if (editing) Box(Modifier.matchParentSize().pointerInput(Unit) { awaitEachGesture { awaitFirstDown(requireUnconsumed = false) } }) {
                     // on top of the part, so its own buttons get no tap; the frame says it can be moved
                     Box(Modifier.matchParentSize().border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), MaterialTheme.shapes.large))

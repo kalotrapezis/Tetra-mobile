@@ -4884,4 +4884,12 @@
     <string name="text_markdown_view_info">Failas rodomas suformatuotas, kaip Užrašuose. .md failai atidaromi taip.</string>
     <string name="text_view_mode">Rodinys</string>
     <string name="text_edit_mode">Redaguoti</string>
+    <string name="notices_empty">Nieko naujo</string>
+    <string name="remote_from">Iš %1$s</string>
+    <string name="remote_channel">Iš kitų jūsų įrenginių</string>
+    <string name="brief_place">Orų vieta</string>
+    <string name="brief_place_hint">Miestas ar kaimas</string>
+    <string name="brief_place_phone">ten, kur yra telefonas</string>
+    <string name="brief_place_not_found">Tokia vieta nerasta.</string>
+    <string name="brief_place_use_phone">Ten, kur yra telefonas</string>
 </resources>

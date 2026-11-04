@@ -246,6 +246,13 @@ internal class AssistantTools(
     private val extract: (File) -> Attach.Doc = { Attach.extract(it) },
     /** The phone's SMS (SmsBox.read), newest first; null while Tetra may not read them. */
     private val texts: () -> List<SmsText>? = { null },
+    /** The Browser's bookmarks (a station is one) and Maps' ♪ station (address, name). */
+    private val stations: () -> List<Bookmark> = { emptyList() },
+    private val mapsStation: () -> Pair<String, String>? = { null },
+    /** The media volume: "up", "down", "mute", "unmute" or "set" (with a percent); the percent it is now. */
+    private val volume: (String, Int?) -> Int = { _, _ -> 0 },
+    /** A command to another device through the computer (AssistantRemote): { ok, device } or { error, devices }. */
+    private val send: (JSONObject) -> JSONObject = { JSONObject().put("error", "This phone is not paired with a computer.") },
 ) {
     /** The file attached in this chat: read, or only its path until attachment_read needs it again (a chat from History). */
     private var doc: Attach.Doc? = null
@@ -289,8 +296,19 @@ internal class AssistantTools(
             "place_reminder" -> placeReminder(args)
             "youtube" -> args.getString("query").trim().let { q -> ToolResult("YouTube is open on a search for \"$q\".", go = "youtube:$q") }
             // Tetra's Browser in Player mode: the site's search, its first result played (BrowserScreen's play)
-            "media_play" -> args.getString("query").trim().let { q -> MediaSites.byId(args.optString("site")).let { site ->
-                ToolResult("Playing the first result for \"$q\" on ${site.id.replace('_', ' ')} in Tetra's Browser.", go = "browser-play:" + JSONObject().put("site", site.id).put("q", q)) } }
+            "media_play" -> args.getString("query").trim().let { q -> MediaSites.byId(args.optString("site")).let { site -> args.optBoolean("playlist").let { list ->
+                ToolResult("Playing the first ${if (list && site.lists.isNotEmpty()) "playlist" else "result"} for \"$q\" on ${site.id.replace('_', ' ')} in Tetra's Browser.",
+                    go = "browser-play:" + JSONObject().put("site", site.id).put("q", q).put("list", list)) } } }
+            // the radio (the user, 4 Nov: "play radio and play the driving radio"): a saved station by name, else Maps' ♪
+            "radio_play" -> args.optString("name").trim().let { said ->
+                val pick = if (said.isEmpty()) null else MediaSites.station(stations(), said)
+                val (url, title) = pick?.let { it.url to it.title } ?: mapsStation() ?: return@let ToolResult(
+                    if (said.isEmpty()) "No station is chosen for Maps yet: the user hearts one in the Browser's Player and picks it for Maps." else "No saved station matches \"$said\".")
+                ToolResult("Playing ${title.ifEmpty { url }}.", go = "browser-play:" + JSONObject().put("url", url).put("at", System.currentTimeMillis()))
+            }
+            // to another device (the user, 4 Nov: "play youtube on the tablet", "send it to the PC … the daily brief")
+            "send_to_device" -> sendTo(args)
+            "volume" -> volume(args.optString("change", "up"), if (args.has("percent")) args.optInt("percent") else null).let { ToolResult("The volume is at $it%.") }
             "shopping_list" -> shoppingList(args)
             "files_find" -> filesFind(args)
             "file_open" -> pick(files, args) { f -> ToolResult("Opened ${f.name}.", open = f, cards = listOf(ResultCard.Files(listOf(f), tetra))) }
@@ -527,6 +545,22 @@ internal class AssistantTools(
         val found = photos(place) { locate(place)?.let { it.lat to it.lng } }
         if (found.isEmpty()) return ToolResult("No photo from $place.")
         return ToolResult("${found.size} photos from $place; the newest are on the screen.", photos = found.take(SHOWN_PHOTOS))
+    }
+
+    private fun sendTo(a: JSONObject): ToolResult {
+        val what = a.optString("what")
+        val args = JSONObject(a.toString())
+        if (what == "radio") { // the station found here, from this phone's saved ones (they sync to the other devices too)
+            val said = a.optString("station").trim()
+            val (url, title) = (if (said.isEmpty()) null else MediaSites.station(stations(), said))?.let { it.url to it.title } ?: mapsStation()
+                ?: return ToolResult(if (said.isEmpty()) "No station is chosen for Maps yet." else "No saved station matches \"$said\".")
+            args.put("url", url).put("title", title)
+        }
+        if (what == "play") args.put("q", a.optString("query")).put("list", a.optBoolean("playlist"))
+        val r = runCatching { send(AssistantRemote.command(a.optString("device"), what, args)) }
+            .getOrElse { return ToolResult("Could not reach the computer: ${it.message}") }
+        return if (r.optBoolean("ok")) ToolResult("Sent to ${r.optString("device")}.")
+        else ToolResult("Not sent: ${r.optString("error")}" + (r.optJSONArray("devices")?.let { d -> " The devices are: " + (0 until d.length()).joinToString(", ") { d.getString(it) } + "." } ?: ""))
     }
 
     private fun shoppingList(a: JSONObject): ToolResult {
@@ -813,7 +847,7 @@ internal class AssistantTools(
             "contacts_find" to "contacts", "my_card" to "contacts", "relation_remember" to "contacts", "relation_forget" to "contacts", "contact_call" to "phone",
             "navigate" to "maps", "place_reminder" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail", "mail_stored_find" to "mail", "mail_export" to "mail",
             "sms_list" to "sms", "sms_read" to "sms", "sms_write" to "sms",
-            "web_search" to "web", "make_image" to "web", "youtube" to "web", "media_play" to "browser", "attachment_read" to "files", "audio_make" to "files")
+            "web_search" to "web", "make_image" to "web", "youtube" to "web", "media_play" to "browser", "radio_play" to "browser", "send_to_device" to "browser", "attachment_read" to "files", "audio_make" to "files")
         /** The tools of the apps the assistant may use now: the others are not even offered. */
         fun allowed(): JSONArray = JSONArray((0 until SCHEMA.length()).map { SCHEMA.getJSONObject(it) }
             .filter { AiGate.state.keeps(APP_OF[it.getJSONObject("function").getString("name")]) && (beside || it.getJSONObject("function").getString("name") != "open_beside") })
@@ -871,8 +905,21 @@ internal class AssistantTools(
                 "note" to p("string", "Words of the checklist's title (Ψώνια for shopping); leave out for any checklist with items left.")),
             fn("photos_place", "Show the user's photos taken at a place.", listOf("place"), "place" to p("string", "A town or a place.")),
             fn("youtube", "Open the YouTube app on a search, only when the user names the YouTube app.", listOf("query"), "query" to p("string", "The song or video, with the artist if said.")),
-            fn("media_play", "Play a song or a video in Tetra's Browser: the site's search opens and its first result plays, in Player mode.", listOf("query"),
-                "query" to p("string", "The song or video, with the artist if said."), "site" to p("string", "youtube (the default) or youtube_music when the user says YouTube Music.")),
+            fn("media_play", "Play a song, a video or a playlist in Tetra's Browser: the site's search opens and its first result plays, in Player mode.", listOf("query"),
+                "query" to p("string", "The song or video, with the artist if said; for a playlist the kind of music (disco, 80s rock, chill)."),
+                "site" to p("string", "youtube (the default) or youtube_music when the user says YouTube Music."),
+                "playlist" to p("boolean", "true for a kind of music rather than one song: a genre, a mood, an era, an artist's songs in general, or when the user says playlist or music (\"play disco\", \"βάλε χαλαρή μουσική\"); false for one named song or video.")),
+            fn("radio_play", "Play the radio: a station the user saved (by its name), or with no name the station chosen for driving (Maps).", emptyList(),
+                "name" to p("string", "The station's name if said (Kosmos, Μελωδία, ΕΡΤ); leave out for \"the radio\" or \"the driving radio\".")),
+            fn("send_to_device", "Do something on another of the user's devices (the computer, the tablet): play a song, a video or a playlist, a radio station, open a link (a search result), show a text (an answer just given), or open the daily brief.", listOf("device", "what"),
+                "device" to p("string", "The device as the user says it: computer, PC, tablet, or its name."),
+                "what" to p("string", "play, radio, link, text or brief."),
+                "query" to p("string", "With play: the song or video, or the kind of music."), "playlist" to p("boolean", "With play: true for a kind of music, as media_play."),
+                "site" to p("string", "With play: youtube or youtube_music."), "station" to p("string", "With radio: the station's name; leave out for the driving one."),
+                "url" to p("string", "With link: the address (a search result's)."), "title" to p("string", "With link or text: a few words saying what it is."),
+                "text" to p("string", "With text: the words to show there (an answer, in full).")),
+            fn("volume", "Change the phone's media volume.", listOf("change"),
+                "change" to p("string", "up, down, mute, unmute, or set (with percent)."), "percent" to p("integer", "With set: 0–100.")),
             fn("mail_new", "The new mail in the Inbox: what came in the last hours, and anything still unread; a numbered list with senders, subjects and the start of each.", emptyList(),
                 "hours" to p("integer", "How far back; 24 if not said."), "unread" to p("boolean", "Also older mail that is still unread; true if not said.")),
             fn("mail_attention", "The recent Inbox mail that is unread or marked ♥, with the start of each, to judge which needs an answer or an action.", emptyList(),
@@ -932,7 +979,7 @@ internal class AssistantTools(
             "Χρονόμετρο" is both a timer and a stopwatch: with a length ("βάλε χρονόμετρο 10 λεπτά") timer_start; without ("ξεκίνα χρονόμετρο", "σταμάτα το χρονόμετρο", "πόση ώρα πάει") the stopwatch.
             "Ξυπνητήρι", "ξύπνα με": alarm_add ("κάθε μέρα" all seven days, "τις καθημερινές" MO–FR; "αύριο στις 6" a date). To remove one, alarm_list then alarm_delete.
             "Όταν πάω σούπερ μάρκετ δείξε μου τα ψώνια": place_reminder with kind supermarket and note Ψώνια; then say it rings on arrival.
-            A song or a video («βάλε στο YouTube …», «παίξε …», «play … on YouTube»): media_play; «στο YouTube Music»: media_play with site youtube_music; the YouTube app only when named: youtube. "Κάνε σημείωση": note_new.
+            A song or a video («βάλε στο YouTube …», «παίξε …», «play … on YouTube»): media_play; a kind of music («play disco on YouTube», «βάλε ελληνικά 80s», «κάτι χαλαρό για διάβασμα»): media_play with playlist true; «βάλε ραδιόφωνο», «το ραδιόφωνο του αυτοκινήτου», «βάλε Kosmos»: radio_play; «δυνάμωσε», «χαμήλωσε», «σίγαση», «ένταση στο 30»: volume; on another device («βάλε disco στο tablet», «στείλε την απάντηση στον υπολογιστή», «άνοιξε την ενημέρωση στο PC», «βάλε ραδιόφωνο στο tablet»): send_to_device; «στο YouTube Music»: media_play with site youtube_music; the YouTube app only when named: youtube. "Κάνε σημείωση": note_new.
             Mail: "νέα μηνύματα;", "ήρθε κάτι;": mail_new, then say how many and from whom. "Τι χρειάζεται απάντηση;", "σημαντικά mail": mail_attention, then name
             only those that need an answer or an action and in a few words why (a deadline, a question to the user, a payment). "Βρες το mail από τη Μαρία": mail_find.
             "Στείλε mail στον …": mail_write, written as a proper e-mail in the language the user speaks; after it, say it waits for their Send.

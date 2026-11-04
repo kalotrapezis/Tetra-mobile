@@ -358,7 +358,7 @@ class TimerService : Service() {
         private const val ID = "id"
         /** MainActivity's word for the Timer screen (Applet.EXTRA), as an applet icon's. */
         const val SCREEN = "Timer"
-        const val CHANNEL = "timer"
+        const val CHANNEL = "timer_nobadge" // a countdown is no count on the icon (4 Nov); "timer_done" still counts
         private const val CHANNEL_DONE = "timer_done"
         const val CHANNEL_SOON = "alarm_soon"
         private const val PLACEHOLDER = 7999
@@ -370,7 +370,7 @@ class TimerService : Service() {
 
         fun channels(c: Context) {
             val nm = c.getSystemService(NotificationManager::class.java) ?: return
-            if (nm.getNotificationChannel(CHANNEL) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.app_timer), NotificationManager.IMPORTANCE_LOW).apply { description = c.getString(R.string.timer_channel_about) })
+            if (nm.getNotificationChannel(CHANNEL) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.app_timer), NotificationManager.IMPORTANCE_LOW).apply { description = c.getString(R.string.timer_channel_about); setShowBadge(false) })
             // the 30-minute notice pops up without a sound: it may come while the user still sleeps
             if (nm.getNotificationChannel(CHANNEL_SOON) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL_SOON, c.getString(R.string.alarm_channel_soon), NotificationManager.IMPORTANCE_HIGH).apply {
                 description = c.getString(R.string.alarm_channel_soon_about); setSound(null, null)

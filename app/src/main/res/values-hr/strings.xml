@@ -4783,4 +4783,12 @@
     <string name="text_markdown_view_info">Datoteka prikazana oblikovano, kao u Bilješkama. .md datoteke se otvaraju tako.</string>
     <string name="text_view_mode">Prikaz</string>
     <string name="text_edit_mode">Uredi</string>
+    <string name="notices_empty">Ništa novo</string>
+    <string name="remote_from">Od %1$s</string>
+    <string name="remote_channel">S vaših drugih uređaja</string>
+    <string name="brief_place">Mjesto za vrijeme</string>
+    <string name="brief_place_hint">Grad ili selo</string>
+    <string name="brief_place_phone">gdje je telefon</string>
+    <string name="brief_place_not_found">Takvo mjesto nije pronađeno.</string>
+    <string name="brief_place_use_phone">Gdje je telefon</string>
 </resources>

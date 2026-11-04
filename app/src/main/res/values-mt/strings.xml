@@ -4884,4 +4884,12 @@
     <string name="text_markdown_view_info">Il-fajl muri ffurmattjat, bħal f\'Noti. Il-fajls .md jinfetħu b\'dan il-mod.</string>
     <string name="text_view_mode">Ara</string>
     <string name="text_edit_mode">Editja</string>
+    <string name="notices_empty">Xejn ġdid</string>
+    <string name="remote_from">Minn %1$s</string>
+    <string name="remote_channel">Mill-apparat l-oħra tiegħek</string>
+    <string name="brief_place">Post tat-temp</string>
+    <string name="brief_place_hint">Belt jew raħal</string>
+    <string name="brief_place_phone">fejn hu t-telefon</string>
+    <string name="brief_place_not_found">Ma nstabx post bħal dan.</string>
+    <string name="brief_place_use_phone">Fejn hu t-telefon</string>
 </resources>

@@ -232,6 +232,15 @@ internal class SyncServer(private val context: Context, private val store: SyncS
             PhoneRelay.show(context, s)
             return reply(output, 200, JSONObject().put("ok", true))
         }
+        // Another device's AI Assist, through the computer: play, a station, a link, an answer, the brief (AssistantRemote). Only a paired device.
+        if (method == "POST" && path.startsWith("/assist/do?")) {
+            val known = bearer != null && store.peers().any { it.theirToken == bearer }
+            if (!known) return reply(output, 401, JSONObject().put("error", "Not paired."))
+            val c = runCatching { JSONObject(android.net.Uri.parse("https://x$path").getQueryParameter("c").orEmpty()) }.getOrNull()
+                ?: return reply(output, 400, JSONObject().put("error", "No command."))
+            val r = AssistantRemote.run(context, c)
+            return reply(output, if (r.has("error")) 409 else 200, r)
+        }
         // The computer's call bubble: Answer, Decline, End (PhoneCall.act). Only a paired device.
         if (method == "POST" && path.startsWith("/call/action?")) {
             val known = bearer != null && store.peers().any { it.theirToken == bearer }

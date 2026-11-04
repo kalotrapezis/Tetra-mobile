@@ -4681,4 +4681,12 @@
     <string name="scanner_no_text_lines">Δεν βρέθηκαν αρκετές γραμμές κειμένου σε αυτή τη σελίδα.</string>
     <string name="scanner_import_failed">Δεν άνοιξαν αυτές οι σελίδες.</string>
     <string name="scanner_importing">Άνοιγμα σελίδων…</string>
+    <string name="notices_empty">Τίποτα καινούργιο</string>
+    <string name="remote_from">Από %1$s</string>
+    <string name="remote_channel">Από τις άλλες συσκευές σου</string>
+    <string name="brief_place">Τοποθεσία καιρού</string>
+    <string name="brief_place_hint">Πόλη ή χωριό</string>
+    <string name="brief_place_phone">εκεί που είναι το κινητό</string>
+    <string name="brief_place_not_found">Δεν βρέθηκε τέτοιο μέρος.</string>
+    <string name="brief_place_use_phone">Εκεί που είναι το κινητό</string>
 </resources>

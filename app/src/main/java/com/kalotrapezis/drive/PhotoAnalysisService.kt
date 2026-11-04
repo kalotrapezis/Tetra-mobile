@@ -37,7 +37,7 @@ internal data class AnalysisState(val done: Int, val total: Int, val paused: Boo
  */
 internal class PhotoAnalysisService : Service() {
     companion object {
-        private const val CHANNEL_ID = "analysis"
+        private const val CHANNEL_ID = "analysis_nobadge" // progress is no count on the icon (4 Nov)
         private const val NOTIFICATION_ID = 2
         const val ACTION_START = "start"
         const val ACTION_STOP = "stop"
@@ -166,7 +166,7 @@ internal class PhotoAnalysisService : Service() {
     private fun notification(done: Int, total: Int): Notification {
         val nm = getSystemService(NotificationManager::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm.getNotificationChannel(CHANNEL_ID) == null) {
-            nm.createNotificationChannel(NotificationChannel(CHANNEL_ID, getString(R.string.photos_reading), NotificationManager.IMPORTANCE_LOW))
+            nm.createNotificationChannel(NotificationChannel(CHANNEL_ID, getString(R.string.photos_reading), NotificationManager.IMPORTANCE_LOW).apply { setShowBadge(false) })
         }
         val isPaused = paused.value
         val title = getString(if (isPaused) R.string.photos_reading_paused else R.string.photos_reading)

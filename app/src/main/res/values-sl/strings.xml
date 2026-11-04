@@ -4884,4 +4884,12 @@
     <string name="text_markdown_view_info">Datoteka prikazana oblikovano, kot v Zapiskih. Datoteke .md se tako odprejo.</string>
     <string name="text_view_mode">Prikaz</string>
     <string name="text_edit_mode">Uredi</string>
+    <string name="notices_empty">Nič novega</string>
+    <string name="remote_from">Od %1$s</string>
+    <string name="remote_channel">Z vaših drugih naprav</string>
+    <string name="brief_place">Kraj vremena</string>
+    <string name="brief_place_hint">Mesto ali vas</string>
+    <string name="brief_place_phone">kjer je telefon</string>
+    <string name="brief_place_not_found">Takega kraja ni.</string>
+    <string name="brief_place_use_phone">Kjer je telefon</string>
 </resources>

@@ -4884,4 +4884,12 @@
     <string name="text_markdown_view_info">Plik wyświetlony z formatowaniem, jak w Notatkach. Pliki .md otwierają się tak.</string>
     <string name="text_view_mode">Widok</string>
     <string name="text_edit_mode">Edycja</string>
+    <string name="notices_empty">Nic nowego</string>
+    <string name="remote_from">Od %1$s</string>
+    <string name="remote_channel">Z innych twoich urządzeń</string>
+    <string name="brief_place">Miejsce pogody</string>
+    <string name="brief_place_hint">Miasto lub wieś</string>
+    <string name="brief_place_phone">tam, gdzie jest telefon</string>
+    <string name="brief_place_not_found">Nie znaleziono takiego miejsca.</string>
+    <string name="brief_place_use_phone">Tam, gdzie jest telefon</string>
 </resources>

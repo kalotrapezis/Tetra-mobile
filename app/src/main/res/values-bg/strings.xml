@@ -4682,4 +4682,12 @@
     <string name="text_markdown_view_info">Файлът е показан форматиран, както в Бележки. .md файловете се отварят така.</string>
     <string name="text_view_mode">Преглед</string>
     <string name="text_edit_mode">Редактиране</string>
+    <string name="notices_empty">Нищо ново</string>
+    <string name="remote_from">От %1$s</string>
+    <string name="remote_channel">От другите ви устройства</string>
+    <string name="brief_place">Място за времето</string>
+    <string name="brief_place_hint">Град или село</string>
+    <string name="brief_place_phone">където е телефонът</string>
+    <string name="brief_place_not_found">Няма такова място.</string>
+    <string name="brief_place_use_phone">Където е телефонът</string>
 </resources>

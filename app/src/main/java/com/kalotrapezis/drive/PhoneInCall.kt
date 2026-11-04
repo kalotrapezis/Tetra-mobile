@@ -58,7 +58,7 @@ internal object PhoneCalls {
     private val answered = mutableSetOf<Call>()
     private val names = HashMap<String, ContactInfo?>()
     private const val RINGING = "phone_ringing"
-    private const val ONGOING = "phone_call"
+    private const val ONGOING = "phone_call_nobadge" // a call going on is no count on the icon (4 Nov)
     private const val NOTE = 4147
     const val ANSWER = "com.kalotrapezis.drive.phone.ANSWER"
 
@@ -275,7 +275,7 @@ internal object PhoneCalls {
         // made again each time: an existing channel keeps its sound and takes only the name, in the language now
         nm.createNotificationChannel(NotificationChannel(RINGING, c.getString(R.string.phone_channel_incoming), NotificationManager.IMPORTANCE_HIGH)
             .apply { setSound(null, null); enableVibration(false) }) // Telecom rings and vibrates
-        nm.createNotificationChannel(NotificationChannel(ONGOING, c.getString(R.string.phone_channel_ongoing), NotificationManager.IMPORTANCE_LOW))
+        nm.createNotificationChannel(NotificationChannel(ONGOING, c.getString(R.string.phone_channel_ongoing), NotificationManager.IMPORTANCE_LOW).apply { setShowBadge(false) })
         val ringing = call.state == Call.STATE_RINGING
         val screen = Intent(c, PhoneCallActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         val open = PendingIntent.getActivity(c, 0, screen, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)

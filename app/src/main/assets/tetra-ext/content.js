@@ -82,10 +82,16 @@ function autoplay() { var n = 0, said = 0, t = setInterval(function () { var m =
   if (m && !m.paused) { clearInterval(t); return; }
   if (m && (m.currentSrc || m.src)) m.play().catch(function (e) { if (!said) { said = 1; post({ error: 'autoplay: ' + e }); } }); else if (n == 4) click('.jp-play,[class*=play-button],button[aria-label*=Play i],button[title*=Play i]');
   if (++n > 30) clearInterval(t); }, 500); }
-// AI Assist's search: its first result, past shorts and ads
-function first(sel) { var n = 0, t = setInterval(function () { var l = document.querySelectorAll(sel);
-  for (var i = 0; i < l.length; i++) { var a = l[i]; if (!a.href || a.href.indexOf('/shorts/') >= 0 || a.closest('[class*=promoted],[class*=ad-slot],ytm-reel-shelf-renderer')) continue; clearInterval(t); location.href = a.href; return; }
-  if (++n > 40) clearInterval(t); }, 250); }
+// AI Assist's search: its first result, past shorts and ads. Looked for as the page draws its results, for up to a minute:
+// YouTube's mobile page draws them seconds after it has loaded, slower in Gecko than the WebView's 10 s allowed (4 Nov)
+var firstOff = null;
+function first(sel) { if (firstOff) firstOff();
+  function look() { var l = document.querySelectorAll(sel);
+    for (var i = 0; i < l.length; i++) { var a = l[i]; if (!a.href || a.href.indexOf('/shorts/') >= 0 || a.closest('[class*=promoted],[class*=ad-slot],ytm-reel-shelf-renderer,ytm-shorts-lockup-view-model')) continue;
+      firstOff(); post({ first: a.href }); location.href = a.href; return; } }
+  var seen = new MutationObserver(look), t = setInterval(look, 500), end = setTimeout(function () { firstOff(); post({ error: 'first: no result on ' + location.host + ' after 60 s' }); }, 60000);
+  firstOff = function () { seen.disconnect(); clearInterval(t); clearTimeout(end); document.removeEventListener('visibilitychange', look); firstOff = null; };
+  seen.observe(document.documentElement, { childList: true, subtree: true }); document.addEventListener('visibilitychange', look); look(); }
 
 function heard(m) {
   if ('bg' in m) bg = !!m.bg;

@@ -36,7 +36,7 @@ internal data class BackupState(val progress: BackupProgress?, val result: Backu
  */
 internal class SyncService : Service() {
     companion object {
-        private const val CHANNEL_ID = "sync"
+        private const val CHANNEL_ID = "sync_nobadge" // a running sync is no count on the icon (4 Nov)
         private const val AUTO_SYNC_GAP_MS = 15 * 60_000L
         /** How long the service holds itself open waiting for a network to come back before giving up. */
         private const val WAIT_FOR_NETWORK_MS = 10 * 60_000L
@@ -198,7 +198,7 @@ internal class SyncService : Service() {
         val nm = getSystemService(NotificationManager::class.java)
         // made again when its name is not the one in the language now shown (an existing channel keeps its first name otherwise)
         val channel = getString(R.string.app_sync)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm.getNotificationChannel(CHANNEL_ID)?.name != channel) nm.createNotificationChannel(NotificationChannel(CHANNEL_ID, channel, NotificationManager.IMPORTANCE_LOW))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm.getNotificationChannel(CHANNEL_ID)?.name != channel) nm.createNotificationChannel(NotificationChannel(CHANNEL_ID, channel, NotificationManager.IMPORTANCE_LOW).apply { setShowBadge(false) })
         val isPaused = paused.value
         val stopPending = service(1, ACTION_STOP)
         val pausePending = android.app.PendingIntent.getBroadcast(

@@ -24,7 +24,7 @@ import androidx.core.content.ContextCompat
 internal class SyncListenService : Service() {
     companion object {
         private const val ID = 0x5EA7
-        private const val CHANNEL = "listening"
+        private const val CHANNEL = "listening_nobadge" // no count on the launcher icon (4 Nov): it is always there
         private const val ACTION_STOP = "com.kalotrapezis.drive.LISTEN_STOP"
         private const val PREF = "listen_in_background"
 
@@ -81,7 +81,7 @@ internal class SyncListenService : Service() {
     private fun notification(): android.app.Notification {
         val nm = getSystemService(NotificationManager::class.java)
         // made again when its name is not the one in the language now shown (an existing channel keeps its first name otherwise)
-        if (nm.getNotificationChannel(CHANNEL)?.name != getString(R.string.sync_listen_channel)) nm.createNotificationChannel(NotificationChannel(CHANNEL, getString(R.string.sync_listen_channel), NotificationManager.IMPORTANCE_MIN).apply { description = getString(R.string.sync_listen_channel_about) })
+        if (nm.getNotificationChannel(CHANNEL)?.name != getString(R.string.sync_listen_channel)) nm.createNotificationChannel(NotificationChannel(CHANNEL, getString(R.string.sync_listen_channel), NotificationManager.IMPORTANCE_MIN).apply { description = getString(R.string.sync_listen_channel_about); setShowBadge(false) })
         val open = PendingIntent.getActivity(this, ID, Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val stop = PendingIntent.getService(this, ID, Intent(this, SyncListenService::class.java).setAction(ACTION_STOP), PendingIntent.FLAG_IMMUTABLE)

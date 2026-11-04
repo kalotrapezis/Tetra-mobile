@@ -4682,4 +4682,12 @@
     <string name="text_markdown_view_info">File mostrato formattato, come in Note. I file .md si aprono così.</string>
     <string name="text_view_mode">Visualizza</string>
     <string name="text_edit_mode">Modifica</string>
+    <string name="notices_empty">Niente di nuovo</string>
+    <string name="remote_from">Da %1$s</string>
+    <string name="remote_channel">Dagli altri tuoi dispositivi</string>
+    <string name="brief_place">Località meteo</string>
+    <string name="brief_place_hint">Una città o un paese</string>
+    <string name="brief_place_phone">dove si trova il telefono</string>
+    <string name="brief_place_not_found">Nessun luogo trovato.</string>
+    <string name="brief_place_use_phone">Dove si trova il telefono</string>
 </resources>
