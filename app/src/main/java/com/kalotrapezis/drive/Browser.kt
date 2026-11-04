@@ -150,8 +150,8 @@ internal object BrowserRules {
     fun front(b: List<Bookmark>) = b.reversed().sortedByDescending { it.pinned }
 }
 
-/** [note]: what the user wrote of it (the Passwords applet, Google's export's "note"); a page's form never has one. */
-internal data class SavedLogin(val host: String, val user: String, val password: String, val note: String = "")
+/** [note]: what the user wrote of it (the Passwords applet, Google's export's "note"); a page's form never has one. [pinned]: ♥, at the top. */
+internal data class SavedLogin(val host: String, val user: String, val password: String, val note: String = "", val pinned: Boolean = false)
 internal data class SavedCard(val name: String, val number: String, val month: String, val year: String) {
     val last4 get() = number.takeLast(4)
 }
@@ -165,14 +165,14 @@ internal data class BrowserVault(val logins: List<SavedLogin> = emptyList(), val
     /** A login replaces the same host and user's (an import may hold one twice, for http and https); a card the same number's. */
     fun with(o: BrowserVault) = BrowserVault(
         (logins + o.logins).associateBy { it.host to it.user }.values.map { n -> // a page's save keeps the note written
-            if (n.note.isEmpty()) n.copy(note = logins.firstOrNull { it.host == n.host && it.user == n.user }?.note.orEmpty()) else n },
+            logins.firstOrNull { it.host == n.host && it.user == n.user }?.let { o -> n.copy(note = n.note.ifEmpty { o.note }, pinned = n.pinned || o.pinned) } ?: n },
         (addresses + o.addresses).distinct(),
         (cards + o.cards).associateBy { it.number }.values.toList())
 
     val empty get() = logins.isEmpty() && addresses.isEmpty() && cards.isEmpty()
 
     fun json(): String = JSONObject()
-        .put("logins", JSONArray(logins.map { JSONObject().put("host", it.host).put("user", it.user).put("password", it.password).apply { if (it.note.isNotEmpty()) put("note", it.note) } }))
+        .put("logins", JSONArray(logins.map { JSONObject().put("host", it.host).put("user", it.user).put("password", it.password).apply { if (it.note.isNotEmpty()) put("note", it.note); if (it.pinned) put("pinned", true) } }))
         .put("addresses", JSONArray(addresses.map { JSONObject(it) }))
         .put("cards", JSONArray(cards.map { JSONObject().put("name", it.name).put("number", it.number).put("month", it.month).put("year", it.year) }))
         .toString()
@@ -185,7 +185,7 @@ internal data class BrowserVault(val logins: List<SavedLogin> = emptyList(), val
             val o = JSONObject(s!!)
             fun list(k: String) = o.optJSONArray(k)?.let { a -> (0 until a.length()).map(a::getJSONObject) }.orEmpty()
             BrowserVault(
-                list("logins").map { SavedLogin(it.getString("host"), it.optString("user"), it.getString("password"), it.optString("note")) },
+                list("logins").map { SavedLogin(it.getString("host"), it.optString("user"), it.getString("password"), it.optString("note"), it.optBoolean("pinned")) },
                 list("addresses").map { a -> a.keys().asSequence().associateWith { a.getString(it) } },
                 list("cards").map { SavedCard(it.optString("name"), it.getString("number"), it.optString("month"), it.optString("year")) })
         }.getOrDefault(BrowserVault())

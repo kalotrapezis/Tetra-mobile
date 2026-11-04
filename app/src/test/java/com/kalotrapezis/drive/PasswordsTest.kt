@@ -34,6 +34,12 @@ class PasswordsTest {
         // a page's form saving the same login asks nothing; a new password from it keeps the note
         assertTrue(v.news(BrowserVault(listOf(SavedLogin("a.gr", "teo", "pw")))).empty)
         assertEquals("PIN 1234", v.with(BrowserVault(listOf(SavedLogin("a.gr", "teo", "new")))).logins.single().note)
+        // ♥ kept through the store and sync, with a note or without; a page's save keeps it
+        listOf(SavedLogin("p.gr", "u", "pw", pinned = true), SavedLogin("p.gr", "v", "pw", "n", pinned = true)).forEach { l ->
+            assertEquals(listOf(l), BrowserVault.of(BrowserVault(listOf(l)).json()).logins)
+            assertEquals(listOf(l), SecretSet().record(BrowserVault(listOf(l)), 1).vault().logins)
+        }
+        assertEquals(true, BrowserVault(listOf(SavedLogin("p.gr", "u", "pw", pinned = true))).with(BrowserVault(listOf(SavedLogin("p.gr", "u", "new")))).logins.single().pinned)
         // a login without a note is written as before notes, so an older sync file still reads the same
         assertEquals("[\"a.gr\",\"teo\",\"pw\"]", SecretSet.keyed(BrowserVault(listOf(SavedLogin("a.gr", "teo", "pw")))).values.single())
     }

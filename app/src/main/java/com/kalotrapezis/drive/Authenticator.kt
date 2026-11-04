@@ -15,16 +15,16 @@ import javax.crypto.spec.SecretKeySpec
  * under the Android Keystore. Added by a QR (otpauth://, or Google Authenticator's export, otpauth-migration://) or typed.
  */
 
-/** One 2FA account: [secret] in Base32 as sites give it; SHA1/6/30 unless the site said otherwise. */
+/** One 2FA account: [secret] in Base32 as sites give it; SHA1/6/30 unless the site said otherwise; [pinned] ♥, at the top. */
 internal data class OtpEntry(val issuer: String, val account: String, val secret: String, val algorithm: String = "SHA1",
-                             val digits: Int = 6, val period: Int = 30) {
+                             val digits: Int = 6, val period: Int = 30, val pinned: Boolean = false) {
     val key get() = "${issuer.lowercase()}|${account.lowercase()}|${Totp.clean(secret)}"
     fun json(): JSONObject = JSONObject().put("issuer", issuer).put("account", account).put("secret", secret)
-        .put("algorithm", algorithm).put("digits", digits).put("period", period)
+        .put("algorithm", algorithm).put("digits", digits).put("period", period).apply { if (pinned) put("pinned", true) }
 
     companion object {
         fun of(o: JSONObject) = OtpEntry(o.optString("issuer"), o.optString("account"), o.getString("secret"),
-            o.optString("algorithm", "SHA1"), o.optInt("digits", 6), o.optInt("period", 30))
+            o.optString("algorithm", "SHA1"), o.optInt("digits", 6), o.optInt("period", 30), o.optBoolean("pinned"))
     }
 }
 
