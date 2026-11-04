@@ -136,4 +136,12 @@
     <string name="browser_repost">Send formularen igen?</string>
     <string name="browser_resend">Send igen</string>
     <string name="browser_ext_added">%1$s er tilføjet</string>
+    <string name="browser_held_behind">I baggrunden</string>
+    <string name="browser_held_opened_behind">Åbnet i en fane i baggrunden</string>
+    <string name="browser_held_picture">Åbn billede</string>
+    <string name="browser_held_save">Gem billede</string>
+    <string name="browser_held_copy_picture">Kopiér billedadresse</string>
+    <string name="browser_side_bar">Faner i siden på en tablet</string>
+    <string name="browser_side_bar_note">På tværs står adressen, værktøjerne og fanerne i en kolonne til venstre. Træk den til venstre for at skjule den til en smal stribe, eller lad Skjul automatisk fjerne den, når siden ruller.</string>
+    <string name="browser_side_hide">Skjul sidebjælken</string>
 </resources>

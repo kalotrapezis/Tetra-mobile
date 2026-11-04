@@ -136,4 +136,12 @@
     <string name="browser_repost">Send the form again?</string>
     <string name="browser_resend">Send again</string>
     <string name="browser_ext_added">%1$s added</string>
+    <string name="browser_held_behind">Behind</string>
+    <string name="browser_held_opened_behind">Opened in a tab behind</string>
+    <string name="browser_held_picture">Open picture</string>
+    <string name="browser_held_save">Save picture</string>
+    <string name="browser_held_copy_picture">Copy picture address</string>
+    <string name="browser_side_bar">Tabs at the side on a tablet</string>
+    <string name="browser_side_bar_note">In landscape the address, the tools and the tabs stand in a column on the left. Hide it to a thin strip by dragging it left, or let Auto-hide put it away as the page scrolls.</string>
+    <string name="browser_side_hide">Hide the side bar</string>
 </resources>

@@ -136,4 +136,12 @@
     <string name="browser_repost">Vai sūtīt veidlapu vēlreiz?</string>
     <string name="browser_resend">Sūtīt vēlreiz</string>
     <string name="browser_ext_added">%1$s pievienots</string>
+    <string name="browser_held_behind">Fonā</string>
+    <string name="browser_held_opened_behind">Atvērts cilnē fonā</string>
+    <string name="browser_held_picture">Atvērt attēlu</string>
+    <string name="browser_held_save">Saglabāt attēlu</string>
+    <string name="browser_held_copy_picture">Kopēt attēla adresi</string>
+    <string name="browser_side_bar">Cilnes sānos planšetdatorā</string>
+    <string name="browser_side_bar_note">Ainavā adrese, rīki un cilnes ir kolonnā pa kreisi. Velciet to pa kreisi, lai paslēptu šaurā joslā, vai ļaujiet automātiskajai slēpšanai to noņemt, ritinot lapu.</string>
+    <string name="browser_side_hide">Slēpt sānjoslu</string>
 </resources>

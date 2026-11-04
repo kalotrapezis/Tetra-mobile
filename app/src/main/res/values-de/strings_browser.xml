@@ -136,4 +136,12 @@
     <string name="browser_repost">Formular erneut senden?</string>
     <string name="browser_resend">Erneut senden</string>
     <string name="browser_ext_added">%1$s hinzugefügt</string>
+    <string name="browser_held_behind">Im Hintergrund</string>
+    <string name="browser_held_opened_behind">In einem Tab im Hintergrund geöffnet</string>
+    <string name="browser_held_picture">Bild öffnen</string>
+    <string name="browser_held_save">Bild speichern</string>
+    <string name="browser_held_copy_picture">Bildadresse kopieren</string>
+    <string name="browser_side_bar">Tabs an der Seite auf dem Tablet</string>
+    <string name="browser_side_bar_note">Im Querformat stehen Adresse, Werkzeuge und Tabs in einer Spalte links. Nach links ziehen blendet sie zu einem schmalen Streifen aus, oder Automatisch ausblenden räumt sie beim Scrollen weg.</string>
+    <string name="browser_side_hide">Seitenleiste ausblenden</string>
 </resources>

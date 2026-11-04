@@ -18,6 +18,10 @@ try { [['visibilityState', 'visible'], ['webkitVisibilityState', 'visible'], ['h
   Object.defineProperty(document.wrappedJSObject, p[0], { configurable: true, get: exportFunction(function () { return bg ? p[1] : document[p[0]]; }, window) }); }); } catch (e) {}
 ['visibilitychange', 'webkitvisibilitychange'].forEach(function (t) { window.addEventListener(t, function (e) {
   if (bg) e.stopImmediatePropagation(); }, true); });
+// a long press on a link is the browser's menu (the user, 4 Nov): YouTube cancels it on its links in every browser, so on
+// its pages the page's own handler never hears it there (the player's hold for 2× is a touch, not this)
+if (/(^|\.)youtube\.com$/.test(location.hostname)) window.addEventListener('contextmenu', function (e) {
+  if (e.target && e.target.closest && e.target.closest('a[href]')) e.stopImmediatePropagation(); }, true);
 window.addEventListener('pageshow', function (e) { if (e.persisted) { last = null; lastMedia = ''; report(); media(); } });
 
 // forms: which kinds of fields there are, a form's values on its way, a fill

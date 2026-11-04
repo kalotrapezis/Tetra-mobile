@@ -136,4 +136,12 @@
     <string name="browser_repost">Tibgħat il-formola mill-ġdid?</string>
     <string name="browser_resend">Ibgħat mill-ġdid</string>
     <string name="browser_ext_added">%1$s miżjud</string>
+    <string name="browser_held_behind">Fl-isfond</string>
+    <string name="browser_held_opened_behind">Infetaħ f\'tab fl-isfond</string>
+    <string name="browser_held_picture">Iftaħ l-istampa</string>
+    <string name="browser_held_save">Issejvja l-istampa</string>
+    <string name="browser_held_copy_picture">Ikkopja l-indirizz tal-istampa</string>
+    <string name="browser_side_bar">Tabs fuq il-ġenb fuq tablet</string>
+    <string name="browser_side_bar_note">Mimdud, l-indirizz, l-għodod u t-tabs jinsabu f\'kolonna fuq ix-xellug. Kaxkarha lejn ix-xellug biex taħbiha bħala strixxa rqiqa, jew ħalli l-ħabi awtomatiku jneħħiha meta l-paġna tiskrolja.</string>
+    <string name="browser_side_hide">Aħbi l-bar tal-ġenb</string>
 </resources>

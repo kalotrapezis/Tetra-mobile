@@ -136,4 +136,12 @@
     <string name="browser_repost">Да се изпрати ли формулярът отново?</string>
     <string name="browser_resend">Изпрати отново</string>
     <string name="browser_ext_added">%1$s е добавено</string>
+    <string name="browser_held_behind">На заден план</string>
+    <string name="browser_held_opened_behind">Отворено в раздел на заден план</string>
+    <string name="browser_held_picture">Отвори изображението</string>
+    <string name="browser_held_save">Запази изображението</string>
+    <string name="browser_held_copy_picture">Копирай адреса на изображението</string>
+    <string name="browser_side_bar">Раздели отстрани на таблета</string>
+    <string name="browser_side_bar_note">Хоризонтално адресът, инструментите и разделите стоят в колона вляво. Плъзнете я наляво, за да я скриете в тясна ивица, или оставете автоматичното скриване да я прибира при превъртане.</string>
+    <string name="browser_side_hide">Скрий страничната лента</string>
 </resources>

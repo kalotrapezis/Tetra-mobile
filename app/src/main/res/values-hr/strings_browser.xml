@@ -136,4 +136,12 @@
     <string name="browser_repost">Ponovno poslati obrazac?</string>
     <string name="browser_resend">Pošalji ponovno</string>
     <string name="browser_ext_added">%1$s dodano</string>
+    <string name="browser_held_behind">U pozadini</string>
+    <string name="browser_held_opened_behind">Otvoreno u kartici u pozadini</string>
+    <string name="browser_held_picture">Otvori sliku</string>
+    <string name="browser_held_save">Spremi sliku</string>
+    <string name="browser_held_copy_picture">Kopiraj adresu slike</string>
+    <string name="browser_side_bar">Kartice sa strane na tabletu</string>
+    <string name="browser_side_bar_note">Vodoravno su adresa, alati i kartice u stupcu lijevo. Povucite ga ulijevo da ga sakrijete u tanku traku, ili neka ga automatsko skrivanje skloni dok se stranica pomiče.</string>
+    <string name="browser_side_hide">Sakrij bočnu traku</string>
 </resources>

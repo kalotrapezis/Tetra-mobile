@@ -136,4 +136,12 @@
     <string name="browser_repost">¿Enviar el formulario de nuevo?</string>
     <string name="browser_resend">Enviar de nuevo</string>
     <string name="browser_ext_added">%1$s añadido</string>
+    <string name="browser_held_behind">En segundo plano</string>
+    <string name="browser_held_opened_behind">Abierto en una pestaña en segundo plano</string>
+    <string name="browser_held_picture">Abrir imagen</string>
+    <string name="browser_held_save">Guardar imagen</string>
+    <string name="browser_held_copy_picture">Copiar dirección de la imagen</string>
+    <string name="browser_side_bar">Pestañas al lado en la tableta</string>
+    <string name="browser_side_bar_note">En horizontal, la dirección, las herramientas y las pestañas van en una columna a la izquierda. Arrástrala a la izquierda para dejarla en una franja fina, o deja que la ocultación automática la quite al desplazar la página.</string>
+    <string name="browser_side_hide">Ocultar la barra lateral</string>
 </resources>

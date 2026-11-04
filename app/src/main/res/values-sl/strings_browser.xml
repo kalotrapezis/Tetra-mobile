@@ -136,4 +136,12 @@
     <string name="browser_repost">Znova pošljem obrazec?</string>
     <string name="browser_resend">Pošlji znova</string>
     <string name="browser_ext_added">%1$s dodano</string>
+    <string name="browser_held_behind">V ozadju</string>
+    <string name="browser_held_opened_behind">Odprto v zavihku v ozadju</string>
+    <string name="browser_held_picture">Odpri sliko</string>
+    <string name="browser_held_save">Shrani sliko</string>
+    <string name="browser_held_copy_picture">Kopiraj naslov slike</string>
+    <string name="browser_side_bar">Zavihki ob strani na tablici</string>
+    <string name="browser_side_bar_note">Ležeče so naslov, orodja in zavihki v stolpcu na levi. Povlecite ga v levo, da ga skrijete v ozek trak, ali naj ga samodejno skrivanje pospravi med drsenjem strani.</string>
+    <string name="browser_side_hide">Skrij stransko vrstico</string>
 </resources>

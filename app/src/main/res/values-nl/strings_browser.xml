@@ -136,4 +136,12 @@
     <string name="browser_repost">Het formulier opnieuw verzenden?</string>
     <string name="browser_resend">Opnieuw verzenden</string>
     <string name="browser_ext_added">%1$s toegevoegd</string>
+    <string name="browser_held_behind">Op de achtergrond</string>
+    <string name="browser_held_opened_behind">Geopend in een tabblad op de achtergrond</string>
+    <string name="browser_held_picture">Afbeelding openen</string>
+    <string name="browser_held_save">Afbeelding opslaan</string>
+    <string name="browser_held_copy_picture">Afbeeldingsadres kopiëren</string>
+    <string name="browser_side_bar">Tabbladen aan de zijkant op een tablet</string>
+    <string name="browser_side_bar_note">Liggend staan het adres, de hulpmiddelen en de tabbladen in een kolom links. Sleep hem naar links om hem tot een smalle strook te verbergen, of laat Automatisch verbergen hem wegzetten bij het scrollen.</string>
+    <string name="browser_side_hide">Zijbalk verbergen</string>
 </resources>

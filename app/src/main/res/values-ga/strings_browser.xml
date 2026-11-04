@@ -136,4 +136,12 @@
     <string name="browser_repost">An fhoirm a sheoladh arís?</string>
     <string name="browser_resend">Seol arís</string>
     <string name="browser_ext_added">Cuireadh %1$s leis</string>
+    <string name="browser_held_behind">Sa chúlra</string>
+    <string name="browser_held_opened_behind">Osclaíodh i gcluaisín sa chúlra</string>
+    <string name="browser_held_picture">Oscail an pictiúr</string>
+    <string name="browser_held_save">Sábháil an pictiúr</string>
+    <string name="browser_held_copy_picture">Cóipeáil seoladh an phictiúir</string>
+    <string name="browser_side_bar">Cluaisíní ar an taobh ar tháibléad</string>
+    <string name="browser_side_bar_note">Go cothrománach, tá an seoladh, na huirlisí agus na cluaisíní i gcolún ar chlé. Tarraing ar chlé é chun é a cheilt mar stiall tanaí, nó lig don cheilt uathoibríoch é a chur i leataobh agus an leathanach ag scrolláil.</string>
+    <string name="browser_side_hide">Folaigh an barra taoibh</string>
 </resources>

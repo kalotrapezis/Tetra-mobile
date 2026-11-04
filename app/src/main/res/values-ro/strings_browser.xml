@@ -136,4 +136,12 @@
     <string name="browser_repost">Trimiți formularul din nou?</string>
     <string name="browser_resend">Trimite din nou</string>
     <string name="browser_ext_added">%1$s adăugat</string>
+    <string name="browser_held_behind">În fundal</string>
+    <string name="browser_held_opened_behind">Deschis într-o filă în fundal</string>
+    <string name="browser_held_picture">Deschide imaginea</string>
+    <string name="browser_held_save">Salvează imaginea</string>
+    <string name="browser_held_copy_picture">Copiază adresa imaginii</string>
+    <string name="browser_side_bar">File în lateral pe tabletă</string>
+    <string name="browser_side_bar_note">Pe orizontală, adresa, instrumentele și filele stau într-o coloană în stânga. Trage-o la stânga ca s-o ascunzi într-o fâșie îngustă, sau lasă ascunderea automată s-o strângă la derularea paginii.</string>
+    <string name="browser_side_hide">Ascunde bara laterală</string>
 </resources>

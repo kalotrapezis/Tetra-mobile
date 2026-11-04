@@ -136,4 +136,12 @@
     <string name="browser_repost">Αποστολή της φόρμας ξανά;</string>
     <string name="browser_resend">Αποστολή ξανά</string>
     <string name="browser_ext_added">Προστέθηκε το %1$s</string>
+    <string name="browser_held_behind">Από πίσω</string>
+    <string name="browser_held_opened_behind">Άνοιξε σε καρτέλα από πίσω</string>
+    <string name="browser_held_picture">Άνοιγμα εικόνας</string>
+    <string name="browser_held_save">Αποθήκευση εικόνας</string>
+    <string name="browser_held_copy_picture">Αντιγραφή διεύθυνσης εικόνας</string>
+    <string name="browser_side_bar">Καρτέλες στο πλάι στο tablet</string>
+    <string name="browser_side_bar_note">Στο οριζόντιο, η διεύθυνση, τα εργαλεία και οι καρτέλες μπαίνουν σε στήλη αριστερά. Κρύψ\' την σε λεπτή λωρίδα σέρνοντάς την αριστερά, ή άφησε την Αυτόματη απόκρυψη να την κρύβει όσο κυλά η σελίδα.</string>
+    <string name="browser_side_hide">Απόκρυψη της πλαϊνής μπάρας</string>
 </resources>

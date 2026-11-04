@@ -39,7 +39,7 @@ import org.mozilla.geckoview.WebExtension
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ExtensionsSheet(pinned: List<String>, private: Boolean, close: () -> Unit, pin: (String) -> Unit, press: (WebExtension) -> Unit, openTab: (String) -> Unit) =
-    ModalBottomSheet(onDismissRequest = close) {
+    BrowserSheet(onDismissRequest = close) {
         var chosen by remember { mutableStateOf<String?>(null) }
         val ext = chosen?.let { id -> BrowserEngine.extensions.firstOrNull { it.id == id } }
         androidx.activity.compose.BackHandler(ext != null) { chosen = null }
@@ -127,7 +127,7 @@ internal fun ExtAskDialog(a: ExtAsk) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ExtPopupSheet(p: Pair<WebExtension, org.mozilla.geckoview.GeckoSession>) =
-    ModalBottomSheet(onDismissRequest = { BrowserEngine.closePopup() }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+    BrowserSheet(onDismissRequest = { BrowserEngine.closePopup() }, full = true) {
         Row(Modifier.padding(start = 20.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             ExtIcon(p.first.id, 20); Text(p.first.metaData.name ?: "", Modifier.padding(start = 10.dp), style = MaterialTheme.typography.titleSmall)
         }

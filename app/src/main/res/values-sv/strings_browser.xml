@@ -136,4 +136,12 @@
     <string name="browser_repost">Skicka formuläret igen?</string>
     <string name="browser_resend">Skicka igen</string>
     <string name="browser_ext_added">%1$s har lagts till</string>
+    <string name="browser_held_behind">I bakgrunden</string>
+    <string name="browser_held_opened_behind">Öppnad i en flik i bakgrunden</string>
+    <string name="browser_held_picture">Öppna bild</string>
+    <string name="browser_held_save">Spara bild</string>
+    <string name="browser_held_copy_picture">Kopiera bildadress</string>
+    <string name="browser_side_bar">Flikar vid sidan på en surfplatta</string>
+    <string name="browser_side_bar_note">Liggande står adressen, verktygen och flikarna i en kolumn till vänster. Dra den åt vänster för att gömma den till en smal remsa, eller låt Dölj automatiskt ta undan den när sidan rullar.</string>
+    <string name="browser_side_hide">Dölj sidofältet</string>
 </resources>

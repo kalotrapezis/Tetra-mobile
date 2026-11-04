@@ -48,7 +48,7 @@ import androidx.compose.ui.window.DialogProperties
     BackHandler { when { devices -> devices = false; choosing -> clear(); query.isNotEmpty() -> query = ""; folder.isNotEmpty() -> go(BookmarkLibrary.parentOf(folder)); else -> close() } }
 
     val (marks, subs) = if (query.isBlank()) library.marks.filter { it.folder == folder } to library.subfolders(folder) else library.find(query)
-    Surface(if (wide) Modifier.widthIn(max = 900.dp).fillMaxWidth(0.92f).fillMaxHeight(0.88f) else Modifier.fillMaxSize(),
+    Surface((if (wide) Modifier.widthIn(max = 900.dp).fillMaxWidth(0.92f).fillMaxHeight(0.88f) else Modifier.fillMaxSize()).growFromSide(),
         shape = if (wide) MaterialTheme.shapes.extraLarge else RoundedCornerShapeNone, color = MaterialTheme.colorScheme.surface) {
         Column(Modifier.then(if (wide) Modifier else Modifier.systemBarsPadding()).imePadding()) {
             // the top: where we are and the search (viewing); the actions are at the bottom

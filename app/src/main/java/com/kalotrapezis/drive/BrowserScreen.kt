@@ -16,6 +16,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -48,6 +50,9 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.composed
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -85,6 +90,7 @@ import org.mozilla.geckoview.WebResponse
 // Browser (the user's sketch, 2 Nov): the page fills the screen; under a line, the address bar, a round button and three
 // small stacked ones, and under them three equal buttons. More slides that row into a strip with ‹ (Office's way).
 
+internal const val BROWSER_SETTINGS = "settings-browser" // the sidebar's ⚙: Settings › Browser (MainActivity)
 internal val BROWSER_COLOR = Color(0xFF1A87FD) // the blue of the user's icon (Assets/BrowserApp.png)
 private val PRIVATE_COLOR = Color(0xFF2B2140)
 
@@ -247,6 +253,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     var tabsRun by remember { mutableStateOf(prefs.getBoolean("tabs_run", true)) } // tabs not shown go on, sound and all (☰'s switch)
     // a video's full screen (YouTube's ⛶): the page alone, turned to landscape, until its ⛶ or ‹
     var fullTab by remember { mutableStateOf<Int?>(null) }
+    // a link or a picture held (the user, 4 Nov: "when I long click replace the tab bar with the right click menu")
+    var held by remember { mutableStateOf<GeckoSession.ContentDelegate.ContextElement?>(null) }
     fun hostActivity() = generateSequence(context) { (it as? android.content.ContextWrapper)?.baseContext }.filterIsInstance<android.app.Activity>().firstOrNull()
     var barShown by remember { mutableStateOf(true) }
     var lowered by remember { mutableStateOf(false) } // the handle pulled down: the page full screen over a thin black strip (the user, 2 Nov)
@@ -364,6 +372,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         session.progressDelegate = object : GeckoSession.ProgressDelegate {
             override fun onPageStart(session: GeckoSession, url: String) {
                 tab.kinds = emptySet(); tab.media = PageMedia(); tab.progress = 0; tab.waiting.clear()
+                if (tab.id == currentId) held = null
                 // extensions' buttons speak of the tab shown; told again, as a session reopened after its process was killed is a new window to them
                 if (tab.id == currentId) runtime.webExtensionController.setTabActive(session, true)
             }
@@ -386,6 +395,12 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             }
             override fun onExternalResponse(session: GeckoSession, response: WebResponse) = download(response)
             override fun onCloseRequest(session: GeckoSession) = closeTab(tab) // window.close()
+            // a long press on a link or a picture: its menu where the tabs are (a video or plain text: nothing)
+            override fun onContextMenu(session: GeckoSession, screenX: Int, screenY: Int, element: GeckoSession.ContentDelegate.ContextElement) {
+                if (tab.id != currentId) return
+                if (element.linkUri == null && !(element.type == GeckoSession.ContentDelegate.ContextElement.TYPE_IMAGE && element.srcUri != null)) return
+                held = element; barShown = true
+            }
             // its page's process gone (killed behind other apps, or crashed): the same page again
             override fun onCrash(session: GeckoSession) { WriterLog.w("Browser: a tab's page crashed, ${BrowserRules.host(tab.url)}"); reopen(tab) }
             override fun onKill(session: GeckoSession) { WriterLog.w("Browser: a tab's page was killed, ${BrowserRules.host(tab.url)}"); reopen(tab) }
@@ -478,6 +493,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     val media = tab.media
     fun switch(to: BrowserTab) {
         if (to.id == currentId) return
+        held = null
         val old = tabs.firstOrNull { it.id == currentId }
         old?.let { runtime.webExtensionController.setTabActive(it.session, false) }
         runtime.webExtensionController.setTabActive(to.session, true) // extensions' buttons speak of the tab shown (uBlock's count)
@@ -672,7 +688,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         }
     }
 
-    BackHandler { when { fullTab != null -> tab.session.exitFullScreen(); player -> player = false; editing -> editing = false; panel != null -> panel = null; menu -> menu = false; tab.canBack -> tab.session.goBack(); else -> back() } }
+    BackHandler { when { held != null -> held = null; fullTab != null -> tab.session.exitFullScreen(); player -> player = false; editing -> editing = false; panel != null -> panel = null; menu -> menu = false; tab.canBack -> tab.session.goBack(); else -> back() } }
 
     val url = tab.url
     val host = BrowserRules.host(url)
@@ -690,7 +706,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     }
     val imeOpen = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
     // lowered stays lowered while typing in the page (the user, 4 Nov): the strip's tap brings the bar, and Fill, back
-    val showBar = (!lowered || editing || menu || panel != null) && (!autohide || barShown || editing || imeOpen || menu || panel != null || url.isEmpty())
+    val showBar = (!lowered || editing || menu || panel != null || held != null) && (!autohide || barShown || editing || imeOpen || menu || panel != null || held != null || url.isEmpty())
     // full screen while the bar is away: the status bar goes too (a swipe brings it for a moment)
     val activity = remember { generateSequence(context) { (it as? android.content.ContextWrapper)?.baseContext }.filterIsInstance<android.app.Activity>().firstOrNull() }
     val full = fullTab != null // a video's full screen: no bar, no system bars
@@ -749,6 +765,48 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     val editBar = { editTools = true; menu = true; editing = false }
     val bar = if (private) PRIVATE_COLOR else MaterialTheme.colorScheme.surface
     val onBar = if (private) Color.White else MaterialTheme.colorScheme.onSurface
+    /** The address: the host, ♥ at its end; a tap types a new one. The bar's and the sidebar's (the tablet's, 4 Nov). */
+    @Composable fun addressPill(modifier: Modifier, withHeart: Boolean = true, typing: Boolean = true) {
+        Surface(color = onBar.copy(alpha = 0.08f), shape = CircleShape, modifier = modifier) {
+            Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (editing && typing) {
+                    val focus = remember { FocusRequester() }
+                    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+                    Box(Modifier.weight(1f)) {
+                        if (typed.text.isEmpty()) Text(stringResource(R.string.browser_address), color = onBar.copy(alpha = 0.6f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        BasicTextField(typed, { typed = it }, singleLine = true, textStyle = TextStyle(color = onBar, fontSize = 16.sp), cursorBrush = SolidColor(onBar),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
+                            keyboardActions = KeyboardActions(onGo = { if (typed.text.isNotBlank()) go(typed.text) }), modifier = Modifier.fillMaxWidth().focusRequester(focus))
+                    }
+                } else Row(Modifier.weight(1f).fillMaxHeight().clickable { typed = TextFieldValue(url, TextRange(0, url.length)); editing = true; panel = null; menu = false },
+                    verticalAlignment = Alignment.CenterVertically) {
+                    if (url.startsWith("https://")) Icon(painterResource(R.drawable.ic_lock), null, Modifier.size(16.dp).padding(end = 4.dp))
+                    // HTML only on: said on the bar, so a page that looks broken makes sense
+                    if (tab.html) Icon(painterResource(R.drawable.ic_code), stringResource(R.string.browser_html), Modifier.padding(end = 6.dp).size(18.dp), tint = BROWSER_COLOR)
+                    Text(host.removePrefix("www.").ifEmpty { stringResource(R.string.browser_address) }, Modifier.weight(1f), color = if (host.isEmpty()) onBar.copy(alpha = 0.6f) else onBar,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    // ♥ at the end of the address, as Chrome's star, so the row is no wider
+                    if (withHeart && url.isNotEmpty()) IconButton(onClick = ::heart, Modifier.size(36.dp)) { BrowserHeart(marked) }
+                }
+            }
+        }
+    }
+    /** A held link or picture's action (BrowserHeld), from the tab row or the sidebar. */
+    fun heldAct(h: GeckoSession.ContentDelegate.ContextElement, what: String) {
+        held = null
+        val link = h.linkUri; val pic = h.srcUri
+        fun copy(s: String) { context.getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(android.content.ClipData.newPlainText(BrowserRules.host(s), s)); message = context.getString(R.string.browser_copied) }
+        when (what) {
+            "tab" -> link?.let { open(it) }
+            "behind" -> link?.let { tabs += newTab(nextId++, it, lazy = true); message = context.getString(R.string.browser_held_opened_behind) }
+            "copy" -> link?.let(::copy)
+            "share" -> (link ?: pic)?.let { runCatching { context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, it), null)) } }
+            "picture" -> pic?.let { open(it) }
+            "save" -> pic?.let { src -> org.mozilla.geckoview.GeckoWebExecutor(runtime).fetch(org.mozilla.geckoview.WebRequest(src))
+                .accept({ r -> r?.let(::download) }, { e -> WriterLog.w("Browser: picture not fetched", e); message = context.getString(R.string.browser_download_failed, src.substringAfterLast('/').take(40)); null }) }
+            "copyPicture" -> pic?.let(::copy)
+        }
+    }
 
     // ☰ at the bar's end when it is at the top: the tools not on the bar, as a computer's browser menu
     @Composable fun topMenu() = Box {
@@ -796,29 +854,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                             BrowserRound(R.drawable.ic_chevron_left, stringResource(R.string.common_back), tab.canBack, 56) { tab.session.goBack() }
                             BrowserRound(R.drawable.ic_chevron_right, stringResource(R.string.browser_forward), tab.canForward, 44) { tab.session.goForward() }
                         }
-                        Surface(color = onBar.copy(alpha = 0.08f), shape = CircleShape, modifier = Modifier.weight(if (wide) 0.8f else 1f).height(48.dp)) {
-                            Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                if (editing) {
-                                    val focus = remember { FocusRequester() }
-                                    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
-                                    Box(Modifier.weight(1f)) {
-                                        if (typed.text.isEmpty()) Text(stringResource(R.string.browser_address), color = onBar.copy(alpha = 0.6f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                        BasicTextField(typed, { typed = it }, singleLine = true, textStyle = TextStyle(color = onBar, fontSize = 16.sp), cursorBrush = SolidColor(onBar),
-                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
-                                            keyboardActions = KeyboardActions(onGo = { if (typed.text.isNotBlank()) go(typed.text) }), modifier = Modifier.fillMaxWidth().focusRequester(focus))
-                                    }
-                                } else Row(Modifier.weight(1f).fillMaxHeight().clickable { typed = TextFieldValue(url, TextRange(0, url.length)); editing = true; panel = null; menu = false },
-                                    verticalAlignment = Alignment.CenterVertically) {
-                                    if (url.startsWith("https://")) Icon(painterResource(R.drawable.ic_lock), null, Modifier.size(16.dp).padding(end = 4.dp))
-                                    // HTML only on: said on the bar, so a page that looks broken makes sense
-                                    if (tab.html) Icon(painterResource(R.drawable.ic_code), stringResource(R.string.browser_html), Modifier.padding(end = 6.dp).size(18.dp), tint = BROWSER_COLOR)
-                                    Text(host.removePrefix("www.").ifEmpty { stringResource(R.string.browser_address) }, Modifier.weight(1f), color = if (host.isEmpty()) onBar.copy(alpha = 0.6f) else onBar,
-                                        maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                    // ♥ at the end of the address, as Chrome's star, so the row is no wider
-                                    if (url.isNotEmpty()) IconButton(onClick = ::heart, Modifier.size(36.dp)) { BrowserHeart(marked) }
-                                }
-                            }
-                        }
+                        addressPill(Modifier.weight(if (wide) 0.8f else 1f).height(48.dp))
                         if (wide) Surface(shape = MaterialTheme.shapes.large, color = Color.Transparent, border = androidx.compose.foundation.BorderStroke(1.dp, onBar.copy(alpha = 0.25f)),
                             modifier = Modifier.weight(1f).height(56.dp)) {
                             Row(Modifier.padding(horizontal = 6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -837,7 +873,11 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                     }
                     @Composable fun tabsRow() {
                     // row 2: the tabs (☰'s rest is a sheet from the bottom, as in Tetra's other apps)
-                    BrowserTabs(tabs, groups, openGroups, currentId, wide, switch = ::switch, close = ::close, add = { open(); editing = true; typed = TextFieldValue("") },
+                    val h = held
+                    if (h != null) BrowserHeld(h, close = { held = null }) { what ->
+                        heldAct(h, what)
+                    }
+                    else BrowserTabs(tabs, groups, openGroups, currentId, wide, switch = ::switch, close = ::close, add = { open(); editing = true; typed = TextFieldValue("") },
                         fold = { g -> openGroups = if (g in openGroups) openGroups - g else openGroups + g }, options = { tabOptions = it.id }, groupOptions = { groupOptions = it }, dropOn = ::dropOn)
                     }
                     if (top) { tabsRow(); addressRow() } else { addressRow(); tabsRow() }
@@ -852,14 +892,96 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         if (top) line()
     }
 
+
+    // the tablet's sidebar (the user, 4 Nov: "vertical layout for the tablet like zen browser does", their sketch): in
+    // landscape, the address, Back, Forward, Copy and Share under it, the tools, the favourites, the tabs; Settings and
+    // Private at its foot. Hidden by hand to a thin strip, or as the page scrolls (Auto-hide), as the bar is.
+    val landscape = androidx.compose.ui.platform.LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
+    val sidePref = remember { prefs.getBoolean("side_bar", true) }
+    val side = wide && landscape && sidePref && !player && !full
+    @Composable fun sideIcon(icon: Int, label: String, enabled: Boolean = true, act: () -> Unit) =
+        IconButton(onClick = act, enabled = enabled, modifier = Modifier.size(44.dp)) { Icon(painterResource(icon), label, tint = if (enabled) onBar else onBar.copy(alpha = 0.3f)) }
+    SideEffect { BrowserSideSheets.on = side }
+    DisposableEffect(Unit) { onDispose { BrowserSideSheets.on = false } }
+    @Composable fun sideBar(modifier: Modifier) = Surface(modifier.width(272.dp).fillMaxHeight().sideTouches(), color = bar, contentColor = onBar) { CompositionLocalProvider(LocalContentColor provides onBar) {
+        Row(Modifier.fillMaxSize()) {
+            Column(Modifier.weight(1f).fillMaxHeight().padding(start = 10.dp, top = 10.dp, bottom = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                addressPill(Modifier.fillMaxWidth().height(46.dp), withHeart = false, typing = false)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    sideIcon(R.drawable.ic_chevron_left, stringResource(R.string.common_back), tab.canBack) { tab.session.goBack() }
+                    sideIcon(R.drawable.ic_chevron_right, stringResource(R.string.browser_forward), tab.canForward) { tab.session.goForward() }
+                    Spacer(Modifier.weight(1f))
+                    // ♥ under the address, with Copy and Share (the user, 4 Nov)
+                    IconButton(onClick = ::heart, enabled = url.isNotEmpty(), modifier = Modifier.size(44.dp)) { BrowserHeart(marked) }
+                    sideIcon(R.drawable.ic_copy, stringResource(R.string.browser_copy_url), url.isNotEmpty()) {
+                        context.getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(android.content.ClipData.newPlainText(host, url)); message = context.getString(R.string.browser_copied)
+                    }
+                    sideIcon(R.drawable.ic_share, stringResource(R.string.browser_share), url.isNotEmpty()) {
+                        runCatching { context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, url), null)) }
+                    }
+                }
+                Surface(shape = MaterialTheme.shapes.large, color = Color.Transparent, border = androidx.compose.foundation.BorderStroke(1.dp, onBar.copy(alpha = 0.25f)), modifier = Modifier.fillMaxWidth()) {
+                    androidx.compose.foundation.layout.FlowRow(Modifier.padding(4.dp), horizontalArrangement = Arrangement.SpaceEvenly, maxItemsInEachRow = 5) {
+                        onBarTools.filter { it != "copy" && it != "share" }.mapNotNull { toolOf(it) }.forEach { t -> BrowserSmall(t.icon, t.image, t.label, t.on, t.enabled, t.badge, Modifier.size(width = 46.dp, height = 40.dp), long = editBar, click = t.act) }
+                        if (top) topMenu() else IconButton(onClick = { menu = true; editing = false }, Modifier.size(width = 46.dp, height = 40.dp)) { Icon(painterResource(R.drawable.ic_more_horiz), stringResource(R.string.browser_menu)) }
+                    }
+                }
+                val favourites = library.start("").first
+                if (favourites.isNotEmpty()) LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(favourites, key = { it.url }) { b ->
+                        val site = BrowserRules.site(BrowserRules.host(b.url))
+                        Box(Modifier.size(36.dp).clip(CircleShape).background(TILE_COLORS[(site.hashCode() and 0x7fffffff) % TILE_COLORS.size]).clickable(onClickLabel = b.title.ifBlank { site }) { go(b.url) },
+                            contentAlignment = Alignment.Center) { Text(site.take(1).uppercase(), color = Color.White, style = MaterialTheme.typography.labelLarge) }
+                    }
+                }
+                val h = held
+                if (h != null) BrowserHeld(h, vertical = true, close = { held = null }) { what -> heldAct(h, what) }
+                else {
+                    Row(Modifier.fillMaxWidth().height(40.dp).clip(MaterialTheme.shapes.medium).clickable { open(); editing = true; typed = TextFieldValue("") }.padding(horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(R.drawable.ic_add), null, tint = BROWSER_COLOR); Text(stringResource(R.string.browser_tab_new), Modifier.padding(start = 10.dp), color = BROWSER_COLOR, style = MaterialTheme.typography.labelLarge)
+                    }
+                    BrowserSideTabs(tabs, groups, openGroups, currentId, Modifier.weight(1f), switch = ::switch, close = ::close,
+                        fold = { g -> openGroups = if (g in openGroups) openGroups - g else openGroups + g }, options = { tabOptions = it.id }, groupOptions = { groupOptions = it })
+                }
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    sideIcon(R.drawable.ic_settings, stringResource(R.string.common_settings)) {
+                        context.startActivity(Intent(context, MainActivity::class.java).putExtra(Applet.EXTRA, BROWSER_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                    }
+                    Surface(onClick = { setPrivate(!private, url) }, shape = CircleShape, color = if (private) Color.White.copy(alpha = 0.15f) else onBar.copy(alpha = 0.08f), modifier = Modifier.weight(1f).height(40.dp)) {
+                        Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                            Icon(painterResource(R.drawable.ic_visibility_off), null, Modifier.size(18.dp)); Text(stringResource(R.string.browser_private), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelLarge)
+                        }
+                    }
+                }
+            }
+            // its grip: a tap or a drag to the left hides it to the strip
+            var drag by remember { mutableFloatStateOf(0f) }
+            Box(Modifier.width(16.dp).fillMaxHeight().clickable(onClickLabel = stringResource(R.string.browser_side_hide)) { lowered = true; editing = false }
+                .pointerInput(Unit) { detectHorizontalDragGestures(onDragStart = { drag = 0f }, onHorizontalDrag = { _, d -> drag += d }, onDragEnd = { if (drag < -30) { lowered = true; editing = false } }) },
+                contentAlignment = Alignment.Center) { Box(Modifier.size(width = 4.dp, height = 36.dp).clip(CircleShape).background(onBar.copy(alpha = 0.4f))) }
+        }
+    } }
+    /** Hidden by hand: a thin black strip at the left; a tap or a drag to the right brings the sidebar back. */
+    @Composable fun sideStrip() {
+        var drag by remember { mutableFloatStateOf(0f) }
+        Box(Modifier.width(18.dp).fillMaxHeight().background(Color.Black).clickable(onClickLabel = stringResource(R.string.browser_menu)) { lowered = false }
+            .pointerInput(Unit) { detectHorizontalDragGestures(onDragStart = { drag = 0f }, onHorizontalDrag = { _, d -> drag += d }, onDragEnd = { if (drag > 20) lowered = false }) },
+            contentAlignment = Alignment.Center) { Box(Modifier.size(width = 4.dp, height = 36.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.35f))) }
+    }
+
     Column(Modifier.fillMaxSize().background(bar).then(if (full) Modifier else Modifier.statusBarsPadding().navigationBarsPadding()).imePadding()) {
-        if (top && !player && !full) barArea()
-        Box(Modifier.weight(if (player) 0.6f else 1f).fillMaxWidth().background(MaterialTheme.colorScheme.background)) {
+        if (top && !player && !full && !side) barArea()
+        Row(Modifier.weight(if (player) 0.6f else 1f).fillMaxWidth()) {
+        // the sidebar beside the page; with Auto-hide it comes back over the page instead, so the page does not jump
+        if (side && !autohide && showBar) sideBar(Modifier)
+        if (side && lowered && !showBar) sideStrip()
+        Box(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.background)) {
             val panes = splitPair?.takeIf { wide && !player }?.let { p -> listOfNotNull(tabs.firstOrNull { it.id == p.first }, tabs.firstOrNull { it.id == p.second }) }?.takeIf { it.size == 2 }
             @Composable fun pane(t: BrowserTab, m: Modifier) = Box(m.then(if (panes != null && t.id == currentId) Modifier.border(2.dp, BROWSER_COLOR) else Modifier)
                 .pointerInput(t.id, panes != null) { if (panes != null) awaitEachGesture { awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial); if (t.id != currentId) currentId = t.id } }) {
                 key(t.id) { AndroidView({ (t.view.parent as? android.view.ViewGroup)?.removeView(t.view); t.view }, Modifier.fillMaxSize()) }
-                if (t.url.isEmpty()) BrowserStart(private, library, file = { filing = it }) { u -> currentId = t.id; editing = false; load(t, BrowserRules.target(u)) }
+                if (t.url.isEmpty()) BrowserStart(private, library, file = { filing = it }, search = if (side && !editing) ({ currentId = t.id; typed = TextFieldValue(""); editing = true; held = null }) else null) { u -> currentId = t.id; editing = false; load(t, BrowserRules.target(u)) }
                 if (t.pull > 8f) Surface(shape = CircleShape, color = if (t.pull >= PULL_DP) BROWSER_COLOR else MaterialTheme.colorScheme.surfaceContainerHigh,
                     contentColor = if (t.pull >= PULL_DP) Color.White else MaterialTheme.colorScheme.onSurface, shadowElevation = 4.dp,
                     modifier = Modifier.align(Alignment.TopCenter).offset(y = (t.pull.coerceAtMost(PULL_DP) * 0.6f).dp).size(40.dp)) {
@@ -879,7 +1001,28 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                     (bookmarks.filter { q.isNotEmpty() || !BookmarkLibrary.under(it.folder, BookmarkLibrary.IMPORTED) }.map { it.url to it.title } + visits.map { it.url to it.title }).distinctBy { it.first }
                         .filter { q.isEmpty() || it.first.contains(q, true) || it.second.contains(q, true) }.take(8)
                 }
-                if (found.isNotEmpty()) Surface(Modifier.align(Alignment.BottomCenter).fillMaxWidth(), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+                // the sidebar's: the address typed in the middle of the page, its suggestions under it, as Zen's (the user, 4 Nov)
+                if (side) {
+                    Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.35f)).pointerInput(Unit) { detectTapGestures { editing = false } })
+                    Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainerHigh, shadowElevation = 12.dp,
+                        modifier = Modifier.align(androidx.compose.ui.BiasAlignment(0f, -0.45f)).widthIn(max = 680.dp).fillMaxWidth(0.66f).pointerInput(Unit) { detectTapGestures { } }) {
+                        Column {
+                            Row(Modifier.fillMaxWidth().height(60.dp).padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(painterResource(R.drawable.ic_search), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                val focus = remember { FocusRequester() }
+                                LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+                                Box(Modifier.weight(1f).padding(start = 14.dp)) {
+                                    if (typed.text.isEmpty()) Text(stringResource(R.string.browser_address), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 18.sp, maxLines = 1)
+                                    BasicTextField(typed, { typed = it }, singleLine = true, textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = 18.sp),
+                                        cursorBrush = SolidColor(BROWSER_COLOR), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
+                                        keyboardActions = KeyboardActions(onGo = { if (typed.text.isNotBlank()) go(typed.text) }), modifier = Modifier.fillMaxWidth().focusRequester(focus))
+                                }
+                            }
+                            if (found.isNotEmpty()) { HorizontalDivider(); found.forEach { (u, t) -> BrowserRow(t, u, click = { go(u) }) } }
+                        }
+                    }
+                }
+                else if (found.isNotEmpty()) Surface(Modifier.align(Alignment.BottomCenter).fillMaxWidth(), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
                     Column { found.forEach { (u, t) -> BrowserRow(t, u, click = { go(u) }) } }
                 }
             }
@@ -900,12 +1043,21 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                     Text(it, Modifier.padding(horizontal = 18.dp, vertical = 10.dp))
                 }
             }
+            if (side && autohide && !lowered) {
+                androidx.compose.animation.AnimatedVisibility(showBar, Modifier.align(Alignment.CenterStart),
+                    enter = androidx.compose.animation.slideInHorizontally { -it }, exit = androidx.compose.animation.slideOutHorizontally { -it }) { sideBar(Modifier.shadow(8.dp)) }
+                // hidden: a swipe in from the left edge brings it
+                if (!showBar) { var drag by remember { mutableFloatStateOf(0f) }
+                    Box(Modifier.align(Alignment.CenterStart).width(20.dp).fillMaxHeight().pointerInput(Unit) {
+                        detectHorizontalDragGestures(onDragStart = { drag = 0f }, onHorizontalDrag = { _, d -> drag += d }, onDragEnd = { if (drag > 30) barShown = true }) }) }
+            }
+        }
         }
         if (player) { HorizontalDivider(color = onBar.copy(alpha = 0.2f)); CompositionLocalProvider(LocalContentColor provides onBar) {
             BrowserPlayer(Modifier.weight(0.4f), media, key = { mediaKey(it) }, marked = marked, heart = ::heart, forMaps = BrowserMedia.station(context)?.first == url,
                 setForMaps = { BrowserMedia.setStation(context, url, tab.title.ifEmpty { host }); message = context.getString(R.string.browser_for_maps_set) },
                 exit = { player = false }) }
-        } else if (!top && !full) barArea()
+        } else if (!top && !full && !side) barArea()
     }
 
     offer?.let { o ->
@@ -922,7 +1074,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     // the handle's sheet: the tools not on the bar (the user, 2 Nov: "like the rest of the Tetra apps a modal menu from the bottom");
     // a long press, there or on the bar: every tool, a tap moves it between the bar and the sheet
     // open in full and scrolling: every tool is in sight, the last row too
-    if (menu && (!top || editTools)) ModalBottomSheet(onDismissRequest = { menu = false; editTools = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+    if (menu && (!top || editTools)) BrowserSheet(onDismissRequest = { menu = false; editTools = false }, full = true) {
         var full by remember { mutableStateOf(false) }
         Column(Modifier.fillMaxWidth().verticalScroll(androidx.compose.foundation.rememberScrollState()).navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 24.dp)) {
             if (editTools) Row(Modifier.padding(start = 8.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -947,7 +1099,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     // Bookmarks, History, Passwords and Import: modal sheets too
     if (panel == BrowserPanel.Bookmarks) BookmarksManager(library, wide, managerFolder, keep = ::keepLibrary, close = { panel = null }, others = others,
         openNew = { u -> panel = null; open(u) }) { u -> panel = null; go(u) }
-    else panel?.let { p -> ModalBottomSheet(onDismissRequest = { panel = null }) {
+    else panel?.let { p -> BrowserSheet(onDismissRequest = { panel = null }) {
         BrowserPanelView(p, close = { panel = null }, visits = visits, vault = vault, imported = imported, open = ::go,
                     keepHistory = keepHistory,
                     clearHistory = { visits = emptyList(); prefs.edit().remove("history").apply() },
@@ -1037,7 +1189,7 @@ private class BrowserTool(val icon: Int, val label: String, val on: Boolean = fa
 /** A choice of actions from the bottom, as Tetra's others (no popup lists on a touch screen). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable private fun BrowserOptions(title: String, dismiss: () -> Unit, options: List<Pair<String, () -> Unit>>) =
-    ModalBottomSheet(onDismissRequest = dismiss) {
+    BrowserSheet(onDismissRequest = dismiss) {
         Column(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(bottom = 8.dp))
             options.forEach { (label, act) -> Text(label, Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).clickable { dismiss(); act() }.padding(horizontal = 8.dp, vertical = 14.dp)) }
@@ -1048,6 +1200,153 @@ private class BrowserTool(val icon: Int, val label: String, val on: Boolean = fa
  * The open tabs: pinned ones as circles, then each with its initial and a short title, a group as one chip that unfolds;
  * × closes the chosen tab, + opens one. A long press gives a tab's choices; held and dragged onto another tab or a group, it joins it.
  */
+/**
+ * A held link or picture's menu, in the tab row's place and height: × first, then what it is, then its actions; the
+ * tabs come back with ×, Back, an action, or the page moving on.
+ */
+@Composable private fun BrowserHeld(e: GeckoSession.ContentDelegate.ContextElement, vertical: Boolean = false, close: () -> Unit, act: (String) -> Unit) {
+    val picture = e.type == GeckoSession.ContentDelegate.ContextElement.TYPE_IMAGE && e.srcUri != null
+    val actions = buildList {
+        if (e.linkUri != null) { add(Triple("tab", R.drawable.ic_tab, R.string.browser_tab_new)); add(Triple("behind", R.drawable.ic_add, R.string.browser_held_behind)); add(Triple("copy", R.drawable.ic_copy, R.string.browser_copy_url)) }
+        if (picture) { add(Triple("picture", R.drawable.ic_open_in_browser, R.string.browser_held_picture)); add(Triple("save", R.drawable.ic_file_download, R.string.browser_held_save)); add(Triple("copyPicture", R.drawable.ic_link, R.string.browser_held_copy_picture)) }
+        add(Triple("share", R.drawable.ic_share, R.string.browser_share))
+    }
+    val name = (e.linkText?.takeIf { it.isNotBlank() } ?: e.title ?: e.altText ?: (e.linkUri ?: e.srcUri)?.let { BrowserRules.host(it) }).orEmpty().trim().take(40)
+    if (vertical) return Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = close, Modifier.size(40.dp)) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_close)) }
+            Text(name, Modifier.weight(1f), style = MaterialTheme.typography.labelLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+        actions.forEach { (id, icon, label) ->
+            Row(Modifier.fillMaxWidth().height(44.dp).clip(MaterialTheme.shapes.medium).clickable { act(id) }.padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(painterResource(icon), null, Modifier.size(20.dp)); Text(stringResource(label), Modifier.padding(start = 12.dp), style = MaterialTheme.typography.labelLarge)
+            }
+        }
+    }
+    Row(Modifier.fillMaxWidth().height(40.dp), verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = close, Modifier.size(40.dp)) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_close)) }
+        LazyRow(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            item {
+                Text((e.linkText?.takeIf { it.isNotBlank() } ?: e.title ?: e.altText ?: (e.linkUri ?: e.srcUri)?.let { BrowserRules.host(it) }).orEmpty().trim().take(40),
+                    style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 160.dp).padding(end = 4.dp))
+            }
+            items(actions, key = { it.first }) { (id, icon, label) ->
+                Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer, onClick = { act(id) }, modifier = Modifier.height(34.dp)) {
+                    Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(icon), null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(label), style = MaterialTheme.typography.labelLarge, maxLines = 1)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** The sidebar's tabs: one under another, a group a folder row that folds; a tap switches, a long press its options. */
+@OptIn(ExperimentalFoundationApi::class)
+/**
+ * Panels while the tablet's sidebar is on (the user, 4 Nov: a sheet from the bottom "does not make sense when the bar is
+ * on the side"): a card in the middle that grows out of where the sidebar was touched, and shrinks back into it.
+ */
+internal object BrowserSideSheets {
+    var on by mutableStateOf(false)
+    @Volatile var from: Offset? = null // the last touch on the sidebar, in the window
+}
+
+/** Every touch on the sidebar, noted (BrowserSideSheets.from), before its buttons see it. */
+private fun Modifier.sideTouches(): Modifier = composed {
+    var origin by remember { mutableStateOf(Offset.Zero) }
+    onGloballyPositioned { origin = it.positionInWindow() }.pointerInput(Unit) {
+        awaitPointerEventScope { while (true) { awaitPointerEvent(PointerEventPass.Initial).changes.firstOrNull { it.pressed }?.let { BrowserSideSheets.from = origin + it.position } } }
+    }
+}
+
+/** A window grown out of where the sidebar was touched, as BrowserSheet's card (Bookmarks' own window); as it is without the sidebar. */
+@Composable internal fun Modifier.growFromSide(): Modifier {
+    if (!BrowserSideSheets.on) return this
+    val from = remember { BrowserSideSheets.from }
+    var go by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { androidx.compose.runtime.withFrameNanos { }; androidx.compose.runtime.withFrameNanos { }; go = true }
+    val p by androidx.compose.animation.core.animateFloatAsState(if (go) 1f else 0f,
+        androidx.compose.animation.core.tween(320, easing = androidx.compose.animation.core.CubicBezierEasing(0.2f, 0f, 0f, 1f)), label = "grow")
+    var at by remember { mutableStateOf(Offset.Zero) }
+    return onGloballyPositioned { at = it.positionInWindow() }.graphicsLayer {
+        transformOrigin = from?.takeIf { size.width > 0 && size.height > 0 }
+            ?.let { androidx.compose.ui.graphics.TransformOrigin((it.x - at.x) / size.width, (it.y - at.y) / size.height) } ?: androidx.compose.ui.graphics.TransformOrigin.Center
+        val k = 0.12f + 0.88f * p; scaleX = k; scaleY = k; alpha = (p * 1.6f).coerceAtMost(1f)
+    }
+}
+
+/** A bottom sheet; with the sidebar on, the floating card instead. [full]: the sheet opens all the way. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable internal fun BrowserSheet(onDismissRequest: () -> Unit, full: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
+    if (!BrowserSideSheets.on) { ModalBottomSheet(onDismissRequest = onDismissRequest, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = full), content = content); return }
+    val from = remember { BrowserSideSheets.from }
+    var open by remember { mutableStateOf(false) }
+    var closing by remember { mutableStateOf(false) }
+    val dismiss by rememberUpdatedState(onDismissRequest)
+    // a third of a second out of the button, a little quicker back into it (Material's emphasized curve)
+    val p by androidx.compose.animation.core.animateFloatAsState(if (open && !closing) 1f else 0f,
+        androidx.compose.animation.core.tween(if (closing) 220 else 320, easing = androidx.compose.animation.core.CubicBezierEasing(0.2f, 0f, 0f, 1f)),
+        label = "panel", finishedListener = { if (closing) dismiss() })
+    androidx.compose.ui.window.Dialog(onDismissRequest = { closing = true },
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+        // grown only once its window is on the screen: started before, the growing ran unseen and the card just appeared
+        LaunchedEffect(Unit) { androidx.compose.runtime.withFrameNanos { }; androidx.compose.runtime.withFrameNanos { }; open = true }
+        var at by remember { mutableStateOf(Offset.Zero) }
+        BoxWithConstraints(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { closing = true } }, // the dim is the window's, as Bookmarks' own
+            contentAlignment = Alignment.Center) {
+            Surface(shape = MaterialTheme.shapes.extraLarge, tonalElevation = 6.dp, shadowElevation = 12.dp,
+                modifier = Modifier.fillMaxWidth(0.62f).widthIn(max = 720.dp).heightIn(max = maxHeight * 0.86f)
+                    .onGloballyPositioned { at = it.positionInWindow() }
+                    .graphicsLayer {
+                        transformOrigin = from?.takeIf { size.width > 0 && size.height > 0 }
+                            ?.let { androidx.compose.ui.graphics.TransformOrigin((it.x - at.x) / size.width, (it.y - at.y) / size.height) } ?: androidx.compose.ui.graphics.TransformOrigin.Center
+                        val s = 0.12f + 0.88f * p; scaleX = s; scaleY = s; alpha = (p * 1.6f).coerceAtMost(1f)
+                    }
+                    .pointerInput(Unit) { detectTapGestures { } }) { // a tap on the card stays on it
+                Column(Modifier.padding(vertical = 12.dp), content = content)
+            }
+        }
+    }
+}
+
+@Composable private fun BrowserSideTabs(tabs: List<BrowserTab>, groups: Map<Int, String>, open: Set<Int>, current: Int, modifier: Modifier, switch: (BrowserTab) -> Unit,
+                                        close: (BrowserTab) -> Unit, fold: (Int) -> Unit, options: (BrowserTab) -> Unit, groupOptions: (Int) -> Unit) {
+    val items = BrowserTabRow.items(tabs.map { TabInfo(it.id, it.pinned, it.group) }, open)
+    val scroll = androidx.compose.foundation.lazy.rememberLazyListState()
+    LaunchedEffect(current, items.size) { items.indexOfFirst { it is TabRowItem.Tab && it.id == current }.takeIf { it >= 0 }?.let { scroll.animateScrollToItem(it) } }
+    androidx.compose.foundation.lazy.LazyColumn(modifier.fillMaxWidth(), state = scroll, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        items(items, key = { if (it is TabRowItem.Group) "g${it.id}" else "t${(it as TabRowItem.Tab).id}" }) { item ->
+            when (item) {
+                is TabRowItem.Group -> Row(Modifier.fillMaxWidth().height(40.dp).clip(MaterialTheme.shapes.medium).combinedClickable(onClick = { fold(item.id) }, onLongClick = { groupOptions(item.id) })
+                    .padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(painterResource(R.drawable.ic_folder), null, Modifier.size(18.dp), tint = BROWSER_COLOR)
+                    Text(groups[item.id].orEmpty(), Modifier.padding(start = 10.dp).weight(1f), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("${item.count}", Modifier.padding(horizontal = 6.dp), color = BROWSER_COLOR, style = MaterialTheme.typography.labelLarge)
+                    Icon(painterResource(if (item.open) R.drawable.ic_chevron_left else R.drawable.ic_chevron_right), null, Modifier.size(18.dp))
+                }
+                is TabRowItem.Tab -> {
+                    val t = tabs.first { it.id == item.id }
+                    val on = t.id == current
+                    val fg = if (on) Color.White else LocalContentColor.current
+                    Row(Modifier.fillMaxWidth().padding(start = if (item.grouped) 16.dp else 0.dp).height(40.dp).clip(MaterialTheme.shapes.medium)
+                        .background(if (on) BROWSER_COLOR else Color.Transparent).combinedClickable(onClick = { switch(t) }, onLongClick = { options(t) }).padding(start = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(26.dp).clip(CircleShape).background(fg.copy(alpha = 0.18f)), contentAlignment = Alignment.Center) {
+                            Text(BrowserRules.site(BrowserRules.host(t.url)).take(1).uppercase().ifEmpty { "+" }, fontSize = 12.sp, color = fg, maxLines = 1)
+                        }
+                        Text(t.title.ifBlank { BrowserRules.host(t.url).removePrefix("www.") }.ifBlank { stringResource(R.string.browser_tab_new) }, Modifier.padding(start = 10.dp).weight(1f),
+                            color = fg, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        if (t.media.playing) Icon(painterResource(R.drawable.ic_volume_up), null, Modifier.size(16.dp), tint = fg)
+                        if (!t.pinned) IconButton(onClick = { close(t) }, Modifier.size(36.dp)) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.browser_tab_close), Modifier.size(16.dp), tint = fg) }
+                        else Spacer(Modifier.width(12.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Composable private fun BrowserTabs(tabs: List<BrowserTab>, groups: Map<Int, String>, open: Set<Int>, current: Int, wide: Boolean, switch: (BrowserTab) -> Unit, close: (BrowserTab) -> Unit,
                                     add: () -> Unit, fold: (Int) -> Unit, options: (BrowserTab) -> Unit, groupOptions: (Int) -> Unit, dropOn: (BrowserTab, String) -> Unit) =
     BoxWithConstraints(Modifier.fillMaxWidth().height(40.dp)) { // a fixed height: the bar measures its rows by their intrinsic height
@@ -1121,7 +1420,7 @@ private fun addressLabel(a: Map<String, String>) = a["name"] ?: listOfNotNull(a[
  * The first page: the favourites as tiles (the user, 2 Nov: "or nothing"), then their folders ("so we can have Radios", 2 Nov),
  * a tap opening one; a tile held is put in a folder. Private says what it keeps.
  */
-@Composable private fun BrowserStart(private: Boolean, library: BookmarkLibrary, file: (Bookmark) -> Unit, open: (String) -> Unit) =
+@Composable private fun BrowserStart(private: Boolean, library: BookmarkLibrary, file: (Bookmark) -> Unit, search: (() -> Unit)? = null, open: (String) -> Unit) =
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         var folder by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("") }
         BackHandler(folder.isNotEmpty()) { folder = BookmarkLibrary.parentOf(folder) }
@@ -1138,7 +1437,20 @@ private fun addressLabel(a: Map<String, String>) = a["name"] ?: listOfNotNull(a[
                 Text(label, Modifier.padding(top = 6.dp), style = MaterialTheme.typography.labelMedium, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
             }
         val (shown, folders) = library.start(folder)
-        LazyVerticalGrid(GridCells.Adaptive(88.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        // the sidebar's new tab (the user's sketch, 4 Nov): "type an address" in the middle; a tap types it in the sidebar
+        if (search != null && folder.isEmpty()) {
+            val empty = shown.isEmpty() && folders.isEmpty()
+            if (empty) Spacer(Modifier.weight(1f))
+            Surface(onClick = search, shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 32.dp, bottom = 8.dp).widthIn(max = 560.dp).fillMaxWidth(0.7f).height(52.dp)) {
+                Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(painterResource(R.drawable.ic_search), null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.browser_address), Modifier.padding(start = 12.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            if (empty) Spacer(Modifier.weight(1.4f))
+        }
+        if (shown.isNotEmpty() || folders.isNotEmpty()) LazyVerticalGrid(GridCells.Adaptive(88.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             gridItems(shown, key = { it.url }) { b ->
                 val host = BrowserRules.site(BrowserRules.host(b.url))
                 Tile(b.title.ifBlank { host }, host.take(1).uppercase(), TILE_COLORS[(host.hashCode() and 0x7fffffff) % TILE_COLORS.size], null, { open(b.url) }) { file(b) }
@@ -1234,7 +1546,7 @@ private fun BrowserPanelView(p: BrowserPanel, close: () -> Unit, visits: List<Vi
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BrowserFillStrip(logins: List<SavedLogin>, addresses: List<Map<String, String>>, cards: List<SavedCard>, dismiss: () -> Unit, fill: (JSONObject, String?) -> Unit) {
-    ModalBottomSheet(onDismissRequest = dismiss) {
+    BrowserSheet(onDismissRequest = dismiss) {
         Column(Modifier.navigationBarsPadding().padding(start = 12.dp, end = 12.dp, bottom = 24.dp)) {
             Text(stringResource(R.string.browser_fill_title), Modifier.padding(horizontal = 8.dp, vertical = 8.dp), style = MaterialTheme.typography.titleMedium)
             logins.forEach { l -> BrowserRow(l.user.ifEmpty { "—" }, l.host, click = { fill(JSONObject().put("username", l.user).put("password", l.password), l.host) }) }

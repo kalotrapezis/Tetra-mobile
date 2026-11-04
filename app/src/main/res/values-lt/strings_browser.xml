@@ -136,4 +136,12 @@
     <string name="browser_repost">Siųsti formą dar kartą?</string>
     <string name="browser_resend">Siųsti dar kartą</string>
     <string name="browser_ext_added">%1$s pridėtas</string>
+    <string name="browser_held_behind">Fone</string>
+    <string name="browser_held_opened_behind">Atidaryta fono skirtuke</string>
+    <string name="browser_held_picture">Atidaryti paveikslėlį</string>
+    <string name="browser_held_save">Įrašyti paveikslėlį</string>
+    <string name="browser_held_copy_picture">Kopijuoti paveikslėlio adresą</string>
+    <string name="browser_side_bar">Kortelės šone planšetėje</string>
+    <string name="browser_side_bar_note">Gulsčiai adresas, įrankiai ir kortelės yra stulpelyje kairėje. Patraukite jį kairėn, kad paslėptumėte į ploną juostelę, arba leiskite automatiniam slėpimui jį paslėpti slenkant puslapį.</string>
+    <string name="browser_side_hide">Slėpti šoninę juostą</string>
 </resources>

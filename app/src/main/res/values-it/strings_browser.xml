@@ -136,4 +136,12 @@
     <string name="browser_repost">Inviare di nuovo il modulo?</string>
     <string name="browser_resend">Invia di nuovo</string>
     <string name="browser_ext_added">%1$s aggiunto</string>
+    <string name="browser_held_behind">In background</string>
+    <string name="browser_held_opened_behind">Aperto in una scheda in background</string>
+    <string name="browser_held_picture">Apri immagine</string>
+    <string name="browser_held_save">Salva immagine</string>
+    <string name="browser_held_copy_picture">Copia indirizzo immagine</string>
+    <string name="browser_side_bar">Schede di lato sul tablet</string>
+    <string name="browser_side_bar_note">In orizzontale, indirizzo, strumenti e schede stanno in una colonna a sinistra. Trascinala a sinistra per ridurla a una striscia sottile, oppure lascia che il nascondi automatico la tolga mentre la pagina scorre.</string>
+    <string name="browser_side_hide">Nascondi la barra laterale</string>
 </resources>

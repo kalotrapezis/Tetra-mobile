@@ -136,4 +136,12 @@
     <string name="browser_repost">Újra elküldi az űrlapot?</string>
     <string name="browser_resend">Újraküldés</string>
     <string name="browser_ext_added">%1$s hozzáadva</string>
+    <string name="browser_held_behind">Háttérben</string>
+    <string name="browser_held_opened_behind">Megnyitva egy háttérlapon</string>
+    <string name="browser_held_picture">Kép megnyitása</string>
+    <string name="browser_held_save">Kép mentése</string>
+    <string name="browser_held_copy_picture">Kép címének másolása</string>
+    <string name="browser_side_bar">Lapok oldalt a táblagépen</string>
+    <string name="browser_side_bar_note">Fekvő helyzetben a cím, az eszközök és a lapok egy bal oldali oszlopban vannak. Húzd balra, hogy vékony csíkká rejtsd, vagy hagyd, hogy az automatikus elrejtés görgetéskor eltüntesse.</string>
+    <string name="browser_side_hide">Oldalsáv elrejtése</string>
 </resources>

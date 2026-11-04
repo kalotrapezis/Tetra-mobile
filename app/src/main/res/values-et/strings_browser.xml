@@ -136,4 +136,12 @@
     <string name="browser_repost">Kas saata vorm uuesti?</string>
     <string name="browser_resend">Saada uuesti</string>
     <string name="browser_ext_added">%1$s lisatud</string>
+    <string name="browser_held_behind">Taustal</string>
+    <string name="browser_held_opened_behind">Avatud taustal kaardil</string>
+    <string name="browser_held_picture">Ava pilt</string>
+    <string name="browser_held_save">Salvesta pilt</string>
+    <string name="browser_held_copy_picture">Kopeeri pildi aadress</string>
+    <string name="browser_side_bar">Kaardid küljel tahvelarvutis</string>
+    <string name="browser_side_bar_note">Rõhtpaigutuses on aadress, tööriistad ja kaardid vasakul veerus. Lohista see vasakule, et peita see kitsaks ribaks, või lase automaatpeitmisel see kerimisel ära panna.</string>
+    <string name="browser_side_hide">Peida külgriba</string>
 </resources>

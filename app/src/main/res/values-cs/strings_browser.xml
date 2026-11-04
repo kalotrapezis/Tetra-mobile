@@ -136,4 +136,12 @@
     <string name="browser_repost">Odeslat formulář znovu?</string>
     <string name="browser_resend">Odeslat znovu</string>
     <string name="browser_ext_added">%1$s přidáno</string>
+    <string name="browser_held_behind">Na pozadí</string>
+    <string name="browser_held_opened_behind">Otevřeno v kartě na pozadí</string>
+    <string name="browser_held_picture">Otevřít obrázek</string>
+    <string name="browser_held_save">Uložit obrázek</string>
+    <string name="browser_held_copy_picture">Kopírovat adresu obrázku</string>
+    <string name="browser_side_bar">Karty na boku na tabletu</string>
+    <string name="browser_side_bar_note">Na šířku jsou adresa, nástroje a karty ve sloupci vlevo. Přetažením doleva ji skryjete do úzkého pruhu, nebo ji nechte schovávat automaticky při posouvání stránky.</string>
+    <string name="browser_side_hide">Skrýt boční panel</string>
 </resources>

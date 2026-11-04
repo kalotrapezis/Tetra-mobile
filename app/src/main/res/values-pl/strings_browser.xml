@@ -136,4 +136,12 @@
     <string name="browser_repost">Wysłać formularz ponownie?</string>
     <string name="browser_resend">Wyślij ponownie</string>
     <string name="browser_ext_added">Dodano %1$s</string>
+    <string name="browser_held_behind">W tle</string>
+    <string name="browser_held_opened_behind">Otwarto w karcie w tle</string>
+    <string name="browser_held_picture">Otwórz obraz</string>
+    <string name="browser_held_save">Zapisz obraz</string>
+    <string name="browser_held_copy_picture">Kopiuj adres obrazu</string>
+    <string name="browser_side_bar">Karty z boku na tablecie</string>
+    <string name="browser_side_bar_note">W poziomie adres, narzędzia i karty stoją w kolumnie po lewej. Przeciągnij ją w lewo, by schować do wąskiego paska, albo pozwól automatycznemu ukrywaniu chować ją przy przewijaniu.</string>
+    <string name="browser_side_hide">Ukryj pasek boczny</string>
 </resources>

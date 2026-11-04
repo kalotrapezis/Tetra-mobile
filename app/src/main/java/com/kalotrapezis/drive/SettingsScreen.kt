@@ -481,6 +481,7 @@ internal fun SettingsTab(
     val prefs = remember { context.getSharedPreferences("browser", Context.MODE_PRIVATE) }
     var keep by remember { mutableStateOf(prefs.getString("keep_history", BrowserRules.DAY) ?: BrowserRules.DAY) }
     var top by remember { mutableStateOf(prefs.getBoolean("top_bar", false)) }
+    var side by remember { mutableStateOf(prefs.getBoolean("side_bar", true)) }
     SettingsSection(stringResource(R.string.browser_history)) {
         ChoiceRow(stringResource(R.string.browser_history_keep), null, listOf(BrowserRules.ON_EXIT to stringResource(R.string.browser_keep_exit),
             BrowserRules.DAY to stringResource(R.string.browser_keep_day), BrowserRules.NEVER to stringResource(R.string.browser_keep_never)), keep) {
@@ -490,6 +491,9 @@ internal fun SettingsTab(
     }
     SettingsSection(null, stringResource(R.string.browser_top_bar_note)) {
         SwitchRow(stringResource(R.string.browser_top_bar), null, top) { top = it; prefs.edit().putBoolean("top_bar", it).apply() }
+    }
+    SettingsSection(null, stringResource(R.string.browser_side_bar_note)) {
+        SwitchRow(stringResource(R.string.browser_side_bar), null, side) { side = it; prefs.edit().putBoolean("side_bar", it).apply() }
     }
     // what this device shares with the others through Tetra's sync (the user, 3 Nov: "options in the settings what to sync in the
     // browser"); each switch is this device's own, and off keeps what is here (BrowserSync.kt)

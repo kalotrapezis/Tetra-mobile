@@ -136,4 +136,12 @@
     <string name="browser_repost">Enviar o formulário novamente?</string>
     <string name="browser_resend">Enviar novamente</string>
     <string name="browser_ext_added">%1$s adicionado</string>
+    <string name="browser_held_behind">Em segundo plano</string>
+    <string name="browser_held_opened_behind">Aberto num separador em segundo plano</string>
+    <string name="browser_held_picture">Abrir imagem</string>
+    <string name="browser_held_save">Guardar imagem</string>
+    <string name="browser_held_copy_picture">Copiar endereço da imagem</string>
+    <string name="browser_side_bar">Separadores ao lado no tablet</string>
+    <string name="browser_side_bar_note">Na horizontal, o endereço, as ferramentas e os separadores ficam numa coluna à esquerda. Arraste-a para a esquerda para a reduzir a uma faixa fina, ou deixe a ocultação automática escondê-la ao deslocar a página.</string>
+    <string name="browser_side_hide">Ocultar a barra lateral</string>
 </resources>
