@@ -789,6 +789,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
         // a map turned old (MapsAge): Settings › Maps
         if (applet.value == MapsAge.SCREEN && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Maps; screen = Screen.Settings; return@LaunchedEffect }
         if (applet.value == BROWSER_SETTINGS && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Browser; screen = Screen.Settings; return@LaunchedEffect }
+        if (applet.value == PASSWORDS_SETTINGS && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Passwords; screen = Screen.Settings; return@LaunchedEffect }
         if (applet.value == LocationReminders.SCREEN && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Calendar; screen = Screen.Settings; return@LaunchedEffect }
         if (applet.value == MailActivity.SETTINGS && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Mail; screen = Screen.Settings; return@LaunchedEffect }
         // Mail's «Άνοιγμα φακέλου»: its folder in Files

@@ -94,6 +94,7 @@ import kotlinx.coroutines.withContext
 
 // the purple of the user's icon (4 Nov: a padlock and its key, "more curves… no corners"; Assets/Icons/Applets/Passwords.png)
 internal val PASSWORDS_COLOR = Color(0xFF7E37ED)
+internal const val PASSWORDS_SETTINGS = "settings-passwords" // the sheet's Settings: Settings › Passwords (MainActivity)
 
 private enum class PwPage { Passwords, Create, TwoFactor }
 private enum class PwKind(val label: Int) { All(R.string.common_all), Logins(R.string.browser_passwords), Cards(R.string.browser_cards), Addresses(R.string.browser_addresses) }
@@ -210,13 +211,6 @@ private fun PasswordsOpen(back: () -> Unit, start: String?, setAway: (Boolean) -
         if (uri == null) return@rememberLauncherForActivityResult
         val r = runCatching { context.contentResolver.openInputStream(uri)!!.use { it.readBytes().decodeToString() } }.getOrNull()?.let(OtpUri::lines)
         if (r == null) report = context.getString(R.string.pw_import_nothing) to null else addCodes(r, uri)
-    }
-    // Android's autofill service (the user, 4 Nov: "Can I set it as Android autocomplete?"): Android's own question, then back
-    val autofill = remember { context.getSystemService(android.view.autofill.AutofillManager::class.java) }
-    var filling by remember { mutableStateOf(autofill?.hasEnabledAutofillServices() == true) }
-    val askAutofill = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        setAway(false); filling = autofill?.hasEnabledAutofillServices() == true
-        WriterLog.i("Autofill: Tetra ${if (filling) "chosen" else "not chosen"}")
     }
     fun copy(label: String, text: String, said: Int) { SecretClip.copy(context, label, text); Toast.makeText(context, said, Toast.LENGTH_SHORT).show() }
 
@@ -354,13 +348,11 @@ private fun PasswordsOpen(back: () -> Unit, start: String?, setAway: (Boolean) -
             choice(R.drawable.ic_qr_code, R.string.pw_import_google_auth, R.string.pw_import_google_auth_how) { page = PwPage.TwoFactor; scanning = true }
             choice(R.drawable.ic_file_text, R.string.pw_import_text, R.string.pw_import_text_how) { setAway(true); pickText.launch(arrayOf("text/*", "application/octet-stream")) }
             HorizontalDivider(Modifier.padding(vertical = 8.dp), color = Color.White.copy(alpha = 0.15f))
-            if (filling) choice(R.drawable.ic_check, R.string.pw_autofill_on, R.string.pw_autofill_off_how) { }
-            else choice(R.drawable.ic_lock_open, R.string.pw_autofill_title, R.string.pw_autofill_note) {
-                setAway(true)
-                runCatching { askAutofill.launch(android.content.Intent(android.provider.Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE, Uri.parse("package:${context.packageName}"))) }
-                    .onFailure { setAway(false); WriterLog.e("Autofill: Android's chooser not opened", it) }
+            // autofill and sync are Settings › Passwords' (the user, 4 Nov: "this kind of thing should go to the settings page")
+            choice(R.drawable.ic_settings, R.string.common_settings, R.string.pw_settings_summary) {
+                context.startActivity(android.content.Intent(context, MainActivity::class.java).putExtra(Applet.EXTRA, PASSWORDS_SETTINGS)
+                    .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP))
             }
-            Text(stringResource(if (BrowserSync.on(context, BrowserSync.PASSWORDS)) R.string.pw_sync_on_note else R.string.pw_sync_off_note), style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.8f))
         }
     }
 

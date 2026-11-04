@@ -54,7 +54,8 @@ internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, 
     Appearance(R.string.settings_appearance, R.drawable.ic_palette, null, R.string.settings_appearance_summary, listOf(R.string.settings_theme, R.string.settings_language, R.string.settings_photo_on_home, R.string.settings_hidden_from_home, R.string.settings_app_icons)),
     Mail(R.string.app_mail, Category.Mail.icon, Category.Mail.color, R.string.settings_mail_summary, listOf(R.string.mail_accounts, R.string.mail_add_account, R.string.mail_check, R.string.mail_undo, R.string.mail_default_app, R.string.mail_threads, R.string.mail_read_shown, R.string.mail_islands, R.string.mail_security,
         R.string.mail_remote, R.string.mail_allowed, R.string.mail_tracking, R.string.mail_link_warning, R.string.mail_risky, R.string.mail_real_address, R.string.mail_receipts)),
-    Browser(R.string.app_browser, Category.Browser.icon, Category.Browser.color, R.string.settings_browser_summary, listOf(R.string.browser_history_keep, R.string.browser_top_bar, R.string.browser_sync_bookmarks, R.string.browser_sync_tabs, R.string.browser_sync_passwords)),
+    Browser(R.string.app_browser, Category.Browser.icon, Category.Browser.color, R.string.settings_browser_summary, listOf(R.string.browser_history_keep, R.string.browser_top_bar, R.string.browser_sync_bookmarks, R.string.browser_sync_tabs)),
+    Passwords(R.string.app_passwords, R.drawable.ic_key, PASSWORDS_COLOR, R.string.pw_settings_summary, listOf(R.string.pw_autofill_title, R.string.browser_sync_passwords, R.string.pw_sync_2fa)),
     Gallery(R.string.app_gallery, Category.Gallery.icon, Category.Gallery.color, R.string.settings_gallery_summary, listOf(R.string.settings_photos_videos, R.string.settings_search_quality, R.string.settings_folders)),
     Files(R.string.app_files, Category.Files.icon, Category.Files.color, R.string.settings_files_summary, listOf(R.string.settings_drive_workspace, R.string.settings_all_files)),
     Scanner(R.string.settings_pdf_scanner, Category.Scanner.icon, Category.Scanner.color, R.string.settings_resolution, listOf(R.string.settings_resolution)),
@@ -170,6 +171,7 @@ internal fun SettingsTab(
                     SettingsPage.Contacts -> ContactsPage()
                     SettingsPage.Mail -> MailPage(openPart)
                     SettingsPage.Browser -> BrowserSettingsPage()
+                    SettingsPage.Passwords -> PasswordsSettingsPage()
                     SettingsPage.Phone -> PhonePage()
                     SettingsPage.Data -> DataPage()
                     SettingsPage.Assistant -> AssistantPage()
@@ -511,6 +513,28 @@ internal fun SettingsTab(
                 if (java.io.File(root, "Tabs/$me.json").isFile && BrowserSync.writeTabs(root, me, DataFiles.deviceName(context), emptyList())) ScopedSync.soon(context.applicationContext, "browser", orWhole = true)
             } }.start()
         }
+    }
+}
+
+/**
+ * Passwords (the user, 4 Nov: "make a category for the passwords app in the main settings page… all the others have a
+ * section"): Android's autofill, and sync of the passwords and the 2FA codes (from Browser › Sync, where it was first).
+ */
+@Composable private fun PasswordsSettingsPage() {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("browser", Context.MODE_PRIVATE) }
+    val back = resumes() // back from Android's question: read again
+    val autofill = remember { context.getSystemService(android.view.autofill.AutofillManager::class.java) }
+    val filling = remember(back.intValue) { autofill?.hasEnabledAutofillServices() == true }
+    SettingsSection {
+        SettingRow(stringResource(R.string.pw_autofill_title), stringResource(if (filling) R.string.pw_autofill_on else R.string.pw_autofill_note),
+            onClick = if (filling) null else ({
+                runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE, android.net.Uri.parse("package:${context.packageName}"))) }
+                    .onFailure { WriterLog.e("Autofill: Android's chooser not opened", it) }
+            })) { if (filling) Icon(painterResource(R.drawable.ic_check), null, tint = PASSWORDS_COLOR) else Chevron() }
+        if (filling) Text(stringResource(R.string.pw_autofill_off_how), Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.bodySmall, color = quiet())
+    }
+    SettingsSection(stringResource(R.string.browser_sync_title), stringResource(R.string.browser_sync_note)) {
         // passwords (the user, 3 Nov: "sync passwords as well but have some encryption"): off until a passphrase is given here
         val scope = rememberCoroutineScope()
         var pw by remember { mutableStateOf(PasswordSync.State.OFF) }
