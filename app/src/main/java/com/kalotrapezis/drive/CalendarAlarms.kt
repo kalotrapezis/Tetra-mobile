@@ -117,8 +117,7 @@ internal object CalendarAlarms {
     /** [open]: what its tap opens (MainActivity's applet: the Calendar, or "note:<id>" for a place reminder's list). */
     fun post(c: Context, id: Int, title: String, text: String, color: Int, occurrence: String = "", time: String = "", open: String = Applet.Calendar.name) {
         channel(c)
-        val tap = PendingIntent.getActivity(c, id, Intent(c, MainActivity::class.java).putExtra(Applet.EXTRA, open)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val tap = PendingIntent.getActivity(c, id, appletIntent(c, open), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val snooze = PendingIntent.getBroadcast(c, id, Intent(c, CalendarAlarmReceiver::class.java).setAction(ACTION_SNOOZE)
             .putExtra("id", id).putExtra("title", title).putExtra("text", text).putExtra("color", color).putExtra("occurrence", occurrence).putExtra("time", time).putExtra("open", open), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         // X: this time of the event is done — the notification goes and its other reminders (a daily repeat) do not ring

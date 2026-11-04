@@ -256,8 +256,7 @@ class TimerService : Service() {
         return b.build()
     }
 
-    private fun openTimer() = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java).putExtra(Applet.EXTRA, SCREEN)
-        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    private fun openTimer() = PendingIntent.getActivity(this, 0, appletIntent(this, SCREEN), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
     private fun watchAction(what: String) = PendingIntent.getForegroundService(this, what.hashCode(),
         Intent(this, TimerService::class.java).setAction(what), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
@@ -303,7 +302,7 @@ class TimerService : Service() {
         val am = getSystemService(AlarmManager::class.java) ?: return
         val pi = PendingIntent.getForegroundService(this, 1, Intent(this, TimerService::class.java).setAction(RING), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         if (at == null) return am.cancel(pi)
-        val show = PendingIntent.getActivity(this, 2, Intent(this, MainActivity::class.java).putExtra(Applet.EXTRA, SCREEN), PendingIntent.FLAG_IMMUTABLE)
+        val show = PendingIntent.getActivity(this, 2, appletIntent(this, SCREEN), PendingIntent.FLAG_IMMUTABLE)
         runCatching { am.setAlarmClock(AlarmManager.AlarmClockInfo(at.toEpochMilli(), show), pi) }.onFailure { WriterLog.e("Timer: no alarm clock", it) }
     }
 
@@ -456,7 +455,7 @@ internal object AlarmPlan {
         am.cancel(look)
         if (next == null) { am.cancel(ring); nm.cancel(NEXT_ID); return }
         val (a, at) = next
-        val show = PendingIntent.getActivity(app, 7, Intent(app, MainActivity::class.java).putExtra(Applet.EXTRA, TimerService.SCREEN), PendingIntent.FLAG_IMMUTABLE)
+        val show = PendingIntent.getActivity(app, 7, appletIntent(app, TimerService.SCREEN), PendingIntent.FLAG_IMMUTABLE)
         runCatching { am.setAlarmClock(AlarmManager.AlarmClockInfo(at.toEpochMilli(), show), ring) }.onFailure { WriterLog.e("Alarms: no alarm clock", it) }
         if (at.toEpochMilli() - now.toEpochMilli() > SOON_MS) {
             nm.cancel(NEXT_ID)

@@ -97,7 +97,7 @@
         </service>
         <activity android:name=".PhoneCallActivity" android:exported="false" android:launchMode="singleTask" android:taskAffinity="com.kalotrapezis.drive.call"
             android:excludeFromRecents="true" android:showWhenLocked="true" android:turnScreenOn="true" />
-        <activity android:name=".PhoneActivity" android:exported="true" android:label="@string/home_label_phone" android:taskAffinity="com.kalotrapezis.drive.dial" android:windowSoftInputMode="stateAlwaysHidden">
+        <activity android:name=".PhoneActivity" android:exported="true" android:label="@string/home_label_phone" android:icon="@mipmap/applet_phone" android:roundIcon="@mipmap/applet_phone" android:taskAffinity="com.kalotrapezis.drive.dial" android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter><action android:name="android.intent.action.DIAL" /><category android:name="android.intent.category.DEFAULT" /></intent-filter>
             <intent-filter><action android:name="android.intent.action.DIAL" /><category android:name="android.intent.category.DEFAULT" /><data android:scheme="tel" /></intent-filter>
             <intent-filter><action android:name="android.intent.action.VIEW" /><category android:name="android.intent.category.DEFAULT" /><category android:name="android.intent.category.BROWSABLE" /><data android:scheme="tel" /></intent-filter>
@@ -106,9 +106,9 @@
         </activity>
         <activity android:name=".BriefActivity" android:exported="false" android:label="@string/assistant_briefs_channel" />
         <activity android:name=".UsageActivity" android:exported="false" android:label="@string/usage_title" />
-        <activity android:name=".BrowserActivity" android:exported="false" android:label="@string/app_browser" android:taskAffinity="com.kalotrapezis.drive.browser"
+        <activity android:name=".BrowserActivity" android:exported="false" android:label="@string/app_browser" android:icon="@mipmap/applet_browser" android:roundIcon="@mipmap/applet_browser" android:taskAffinity="com.kalotrapezis.drive.browser"
             android:launchMode="singleTask" android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode" />
-        <activity android:name=".DataActivity" android:exported="false" android:label="@string/home_label_data" android:taskAffinity="com.kalotrapezis.drive.data" />
+        <activity android:name=".DataActivity" android:exported="false" android:label="@string/home_label_data" android:icon="@mipmap/applet_data" android:roundIcon="@mipmap/applet_data" android:taskAffinity="com.kalotrapezis.drive.data" />
         <receiver android:name=".PhoneCallReceiver" android:exported="false" />
         <receiver android:name=".PhoneRelayReceiver" android:exported="false" />
         <!-- Android's missed-call notice, handed to the phone app; only Telecom (it holds MODIFY_PHONE_STATE) may send it -->
@@ -192,6 +192,24 @@
                 <data android:mimeType="video/*" />
             </intent-filter>
         </activity>
+        <!-- The applets in windows of their own, as the Browser (asked 4 Nov): a task each in Recents, with its name and icon
+             (AppletActivities.kt); Tetra, its notifications and AI Assist open them with appletIntent -->
+        <activity android:name=".NotesActivity" android:exported="false" android:label="@string/home_label_notes" android:icon="@mipmap/applet_notes" android:roundIcon="@mipmap/applet_notes"
+            android:taskAffinity="com.kalotrapezis.drive.notes" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
+        <activity android:name=".CodesActivity" android:exported="false" android:label="@string/home_label_codes" android:icon="@mipmap/applet_codes" android:roundIcon="@mipmap/applet_codes"
+            android:taskAffinity="com.kalotrapezis.drive.codes" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
+        <activity android:name=".CalendarActivity" android:exported="false" android:label="@string/home_label_calendar" android:icon="@mipmap/applet_calendar" android:roundIcon="@mipmap/applet_calendar"
+            android:taskAffinity="com.kalotrapezis.drive.calendar" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
+        <activity android:name=".TimerActivity" android:exported="false" android:label="@string/home_label_timer" android:icon="@mipmap/applet_timer" android:roundIcon="@mipmap/applet_timer"
+            android:taskAffinity="com.kalotrapezis.drive.timer" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
+        <activity android:name=".MapsActivity" android:exported="false" android:label="@string/home_label_maps" android:icon="@mipmap/applet_maps" android:roundIcon="@mipmap/applet_maps"
+            android:taskAffinity="com.kalotrapezis.drive.maps" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
+        <activity android:name=".ContactsActivity" android:exported="false" android:label="@string/home_label_contacts" android:icon="@mipmap/applet_contacts" android:roundIcon="@mipmap/applet_contacts"
+            android:taskAffinity="com.kalotrapezis.drive.contacts" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
+        <activity android:name=".MailActivity" android:exported="false" android:label="@string/home_label_mail" android:icon="@mipmap/applet_mail" android:roundIcon="@mipmap/applet_mail"
+            android:taskAffinity="com.kalotrapezis.drive.mail" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
+        <activity android:name=".SmsActivity" android:exported="false" android:label="@string/home_label_sms" android:icon="@mipmap/applet_messages" android:roundIcon="@mipmap/applet_messages"
+            android:taskAffinity="com.kalotrapezis.drive.sms" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
         <!-- Settings › App icons (asked 17 Oct): a launcher icon for each part of Tetra, off until switched on; AppletLaunch
              hands the part to MainActivity (its own empty task affinity, so a running Tetra is asked, not just brought up). -->
         <activity android:name=".AppletLaunch" android:exported="false" android:theme="@android:style/Theme.NoDisplay"
@@ -202,40 +220,40 @@
         <activity-alias android:name=".AppFiles" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_files" android:icon="@mipmap/applet_files" android:roundIcon="@mipmap/applet_files">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
-        <activity-alias android:name=".AppNotes" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_notes" android:icon="@mipmap/applet_notes" android:roundIcon="@mipmap/applet_notes">
+        <activity-alias android:name=".AppNotes" android:targetActivity=".NotesActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_notes" android:icon="@mipmap/applet_notes" android:roundIcon="@mipmap/applet_notes">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <activity-alias android:name=".AppScanner" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_scanner" android:icon="@mipmap/applet_scanner" android:roundIcon="@mipmap/applet_scanner">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
-        <activity-alias android:name=".AppCodes" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_codes" android:icon="@mipmap/applet_codes" android:roundIcon="@mipmap/applet_codes">
+        <activity-alias android:name=".AppCodes" android:targetActivity=".CodesActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_codes" android:icon="@mipmap/applet_codes" android:roundIcon="@mipmap/applet_codes">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <activity-alias android:name=".AppOffice" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_office" android:icon="@mipmap/applet_office" android:roundIcon="@mipmap/applet_office">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
-        <activity-alias android:name=".AppTextEditor" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_text" android:icon="@mipmap/applet_text_editor" android:roundIcon="@mipmap/applet_text_editor">
+        <activity-alias android:name=".AppTextEditor" android:targetActivity=".TextEditorActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_text" android:icon="@mipmap/applet_text_editor" android:roundIcon="@mipmap/applet_text_editor">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
-        <activity-alias android:name=".AppCalendar" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_calendar" android:icon="@mipmap/applet_calendar" android:roundIcon="@mipmap/applet_calendar">
+        <activity-alias android:name=".AppCalendar" android:targetActivity=".CalendarActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_calendar" android:icon="@mipmap/applet_calendar" android:roundIcon="@mipmap/applet_calendar">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
-        <activity-alias android:name=".AppTimer" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_timer" android:icon="@mipmap/applet_timer" android:roundIcon="@mipmap/applet_timer">
+        <activity-alias android:name=".AppTimer" android:targetActivity=".TimerActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_timer" android:icon="@mipmap/applet_timer" android:roundIcon="@mipmap/applet_timer">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
-        <activity-alias android:name=".AppMaps" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_maps" android:icon="@mipmap/applet_maps" android:roundIcon="@mipmap/applet_maps">
+        <activity-alias android:name=".AppMaps" android:targetActivity=".MapsActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_maps" android:icon="@mipmap/applet_maps" android:roundIcon="@mipmap/applet_maps">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
-        <activity-alias android:name=".AppMail" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_mail" android:icon="@mipmap/applet_mail" android:roundIcon="@mipmap/applet_mail">
+        <activity-alias android:name=".AppMail" android:targetActivity=".MailActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_mail" android:icon="@mipmap/applet_mail" android:roundIcon="@mipmap/applet_mail">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
-        <activity-alias android:name=".AppMessages" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_sms" android:icon="@mipmap/applet_messages" android:roundIcon="@mipmap/applet_messages">
+        <activity-alias android:name=".AppMessages" android:targetActivity=".SmsActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_sms" android:icon="@mipmap/applet_messages" android:roundIcon="@mipmap/applet_messages">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <activity-alias android:name=".AppBrowser" android:targetActivity=".BrowserActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_browser" android:icon="@mipmap/applet_browser" android:roundIcon="@mipmap/applet_browser">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
-        <activity-alias android:name=".AppContacts" android:targetActivity=".AppletLaunch" android:enabled="false" android:exported="true" android:label="@string/home_label_contacts" android:icon="@mipmap/applet_contacts" android:roundIcon="@mipmap/applet_contacts">
+        <activity-alias android:name=".AppContacts" android:targetActivity=".ContactsActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_contacts" android:icon="@mipmap/applet_contacts" android:roundIcon="@mipmap/applet_contacts">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <activity-alias android:name=".AppPhone" android:targetActivity=".PhoneActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_phone" android:icon="@mipmap/applet_phone" android:roundIcon="@mipmap/applet_phone">
@@ -248,8 +266,8 @@
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <!-- Tetra Assistant (Assistant.kt): the chat, and the sheet the phone's assistant gesture opens over any app -->
-        <activity android:name=".AssistantActivity" android:exported="false" android:label="@string/app_assistant" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".AssistantSheetActivity" android:exported="true" android:label="@string/home_label_assistant" android:theme="@android:style/Theme.Translucent.NoTitleBar"
+        <activity android:name=".AssistantActivity" android:exported="false" android:label="@string/app_assistant" android:icon="@mipmap/applet_assistant" android:roundIcon="@mipmap/applet_assistant" android:taskAffinity="com.kalotrapezis.drive.assistant.chat" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".AssistantSheetActivity" android:exported="true" android:label="@string/home_label_assistant" android:icon="@mipmap/applet_assistant" android:roundIcon="@mipmap/applet_assistant" android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:excludeFromRecents="true" android:launchMode="singleTask" android:taskAffinity="com.kalotrapezis.drive.assistant" android:windowSoftInputMode="adjustResize">
             <intent-filter><action android:name="android.intent.action.ASSIST" /><category android:name="android.intent.category.DEFAULT" /></intent-filter>
         </activity>
@@ -295,7 +313,8 @@
             </intent-filter>
         </activity-alias>
         <!-- Office › Text editor: "Open with Tetra" for text files from any app (asked 2026-09-27). -->
-        <activity android:name=".TextEditorActivity" android:exported="true" android:label="@string/home_label_text_editor" android:windowSoftInputMode="adjustResize"
+        <activity android:name=".TextEditorActivity" android:exported="true" android:label="@string/home_label_text_editor" android:icon="@mipmap/applet_text_editor" android:roundIcon="@mipmap/applet_text_editor"
+            android:taskAffinity="com.kalotrapezis.drive.text" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

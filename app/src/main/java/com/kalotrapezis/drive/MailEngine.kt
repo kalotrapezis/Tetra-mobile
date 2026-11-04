@@ -536,8 +536,7 @@ internal object MailEngine {
     private fun announce(c: Context, acc: JSONObject, mails: List<MailEntry>) {
         val nm = c.getSystemService(NotificationManager::class.java) ?: return
         if (nm.getNotificationChannel(CHANNEL) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.app_mail), NotificationManager.IMPORTANCE_DEFAULT))
-        val open = PendingIntent.getActivity(c, JOB, Intent(c, MainActivity::class.java).putExtra(Applet.EXTRA, Applet.Mail.name)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val open = PendingIntent.getActivity(c, JOB, appletIntent(c, Applet.Mail.name), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         mails.takeLast(5).forEach { e ->
             runCatching {
                 nm.notify(e.id.hashCode(), android.app.Notification.Builder(c, CHANNEL).setSmallIcon(R.drawable.ic_mail)

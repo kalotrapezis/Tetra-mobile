@@ -100,9 +100,7 @@ class PhoneActivity : ComponentActivity() {
 }
 
 /** Opens Tetra's Contacts on a person, or at a new contact with this number. */
-internal fun openInContacts(c: Context, uid: String? = null, newNumber: String? = null) = c.startActivity(Intent(c, MainActivity::class.java)
-    .putExtra(Applet.EXTRA, if (uid != null) "contact:$uid" else "contact-new:${newNumber.orEmpty()}")
-    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+internal fun openInContacts(c: Context, uid: String? = null, newNumber: String? = null) = openApplet(c, if (uid != null) "contact:$uid" else "contact-new:${newNumber.orEmpty()}")
 
 /** The Phone's own folder, Tetra/.System/Phone/Shared: the recordings made on the computer land in Recordings (Plan.md § Phone). */
 internal fun phoneRoot() = java.io.File(TetraFolder.root(android.os.Environment.getExternalStorageDirectory()), TetraSystem.onDisk(PhoneHistory.FOLDER))

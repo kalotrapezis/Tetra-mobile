@@ -9,7 +9,8 @@ import android.os.Bundle
 
 /**
  * Tetra's parts with launcher icons of their own (asked 17 Oct: Settings › App icons — on the home screen and in the
- * app list, each opening straight into its part). Each is an activity-alias of [AppletLaunch], off until switched on.
+ * app list, each opening straight into its part). Each is an activity-alias, off until switched on: of its own window (AppletActivities.kt),
+ * or of [AppletLaunch] for the parts still in Tetra's (Photos, Files, Scanner, Office).
  */
 internal enum class Applet(@androidx.annotation.StringRes val label: Int, val art: Int) {
     // Home's art for each; the launcher icons are made from the same (res/mipmap-anydpi-v26/applet_*)
