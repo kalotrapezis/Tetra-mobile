@@ -20,8 +20,6 @@
     <string name="browser_history">Stair</string>
     <string name="browser_history_note">Coinnítear í ar feadh 24 uair, ansin déantar dearmad uirthi</string>
     <string name="browser_no_history">Faic le 24 uair anuas</string>
-    <string name="browser_saved">Pasfhocail agus cártaí</string>
-    <string name="browser_none_saved">Níl faic sábháilte fós</string>
     <string name="browser_saved_note">Criptithe, ar an bhfón seo amháin</string>
     <string name="browser_passwords">Pasfhocail</string>
     <string name="browser_addresses">Seoltaí</string>

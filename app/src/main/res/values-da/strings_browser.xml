@@ -20,8 +20,6 @@
     <string name="browser_history">Historik</string>
     <string name="browser_history_note">Gemmes i 24 timer og glemmes så</string>
     <string name="browser_no_history">Intet de seneste 24 timer</string>
-    <string name="browser_saved">Adgangskoder og kort</string>
-    <string name="browser_none_saved">Intet gemt endnu</string>
     <string name="browser_saved_note">Krypteret, kun på denne telefon</string>
     <string name="browser_passwords">Adgangskoder</string>
     <string name="browser_addresses">Adresser</string>

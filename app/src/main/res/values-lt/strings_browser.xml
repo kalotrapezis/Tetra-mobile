@@ -20,8 +20,6 @@
     <string name="browser_history">Istorija</string>
     <string name="browser_history_note">Laikoma 24 valandas, paskui pamirštama</string>
     <string name="browser_no_history">Per pastarąsias 24 valandas nieko</string>
-    <string name="browser_saved">Slaptažodžiai ir kortelės</string>
-    <string name="browser_none_saved">Dar nieko neišsaugota</string>
     <string name="browser_saved_note">Šifruotai, tik šiame telefone</string>
     <string name="browser_passwords">Slaptažodžiai</string>
     <string name="browser_addresses">Adresai</string>

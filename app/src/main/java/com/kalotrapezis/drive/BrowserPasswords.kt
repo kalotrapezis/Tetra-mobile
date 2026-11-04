@@ -39,8 +39,10 @@ internal data class SecretSet(val items: Map<String, SecretRec> = emptyMap()) {
     fun pruned(now: Long, days: Int = 30) = (now - days * 86_400_000L).let { old -> SecretSet(items.filterValues { !it.gone || it.at >= old }) }
 
     /** What [v] changed since this set, stamped [now]: a new or changed one recorded whole, one no longer there a tombstone. */
-    fun record(v: BrowserVault, now: Long): SecretSet {
-        val here = keyed(v)
+    fun record(v: BrowserVault, now: Long) = record(keyed(v), now)
+
+    /** The same for any keyed values ([keyed]'s shape; 2FA's are Authenticator.kt's). */
+    fun record(here: Map<String, String>, now: Long): SecretSet {
         val out = items.toMutableMap()
         here.forEach { (k, value) -> val r = items[k]; if (r == null || r.gone || r.value != value) out[k] = SecretRec(value, now) }
         items.forEach { (k, r) -> if (!r.gone && k !in here) out[k] = r.copy(gone = true, at = now) }
@@ -49,14 +51,20 @@ internal data class SecretSet(val items: Map<String, SecretRec> = emptyMap()) {
 
     /** The vault to keep: the living ones, [prev]'s order kept, new ones after. */
     fun vault(prev: BrowserVault = BrowserVault()): BrowserVault {
-        val live = items.filterValues { !it.gone }
-        val order = keyed(prev).keys.withIndex().associate { it.value to it.index }
-        val keys = live.keys.sortedWith(compareBy({ order[it] ?: Int.MAX_VALUE }, { live.getValue(it).at }, { it }))
-        fun a(k: String) = JSONArray(live.getValue(k).value)
+        val live = live(keyed(prev).keys)
+        val keys = live.keys
+        fun a(k: String) = JSONArray(live.getValue(k))
         return BrowserVault(
-            keys.filter { it.startsWith("l|") }.map { a(it).let { j -> SavedLogin(j.getString(0), j.getString(1), j.getString(2)) } },
+            keys.filter { it.startsWith("l|") }.map { a(it).let { j -> SavedLogin(j.getString(0), j.getString(1), j.getString(2), j.optString(3)) } },
             keys.filter { it.startsWith("a|") }.map { a(it).let { j -> (0 until j.length() / 2).associate { i -> j.getString(2 * i) to j.getString(2 * i + 1) } } },
             keys.filter { it.startsWith("c|") }.map { a(it).let { j -> SavedCard(j.getString(0), j.getString(1), j.getString(2), j.getString(3)) } })
+    }
+
+    /** The living ones' values by key, [prev]'s order kept, new ones after (oldest first). */
+    fun live(prev: Collection<String>): Map<String, String> {
+        val live = items.filterValues { !it.gone }
+        val order = prev.withIndex().associate { it.value to it.index }
+        return live.keys.sortedWith(compareBy({ order[it] ?: Int.MAX_VALUE }, { live.getValue(it).at }, { it })).associateWith { live.getValue(it).value }
     }
 
     fun json(): String = JSONObject(items.mapValues { (_, r) -> JSONObject().put("v", r.value).put("at", r.at).apply { if (r.gone) put("gone", true) } }).toString()
@@ -67,7 +75,7 @@ internal data class SecretSet(val items: Map<String, SecretRec> = emptyMap()) {
          * by all it holds (an address changed is the old one gone and a new one). The bookmarks' merge then covers all three.
          */
         fun keyed(v: BrowserVault): Map<String, String> =
-            v.logins.associate { "l|${it.host}|${it.user}" to JSONArray(listOf(it.host, it.user, it.password)).toString() } +
+            v.logins.associate { "l|${it.host}|${it.user}" to JSONArray(listOfNotNull(it.host, it.user, it.password, it.note.ifEmpty { null })).toString() } + // no note: as before it had one
             v.cards.associate { "c|${it.number}" to JSONArray(listOf(it.name, it.number, it.month, it.year)).toString() } +
             v.addresses.associate { m -> JSONArray(m.toSortedMap().flatMap { listOf(it.key, it.value) }).toString().let { "a|$it" to it } }
 
@@ -139,16 +147,17 @@ internal object BrowserPasswords {
 
     fun writeRecipe(root: File, r: Recipe) = BrowserSync.save(File(root, "$DIR/key.json"), r.json())
 
-    fun encrypt(key: ByteArray, r: Recipe, me: String, set: SecretSet): String {
-        val (n, d) = seal(key, set.json().toByteArray(), "passwords|$me")
+    // [kind] is bound into each file ("passwords", "2fa"), so one moved into the other's folder does not open
+    fun encrypt(key: ByteArray, r: Recipe, me: String, set: SecretSet, kind: String = "passwords"): String {
+        val (n, d) = seal(key, set.json().toByteArray(), "$kind|$me")
         return JSONObject().put("v", 1).put("kdf", "argon2id").put("m", r.m).put("t", r.t).put("p", r.p).put("salt", r.id).put("nonce", n).put("data", d).toString(1) + "\n"
     }
 
     /** A device's file opened with [key]; null when it is another key's (another salt) or does not open (changed, or not ours). */
-    fun decrypt(key: ByteArray, r: Recipe, device: String, text: String): SecretSet? = runCatching {
+    fun decrypt(key: ByteArray, r: Recipe, device: String, text: String, kind: String = "passwords"): SecretSet? = runCatching {
         val o = JSONObject(text)
         if (o.optInt("v") != 1 || o.getString("salt") != r.id) return null
-        SecretSet.parse(open(key, o.getString("nonce"), o.getString("data"), "passwords|$device").decodeToString())
+        SecretSet.parse(open(key, o.getString("nonce"), o.getString("data"), "$kind|$device").decodeToString())
     }.getOrNull()
 
     class Result(val vault: BrowserVault, val base: SecretSet, val unreadable: Int)
@@ -159,24 +168,31 @@ internal object BrowserPasswords {
      * the recipe in force ([recipe]); a file of another key is left (that device has not entered the new passphrase yet).
      */
     fun sync(root: File, me: String, vault: BrowserVault, base: SecretSet?, key: ByteArray, r: Recipe, now: Long = System.currentTimeMillis()): Result {
-        val dir = File(root, DIR)
-        val mine = File(dir, "$me.enc")
-        val shared = mine.takeIf { it.isFile }?.let { decrypt(key, r, me, it.readText()) }
-        val own = base ?: shared ?: SecretSet()
-        val recorded = own.record(vault, now)
-        var unreadable = 0
-        val others = dir.listFiles().orEmpty().filter { it.isFile && it.name.endsWith(".enc") && !it.name.startsWith(".") && it.name != mine.name }
-            .mapNotNull { f -> decrypt(key, r, f.name.removeSuffix(".enc"), f.readText()).also { if (it == null) unreadable++ } }
-        val all = others.fold(recorded) { a, b -> a.merge(b) }.pruned(now)
-        if (all != shared) BrowserSync.save(mine, encrypt(key, r, me, all))
+        val (own, recorded, all, others, unreadable) = merged(File(root, DIR), "passwords", me, SecretSet.keyed(vault), base, key, r, now)
         val out = all.vault(vault)
         val here = recorded.items.count { (k, v) -> own.items[k] != v }
         val there = all.items.count { (k, v) -> recorded.items[k] != v }
         if (here > 0 || there > 0 || unreadable > 0 || base == null)
             WriterLog.i("Browser sync: passwords ${if (base == null) "(first sync) " else ""}${out.logins.size} logins, ${out.addresses.size} addresses, ${out.cards.size} cards; " +
-                "${others.size} other devices; $here changed here, $there from the others (${all.items.count { (k, v) -> v.gone && recorded.items[k]?.gone == false }} deleted)" +
+                "$others other devices; $here changed here, $there from the others (${all.items.count { (k, v) -> v.gone && recorded.items[k]?.gone == false }} deleted)" +
                 if (unreadable > 0) "; $unreadable files of another passphrase left" else "")
         return Result(out, all, unreadable)
+    }
+
+    data class Merged(val own: SecretSet, val recorded: SecretSet, val all: SecretSet, val others: Int, val unreadable: Int)
+
+    /** [sync]'s merge for any keyed values in [dir]: [here]'s changes since [base] recorded, the others' files merged in, mine written when it differs. */
+    fun merged(dir: File, kind: String, me: String, here: Map<String, String>, base: SecretSet?, key: ByteArray, r: Recipe, now: Long): Merged {
+        val mine = File(dir, "$me.enc")
+        val shared = mine.takeIf { it.isFile }?.let { decrypt(key, r, me, it.readText(), kind) }
+        val own = base ?: shared ?: SecretSet()
+        val recorded = own.record(here, now)
+        var unreadable = 0
+        val others = dir.listFiles().orEmpty().filter { it.isFile && it.name.endsWith(".enc") && !it.name.startsWith(".") && it.name != mine.name }
+            .mapNotNull { f -> decrypt(key, r, f.name.removeSuffix(".enc"), f.readText(), kind).also { if (it == null) unreadable++ } }
+        val all = others.fold(recorded) { a, b -> a.merge(b) }.pruned(now)
+        if (all != shared) BrowserSync.save(mine, encrypt(key, r, me, all, kind))
+        return Merged(own, recorded, all, others.size, unreadable)
     }
 }
 
@@ -184,7 +200,7 @@ internal object BrowserPasswords {
 internal object PasswordSync {
     enum class State { OFF, ON, NEED } // NEED: on, but another passphrase is in force now ("forgot it" elsewhere): asked again
 
-    private fun stored(c: android.content.Context): Pair<BrowserPasswords.Recipe, ByteArray>? = BrowserSecrets.get(c, "sync_key")?.let { s -> runCatching {
+    fun stored(c: android.content.Context): Pair<BrowserPasswords.Recipe, ByteArray>? = BrowserSecrets.get(c, "sync_key")?.let { s -> runCatching {
         val o = JSONObject(s)
         BrowserPasswords.parseRecipe(o.getString("recipe"))!! to Base64.getDecoder().decode(o.getString("key"))
     }.getOrNull() }

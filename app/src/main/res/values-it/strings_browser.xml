@@ -20,8 +20,6 @@
     <string name="browser_history">Cronologia</string>
     <string name="browser_history_note">Conservata 24 ore, poi dimenticata</string>
     <string name="browser_no_history">Niente nelle ultime 24 ore</string>
-    <string name="browser_saved">Password e carte</string>
-    <string name="browser_none_saved">Ancora niente di salvato</string>
     <string name="browser_saved_note">Cifrati, solo su questo telefono</string>
     <string name="browser_passwords">Password</string>
     <string name="browser_addresses">Indirizzi</string>

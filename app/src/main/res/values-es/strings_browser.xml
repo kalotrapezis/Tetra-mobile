@@ -20,8 +20,6 @@
     <string name="browser_history">Historial</string>
     <string name="browser_history_note">Se guarda 24 horas y luego se olvida</string>
     <string name="browser_no_history">Nada en las últimas 24 horas</string>
-    <string name="browser_saved">Contraseñas y tarjetas</string>
-    <string name="browser_none_saved">Aún no hay nada guardado</string>
     <string name="browser_saved_note">Cifrado, solo en este teléfono</string>
     <string name="browser_passwords">Contraseñas</string>
     <string name="browser_addresses">Direcciones</string>

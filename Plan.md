@@ -12,6 +12,14 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [~] (password-manager session, 4 Nov; branch `claude/password-manager-29e709`, not merged) **Passwords: a password manager and
+      2FA as an applet of its own** (the user: "the passwords page on the webrowser have no search what so ever. no edit no delete no
+      new or save. Instead of making a better password page, create a password manager in tetra, one page with two tabs Passwords and
+      create a password, one page 2FA, add importing from Google and this Text file… Do the island with passwords and 2FA"). Council
+      (features, design) then the user: GNOME Authenticator's .txt (otpauth:// lines), 2FA sync opt-in and off, locked every time it
+      comes back, the user's purple padlock icon. The Browser's vault stays the store (logins gain a note; sync format unchanged without
+      one); 2FA in its own Keystore store, synced in `Browser/TwoFactor/<device>.enc` with the passwords' passphrase ("2fa" bound in).
+      The Browser's key and Fill open it. Not in v1: export, folders, breach checks, an Android autofill service.
 - [x] (browser-sync session, 3 Nov; branch `browser-sync`, not merged; desktop bc9f2b4 on main) **Browser: bookmarks, open tabs and
       (chosen) passwords between the phone and the tablet** (the user: "bookmarks and tabs"; "sync passwords as well but have some
       encryption"; "options in the settings what to sync"). `.System/Browser/Shared` (synced as `Browser/…`, part `browser`; the desktop

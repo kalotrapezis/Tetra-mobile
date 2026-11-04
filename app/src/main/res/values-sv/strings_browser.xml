@@ -20,8 +20,6 @@
     <string name="browser_history">Historik</string>
     <string name="browser_history_note">Sparas i 24 timmar, sedan glöms den</string>
     <string name="browser_no_history">Inget de senaste 24 timmarna</string>
-    <string name="browser_saved">Lösenord och kort</string>
-    <string name="browser_none_saved">Inget sparat än</string>
     <string name="browser_saved_note">Krypterat, bara på den här telefonen</string>
     <string name="browser_passwords">Lösenord</string>
     <string name="browser_addresses">Adresser</string>

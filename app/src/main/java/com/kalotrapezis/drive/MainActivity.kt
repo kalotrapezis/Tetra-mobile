@@ -389,7 +389,8 @@ internal val TetraColors = darkColorScheme(
 internal data class ExternalMedia(val uri: Uri, val mimeType: String?)
 private val EXTERNAL_VIEW_ACTIONS = setOf(Intent.ACTION_VIEW, "android.provider.action.REVIEW", "com.android.camera.action.REVIEW")
 
-private fun authenticateVault(activity: Activity, success: () -> Unit, failure: (String) -> Unit) {
+internal fun authenticateVault(activity: Activity, success: () -> Unit, failure: (String) -> Unit,
+                               title: String = activity.getString(R.string.home_vault_unlock), subtitle: String = activity.getString(R.string.home_vault_unlock_detail)) {
     val allowed = BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
     val manager = activity.getSystemService(BiometricManager::class.java)
     if (manager.canAuthenticate(allowed) != BiometricManager.BIOMETRIC_SUCCESS) {
@@ -397,8 +398,8 @@ private fun authenticateVault(activity: Activity, success: () -> Unit, failure: 
         return
     }
     BiometricPrompt.Builder(activity)
-        .setTitle(activity.getString(R.string.home_vault_unlock))
-        .setSubtitle(activity.getString(R.string.home_vault_unlock_detail))
+        .setTitle(title)
+        .setSubtitle(subtitle)
         .setAllowedAuthenticators(allowed)
         .build()
         .authenticate(CancellationSignal(), activity.mainExecutor, object : BiometricPrompt.AuthenticationCallback() {
@@ -1066,6 +1067,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                         "mail" -> openApplet(context, Applet.Mail.name)
                         "sms" -> openApplet(context, Applet.Messages.name)
                         "browser" -> openBrowser(context)
+                        "passwords" -> openApplet(context, Applet.Passwords.name)
                         // «Αποθήκη» › «Άνοιγμα φακέλου»: Mail's folder in Files, though it is under .System
                         else -> if (id == MailFiles.FOLDER || id.startsWith(MailFiles.FOLDER + "/")) { screen = Screen.Drive; drivePane = DrivePane.Files; driveFolder = id; loadDrive(id) }
                     } },
@@ -1238,6 +1240,7 @@ private fun Home(
         "mail" -> HomeWideCard(stringResource(R.string.app_mail), stringResource(R.string.mail_home_detail), R.drawable.mail_art, openMail)
         "sms" -> HomeWideCard(stringResource(R.string.app_sms), stringResource(R.string.sms_home_detail), R.drawable.sms_art, openSms)
         "browser" -> HomeWideCard(stringResource(R.string.app_browser), stringResource(R.string.browser_home_detail), R.drawable.browser_art, openBrowser)
+        "passwords" -> HomeWideCard(stringResource(R.string.app_passwords), stringResource(R.string.passwords_home_detail), R.drawable.passwords_art, { openApplet(context, Applet.Passwords.name) })
         "maps" -> HomeMapsGroup(wide, openMaps)
     } }
     // each part small: just its icon, as a launcher's (Scanner and Codes are two apps, so two icons)
@@ -1259,6 +1262,7 @@ private fun Home(
         "mail" -> listOf(HomeIcon(R.string.app_mail, R.drawable.mail_art, openMail))
         "sms" -> listOf(HomeIcon(R.string.app_sms, R.drawable.sms_art, openSms))
         "browser" -> listOf(HomeIcon(R.string.app_browser, R.drawable.browser_art, openBrowser))
+        "passwords" -> listOf(HomeIcon(R.string.app_passwords, R.drawable.passwords_art, { openApplet(context, Applet.Passwords.name) }))
         "maps" -> listOf(HomeIcon(R.string.app_maps, R.drawable.maps_art, { openMaps(null) }))
         else -> emptyList()
     }

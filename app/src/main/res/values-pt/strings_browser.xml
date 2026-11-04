@@ -20,8 +20,6 @@
     <string name="browser_history">Histórico</string>
     <string name="browser_history_note">Guardado 24 horas, depois esquecido</string>
     <string name="browser_no_history">Nada nas últimas 24 horas</string>
-    <string name="browser_saved">Palavras-passe e cartões</string>
-    <string name="browser_none_saved">Ainda nada guardado</string>
     <string name="browser_saved_note">Encriptado, apenas neste telemóvel</string>
     <string name="browser_passwords">Palavras-passe</string>
     <string name="browser_addresses">Moradas</string>

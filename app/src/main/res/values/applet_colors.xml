@@ -18,4 +18,5 @@
     <color name="applet_mail">#FD0DA4</color>
     <color name="applet_messages">#024F5D</color>
     <color name="applet_browser">#1A87FD</color>
+    <color name="applet_passwords">#7E37ED</color>
 </resources>

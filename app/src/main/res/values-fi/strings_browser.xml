@@ -20,8 +20,6 @@
     <string name="browser_history">Historia</string>
     <string name="browser_history_note">Säilytetään 24 tuntia, sitten unohdetaan</string>
     <string name="browser_no_history">Ei mitään viimeisten 24 tunnin ajalta</string>
-    <string name="browser_saved">Salasanat ja kortit</string>
-    <string name="browser_none_saved">Mitään ei ole vielä tallennettu</string>
     <string name="browser_saved_note">Salattuna, vain tässä puhelimessa</string>
     <string name="browser_passwords">Salasanat</string>
     <string name="browser_addresses">Osoitteet</string>

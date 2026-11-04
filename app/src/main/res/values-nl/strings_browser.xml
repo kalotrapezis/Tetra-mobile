@@ -20,8 +20,6 @@
     <string name="browser_history">Geschiedenis</string>
     <string name="browser_history_note">24 uur bewaard, daarna vergeten</string>
     <string name="browser_no_history">Niets in de afgelopen 24 uur</string>
-    <string name="browser_saved">Wachtwoorden en kaarten</string>
-    <string name="browser_none_saved">Nog niets opgeslagen</string>
     <string name="browser_saved_note">Versleuteld, alleen op deze telefoon</string>
     <string name="browser_passwords">Wachtwoorden</string>
     <string name="browser_addresses">Adressen</string>

@@ -20,8 +20,6 @@
     <string name="browser_history">História</string>
     <string name="browser_history_note">Uchováva sa 24 hodín, potom sa zabudne</string>
     <string name="browser_no_history">Za posledných 24 hodín nič</string>
-    <string name="browser_saved">Heslá a karty</string>
-    <string name="browser_none_saved">Zatiaľ nič uložené</string>
     <string name="browser_saved_note">Šifrovane, len v tomto telefóne</string>
     <string name="browser_passwords">Heslá</string>
     <string name="browser_addresses">Adresy</string>

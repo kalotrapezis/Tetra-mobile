@@ -20,8 +20,6 @@
     <string name="browser_history">Verlauf</string>
     <string name="browser_history_note">24 Stunden behalten, dann vergessen</string>
     <string name="browser_no_history">Nichts in den letzten 24 Stunden</string>
-    <string name="browser_saved">Passwörter und Karten</string>
-    <string name="browser_none_saved">Noch nichts gespeichert</string>
     <string name="browser_saved_note">Verschlüsselt, nur auf diesem Telefon</string>
     <string name="browser_passwords">Passwörter</string>
     <string name="browser_addresses">Adressen</string>

@@ -150,7 +150,8 @@ internal object BrowserRules {
     fun front(b: List<Bookmark>) = b.reversed().sortedByDescending { it.pinned }
 }
 
-internal data class SavedLogin(val host: String, val user: String, val password: String)
+/** [note]: what the user wrote of it (the Passwords applet, Google's export's "note"); a page's form never has one. */
+internal data class SavedLogin(val host: String, val user: String, val password: String, val note: String = "")
 internal data class SavedCard(val name: String, val number: String, val month: String, val year: String) {
     val last4 get() = number.takeLast(4)
 }
@@ -159,18 +160,19 @@ internal data class SavedCard(val name: String, val number: String, val month: S
 internal data class BrowserVault(val logins: List<SavedLogin> = emptyList(), val addresses: List<Map<String, String>> = emptyList(), val cards: List<SavedCard> = emptyList()) {
     /** Only what is new or changed: the same login, address or card again asks nothing. */
     fun news(o: BrowserVault) = BrowserVault(
-        o.logins.filter { it !in logins }, o.addresses.filter { it !in addresses }, o.cards.filter { c -> cards.none { it.number == c.number && it.month == c.month && it.year == c.year } })
+        o.logins.filter { n -> logins.none { it.host == n.host && it.user == n.user && it.password == n.password } }, o.addresses.filter { it !in addresses }, o.cards.filter { c -> cards.none { it.number == c.number && it.month == c.month && it.year == c.year } })
 
     /** A login replaces the same host and user's (an import may hold one twice, for http and https); a card the same number's. */
     fun with(o: BrowserVault) = BrowserVault(
-        (logins + o.logins).associateBy { it.host to it.user }.values.toList(),
+        (logins + o.logins).associateBy { it.host to it.user }.values.map { n -> // a page's save keeps the note written
+            if (n.note.isEmpty()) n.copy(note = logins.firstOrNull { it.host == n.host && it.user == n.user }?.note.orEmpty()) else n },
         (addresses + o.addresses).distinct(),
         (cards + o.cards).associateBy { it.number }.values.toList())
 
     val empty get() = logins.isEmpty() && addresses.isEmpty() && cards.isEmpty()
 
     fun json(): String = JSONObject()
-        .put("logins", JSONArray(logins.map { JSONObject().put("host", it.host).put("user", it.user).put("password", it.password) }))
+        .put("logins", JSONArray(logins.map { JSONObject().put("host", it.host).put("user", it.user).put("password", it.password).apply { if (it.note.isNotEmpty()) put("note", it.note) } }))
         .put("addresses", JSONArray(addresses.map { JSONObject(it) }))
         .put("cards", JSONArray(cards.map { JSONObject().put("name", it.name).put("number", it.number).put("month", it.month).put("year", it.year) }))
         .toString()
@@ -183,7 +185,7 @@ internal data class BrowserVault(val logins: List<SavedLogin> = emptyList(), val
             val o = JSONObject(s!!)
             fun list(k: String) = o.optJSONArray(k)?.let { a -> (0 until a.length()).map(a::getJSONObject) }.orEmpty()
             BrowserVault(
-                list("logins").map { SavedLogin(it.getString("host"), it.optString("user"), it.getString("password")) },
+                list("logins").map { SavedLogin(it.getString("host"), it.optString("user"), it.getString("password"), it.optString("note")) },
                 list("addresses").map { a -> a.keys().asSequence().associateWith { a.getString(it) } },
                 list("cards").map { SavedCard(it.optString("name"), it.getString("number"), it.optString("month"), it.optString("year")) })
         }.getOrDefault(BrowserVault())
@@ -225,16 +227,21 @@ internal object FirefoxImport {
         }
     }
 
-    /** Firefox's logins.csv: "url","username","password",… with a header; a line break may be inside quotes. */
+    /**
+     * Firefox's logins.csv: "url","username","password",… with a header; a line break may be inside quotes. Google Password
+     * Manager's (Settings › Export passwords) is name,url,username,password,note: its app logins' url is android://…@package,
+     * so their host is the package; a row with no url falls back to its name.
+     */
     fun logins(text: String): Result? {
         val rows = csv(text)
         val head = rows.firstOrNull()?.map { it.trim().lowercase() } ?: return null
         val u = head.indexOf("url"); val n = head.indexOf("username"); val p = head.indexOf("password")
+        val name = head.indexOf("name"); val note = head.indexOf("note")
         if (u < 0 || p < 0) return null
         val logins = rows.drop(1).mapNotNull { r ->
-            val host = BrowserRules.host(r.getOrNull(u))
+            val host = BrowserRules.host(r.getOrNull(u)).ifEmpty { r.getOrNull(name)?.trim()?.lowercase().orEmpty() }
             val pass = r.getOrNull(p).orEmpty()
-            if (host.isEmpty() || pass.isEmpty()) null else SavedLogin(host, r.getOrNull(n).orEmpty(), pass)
+            if (host.isEmpty() || pass.isEmpty()) null else SavedLogin(host, r.getOrNull(n).orEmpty(), pass, r.getOrNull(note).orEmpty().trim())
         }
         return Result(logins, emptyList())
     }

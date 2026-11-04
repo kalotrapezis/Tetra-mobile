@@ -525,6 +525,18 @@ internal fun SettingsTab(
                 if (on) begin() else { PasswordSync.disable(context); pw = PasswordSync.State.OFF }
             })
         }
+        // the Passwords applet's 2FA codes (the user, 4 Nov: opt-in, off), with the passwords' passphrase: only once that is on here
+        var twoFa by remember { mutableStateOf(BrowserSync.on(context, BrowserSync.TWO_FACTOR)) }
+        SettingRow(stringResource(R.string.pw_sync_2fa), stringResource(if (pw == PasswordSync.State.ON) R.string.pw_sync_2fa_note else R.string.pw_sync_2fa_needs)) {
+            Switch(checked = twoFa && pw == PasswordSync.State.ON, enabled = pw == PasswordSync.State.ON, onCheckedChange = { on ->
+                twoFa = on
+                if (!on) AuthSync.off(context) else {
+                    prefs.edit().putBoolean(BrowserSync.TWO_FACTOR, true).apply(); WriterLog.i("2FA sync: on")
+                    val app = context.applicationContext
+                    Thread { runCatching { PasswordStore.keep2fa(app, AuthSecrets.load(app)) }.onFailure { WriterLog.e("2FA sync: first merge failed", it) } }.start()
+                }
+            })
+        }
         when (ask) {
             "new", "enter" -> PassphraseDialog(if (ask == "new") null else recipe, close = { ask = null }, forgot = { ask = "forgot" }) { r, key, isNew ->
                 withContext(Dispatchers.IO) { PasswordSync.enable(context.applicationContext, r, key, isNew) }

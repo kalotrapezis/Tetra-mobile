@@ -114,7 +114,8 @@ private fun codeResult(value: String, url: String?): CodeResult = PaymentCodes.f
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @androidx.annotation.OptIn(markerClass = [ExperimentalGetImage::class])
-internal fun CodeScannerTab(back: () -> Unit, onCode: ((String) -> Boolean)? = null) {
+// [onCode]: only the codes [takes] wants go to it (Sync's pairing by default; Passwords' 2FA otpauth codes), [hint] over the camera
+internal fun CodeScannerTab(back: () -> Unit, onCode: ((String) -> Boolean)? = null, takes: (String) -> Boolean = { SyncRules.parseQr(it) != null }, hint: String? = null) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val haptics = LocalHapticFeedback.current
@@ -183,8 +184,9 @@ internal fun CodeScannerTab(back: () -> Unit, onCode: ((String) -> Boolean)? = n
                             // pairing code wins over everything else.
                             val codes = found.filter { !it.rawValue.isNullOrBlank() }
                             val pairing = codes.firstNotNullOfOrNull { c -> SyncRules.parseQr(c.rawValue!!)?.let { c.rawValue!! to it } }
-                            if (onCode != null) { // Sync's pairing mode: every other code is ignored
-                                if (scanning && pairing != null && onCode(pairing.first)) haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            if (onCode != null) { // Sync's pairing mode (or Passwords' 2FA): every other code is ignored
+                                val taken = codes.firstOrNull { takes(it.rawValue!!) }?.rawValue
+                                if (scanning && taken != null && onCode(taken)) haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                 return@addOnSuccessListener
                             }
                             val code = codes.firstOrNull() ?: return@addOnSuccessListener
@@ -251,7 +253,7 @@ internal fun CodeScannerTab(back: () -> Unit, onCode: ((String) -> Boolean)? = n
             Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape) {
                 Text(
                     when {
-                        onCode != null -> stringResource(R.string.codes_point_pairing)
+                        onCode != null -> hint ?: stringResource(R.string.codes_point_pairing)
                         mode == CodeMode.Codes -> stringResource(R.string.codes_point_code)
                         else -> stringResource(R.string.codes_frame_text)
                     },

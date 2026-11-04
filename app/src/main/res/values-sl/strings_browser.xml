@@ -20,8 +20,6 @@
     <string name="browser_history">Zgodovina</string>
     <string name="browser_history_note">Hrani se 24 ur, nato pozabi</string>
     <string name="browser_no_history">Nič v zadnjih 24 urah</string>
-    <string name="browser_saved">Gesla in kartice</string>
-    <string name="browser_none_saved">Še nič shranjenega</string>
     <string name="browser_saved_note">Šifrirano, samo v tem telefonu</string>
     <string name="browser_passwords">Gesla</string>
     <string name="browser_addresses">Naslovi</string>

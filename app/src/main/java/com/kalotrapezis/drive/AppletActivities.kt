@@ -113,6 +113,18 @@ class SmsActivity : AppletActivity() {
     @Composable override fun Content(word: String?, back: () -> Unit) = SmsScreen(back = back, start = word?.takeIf { it.startsWith("sms:") })
 }
 
+class PasswordsActivity : AppletActivity() {
+    override val applet = Applet.Passwords
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // no screenshots, and Recents shows no thumbnail of the passwords (the council, 4 Nov)
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+        super.onCreate(savedInstanceState)
+    }
+    // "passwords:<host>": the Browser's key, a page's logins found at once; "passwords:2fa" the 2FA page
+    @Composable override fun Content(word: String?, back: () -> Unit) = PasswordsScreen(back = back, start = word?.takeIf { it.startsWith(WORD) }?.removePrefix(WORD))
+    companion object { const val WORD = "passwords:" }
+}
+
 /** Which applet window an Applet.EXTRA word opens; null: Tetra's own window (Photos, Files, Office, Settings…). */
 private fun appletWindow(word: String): Class<*>? = when {
     word == Applet.Notes.name || word.startsWith("note:") || word == NotesActivity.NEW_NOTE || word == NotesActivity.NEW_CHECKLIST -> NotesActivity::class.java
@@ -125,6 +137,7 @@ private fun appletWindow(word: String): Class<*>? = when {
     word == Applet.Mail.name || word.startsWith("mail:") || word.startsWith("mail-write:") -> MailActivity::class.java
     word == Applet.Messages.name || word.startsWith("sms:") -> SmsActivity::class.java
     word == Applet.Browser.name -> BrowserActivity::class.java
+    word == Applet.Passwords.name || word.startsWith(PasswordsActivity.WORD) -> PasswordsActivity::class.java
     word.startsWith("browser-play:") -> BrowserActivity::class.java
     word == Applet.Phone.name -> PhoneActivity::class.java
     word == Applet.Data.name -> DataActivity::class.java

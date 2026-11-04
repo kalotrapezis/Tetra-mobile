@@ -20,8 +20,6 @@
     <string name="browser_history">Povijest</string>
     <string name="browser_history_note">Čuva se 24 sata, zatim se zaboravlja</string>
     <string name="browser_no_history">Ništa u posljednja 24 sata</string>
-    <string name="browser_saved">Lozinke i kartice</string>
-    <string name="browser_none_saved">Još ništa nije spremljeno</string>
     <string name="browser_saved_note">Šifrirano, samo na ovom telefonu</string>
     <string name="browser_passwords">Lozinke</string>
     <string name="browser_addresses">Adrese</string>
