@@ -101,15 +101,31 @@ internal object AutofillForm {
         return out to domain
     }
 
+    /**
+     * The same row for the keyboard's strip, when the keyboard asks for one ([spec] its look for this place): Gboard shows
+     * no list of Android's own then, so without it nothing is offered at all (seen on an emulator, 4 Nov).
+     */
+    fun inline(c: Context, spec: android.widget.inline.InlinePresentationSpec?, title: String, text: String): android.service.autofill.InlinePresentation? {
+        if (spec == null || androidx.autofill.inline.UiVersions.INLINE_UI_VERSION_1 !in androidx.autofill.inline.UiVersions.getVersions(spec.style)) return null
+        val tap = PendingIntent.getActivity(c, 0, Intent(c, PasswordsActivity::class.java), PendingIntent.FLAG_IMMUTABLE) // a long press: whose row it is
+        val slice = androidx.autofill.inline.v1.InlineSuggestionUi.newContentBuilder(tap).setTitle(title).setSubtitle(text)
+            .setStartIcon(android.graphics.drawable.Icon.createWithResource(c, R.mipmap.applet_passwords)).build().slice
+        return android.service.autofill.InlinePresentation(slice, spec, false)
+    }
+    /** The keyboard's look for its [i]th suggestion (the last one repeats), or null when it asks for none. */
+    fun spec(r: android.view.inputmethod.InlineSuggestionsRequest?, i: Int) = r?.inlinePresentationSpecs?.let { it.getOrNull(i) ?: it.lastOrNull() }
+        ?.takeIf { i < r.maxSuggestionCount }
+
     fun row(c: Context, title: String, text: String) = RemoteViews(c.packageName, R.layout.autofill_item).apply {
         setTextViewText(R.id.title, title); setTextViewText(R.id.text, text)
     }
 
     @Suppress("DEPRECATION") // Dataset.Builder(RemoteViews) and setValue: the forms that work from Android 11 (minSdk 30) on
-    fun datasets(c: Context, form: Form, logins: List<SavedLogin>): FillResponse? {
+    fun datasets(c: Context, form: Form, logins: List<SavedLogin>, inlineAsk: android.view.inputmethod.InlineSuggestionsRequest? = null): FillResponse? {
         val b = FillResponse.Builder(); var any = false
-        logins.forEach { l ->
+        logins.forEachIndexed { i, l ->
             val d = Dataset.Builder(row(c, l.user.ifEmpty { "—" }, l.host))
+            inline(c, spec(inlineAsk, i), l.user.ifEmpty { "—" }, l.host)?.let { d.setInlinePresentation(it) }
             form.user?.let { d.setValue(it.id as AutofillId, AutofillValue.forText(l.user)) }
             form.passwords.forEach { d.setValue(it.id as AutofillId, AutofillValue.forText(l.password)) }
             if (form.user != null || form.passwords.isNotEmpty()) { b.addDataset(d.build()); any = true }
@@ -134,7 +150,9 @@ class PasswordsAutofill : AutofillService() {
                 // the logins are given only after the fingerprint or the screen lock: until then, one row says how many there are
                 val pi = PendingIntent.getActivity(this, (System.nanoTime() and 0xFFFFFF).toInt(), Intent(this, AutofillUnlock::class.java),
                     PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE)
-                b.setAuthentication(ids.toTypedArray(), pi.intentSender, AutofillForm.row(this, getString(R.string.pw_autofill_unlock, found.size), AutofillForm.hostFor(domain, pkg)))
+                val title = getString(R.string.pw_autofill_unlock, found.size); val where = AutofillForm.hostFor(domain, pkg)
+                b.setAuthentication(ids.toTypedArray(), pi.intentSender, AutofillForm.row(this, title, where),
+                    AutofillForm.inline(this, AutofillForm.spec(request.inlineSuggestionsRequest, 0), title, where))
             }
             if (form.passwords.isNotEmpty()) b.setSaveInfo(SaveInfo.Builder(SaveInfo.SAVE_DATA_TYPE_PASSWORD or (if (form.user != null) SaveInfo.SAVE_DATA_TYPE_USERNAME else 0),
                 form.passwords.map { it.id as AutofillId }.toTypedArray()).apply { form.user?.let { setOptionalIds(arrayOf(it.id as AutofillId)) } }
@@ -181,7 +199,8 @@ class AutofillUnlock : Activity() {
             val s = intent.getParcelableExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, AssistStructure::class.java)!!
             val (fields, domain) = AutofillForm.read(s)
             val form = AutofillForm.find(fields)!!
-            AutofillForm.datasets(this, form, AutofillForm.matches(BrowserSecrets.vault(this).logins, domain, s.activityComponent.packageName))
+            AutofillForm.datasets(this, form, AutofillForm.matches(BrowserSecrets.vault(this).logins, domain, s.activityComponent.packageName),
+                intent.getParcelableExtra(AutofillManager.EXTRA_INLINE_SUGGESTIONS_REQUEST, android.view.inputmethod.InlineSuggestionsRequest::class.java))
         }.onFailure { WriterLog.e("Autofill: the logins not given", it) }.getOrNull()
         setResult(if (r != null) RESULT_OK else RESULT_CANCELED, Intent().apply { if (r != null) putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, r) })
         finish()

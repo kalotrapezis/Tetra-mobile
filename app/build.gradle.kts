@@ -112,6 +112,7 @@ dependencies {
     implementation("org.mozilla.geckoview:geckoview:159.0.20261102144711") // Browser: Firefox's engine and its extensions (MPL 2.0)
     implementation("com.googlecode.libphonenumber:libphonenumber:9.0.42") // Phone: a number read in the SIM's country (Apache 2.0)
     implementation("org.eclipse.angus:angus-mail:2.0.3") // Mail: IMAP and SMTP for the accounts the phone fetches itself (EPL 2.0 / GPL 2.0 + Classpath Exception)
+    implementation("androidx.autofill:autofill:1.1.0") // Passwords' autofill: its rows in the keyboard's strip (Gboard asks for them) (Apache 2.0)
     implementation("org.bouncycastle:bcprov-jdk18on:1.80.2") // Browser: Argon2id for the passwords' sync passphrase (MIT)
     // Maps: offline routing on the graph the computer builds (Apache 2.0). Only what reading a graph needs: Janino (run-time
     // bytecode, which Android cannot load — MapsRouting writes the custom models out), the OSM reader, XML and logback stay out.

@@ -23,7 +23,9 @@ How to write here:
       Then Android's autofill service (the user: "Can I set it as Android autocomplete?"): Passwords › More › Fill passwords in
       other apps asks Android; a form's logins after the fingerprint or PIN (AutofillUnlock), a login typed elsewhere kept. In a
       known browser by the page's site; in an app only logins kept for that exact package (no app's word for a site trusted).
-      AutofillFormTest. Not checked on a device yet.
+      AutofillFormTest. On an emulator (AutofillProbe, a form in the test package): save offered and kept, then the row,
+      the PIN, the login filled; the keyboard's strip rows added (Gboard showed nothing without them). Not in Chrome 133 (it
+      has no "another service" switch yet) and not on the phone.
       Then Mail (the user: "where else do we need passwords? mail?"): an account's password is kept in Passwords too, as a login of
       its IMAP server noted "Tetra Mail" (added, adopted from the PC, or changed in Settings), so it syncs; Mail's setup offers
       "Fill from Passwords" after the fingerprint or PIN. Google's account password is never offered for Gmail (an app password is).

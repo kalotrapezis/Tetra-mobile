@@ -6,8 +6,8 @@
     <ImageView android:id="@+id/icon" android:layout_width="28dp" android:layout_height="28dp" android:src="@mipmap/applet_passwords" />
     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="12dp" android:orientation="vertical">
         <TextView android:id="@+id/title" android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:singleLine="true" android:ellipsize="end" android:textSize="16sp" android:textColor="#202124" />
+            android:singleLine="true" android:ellipsize="end" android:textSize="16sp" android:textColor="?android:attr/textColorPrimary" />
         <TextView android:id="@+id/text" android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:singleLine="true" android:ellipsize="end" android:textSize="13sp" android:textColor="#5F6368" />
+            android:singleLine="true" android:ellipsize="end" android:textSize="13sp" android:textColor="?android:attr/textColorSecondary" />
     </LinearLayout>
 </LinearLayout>
