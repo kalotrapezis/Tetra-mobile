@@ -24,6 +24,9 @@ How to write here:
       other apps asks Android; a form's logins after the fingerprint or PIN (AutofillUnlock), a login typed elsewhere kept. In a
       known browser by the page's site; in an app only logins kept for that exact package (no app's word for a site trusted).
       AutofillFormTest. Not checked on a device yet.
+      Then Mail (the user: "where else do we need passwords? mail?"): an account's password is kept in Passwords too, as a login of
+      its IMAP server noted "Tetra Mail" (added, adopted from the PC, or changed in Settings), so it syncs; Mail's setup offers
+      "Fill from Passwords" after the fingerprint or PIN. Google's account password is never offered for Gmail (an app password is).
 - [x] (browser-sync session, 3 Nov; branch `browser-sync`, not merged; desktop bc9f2b4 on main) **Browser: bookmarks, open tabs and
       (chosen) passwords between the phone and the tablet** (the user: "bookmarks and tabs"; "sync passwords as well but have some
       encryption"; "options in the settings what to sync"). `.System/Browser/Shared` (synced as `Browser/…`, part `browser`; the desktop

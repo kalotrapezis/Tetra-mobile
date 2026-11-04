@@ -109,7 +109,7 @@ private sealed class PwItem(val index: Int) {
     }.any { it.contains(q.trim(), ignoreCase = true) }
 }
 
-private fun Context.activity(): Activity? = generateSequence(this) { (it as? ContextWrapper)?.baseContext }.filterIsInstance<Activity>().firstOrNull()
+internal fun Context.activity(): Activity? = generateSequence(this) { (it as? ContextWrapper)?.baseContext }.filterIsInstance<Activity>().firstOrNull()
 
 /**
  * The Passwords applet: locked until the fingerprint or the screen lock opens it, every time it comes back (the user,

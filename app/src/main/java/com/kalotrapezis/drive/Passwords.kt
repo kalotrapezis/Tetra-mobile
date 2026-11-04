@@ -84,3 +84,33 @@ internal object PasswordStore {
         return r.takeIf { it != e }
     }
 }
+
+/**
+ * Mail's account passwords kept in Passwords too (the user, 4 Nov: "where else do we need passwords? mail?"): a login of the
+ * account's IMAP server, noted "Tetra Mail", so it syncs with the vault and the other device's Mail setup offers it.
+ */
+internal object MailPasswords {
+    const val NOTE = "Tetra Mail"
+
+    /**
+     * The saved logins that could be [address]'s mail password: one kept for its server first, then the same user at that
+     * server's site (a provider's own login). Google's account password is not Gmail's (an app password is): another site.
+     */
+    fun candidates(logins: List<SavedLogin>, address: String, imapHost: String): List<SavedLogin> {
+        val a = address.trim().lowercase(); val local = a.substringBefore('@'); val host = imapHost.trim().lowercase()
+        if (host.isEmpty()) return emptyList()
+        val mine = logins.filter { it.user.equals(a, true) || it.user.equals(local, true) }
+        val server = mine.filter { it.host == host }
+        return server + mine.filter { it !in server && BrowserRules.site(it.host) == BrowserRules.site(host) }
+    }
+
+    /** [pass] kept for [imapHost] and [user]; never fails Mail (a vault not written is logged). Call off the main thread. */
+    fun keep(c: Context, imapHost: String, user: String, pass: String) {
+        val host = imapHost.trim().lowercase()
+        if (host.isEmpty() || pass.isEmpty()) return
+        runCatching {
+            val v = BrowserSecrets.vault(c)
+            if (v.logins.none { it.host == host && it.user == user && it.password == pass }) PasswordStore.keep(c, v.with(BrowserVault(listOf(SavedLogin(host, user, pass, NOTE)))))
+        }.onFailure { WriterLog.e("Mail: the password not kept in Passwords", it) }
+    }
+}

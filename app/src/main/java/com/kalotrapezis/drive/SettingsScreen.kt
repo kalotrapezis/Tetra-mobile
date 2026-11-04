@@ -1109,7 +1109,11 @@ internal fun SettingsTab(
             } },
             confirmButton = { TextButton(enabled = pass.isNotBlank() || (name.isNotBlank() && name.trim() != a.name), onClick = {
                 if (name.isNotBlank() && name.trim() != a.name) runCatching { MailEngine.rename(mailRoot(), a.id, name.trim()) }.onFailure { WriterLog.e("Mail: renaming an account", it) }
-                if (pass.isNotBlank()) { MailSecret.set(context, a.id, pass.trim()); MailPrefs.setState(context, a.id, null); Thread { MailEngine.syncAll(context.applicationContext) }.start() }
+                if (pass.isNotBlank()) {
+                    MailSecret.set(context, a.id, pass.trim()); MailPrefs.setState(context, a.id, null)
+                    val server = a.json?.optJSONObject("server"); val p = pass.trim()
+                    Thread { MailPasswords.keep(context.applicationContext, server?.optString("host").orEmpty(), server?.optString("user").orEmpty().ifEmpty { a.address }, p); MailEngine.syncAll(context.applicationContext) }.start()
+                }
                 managing = null; version++ }) { Text(stringResource(R.string.common_save)) } },
             dismissButton = { TextButton(onClick = { managing = null }) { Text(stringResource(R.string.common_cancel)) } })
     }

@@ -197,6 +197,7 @@ internal object MailEngine {
             .put("server", imap.json()).put("smtp", smtp.json()).put("archive", true).put("notify", true)
             .put("addedOn", "phone").put("device", device()).put("added", System.currentTimeMillis()).apply { provider?.let { put("provider", it) } }
         MailSecret.set(c, address, pass)
+        if (provider == null) MailPasswords.keep(c, imap.host, imap.user.ifEmpty { address }, pass) // a password, not a sign-in's token
         saveAccounts(root, ownAccounts(root).filter { it.optString("id") != address } + acc)
         schedule(c)
         acc

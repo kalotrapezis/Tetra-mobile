@@ -57,6 +57,16 @@ class PasswordsTest {
         assertEquals(10.0, PasswordGen.passphraseBits(words, 5), 1e-9)
     }
 
+    @Test fun mailPasswordsOffered() {
+        val logins = listOf(SavedLogin("accounts.google.com", "maria@gmail.com", "google-account"), SavedLogin("imap.gmail.com", "maria@gmail.com", "app-password", MailPasswords.NOTE),
+            SavedLogin("mail.example.gr", "maria", "school"), SavedLogin("imap.example.gr", "nikos", "not-hers"))
+        // Gmail: the app password kept for its server, never Google's account password (another site)
+        assertEquals(listOf("app-password"), MailPasswords.candidates(logins, "Maria@gmail.com", "imap.gmail.com").map { it.password })
+        // a school's: the user by her name before the @, at the same site as the server
+        assertEquals(listOf("school"), MailPasswords.candidates(logins, "maria@example.gr", "imap.example.gr").map { it.password })
+        assertEquals(emptyList<SavedLogin>(), MailPasswords.candidates(logins, "maria@example.gr", ""))
+    }
+
     @Test fun effWordList() {
         // the asset as PasswordGen.words reads it: every one of EFF's 7,776 words, each once (12.9 bits a word)
         val words = File("src/main/assets/eff_large_wordlist.txt").readLines().mapNotNull { it.substringAfter('\t', "").trim().takeIf(String::isNotEmpty) }
