@@ -238,7 +238,7 @@ private fun PasswordsOpen(back: () -> Unit, start: String?, setAway: (Boolean) -
     BackHandler(enabled = current != null && !wide) { open = null }
 
     Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
-        val top = PaddingValues(top = 72.dp, bottom = if (wide) 104.dp else 160.dp) // room for the island, and on a phone the actions over it
+        val top = PaddingValues(top = 72.dp, bottom = if (wide || page != PwPage.Create) 104.dp else 160.dp) // room for the island, and on a phone the actions over it
         when (page) {
             PwPage.Passwords, PwPage.Create -> Row(Modifier.fillMaxSize()) {
                 val listShown = wide || current == null
@@ -303,22 +303,38 @@ private fun PasswordsOpen(back: () -> Unit, start: String?, setAway: (Boolean) -
             }
             val actions = @Composable {
                 if (!more) when (page) {
-                    PwPage.Passwords -> {
-                        ActionPill(R.drawable.ic_add, stringResource(R.string.common_new)) { newOf = if (kind == PwKind.Cards || kind == PwKind.Addresses) kind else PwKind.Logins; newLogin = SavedLogin("", "", "") }
-                        ActionPill(R.drawable.ic_file_download, stringResource(R.string.common_import)) { more = true }
-                    }
+                    PwPage.Passwords -> Unit // its own row, below
                     PwPage.Create -> {
                         ActionPill(R.drawable.ic_copy, stringResource(R.string.common_copy)) { copy(context.getString(R.string.pw_password), generated, R.string.pw_password_copied) }
                         ActionPill(R.drawable.ic_save, stringResource(R.string.pw_save_login)) { newOf = PwKind.Logins; newLogin = SavedLogin("", "", generated) }
                     }
-                    PwPage.TwoFactor -> {
-                        ActionPill(R.drawable.ic_qr_code, stringResource(R.string.pw_scan)) { scanning = true }
-                        ActionPill(R.drawable.ic_key, stringResource(R.string.pw_type_key)) { typing = OtpEntry("", "", "") }
-                        ActionPill(R.drawable.ic_file_download, stringResource(R.string.common_import)) { more = true }
-                    }
+                    PwPage.TwoFactor -> Unit // its own row, below
                 }
             }
-            if (wide) Row(Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) { tabs(); actions() }
+            // the passwords' list as Contacts' (the user, 4 Nov: "the import goes to the bottom row the plus goes to the right corner
+            // with no text the island to the left"): the island left, Import and + round at the right, nothing over it
+            if (page == PwPage.Passwords) Row(Modifier.align(Alignment.BottomStart).then(if (wide) Modifier.width(400.dp) else Modifier.fillMaxWidth())
+                .padding(start = 12.dp, end = 12.dp, bottom = 12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                tabs()
+                if (!more) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    IslandAction(R.drawable.ic_file_download, stringResource(R.string.common_import)) { more = true }
+                    IslandAction(R.drawable.ic_add, stringResource(R.string.common_new)) { newOf = if (kind == PwKind.Cards || kind == PwKind.Addresses) kind else PwKind.Logins; newLogin = SavedLogin("", "", "") }
+                }
+            }
+            // 2FA likewise (the user: "the island to the left and a plus to the right that will pop two pills scan and insert key")
+            else if (page == PwPage.TwoFactor) {
+                var adding by remember { mutableStateOf(false) }
+                BackHandler(enabled = adding) { adding = false }
+                Column(Modifier.align(Alignment.BottomEnd).padding(end = 12.dp, bottom = 12.dp), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (adding && !more) {
+                        ActionPill(R.drawable.ic_qr_code, stringResource(R.string.pw_scan)) { adding = false; scanning = true }
+                        ActionPill(R.drawable.ic_key, stringResource(R.string.pw_type_key)) { adding = false; typing = OtpEntry("", "", "") }
+                    }
+                    if (!more) IslandAction(if (adding) R.drawable.ic_close else R.drawable.ic_add, stringResource(if (adding) R.string.common_close else R.string.common_add)) { adding = !adding }
+                }
+                Box(Modifier.align(Alignment.BottomStart).padding(start = 12.dp, bottom = 12.dp)) { tabs() }
+            }
+            else if (wide) Row(Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) { tabs(); actions() }
             else {
                 Row(Modifier.align(Alignment.BottomCenter).padding(bottom = 92.dp, start = 12.dp, end = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) { actions() }
                 Box(Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp)) { tabs() }
