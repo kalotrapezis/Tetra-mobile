@@ -63,7 +63,7 @@ internal object AssistantRemote {
     private fun note(c: Context, title: String, text: String, open: Intent?) {
         val nm = c.getSystemService(NotificationManager::class.java) ?: return
         if (nm.getNotificationChannel(CHANNEL)?.name != c.getString(R.string.remote_channel))
-            nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.remote_channel), NotificationManager.IMPORTANCE_HIGH))
+            nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.remote_channel), NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false) })
         val tap = PendingIntent.getActivity(c, ID, open ?: Intent(c, AssistantActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         nm.notify(ID, NotificationCompat.Builder(c, CHANNEL).setSmallIcon(R.drawable.ic_auto_fix).setContentTitle(title).setContentText(text)
@@ -71,6 +71,6 @@ internal object AssistantRemote {
             .apply { if (open != null) setFullScreenIntent(tap, true) }.build())
     }
 
-    const val CHANNEL = "assistant_remote"
+    const val CHANNEL = "assistant_remote_nobadge"
     private const val ID = 0x5E4D
 }

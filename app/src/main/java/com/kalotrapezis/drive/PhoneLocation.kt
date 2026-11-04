@@ -29,7 +29,7 @@ internal object PhoneLocation {
     /** Set by the open app: shows Android's location question. The server's thread cannot ask by itself. */
     @Volatile var askPermission: (() -> Unit)? = null
 
-    private const val CHANNEL = "where"
+    private const val CHANNEL = "where_nobadge"
     private const val NOTE = 0x10CA7E
 
     data class Fix(val lat: Double, val lng: Double, val accuracy: Float, val at: Long, val provider: String)
@@ -72,7 +72,7 @@ internal object PhoneLocation {
     /** "The computer asks where this phone is": a tap opens Tetra, and the answer goes as soon as it is on screen. */
     private fun tapToAnswer(c: Context): Boolean {
         val nm = c.getSystemService(NotificationManager::class.java)?.takeIf { it.areNotificationsEnabled() } ?: return false
-        nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.phone_channel_where), NotificationManager.IMPORTANCE_HIGH).apply { description = c.getString(R.string.phone_channel_where_about) }) // again: its name follows the language
+        nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.phone_channel_where), NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false); description = c.getString(R.string.phone_channel_where_about) }) // again: its name follows the language
         val open = PendingIntent.getActivity(c, NOTE, Intent(c, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         nm.notify(NOTE, NotificationCompat.Builder(c, CHANNEL).setSmallIcon(R.drawable.ic_my_location)

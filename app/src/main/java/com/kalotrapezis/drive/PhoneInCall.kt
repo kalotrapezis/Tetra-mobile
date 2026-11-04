@@ -57,7 +57,7 @@ internal object PhoneCalls {
     /** Outgoing calls already answered: the buzz once, not again after Hold → Resume. */
     private val answered = mutableSetOf<Call>()
     private val names = HashMap<String, ContactInfo?>()
-    private const val RINGING = "phone_ringing"
+    private const val RINGING = "phone_ringing_nobadge"
     private const val ONGOING = "phone_call_nobadge" // a call going on is no count on the icon (4 Nov)
     private const val NOTE = 4147
     const val ANSWER = "com.kalotrapezis.drive.phone.ANSWER"
@@ -274,7 +274,7 @@ internal object PhoneCalls {
         if (call == null || call.state == Call.STATE_DISCONNECTED) { nm.cancel(NOTE); return }
         // made again each time: an existing channel keeps its sound and takes only the name, in the language now
         nm.createNotificationChannel(NotificationChannel(RINGING, c.getString(R.string.phone_channel_incoming), NotificationManager.IMPORTANCE_HIGH)
-            .apply { setSound(null, null); enableVibration(false) }) // Telecom rings and vibrates
+            .apply { setShowBadge(false); setSound(null, null); enableVibration(false) }) // Telecom rings and vibrates
         nm.createNotificationChannel(NotificationChannel(ONGOING, c.getString(R.string.phone_channel_ongoing), NotificationManager.IMPORTANCE_LOW).apply { setShowBadge(false) })
         val ringing = call.state == Call.STATE_RINGING
         val screen = Intent(c, PhoneCallActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -435,7 +435,7 @@ class PhoneMissedReceiver : BroadcastReceiver() {
         Thread {
             runCatching {
                 val who = number?.let { PhoneCalls.contactFor(it)?.name } ?: number
-                nm.createNotificationChannel(NotificationChannel(CHANNEL, app.getString(R.string.phone_channel_missed), NotificationManager.IMPORTANCE_DEFAULT)) // again: its name follows the language
+                nm.createNotificationChannel(NotificationChannel(CHANNEL, app.getString(R.string.phone_channel_missed), NotificationManager.IMPORTANCE_DEFAULT).apply { setShowBadge(false) }) // again: its name follows the language
                 val open = PendingIntent.getActivity(app, 10, Intent(app, PhoneActivity::class.java).putExtra(PhoneActivity.TAB, "missed").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
                 @Suppress("DEPRECATION") val clear = i.getParcelableExtra<PendingIntent>("android.telecom.extra.CLEAR_MISSED_CALLS_INTENT") // TelecomManager.EXTRA_CLEAR_MISSED_CALLS_INTENT, a system API name
@@ -453,5 +453,5 @@ class PhoneMissedReceiver : BroadcastReceiver() {
             done.finish()
         }.start()
     }
-    private companion object { const val CHANNEL = "phone_missed"; const val NOTE = 4150 }
+    private companion object { const val CHANNEL = "phone_missed_nobadge"; const val NOTE = 4150 }
 }

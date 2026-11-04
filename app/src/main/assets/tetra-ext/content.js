@@ -22,6 +22,14 @@ try { [['visibilityState', 'visible'], ['webkitVisibilityState', 'visible'], ['h
 // its pages the page's own handler never hears it there (the player's hold for 2× is a touch, not this)
 if (/(^|\.)youtube\.com$/.test(location.hostname)) window.addEventListener('contextmenu', function (e) {
   if (e.target && e.target.closest && e.target.closest('a[href]')) e.stopImmediatePropagation(); }, true);
+// the page's icon for the favourites' and tabs' circles (BrowserIcons): the largest it names that Android draws, else /favicon.ico
+function icon() { try { var best = null, size = 0;
+  document.querySelectorAll('link[rel~="icon"],link[rel="shortcut icon"],link[rel~="apple-touch-icon"],link[rel~="apple-touch-icon-precomposed"]').forEach(function (l) {
+    if (!l.href || l.type == 'image/svg+xml' || /\.svg(\?|#|$)/i.test(l.href)) return;
+    var s = parseInt((l.getAttribute('sizes') || '').split(/x/i)[0], 10) || (/apple-touch/.test(l.rel) ? 180 : 32);
+    if (s > size) { size = s; best = l.href; } });
+  if (/^https?:$/.test(location.protocol)) post({ icon: best || (location.origin + '/favicon.ico') }); } catch (e) {} }
+window.addEventListener('load', function () { setTimeout(icon, 500); });
 window.addEventListener('pageshow', function (e) { if (e.persisted) { last = null; lastMedia = ''; report(); media(); } });
 
 // forms: which kinds of fields there are, a form's values on its way, a fill

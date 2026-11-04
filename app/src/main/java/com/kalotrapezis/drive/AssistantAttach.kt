@@ -277,7 +277,7 @@ internal object AudioJobs {
     private fun post(c: Context, j: Job) {
         val nm = c.getSystemService(NotificationManager::class.java) ?: return
         if (nm.getNotificationChannel(AssistantBriefs.CHANNEL) == null)
-            nm.createNotificationChannel(NotificationChannel(AssistantBriefs.CHANNEL, c.getString(R.string.assistant_briefs_channel), NotificationManager.IMPORTANCE_HIGH))
+            nm.createNotificationChannel(NotificationChannel(AssistantBriefs.CHANNEL, c.getString(R.string.assistant_briefs_channel), NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false) })
         val open = PendingIntent.getActivity(c, j.id.hashCode(), Intent(c, AssistantActivity::class.java).putExtra(EXTRA, j.id).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val done = j.state == "done"

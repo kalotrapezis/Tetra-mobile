@@ -359,8 +359,8 @@ class TimerService : Service() {
         /** MainActivity's word for the Timer screen (Applet.EXTRA), as an applet icon's. */
         const val SCREEN = "Timer"
         const val CHANNEL = "timer_nobadge" // a countdown is no count on the icon (4 Nov); "timer_done" still counts
-        private const val CHANNEL_DONE = "timer_done"
-        const val CHANNEL_SOON = "alarm_soon"
+        private const val CHANNEL_DONE = "timer_done_nobadge"
+        const val CHANNEL_SOON = "alarm_soon_nobadge"
         private const val PLACEHOLDER = 7999
         private const val LOOK_MS = 30_000L
         const val COLOR = 0xFF26A69A.toInt()
@@ -372,10 +372,10 @@ class TimerService : Service() {
             val nm = c.getSystemService(NotificationManager::class.java) ?: return
             if (nm.getNotificationChannel(CHANNEL) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.app_timer), NotificationManager.IMPORTANCE_LOW).apply { description = c.getString(R.string.timer_channel_about); setShowBadge(false) })
             // the 30-minute notice pops up without a sound: it may come while the user still sleeps
-            if (nm.getNotificationChannel(CHANNEL_SOON) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL_SOON, c.getString(R.string.alarm_channel_soon), NotificationManager.IMPORTANCE_HIGH).apply {
+            if (nm.getNotificationChannel(CHANNEL_SOON) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL_SOON, c.getString(R.string.alarm_channel_soon), NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false);
                 description = c.getString(R.string.alarm_channel_soon_about); setSound(null, null)
             })
-            if (nm.getNotificationChannel(CHANNEL_DONE) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL_DONE, c.getString(R.string.timer_channel_done), NotificationManager.IMPORTANCE_HIGH).apply {
+            if (nm.getNotificationChannel(CHANNEL_DONE) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL_DONE, c.getString(R.string.timer_channel_done), NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false);
                 description = c.getString(R.string.timer_channel_done_about); setSound(null, null) // the alarm plays its own sound
             })
         }

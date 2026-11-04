@@ -146,7 +146,7 @@ internal fun mailReason(e: Throwable): String {
  */
 internal object MailEngine {
     const val JOB = 4153
-    private const val CHANNEL = "mail"
+    private const val CHANNEL = "mail_nobadge"
     private val lock = Any()
 
     fun device() = DataFiles.device()
@@ -543,7 +543,7 @@ internal object MailEngine {
 
     private fun announce(c: Context, acc: JSONObject, mails: List<MailEntry>) {
         val nm = c.getSystemService(NotificationManager::class.java) ?: return
-        if (nm.getNotificationChannel(CHANNEL) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.app_mail), NotificationManager.IMPORTANCE_DEFAULT))
+        if (nm.getNotificationChannel(CHANNEL) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.app_mail), NotificationManager.IMPORTANCE_DEFAULT).apply { setShowBadge(false) })
         val open = PendingIntent.getActivity(c, JOB, appletIntent(c, Applet.Mail.name), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         mails.takeLast(5).forEach { e ->
             runCatching {

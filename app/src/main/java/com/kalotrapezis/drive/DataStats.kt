@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter
  */
 internal object DataStats {
     const val JOB = 4150
-    private const val CHANNEL = "data_warnings"
+    private const val CHANNEL = "data_warnings_nobadge"
     private const val BUCKET = 2 * 3600_000L // Android keeps per-app counts in 2-hour buckets
     private const val KEEP_DAYS = 85L // older days are kept as the files have them: Android has forgotten them
     private val HOUR = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH")
@@ -255,7 +255,7 @@ internal object DataStats {
     private fun channel(c: Context): NotificationManager {
         val nm = c.getSystemService(NotificationManager::class.java)
         // made again each time: an existing channel takes only its name and description, in the language now
-        nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.data_channel_warnings), NotificationManager.IMPORTANCE_DEFAULT).apply { description = c.getString(R.string.data_channel_warnings_about) })
+        nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.data_channel_warnings), NotificationManager.IMPORTANCE_DEFAULT).apply { setShowBadge(false); description = c.getString(R.string.data_channel_warnings_about) })
         return nm
     }
 

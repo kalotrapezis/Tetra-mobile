@@ -69,6 +69,7 @@ private enum class PhonePage(@androidx.annotation.StringRes val title: Int) { Bl
  */
 class PhoneActivity : ComponentActivity() {
     override fun attachBaseContext(base: android.content.Context) = super.attachBaseContext(AppLocale.wrap(base))
+    override fun onResume() { super.onResume(); runCatching { Notices.seen(this, "phone") } } // its missed calls seen
     private val number = mutableStateOf("")
     private val keypad = mutableStateOf(false)
     private val tab = mutableStateOf(PhoneTab.Recents)

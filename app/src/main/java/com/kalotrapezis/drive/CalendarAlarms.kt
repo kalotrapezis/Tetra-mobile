@@ -30,7 +30,7 @@ internal data class DueReminder(val at: Instant, val occ: Occurrence, val key: S
 internal data class Ringing(val id: Int, val title: String, val text: String, val color: Int, val occurrence: String, val time: String, val open: String = Applet.Calendar.name)
 
 internal object CalendarAlarms {
-    private const val CHANNEL = "calendar_reminders"
+    private const val CHANNEL = "calendar_reminders_nobadge"
     private const val ACTION_RING = "com.kalotrapezis.drive.CALENDAR_RING"
     private const val ACTION_SNOOZE = "com.kalotrapezis.drive.CALENDAR_SNOOZE"
     private const val ACTION_AGAIN = "com.kalotrapezis.drive.CALENDAR_AGAIN"
@@ -88,7 +88,7 @@ internal object CalendarAlarms {
     private fun channel(c: Context) {
         val nm = c.getSystemService(NotificationManager::class.java) ?: return
         if (nm.getNotificationChannel(CHANNEL) == null)
-            nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.calendar_channel), NotificationManager.IMPORTANCE_HIGH).apply { description = c.getString(R.string.calendar_channel_about) })
+            nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.calendar_channel), NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false); description = c.getString(R.string.calendar_channel_about) })
     }
 
     /** The words under a reminder's title: "Today 13:00 – 14:00 · Café Ermou", "Tue 20 Oct, all day". */

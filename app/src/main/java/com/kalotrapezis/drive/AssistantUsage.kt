@@ -137,7 +137,7 @@ internal object AssistantUsage {
             val b = u.budget()
             val nm = c.getSystemService(NotificationManager::class.java) ?: return
             if (nm.getNotificationChannel(AssistantBriefs.CHANNEL) == null)
-                nm.createNotificationChannel(NotificationChannel(AssistantBriefs.CHANNEL, c.getString(R.string.assistant_briefs_channel), NotificationManager.IMPORTANCE_HIGH))
+                nm.createNotificationChannel(NotificationChannel(AssistantBriefs.CHANNEL, c.getString(R.string.assistant_briefs_channel), NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false) })
             val open = PendingIntent.getActivity(c, 7350, Intent(c, UsageActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
             NotificationManagerCompat.from(c).notify(7350, NotificationCompat.Builder(c, AssistantBriefs.CHANNEL).setSmallIcon(R.drawable.ic_auto_fix)
                 .setContentTitle(c.getString(R.string.usage_warn_title)).setContentText(c.getString(R.string.usage_warn_body, Bill.text(u.month()), Bill.text(b.monthly ?: 0.0)))

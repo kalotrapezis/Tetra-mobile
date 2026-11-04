@@ -62,6 +62,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /** The assistant's chat (Home › Assistant): type or speak, answers as bubbles, read aloud when the speaker is on. */
 open class AssistantActivity : ComponentActivity() {
+    override fun onResume() { super.onResume(); runCatching { Notices.seen(this, "assistant") } } // a brief or a word from another device seen
     protected open val sheet = false
     override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLocale.wrap(base))
     override fun onCreate(savedInstanceState: Bundle?) {

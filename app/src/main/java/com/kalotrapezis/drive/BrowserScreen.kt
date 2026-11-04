@@ -312,6 +312,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     fun heard(tab: BrowserTab, o: JSONObject) {
         o.optString("error", null)?.let { WriterLog.w("Browser: page script, ${it.take(200)}") }
         o.optString("first", null)?.let { WriterLog.i("Browser: AI Assist plays ${it.take(120)}") }
+        o.optString("icon", null)?.let { if (!private && tab.url.startsWith("http")) BrowserIcons.learn(context, tab.url, it) } // its circle's picture
         o.optString("kinds", null)?.let { s -> tab.kinds = s.split(',').filter { it.isNotBlank() }.toSet() }
         o.optString("media", null)?.let { s -> runCatching { JSONObject(s) }.getOrNull()?.let { m ->
             val was = tab.media
@@ -930,8 +931,11 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                 if (favourites.isNotEmpty()) LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(favourites, key = { it.url }) { b ->
                         val site = BrowserRules.site(BrowserRules.host(b.url))
-                        Box(Modifier.size(36.dp).clip(CircleShape).background(TILE_COLORS[(site.hashCode() and 0x7fffffff) % TILE_COLORS.size]).clickable(onClickLabel = b.title.ifBlank { site }) { go(b.url) },
-                            contentAlignment = Alignment.Center) { Text(site.take(1).uppercase(), color = Color.White, style = MaterialTheme.typography.labelLarge) }
+                        val pic = siteIcon(b.url, fetch = !private)
+                        Box(Modifier.size(36.dp).clip(CircleShape).background(if (pic != null) Color.White else TILE_COLORS[(site.hashCode() and 0x7fffffff) % TILE_COLORS.size])
+                            .clickable(onClickLabel = b.title.ifBlank { site }) { go(b.url) }, contentAlignment = Alignment.Center) {
+                            if (pic != null) androidx.compose.foundation.Image(pic, null, Modifier.size(24.dp)) else Text(site.take(1).uppercase(), color = Color.White, style = MaterialTheme.typography.labelLarge)
+                        }
                     }
                 }
                 val h = held
@@ -1332,8 +1336,10 @@ private fun Modifier.sideTouches(): Modifier = composed {
                     Row(Modifier.fillMaxWidth().padding(start = if (item.grouped) 16.dp else 0.dp).height(40.dp).clip(MaterialTheme.shapes.medium)
                         .background(if (on) BROWSER_COLOR else Color.Transparent).combinedClickable(onClick = { switch(t) }, onLongClick = { options(t) }).padding(start = 8.dp),
                         verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(26.dp).clip(CircleShape).background(fg.copy(alpha = 0.18f)), contentAlignment = Alignment.Center) {
-                            Text(BrowserRules.site(BrowserRules.host(t.url)).take(1).uppercase().ifEmpty { "+" }, fontSize = 12.sp, color = fg, maxLines = 1)
+                        val pic = siteIcon(t.url, fetch = false) // a tab's page says its own icon as it loads
+                        Box(Modifier.size(26.dp).clip(CircleShape).background(if (pic != null) Color.White else fg.copy(alpha = 0.18f)), contentAlignment = Alignment.Center) {
+                            if (pic != null) androidx.compose.foundation.Image(pic, null, Modifier.size(18.dp))
+                            else Text(BrowserRules.site(BrowserRules.host(t.url)).take(1).uppercase().ifEmpty { "+" }, fontSize = 12.sp, color = fg, maxLines = 1)
                         }
                         Text(t.title.ifBlank { BrowserRules.host(t.url).removePrefix("www.") }.ifBlank { stringResource(R.string.browser_tab_new) }, Modifier.padding(start = 10.dp).weight(1f),
                             color = fg, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -1398,8 +1404,9 @@ private fun Modifier.sideTouches(): Modifier = composed {
                             contentColor = if (on) Color.White else LocalContentColor.current,
                             modifier = gestures.height(40.dp).then(if (wide) Modifier.width(width) else Modifier.widthIn(max = 150.dp))) {
                             Row(Modifier.padding(start = 6.dp, end = if (on) 0.dp else 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Box(Modifier.size(26.dp).clip(CircleShape).background(LocalContentColor.current.copy(alpha = 0.18f)), contentAlignment = Alignment.Center) {
-                                    Text(initial, fontSize = 12.sp, maxLines = 1)
+                                val pic = siteIcon(t.url, fetch = false)
+                                Box(Modifier.size(26.dp).clip(CircleShape).background(if (pic != null) Color.White else LocalContentColor.current.copy(alpha = 0.18f)), contentAlignment = Alignment.Center) {
+                                    if (pic != null) androidx.compose.foundation.Image(pic, null, Modifier.size(18.dp)) else Text(initial, fontSize = 12.sp, maxLines = 1)
                                 }
                                 val name = t.title.ifBlank { BrowserRules.host(t.url).removePrefix("www.") }.ifBlank { stringResource(R.string.browser_tab_new) }
                                 Text(name, Modifier.padding(start = 6.dp).weight(1f, fill = wide), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -1429,10 +1436,14 @@ private fun addressLabel(a: Map<String, String>) = a["name"] ?: listOfNotNull(a[
             IconButton(onClick = { folder = BookmarkLibrary.parentOf(folder) }) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
             Text(BookmarkLibrary.nameOf(folder), style = MaterialTheme.typography.titleMedium)
         }
-        @Composable fun Tile(label: String, letter: String, color: Color, icon: Int?, click: () -> Unit, hold: (() -> Unit)?) =
+        @Composable fun Tile(label: String, letter: String, color: Color, icon: Int?, click: () -> Unit, hold: (() -> Unit)?, picture: androidx.compose.ui.graphics.ImageBitmap? = null) =
             Column(Modifier.clip(MaterialTheme.shapes.medium).combinedClickable(onClick = click, onLongClick = hold).padding(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(Modifier.size(56.dp).clip(CircleShape).background(color), contentAlignment = Alignment.Center) {
-                    if (icon != null) Icon(painterResource(icon), null, tint = Color.White) else Text(letter, color = Color.White, style = MaterialTheme.typography.titleLarge)
+                Box(Modifier.size(56.dp).clip(CircleShape).background(if (picture != null && icon == null) Color.White else color), contentAlignment = Alignment.Center) {
+                    when {
+                        icon != null -> Icon(painterResource(icon), null, tint = Color.White)
+                        picture != null -> androidx.compose.foundation.Image(picture, null, Modifier.size(36.dp)) // the site's own icon (BrowserIcons)
+                        else -> Text(letter, color = Color.White, style = MaterialTheme.typography.titleLarge)
+                    }
                 }
                 Text(label, Modifier.padding(top = 6.dp), style = MaterialTheme.typography.labelMedium, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
             }
@@ -1453,7 +1464,8 @@ private fun addressLabel(a: Map<String, String>) = a["name"] ?: listOfNotNull(a[
         if (shown.isNotEmpty() || folders.isNotEmpty()) LazyVerticalGrid(GridCells.Adaptive(88.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             gridItems(shown, key = { it.url }) { b ->
                 val host = BrowserRules.site(BrowserRules.host(b.url))
-                Tile(b.title.ifBlank { host }, host.take(1).uppercase(), TILE_COLORS[(host.hashCode() and 0x7fffffff) % TILE_COLORS.size], null, { open(b.url) }) { file(b) }
+                Tile(b.title.ifBlank { host }, host.take(1).uppercase(), TILE_COLORS[(host.hashCode() and 0x7fffffff) % TILE_COLORS.size], null, { open(b.url) }, { file(b) },
+                    picture = siteIcon(b.url, fetch = !private))
             }
             gridItems(folders, key = { "folder:$it" }) { f -> Tile(BookmarkLibrary.nameOf(f), "", BROWSER_COLOR, R.drawable.ic_folder, { folder = f }, null) }
         }

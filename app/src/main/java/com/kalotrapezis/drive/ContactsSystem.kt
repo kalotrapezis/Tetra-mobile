@@ -162,7 +162,7 @@ internal object ContactsWays {
  * notification "Call Μαρία" that opens the dialer at a tap. The voice is the phone's, or a Bluetooth headset's.
  */
 internal object PhoneCall {
-    private const val CHANNEL = "calls_from_computer"
+    private const val CHANNEL = "calls_from_computer_nobadge"
     private const val NOTE = 4146
 
     fun allowed(c: Context) = c.checkSelfPermission(android.Manifest.permission.CALL_PHONE) == android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -260,7 +260,7 @@ internal object PhoneCall {
         if (!androidx.core.app.NotificationManagerCompat.from(c).areNotificationsEnabled())
             return org.json.JSONObject().put("error", "Tetra's notifications are off on the phone, and it may not call by itself.")
         val nm = c.getSystemService(android.app.NotificationManager::class.java)
-        nm.createNotificationChannel(android.app.NotificationChannel(CHANNEL, c.getString(R.string.phone_channel_pc_calls), android.app.NotificationManager.IMPORTANCE_HIGH)) // again: its name follows the language
+        nm.createNotificationChannel(android.app.NotificationChannel(CHANNEL, c.getString(R.string.phone_channel_pc_calls), android.app.NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false) }) // again: its name follows the language
         val tap = android.app.PendingIntent.getActivity(c, 0, android.content.Intent(android.content.Intent.ACTION_DIAL, uri).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
             android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT)
         nm.notify(NOTE, androidx.core.app.NotificationCompat.Builder(c, CHANNEL).setSmallIcon(R.drawable.ic_call)

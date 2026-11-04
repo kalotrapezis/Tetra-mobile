@@ -35,11 +35,11 @@ class PhoneScreening : CallScreeningService() {
 
 /** A blocked number called (Call blocking › Notify silently): a quiet notification, a tap opening the number's card. */
 internal object PhoneBlockedNote {
-    private const val CHANNEL = "phone_blocked"
+    private const val CHANNEL = "phone_blocked_nobadge"
     fun show(c: Context, number: String) = runCatching {
         val nm = c.getSystemService(android.app.NotificationManager::class.java)
         // made again each time: an existing channel takes only the name, in the language now
-        nm.createNotificationChannel(android.app.NotificationChannel(CHANNEL, c.getString(R.string.phone_channel_blocked), android.app.NotificationManager.IMPORTANCE_LOW))
+        nm.createNotificationChannel(android.app.NotificationChannel(CHANNEL, c.getString(R.string.phone_channel_blocked), android.app.NotificationManager.IMPORTANCE_LOW).apply { setShowBadge(false) })
         val open = android.app.PendingIntent.getActivity(c, number.hashCode(), android.content.Intent(c, PhoneActivity::class.java).putExtra(PhoneActivity.BLOCKED, number)
             .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK), android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT)
         nm.notify(CHANNEL, number.hashCode(), androidx.core.app.NotificationCompat.Builder(c, CHANNEL).setSmallIcon(R.drawable.ic_block)

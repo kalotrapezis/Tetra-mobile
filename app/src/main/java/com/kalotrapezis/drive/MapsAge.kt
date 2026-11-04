@@ -15,7 +15,7 @@ import androidx.core.app.NotificationCompat
  */
 internal object MapsAge {
     const val SCREEN = "settings-maps" // the tap: Settings › Maps (MainActivity)
-    private const val CHANNEL = "maps_old"
+    private const val CHANNEL = "maps_old_nobadge"
 
     fun check(c: Context) {
         val root = MapsFiles.root(TetraFolder.root(Environment.getExternalStorageDirectory()))
@@ -27,7 +27,7 @@ internal object MapsAge {
         if (new.isEmpty()) return
         val nm = c.getSystemService(NotificationManager::class.java)
         // made again each time: an existing channel takes only its name, in the language now
-        nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.maps_old_channel), NotificationManager.IMPORTANCE_DEFAULT))
+        nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.maps_old_channel), NotificationManager.IMPORTANCE_DEFAULT).apply { setShowBadge(false) })
         val open = PendingIntent.getActivity(c, CHANNEL.hashCode(), Intent(c, MainActivity::class.java).putExtra(Applet.EXTRA, SCREEN)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         new.forEach { (m, _) ->

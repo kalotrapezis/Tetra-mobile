@@ -33,10 +33,10 @@ internal object SmsRole {
     }
     private fun android.net.Uri.getQueryParameterSafe(k: String) = runCatching { android.net.Uri.parse("x://x?" + schemeSpecificPart.substringAfter('?', "")).getQueryParameter(k) }.getOrNull()
 
-    const val CHANNEL = "sms_in"
+    const val CHANNEL = "sms_in_nobadge"
     fun notify(c: Context, from: String, text: String) = runCatching {
         val nm = c.getSystemService(NotificationManager::class.java)
-        if (nm.getNotificationChannel(CHANNEL) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.app_sms), NotificationManager.IMPORTANCE_HIGH))
+        if (nm.getNotificationChannel(CHANNEL) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.app_sms), NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false) })
         val open = PendingIntent.getActivity(c, from.hashCode(), appletIntent(c, "sms:" + JSONObject().put("to", from).put("text", "")), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         nm.notify(CHANNEL, from.hashCode(), NotificationCompat.Builder(c, CHANNEL).setSmallIcon(R.drawable.ic_chat).setContentTitle(from).setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text)).setCategory(NotificationCompat.CATEGORY_MESSAGE).setContentIntent(open).setAutoCancel(true).build())

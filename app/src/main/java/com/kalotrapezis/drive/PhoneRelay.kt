@@ -18,7 +18,7 @@ import org.json.JSONObject
  * The voice stays on the phone (or its headset, or the computer): an Android tablet cannot be a hands-free kit for an app.
  */
 internal object PhoneRelay {
-    private const val CHANNEL = "calls_on_phone"
+    private const val CHANNEL = "calls_on_phone_nobadge"
     private const val NOTE = 4149
     const val ACT = "com.kalotrapezis.drive.phone.RELAY"
 
@@ -38,7 +38,7 @@ internal object PhoneRelay {
         val who = number.ifBlank { null }?.let { PhoneCalls.contactFor(it)?.name } ?: number.ifBlank { c.getString(R.string.phone_hidden_number) }
         val device = s.optString("device").ifBlank { c.getString(R.string.phone_relay_the_phone) }
         if (state == "ended" && !s.optBoolean("missed")) { nm.cancel(NOTE); return }
-        nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.phone_channel_relay), NotificationManager.IMPORTANCE_HIGH)) // again: its name follows the language
+        nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.phone_channel_relay), NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false) }) // again: its name follows the language
         fun act(what: String, label: String, code: Int) = NotificationCompat.Action(0, label,
             PendingIntent.getBroadcast(c, code, Intent(c, PhoneRelayReceiver::class.java).setAction(ACT).putExtra("do", what), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
         val open = PendingIntent.getActivity(c, 0, Intent(c, PhoneActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_IMMUTABLE)

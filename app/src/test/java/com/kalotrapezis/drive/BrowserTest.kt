@@ -279,4 +279,12 @@ class BrowserTest {
         assertNull(MediaSites.station(marks, "radio"))
         assertNull(MediaSites.station(marks, "Sfera"))
     }
+
+    @Test fun aSitesIconIsOneFileForAllItsAddresses() {
+        val k = BrowserIcons.key("https://m.youtube.com/watch?v=x")
+        assertEquals(k, BrowserIcons.key("https://www.youtube.com/"))
+        assertEquals(k, BrowserIcons.key("https://youtube.com/results?search_query=disco"))
+        assertEquals("youtube.com.png", BrowserIcons.fileName(k))
+        assertEquals("a_b.c.png", BrowserIcons.fileName("a/b.c")) // never a path out of its folder
+    }
 }

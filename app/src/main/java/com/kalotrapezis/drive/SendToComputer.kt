@@ -154,7 +154,7 @@ internal object Outbox {
 internal object FromComputer {
     const val FOLDER = "From computer"
     const val SCREEN = "from-computer" // the notification's tap: Files at FOLDER (MainActivity)
-    private const val CHANNEL = "files_from_computer" // high: on HyperOS a default one went unseen, folded under "Listening" (23 Oct)
+    private const val CHANNEL = "files_from_computer_nobadge" // high: on HyperOS a default one went unseen, folded under "Listening" (23 Oct)
     private const val NOTE = 4144
     private val handler by lazy { Handler(Looper.getMainLooper()) }
     private val names = mutableListOf<String>()
@@ -211,7 +211,7 @@ internal object FromComputer {
         val nm = context.getSystemService(NotificationManager::class.java)?.takeIf { it.areNotificationsEnabled() } ?: return
         nm.deleteNotificationChannel("from_computer") // the first build's, default importance
         // made again when its name is not the one in the language now shown (an existing channel keeps its first name otherwise)
-        if (nm.getNotificationChannel(CHANNEL)?.name != context.getString(R.string.sync_from_channel)) nm.createNotificationChannel(NotificationChannel(CHANNEL, context.getString(R.string.sync_from_channel), NotificationManager.IMPORTANCE_HIGH).apply { description = context.getString(R.string.sync_from_channel_about) })
+        if (nm.getNotificationChannel(CHANNEL)?.name != context.getString(R.string.sync_from_channel)) nm.createNotificationChannel(NotificationChannel(CHANNEL, context.getString(R.string.sync_from_channel), NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false); description = context.getString(R.string.sync_from_channel_about) })
         val open = PendingIntent.getActivity(context, NOTE, Intent(context, MainActivity::class.java).putExtra(Applet.EXTRA, SCREEN).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         nm.notify(NOTE, NotificationCompat.Builder(context, CHANNEL).setSmallIcon(R.drawable.ic_computer)

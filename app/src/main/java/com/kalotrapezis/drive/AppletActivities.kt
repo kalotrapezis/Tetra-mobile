@@ -30,6 +30,8 @@ abstract class AppletActivity : ComponentActivity() {
 
     protected fun grant() = startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:$packageName")))
     override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLocale.wrap(base))
+    // opened: its news seen (Notices.seen), off its number on Home
+    override fun onResume() { super.onResume(); runCatching { Notices.seen(this, Notices.homeOf(applet)) } }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WriterLog.init(this)

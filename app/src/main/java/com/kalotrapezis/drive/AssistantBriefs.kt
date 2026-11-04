@@ -22,7 +22,7 @@ import java.util.Date
  * which is new: after a sync, a new one rings like a Calendar reminder (the island on HyperOS), and a tap opens the page.
  */
 internal object AssistantBriefs {
-    const val CHANNEL = "assistant_briefs"
+    const val CHANNEL = "assistant_briefs_nobadge"
     private const val ID = 7301
 
     fun dir(): File = File(TetraSystem.dir(TetraFolder.root(Environment.getExternalStorageDirectory()), "Assistant", "Shared"), "Briefs")
@@ -51,7 +51,7 @@ internal object AssistantBriefs {
     fun post(c: Context, title: String, text: String, page: File, time: String) {
         val nm = c.getSystemService(NotificationManager::class.java) ?: return
         if (nm.getNotificationChannel(CHANNEL) == null)
-            nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.assistant_briefs_channel), NotificationManager.IMPORTANCE_HIGH))
+            nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.assistant_briefs_channel), NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false) })
         val open = PendingIntent.getActivity(c, ID, Intent(c, BriefActivity::class.java).putExtra("file", page.absolutePath)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         // ✕: the island goes (the Calendar's Done does that, and for a time with no event, nothing more)
