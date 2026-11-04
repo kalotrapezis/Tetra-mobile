@@ -210,6 +210,14 @@
             android:taskAffinity="com.kalotrapezis.drive.mail" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
         <activity android:name=".PasswordsActivity" android:exported="false" android:label="@string/home_label_passwords" android:icon="@mipmap/applet_passwords" android:roundIcon="@mipmap/applet_passwords"
             android:taskAffinity="com.kalotrapezis.drive.passwords" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
+        <!-- Passwords as Android's autofill service (the user, 4 Nov: "Can I set it as Android autocomplete?"): chosen in Android's settings -->
+        <service android:name=".PasswordsAutofill" android:label="@string/home_label_passwords" android:icon="@mipmap/applet_passwords"
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE" android:exported="true">
+            <intent-filter><action android:name="android.service.autofill.AutofillService" /></intent-filter>
+            <meta-data android:name="android.autofill" android:resource="@xml/autofill_service" />
+        </service>
+        <activity android:name=".AutofillUnlock" android:exported="false" android:theme="@android:style/Theme.Translucent.NoTitleBar" android:excludeFromRecents="true"
+            android:taskAffinity="com.kalotrapezis.drive.autofill" />
         <activity android:name=".SmsActivity" android:exported="false" android:label="@string/home_label_sms" android:icon="@mipmap/applet_messages" android:roundIcon="@mipmap/applet_messages"
             android:taskAffinity="com.kalotrapezis.drive.sms" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
         <!-- Settings › App icons (asked 17 Oct): a launcher icon for each part of Tetra, off until switched on; AppletLaunch

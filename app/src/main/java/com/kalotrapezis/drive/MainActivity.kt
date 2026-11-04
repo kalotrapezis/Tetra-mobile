@@ -390,7 +390,8 @@ internal data class ExternalMedia(val uri: Uri, val mimeType: String?)
 private val EXTERNAL_VIEW_ACTIONS = setOf(Intent.ACTION_VIEW, "android.provider.action.REVIEW", "com.android.camera.action.REVIEW")
 
 internal fun authenticateVault(activity: Activity, success: () -> Unit, failure: (String) -> Unit,
-                               title: String = activity.getString(R.string.home_vault_unlock), subtitle: String = activity.getString(R.string.home_vault_unlock_detail)) {
+                               title: String = activity.getString(R.string.home_vault_unlock), subtitle: String = activity.getString(R.string.home_vault_unlock_detail),
+                               cancelled: () -> Unit = {}) {
     val allowed = BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
     val manager = activity.getSystemService(BiometricManager::class.java)
     if (manager.canAuthenticate(allowed) != BiometricManager.BIOMETRIC_SUCCESS) {
@@ -405,7 +406,7 @@ internal fun authenticateVault(activity: Activity, success: () -> Unit, failure:
         .authenticate(CancellationSignal(), activity.mainExecutor, object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) = success()
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                if (errorCode != BiometricPrompt.BIOMETRIC_ERROR_USER_CANCELED && errorCode != BiometricPrompt.BIOMETRIC_ERROR_CANCELED) failure(errString.toString())
+                if (errorCode != BiometricPrompt.BIOMETRIC_ERROR_USER_CANCELED && errorCode != BiometricPrompt.BIOMETRIC_ERROR_CANCELED) failure(errString.toString()) else cancelled()
             }
         })
 }

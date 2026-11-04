@@ -19,7 +19,11 @@ How to write here:
       (features, design) then the user: GNOME Authenticator's .txt (otpauth:// lines), 2FA sync opt-in and off, locked every time it
       comes back, the user's purple padlock icon. The Browser's vault stays the store (logins gain a note; sync format unchanged without
       one); 2FA in its own Keystore store, synced in `Browser/TwoFactor/<device>.enc` with the passwords' passphrase ("2fa" bound in).
-      The Browser's key and Fill open it. Not in v1: export, folders, breach checks, an Android autofill service.
+      The Browser's key and Fill open it. Not in v1: export, folders, breach checks.
+      Then Android's autofill service (the user: "Can I set it as Android autocomplete?"): Passwords › More › Fill passwords in
+      other apps asks Android; a form's logins after the fingerprint or PIN (AutofillUnlock), a login typed elsewhere kept. In a
+      known browser by the page's site; in an app only logins kept for that exact package (no app's word for a site trusted).
+      AutofillFormTest. Not checked on a device yet.
 - [x] (browser-sync session, 3 Nov; branch `browser-sync`, not merged; desktop bc9f2b4 on main) **Browser: bookmarks, open tabs and
       (chosen) passwords between the phone and the tablet** (the user: "bookmarks and tabs"; "sync passwords as well but have some
       encryption"; "options in the settings what to sync"). `.System/Browser/Shared` (synced as `Browser/…`, part `browser`; the desktop
