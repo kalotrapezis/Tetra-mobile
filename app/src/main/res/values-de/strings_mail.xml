@@ -227,4 +227,8 @@
     <string name="mail_saved">Gespeichert</string>
     <string name="mail_search_stored">Speicher durchsuchen</string>
     <string name="mail_search_stored_in">Speicher durchsuchen › %1$s</string>
+    <string name="mail_undo">Senden rückgängig</string>
+    <string name="mail_undo_summary">Senden wartet so lange; ein Countdown auf der Schaltfläche holt die Mail zurück.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Ohne Wartezeit</string>
 </resources>

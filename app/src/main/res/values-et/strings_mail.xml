@@ -227,4 +227,8 @@
     <string name="mail_saved">Salvestatud</string>
     <string name="mail_search_stored">Otsi salvestusruumist</string>
     <string name="mail_search_stored_in">Otsi salvestusruumist › %1$s</string>
+    <string name="mail_undo">Saatmise tühistamine</string>
+    <string name="mail_undo_summary">Saatmine ootab nii kaua; nupu loendus võtab kirja tagasi.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Ootamata</string>
 </resources>

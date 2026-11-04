@@ -227,4 +227,8 @@
     <string name="mail_saved">Tallennettu</string>
     <string name="mail_search_stored">Hae tallennustilasta</string>
     <string name="mail_search_stored_in">Hae tallennustilasta › %1$s</string>
+    <string name="mail_undo">Peru lähetys</string>
+    <string name="mail_undo_summary">Lähetys odottaa näin kauan; painikkeen lähtölaskenta ottaa viestin takaisin.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Ei odotusta</string>
 </resources>

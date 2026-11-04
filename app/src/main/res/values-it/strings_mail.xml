@@ -227,4 +227,8 @@
     <string name="mail_saved">Salvato</string>
     <string name="mail_search_stored">Cerca in Archivio</string>
     <string name="mail_search_stored_in">Cerca in Archivio › %1$s</string>
+    <string name="mail_undo">Annulla invio</string>
+    <string name="mail_undo_summary">Invia aspetta questo tempo; un conto alla rovescia sul pulsante riprende il messaggio.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Nessuna attesa</string>
 </resources>

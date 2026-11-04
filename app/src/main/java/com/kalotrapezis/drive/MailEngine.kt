@@ -352,6 +352,14 @@ internal object MailEngine {
         // one the PC (or another device) already saved, here or not: its file, not a second download (opened, it comes from the PC)
         val saved = MailFiles.index(root, device()).filter { it.file != null }.associateBy { it.id }
         synchronized(lock) { append(root, all.mapNotNull { e -> saved[e.id]?.let { s -> e.copy(file = s.file, saved = s.saved, attachments = s.attachments, snippet = s.snippet) } }) }
+        // one held here as not saved that the computer has saved since: its file (MailFiles.healed); the computer's index read only then
+        val unsaved = synchronized(lock) { mine(root) }.filter { it.account == id && it.file != null && !it.saved && !it.gone }
+        if (unsaved.isNotEmpty()) File(root, "index.jsonl").takeIf { it.isFile }?.let { f ->
+            val ids = unsaved.map { it.id }.toSet()
+            val computer = f.useLines { l -> MailFiles.parse(l.filter { s -> ids.any { s.contains(it) } }) }.associateBy { it.id }
+            val mended = MailFiles.healed(unsaved, computer) { File(root, it).isFile }
+            if (mended.isNotEmpty()) { WriterLog.i("Mail: ${mended.size} taken from the computer's saved copy"); synchronized(lock) { append(root, mended) } }
+        }
         // one that moved on the server (archived, deleted, a move): its file follows it, as the PC's does, not a second download
         fun same(e: MailEntry) = e.messageId ?: "${e.date}|${e.fromAddress}|${e.subject}|${e.size}" // a mail with no Message-ID: by what it is
         val left = synchronized(lock) { mine(root) }.filter { it.account == id && it.gone && it.file != null && File(root, it.file).isFile }.associateBy(::same)

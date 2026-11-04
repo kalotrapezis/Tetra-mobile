@@ -235,4 +235,8 @@
     <string name="mail_saved">Shranjeno</string>
     <string name="mail_search_stored">Iskanje po shrambi</string>
     <string name="mail_search_stored_in">Iskanje po shrambi › %1$s</string>
+    <string name="mail_undo">Razveljavi pošiljanje</string>
+    <string name="mail_undo_summary">Pošiljanje počaka toliko; odštevanje na gumbu vzame sporočilo nazaj.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Brez čakanja</string>
 </resources>

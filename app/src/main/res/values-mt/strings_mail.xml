@@ -235,4 +235,8 @@
     <string name="mail_saved">Salvat</string>
     <string name="mail_search_stored">Fittex fil-Ħażna</string>
     <string name="mail_search_stored_in">Fittex fil-Ħażna › %1$s</string>
+    <string name="mail_undo">Ħassar il-bgħit</string>
+    <string name="mail_undo_summary">Ibgħat jistenna dan il-ħin; għadd lura fuq il-buttuna jieħu l-email lura.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Mingħajr stennija</string>
 </resources>

@@ -238,4 +238,8 @@
     <string name="mail_saved">Saved</string>
     <string name="mail_search_stored">Search Storage</string>
     <string name="mail_search_stored_in">Search Storage › %1$s</string>
+    <string name="mail_undo">Undo send</string>
+    <string name="mail_undo_summary">Send waits this long, its button a countdown that takes the mail back.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">No wait</string>
 </resources>

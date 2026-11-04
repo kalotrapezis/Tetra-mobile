@@ -235,4 +235,8 @@
     <string name="mail_saved">Uložené</string>
     <string name="mail_search_stored">Hľadať v úložisku</string>
     <string name="mail_search_stored_in">Hľadať v úložisku › %1$s</string>
+    <string name="mail_undo">Vrátiť odoslanie</string>
+    <string name="mail_undo_summary">Odoslanie toľko počká; odpočet na tlačidle vezme e-mail späť.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Bez čakania</string>
 </resources>

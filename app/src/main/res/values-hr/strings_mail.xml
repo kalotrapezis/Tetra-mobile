@@ -231,4 +231,8 @@
     <string name="mail_saved">Spremljeno</string>
     <string name="mail_search_stored">Pretraži Pohranu</string>
     <string name="mail_search_stored_in">Pretraži Pohranu › %1$s</string>
+    <string name="mail_undo">Poništi slanje</string>
+    <string name="mail_undo_summary">Slanje čeka toliko; odbrojavanje na gumbu vraća poruku.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Bez čekanja</string>
 </resources>

@@ -227,4 +227,8 @@
     <string name="mail_saved">Gemt</string>
     <string name="mail_search_stored">Søg i Lager</string>
     <string name="mail_search_stored_in">Søg i Lager › %1$s</string>
+    <string name="mail_undo">Fortryd afsendelse</string>
+    <string name="mail_undo_summary">Send venter så længe; en nedtælling på knappen tager mailen tilbage.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Ingen ventetid</string>
 </resources>

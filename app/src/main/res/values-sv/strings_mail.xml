@@ -227,4 +227,8 @@
     <string name="mail_saved">Sparat</string>
     <string name="mail_search_stored">Sök i Lagring</string>
     <string name="mail_search_stored_in">Sök i Lagring › %1$s</string>
+    <string name="mail_undo">Ångra skicka</string>
+    <string name="mail_undo_summary">Skicka väntar så länge; en nedräkning på knappen tar tillbaka mejlet.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Ingen väntan</string>
 </resources>

@@ -231,4 +231,8 @@
     <string name="mail_saved">Enregistré</string>
     <string name="mail_search_stored">Rechercher dans Stockage</string>
     <string name="mail_search_stored_in">Rechercher dans Stockage › %1$s</string>
+    <string name="mail_undo">Annuler l\'envoi</string>
+    <string name="mail_undo_summary">L\'envoi attend ce délai ; un compte à rebours sur le bouton reprend le message.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Sans attente</string>
 </resources>

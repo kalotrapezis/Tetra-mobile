@@ -438,4 +438,18 @@ class MailTest {
         assertEquals(name, got)
         assertTrue(pdf.contentEquals(bytes))
     }
+
+    @Test fun aMailHeldAsNotSavedTakesTheComputersSavedCopy() {
+        fun e(file: String?, saved: Boolean, id: String = "g/Inbox/624517641/50967") = MailEntry(id, "g", "Inbox", 1793710847000, "Skroutz", "s@skroutz.gr",
+            listOf("g"), "Συγγνώμη", true, false, 91604, 0, "", saved, file, false)
+        val mine = listOf(e("g/Inbox/1970/1970-01-01 0200 - - -.eml", false), e("g/Inbox/2026/a.eml", true, "g/Inbox/1/2"), e(null, false, "g/Inbox/1/3"))
+        val good = "g/Inbox/2026/2026-11-03 1500 Skroutz - Συγγνώμη.eml"
+        val computer = mapOf("g/Inbox/624517641/50967" to e(good, true), "g/Inbox/1/3" to e("g/Inbox/2026/c.eml", true, "g/Inbox/1/3"))
+        val mended = MailFiles.healed(mine, computer) { it == good }
+        assertEquals(1, mended.size) // the saved one stays; the one with no file yet is bodies()' first step's
+        assertEquals(good, mended[0].file)
+        assertTrue(mended[0].saved)
+        assertTrue(MailFiles.healed(mine, computer) { false }.isEmpty()) // the computer's file not here yet: nothing changes
+        assertTrue(MailFiles.healed(mine, mapOf("g/Inbox/624517641/50967" to e(good, false))) { true }.isEmpty()) // nor while it is not saved there
+    }
 }

@@ -231,4 +231,8 @@
     <string name="mail_saved">Saglabāts</string>
     <string name="mail_search_stored">Meklēt krātuvē</string>
     <string name="mail_search_stored_in">Meklēt krātuvē › %1$s</string>
+    <string name="mail_undo">Atsaukt sūtīšanu</string>
+    <string name="mail_undo_summary">Sūtīšana gaida tik ilgi; atpakaļskaitīšana uz pogas paņem vēstuli atpakaļ.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Bez gaidīšanas</string>
 </resources>

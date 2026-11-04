@@ -235,4 +235,8 @@
     <string name="mail_saved">Išsaugota</string>
     <string name="mail_search_stored">Ieškoti saugykloje</string>
     <string name="mail_search_stored_in">Ieškoti saugykloje › %1$s</string>
+    <string name="mail_undo">Atšaukti siuntimą</string>
+    <string name="mail_undo_summary">Siuntimas laukia tiek; mygtuko atgalinė atskaita grąžina laišką.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Nelaukti</string>
 </resources>

@@ -99,6 +99,17 @@ internal object MailFiles {
         runCatching { val root = mailRoot(); if (File(root, "index.jsonl").isFile) index(root, own) }
     }.start()
 
+    /**
+     * This device's mails held as not saved that the computer has saved since: its file instead. The computer had blanked a
+     * saved mail and fetched it again as "1970 - - -" (4 Nov); mended there, this device's copy of its record still said
+     * "only on the server".
+     */
+    fun healed(mine: List<MailEntry>, computer: Map<String, MailEntry>, exists: (String) -> Boolean): List<MailEntry> =
+        mine.filter { it.file != null && !it.saved && !it.gone }.mapNotNull { e ->
+            computer[e.id]?.takeIf { it.saved && !it.gone && it.file != null && it.file != e.file && exists(it.file) }
+                ?.let { s -> e.copy(file = s.file, saved = true, attachments = s.attachments, snippet = s.snippet.ifEmpty { e.snippet }) }
+        }
+
     /** The index files in the order their lines count: the computer's, the other devices', this device's last. */
     fun indexFiles(root: File, own: String?): List<File> {
         val others = root.listFiles { f -> f.name.startsWith("index.") && f.name.endsWith(".jsonl") && f.name != "index.jsonl" }.orEmpty().sortedBy { it.name }
@@ -484,6 +495,9 @@ internal object MailPrefs {
     private fun p(c: Context) = c.getSharedPreferences("mail", Context.MODE_PRIVATE)
     fun remote(c: Context) = p(c).getBoolean("remote", false)
     fun setRemote(c: Context, on: Boolean) = p(c).edit().putBoolean("remote", on).apply()
+    /** Undo send: how many seconds Send waits, its button a countdown that takes the mail back (5, 3 or 0; the user, 4 Nov). */
+    fun undo(c: Context) = p(c).getInt("undo", 5)
+    fun setUndo(c: Context, seconds: Int) = p(c).edit().putInt("undo", seconds).apply()
     fun allowed(c: Context): Set<String> = p(c).getStringSet("allowed", emptySet())!!
     fun allow(c: Context, sender: String, on: Boolean = true) = p(c).edit().putStringSet("allowed", if (on) allowed(c) + sender.lowercase() else allowed(c) - sender).apply()
     fun switch(c: Context, name: String) = p(c).getBoolean(name, true) // tracking, links, risky, realAddress: on by default

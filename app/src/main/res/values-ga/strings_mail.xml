@@ -239,4 +239,8 @@
     <string name="mail_saved">Sábháilte</string>
     <string name="mail_search_stored">Cuardaigh Stóras</string>
     <string name="mail_search_stored_in">Cuardaigh Stóras › %1$s</string>
+    <string name="mail_undo">Cealaigh an seoladh</string>
+    <string name="mail_undo_summary">Fanann Seol an fad seo; tógann comhaireamh siar ar an gcnaipe an ríomhphost ar ais.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Gan fanacht</string>
 </resources>

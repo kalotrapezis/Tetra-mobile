@@ -227,4 +227,8 @@
     <string name="mail_saved">Mentve</string>
     <string name="mail_search_stored">Keresés a tárhelyen</string>
     <string name="mail_search_stored_in">Keresés a tárhelyen › %1$s</string>
+    <string name="mail_undo">Küldés visszavonása</string>
+    <string name="mail_undo_summary">A Küldés ennyit vár; a gombon visszaszámlálás veszi vissza a levelet.</string>
+    <string name="mail_undo_seconds">%1$d mp</string>
+    <string name="mail_undo_none">Nincs várakozás</string>
 </resources>

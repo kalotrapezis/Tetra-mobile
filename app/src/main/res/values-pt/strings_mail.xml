@@ -231,4 +231,8 @@
     <string name="mail_saved">Guardado</string>
     <string name="mail_search_stored">Pesquisar em Armazenamento</string>
     <string name="mail_search_stored_in">Pesquisar em Armazenamento › %1$s</string>
+    <string name="mail_undo">Anular envio</string>
+    <string name="mail_undo_summary">Enviar espera este tempo; uma contagem no botão recupera o email.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Sem espera</string>
 </resources>

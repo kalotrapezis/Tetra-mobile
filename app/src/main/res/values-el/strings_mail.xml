@@ -237,4 +237,8 @@
     <string name="mail_saved">Αποθηκεύτηκε</string>
     <string name="mail_search_stored">Αναζήτηση στην Αποθήκη</string>
     <string name="mail_search_stored_in">Αναζήτηση στην Αποθήκη › %1$s</string>
+    <string name="mail_undo">Αναίρεση αποστολής</string>
+    <string name="mail_undo_summary">Η Αποστολή περιμένει τόσο, με το κουμπί της να μετρά αντίστροφα· ένα πάτημα παίρνει πίσω το μήνυμα.</string>
+    <string name="mail_undo_seconds">%1$d δευτ.</string>
+    <string name="mail_undo_none">Χωρίς αναμονή</string>
 </resources>

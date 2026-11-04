@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -244,9 +245,14 @@ internal object MailSend {
             t.connect(smtp.host, smtp.port, smtp.user, MailEngine.secret(c, acc))
             t.sendMessage(msg, msg.allRecipients)
         }
-        if (smtp.host != "smtp.gmail.com") runCatching { appendTo(c, root, m.account, "Sent", msg, Flags(Flags.Flag.SEEN)) } // Gmail keeps its own copy
-            .onFailure { WriterLog.w("Mail: the copy in Sent failed (${it.message})") }
-        runCatching { MailEngine.sync(c, root, acc) }
+        // sent: the copy in Sent and the account's sync after the composer has closed (it waited for both; the user, 4 Nov:
+        // "it took its sweet time")
+        val app = c.applicationContext
+        Thread {
+            if (smtp.host != "smtp.gmail.com") runCatching { appendTo(app, root, m.account, "Sent", msg, Flags(Flags.Flag.SEEN)) } // Gmail keeps its own copy
+                .onFailure { WriterLog.w("Mail: the copy in Sent failed (${it.message})") }
+            runCatching { MailEngine.sync(app, root, acc) }
+        }.start()
     }
 
     fun draft(c: Context, root: File, m: MailOut) {
@@ -338,6 +344,10 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
     var panel by remember { mutableStateOf(false) }
     var asking by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
+    // Send waits 5 s, the button a ring running down that takes it back (the user, 4 Nov: "a 5 sec undo, and then send")
+    var waiting by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+    val left = remember { androidx.compose.animation.core.Animatable(1f) }
+    val undoSeconds = remember { MailPrefs.undo(context) } // Settings › Mail › Undo send: 5, 3 or no wait
     val pick = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         attachments = attachments + uris.map { u -> MailAttachment(context.contentResolver.query(u, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c -> if (c.moveToFirst()) c.getString(0) else null } ?: "attachment", uri = u) }
     }
@@ -364,6 +374,7 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
         if (isDraft) original?.headers?.get("in-reply-to") else of?.let { original?.headers?.get("message-id") },
         if (isDraft) original?.headers?.get("references") else of?.let { listOfNotNull(original?.headers?.get("references"), original?.headers?.get("message-id")).joinToString(" ").ifEmpty { null } },
         html = bodyHtml())
+    BackHandler(waiting != null) { waiting?.cancel(); waiting = null; scope.launch { left.snapTo(1f) } } // Back in the 5 s: taken back too
     fun go(save: Boolean) {
         if (!save && to.isBlank()) { problem = context.getString(R.string.mail_no_recipient); return }
         busy = true; problem = null
@@ -437,13 +448,32 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
         // the writing island: two big buttons with words; the rest pulled up
         Box(if (MailLook.top) Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 8.dp) else Modifier.align(Alignment.BottomCenter).navigationBarsPadding().imePadding().padding(bottom = 12.dp)) {
             IslandBottomBar(expand = { panel = true }, visible = !panel) {
-                Surface(color = MAIL_ACCENT, contentColor = Color.White, shape = CircleShape, modifier = Modifier.clickable(enabled = !busy) { go(false) }) {
+                Surface(color = MAIL_ACCENT, contentColor = Color.White, shape = CircleShape, modifier = Modifier.clickable(enabled = !busy) {
+                    val w = waiting
+                    when {
+                        w != null -> { w.cancel(); waiting = null; scope.launch { left.snapTo(1f) } } // taken back: the mail stays as written
+                        to.isBlank() -> problem = context.getString(R.string.mail_no_recipient)
+                        undoSeconds <= 0 -> go(false)
+                        else -> waiting = scope.launch {
+                            left.snapTo(1f)
+                            left.animateTo(0f, androidx.compose.animation.core.tween(undoSeconds * 1000, easing = androidx.compose.animation.core.LinearEasing))
+                            waiting = null; go(false)
+                        }
+                    }
+                }) {
                     Row(Modifier.padding(horizontal = 22.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(painterResource(R.drawable.ic_arrow_forward), null)
-                        Text(stringResource(if (busy) R.string.mail_sending else R.string.mail_send), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        when {
+                            waiting != null -> Box(contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(progress = { left.value }, Modifier.size(26.dp), color = Color.White, strokeWidth = 3.dp, trackColor = Color.White.copy(alpha = 0.25f))
+                                Text("${kotlin.math.ceil(left.value * undoSeconds).toInt().coerceAtLeast(1)}", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            }
+                            busy -> CircularProgressIndicator(Modifier.size(22.dp), color = Color.White, strokeWidth = 2.5.dp) // going: the server not answered yet
+                            else -> Icon(painterResource(R.drawable.ic_arrow_forward), null)
+                        }
+                        Text(stringResource(when { waiting != null -> R.string.common_undo; busy -> R.string.mail_sending; else -> R.string.mail_send }), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                 }
-                Surface(color = Color.Transparent, contentColor = islandContentColor(), shape = CircleShape, modifier = Modifier.clickable(enabled = !busy) { go(true) }) {
+                Surface(color = Color.Transparent, contentColor = islandContentColor(), shape = CircleShape, modifier = Modifier.clickable(enabled = !busy && waiting == null) { go(true) }) {
                     Text(stringResource(R.string.mail_save_draft), Modifier.padding(horizontal = 16.dp, vertical = 12.dp), style = MaterialTheme.typography.titleSmall)
                 }
             }

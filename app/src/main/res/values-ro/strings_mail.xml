@@ -231,4 +231,8 @@
     <string name="mail_saved">Salvat</string>
     <string name="mail_search_stored">Caută în Stocare</string>
     <string name="mail_search_stored_in">Caută în Stocare › %1$s</string>
+    <string name="mail_undo">Anulează trimiterea</string>
+    <string name="mail_undo_summary">Trimiterea așteaptă atât; numărătoarea de pe buton ia mesajul înapoi.</string>
+    <string name="mail_undo_seconds">%1$d s</string>
+    <string name="mail_undo_none">Fără așteptare</string>
 </resources>
