@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Najkrótsza: krótsza droga, nawet po drogach gruntowych i małych drogach</string>
     <string name="settings_main_roads">Główne drogi</string>
     <string name="settings_shortest">Najkrótsza</string>
-    <string name="settings_no_left">Bez skrętów w lewo</string>
-    <string name="settings_no_left_summary">Bez skrętów w lewo: główne drogi, a gdzie skręt w lewo przecinałby ruch, objazd w prawo, jak w mieście w godzinach szczytu</string>
+    <string name="settings_no_left">Bez przecinania ruchu</string>
+    <string name="settings_no_left_summary">Bez przecinania ruchu: główne drogi, a w miastach zamiast wyjeżdżać z bocznej ulicy w lewo lub prosto przez większą drogę objazd, by wjechać na nią w prawo</string>
     <string name="settings_directions">Wskazówki</string>
     <string name="settings_directions_note">Głos to synteza mowy Androida; jej głosy są w ustawieniach Androida.</string>
     <string name="settings_directions_in_summary">Słowa nawigacji zakręt po zakręcie i głos</string>

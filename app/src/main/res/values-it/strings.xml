@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Più breve: la via più corta, anche su sterrati e stradine</string>
     <string name="settings_main_roads">Strade principali</string>
     <string name="settings_shortest">Più breve</string>
-    <string name="settings_no_left">Senza svolte a sinistra</string>
-    <string name="settings_no_left_summary">Senza svolte a sinistra: strade principali e, dove una svolta a sinistra taglierebbe il traffico, un giro a destra, come in città nell\'ora di punta</string>
+    <string name="settings_no_left">Senza tagliare il traffico</string>
+    <string name="settings_no_left_summary">Senza tagliare il traffico: strade principali e, in città, invece di uscire da una via secondaria a sinistra o dritto attraverso una più grande, un giro per immettersi svoltando a destra</string>
     <string name="settings_directions">Indicazioni</string>
     <string name="settings_directions_note">La voce è la sintesi vocale di Android; le voci sono nelle impostazioni di Android.</string>
     <string name="settings_directions_in_summary">Le indicazioni passo passo e la voce</string>

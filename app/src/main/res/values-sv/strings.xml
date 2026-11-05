@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Kortast: den kortare vägen, även på grusvägar och små vägar</string>
     <string name="settings_main_roads">Huvudvägar</string>
     <string name="settings_shortest">Kortast</string>
-    <string name="settings_no_left">Inga vänstersvängar</string>
-    <string name="settings_no_left_summary">Inga vänstersvängar: större vägar, och där en vänstersväng skulle korsa trafiken en sväng runt till höger, som i stan i rusningstid</string>
+    <string name="settings_no_left">Utan att korsa trafiken</string>
+    <string name="settings_no_left_summary">Utan att korsa trafiken: större vägar, och i stan i stället för att från en sidogata svänga vänster eller köra rakt över en större väg en omväg för att svänga in på den till höger</string>
     <string name="settings_directions">Vägbeskrivning</string>
     <string name="settings_directions_note">Rösten är Androids text till tal; dess röster finns i Androids inställningar.</string>
     <string name="settings_directions_in_summary">Instruktionerna sväng för sväng och rösten</string>

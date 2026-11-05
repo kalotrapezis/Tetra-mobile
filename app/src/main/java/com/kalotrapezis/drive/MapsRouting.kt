@@ -65,8 +65,10 @@ internal object MapsRouting {
     const val MAIN_ROADS = "tetra.main_roads"
     const val MAIN_DISTANCE = 90.0
     /**
-     * Main roads without left turns (the user, 5 Nov, in Ναύπλιο at rush hour: "I would not turn left for anything, I went
-     * round the block or on to a junction further down to turn right — it should be a mode"): a left turn counts NO_LEFT_TURN.
+     * No cutting across (the user, 5 Nov, in Ναύπλιο at rush hour: "I went round the block or on to a junction further down,
+     * not to cut two streams — it should be a mode"): Main roads, a left or straight on out of a side road over a bigger one
+     * counting CROSS_IN_TOWN in a town ([Towns]); outside one, as on Main roads ("not everywhere, in big built-up areas").
+     * Its setting is still called no_left.
      */
     const val NO_LEFT = "tetra.no_left"
     // shortcut: past this (a drive across Greece) the shortest way is taken, mostly on motorways anyway; a car_main CH profile in maps-graph.yml (a rebuild) would lift it
@@ -509,18 +511,33 @@ internal object MapsRouting {
     fun posted(vararg kmh: Double): Int? =
         kmh.filter { it.isFinite() && it > 0 && it < MaxSpeed.UNLIMITED_SIGN_SPEED }.minOrNull()?.let { Math.round(it / 5).toInt() * 5 }
 
-    /** A turn's seconds on Main roads, a right one and a left one across the traffic: 5 Nov, five drives round Θήβα and
-     *  Σχηματάρι, the fewest turns (Θήβα → Χαλκίδα 25 turns down to 8, 4 minutes longer) and none through a factory's yard. */
+    /**
+     * A turn's seconds on Main roads by the streams of traffic it cuts (the user, 5 Nov: "out of a side road, left or straight
+     * across, I cut two streams; I went round the block to turn left from the main road, with the right of way — one stream"):
+     * right into one stream; left off the road with the right of way, across one; left or straight across a bigger road from a
+     * smaller one, across two with none — and in a town on No cutting across ([NO_LEFT]), as long as a way round the block.
+     * Tuned 5 Nov on drives round Θήβα, Σχηματάρι and Ναύπλιο (Θήβα → Χαλκίδα 25 turns down to 6).
+     */
     private const val RIGHT_TURN = 30.0
     private const val LEFT_TURN = 60.0
-    private const val NO_LEFT_TURN = 180.0 // three rights round a block, and then some
+    private const val CROSS = 120.0
+    private const val CROSS_IN_TOWN = 300.0
+
+    /** A road's size at a crossing: the smaller the bigger, residential and unclassified alike. */
+    private fun rank(c: RoadClass) = when (c) {
+        RoadClass.MOTORWAY -> 0; RoadClass.TRUNK -> 1; RoadClass.PRIMARY -> 2; RoadClass.SECONDARY -> 3; RoadClass.TERTIARY -> 4
+        RoadClass.RESIDENTIAL, RoadClass.UNCLASSIFIED, RoadClass.LIVING_STREET -> 5
+        else -> 6
+    }
 
     /**
      * Main roads' turns (the user, 5 Nov, beside Google's way: "by eye, the turns — turn here, turn there; the other has far
-     * fewer"): [base]'s costs, and seconds for leaving the way on at a crossing, more for a left turn across the traffic.
-     * The graph keeps no road's direction (no orientation), so a turn's angle comes from the two roads' first metres.
+     * fewer"): [base]'s costs, and the seconds above for the streams a turn cuts. The graph keeps no road's direction (no
+     * orientation), so a turn's angle comes from the two roads' first metres; [towns] when No cutting across is on.
      */
-    private class Turns(private val base: TurnCostProvider, private val g: com.graphhopper.storage.BaseGraph, private val left: Double) : TurnCostProvider {
+    private class Turns(private val base: TurnCostProvider, private val g: com.graphhopper.storage.BaseGraph,
+                        private val road: com.graphhopper.routing.ev.EnumEncodedValue<RoadClass>, private val roundabout: BooleanEncodedValue,
+                        private val towns: Towns?) : TurnCostProvider {
         private val explorer = g.createEdgeExplorer()
         override fun calcTurnMillis(inEdge: Int, viaNode: Int, outEdge: Int) = base.calcTurnMillis(inEdge, viaNode, outEdge)
         override fun calcTurnWeight(inEdge: Int, viaNode: Int, outEdge: Int): Double {
@@ -528,20 +545,57 @@ internal object MapsRouting {
             if (w.isInfinite() || inEdge < 0 || outEdge < 0 || inEdge == outEdge) return w
             val other = g.getOtherNode(outEdge, viaNode)
             if (other == viaNode || g.getOtherNode(inEdge, viaNode) == viaNode) return w // a loop
-            val inn = g.getEdgeIteratorState(inEdge, viaNode).fetchWayGeometry(com.graphhopper.util.FetchMode.ALL)
-            val out = g.getEdgeIteratorState(outEdge, other).fetchWayGeometry(com.graphhopper.util.FetchMode.ALL)
+            val ins = g.getEdgeIteratorState(inEdge, viaNode); val outs = g.getEdgeIteratorState(outEdge, other)
+            if (ins.get(roundabout) || outs.get(roundabout)) return w // a roundabout gives way by itself
+            val inn = ins.fetchWayGeometry(com.graphhopper.util.FetchMode.ALL); val out = outs.fetchWayGeometry(com.graphhopper.util.FetchMode.ALL)
             val n = inn.size()
             val turn = ((bearing(out.getLat(0), out.getLon(0), out.getLat(1), out.getLon(1)) -
                 bearing(inn.getLat(n - 2), inn.getLon(n - 2), inn.getLat(n - 1), inn.getLon(n - 1)) + 540) % 360) - 180
-            if (Math.abs(turn) < 40) return w
-            // a bend where two pieces of one road meet is no crossing
-            val it = explorer.setBaseNode(viaNode); var roads = 0
-            while (it.next()) if (++roads > 2) break
-            return if (roads <= 2) w else w + if (turn > 0) RIGHT_TURN else left
+            // the roads meeting here: a bend where two pieces of one road meet is no crossing; the biggest road but mine and my way on
+            val mine = rank(ins.get(road)); val on = rank(outs.get(road))
+            val it = explorer.setBaseNode(viaNode); var roads = 0; var biggest = 7
+            while (it.next()) { roads++; if (it.edge != inEdge && it.edge != outEdge) biggest = minOf(biggest, rank(it.get(road))) }
+            if (roads <= 2) return w
+            val across = biggest < mine && (turn < -40 || (Math.abs(turn) < 40 && on > biggest)) // out of a smaller road, left or straight over
+            return w + when {
+                turn > 40 -> RIGHT_TURN
+                across -> if (towns != null && towns.inside(g.nodeAccess.getLat(viaNode), g.nodeAccess.getLon(viaNode))) CROSS_IN_TOWN else CROSS
+                turn < -40 -> LEFT_TURN
+                else -> 0.0
+            }
+        }
+    }
+
+    /**
+     * The built-up areas of a graph's country for No cutting across: within 4 km of a city, 1.5 km of a town, 1 km of a suburb,
+     * from <id>-places.tsv beside the graph (maps-tools/maps-places.py).
+     */
+    // shortcut: circles round a place's point, not the town's real edge; OSM's landuse=residential areas would be truer (a new file)
+    internal class Towns(file: File) {
+        private val at: DoubleArray // lat, lng, metres
+        init {
+            val radius = mapOf("city" to 4000.0, "town" to 1500.0, "suburb" to 1000.0)
+            val out = ArrayList<Double>()
+            file.forEachLine { line ->
+                val p = line.split('\t')
+                val r = radius[p[0]] ?: return@forEachLine
+                val lat = p.getOrNull(1)?.toDoubleOrNull() ?: return@forEachLine; val lng = p.getOrNull(2)?.toDoubleOrNull() ?: return@forEachLine
+                out += lat; out += lng; out += r
+            }
+            at = out.toDoubleArray()
+        }
+        fun inside(lat: Double, lng: Double): Boolean {
+            for (i in at.indices step 3) if (Math.abs(at[i] - lat) < 0.04 && metresBetween(lat, lng, at[i], at[i + 1]) < at[i + 2]) return true
+            return false
         }
     }
 
     private class TetraHopper : GraphHopper() {
+        /** The towns beside this graph, read the first time No cutting across asks; null without the places file. */
+        val towns by lazy {
+            val dir = File(graphHopperLocation)
+            File(dir.parentFile, dir.name.removeSuffix("-gh") + "-places.tsv").takeIf { it.isFile }?.let { f -> runCatching { Towns(f) }.onFailure { once("towns not read", it) }.getOrNull() }
+        }
         override fun createWeightingFactory() = WeightingFactory { profile, hints, noTurns -> weighting(profile, hints, noTurns) }
 
         private fun weighting(profile: Profile, request: PMap, noTurns: Boolean): Weighting {
@@ -614,7 +668,8 @@ internal object MapsRouting {
                 else -> throw IllegalArgumentException("No profile ${profile.name}")
             }
             val main = profile.name == "car" && hints.getBool(MAIN_ROADS, false) && turns !== TurnCostProvider.NO_TURN_COST_PROVIDER
-            return CustomWeighting(if (main) Turns(turns, baseGraph.baseGraph, if (hints.getBool(NO_LEFT, false)) NO_LEFT_TURN else LEFT_TURN) else turns, p)
+            return CustomWeighting(if (main) Turns(turns, baseGraph.baseGraph, em.getEnumEncodedValue(RoadClass.KEY, RoadClass::class.java),
+                em.getBooleanEncodedValue("roundabout"), if (hints.getBool(NO_LEFT, false)) towns else null) else turns, p)
         }
     }
 }

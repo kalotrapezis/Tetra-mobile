@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Legrövidebb: a rövidebb út, földutakon és kis utakon is</string>
     <string name="settings_main_roads">Főutak</string>
     <string name="settings_shortest">Legrövidebb</string>
-    <string name="settings_no_left">Balra kanyar nélkül</string>
-    <string name="settings_no_left_summary">Balra kanyar nélkül: főutak, és ahol a balra kanyar keresztezné a forgalmat, kerülő jobbra, mint a városban csúcsidőben</string>
+    <string name="settings_no_left">Forgalom keresztezése nélkül</string>
+    <string name="settings_no_left_summary">Forgalom keresztezése nélkül: főutak, és a városokban mellékutcából balra vagy egyenesen egy nagyobb úton át helyett kerülő, hogy jobbra kanyarodva térjen rá</string>
     <string name="settings_directions">Útbaigazítás</string>
     <string name="settings_directions_note">A hang az Android szövegfelolvasója; a hangjai az Android beállításaiban vannak.</string>
     <string name="settings_directions_in_summary">Az útbaigazítás szövege és hangja</string>

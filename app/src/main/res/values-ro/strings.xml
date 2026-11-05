@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Cel mai scurt: calea mai scurtă, chiar pe drumuri de pământ și drumuri mici</string>
     <string name="settings_main_roads">Drumuri principale</string>
     <string name="settings_shortest">Cel mai scurt</string>
-    <string name="settings_no_left">Fără viraje la stânga</string>
-    <string name="settings_no_left_summary">Fără viraje la stânga: drumurile principale, iar unde un viraj la stânga ar tăia traficul, un ocol pe la dreapta, ca în oraș la ora de vârf</string>
+    <string name="settings_no_left">Fără a tăia traficul</string>
+    <string name="settings_no_left_summary">Fără a tăia traficul: drumurile principale, iar în orașe, în loc să ieși dintr-o stradă laterală la stânga sau drept peste un drum mai mare, un ocol ca să intri pe el la dreapta</string>
     <string name="settings_directions">Indicații</string>
     <string name="settings_directions_note">Vocea este sinteza vocală Android; vocile ei sunt în setările Android.</string>
     <string name="settings_directions_in_summary">Cuvintele indicațiilor pas cu pas și vocea</string>

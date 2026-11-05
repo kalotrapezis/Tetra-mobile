@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Īsākais: īsākais ceļš, arī pa meža ceļiem un maziem ceļiem</string>
     <string name="settings_main_roads">Galvenie ceļi</string>
     <string name="settings_shortest">Īsākais</string>
-    <string name="settings_no_left">Bez pagriezieniem pa kreisi</string>
-    <string name="settings_no_left_summary">Bez pagriezieniem pa kreisi: galvenie ceļi, un kur pagrieziens pa kreisi šķērsotu satiksmi, apbraukšana pa labi, kā pilsētā sastrēgumstundā</string>
+    <string name="settings_no_left">Nešķērsojot satiksmi</string>
+    <string name="settings_no_left_summary">Nešķērsojot satiksmi: galvenie ceļi, un pilsētās tā vietā, lai no blakusielas grieztos pa kreisi vai brauktu taisni pāri lielākam ceļam, apbraukšana, lai uz tā nogrieztos pa labi</string>
     <string name="settings_directions">Norādes</string>
     <string name="settings_directions_note">Balss ir Android teksta pārveide runā; tās balsis ir Android iestatījumos.</string>
     <string name="settings_directions_in_summary">Pagriezienu norāžu vārdi un balss</string>

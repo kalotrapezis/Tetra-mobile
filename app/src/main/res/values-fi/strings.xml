@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Lyhin: lyhyempi reitti, myös metsäteitä ja pieniä teitä pitkin</string>
     <string name="settings_main_roads">Pääteitä</string>
     <string name="settings_shortest">Lyhin</string>
-    <string name="settings_no_left">Ei vasemmalle</string>
-    <string name="settings_no_left_summary">Ei vasemmalle: pääteitä, ja missä vasemmalle kääntyminen ylittäisi liikenteen, kierros oikealta, kuten kaupungissa ruuhka-aikaan</string>
+    <string name="settings_no_left">Ei liikenteen poikki</string>
+    <string name="settings_no_left_summary">Ei liikenteen poikki: pääteitä, ja kaupungeissa sivukadulta vasemmalle tai suoraan isomman tien yli ajamisen sijaan kierros, jotta sille käännytään oikealle</string>
     <string name="settings_directions">Reittiohjeet</string>
     <string name="settings_directions_note">Ääni on Androidin tekstistä puheeksi -toiminto; sen äänet ovat Androidin asetuksissa.</string>
     <string name="settings_directions_in_summary">Käännös käännökseltä -ohjeiden sanat ja ääni</string>

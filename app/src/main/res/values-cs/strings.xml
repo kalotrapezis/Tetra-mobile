@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Nejkratší: kratší cesta, i po polních cestách a malých silnicích</string>
     <string name="settings_main_roads">Hlavní silnice</string>
     <string name="settings_shortest">Nejkratší</string>
-    <string name="settings_no_left">Bez odbočení vlevo</string>
-    <string name="settings_no_left_summary">Bez odbočení vlevo: hlavní silnice, a kde by levé odbočení křížilo provoz, objížďka vpravo, jako ve městě ve špičce</string>
+    <string name="settings_no_left">Bez křížení provozu</string>
+    <string name="settings_no_left_summary">Bez křížení provozu: hlavní silnice, a ve městech místo vyjetí z vedlejší ulice vlevo nebo rovně přes větší silnici objížďka, abyste na ni najeli vpravo</string>
     <string name="settings_directions">Navigace</string>
     <string name="settings_directions_note">Hlas je převod textu na řeč Androidu; jeho hlasy najdete v nastavení Androidu.</string>
     <string name="settings_directions_in_summary">Pokyny k odbočení a hlas</string>

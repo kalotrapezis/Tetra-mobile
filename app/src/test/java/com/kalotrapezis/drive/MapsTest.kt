@@ -699,15 +699,33 @@ class MapsMainRoadsTest {
         assertTrue(turns <= 13)
     }
 
-    /** No left turns (the user, 5 Nov, Ναύπλιο at rush hour: round the block to the right instead): Τολό → Νέα Κίος. */
-    @Test fun noLeftTurns() {
+    /**
+     * No cutting across (the user, 5 Nov, Ναύπλιο at rush hour: round the block, not out of a side road across two streams), in
+     * town only: in Θεσσαλονίκη, Καμάρα → Χαριλάου, and in Ξάνθη from the cemeteries' road onto Ξάνθης - Κομοτηνής (the user:
+     * "left onto the main road you wait for ages; I went by the roundabout, onto the main road at once"), no left out of a
+     * smaller road onto a bigger one; by Σχηματάρι, among fields, the same way as Main roads.
+     */
+    @Test fun noCuttingAcross() {
         assumeTrue(File(dir, "properties").isFile)
-        fun lefts(noLeft: Boolean) = MapsRouting.route(dir, 37.5207, 22.8590, 37.5844, 22.7480, "car", el, main = true, noLeft = noLeft).let { r ->
-            println("Τολό → Νέα Κίος${if (noLeft) " without left turns" else ""}: ${"%.1f".format(r.metres / 1000)} km, ${r.millis / 60_000} min, " +
-                "${r.steps.count { it.sign in leftSigns }} left of ${r.steps.count { it.sign in turnSigns }} turns")
-            r.steps.count { it.sign in leftSigns }
+        val gh = MapsRouting.open(dir)
+        val size = listOf("motorway", "trunk", "primary", "secondary", "tertiary")
+        fun rank(c: String?) = size.indexOf(c).let { if (it < 0) size.size else it }
+        fun across(name: String, c: DoubleArray, noLeft: Boolean): Int {
+            val req = com.graphhopper.GHRequest(c[0], c[1], c[2], c[3]).setProfile("car").setPathDetails(listOf("road_class"))
+            req.hints.putObject(MapsRouting.MAIN_ROADS, true).putObject(MapsRouting.NO_LEFT, noLeft).putObject(com.graphhopper.util.Parameters.CH.DISABLE, true)
+            val p = gh.route(req).best
+            val cls = arrayOfNulls<String>(p.points.size()); p.pathDetails["road_class"]!!.forEach { d -> for (i in d.first until d.last) cls[i] = d.value.toString() }
+            var at = 0; var n = 0
+            for (ins in p.instructions) { if (ins.sign in leftSigns && at > 0 && rank(cls[at]) < rank(cls[at - 1])) n++; at += ins.points.size() }
+            println("$name${if (noLeft) " without cutting across" else ""}: ${"%.1f".format(p.distance / 1000)} km, $n left out of a smaller road")
+            return n
         }
-        assertTrue(lefts(true) < lefts(false))
+        for ((name, c) in listOf("Καμάρα → Χαριλάου" to doubleArrayOf(40.6327, 22.9518, 40.6005, 22.9705),
+                "Ανατολικής Ρωμυλίας → Ξάνθης - Κομοτηνής" to doubleArrayOf(41.1345, 24.8981, 41.1219, 24.9110))) {
+            assertTrue(across(name, c, false) > 0); assertEquals(0, across(name, c, true))
+        }
+        fun way(noLeft: Boolean) = MapsRouting.route(dir, 38.30874, 23.59751, 38.371342, 23.465152, "car", el, heading = 279.0, main = true, noLeft = noLeft).metres
+        assertEquals(way(false), way(true), 1.0)
     }
 
     @Ignore("its places were made up before publishing; put your own back locally to run it") @Test fun homeToMarket() {

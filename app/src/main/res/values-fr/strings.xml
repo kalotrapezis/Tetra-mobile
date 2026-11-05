@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Plus court : le chemin le plus court, même par des pistes et petites routes</string>
     <string name="settings_main_roads">Grands axes</string>
     <string name="settings_shortest">Plus court</string>
-    <string name="settings_no_left">Sans tourner à gauche</string>
-    <string name="settings_no_left_summary">Sans tourner à gauche : les grands axes, et là où tourner à gauche couperait la circulation, un détour par la droite, comme en ville aux heures de pointe</string>
+    <string name="settings_no_left">Sans couper le trafic</string>
+    <string name="settings_no_left_summary">Sans couper le trafic : les grands axes et, en ville, plutôt que de sortir d’une petite rue à gauche ou tout droit à travers une plus grande, un détour pour s’y engager à droite</string>
     <string name="settings_directions">Itinéraire</string>
     <string name="settings_directions_note">La voix est la synthèse vocale d’Android ; ses voix se trouvent dans les paramètres d’Android.</string>
     <string name="settings_directions_in_summary">Les instructions pas à pas et la voix</string>

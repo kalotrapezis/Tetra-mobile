@@ -358,8 +358,8 @@
     <string name="settings_shortest_summary">Shortest: the shorter way, even on tracks and small roads</string>
     <string name="settings_main_roads">Main roads</string>
     <string name="settings_shortest">Shortest</string>
-    <string name="settings_no_left">No left turns</string>
-    <string name="settings_no_left_summary">No left turns: main roads, going round by the right where a left turn would cross the traffic, as in a town at rush hour</string>
+    <string name="settings_no_left">No cutting across</string>
+    <string name="settings_no_left_summary">No cutting across: main roads, and in towns, rather than leaving a side road to turn left or go straight over a bigger one, a way round to join it turning right</string>
     <string name="settings_directions">Directions</string>
     <string name="settings_directions_note">The voice is Android\'s text-to-speech; its voices are in Android\'s settings.</string>
     <string name="settings_directions_in_summary">The turn-by-turn words and the voice</string>

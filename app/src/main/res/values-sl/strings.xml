@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Najkrajša: krajša pot, tudi po kolovozih in majhnih cestah</string>
     <string name="settings_main_roads">Glavne ceste</string>
     <string name="settings_shortest">Najkrajša</string>
-    <string name="settings_no_left">Brez zavijanja levo</string>
-    <string name="settings_no_left_summary">Brez zavijanja levo: glavne ceste, in kjer bi zavoj levo prečkal promet, obvoz po desni, kot v mestu ob prometni konici</string>
+    <string name="settings_no_left">Brez prečkanja prometa</string>
+    <string name="settings_no_left_summary">Brez prečkanja prometa: glavne ceste, v mestih pa namesto izvoza iz stranske ulice levo ali naravnost čez večjo cesto obvoz, da nanjo zavijete desno</string>
     <string name="settings_directions">Navodila</string>
     <string name="settings_directions_note">Glas je Androidova pretvorba besedila v govor; njeni glasovi so v nastavitvah Androida.</string>
     <string name="settings_directions_in_summary">Besede navodil za zavijanje in glas</string>

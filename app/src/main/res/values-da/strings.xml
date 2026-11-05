@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Korteste: den korteste vej, også ad markveje og små veje</string>
     <string name="settings_main_roads">Hovedveje</string>
     <string name="settings_shortest">Korteste</string>
-    <string name="settings_no_left">Ingen venstresving</string>
-    <string name="settings_no_left_summary">Ingen venstresving: hovedveje, og hvor et venstresving ville krydse trafikken, en omvej til højre, som i byen i myldretiden</string>
+    <string name="settings_no_left">Uden at krydse trafikken</string>
+    <string name="settings_no_left_summary">Uden at krydse trafikken: hovedveje, og i byer, i stedet for at køre fra en sidevej til venstre eller ligeud over en større vej, en omvej så du drejer ind på den til højre</string>
     <string name="settings_directions">Rutevejledning</string>
     <string name="settings_directions_note">Stemmen er Androids tekst-til-tale; dens stemmer findes i Androids indstillinger.</string>
     <string name="settings_directions_in_summary">Ordene sving for sving og stemmen</string>

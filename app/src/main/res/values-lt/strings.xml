@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Trumpiausias: trumpesnis kelias, net vieškeliais ir mažais keliais</string>
     <string name="settings_main_roads">Pagrindiniai keliai</string>
     <string name="settings_shortest">Trumpiausias</string>
-    <string name="settings_no_left">Be posūkių į kairę</string>
-    <string name="settings_no_left_summary">Be posūkių į kairę: pagrindiniai keliai, o kur posūkis į kairę kirstų eismą, apvažiavimas į dešinę, kaip mieste piko metu</string>
+    <string name="settings_no_left">Nekertant eismo</string>
+    <string name="settings_no_left_summary">Nekertant eismo: pagrindiniai keliai, o miestuose, užuot iš šalutinės gatvės sukus į kairę ar važiavus tiesiai per didesnį kelią, apvažiavimas, kad į jį įsuktumėte į dešinę</string>
     <string name="settings_directions">Nuorodos</string>
     <string name="settings_directions_note">Balsas – Android teksto vertimo kalba funkcija; jos balsai yra Android nustatymuose.</string>
     <string name="settings_directions_in_summary">Nuoseklių nuorodų žodžiai ir balsas</string>

@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Kortste: de kortere weg, ook over onverharde en kleine wegen</string>
     <string name="settings_main_roads">Hoofdwegen</string>
     <string name="settings_shortest">Kortste</string>
-    <string name="settings_no_left">Niet linksaf</string>
-    <string name="settings_no_left_summary">Niet linksaf: hoofdwegen, en waar linksaf het verkeer zou kruisen een omweg rechtsom, zoals in de stad in de spits</string>
+    <string name="settings_no_left">Zonder het verkeer te kruisen</string>
+    <string name="settings_no_left_summary">Zonder het verkeer te kruisen: hoofdwegen, en in de stad in plaats van vanuit een zijstraat linksaf of rechtdoor een grotere weg over te steken een omweg om er rechtsaf op te komen</string>
     <string name="settings_directions">Routebeschrijving</string>
     <string name="settings_directions_note">De stem is de tekst-naar-spraak van Android; de stemmen staan in de Android-instellingen.</string>
     <string name="settings_directions_in_summary">De aanwijzingen en de stem</string>

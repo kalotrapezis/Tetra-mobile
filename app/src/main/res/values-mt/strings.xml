@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">L-eqsar: l-eqsar triq, anki fuq trakkijiet u toroq żgħar</string>
     <string name="settings_main_roads">Toroq ewlenin</string>
     <string name="settings_shortest">L-eqsar</string>
-    <string name="settings_no_left">Mingħajr dawriet lejn ix-xellug</string>
-    <string name="settings_no_left_summary">Mingħajr dawriet lejn ix-xellug: it-toroq ewlenin, u fejn dawra lejn ix-xellug taqsam it-traffiku, dawra mil-lemin, bħal fil-belt fl-eqqel ħin</string>
+    <string name="settings_no_left">Mingħajr ma taqsam it-traffiku</string>
+    <string name="settings_no_left_summary">Mingħajr ma taqsam it-traffiku: it-toroq ewlenin, u fil-bliet, minflok toħroġ minn triq żgħira lejn ix-xellug jew dritt minn fuq triq akbar, dawra biex tidħol fiha lejn il-lemin</string>
     <string name="settings_directions">Direzzjonijiet</string>
     <string name="settings_directions_note">Il-vuċi hija text-to-speech tal-Android; il-vuċijiet tagħha jinsabu fis-settings tal-Android.</string>
     <string name="settings_directions_in_summary">Il-kliem tad-direzzjonijiet u l-vuċi</string>

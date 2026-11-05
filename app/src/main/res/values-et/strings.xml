@@ -357,8 +357,8 @@
     <string name="settings_shortest_summary">Lühim: lühem tee, ka mööda radu ja väikesi teid</string>
     <string name="settings_main_roads">Põhiteed</string>
     <string name="settings_shortest">Lühim</string>
-    <string name="settings_no_left">Vasakpööreteta</string>
-    <string name="settings_no_left_summary">Vasakpööreteta: suured teed, ja kus vasakpööre lõikaks liiklust, ring paremalt, nagu linnas tipptunnil</string>
+    <string name="settings_no_left">Liiklust lõikamata</string>
+    <string name="settings_no_left_summary">Liiklust lõikamata: suured teed, ja linnades kõrvaltänavalt vasakule või otse üle suurema tee mineku asemel ring, et sinna paremale pöörata</string>
     <string name="settings_directions">Juhised</string>
     <string name="settings_directions_note">Hääl on Androidi kõnesüntees; selle hääled on Androidi seadetes.</string>
     <string name="settings_directions_in_summary">Pöörete juhiste sõnad ja hääl</string>
