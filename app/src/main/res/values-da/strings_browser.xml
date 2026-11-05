@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Aldrig</string>
     <string name="browser_history_exit_note">Glemmes, når du forlader browseren</string>
     <string name="browser_history_never_note">Gemmes, til du rydder den</string>
-    <string name="browser_top_bar">Bjælken øverst</string>
+    <string name="browser_top_bar">Bjælken</string>
     <string name="browser_top_bar_note">Som på en computer: faner og adresse øverst, de øvrige værktøjer i ☰ yderst.</string>
     <string name="browser_pin_favorite">Fastgør på startsiden</string>
     <string name="browser_unpin_favorite">Frigør fra startsiden</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Åbn billede</string>
     <string name="browser_held_save">Gem billede</string>
     <string name="browser_held_copy_picture">Kopiér billedadresse</string>
-    <string name="browser_side_bar">Faner i siden på en tablet</string>
-    <string name="browser_side_bar_note">På tværs står adressen, værktøjerne og fanerne i en kolonne til venstre. Træk den til venstre for at skjule den til en smal stribe, eller lad Skjul automatisk fjerne den, når siden ruller.</string>
+    <string name="browser_side_bar">Lodrette faner</string>
+    <string name="browser_side_bar_note">På en tablet på tværs står adressen, værktøjerne og fanerne i en kolonne til venstre. Knappen ved ♥ skjuler den til en smal stribe, eller lad Skjul automatisk fjerne den, når siden ruller.</string>
     <string name="browser_side_hide">Skjul sidebjælken</string>
 </resources>

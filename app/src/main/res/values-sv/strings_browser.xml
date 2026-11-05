@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Aldrig</string>
     <string name="browser_history_exit_note">Glöms när du lämnar webbläsaren</string>
     <string name="browser_history_never_note">Sparas tills du rensar den</string>
-    <string name="browser_top_bar">Fältet överst</string>
+    <string name="browser_top_bar">Fältet</string>
     <string name="browser_top_bar_note">Som på en dator: flikar och adress överst, övriga verktyg i ☰ längst ut.</string>
     <string name="browser_pin_favorite">Fäst på startsidan</string>
     <string name="browser_unpin_favorite">Lossa från startsidan</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Öppna bild</string>
     <string name="browser_held_save">Spara bild</string>
     <string name="browser_held_copy_picture">Kopiera bildadress</string>
-    <string name="browser_side_bar">Flikar vid sidan på en surfplatta</string>
-    <string name="browser_side_bar_note">Liggande står adressen, verktygen och flikarna i en kolumn till vänster. Dra den åt vänster för att gömma den till en smal remsa, eller låt Dölj automatiskt ta undan den när sidan rullar.</string>
+    <string name="browser_side_bar">Vertikala flikar</string>
+    <string name="browser_side_bar_note">På en surfplatta liggande står adressen, verktygen och flikarna i en kolumn till vänster. Knappen bredvid ♥ gömmer den till en smal remsa, eller låt Dölj automatiskt ta undan den när sidan rullar.</string>
     <string name="browser_side_hide">Dölj sidofältet</string>
 </resources>

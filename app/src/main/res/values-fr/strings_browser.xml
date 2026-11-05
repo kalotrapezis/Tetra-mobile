@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Jamais</string>
     <string name="browser_history_exit_note">Oublié quand vous quittez le navigateur</string>
     <string name="browser_history_never_note">Conservé jusqu’à ce que vous l’effaciez</string>
-    <string name="browser_top_bar">Barre en haut</string>
+    <string name="browser_top_bar">Barre</string>
     <string name="browser_top_bar_note">Comme sur un ordinateur : onglets et adresse en haut, les autres outils dans le ☰ au bout.</string>
     <string name="browser_pin_favorite">Épingler à la page d’accueil</string>
     <string name="browser_unpin_favorite">Détacher de la page d’accueil</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Ouvrir l\'image</string>
     <string name="browser_held_save">Enregistrer l\'image</string>
     <string name="browser_held_copy_picture">Copier l\'adresse de l\'image</string>
-    <string name="browser_side_bar">Onglets sur le côté sur une tablette</string>
-    <string name="browser_side_bar_note">En paysage, l\'adresse, les outils et les onglets se rangent dans une colonne à gauche. Glissez-la vers la gauche pour la réduire à une fine bande, ou laissez le masquage automatique la ranger quand la page défile.</string>
+    <string name="browser_side_bar">Onglets verticaux</string>
+    <string name="browser_side_bar_note">Sur une tablette en paysage, l\'adresse, les outils et les onglets se rangent dans une colonne à gauche. Le bouton à côté de ♥ la réduit à une fine bande, ou laissez le masquage automatique la ranger quand la page défile.</string>
     <string name="browser_side_hide">Masquer la barre latérale</string>
 </resources>

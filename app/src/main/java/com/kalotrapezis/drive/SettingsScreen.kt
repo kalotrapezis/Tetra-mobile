@@ -489,11 +489,13 @@ internal fun SettingsTab(
             prefs.edit().putString("keep_history", it).apply { if (it == BrowserRules.ON_EXIT) remove("history") }.apply() // "on leaving": nothing kept from before either
         }
     }
+    // one menu, Top or Bottom, and Vertical tabs under it on a tablet only, as Contacts' (the user, 5 Nov)
     SettingsSection(null, stringResource(R.string.browser_top_bar_note)) {
-        SwitchRow(stringResource(R.string.browser_top_bar), null, top) { top = it; prefs.edit().putBoolean("top_bar", it).apply() }
-    }
-    SettingsSection(null, stringResource(R.string.browser_side_bar_note)) {
-        SwitchRow(stringResource(R.string.browser_side_bar), null, side) { side = it; prefs.edit().putBoolean("side_bar", it).apply() }
+        ChoiceRow(stringResource(R.string.browser_top_bar), null, listOf(true to stringResource(R.string.settings_top), false to stringResource(R.string.settings_bottom)), top) {
+            top = it; prefs.edit().putBoolean("top_bar", it).apply()
+        }
+        if (LocalConfiguration.current.smallestScreenWidthDp >= 600)
+            SwitchRow(stringResource(R.string.browser_side_bar), stringResource(R.string.browser_side_bar_note), side) { side = it; prefs.edit().putBoolean("side_bar", it).apply() }
     }
     // what this device shares with the others through Tetra's sync (the user, 3 Nov: "options in the settings what to sync in the
     // browser"); each switch is this device's own, and off keeps what is here (BrowserSync.kt)

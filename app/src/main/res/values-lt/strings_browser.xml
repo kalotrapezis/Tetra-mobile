@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Niekada</string>
     <string name="browser_history_exit_note">Pamirštama, kai išeinate iš naršyklės</string>
     <string name="browser_history_never_note">Lieka, kol ją išvalysite</string>
-    <string name="browser_top_bar">Juosta viršuje</string>
+    <string name="browser_top_bar">Juosta</string>
     <string name="browser_top_bar_note">Kaip kompiuteryje: skirtukai ir adresas viršuje, kiti įrankiai ☰ gale.</string>
     <string name="browser_pin_favorite">Prisegti prie pradžios puslapio</string>
     <string name="browser_unpin_favorite">Atsegti nuo pradžios puslapio</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Atidaryti paveikslėlį</string>
     <string name="browser_held_save">Įrašyti paveikslėlį</string>
     <string name="browser_held_copy_picture">Kopijuoti paveikslėlio adresą</string>
-    <string name="browser_side_bar">Kortelės šone planšetėje</string>
-    <string name="browser_side_bar_note">Gulsčiai adresas, įrankiai ir kortelės yra stulpelyje kairėje. Patraukite jį kairėn, kad paslėptumėte į ploną juostelę, arba leiskite automatiniam slėpimui jį paslėpti slenkant puslapį.</string>
+    <string name="browser_side_bar">Vertikalios kortelės</string>
+    <string name="browser_side_bar_note">Planšetėje gulsčiai adresas, įrankiai ir kortelės yra stulpelyje kairėje. Mygtukas šalia ♥ paslepia jį į ploną juostelę, arba leiskite automatiniam slėpimui jį paslėpti slenkant puslapį.</string>
     <string name="browser_side_hide">Slėpti šoninę juostą</string>
 </resources>

@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Nikad</string>
     <string name="browser_history_exit_note">Zaboravlja se kad izađete iz preglednika</string>
     <string name="browser_history_never_note">Ostaje dok je ne izbrišete</string>
-    <string name="browser_top_bar">Traka gore</string>
+    <string name="browser_top_bar">Traka</string>
     <string name="browser_top_bar_note">Kao na računalu: kartice i adresa gore, ostali alati u ☰ na kraju.</string>
     <string name="browser_pin_favorite">Prikvači na početnu stranicu</string>
     <string name="browser_unpin_favorite">Otkvači s početne stranice</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Otvori sliku</string>
     <string name="browser_held_save">Spremi sliku</string>
     <string name="browser_held_copy_picture">Kopiraj adresu slike</string>
-    <string name="browser_side_bar">Kartice sa strane na tabletu</string>
-    <string name="browser_side_bar_note">Vodoravno su adresa, alati i kartice u stupcu lijevo. Povucite ga ulijevo da ga sakrijete u tanku traku, ili neka ga automatsko skrivanje skloni dok se stranica pomiče.</string>
+    <string name="browser_side_bar">Okomite kartice</string>
+    <string name="browser_side_bar_note">Na tabletu vodoravno su adresa, alati i kartice u stupcu lijevo. Gumb pokraj ♥ skriva ga u tanku traku, ili neka ga automatsko skrivanje skloni dok se stranica pomiče.</string>
     <string name="browser_side_hide">Sakrij bočnu traku</string>
 </resources>

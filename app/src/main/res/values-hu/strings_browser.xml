@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Soha</string>
     <string name="browser_history_exit_note">Elfelejtődik, amikor kilépsz a böngészőből</string>
     <string name="browser_history_never_note">Megmarad, amíg nem törlöd</string>
-    <string name="browser_top_bar">Sáv felül</string>
+    <string name="browser_top_bar">Sáv</string>
     <string name="browser_top_bar_note">Mint a számítógépen: lapok és cím felül, a többi eszköz a végén lévő ☰ alatt.</string>
     <string name="browser_pin_favorite">Rögzítés a kezdőlapra</string>
     <string name="browser_unpin_favorite">Levétel a kezdőlapról</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Kép megnyitása</string>
     <string name="browser_held_save">Kép mentése</string>
     <string name="browser_held_copy_picture">Kép címének másolása</string>
-    <string name="browser_side_bar">Lapok oldalt a táblagépen</string>
-    <string name="browser_side_bar_note">Fekvő helyzetben a cím, az eszközök és a lapok egy bal oldali oszlopban vannak. Húzd balra, hogy vékony csíkká rejtsd, vagy hagyd, hogy az automatikus elrejtés görgetéskor eltüntesse.</string>
+    <string name="browser_side_bar">Függőleges lapok</string>
+    <string name="browser_side_bar_note">Táblagépen fekvő helyzetben a cím, az eszközök és a lapok egy bal oldali oszlopban vannak. A ♥ melletti gomb vékony csíkká rejti, vagy hagyd, hogy az automatikus elrejtés görgetéskor eltüntesse.</string>
     <string name="browser_side_hide">Oldalsáv elrejtése</string>
 </resources>

@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Nooit</string>
     <string name="browser_history_exit_note">Vergeten als je de browser verlaat</string>
     <string name="browser_history_never_note">Bewaard tot je hem wist</string>
-    <string name="browser_top_bar">Balk bovenaan</string>
+    <string name="browser_top_bar">Balk</string>
     <string name="browser_top_bar_note">Zoals op een computer: tabbladen en adres bovenaan, de andere hulpmiddelen in de ☰ aan het eind.</string>
     <string name="browser_pin_favorite">Vastzetten op de startpagina</string>
     <string name="browser_unpin_favorite">Losmaken van de startpagina</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Afbeelding openen</string>
     <string name="browser_held_save">Afbeelding opslaan</string>
     <string name="browser_held_copy_picture">Afbeeldingsadres kopiëren</string>
-    <string name="browser_side_bar">Tabbladen aan de zijkant op een tablet</string>
-    <string name="browser_side_bar_note">Liggend staan het adres, de hulpmiddelen en de tabbladen in een kolom links. Sleep hem naar links om hem tot een smalle strook te verbergen, of laat Automatisch verbergen hem wegzetten bij het scrollen.</string>
+    <string name="browser_side_bar">Verticale tabbladen</string>
+    <string name="browser_side_bar_note">Op een tablet liggend staan het adres, de hulpmiddelen en de tabbladen in een kolom links. De knop naast ♥ verbergt hem tot een smalle strook, of laat Automatisch verbergen hem wegzetten bij het scrollen.</string>
     <string name="browser_side_hide">Zijbalk verbergen</string>
 </resources>

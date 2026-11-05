@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Qatt</string>
     <string name="browser_history_exit_note">Tintesa meta toħroġ mill-browser</string>
     <string name="browser_history_never_note">Tibqa’ sakemm tħassarha</string>
-    <string name="browser_top_bar">Il-bar fuq</string>
+    <string name="browser_top_bar">Il-bar</string>
     <string name="browser_top_bar_note">Bħal fuq kompjuter: it-tabs u l-indirizz fuq, l-għodod l-oħra fil-☰ fit-tarf.</string>
     <string name="browser_pin_favorite">Waħħal fil-paġna tal-bidu</string>
     <string name="browser_unpin_favorite">Ħoll mill-paġna tal-bidu</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Iftaħ l-istampa</string>
     <string name="browser_held_save">Issejvja l-istampa</string>
     <string name="browser_held_copy_picture">Ikkopja l-indirizz tal-istampa</string>
-    <string name="browser_side_bar">Tabs fuq il-ġenb fuq tablet</string>
-    <string name="browser_side_bar_note">Mimdud, l-indirizz, l-għodod u t-tabs jinsabu f\'kolonna fuq ix-xellug. Kaxkarha lejn ix-xellug biex taħbiha bħala strixxa rqiqa, jew ħalli l-ħabi awtomatiku jneħħiha meta l-paġna tiskrolja.</string>
+    <string name="browser_side_bar">Tabs vertikali</string>
+    <string name="browser_side_bar_note">Fuq tablet mimdud, l-indirizz, l-għodod u t-tabs jinsabu f\'kolonna fuq ix-xellug. Il-buttuna ħdejn ♥ taħbiha bħala strixxa rqiqa, jew ħalli l-ħabi awtomatiku jneħħiha meta l-paġna tiskrolja.</string>
     <string name="browser_side_hide">Aħbi l-bar tal-ġenb</string>
 </resources>

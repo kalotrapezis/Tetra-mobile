@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Nekad</string>
     <string name="browser_history_exit_note">Aizmirst, kad izejat no pārlūka</string>
     <string name="browser_history_never_note">Saglabājas, līdz to notīrāt</string>
-    <string name="browser_top_bar">Josla augšā</string>
+    <string name="browser_top_bar">Josla</string>
     <string name="browser_top_bar_note">Kā datorā: cilnes un adrese augšā, pārējie rīki ☰ galā.</string>
     <string name="browser_pin_favorite">Piespraust sākumlapai</string>
     <string name="browser_unpin_favorite">Atspraust no sākumlapas</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Atvērt attēlu</string>
     <string name="browser_held_save">Saglabāt attēlu</string>
     <string name="browser_held_copy_picture">Kopēt attēla adresi</string>
-    <string name="browser_side_bar">Cilnes sānos planšetdatorā</string>
-    <string name="browser_side_bar_note">Ainavā adrese, rīki un cilnes ir kolonnā pa kreisi. Velciet to pa kreisi, lai paslēptu šaurā joslā, vai ļaujiet automātiskajai slēpšanai to noņemt, ritinot lapu.</string>
+    <string name="browser_side_bar">Vertikālas cilnes</string>
+    <string name="browser_side_bar_note">Planšetdatorā ainavā adrese, rīki un cilnes ir kolonnā pa kreisi. Poga blakus ♥ to paslēpj šaurā joslā, vai ļaujiet automātiskajai slēpšanai to noņemt, ritinot lapu.</string>
     <string name="browser_side_hide">Slēpt sānjoslu</string>
 </resources>

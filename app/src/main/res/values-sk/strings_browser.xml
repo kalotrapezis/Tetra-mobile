@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Nikdy</string>
     <string name="browser_history_exit_note">Zabudne sa, keď opustíte prehliadač</string>
     <string name="browser_history_never_note">Zostáva, kým ju nevymažete</string>
-    <string name="browser_top_bar">Lišta hore</string>
+    <string name="browser_top_bar">Lišta</string>
     <string name="browser_top_bar_note">Ako na počítači: karty a adresa hore, ostatné nástroje v ☰ na konci.</string>
     <string name="browser_pin_favorite">Pripnúť na úvodnú stránku</string>
     <string name="browser_unpin_favorite">Odopnúť z úvodnej stránky</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Otvoriť obrázok</string>
     <string name="browser_held_save">Uložiť obrázok</string>
     <string name="browser_held_copy_picture">Kopírovať adresu obrázka</string>
-    <string name="browser_side_bar">Karty na boku na tablete</string>
-    <string name="browser_side_bar_note">Na šírku sú adresa, nástroje a karty v stĺpci vľavo. Potiahnutím doľava ho skryjete do úzkeho pásika, alebo ho nechajte schovávať automaticky pri posúvaní stránky.</string>
+    <string name="browser_side_bar">Zvislé karty</string>
+    <string name="browser_side_bar_note">Na tablete na šírku sú adresa, nástroje a karty v stĺpci vľavo. Tlačidlo vedľa ♥ ho skryje do úzkeho pásika, alebo ho nechajte schovávať automaticky pri posúvaní stránky.</string>
     <string name="browser_side_hide">Skryť bočný panel</string>
 </resources>

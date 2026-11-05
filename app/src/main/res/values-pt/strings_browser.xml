@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Nunca</string>
     <string name="browser_history_exit_note">Esquecido quando sai do navegador</string>
     <string name="browser_history_never_note">Guardado até o limpar</string>
-    <string name="browser_top_bar">Barra em cima</string>
+    <string name="browser_top_bar">Barra</string>
     <string name="browser_top_bar_note">Como num computador: separadores e endereço em cima, as outras ferramentas no ☰ ao fundo.</string>
     <string name="browser_pin_favorite">Fixar na página inicial</string>
     <string name="browser_unpin_favorite">Tirar da página inicial</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Abrir imagem</string>
     <string name="browser_held_save">Guardar imagem</string>
     <string name="browser_held_copy_picture">Copiar endereço da imagem</string>
-    <string name="browser_side_bar">Separadores ao lado no tablet</string>
-    <string name="browser_side_bar_note">Na horizontal, o endereço, as ferramentas e os separadores ficam numa coluna à esquerda. Arraste-a para a esquerda para a reduzir a uma faixa fina, ou deixe a ocultação automática escondê-la ao deslocar a página.</string>
+    <string name="browser_side_bar">Separadores verticais</string>
+    <string name="browser_side_bar_note">No tablet na horizontal, o endereço, as ferramentas e os separadores ficam numa coluna à esquerda. O botão ao lado de ♥ reduz-a a uma faixa fina, ou deixe a ocultação automática escondê-la ao deslocar a página.</string>
     <string name="browser_side_hide">Ocultar a barra lateral</string>
 </resources>

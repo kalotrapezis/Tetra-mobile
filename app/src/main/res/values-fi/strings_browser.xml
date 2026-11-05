@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Ei koskaan</string>
     <string name="browser_history_exit_note">Unohdetaan, kun poistut selaimesta</string>
     <string name="browser_history_never_note">Säilyy, kunnes tyhjennät sen</string>
-    <string name="browser_top_bar">Palkki ylhäällä</string>
+    <string name="browser_top_bar">Palkki</string>
     <string name="browser_top_bar_note">Kuten tietokoneella: välilehdet ja osoite ylhäällä, muut työkalut ☰-valikossa reunassa.</string>
     <string name="browser_pin_favorite">Kiinnitä aloitussivulle</string>
     <string name="browser_unpin_favorite">Irrota aloitussivulta</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Avaa kuva</string>
     <string name="browser_held_save">Tallenna kuva</string>
     <string name="browser_held_copy_picture">Kopioi kuvan osoite</string>
-    <string name="browser_side_bar">Välilehdet sivussa tabletilla</string>
-    <string name="browser_side_bar_note">Vaakatilassa osoite, työkalut ja välilehdet ovat sarakkeessa vasemmalla. Vedä se vasemmalle kapeaksi raidaksi, tai anna automaattisen piilotuksen piilottaa se sivua vieritettäessä.</string>
+    <string name="browser_side_bar">Pystysuorat välilehdet</string>
+    <string name="browser_side_bar_note">Tabletin vaakatilassa osoite, työkalut ja välilehdet ovat sarakkeessa vasemmalla. ♥:n vieressä oleva painike piilottaa sen kapeaksi raidaksi, tai anna automaattisen piilotuksen piilottaa se sivua vieritettäessä.</string>
     <string name="browser_side_hide">Piilota sivupalkki</string>
 </resources>

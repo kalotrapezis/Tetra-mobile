@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Nie</string>
     <string name="browser_history_exit_note">Vergessen, wenn Sie den Browser verlassen</string>
     <string name="browser_history_never_note">Bleibt, bis Sie ihn löschen</string>
-    <string name="browser_top_bar">Leiste oben</string>
+    <string name="browser_top_bar">Leiste</string>
     <string name="browser_top_bar_note">Wie am Computer: Tabs und Adresse oben, die übrigen Werkzeuge im ☰ am Ende.</string>
     <string name="browser_pin_favorite">An die Startseite heften</string>
     <string name="browser_unpin_favorite">Von der Startseite lösen</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Bild öffnen</string>
     <string name="browser_held_save">Bild speichern</string>
     <string name="browser_held_copy_picture">Bildadresse kopieren</string>
-    <string name="browser_side_bar">Tabs an der Seite auf dem Tablet</string>
-    <string name="browser_side_bar_note">Im Querformat stehen Adresse, Werkzeuge und Tabs in einer Spalte links. Nach links ziehen blendet sie zu einem schmalen Streifen aus, oder Automatisch ausblenden räumt sie beim Scrollen weg.</string>
+    <string name="browser_side_bar">Vertikale Tabs</string>
+    <string name="browser_side_bar_note">Auf dem Tablet im Querformat stehen Adresse, Werkzeuge und Tabs in einer Spalte links. Die Taste neben ♥ blendet sie zu einem schmalen Streifen aus, oder Automatisch ausblenden räumt sie beim Scrollen weg.</string>
     <string name="browser_side_hide">Seitenleiste ausblenden</string>
 </resources>

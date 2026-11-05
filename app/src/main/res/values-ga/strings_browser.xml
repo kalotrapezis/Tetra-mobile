@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Riamh</string>
     <string name="browser_history_exit_note">Déantar dearmad uirthi nuair a fhágann tú an brabhsálaí</string>
     <string name="browser_history_never_note">Coinnítear í go nglanann tú í</string>
-    <string name="browser_top_bar">An barra thuas</string>
+    <string name="browser_top_bar">An barra</string>
     <string name="browser_top_bar_note">Mar a bheadh ar ríomhaire: cluaisíní agus seoladh thuas, na huirlisí eile sa ☰ ag an deireadh.</string>
     <string name="browser_pin_favorite">Pionnáil ar an leathanach tosaigh</string>
     <string name="browser_unpin_favorite">Díphionnáil ón leathanach tosaigh</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Oscail an pictiúr</string>
     <string name="browser_held_save">Sábháil an pictiúr</string>
     <string name="browser_held_copy_picture">Cóipeáil seoladh an phictiúir</string>
-    <string name="browser_side_bar">Cluaisíní ar an taobh ar tháibléad</string>
-    <string name="browser_side_bar_note">Go cothrománach, tá an seoladh, na huirlisí agus na cluaisíní i gcolún ar chlé. Tarraing ar chlé é chun é a cheilt mar stiall tanaí, nó lig don cheilt uathoibríoch é a chur i leataobh agus an leathanach ag scrolláil.</string>
+    <string name="browser_side_bar">Cluaisíní ingearacha</string>
+    <string name="browser_side_bar_note">Ar tháibléad go cothrománach, tá an seoladh, na huirlisí agus na cluaisíní i gcolún ar chlé. Ceileann an cnaipe in aice le ♥ é mar stiall tanaí, nó lig don cheilt uathoibríoch é a chur i leataobh agus an leathanach ag scrolláil.</string>
     <string name="browser_side_hide">Folaigh an barra taoibh</string>
 </resources>

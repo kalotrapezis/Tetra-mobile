@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Nunca</string>
     <string name="browser_history_exit_note">Se olvida al salir del navegador</string>
     <string name="browser_history_never_note">Se guarda hasta que lo borres</string>
-    <string name="browser_top_bar">Barra arriba</string>
+    <string name="browser_top_bar">Barra</string>
     <string name="browser_top_bar_note">Como en un ordenador: pestañas y dirección arriba, las demás herramientas en el ☰ del extremo.</string>
     <string name="browser_pin_favorite">Fijar en la página de inicio</string>
     <string name="browser_unpin_favorite">Quitar de la página de inicio</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Abrir imagen</string>
     <string name="browser_held_save">Guardar imagen</string>
     <string name="browser_held_copy_picture">Copiar dirección de la imagen</string>
-    <string name="browser_side_bar">Pestañas al lado en la tableta</string>
-    <string name="browser_side_bar_note">En horizontal, la dirección, las herramientas y las pestañas van en una columna a la izquierda. Arrástrala a la izquierda para dejarla en una franja fina, o deja que la ocultación automática la quite al desplazar la página.</string>
+    <string name="browser_side_bar">Pestañas verticales</string>
+    <string name="browser_side_bar_note">En una tableta en horizontal, la dirección, las herramientas y las pestañas van en una columna a la izquierda. El botón junto a ♥ la deja en una franja fina, o deja que la ocultación automática la quite al desplazar la página.</string>
     <string name="browser_side_hide">Ocultar la barra lateral</string>
 </resources>

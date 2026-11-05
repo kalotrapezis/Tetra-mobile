@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Nikoli</string>
     <string name="browser_history_exit_note">Pozabljena, ko zapustite brskalnik</string>
     <string name="browser_history_never_note">Ostane, dokler je ne počistite</string>
-    <string name="browser_top_bar">Vrstica zgoraj</string>
+    <string name="browser_top_bar">Vrstica</string>
     <string name="browser_top_bar_note">Kot na računalniku: zavihki in naslov zgoraj, druga orodja v ☰ na koncu.</string>
     <string name="browser_pin_favorite">Pripni na začetno stran</string>
     <string name="browser_unpin_favorite">Odpni z začetne strani</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Odpri sliko</string>
     <string name="browser_held_save">Shrani sliko</string>
     <string name="browser_held_copy_picture">Kopiraj naslov slike</string>
-    <string name="browser_side_bar">Zavihki ob strani na tablici</string>
-    <string name="browser_side_bar_note">Ležeče so naslov, orodja in zavihki v stolpcu na levi. Povlecite ga v levo, da ga skrijete v ozek trak, ali naj ga samodejno skrivanje pospravi med drsenjem strani.</string>
+    <string name="browser_side_bar">Navpični zavihki</string>
+    <string name="browser_side_bar_note">Na tablici ležeče so naslov, orodja in zavihki v stolpcu na levi. Gumb poleg ♥ ga skrije v ozek trak, ali naj ga samodejno skrivanje pospravi med drsenjem strani.</string>
     <string name="browser_side_hide">Skrij stransko vrstico</string>
 </resources>

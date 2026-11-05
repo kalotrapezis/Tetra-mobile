@@ -97,9 +97,7 @@ import androidx.compose.ui.window.DialogProperties
                         items(d.tabs, key = { "d/${d.id}/${it.url}/${it.title}" }) { t ->
                             val host = BrowserRules.site(BrowserRules.host(t.url))
                             ManagerRow(false, false, {}, { openNew(t.url) }, {
-                                Box(Modifier.size(40.dp).clip(CircleShape).background(TILE_COLORS[(host.hashCode() and 0x7fffffff) % TILE_COLORS.size]), contentAlignment = Alignment.Center) {
-                                    Text(host.take(1).uppercase(), color = Color.White, style = MaterialTheme.typography.titleMedium)
-                                }
+                                SiteCircle(t.url, host)
                             }, t.title.ifBlank { host }, listOf(t.group, t.url).filter { it.isNotEmpty() }.joinToString(" · ")) {
                                 if (t.pinned) Icon(painterResource(R.drawable.ic_push_pin), null, Modifier.size(18.dp), tint = BROWSER_COLOR)
                             }
@@ -131,9 +129,7 @@ import androidx.compose.ui.window.DialogProperties
                         val on = b.url in urls
                         val host = BrowserRules.site(BrowserRules.host(b.url))
                         ManagerRow(on, choosing, { urls = if (on) urls - b.url else urls + b.url }, { open(b.url) }, {
-                            Box(Modifier.size(40.dp).clip(CircleShape).background(TILE_COLORS[(host.hashCode() and 0x7fffffff) % TILE_COLORS.size]), contentAlignment = Alignment.Center) {
-                                Text(host.take(1).uppercase(), color = Color.White, style = MaterialTheme.typography.titleMedium)
-                            }
+                            SiteCircle(b.url, host)
                         }, b.title.ifBlank { host }, listOfNotNull(b.folder.takeIf { query.isNotBlank() && it.isNotEmpty() }?.replace("/", " › "), b.url).joinToString(" · ")) {
                             if (b.pinned) Icon(painterResource(R.drawable.ic_push_pin), stringResource(R.string.browser_pin_favorite), Modifier.size(18.dp), tint = BROWSER_COLOR)
                         }
@@ -186,6 +182,14 @@ private val RoundedCornerShapeNone = androidx.compose.foundation.shape.RoundedCo
 
 /** A folder or a page: a tap opens it, or chooses it while choosing; a long press starts choosing. */
 @OptIn(ExperimentalFoundationApi::class)
+/** A bookmark's circle: the site's icon when this device has it, else its letter on its colour. */
+@Composable private fun SiteCircle(url: String, host: String) {
+    val pic = siteIcon(url, fetch = false)
+    Box(Modifier.size(40.dp).clip(CircleShape).background(if (pic != null) Color.White else TILE_COLORS[(host.hashCode() and 0x7fffffff) % TILE_COLORS.size]), contentAlignment = Alignment.Center) {
+        if (pic != null) androidx.compose.foundation.Image(pic, null, Modifier.size(26.dp)) else Text(host.take(1).uppercase(), color = Color.White, style = MaterialTheme.typography.titleMedium)
+    }
+}
+
 @Composable private fun ManagerRow(on: Boolean, choosing: Boolean, toggle: () -> Unit, open: () -> Unit, lead: @Composable () -> Unit, title: String, sub: String?, end: @Composable RowScope.() -> Unit) =
     Row(Modifier.fillMaxWidth().background(if (on) BROWSER_COLOR.copy(alpha = 0.15f) else Color.Transparent)
         .combinedClickable(onClick = { if (choosing) toggle() else open() }, onLongClick = toggle).padding(horizontal = 16.dp, vertical = 8.dp),

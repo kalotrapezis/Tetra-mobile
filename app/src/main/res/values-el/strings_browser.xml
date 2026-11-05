@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Ποτέ</string>
     <string name="browser_history_exit_note">Ξεχνιέται όταν βγεις από τον περιηγητή</string>
     <string name="browser_history_never_note">Μένει μέχρι να το διαγράψεις</string>
-    <string name="browser_top_bar">Η μπάρα επάνω</string>
+    <string name="browser_top_bar">Η μπάρα</string>
     <string name="browser_top_bar_note">Όπως σε υπολογιστή: οι καρτέλες και η διεύθυνση επάνω, τα υπόλοιπα εργαλεία στο ☰ στην άκρη της.</string>
     <string name="browser_pin_favorite">Καρφίτσωμα στην αρχική σελίδα</string>
     <string name="browser_unpin_favorite">Ξεκαρφίτσωμα από την αρχική σελίδα</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Άνοιγμα εικόνας</string>
     <string name="browser_held_save">Αποθήκευση εικόνας</string>
     <string name="browser_held_copy_picture">Αντιγραφή διεύθυνσης εικόνας</string>
-    <string name="browser_side_bar">Καρτέλες στο πλάι στο tablet</string>
-    <string name="browser_side_bar_note">Στο οριζόντιο, η διεύθυνση, τα εργαλεία και οι καρτέλες μπαίνουν σε στήλη αριστερά. Κρύψ\' την σε λεπτή λωρίδα σέρνοντάς την αριστερά, ή άφησε την Αυτόματη απόκρυψη να την κρύβει όσο κυλά η σελίδα.</string>
+    <string name="browser_side_bar">Κάθετες καρτέλες</string>
+    <string name="browser_side_bar_note">Σε tablet στο οριζόντιο, η διεύθυνση, τα εργαλεία και οι καρτέλες μπαίνουν σε στήλη αριστερά. Το κουμπί δίπλα στην ♥ την κρύβει σε λεπτή λωρίδα, ή άφησε την Αυτόματη απόκρυψη να την κρύβει όσο κυλά η σελίδα.</string>
     <string name="browser_side_hide">Απόκρυψη της πλαϊνής μπάρας</string>
 </resources>

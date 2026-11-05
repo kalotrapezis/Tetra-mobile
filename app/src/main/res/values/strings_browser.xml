@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Never</string>
     <string name="browser_history_exit_note">Forgotten when you leave the browser</string>
     <string name="browser_history_never_note">Kept until you clear it</string>
-    <string name="browser_top_bar">Bar at the top</string>
+    <string name="browser_top_bar">The bar</string>
     <string name="browser_top_bar_note">As on a computer: tabs and the address at the top, the other tools in ☰ at its end.</string>
     <string name="browser_pin_favorite">Pin to the start page</string>
     <string name="browser_unpin_favorite">Unpin from the start page</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Open picture</string>
     <string name="browser_held_save">Save picture</string>
     <string name="browser_held_copy_picture">Copy picture address</string>
-    <string name="browser_side_bar">Tabs at the side on a tablet</string>
-    <string name="browser_side_bar_note">In landscape the address, the tools and the tabs stand in a column on the left. Hide it to a thin strip by dragging it left, or let Auto-hide put it away as the page scrolls.</string>
+    <string name="browser_side_bar">Vertical tabs</string>
+    <string name="browser_side_bar_note">On a tablet in landscape, the address, the tools and the tabs stand in a column on the left. The button beside ♥ hides it to a thin strip, or let Auto-hide put it away as the page scrolls.</string>
     <string name="browser_side_hide">Hide the side bar</string>
 </resources>

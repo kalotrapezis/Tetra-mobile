@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Mai</string>
     <string name="browser_history_exit_note">Dimenticata quando esci dal browser</string>
     <string name="browser_history_never_note">Conservata finché non la cancelli</string>
-    <string name="browser_top_bar">Barra in alto</string>
+    <string name="browser_top_bar">Barra</string>
     <string name="browser_top_bar_note">Come su un computer: schede e indirizzo in alto, gli altri strumenti nel ☰ in fondo.</string>
     <string name="browser_pin_favorite">Fissa nella pagina iniziale</string>
     <string name="browser_unpin_favorite">Togli dalla pagina iniziale</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Apri immagine</string>
     <string name="browser_held_save">Salva immagine</string>
     <string name="browser_held_copy_picture">Copia indirizzo immagine</string>
-    <string name="browser_side_bar">Schede di lato sul tablet</string>
-    <string name="browser_side_bar_note">In orizzontale, indirizzo, strumenti e schede stanno in una colonna a sinistra. Trascinala a sinistra per ridurla a una striscia sottile, oppure lascia che il nascondi automatico la tolga mentre la pagina scorre.</string>
+    <string name="browser_side_bar">Schede verticali</string>
+    <string name="browser_side_bar_note">Sul tablet in orizzontale, indirizzo, strumenti e schede stanno in una colonna a sinistra. Il pulsante accanto a ♥ la riduce a una striscia sottile, oppure lascia che il nascondi automatico la tolga mentre la pagina scorre.</string>
     <string name="browser_side_hide">Nascondi la barra laterale</string>
 </resources>

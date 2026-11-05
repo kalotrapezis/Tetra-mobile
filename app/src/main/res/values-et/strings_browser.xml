@@ -83,7 +83,7 @@
     <string name="browser_keep_never">Mitte kunagi</string>
     <string name="browser_history_exit_note">Unustatakse, kui brauserist lahkud</string>
     <string name="browser_history_never_note">Jääb alles, kuni selle kustutad</string>
-    <string name="browser_top_bar">Riba üleval</string>
+    <string name="browser_top_bar">Riba</string>
     <string name="browser_top_bar_note">Nagu arvutis: kaardid ja aadress üleval, muud tööriistad lõpus ☰ all.</string>
     <string name="browser_pin_favorite">Kinnita avalehele</string>
     <string name="browser_unpin_favorite">Eemalda avalehelt</string>
@@ -141,7 +141,7 @@
     <string name="browser_held_picture">Ava pilt</string>
     <string name="browser_held_save">Salvesta pilt</string>
     <string name="browser_held_copy_picture">Kopeeri pildi aadress</string>
-    <string name="browser_side_bar">Kaardid küljel tahvelarvutis</string>
-    <string name="browser_side_bar_note">Rõhtpaigutuses on aadress, tööriistad ja kaardid vasakul veerus. Lohista see vasakule, et peita see kitsaks ribaks, või lase automaatpeitmisel see kerimisel ära panna.</string>
+    <string name="browser_side_bar">Vertikaalsed kaardid</string>
+    <string name="browser_side_bar_note">Tahvelarvuti rõhtpaigutuses on aadress, tööriistad ja kaardid vasakul veerus. Nupp ♥ kõrval peidab selle kitsaks ribaks, või lase automaatpeitmisel see kerimisel ära panna.</string>
     <string name="browser_side_hide">Peida külgriba</string>
 </resources>
