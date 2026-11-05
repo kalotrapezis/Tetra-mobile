@@ -595,18 +595,25 @@ internal fun junctionPicture(j: Junction, px: Int, left: Boolean = false): andro
         }
     }
     // a roundabout's roads only into it thinner and dimmer: still roads, but not exits to count (the coordinator, 3 Nov)
-    // a way on that hooks round: its own shape, 50 m to the picture's edge
-    val hook = if (j.hooks && !j.uTurn) j.path.let { p ->
-        val s = (far / maxOf(25.0, p.maxOf { Math.hypot(it.first, it.second) })).toFloat()
+    // a way on that hooks round: its own shape, its first 30 m filling the picture (all 50 m squeezed a 15 m hook thin)
+    val hook = if (j.hooks && !j.uTurn) {
+        val p = ArrayList<Pair<Double, Double>>(); var len = 0.0; var last = 0.0 to 0.0
+        for (q in j.path) {
+            val step = Math.hypot(q.first - last.first, q.second - last.second)
+            if (len + step >= 30) { val f = (30 - len) / step; p += (last.first + (q.first - last.first) * f) to (last.second + (q.second - last.second) * f); break }
+            p += q; len += step; last = q
+        }
+        val s = (far / maxOf(12.0, p.maxOf { Math.hypot(it.first, it.second) })).toFloat()
         p.map { (x, y) -> android.graphics.PointF(mid + x.toFloat() * s, mid - y.toFloat() * s) }
     } else null
+    val soft = android.graphics.CornerPathEffect(px * 0.12f) // a road bends, it has no corners (the user, 5 Nov)
     fun line(ps: List<android.graphics.PointF>) = android.graphics.Path().apply { moveTo(mid, mid); ps.forEach { lineTo(it.x, it.y) } }
     roads.forEachIndexed { i, r -> if (i in j.entries) draw(Road(r.s, r.k, r.e, r.width * 0.6f), 0xFF6E7377.toInt())
-        else if (i == t && hook != null) c.drawPath(line(hook), paint(grey, r.width)) else draw(r, grey) }
+        else if (i == t && hook != null) c.drawPath(line(hook), paint(grey, r.width).apply { pathEffect = soft }) else draw(r, grey) }
     if (j.roundabout) c.drawCircle(mid, mid, ringR, paint(grey, w))
     draw(wayIn, blue)
     if (hook != null) {
-        c.drawPath(line(hook), paint(blue, roads[t].width))
+        c.drawPath(line(hook), paint(blue, roads[t].width).apply { pathEffect = soft })
         val a = if (hook.size >= 2) hook[hook.size - 2] else android.graphics.PointF(mid, mid); val e = hook.last()
         arrow(e.x, e.y, e.x - a.x, e.y - a.y)
         return b
