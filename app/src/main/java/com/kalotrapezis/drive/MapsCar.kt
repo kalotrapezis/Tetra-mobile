@@ -922,7 +922,7 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
                     "from ${where(from)}, " + (if (chosen != null) "chosen" else if (facing.isFinite()) "keeping the heading" else "no heading (slow or still)") +
                     "; first: ${route.steps.getOrNull(1)?.text ?: route.steps.firstOrNull()?.text}")
                 MapsTrace.start(carContext, "car", target, "car")
-                nav = Nav(target, "car", route, cumulative(route), System.currentTimeMillis())
+                nav = Nav(target, "car", route, cumulative(route), System.currentTimeMillis(), startOff = metresBetween(from.latitude, from.longitude, route.lats[0], route.lngs[0]))
                 lastAlong = 0.0; backFixes = 0
                 // the tolls on it, found beside the directions, which do not wait for them
                 tolls = emptyList(); tollsAhead = 0; tollSaid = emptySet()

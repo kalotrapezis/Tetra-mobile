@@ -56,11 +56,14 @@ internal object MapsRouting {
 
     /**
      * Main roads (the user, 24 Oct: "it always chooses the shorter path … even if that means a road that falls off a cliff"):
-     * the car's way without car.json's pull towards the shorter one (distance_influence 90, a second and a half a kilometre),
-     * a smaller road counting slower. A request hint on the car profile, so no new graph; the graph's shortcuts are made
-     * for car.json, so it searches without them, up to [MAX_MAIN_NODES].
+     * the car's way, a smaller road counting slower. A request hint on the car profile, so no new graph; the graph's shortcuts
+     * are made for car.json, so it searches without them, up to [MAX_MAIN_NODES]. It keeps car.json's pull towards the shorter
+     * way ([MAIN_DISTANCE]): without it (5 Nov, by Σχηματάρι) it ran to the motorway through a factory's dirt yard where Google
+     * and the user go 6 km straight on (the user: "motorway > main roads > lanes between fields, but straight on is not
+     * through the motorway at all costs").
      */
     const val MAIN_ROADS = "tetra.main_roads"
+    const val MAIN_DISTANCE = 90.0
     // shortcut: past this (a drive across Greece) the shortest way is taken, mostly on motorways anyway; a car_main CH profile in maps-graph.yml (a rebuild) would lift it
     private const val MAX_MAIN_NODES = 500_000
 
@@ -68,7 +71,7 @@ internal object MapsRouting {
     fun mainPriority(c: com.graphhopper.routing.ev.RoadClass): Double = when (c) {
         com.graphhopper.routing.ev.RoadClass.MOTORWAY, com.graphhopper.routing.ev.RoadClass.TRUNK,
         com.graphhopper.routing.ev.RoadClass.PRIMARY, com.graphhopper.routing.ev.RoadClass.SECONDARY -> 1.0
-        com.graphhopper.routing.ev.RoadClass.TERTIARY -> 0.8
+        com.graphhopper.routing.ev.RoadClass.TERTIARY -> 0.9
         com.graphhopper.routing.ev.RoadClass.RESIDENTIAL, com.graphhopper.routing.ev.RoadClass.LIVING_STREET -> 0.6
         com.graphhopper.routing.ev.RoadClass.UNCLASSIFIED -> 0.4
         com.graphhopper.routing.ev.RoadClass.TRACK -> 0.1
@@ -526,7 +529,7 @@ internal object MapsRouting {
                     val access = b("car_access"); val speed = d("car_average_speed")
                     val road = em.getEnumEncodedValue(com.graphhopper.routing.ev.RoadClass.KEY, com.graphhopper.routing.ev.RoadClass::class.java)
                     if (hints.getBool(MAIN_ROADS, false)) CustomWeighting.Parameters({ e, r -> minOf(999.0, e.v(speed, r)) }, { speed.maxOrMaxStorableDecimal },
-                        { e, r -> if (!e.v(access, r)) 0.0 else mainPriority(e.get(road)) }, { 1.0 }, 0.0, heading)
+                        { e, r -> if (!e.v(access, r)) 0.0 else mainPriority(e.get(road)) }, { 1.0 }, MAIN_DISTANCE, heading)
                     else CustomWeighting.Parameters({ e, r -> minOf(999.0, e.v(speed, r)) }, { speed.maxOrMaxStorableDecimal },
                         { e, r -> if (!e.v(access, r)) 0.0 else 1.0 }, { 1.0 }, 90.0, heading)
                 }

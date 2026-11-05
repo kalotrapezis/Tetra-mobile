@@ -211,6 +211,8 @@ internal data class Nav(
     val target: Place, val mode: String, val route: Route, val cum: DoubleArray, val since: Long,
     val index: Int = 0, val p: Progress? = null, val offFixes: Int = 0, val said: Set<String> = emptySet(),
     val bends: List<Bend> = if (mode == "car") bendsOn(route, cum) else emptyList(),
+    /** How far from the route it started (a car park off the roads): no new route for that while still short of it. */
+    val startOff: Double = 0.0,
 )
 
 /**
@@ -394,6 +396,8 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
     val rolling = remember { MapsPrefs.rolling(context) }
     fun profile(mode: String) = if (mode == "foot" && rolling) "wheelchair" else mode
     var fast by remember { mutableStateOf(0) } // fixes in a row at car speed
+    var touchedAt by remember { mutableStateOf(0L) } // a finger last moved the map
+    var loose by remember { mutableStateOf(false) } // directions running, the camera off me (logged once)
     val tts = remember { mutableStateOf<TextToSpeech?>(null) }
     DisposableEffect(Unit) {
         var t: TextToSpeech? = null
@@ -460,7 +464,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
             "; first: ${route.steps.getOrNull(1)?.text ?: route.steps.firstOrNull()?.text}")
         MapsTrace.start(context, "phone", target, mode)
         val rerouted = nav?.target?.id == target.id
-        nav = Nav(target, mode, route, cumulative(route), System.currentTimeMillis())
+        nav = Nav(target, mode, route, cumulative(route), System.currentTimeMillis(), startOff = metresBetween(from.latitude, from.longitude, route.lats[0], route.lngs[0]))
         selected = null; preview = null
         if (!rerouted) route.steps.firstOrNull()?.let { say(it.text) }
         follow(mode)
@@ -541,6 +545,15 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         val lc = mapRef?.locationComponent?.takeIf { it.isLocationComponentActivated }
         MapsTrace.fix(loc, p.takeIf { !g.off }, lc?.let { (if (it.cameraMode == CameraMode.TRACKING_GPS) "follow" else "free") +
             "/z%.1f/t%.0f".format(java.util.Locale.ROOT, mapRef?.cameraPosition?.zoom ?: 0.0, mapRef?.cameraPosition?.tilt ?: 0.0) } ?: "none")
+        // the camera let go of me: on me again 15 s after the last touch, at once when nothing touched the map (the user, 5 Nov,
+        // near Ελεώνας at 86 km/h: "what touch? I was just driving" — MapLibre let go by itself, and it stayed behind to the end)
+        if (lc != null && lc.cameraMode != CameraMode.TRACKING_GPS) {
+            val ago = System.currentTimeMillis() - touchedAt
+            if (!loose) WriterLog.i("Maps: the camera let go of me (mode ${lc.cameraMode}) at ${where(loc)}, " +
+                if (ago < 15_000) "the map touched ${ago / 1000} s ago" else "the map not touched")
+            loose = true
+            if (ago > 15_000) { WriterLog.i("Maps: the camera on me again"); loose = false; follow(n.mode) }
+        } else loose = false
         if (g.off) {
             nav = n.copy(offFixes = n.offFixes + 1)
             if (g.reroute) { WriterLog.i("Maps: off the route by ${p.off.toInt()} m at ${where(loc)}, a new one"); startNav(n.target, n.mode, loc) }
@@ -746,6 +759,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                     tab = null
                     true
                 }
+                map.addOnCameraMoveStartedListener { why -> if (why == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE) touchedAt = System.currentTimeMillis() }
                 mapRef = map
             }
         }

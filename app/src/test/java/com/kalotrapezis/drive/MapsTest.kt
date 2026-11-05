@@ -545,14 +545,15 @@ class MapsReplayTest {
         val target = Place("", d.name, d.lat, d.lng, "pin", mode = d.mode)
         fun route(f: MapsTrace.Fix) = MapsRouting.route(dir, f.lat, f.lng, d.lat, d.lng, d.mode, el,
             heading = if (heading && f.speed > 2.5 && f.bearing >= 0) f.bearing else Double.NaN)
+        fun nav(r: Route, f: MapsTrace.Fix) = Nav(target, d.mode, r, cumulative(r), f.time, startOff = metresBetween(f.lat, f.lng, r.lats[0], r.lngs[0]))
         var r = route(d.fixes.first())
-        var n = Nav(target, d.mode, r, cumulative(r), d.fixes.first().time)
+        var n = nav(r, d.fixes.first())
         var reroutes = 0; val said = ArrayList<String>()
         for (f in d.fixes) {
             val g = guide(n, f.lat, f.lng, maxOf(0.0, f.speed), f.time, true, false)
             if (g.off) {
                 n = n.copy(offFixes = n.offFixes + 1)
-                if (g.reroute) { r = route(f); n = Nav(target, d.mode, r, cumulative(r), f.time); reroutes++; said += "Νέα διαδρομή" }
+                if (g.reroute) { r = route(f); n = nav(r, f); reroutes++; said += "Νέα διαδρομή" }
                 continue
             }
             if (g.arrived) return Played(reroutes, said, true)
@@ -584,6 +585,17 @@ class MapsReplayTest {
         val plain = replay(d, heading = false); val headed = replay(d, heading = true)
         println("${d.fixes.size} s of driving away: without the heading ${plain.reroutes} new routes, with it ${headed.reroutes}")
         assertTrue(headed.reroutes <= plain.reroutes)
+    }
+
+    /**
+     * Directions from a car park 250 m off the roads, the car still in it (the user, 5 Nov, inside Ελεώνας prison's grounds:
+     * a new route every 11 s for two minutes): none until the car is further off than it began.
+     */
+    @Test fun aCarParkOffTheRoads() {
+        assumeTrue(File(dir, "properties").isFile)
+        val fixes = (0 until 120).map { MapsTrace.Fix(1_000_000L + it * 1000, 38.37160 + it * 0.000005, 23.46592, if (it < 60) 0.0 else 3.0, 340.0, 3.0) }
+        val played = replay(MapsTrace.Drive("parked", 38.276420, 23.589035, "car", "Άγιος Θωμάς", fixes), heading = true)
+        assertEquals(0, played.reroutes)
     }
 
     /** Directions followed: the turns said in order, no new route, and there at the end. */
@@ -659,6 +671,20 @@ class MapsMainRoadsTest {
             for (i in d.first until d.last) km.merge(d.value.toString(), metresBetween(p.points.getLat(i), p.points.getLon(i), p.points.getLat(i + 1), p.points.getLon(i + 1)) / 1000, Double::plus)
         }
         return km
+    }
+
+    /**
+     * By Σχηματάρι, westwards, to Ελεώνας (the user, 5 Nov: "Google says straight, ours turn right" onto a wide dirt road with
+     * potholes, through Coca-Cola's yard): OSM has it as tertiary and nothing else. Main roads, the car moving west, go 6 km
+     * straight on as Google does, not through the yard to the motorway.
+     */
+    @Test fun straightOnNotThroughTheYard() {
+        assumeTrue(File(dir, "properties").isFile)
+        val r = MapsRouting.route(dir, 38.30874, 23.59751, 38.371342, 23.465152, "car", el, heading = 279.0, main = true)
+        println("main roads: ${"%.1f".format(r.metres / 1000)} km, ${r.steps.size} steps: ${r.steps.take(3).joinToString(" | ") { it.text + " " + it.metres.toInt() }}")
+        val yard = r.lats.indices.minOf { metresBetween(r.lats[it], r.lngs[it], 38.32034, 23.59502) }
+        assertTrue("passes the yard ${yard.toInt()} m off", yard > 300)
+        assertTrue(r.steps[0].metres > 5000)
     }
 
     @Ignore("its places were made up before publishing; put your own back locally to run it") @Test fun homeToMarket() {

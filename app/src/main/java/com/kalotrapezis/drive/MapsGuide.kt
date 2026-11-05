@@ -83,7 +83,9 @@ internal fun guide(n: Nav, lat: Double, lng: Double, speed: Double, now: Long, b
     val (p, i) = progress(n.route, n.cum, lat, lng, n.index)
     val car = n.mode == "car"
     val step = n.route.steps[p.next]
-    if (p.off > (if (car) 50.0 else 30.0)) {
+    // short of the route's start, as far off as it began (the user, 5 Nov: parked 250 m inside a prison's grounds, a new
+    // route every 11 s for two minutes), else it is off
+    if (p.off > (if (car) 50.0 else 30.0) + (if (p.along < 20) n.startOff else 0.0)) {
         val reroute = n.offFixes + 1 >= 3 && now - n.since > 10_000 && !finding
         return Tick(p, i, step, speed, off = true, reroute = reroute, arrived = false, due = null, bend = null, view = DRIVING_VIEW)
     }
