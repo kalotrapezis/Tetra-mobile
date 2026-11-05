@@ -352,9 +352,12 @@ internal object MapsRouting {
                 if (!car(it) || skip(it)) continue
                 val geo = it.fetchWayGeometry(com.graphhopper.util.FetchMode.ALL)
                 if (geo.size() < 2) continue
-                var k = 1
-                while (k < geo.size() - 1 && metresBetween(geo.getLat(0), geo.getLon(0), geo.getLat(k), geo.getLon(k)) < 40) k++
                 val first = bearing(geo.getLat(0), geo.getLon(0), geo.getLat(1), geo.getLon(1))
+                // ~40 m along, or where the road itself turns 30° from how it leaves (the user, 5 Nov, at Άρμα: out of a loop
+                // onto Θήβας - Χαλκίδας, seen 40 m along the loop it pointed back, and the card drew a U-turn for a left turn)
+                var k = 1
+                while (k < geo.size() - 1 && metresBetween(geo.getLat(0), geo.getLon(0), geo.getLat(k), geo.getLon(k)) < 40 &&
+                    apart(bearing(geo.getLat(k), geo.getLon(k), geo.getLat(k + 1), geo.getLon(k + 1)), first) < 30) k++
                 // OpenStreetMap at times has two ways between the same two nodes (Δράμα's Καραϊσκάκη at Εθνικής Αμύνης): one road
                 if (out.any { a -> a.to == it.adjNode && apart(a.first, first) < 5 }) continue
                 out += Arm(n, it.adjNode, it.distance, first, geo.getLat(k), geo.getLon(k), it.get(access), it.getReverse(access), size(it), it.name.orEmpty())
@@ -378,6 +381,7 @@ internal object MapsRouting {
         fun turned(b: Double, ref: Double) = ((b - ref) % 360 + 540) % 360 - 180
         val dirs: List<Double>; val sizes: List<Int>
         var then = emptyList<Double>(); var thenSizes = emptyList<Int>(); var thenTaken = -1; var entries = emptySet<Int>()
+        var path = emptyList<Pair<Double, Double>>()
         // the crossing's nodes: this one and those a short link away that are crossings too — OpenStreetMap often draws one big
         // crossing as two or three small ones a few metres apart (Νικήσιανη's 5–6 streets: no node there has five roads). A link
         // of 12 m at most, or 20 m where it is one-way (a dual carriageway's side); never a bend or one along a road to the next
@@ -405,6 +409,15 @@ internal object MapsRouting {
             val outArm = all.indices.minBy { apart(all[it].first, on) }
             val ref = bearing(nLat, nLng, all[inArm].lat, all[inArm].lng) + 180 // the way in straight down
             val d = all.map { turned(bearing(nLat, nLng, it.lat, it.lng), ref) }
+            // the route's own shape for 50 m on, in metres right and ahead of the crossing, the way in from below
+            path = ArrayList<Pair<Double, Double>>().apply {
+                var len = 0.0; var k = at
+                while (k + 1 < pts.size() && len < 50) {
+                    len += metresBetween(pts.getLat(k), pts.getLon(k), pts.getLat(k + 1), pts.getLon(k + 1)); k++
+                    val m = metresBetween(nLat, nLng, pts.getLat(k), pts.getLon(k)); val a = Math.toRadians(turned(bearing(nLat, nLng, pts.getLat(k), pts.getLon(k)), ref))
+                    add(Math.sin(a) * m to Math.cos(a) * m)
+                }
+            }
             if (inArm == outArm) { // back the way it came: drawn beside the way in, on the side it turns
                 if (uTurn == 0) return null
                 return listOf(-180.0 to all[inArm].size, (if (uTurn < 0) -179.0 else 179.0) to all[inArm].size) +
@@ -474,7 +487,7 @@ internal object MapsRouting {
         if (dirs.size < 3 && !(uTurn != 0 && dirs.size == 2)) return null
         val order = dirs.indices.sortedBy { dirs[it] }
         return Junction(order.map { dirs[it] }, order.indexOf(1), roundabout, order.map { sizes[it] } + thenSizes,
-            if (roundabout) exit else 0, then, thenTaken, entries.map { order.indexOf(it) }.toSet())
+            if (roundabout) exit else 0, then, thenTaken, entries.map { order.indexOf(it) }.toSet(), path)
     }
 
     /**
@@ -501,6 +514,16 @@ internal object MapsRouting {
     }
 
     /** The car road nearest [lat],[lng] in [gh], within 40 m. */
+    /** The car road of the graph in [dir] nearest [lat],[lng], for the log: its class, name and number, "tertiary, no name" when OSM has none. */
+    fun roadAt(dir: File, lat: Double, lng: Double): String = runCatching {
+        reading(dir) { gh ->
+            val e = car(gh, lat, lng) ?: return@reading "no road"
+            val c = e.get(gh.encodingManager.getEnumEncodedValue(RoadClass.KEY, RoadClass::class.java)).toString()
+            val name = listOfNotNull(e.getValue("street_ref") as? String, e.name.takeIf { it.isNotEmpty() }).joinToString(" ")
+            if (name.isEmpty()) "$c, no name" else "$c «$name»"
+        }
+    }.getOrDefault("?")
+
     private fun car(gh: GraphHopper, lat: Double, lng: Double) = snap(gh, lat, lng).let { s -> s.closestEdge.takeIf { s.isValid && s.queryDistance <= 40 } }
 
     /**

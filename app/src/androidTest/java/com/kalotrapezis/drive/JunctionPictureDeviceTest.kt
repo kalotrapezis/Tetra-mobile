@@ -8,13 +8,13 @@ import org.junit.runner.RunWith
 import java.io.File
 
 /**
- * The turn card's crossing pictures, drawn as on the car's screen: written to files/junctions to look at (adb pull), with
+ * The turn card's crossing pictures, drawn as on the car's screen: written to Android/data/…/files/junctions to look at (adb pull), with
  * junctions.png, a sheet of them all on the card's grey, each big (the phone's card) and small (Android Auto's corner).
  */
 @RunWith(AndroidJUnit4::class)
 class JunctionPictureDeviceTest {
     @Test fun draw() {
-        val dir = File(InstrumentationRegistry.getInstrumentation().targetContext.filesDir, "junctions").apply { mkdirs() }
+        val dir = File(InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null), "junctions").apply { mkdirs() }
         // from MapsJunctionTest and JunctionGraphTest: real crossings and each kind of picture
         val cases = linkedMapOf(
             "drama-ethnikis-amynis (4 roads)" to Junction(listOf(-180.0, -109.0, -11.0, 69.0), 1, roads = listOf(1, 1, 1, 1)),
@@ -30,6 +30,9 @@ class JunctionPictureDeviceTest {
             "motorway-exit-right" to Junction(listOf(-180.0, 0.0, 20.0), 2, roads = listOf(2, 2, -1)),
             "motorway-stay" to Junction(listOf(-180.0, 0.0, 20.0), 1, roads = listOf(2, 2, -1)),
             "u-turn-left" to Junction(listOf(-180.0, -179.0, -90.0, 90.0), 1),
+            // the user's drawing, 5 Nov: right off the main road, at once sharp right back beside it (JunctionGraphTest)
+            "right-then-sharp-right" to Junction(listOf(-180.0, 0.0, 98.0), 2, roads = listOf(2, 2, 0),
+                path = listOf(8.0 to 3.0, 14.0 to -2.0, 15.0 to -15.0, 15.0 to -60.0)),
             "u-turn-dual" to Junction(listOf(-180.0, -166.0, 0.0), 1, roads = listOf(2, 2, 1)),
             "staggered-left-right" to Junction(listOf(-180.0, -90.0, 90.0), 1, roads = listOf(0, 2, 2, 2, 0), then = listOf(-90.0, 0.0), thenTaken = 1),
             // the lower right road (Παλαιολόγου) and Αγίου Κωνσταντίνου only into the ring: thin and dim, not counted

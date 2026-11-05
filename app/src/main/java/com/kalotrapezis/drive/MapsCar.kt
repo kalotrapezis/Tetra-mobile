@@ -823,7 +823,7 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
             // the card still shows the way on (the start of a route is often off it: a house back from the road)
             nav = n.copy(offFixes = n.offFixes + 1, p = n.p ?: p)
             invalidate()
-            if (g.reroute) { WriterLog.i("Maps car: off the route by ${p.off.toInt()} m at ${where(loc)}, a new one"); go(n.target) }
+            if (g.reroute) { WriterLog.i("Maps car: off the route by ${p.off.toInt()} m at ${where(loc)}, ${MapsTrace.off(n, loc, graphAt(loc.latitude, loc.longitude))}; a new one"); go(n.target) }
             return
         }
         if (g.arrived) {
@@ -921,7 +921,7 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
                 WriterLog.i("Maps car: route to ${target.name}, ${route.metres.toInt()} m, ${route.steps.size} steps, in ${System.currentTimeMillis() - t0} ms, " +
                     "from ${where(from)}, " + (if (chosen != null) "chosen" else if (facing.isFinite()) "keeping the heading" else "no heading (slow or still)") +
                     "; first: ${route.steps.getOrNull(1)?.text ?: route.steps.firstOrNull()?.text}")
-                MapsTrace.start(carContext, "car", target, "car")
+                MapsTrace.start(carContext, "car", target, "car", route)
                 nav = Nav(target, "car", route, cumulative(route), System.currentTimeMillis(), startOff = metresBetween(from.latitude, from.longitude, route.lats[0], route.lngs[0]))
                 lastAlong = 0.0; backFixes = 0
                 // the tolls on it, found beside the directions, which do not wait for them

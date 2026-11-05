@@ -102,7 +102,10 @@ internal fun guide(n: Nav, lat: Double, lng: Double, speed: Double, now: Long, b
  * way, how sure the GPS was, where on the route, and what the camera did — so a drive can be replayed in a test.
  *
  *     # <date time> <screen> to <lat> <lng> <mode> <name>        a route started (or a new one)
+ *     @ route <metres> <s> <roads> <lat lng;lat lng;...>        the way it gave (the user, 5 Nov: "keep the routes, the
+ *     @ step <point> <sign> <metres> <text>                       roads I did not take where it told me to go, to have data")
  *     <ms> <lat> <lng> <m/s> <bearing> <accuracy m> <provider> <off m> <along m> <to next m> <step> <camera>
+ *     @ off <ms> <lat> <lng> <what it told, where it wanted, the road taken>       the driver went another way
  *
  * Space-separated; the place's name last, as it may have spaces. Only on this phone, never synced.
  */
@@ -114,14 +117,30 @@ internal object MapsTrace {
 
     fun folder(context: Context) = File(WriterLog.dir(context), "drive")
 
-    /** A route started on [screen] ("car" or "phone") to [target]: its header line; traces older than 7 days removed. */
-    fun start(context: Context, screen: String, target: Place, mode: String) {
+    /** A route started on [screen] ("car" or "phone") to [target]: its header line and [route]; traces older than 7 days removed. */
+    fun start(context: Context, screen: String, target: Place, mode: String, route: Route) {
         val d = folder(context).apply { mkdirs() }; dir = d
         val oldest = LocalDate.now().minusDays(DAYS - 1)
         d.listFiles()?.filter { f -> f.name.removePrefix("drive-").removeSuffix(".csv").let { runCatching { LocalDate.parse(it) }.getOrNull() }?.isBefore(oldest) == true }
             ?.forEach { it.delete() }
         // the name after the format: a name with % in it is not a format
         write("# ${LocalDateTime.now().format(time)} $screen to " + "%.6f %.6f".format(Locale.ROOT, target.lat, target.lng) + " $mode ${target.name}")
+        write("@ route ${route.metres.toInt()} ${route.millis / 1000} ${route.roads.ifEmpty { "-" }} " +
+            route.lats.indices.joinToString(";") { "%.5f %.5f".format(Locale.ROOT, route.lats[it], route.lngs[it]) })
+        route.steps.forEach { s -> write("@ step ${s.at} ${s.sign} ${s.metres.toInt()} ${s.text}") }
+    }
+
+    /**
+     * The driver off [n]'s route at [loc]: what it last told (the turn ahead and the road it wanted there) and the road the
+     * car is on instead, from the graph in [dir] — written to the trace, and returned for the log.
+     */
+    fun off(n: Nav, loc: android.location.Location, dir: File): String {
+        val p = n.p
+        val step = n.route.steps.getOrNull(p?.next ?: 0)
+        val wanted = step?.let { s -> n.route.lats.getOrNull(s.at + 1)?.let { MapsRouting.roadAt(dir, it, n.route.lngs[s.at + 1]) } } ?: "?"
+        val what = "told «${step?.text ?: "?"}» ${p?.toNext?.toInt() ?: "?"} m ahead onto $wanted, on ${MapsRouting.roadAt(dir, loc.latitude, loc.longitude)} instead"
+        write("@ off %d %.6f %.6f %s".format(Locale.ROOT, loc.time, loc.latitude, loc.longitude, what))
+        return what
     }
 
     /** A fix while directions run, [p] where on the route (null off it), [camera] what the camera does. */
@@ -146,6 +165,7 @@ internal object MapsTrace {
         val out = ArrayList<Drive>(); var head: Drive? = null; val fixes = ArrayList<Fix>()
         fun close() { head?.let { out += it.copy(fixes = fixes.toList()) }; fixes.clear() }
         for (line in f.readLines()) {
+            if (line.startsWith("@")) continue // the route, its steps, a detour: not fixes
             if (line.startsWith("# ")) {
                 close()
                 val w = line.removePrefix("# ").split(' ')

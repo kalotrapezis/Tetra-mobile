@@ -107,6 +107,22 @@ class JunctionGraphTest {
         assertEquals(listOf(2, 2, -1), x.roads); assertTrue(x.busy && x.arms[x.taken] > 10)
     }
 
+    @Test fun rightThenSharpRightIsNoUTurn() {
+        // the user's drawing, 5 Nov: a main road north; a road leaves it to the right and within 15 m bends sharp right, back
+        // south beside it — the card drew a U-turn, as 40 m along that road points back the way the car came
+        node(1, 0.0, 0.0)
+        val s = end(0.0, -100.0); val e = end(15.0, -60.0)
+        road(s, 1, "Κύριος", RoadClass.PRIMARY); road(1, end(0.0, 100.0), "Κύριος", RoadClass.PRIMARY)
+        val bend = listOf(8.0 to 3.0, 14.0 to -2.0, 15.0 to -15.0)
+        road(1, e); g.getEdgeIteratorState(g.edges - 1, e).setWayGeometry(PointList().apply { bend.forEach { (x, y) -> add(lat(y), lng(x)) } })
+        val pts = PointList().apply { add(lat(-100.0), lng(0.0)); add(lat(0.0), lng(0.0)); bend.forEach { (x, y) -> add(lat(y), lng(x)) }; add(lat(-60.0), lng(15.0)) }
+        val j = MapsRouting.crossing(g, em, 1, pts, 1, pts.size() - 1, false)!!
+        println("right then sharp right: $j")
+        assertTrue(!j.uTurn)
+        assertTrue(j.arms[j.taken] in 45.0..135.0) // out to the right
+        assertTrue(j.hooks && j.busy) // drawn as it runs
+    }
+
     @Test fun roundaboutExit() {
         node(1, 0.0, -15.0); node(2, 15.0, 0.0); node(3, 0.0, 15.0); node(4, -15.0, 0.0)
         for ((a, b) in listOf(1 to 2, 2 to 3, 3 to 4, 4 to 1)) road(a, b, oneWay = true, round = true)

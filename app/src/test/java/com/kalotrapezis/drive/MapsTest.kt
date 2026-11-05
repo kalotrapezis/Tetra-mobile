@@ -598,6 +598,30 @@ class MapsReplayTest {
         assertEquals(0, played.reroutes)
     }
 
+    /** Out of the loop at Άρμα onto Θήβας - Χαλκίδας (the user, 5 Nov, a satellite picture: the card drew a U-turn): a left at a T. */
+    @Test fun aLoopOntoTheMainRoadIsALeft() {
+        assumeTrue(File(dir, "properties").isFile)
+        val r = MapsRouting.route(dir, 38.37409, 23.46564, 38.277768, 23.585572, "car", el, heading = 280.0, main = true)
+        val j = r.steps.first { "Θήβας - Χαλκίδας" in it.text }.junction!!
+        println("Άρμα: $j")
+        assertTrue(!j.uTurn); assertEquals(-90.0, j.arms[j.taken], 30.0)
+    }
+
+    /** A trace with the route given, its steps and a detour (5 Nov): those lines are no fixes; the road at a spot, from the graph. */
+    @Test fun aTraceWithItsRouteAndDetour() {
+        val f = File.createTempFile("drive-", ".csv").apply { deleteOnExit() }
+        f.writeText("# 2026-11-05 07:52:00 phone to 38.371342 23.465152 car 2ο Δημοτικό Σχολείο Ελεώνα\n" +
+            "@ route 18787 1140 motorway 38.30874 23.59751;38.30900 23.59600\n@ step 0 0 516 Συνεχίστε\n@ step 1 2 2805 Στρίψτε δεξιά\n" +
+            "1793860320000 38.308744 23.597511 13.9 279 3 gps 77 0 516 1 follow/z16.5/t45\n" +
+            "@ off 1793860321000 38.308744 23.597511 told «Στρίψτε δεξιά» 120 m ahead onto tertiary, no name, on tertiary, no name instead\n" +
+            "1793860321000 38.308800 23.597300 14.0 279 3 gps 5 20 496 1 follow/z16.5/t45\n")
+        val d = MapsTrace.read(f).single()
+        assertEquals(2, d.fixes.size); assertEquals("2ο Δημοτικό Σχολείο Ελεώνα", d.name)
+        assumeTrue(File(dir, "properties").isFile)
+        assertEquals("tertiary, no name", MapsRouting.roadAt(dir, 38.32034, 23.59502)) // Coca-Cola's yard
+        assertEquals("primary «ΕΟ2 Ξάνθης - Κομοτηνής»", MapsRouting.roadAt(dir, 41.1290, 24.8998))
+    }
+
     /** Directions followed: the turns said in order, no new route, and there at the end. */
     @Test fun aDriverWhoFollows() {
         assumeTrue(File(dir, "properties").isFile)

@@ -456,16 +456,23 @@ internal fun bearing(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Do
  * the one it leaves by. [entries]: a roundabout's roads only into it, not exits (not counted in [exit]).
  */
 internal data class Junction(val arms: List<Double>, val taken: Int, val roundabout: Boolean = false, val roads: List<Int> = emptyList(),
-                             val exit: Int = 0, val then: List<Double> = emptyList(), val thenTaken: Int = -1, val entries: Set<Int> = emptySet()) {
+                             val exit: Int = 0, val then: List<Double> = emptyList(), val thenTaken: Int = -1, val entries: Set<Int> = emptySet(),
+                             val path: List<Pair<Double, Double>> = emptyList()) {
     /**
      * Worth a picture in the turn card, where the arrow alone can mislead (the user, 23 Oct: Δράμα's five streets): a
      * roundabout, five roads or more, another road leaving within 45° of the one to take, two turns a few metres apart, or
      * a U-turn. A plain cross is not.
      */
-    val busy get() = roundabout || arms.size >= 5 || then.isNotEmpty() || uTurn ||
+    val busy get() = roundabout || arms.size >= 5 || then.isNotEmpty() || uTurn || hooks ||
         arms.indices.any { it != taken && it != way && Math.abs(((arms[it] - arms[taken]) % 360 + 540) % 360 - 180) < 45 }
     /** The way in: the road nearest straight behind. */
     val way get() = arms.indices.minBy { Math.abs(Math.abs(arms[it]) - 180) }
+    /**
+     * The way on bends hard within 50 m of the crossing ([path], metres right and ahead): out to the right and at once sharp
+     * right again, a loop to a bridge (the user, 5 Nov): drawn as it runs, not as a straight road.
+     */
+    val hooks get() = !roundabout && path.size >= 2 && path.last().let { (x, y) ->
+        Math.abs(((Math.toDegrees(Math.atan2(x, y)) - arms[taken]) % 360 + 540) % 360 - 180) > 45 && Math.hypot(x, y) > 15 }
     /** Back the way it came: the way on within 20° of the way in. */
     val uTurn get() = !roundabout && Math.abs(arms[taken]) > 160
 }
@@ -588,9 +595,23 @@ internal fun junctionPicture(j: Junction, px: Int, left: Boolean = false): andro
         }
     }
     // a roundabout's roads only into it thinner and dimmer: still roads, but not exits to count (the coordinator, 3 Nov)
-    roads.forEachIndexed { i, r -> if (i in j.entries) draw(Road(r.s, r.k, r.e, r.width * 0.6f), 0xFF6E7377.toInt()) else draw(r, grey) }
+    // a way on that hooks round: its own shape, 50 m to the picture's edge
+    val hook = if (j.hooks && !j.uTurn) j.path.let { p ->
+        val s = (far / maxOf(25.0, p.maxOf { Math.hypot(it.first, it.second) })).toFloat()
+        p.map { (x, y) -> android.graphics.PointF(mid + x.toFloat() * s, mid - y.toFloat() * s) }
+    } else null
+    fun line(ps: List<android.graphics.PointF>) = android.graphics.Path().apply { moveTo(mid, mid); ps.forEach { lineTo(it.x, it.y) } }
+    roads.forEachIndexed { i, r -> if (i in j.entries) draw(Road(r.s, r.k, r.e, r.width * 0.6f), 0xFF6E7377.toInt())
+        else if (i == t && hook != null) c.drawPath(line(hook), paint(grey, r.width)) else draw(r, grey) }
     if (j.roundabout) c.drawCircle(mid, mid, ringR, paint(grey, w))
-    draw(wayIn, blue); draw(roads[t], blue)
+    draw(wayIn, blue)
+    if (hook != null) {
+        c.drawPath(line(hook), paint(blue, roads[t].width))
+        val a = if (hook.size >= 2) hook[hook.size - 2] else android.graphics.PointF(mid, mid); val e = hook.last()
+        arrow(e.x, e.y, e.x - a.x, e.y - a.y)
+        return b
+    }
+    draw(roads[t], blue)
     if (j.roundabout) ringSweep(shown[way], shown[t], left).let { (start, sweep) -> c.drawArc(mid - ringR, mid - ringR, mid + ringR, mid + ringR, start, sweep, false, paint(blue, w)) }
     arrow(roads[t])
     if (j.roundabout && j.exit > 0) c.drawText("${j.exit}", mid, mid + px * 0.06f, android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {

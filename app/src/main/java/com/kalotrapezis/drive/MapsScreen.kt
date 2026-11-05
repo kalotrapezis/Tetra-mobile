@@ -232,8 +232,8 @@ internal object MapsPrefs {
     /** By car on main roads (MapsRouting.MAIN_ROADS) or the shortest way (the user, 24 Oct). */
     fun mainRoads(c: Context) = prefs(c).getBoolean("main_roads", true)
     fun setMainRoads(c: Context, on: Boolean) = prefs(c).edit().putBoolean("main_roads", on).apply()
-    /** Main roads without left turns ([MapsRouting.NO_LEFT]): By car's third way. */
-    fun noLeft(c: Context) = mainRoads(c) && prefs(c).getBoolean("no_left", false)
+    /** No cutting across ([MapsRouting.NO_LEFT]): By car's third way, the way unless another is chosen (the user, 5 Nov). */
+    fun noLeft(c: Context) = mainRoads(c) && prefs(c).getBoolean("no_left", true)
     fun setNoLeft(c: Context, on: Boolean) = prefs(c).edit().putBoolean("no_left", on).apply()
     /** What is said a little before a sharp bend ([bendsOn]). */
     fun bendWords(w: Words, right: Boolean) = w.s(if (right) R.string.maps_bend_right else R.string.maps_bend_left)
@@ -465,7 +465,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         WriterLog.i("Maps: route by $mode to ${target.name}, ${route.metres.toInt()} m, ${route.steps.size} steps, ${route.roads}, from ${where(from)}" +
             (if (mode == "car") if (headingOf(from).isFinite()) ", keeping the heading" else ", no heading (slow or still)" else "") +
             "; first: ${route.steps.getOrNull(1)?.text ?: route.steps.firstOrNull()?.text}")
-        MapsTrace.start(context, "phone", target, mode)
+        MapsTrace.start(context, "phone", target, mode, route)
         val rerouted = nav?.target?.id == target.id
         nav = Nav(target, mode, route, cumulative(route), System.currentTimeMillis(), startOff = metresBetween(from.latitude, from.longitude, route.lats[0], route.lngs[0]))
         selected = null; preview = null
@@ -559,7 +559,10 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         } else loose = false
         if (g.off) {
             nav = n.copy(offFixes = n.offFixes + 1)
-            if (g.reroute) { WriterLog.i("Maps: off the route by ${p.off.toInt()} m at ${where(loc)}, a new one"); startNav(n.target, n.mode, loc) }
+            if (g.reroute) {
+                WriterLog.i("Maps: off the route by ${p.off.toInt()} m at ${where(loc)}, ${MapsTrace.off(n, loc, MapsFiles.graphAt(root, loc.latitude, loc.longitude))}; a new one")
+                startNav(n.target, n.mode, loc)
+            }
             return
         }
         if (g.arrived) {
