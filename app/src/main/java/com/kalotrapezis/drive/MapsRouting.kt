@@ -64,6 +64,11 @@ internal object MapsRouting {
      */
     const val MAIN_ROADS = "tetra.main_roads"
     const val MAIN_DISTANCE = 90.0
+    /**
+     * Main roads without left turns (the user, 5 Nov, in Ναύπλιο at rush hour: "I would not turn left for anything, I went
+     * round the block or on to a junction further down to turn right — it should be a mode"): a left turn counts NO_LEFT_TURN.
+     */
+    const val NO_LEFT = "tetra.no_left"
     // shortcut: past this (a drive across Greece) the shortest way is taken, mostly on motorways anyway; a car_main CH profile in maps-graph.yml (a rebuild) would lift it
     private const val MAX_MAIN_NODES = 500_000
 
@@ -138,8 +143,8 @@ internal object MapsRouting {
 
     /** A route by [mode] (car, foot, bike), its directions in [w]'s language. */
     fun route(dir: File, fromLat: Double, fromLng: Double, toLat: Double, toLng: Double, mode: String, w: Words, heading: Double = Double.NaN,
-              main: Boolean = false): Route =
-        routes(dir, fromLat, fromLng, toLat, toLng, mode, w, heading, main).first()
+              main: Boolean = false, noLeft: Boolean = false): Route =
+        routes(dir, fromLat, fromLng, toLat, toLng, mode, w, heading, main, noLeft).first()
 
     private val translations by lazy { TranslationMap().doImport() }
     private val translated = HashMap<String, Translation>()
@@ -168,12 +173,12 @@ internal object MapsRouting {
      * runs a tenth of its way on tracks.
      */
     fun routes(dir: File, fromLat: Double, fromLng: Double, toLat: Double, toLng: Double, mode: String, w: Words,
-               heading: Double = Double.NaN, main: Boolean = false): List<Route> {
+               heading: Double = Double.NaN, main: Boolean = false, noLeft: Boolean = false): List<Route> {
         val legs = MapsFiles.legs(dir, fromLat, fromLng, toLat, toLng, w) { g, aLat, aLng, bLat, bLng -> seconds(g, aLat, aLng, bLat, bLng, mode) }
-        if (legs.size == 1) return direct(legs[0].dir, fromLat, fromLng, toLat, toLng, mode, w, heading, main)
+        if (legs.size == 1) return direct(legs[0].dir, fromLat, fromLng, toLat, toLng, mode, w, heading, main, noLeft)
         // across borders: each leg on its own country's roads, driven to the crossing and on from there, as one route
         val t0 = System.nanoTime()
-        val parts = legs.mapIndexed { i, l -> direct(l.dir, l.fromLat, l.fromLng, l.toLat, l.toLng, mode, w, if (i == 0) heading else Double.NaN, main, alternatives = false).first() }
+        val parts = legs.mapIndexed { i, l -> direct(l.dir, l.fromLat, l.fromLng, l.toLat, l.toLng, mode, w, if (i == 0) heading else Double.NaN, main, noLeft, alternatives = false).first() }
         WriterLog.i("Maps: a route across ${legs.size - 1} border(s), through ${legs.joinToString(" → ") { it.dir.name }}, its legs in ${(System.nanoTime() - t0) / 1_000_000} ms")
         return listOf(join(parts))
     }
@@ -200,21 +205,21 @@ internal object MapsRouting {
 
     /** [routes] on the one graph [dir]; without [alternatives], the fastest alone (a leg across a border). */
     private fun direct(dir: File, fromLat: Double, fromLng: Double, toLat: Double, toLng: Double, mode: String, w: Words,
-                       heading: Double, main: Boolean, alternatives: Boolean = true): List<Route> = reading(dir) { gh ->
+                       heading: Double, main: Boolean, noLeft: Boolean = false, alternatives: Boolean = true): List<Route> = reading(dir) { gh ->
         val main = main && mode == "car"
         val tr = translation(w.lang); val locale = tr.locale
         val mode = if (mode == "wheelchair" && "wheelchair" !in profiles(dir)) "foot" else mode // a graph from before Rolling
         val req = GHRequest(fromLat, fromLng, toLat, toLng).setProfile(mode).setLocale(locale).setAlgorithm(if (alternatives) Parameters.Algorithms.ALT_ROUTE else "")
             .setPathDetails(listOf("street_name", "street_ref", "road_environment", "road_class"))
         req.hints.putObject("alternative_route.max_paths", 3)
-        if (main) req.hints.putObject(MAIN_ROADS, true).putObject(Parameters.CH.DISABLE, true).putObject(Parameters.Routing.MAX_VISITED_NODES, MAX_MAIN_NODES)
+        if (main) req.hints.putObject(MAIN_ROADS, true).putObject(NO_LEFT, noLeft).putObject(Parameters.CH.DISABLE, true).putObject(Parameters.Routing.MAX_VISITED_NODES, MAX_MAIN_NODES)
         // a moving car goes on the way it faces (the user, 23 Oct: each new route said "turn back" for kilometres): one way,
         // without the graph's shortcuts, which take no heading; where that search grows too big, the shortcuts without it
         if (heading.isFinite()) {
             val ahead = GHRequest(fromLat, fromLng, toLat, toLng).setProfile(mode).setLocale(locale).setHeadings(listOf(heading, Double.NaN))
                 .setAlgorithm(Parameters.Algorithms.ASTAR_BI).setPathDetails(req.pathDetails)
             ahead.hints.putObject(Parameters.CH.DISABLE, true).putObject(Parameters.Routing.MAX_VISITED_NODES, MAX_HEADED_NODES)
-                .putObject(Parameters.Routing.HEADING_PENALTY, TURN_BACK_SECONDS).putObject(MAIN_ROADS, main)
+                .putObject(Parameters.Routing.HEADING_PENALTY, TURN_BACK_SECONDS).putObject(MAIN_ROADS, main).putObject(NO_LEFT, main && noLeft)
             val r = gh.route(ahead)
             if (!r.hasErrors()) return@reading listOf(MapsLanes.on(build(gh, r.best, tr, w, mode), dir.absoluteFile.parentFile, w))
         }
@@ -223,7 +228,7 @@ internal object MapsRouting {
         if (rsp.hasErrors()) rsp = gh.route(req.setAlgorithm(""))
         if (rsp.hasErrors() && main) { // too far to search without the shortcuts: today's way
             WriterLog.i("Maps: main roads too far to search (${rsp.errors.firstOrNull()?.message}), the shortest way instead")
-            return direct(dir, fromLat, fromLng, toLat, toLng, mode, w, heading, false, alternatives)
+            return direct(dir, fromLat, fromLng, toLat, toLng, mode, w, heading, false, alternatives = alternatives)
         }
         val t1 = System.nanoTime() // alternatives not to be had here: the one way
         check(!rsp.hasErrors()) { words(rsp.errors.firstOrNull(), w) }
@@ -504,6 +509,38 @@ internal object MapsRouting {
     fun posted(vararg kmh: Double): Int? =
         kmh.filter { it.isFinite() && it > 0 && it < MaxSpeed.UNLIMITED_SIGN_SPEED }.minOrNull()?.let { Math.round(it / 5).toInt() * 5 }
 
+    /** A turn's seconds on Main roads, a right one and a left one across the traffic: 5 Nov, five drives round Θήβα and
+     *  Σχηματάρι, the fewest turns (Θήβα → Χαλκίδα 25 turns down to 8, 4 minutes longer) and none through a factory's yard. */
+    private const val RIGHT_TURN = 30.0
+    private const val LEFT_TURN = 60.0
+    private const val NO_LEFT_TURN = 180.0 // three rights round a block, and then some
+
+    /**
+     * Main roads' turns (the user, 5 Nov, beside Google's way: "by eye, the turns — turn here, turn there; the other has far
+     * fewer"): [base]'s costs, and seconds for leaving the way on at a crossing, more for a left turn across the traffic.
+     * The graph keeps no road's direction (no orientation), so a turn's angle comes from the two roads' first metres.
+     */
+    private class Turns(private val base: TurnCostProvider, private val g: com.graphhopper.storage.BaseGraph, private val left: Double) : TurnCostProvider {
+        private val explorer = g.createEdgeExplorer()
+        override fun calcTurnMillis(inEdge: Int, viaNode: Int, outEdge: Int) = base.calcTurnMillis(inEdge, viaNode, outEdge)
+        override fun calcTurnWeight(inEdge: Int, viaNode: Int, outEdge: Int): Double {
+            val w = base.calcTurnWeight(inEdge, viaNode, outEdge)
+            if (w.isInfinite() || inEdge < 0 || outEdge < 0 || inEdge == outEdge) return w
+            val other = g.getOtherNode(outEdge, viaNode)
+            if (other == viaNode || g.getOtherNode(inEdge, viaNode) == viaNode) return w // a loop
+            val inn = g.getEdgeIteratorState(inEdge, viaNode).fetchWayGeometry(com.graphhopper.util.FetchMode.ALL)
+            val out = g.getEdgeIteratorState(outEdge, other).fetchWayGeometry(com.graphhopper.util.FetchMode.ALL)
+            val n = inn.size()
+            val turn = ((bearing(out.getLat(0), out.getLon(0), out.getLat(1), out.getLon(1)) -
+                bearing(inn.getLat(n - 2), inn.getLon(n - 2), inn.getLat(n - 1), inn.getLon(n - 1)) + 540) % 360) - 180
+            if (Math.abs(turn) < 40) return w
+            // a bend where two pieces of one road meet is no crossing
+            val it = explorer.setBaseNode(viaNode); var roads = 0
+            while (it.next()) if (++roads > 2) break
+            return if (roads <= 2) w else w + if (turn > 0) RIGHT_TURN else left
+        }
+    }
+
     private class TetraHopper : GraphHopper() {
         override fun createWeightingFactory() = WeightingFactory { profile, hints, noTurns -> weighting(profile, hints, noTurns) }
 
@@ -576,7 +613,8 @@ internal object MapsRouting {
                 }
                 else -> throw IllegalArgumentException("No profile ${profile.name}")
             }
-            return CustomWeighting(turns, p)
+            val main = profile.name == "car" && hints.getBool(MAIN_ROADS, false) && turns !== TurnCostProvider.NO_TURN_COST_PROVIDER
+            return CustomWeighting(if (main) Turns(turns, baseGraph.baseGraph, if (hints.getBool(NO_LEFT, false)) NO_LEFT_TURN else LEFT_TURN) else turns, p)
         }
     }
 }

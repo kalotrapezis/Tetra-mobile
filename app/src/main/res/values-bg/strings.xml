@@ -357,6 +357,8 @@
     <string name="settings_shortest_summary">Най-кратък: по-краткият път, дори по черни и малки пътища</string>
     <string name="settings_main_roads">Главни пътища</string>
     <string name="settings_shortest">Най-кратък</string>
+    <string name="settings_no_left">Без леви завои</string>
+    <string name="settings_no_left_summary">Без леви завои: главните пътища, а където ляв завой би пресякъл движението, заобикаляне надясно, както в града в пиковия час</string>
     <string name="settings_directions">Упътвания</string>
     <string name="settings_directions_note">Гласът е синтезът на реч на Android; гласовете му са в настройките на Android.</string>
     <string name="settings_directions_in_summary">Думите и гласът за всеки завой</string>

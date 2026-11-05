@@ -357,6 +357,8 @@
     <string name="settings_shortest_summary">Συντομότερη: ο πιο σύντομος δρόμος, ακόμη και από χωματόδρομους και μικρούς δρόμους</string>
     <string name="settings_main_roads">Κύριοι δρόμοι</string>
     <string name="settings_shortest">Συντομότερη</string>
+    <string name="settings_no_left">Χωρίς αριστερές</string>
+    <string name="settings_no_left_summary">Χωρίς αριστερές: οι κύριοι δρόμοι, και όπου μια αριστερή στροφή θα έκοβε την κίνηση, γύρος από δεξιά, όπως μέσα στην πόλη στην αιχμή</string>
     <string name="settings_directions">Οδηγίες</string>
     <string name="settings_directions_note">Η φωνή είναι η μετατροπή κειμένου σε ομιλία του Android· οι φωνές της βρίσκονται στις ρυθμίσεις του Android.</string>
     <string name="settings_directions_in_summary">Οι οδηγίες στις στροφές και η φωνή</string>

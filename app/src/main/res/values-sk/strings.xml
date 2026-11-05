@@ -357,6 +357,8 @@
     <string name="settings_shortest_summary">Najkratšia: kratšia cesta, aj po poľných a malých cestách</string>
     <string name="settings_main_roads">Hlavné cesty</string>
     <string name="settings_shortest">Najkratšia</string>
+    <string name="settings_no_left">Bez odbočenia vľavo</string>
+    <string name="settings_no_left_summary">Bez odbočenia vľavo: hlavné cesty, a kde by odbočenie vľavo križovalo premávku, obchádzka vpravo, ako v meste v špičke</string>
     <string name="settings_directions">Navigácia</string>
     <string name="settings_directions_note">Hlas je prevod textu na reč Androidu; jeho hlasy sú v nastaveniach Androidu.</string>
     <string name="settings_directions_in_summary">Slová navigácie a hlas</string>

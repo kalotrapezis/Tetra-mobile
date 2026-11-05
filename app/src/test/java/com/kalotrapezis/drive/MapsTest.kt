@@ -687,6 +687,29 @@ class MapsMainRoadsTest {
         assertTrue(r.steps[0].metres > 5000)
     }
 
+    private val turnSigns = setOf(-3, -2, -1, 1, 2, 3, -7, 7)
+    private val leftSigns = setOf(-3, -2, -1)
+
+    /** Main roads count a turn (the user, 5 Nov: "by eye, the turns — the other way has far fewer"): Θήβα → Χαλκίδα had 25. */
+    @Test fun fewTurns() {
+        assumeTrue(File(dir, "properties").isFile)
+        val r = MapsRouting.route(dir, 38.3216, 23.3186, 38.4636, 23.5994, "car", el, main = true)
+        val turns = r.steps.count { it.sign in turnSigns }
+        println("Θήβα → Χαλκίδα on main roads: ${"%.1f".format(r.metres / 1000)} km, ${r.millis / 60_000} min, $turns turns")
+        assertTrue(turns <= 13)
+    }
+
+    /** No left turns (the user, 5 Nov, Ναύπλιο at rush hour: round the block to the right instead): Τολό → Νέα Κίος. */
+    @Test fun noLeftTurns() {
+        assumeTrue(File(dir, "properties").isFile)
+        fun lefts(noLeft: Boolean) = MapsRouting.route(dir, 37.5207, 22.8590, 37.5844, 22.7480, "car", el, main = true, noLeft = noLeft).let { r ->
+            println("Τολό → Νέα Κίος${if (noLeft) " without left turns" else ""}: ${"%.1f".format(r.metres / 1000)} km, ${r.millis / 60_000} min, " +
+                "${r.steps.count { it.sign in leftSigns }} left of ${r.steps.count { it.sign in turnSigns }} turns")
+            r.steps.count { it.sign in leftSigns }
+        }
+        assertTrue(lefts(true) < lefts(false))
+    }
+
     @Ignore("its places were made up before publishing; put your own back locally to run it") @Test fun homeToMarket() {
         assumeTrue(File(dir, "properties").isFile)
         val home = 37.27639 to 22.58912; val market = 37.349324 to 22.584650; val skala = 37.212858 to 22.551289

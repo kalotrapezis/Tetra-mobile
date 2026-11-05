@@ -357,6 +357,8 @@
     <string name="settings_shortest_summary">Kürzeste: der kürzere Weg, auch über Feldwege und kleine Straßen</string>
     <string name="settings_main_roads">Hauptstraßen</string>
     <string name="settings_shortest">Kürzeste</string>
+    <string name="settings_no_left">Ohne Linksabbiegen</string>
+    <string name="settings_no_left_summary">Ohne Linksabbiegen: Hauptstraßen, und wo Linksabbiegen den Verkehr kreuzen würde, ein Bogen nach rechts, wie in der Stadt im Berufsverkehr</string>
     <string name="settings_directions">Navigation</string>
     <string name="settings_directions_note">Die Stimme ist die Sprachausgabe von Android; ihre Stimmen sind in den Android-Einstellungen.</string>
     <string name="settings_directions_in_summary">Die Abbiegehinweise und die Stimme</string>

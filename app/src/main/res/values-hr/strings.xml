@@ -357,6 +357,8 @@
     <string name="settings_shortest_summary">Najkraće: kraći put, čak i makadamima i malim cestama</string>
     <string name="settings_main_roads">Glavne ceste</string>
     <string name="settings_shortest">Najkraće</string>
+    <string name="settings_no_left">Bez skretanja lijevo</string>
+    <string name="settings_no_left_summary">Bez skretanja lijevo: glavne ceste, a gdje bi skretanje lijevo presijecalo promet, obilazak desno, kao u gradu u špici</string>
     <string name="settings_directions">Upute</string>
     <string name="settings_directions_note">Glas je Androidova sinteza govora; njezini su glasovi u postavkama Androida.</string>
     <string name="settings_directions_in_summary">Riječi uputa za skretanja i glas</string>

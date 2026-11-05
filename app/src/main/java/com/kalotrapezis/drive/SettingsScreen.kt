@@ -800,10 +800,11 @@ internal fun SettingsTab(
         ChoiceRow(stringResource(R.string.settings_map), stringResource(R.string.settings_map_summary), listOf("light" to stringResource(R.string.settings_light), "dark" to stringResource(R.string.settings_dark)), mapTheme) { mapTheme = it; MapsPrefs.setMapTheme(mapsContext, it) }
         ChoiceRow(stringResource(R.string.settings_on_foot), if (rolling) stringResource(R.string.settings_rolling_summary) else stringResource(R.string.settings_walking_summary),
             listOf(false to stringResource(R.string.settings_walking), true to stringResource(R.string.settings_rolling)), rolling) { rolling = it; MapsPrefs.setRolling(mapsContext, it) }
-        var mainRoads by remember { mutableStateOf(MapsPrefs.mainRoads(mapsContext)) }
-        ChoiceRow(stringResource(R.string.settings_by_car), if (mainRoads) stringResource(R.string.settings_main_roads_summary)
-            else stringResource(R.string.settings_shortest_summary),
-            listOf(true to stringResource(R.string.settings_main_roads), false to stringResource(R.string.settings_shortest)), mainRoads) { mainRoads = it; MapsPrefs.setMainRoads(mapsContext, it) }
+        var byCar by remember { mutableStateOf(if (!MapsPrefs.mainRoads(mapsContext)) "shortest" else if (MapsPrefs.noLeft(mapsContext)) "no_left" else "main") }
+        ChoiceRow(stringResource(R.string.settings_by_car), stringResource(when (byCar) { "main" -> R.string.settings_main_roads_summary; "no_left" -> R.string.settings_no_left_summary
+                else -> R.string.settings_shortest_summary }),
+            listOf("main" to stringResource(R.string.settings_main_roads), "no_left" to stringResource(R.string.settings_no_left), "shortest" to stringResource(R.string.settings_shortest)), byCar) {
+            byCar = it; MapsPrefs.setMainRoads(mapsContext, it != "shortest"); MapsPrefs.setNoLeft(mapsContext, it == "no_left") }
     }
     var lang by remember { mutableStateOf(MapsPrefs.lang(mapsContext)) }
     var bends by remember { mutableStateOf(MapsPrefs.bends(mapsContext)) }

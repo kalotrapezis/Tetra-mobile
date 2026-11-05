@@ -914,7 +914,7 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
         val t0 = System.currentTimeMillis()
         val facing = headingOf(from)
         lifecycleScope.launch {
-            val r = withContext(Dispatchers.IO) { runCatching { chosen ?: MapsRouting.route(graphDir, from.latitude, from.longitude, target.lat, target.lng, "car", words, facing, MapsPrefs.mainRoads(carContext)) } }
+            val r = withContext(Dispatchers.IO) { runCatching { chosen ?: MapsRouting.route(graphDir, from.latitude, from.longitude, target.lat, target.lng, "car", words, facing, MapsPrefs.mainRoads(carContext), MapsPrefs.noLeft(carContext)) } }
             finding = null
             r.onSuccess { route ->
                 val rerouted = nav?.target == target
@@ -1166,7 +1166,7 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
             val h = here
             lifecycleScope.launch {
                 routes = if (h == null) emptyList() else withContext(Dispatchers.IO) {
-                    runCatching { MapsRouting.routes(graphAt(h.latitude, h.longitude), h.latitude, h.longitude, target.lat, target.lng, "car", words, main = MapsPrefs.mainRoads(carContext)) }.getOrDefault(emptyList())
+                    runCatching { MapsRouting.routes(graphAt(h.latitude, h.longitude), h.latitude, h.longitude, target.lat, target.lng, "car", words, main = MapsPrefs.mainRoads(carContext), noLeft = MapsPrefs.noLeft(carContext)) }.getOrDefault(emptyList())
                         .also { rs -> tollCounts = rs.map { r -> runCatching { tollsOn(r, cumulative(r), MapsSearch.tolls(root)).size }.getOrDefault(0) } }
                 }
                 invalidate()

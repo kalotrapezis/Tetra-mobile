@@ -357,6 +357,8 @@
     <string name="settings_shortest_summary">Mais curto: o caminho mais curto, mesmo por caminhos de terra e estradas pequenas</string>
     <string name="settings_main_roads">Estradas principais</string>
     <string name="settings_shortest">Mais curto</string>
+    <string name="settings_no_left">Sem virar à esquerda</string>
+    <string name="settings_no_left_summary">Sem virar à esquerda: estradas principais e, onde virar à esquerda cortaria o trânsito, uma volta pela direita, como na cidade à hora de ponta</string>
     <string name="settings_directions">Indicações</string>
     <string name="settings_directions_note">A voz é a conversão de texto em voz do Android; as vozes estão nas definições do Android.</string>
     <string name="settings_directions_in_summary">As palavras das indicações passo a passo e a voz</string>

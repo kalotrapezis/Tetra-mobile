@@ -232,6 +232,9 @@ internal object MapsPrefs {
     /** By car on main roads (MapsRouting.MAIN_ROADS) or the shortest way (the user, 24 Oct). */
     fun mainRoads(c: Context) = prefs(c).getBoolean("main_roads", true)
     fun setMainRoads(c: Context, on: Boolean) = prefs(c).edit().putBoolean("main_roads", on).apply()
+    /** Main roads without left turns ([MapsRouting.NO_LEFT]): By car's third way. */
+    fun noLeft(c: Context) = mainRoads(c) && prefs(c).getBoolean("no_left", false)
+    fun setNoLeft(c: Context, on: Boolean) = prefs(c).edit().putBoolean("no_left", on).apply()
     /** What is said a little before a sharp bend ([bendsOn]). */
     fun bendWords(w: Words, right: Boolean) = w.s(if (right) R.string.maps_bend_right else R.string.maps_bend_left)
     fun autoPark(c: Context) = prefs(c).getBoolean("auto_park", true)
@@ -489,7 +492,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         finding = context.getString(R.string.maps_finding)
         scope.launch {
             val r = withContext(Dispatchers.IO) { runCatching { MapsRouting.routes(graphDir, from.latitude, from.longitude, target.lat, target.lng, profile(mode), words,
-                if (mode == "car" && !choose) headingOf(from) else Double.NaN, MapsPrefs.mainRoads(context)) } }
+                if (mode == "car" && !choose) headingOf(from) else Double.NaN, MapsPrefs.mainRoads(context), MapsPrefs.noLeft(context)) } }
             finding = null
             r.onSuccess { routes ->
                 if (choose && routes.size > 1) {
