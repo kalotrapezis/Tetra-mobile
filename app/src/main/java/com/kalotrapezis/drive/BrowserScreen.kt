@@ -815,9 +815,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         }
     }
 
-    /** |♥ Copy Share| (the user, 5 Nov): beside the address on a tablet's bar, under it in the sidebar; [hide] before it there. */
-    @Composable fun shareGroup(hide: (() -> Unit)? = null) = Row(verticalAlignment = Alignment.CenterVertically) {
-        if (hide != null) IconButton(onClick = hide, Modifier.size(40.dp)) { Icon(painterResource(R.drawable.ic_last_page), stringResource(R.string.browser_side_hide), Modifier.graphicsLayer { scaleX = -1f }) }
+    /** |♥ Copy Share| (the user, 5 Nov): beside the address on a tablet's bar, under it in the sidebar. */
+    @Composable fun shareGroup() = Row(verticalAlignment = Alignment.CenterVertically) {
         Surface(shape = CircleShape, color = Color.Transparent, border = androidx.compose.foundation.BorderStroke(1.dp, onBar.copy(alpha = 0.25f))) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = ::heart, enabled = url.isNotEmpty(), modifier = Modifier.size(40.dp)) { BrowserHeart(marked) }
@@ -846,13 +845,6 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         @Composable fun line() = if (top && tab.progress < 100 && url.isNotEmpty()) LinearProgressIndicator(progress = { tab.progress / 100f }, Modifier.fillMaxWidth().height(2.dp), color = BROWSER_COLOR)
             else if (showBar) HorizontalDivider(color = onBar.copy(alpha = 0.2f)) else Unit
         if (!top) line()
-        // lowered: only a black strip with the handle; a tap or a drag up brings the bar back
-        if (lowered && !showBar && !top) {
-            var up by remember { mutableFloatStateOf(0f) }
-            Box(Modifier.fillMaxWidth().height(22.dp).background(Color.Black).clickable(onClickLabel = stringResource(R.string.browser_menu)) { lowered = false }
-                .pointerInput(Unit) { detectVerticalDragGestures(onDragStart = { up = 0f }, onVerticalDrag = { _, d -> up += d }, onDragEnd = { if (up < -20) lowered = false }) },
-                contentAlignment = Alignment.Center) { Box(Modifier.size(width = 36.dp, height = 4.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.35f))) }
-        }
         androidx.compose.animation.AnimatedVisibility(showBar, enter = androidx.compose.animation.expandVertically(), exit = androidx.compose.animation.shrinkVertically()) {
         CompositionLocalProvider(LocalContentColor provides onBar) {
             val shown = onBarTools.filter { !wide || (it != "copy" && it != "share") }.mapNotNull { id -> toolOf(id) }
@@ -921,7 +913,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         IconButton(onClick = act, enabled = enabled, modifier = Modifier.size(size.dp)) { Icon(painterResource(icon), label, tint = if (enabled) onBar else onBar.copy(alpha = 0.3f)) }
     SideEffect { BrowserSideSheets.on = side }
     DisposableEffect(Unit) { onDispose { BrowserSideSheets.on = false } }
-    @Composable fun sideBar(modifier: Modifier) = Surface(modifier.width(272.dp).fillMaxHeight().sideTouches(), color = bar, contentColor = onBar) { CompositionLocalProvider(LocalContentColor provides onBar) {
+    @Composable fun sideBar(modifier: Modifier) = Surface(modifier.width(228.dp).fillMaxHeight().sideTouches().swipeLeft { lowered = true; editing = false }, color = bar, contentColor = onBar) { CompositionLocalProvider(LocalContentColor provides onBar) {
         Row(Modifier.fillMaxSize()) {
             Column(Modifier.weight(1f).fillMaxHeight().padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 addressPill(Modifier.fillMaxWidth().height(46.dp), withHeart = false, typing = false)
@@ -929,11 +921,10 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                     sideIcon(R.drawable.ic_chevron_left, stringResource(R.string.common_back), tab.canBack, 40) { tab.session.goBack() }
                     sideIcon(R.drawable.ic_chevron_right, stringResource(R.string.browser_forward), tab.canForward, 40) { tab.session.goForward() }
                     Spacer(Modifier.weight(1f))
-                    // hidden by this button only: the grip's drag fired too easily (the user, 5 Nov)
-                    shareGroup(hide = { lowered = true; editing = false })
+                    shareGroup()
                 }
                 Surface(shape = MaterialTheme.shapes.large, color = Color.Transparent, border = androidx.compose.foundation.BorderStroke(1.dp, onBar.copy(alpha = 0.25f)), modifier = Modifier.fillMaxWidth()) {
-                    androidx.compose.foundation.layout.FlowRow(Modifier.padding(4.dp), horizontalArrangement = Arrangement.SpaceEvenly, maxItemsInEachRow = 5) {
+                    androidx.compose.foundation.layout.FlowRow(Modifier.padding(4.dp), horizontalArrangement = Arrangement.SpaceEvenly, maxItemsInEachRow = 4) {
                         onBarTools.filter { it != "copy" && it != "share" }.mapNotNull { toolOf(it) }.forEach { t -> BrowserSmall(t.icon, t.image, t.label, t.on, t.enabled, t.badge, Modifier.size(width = 46.dp, height = 40.dp), long = editBar, click = t.act) }
                         if (top) topMenu() else IconButton(onClick = { menu = true; editing = false }, Modifier.size(width = 46.dp, height = 40.dp)) { Icon(painterResource(R.drawable.ic_more_horiz), stringResource(R.string.browser_menu)) }
                     }
@@ -972,10 +963,19 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             }
         }
     } }
-    /** Hidden by hand: a thin black strip at the left; a tap brings the sidebar back. */
-    @Composable fun sideStrip() {
-        Box(Modifier.width(18.dp).fillMaxHeight().background(Color.Black).clickable(onClickLabel = stringResource(R.string.browser_menu)) { lowered = false },
-            contentAlignment = Alignment.Center) { Box(Modifier.size(width = 4.dp, height = 36.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.35f))) }
+    /** Hidden by hand (the user, 6 Nov): no strip, only a half circle at the low left, off the system's back-gesture edge
+     *  height; a tap or a drag out brings the bar or sidebar back. [upright]: the sidebar's, on the left edge. */
+    @Composable fun BoxScope.handle(upright: Boolean) {
+        var drag by remember { mutableFloatStateOf(0f) }
+        Box(Modifier.align(Alignment.BottomStart).then(if (upright) Modifier.padding(bottom = 72.dp).size(18.dp, 56.dp)
+                .clip(androidx.compose.foundation.shape.RoundedCornerShape(topEndPercent = 50, bottomEndPercent = 50))
+            else Modifier.padding(start = 24.dp).size(56.dp, 18.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(topStartPercent = 50, topEndPercent = 50)))
+            .background(Color.Black.copy(alpha = 0.75f)).clickable(onClickLabel = stringResource(R.string.browser_menu)) { lowered = false }
+            .pointerInput(upright) { if (upright) detectHorizontalDragGestures(onDragStart = { drag = 0f }, onHorizontalDrag = { _, d -> drag += d }, onDragEnd = { if (drag > 20) lowered = false })
+                else detectVerticalDragGestures(onDragStart = { drag = 0f }, onVerticalDrag = { _, d -> drag += d }, onDragEnd = { if (drag < -20) lowered = false }) },
+            contentAlignment = Alignment.Center) {
+            Box(Modifier.size(if (upright) 4.dp else 24.dp, if (upright) 24.dp else 4.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.6f)))
+        }
     }
 
     Column(Modifier.fillMaxSize().background(bar).then(if (full) Modifier else Modifier.statusBarsPadding().windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top)).navigationBarsPadding()).imePadding()) {
@@ -983,7 +983,6 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         Row(Modifier.weight(if (player) 0.6f else 1f).fillMaxWidth()) {
         // the sidebar beside the page; with Auto-hide it comes back over the page instead, so the page does not jump
         if (side && !autohide && showBar) sideBar(Modifier)
-        if (side && lowered && !showBar) sideStrip()
         Box(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.background)) {
             val panes = splitPair?.takeIf { wide && !player }?.let { p -> listOfNotNull(tabs.firstOrNull { it.id == p.first }, tabs.firstOrNull { it.id == p.second }) }?.takeIf { it.size == 2 }
             @Composable fun pane(t: BrowserTab, m: Modifier) = Box(m.then(if (panes != null && t.id == currentId) Modifier.border(2.dp, BROWSER_COLOR) else Modifier)
@@ -1049,6 +1048,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             // the loading line where the clock was (the bar at the top has its own under it)
             if ((!top || side) && tab.progress < 100 && url.isNotEmpty()) LinearProgressIndicator(progress = { tab.progress / 100f },
                 Modifier.align(Alignment.TopCenter).fillMaxWidth().height(2.dp), color = BROWSER_COLOR, trackColor = Color.Transparent)
+            if (lowered && !showBar && !player && !full && (side || !top)) handle(upright = side)
             message?.let {
                 Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape, modifier = Modifier.align(Alignment.TopCenter).padding(top = 12.dp, start = 16.dp, end = 16.dp)) {
                     Text(it, Modifier.padding(horizontal = 18.dp, vertical = 10.dp))
@@ -1261,6 +1261,20 @@ private class BrowserTool(val icon: Int, val label: String, val on: Boolean = fa
 internal object BrowserSideSheets {
     var on by mutableStateOf(false)
     @Volatile var from: Offset? = null // the last touch on the sidebar, in the window
+}
+
+/** A swipe to the left anywhere on it (the user, 6 Nov): mostly sideways and over 72 dp, so taps and the tabs' scroll are left alone. */
+private fun Modifier.swipeLeft(hide: () -> Unit): Modifier = pointerInput(Unit) {
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+        val need = 72.dp.toPx()
+        while (true) {
+            val c = awaitPointerEvent(PointerEventPass.Initial).changes.firstOrNull { it.id == down.id } ?: break
+            if (!c.pressed) break
+            val d = c.position - down.position
+            if (-d.x > need && -d.x > 2 * kotlin.math.abs(d.y)) { c.consume(); hide(); break }
+        }
+    }
 }
 
 /** Every touch on the sidebar, noted (BrowserSideSheets.from), before its buttons see it. */
