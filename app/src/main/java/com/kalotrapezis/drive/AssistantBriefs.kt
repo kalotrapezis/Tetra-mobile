@@ -13,7 +13,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import org.json.JSONObject
 import java.io.File
-import java.text.DateFormat
 import java.util.Date
 
 /*
@@ -45,7 +44,7 @@ internal object AssistantBriefs {
         prefs.edit().putLong("seen", at).apply()
         if (!AiGate.load(c).enabled) return
         val page = File(dir(), File(o.optString("file")).name)
-        if (page.isFile) post(c, o.optString("title"), o.optString("text"), page, DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(at)))
+        if (page.isFile) post(c, o.optString("title"), o.optString("text"), page, java.text.SimpleDateFormat(if (android.text.format.DateFormat.is24HourFormat(c)) "HH:mm" else "h:mm a", c.uiLocale()).format(Date(at)) /* the phone's clock, as Calendar (6 Nov: 7:30 read as evening) */)
     }
 
     fun post(c: Context, title: String, text: String, page: File, time: String) {
