@@ -16,7 +16,7 @@ import java.io.File
 import java.util.Date
 
 /*
- * The computer's scheduled AI actions, shown here (the desktop's schedule.js and brief.js run them; the phone does not).
+ * The scheduled AI actions' pages, shown here: made by the computer (schedule.js, brief.js) or by this device when it is the runner (AssistantRunner).
  * Each run writes a page into .System/Assistant/Shared/Briefs, which syncs as "AI Assist/Briefs", and latest.json says
  * which is new: after a sync, a new one rings like a Calendar reminder (the island on HyperOS), and a tap opens the page.
  */
@@ -45,6 +45,18 @@ internal object AssistantBriefs {
         if (!AiGate.load(c).enabled) return
         val page = File(dir(), File(o.optString("file")).name)
         if (page.isFile) post(c, o.optString("title"), o.optString("text"), page, java.text.SimpleDateFormat(if (android.text.format.DateFormat.is24HourFormat(c)) "HH:mm" else "h:mm a", c.uiLocale()).format(Date(at)) /* the phone's clock, as Calendar (6 Nov: 7:30 read as evening) */)
+    }
+
+    /** A page made on this device: the sync that brings latest.json back does not ring it again. */
+    fun shown(c: Context, at: Long) = c.getSharedPreferences("assistant_briefs", Context.MODE_PRIVATE).edit().putLong("seen", at).apply()
+
+    /** A word without a page (a run that failed or could not start), on the same channel. */
+    fun notice(c: Context, title: String, text: String) {
+        val nm = c.getSystemService(NotificationManager::class.java) ?: return
+        if (nm.getNotificationChannel(CHANNEL) == null)
+            nm.createNotificationChannel(NotificationChannel(CHANNEL, c.getString(R.string.assistant_briefs_channel), NotificationManager.IMPORTANCE_HIGH).apply { setShowBadge(false) })
+        runCatching { NotificationManagerCompat.from(c).notify(ID + 2, NotificationCompat.Builder(c, CHANNEL).setSmallIcon(R.drawable.ic_auto_fix)
+            .setContentTitle(title).setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text)).setAutoCancel(true).build()) }
     }
 
     fun post(c: Context, title: String, text: String, page: File, time: String) {

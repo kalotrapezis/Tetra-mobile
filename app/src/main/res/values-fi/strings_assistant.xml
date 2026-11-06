@@ -227,4 +227,22 @@
     <string name="assistant_calling">Soitan: %1$s</string>
     <string name="assistant_calling_in">Puhelu %1$d s kuluttua…</string>
     <string name="assistant_mail_kept">Selvä, ei lähetetty.</string>
+    <string name="brief_failed">Ei onnistunut: %1$s</string>
+    <string name="brief_no_lists">Ei avoimia kohtia.</string>
+    <string name="brief_nothing">Kalenterissa ei ole mitään.</string>
+    <string name="brief_place_missing">Sään sijaintia ei ole vielä asetettu.</string>
+    <string name="brief_rain">sade %1$d %%</string>
+    <string name="brief_today_count">Tänään: %1$d</string>
+    <string name="brief_w_clear">Selkeää</string>
+    <string name="brief_w_partly">Puolipilvistä</string>
+    <string name="brief_w_cloudy">Pilvistä</string>
+    <string name="brief_w_fog">Sumua</string>
+    <string name="brief_w_drizzle">Tihkua</string>
+    <string name="brief_w_rain">Sadetta</string>
+    <string name="brief_w_snow">Lunta</string>
+    <string name="brief_w_showers">Kuuroja</string>
+    <string name="brief_w_storm">Ukkosta</string>
+    <string name="brief_runs_on">Missä tehdään</string>
+    <string name="brief_runs_computer">Tietokone</string>
+    <string name="brief_runs_here">Tämä laite</string>
 </resources>

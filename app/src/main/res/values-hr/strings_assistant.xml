@@ -229,4 +229,22 @@
     <string name="assistant_calling">Zovem %1$s</string>
     <string name="assistant_calling_in">Poziv za %1$d s…</string>
     <string name="assistant_mail_kept">U redu, nije poslano.</string>
+    <string name="brief_failed">Nije uspjelo: %1$s</string>
+    <string name="brief_no_lists">Nema otvorenih stavki.</string>
+    <string name="brief_nothing">Ništa u kalendaru.</string>
+    <string name="brief_place_missing">Mjesto za prognozu još nije postavljeno.</string>
+    <string name="brief_rain">kiša %1$d %%</string>
+    <string name="brief_today_count">Danas: %1$d</string>
+    <string name="brief_w_clear">Vedro</string>
+    <string name="brief_w_partly">Djelomično oblačno</string>
+    <string name="brief_w_cloudy">Oblačno</string>
+    <string name="brief_w_fog">Magla</string>
+    <string name="brief_w_drizzle">Rosulja</string>
+    <string name="brief_w_rain">Kiša</string>
+    <string name="brief_w_snow">Snijeg</string>
+    <string name="brief_w_showers">Pljuskovi</string>
+    <string name="brief_w_storm">Grmljavina</string>
+    <string name="brief_runs_on">Izrađuje se na</string>
+    <string name="brief_runs_computer">Računalo</string>
+    <string name="brief_runs_here">Ovaj uređaj</string>
 </resources>

@@ -231,4 +231,22 @@
     <string name="assistant_calling">Volám %1$s</string>
     <string name="assistant_calling_in">Hovor o %1$d s…</string>
     <string name="assistant_mail_kept">Dobre, neodoslané.</string>
+    <string name="brief_failed">Nepodarilo sa: %1$s</string>
+    <string name="brief_no_lists">Žiadne otvorené položky.</string>
+    <string name="brief_nothing">V kalendári nič nie je.</string>
+    <string name="brief_place_missing">Miesto pre počasie zatiaľ nie je nastavené.</string>
+    <string name="brief_rain">dážď %1$d %%</string>
+    <string name="brief_today_count">Dnes: %1$d</string>
+    <string name="brief_w_clear">Jasno</string>
+    <string name="brief_w_partly">Polojasno</string>
+    <string name="brief_w_cloudy">Zamračené</string>
+    <string name="brief_w_fog">Hmla</string>
+    <string name="brief_w_drizzle">Mrholenie</string>
+    <string name="brief_w_rain">Dážď</string>
+    <string name="brief_w_snow">Sneh</string>
+    <string name="brief_w_showers">Prehánky</string>
+    <string name="brief_w_storm">Búrka</string>
+    <string name="brief_runs_on">Vytvára sa na</string>
+    <string name="brief_runs_computer">Počítač</string>
+    <string name="brief_runs_here">Toto zariadenie</string>
 </resources>

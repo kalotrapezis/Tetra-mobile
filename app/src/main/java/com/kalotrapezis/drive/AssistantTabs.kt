@@ -199,6 +199,14 @@ internal fun MemoryTab() {
 private val REPEAT_LABEL = mapOf("once" to R.string.assistant_sched_once, "daily" to R.string.assistant_sched_daily, "weekly" to R.string.assistant_sched_weekly,
     "monthly" to R.string.assistant_sched_monthly, "yearly" to R.string.assistant_sched_yearly)
 
+/** The runner in words: this device, another phone or tablet by its model, or a computer (by its name when it has one). */
+private fun runnerName(c: Context, r: String?) = when {
+    r == AssistantRunner.me() -> c.getString(R.string.brief_runs_here)
+    r?.startsWith("android:") == true -> r.removePrefix("android:")
+    r == null -> c.getString(R.string.brief_runs_computer)
+    else -> c.getString(R.string.brief_runs_computer) + " (" + r + ")"
+}
+
 private fun weekday(c: Context, n: Int) = DayOfWeek.of(if (n == 0) 7 else n).getDisplayName(TextStyle.SHORT, c.uiLocale())
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -213,7 +221,9 @@ internal fun ScheduledTab(offer: (String) -> Unit) {
     var pages by remember { mutableStateOf(AssistantBriefs.pages()) }
     var place by remember { mutableStateOf(AssistantSchedules.place(tetra)) }
     var placing by remember { mutableStateOf(false) }
-    fun reload() { list = AssistantSchedules.list(tetra); pages = AssistantBriefs.pages(); place = AssistantSchedules.place(tetra) }
+    var runner by remember { mutableStateOf(AssistantSchedules.runner(tetra)) }
+    fun reload() { list = AssistantSchedules.list(tetra); pages = AssistantBriefs.pages(); place = AssistantSchedules.place(tetra); runner = AssistantSchedules.runner(tetra); AssistantRunner.planSoon(c) }
+    LaunchedEffect(Unit) { AssistantRunner.planSoon(c) } // a Run now asked here, or one missed while the phone was off
     fun sync() = ScopedSync.soon(c, "assistant", 0, orWhole = true)
     fun change(id: String, x: JSONObject) = runCatching { AssistantSchedules.change(tetra, id, x) }.onSuccess { sync(); reload() }.onFailure { said = it.message }
     val title = { s: JSONObject -> if (s.optString("kind") == "brief") c.getString(R.string.assistant_briefs_channel) else s.optString("title") }
@@ -227,6 +237,10 @@ internal fun ScheduledTab(offer: (String) -> Unit) {
                 }
             }
             said?.let { Text(it, Modifier.padding(top = 6.dp), color = MaterialTheme.colorScheme.primary) }
+            // deleted (the user, 6 Nov: Delete on its card too): one tap brings it back
+            if (list.none { it.optString("kind") == "brief" }) TextButton({ AssistantSchedules.addBrief(tetra); sync(); reload() }) {
+                Icon(painterResource(R.drawable.ic_add), contentDescription = null); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.assistant_briefs_channel))
+            }
             // one tap to a ready prompt: an empty list helps make the first one
             AppChips(listOf(Triple(R.string.assistant_sched_ex1, R.string.assistant_chip_brief_prompt, AppColor.calendar), Triple(R.string.assistant_sched_ex2, R.string.assistant_sched_ex2_prompt, AppColor.calendar),
                 Triple(R.string.assistant_sched_ex3, R.string.assistant_chip_repeat_prompt, AppColor.mail)).map { (l, pr, col) -> val p = stringResource(pr); Triple(stringResource(l), col) { offer(p) } }, Modifier.padding(top = 10.dp))
@@ -251,12 +265,13 @@ internal fun ScheduledTab(offer: (String) -> Unit) {
                     // the weather's place, in sight (the user, 4 Nov: "where do I declare location"); unset, where the phone is
                     if (s.optString("kind") == "brief") Text(stringResource(R.string.brief_place) + ": " + (place?.optString("name") ?: stringResource(R.string.brief_place_phone)),
                         style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.brief_runs_on) + ": " + runnerName(c, runner), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(0.dp)) {
                         TextButton({ change(id, JSONObject().put("runNow", true)).onSuccess { said = c.getString(R.string.assistant_sched_asked) } }) { Text(stringResource(R.string.assistant_sched_run_now)) }
                         TextButton({ change(id, JSONObject().put("paused", !s.optBoolean("paused"))) }) { Text(stringResource(if (s.optBoolean("paused")) R.string.common_resume else R.string.common_pause)) }
                         TextButton({ editing = JSONObject(s.toString()) }) { Text(stringResource(R.string.common_edit)) }
                         if (s.optString("kind") == "brief") TextButton({ placing = true }) { Text(stringResource(R.string.brief_place)) }
-                        if (s.optString("kind") != "brief") TextButton({ AssistantSchedules.remove(tetra, id); sync(); reload() }) { Text(stringResource(R.string.common_delete)) }
+                        TextButton({ AssistantSchedules.remove(tetra, id); sync(); reload() }) { Text(stringResource(R.string.common_delete)) }
                     }
                 }
             }
@@ -273,8 +288,9 @@ internal fun ScheduledTab(offer: (String) -> Unit) {
         }
     }
     if (placing) PlaceDialog(place, close = { placing = false }) { p -> runCatching { AssistantSchedules.setPlace(tetra, p) }.onSuccess { placing = false; sync(); reload() }.onFailure { said = it.message } }
-    editing?.let { e -> ScheduleDialog(e, close = { editing = null }) { x, sections ->
+    editing?.let { e -> ScheduleDialog(e, runner, close = { editing = null }) { x, sections, who ->
         runCatching {
+            if (who != runner) AssistantSchedules.setRunner(tetra, who)
             if (e.has("id")) { sections?.let { AssistantSchedules.setSections(tetra, it) }; AssistantSchedules.change(tetra, e.getString("id"), x) } else AssistantSchedules.add(tetra, x)
         }.onSuccess { editing = null; said = null; sync(); reload() }.onFailure { said = it.message }
     } }
@@ -282,7 +298,7 @@ internal fun ScheduledTab(offer: (String) -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun ScheduleDialog(s: JSONObject, close: () -> Unit, save: (JSONObject, JSONObject?) -> Unit) {
+private fun ScheduleDialog(s: JSONObject, runnerNow: String?, close: () -> Unit, save: (JSONObject, JSONObject?, String?) -> Unit) {
     val c = LocalContext.current
     val brief = s.optString("kind") == "brief"
     var prompt by remember { mutableStateOf(s.optString("prompt")) }
@@ -294,6 +310,9 @@ private fun ScheduleDialog(s: JSONObject, close: () -> Unit, save: (JSONObject, 
     val now = remember { AssistantSchedules.read(tetra).optJSONObject("brief")?.optJSONObject("sections") ?: JSONObject() }
     val sections = remember { mutableStateMapOf<String, Boolean>().apply { listOf("calendar", "mail", "weather", "notes").forEach { put(it, now.optBoolean(it, true)) } } }
     var menu by remember { mutableStateOf(false) }
+    // which device makes them (the user, 6 Nov: "the phone is always open"): the computer (null: the first to look takes it) or this one
+    var who by remember { mutableStateOf(runnerNow) }
+    var whoMenu by remember { mutableStateOf(false) }
     AlertDialog(onDismissRequest = close,
         title = { Text(if (brief) stringResource(R.string.assistant_briefs_channel) else if (s.has("id")) stringResource(R.string.common_edit) else stringResource(R.string.assistant_sched_new)) },
         text = {
@@ -304,6 +323,15 @@ private fun ScheduleDialog(s: JSONObject, close: () -> Unit, save: (JSONObject, 
                     ExposedDropdownMenuBox(menu, { menu = it }, Modifier.weight(1.4f)) {
                         OutlinedTextField(stringResource(REPEAT_LABEL[repeat]!!), {}, Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable), readOnly = true, label = { Text(stringResource(R.string.assistant_sched_repeat)) })
                         ExposedDropdownMenu(menu, { menu = false }) { AssistantSchedules.REPEATS.forEach { r -> DropdownMenuItem({ Text(stringResource(REPEAT_LABEL[r]!!)) }, { repeat = r; menu = false }) } }
+                    }
+                }
+                ExposedDropdownMenuBox(whoMenu, { whoMenu = it }) {
+                    OutlinedTextField(runnerName(c, who), {}, Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable), readOnly = true, label = { Text(stringResource(R.string.brief_runs_on)) })
+                    ExposedDropdownMenu(whoMenu, { whoMenu = false }) {
+                        listOf(runnerNow?.takeUnless { it.startsWith("android:") }, runnerNow?.takeIf { it.startsWith("android:") && it != AssistantRunner.me() }, AssistantRunner.me())
+                            .filterIndexed { i, r -> i == 0 || r != null }.forEach { r ->
+                            DropdownMenuItem({ Text(runnerName(c, r)) }, { who = r; whoMenu = false })
+                        }
                     }
                 }
                 if (repeat in listOf("once", "monthly", "yearly")) OutlinedTextField(date, { date = it }, Modifier.fillMaxWidth(), label = { Text("YYYY-MM-DD") }, singleLine = true)
@@ -321,7 +349,7 @@ private fun ScheduleDialog(s: JSONObject, close: () -> Unit, save: (JSONObject, 
         confirmButton = { TextButton({
             val x = JSONObject().put("time", time.trim()).put("repeat", repeat).put("days", JSONArray(days.sorted())).put("date", date.trim().ifEmpty { JSONObject.NULL })
             if (!brief) x.put("prompt", prompt)
-            save(x, if (brief) JSONObject(sections.toMap() as Map<*, *>) else null)
+            save(x, if (brief) JSONObject(sections.toMap() as Map<*, *>) else null, who)
         }, enabled = brief || prompt.isNotBlank()) { Text(stringResource(R.string.common_save)) } },
         dismissButton = { TextButton(close) { Text(stringResource(R.string.common_cancel)) } })
 }

@@ -227,4 +227,22 @@
     <string name="assistant_calling">Ringer %1$s</string>
     <string name="assistant_calling_in">Samtal om %1$d s…</string>
     <string name="assistant_mail_kept">Okej, inte skickat.</string>
+    <string name="brief_failed">Kunde inte göras: %1$s</string>
+    <string name="brief_no_lists">Inga öppna punkter.</string>
+    <string name="brief_nothing">Inget i kalendern.</string>
+    <string name="brief_place_missing">Ingen plats för vädret ännu.</string>
+    <string name="brief_rain">regn %1$d %%</string>
+    <string name="brief_today_count">I dag: %1$d</string>
+    <string name="brief_w_clear">Klart</string>
+    <string name="brief_w_partly">Halvklart</string>
+    <string name="brief_w_cloudy">Mulet</string>
+    <string name="brief_w_fog">Dimma</string>
+    <string name="brief_w_drizzle">Duggregn</string>
+    <string name="brief_w_rain">Regn</string>
+    <string name="brief_w_snow">Snö</string>
+    <string name="brief_w_showers">Skurar</string>
+    <string name="brief_w_storm">Åska</string>
+    <string name="brief_runs_on">Görs på</string>
+    <string name="brief_runs_computer">Datorn</string>
+    <string name="brief_runs_here">Den här enheten</string>
 </resources>

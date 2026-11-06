@@ -231,4 +231,22 @@
     <string name="assistant_calling">Qed inċempel lil %1$s</string>
     <string name="assistant_calling_in">Sejħa f\'%1$d s…</string>
     <string name="assistant_mail_kept">Tajjeb, ma ntbagħatx.</string>
+    <string name="brief_failed">Ma setax isir: %1$s</string>
+    <string name="brief_no_lists">L-ebda punt miftuħ.</string>
+    <string name="brief_nothing">Xejn fil-kalendarju.</string>
+    <string name="brief_place_missing">Għad m’hemmx post għat-temp.</string>
+    <string name="brief_rain">xita %1$d%%</string>
+    <string name="brief_today_count">Illum: %1$d</string>
+    <string name="brief_w_clear">Ċar</string>
+    <string name="brief_w_partly">Ftit imsaħħab</string>
+    <string name="brief_w_cloudy">Imsaħħab</string>
+    <string name="brief_w_fog">Ċpar</string>
+    <string name="brief_w_drizzle">Xita rqiqa</string>
+    <string name="brief_w_rain">Xita</string>
+    <string name="brief_w_snow">Silġ</string>
+    <string name="brief_w_showers">Xita qawwija</string>
+    <string name="brief_w_storm">Maltempata bir-ragħad</string>
+    <string name="brief_runs_on">Isir fuq</string>
+    <string name="brief_runs_computer">Kompjuter</string>
+    <string name="brief_runs_here">Dan l-apparat</string>
 </resources>

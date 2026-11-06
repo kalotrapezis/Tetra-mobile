@@ -227,4 +227,22 @@
     <string name="assistant_calling">Καλώ %1$s</string>
     <string name="assistant_calling_in">Κλήση σε %1$d″…</string>
     <string name="assistant_mail_kept">Εντάξει, δεν στάλθηκε.</string>
+    <string name="brief_failed">Δεν βγήκε: %1$s</string>
+    <string name="brief_no_lists">Καμία ανοιχτή εκκρεμότητα.</string>
+    <string name="brief_nothing">Τίποτα στο ημερολόγιο.</string>
+    <string name="brief_place_missing">Δεν έχει οριστεί τοποθεσία καιρού.</string>
+    <string name="brief_rain">βροχή %1$d%%</string>
+    <string name="brief_today_count">Σήμερα: %1$d</string>
+    <string name="brief_w_clear">Αίθριος</string>
+    <string name="brief_w_partly">Λίγα σύννεφα</string>
+    <string name="brief_w_cloudy">Συννεφιά</string>
+    <string name="brief_w_fog">Ομίχλη</string>
+    <string name="brief_w_drizzle">Ψιχάλα</string>
+    <string name="brief_w_rain">Βροχή</string>
+    <string name="brief_w_snow">Χιόνι</string>
+    <string name="brief_w_showers">Μπόρες</string>
+    <string name="brief_w_storm">Καταιγίδα</string>
+    <string name="brief_runs_on">Πού φτιάχνεται</string>
+    <string name="brief_runs_computer">Υπολογιστής</string>
+    <string name="brief_runs_here">Αυτή η συσκευή</string>
 </resources>

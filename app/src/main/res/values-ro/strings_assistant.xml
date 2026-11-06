@@ -229,4 +229,22 @@
     <string name="assistant_calling">Îl sun pe %1$s</string>
     <string name="assistant_calling_in">Apel în %1$d s…</string>
     <string name="assistant_mail_kept">Bine, nu s-a trimis.</string>
+    <string name="brief_failed">Nu s-a putut face: %1$s</string>
+    <string name="brief_no_lists">Nimic în așteptare.</string>
+    <string name="brief_nothing">Nimic în calendar.</string>
+    <string name="brief_place_missing">Încă nu e setat locul pentru vreme.</string>
+    <string name="brief_rain">ploaie %1$d%%</string>
+    <string name="brief_today_count">Azi: %1$d</string>
+    <string name="brief_w_clear">Senin</string>
+    <string name="brief_w_partly">Parțial noros</string>
+    <string name="brief_w_cloudy">Noros</string>
+    <string name="brief_w_fog">Ceață</string>
+    <string name="brief_w_drizzle">Burniță</string>
+    <string name="brief_w_rain">Ploaie</string>
+    <string name="brief_w_snow">Ninsoare</string>
+    <string name="brief_w_showers">Averse</string>
+    <string name="brief_w_storm">Furtună</string>
+    <string name="brief_runs_on">Se face pe</string>
+    <string name="brief_runs_computer">Computer</string>
+    <string name="brief_runs_here">Acest dispozitiv</string>
 </resources>

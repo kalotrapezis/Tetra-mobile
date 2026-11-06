@@ -230,4 +230,22 @@
     <string name="assistant_calling">Calling %1$s</string>
     <string name="assistant_calling_in">Calling in %1$d s…</string>
     <string name="assistant_mail_kept">All right, not sent.</string>
+    <string name="brief_failed">Could not be made: %1$s</string>
+    <string name="brief_no_lists">No open items.</string>
+    <string name="brief_nothing">Nothing in the calendar.</string>
+    <string name="brief_place_missing">No weather location set yet.</string>
+    <string name="brief_rain">rain %1$d%%</string>
+    <string name="brief_today_count">Today: %1$d</string>
+    <string name="brief_w_clear">Clear</string>
+    <string name="brief_w_partly">Partly cloudy</string>
+    <string name="brief_w_cloudy">Cloudy</string>
+    <string name="brief_w_fog">Fog</string>
+    <string name="brief_w_drizzle">Drizzle</string>
+    <string name="brief_w_rain">Rain</string>
+    <string name="brief_w_snow">Snow</string>
+    <string name="brief_w_showers">Showers</string>
+    <string name="brief_w_storm">Thunderstorm</string>
+    <string name="brief_runs_on">Made on</string>
+    <string name="brief_runs_computer">Computer</string>
+    <string name="brief_runs_here">This device</string>
 </resources>

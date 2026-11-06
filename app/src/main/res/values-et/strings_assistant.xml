@@ -227,4 +227,22 @@
     <string name="assistant_calling">Helistan: %1$s</string>
     <string name="assistant_calling_in">Kõne %1$d s pärast…</string>
     <string name="assistant_mail_kept">Hea küll, ei saadetud.</string>
+    <string name="brief_failed">Ei õnnestunud: %1$s</string>
+    <string name="brief_no_lists">Avatud punkte pole.</string>
+    <string name="brief_nothing">Kalendris pole midagi.</string>
+    <string name="brief_place_missing">Ilma asukohta pole veel määratud.</string>
+    <string name="brief_rain">vihm %1$d%%</string>
+    <string name="brief_today_count">Täna: %1$d</string>
+    <string name="brief_w_clear">Selge</string>
+    <string name="brief_w_partly">Vahelduv pilvisus</string>
+    <string name="brief_w_cloudy">Pilves</string>
+    <string name="brief_w_fog">Udu</string>
+    <string name="brief_w_drizzle">Uduvihm</string>
+    <string name="brief_w_rain">Vihm</string>
+    <string name="brief_w_snow">Lumi</string>
+    <string name="brief_w_showers">Hoovihm</string>
+    <string name="brief_w_storm">Äike</string>
+    <string name="brief_runs_on">Kus tehakse</string>
+    <string name="brief_runs_computer">Arvuti</string>
+    <string name="brief_runs_here">See seade</string>
 </resources>

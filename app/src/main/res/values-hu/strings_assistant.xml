@@ -227,4 +227,22 @@
     <string name="assistant_calling">Hívom: %1$s</string>
     <string name="assistant_calling_in">Hívás %1$d mp múlva…</string>
     <string name="assistant_mail_kept">Rendben, nincs elküldve.</string>
+    <string name="brief_failed">Nem sikerült: %1$s</string>
+    <string name="brief_no_lists">Nincs nyitott tétel.</string>
+    <string name="brief_nothing">Nincs semmi a naptárban.</string>
+    <string name="brief_place_missing">Még nincs hely az időjáráshoz.</string>
+    <string name="brief_rain">eső %1$d%%</string>
+    <string name="brief_today_count">Ma: %1$d</string>
+    <string name="brief_w_clear">Derült</string>
+    <string name="brief_w_partly">Kissé felhős</string>
+    <string name="brief_w_cloudy">Felhős</string>
+    <string name="brief_w_fog">Köd</string>
+    <string name="brief_w_drizzle">Szitálás</string>
+    <string name="brief_w_rain">Eső</string>
+    <string name="brief_w_snow">Hó</string>
+    <string name="brief_w_showers">Zápor</string>
+    <string name="brief_w_storm">Zivatar</string>
+    <string name="brief_runs_on">Hol készül</string>
+    <string name="brief_runs_computer">Számítógép</string>
+    <string name="brief_runs_here">Ez az eszköz</string>
 </resources>

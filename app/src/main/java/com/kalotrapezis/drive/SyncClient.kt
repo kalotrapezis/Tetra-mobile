@@ -766,6 +766,7 @@ internal class SyncClient(private val context: Context, private val store: SyncS
             .onFailure { if (it is kotlinx.coroutines.CancellationException) throw it else failed += fail(R.string.sync_fail_drive_files, it.message) }
         runCatching { CalendarAlarms.plan(context) } // an event that arrived, or changed, rings on time
         runCatching { AssistantBriefs.check(context) } // a page the computer's scheduled AI made: rings once
+        runCatching { AssistantRunner.plan(context) } // schedules.json changed elsewhere, or this device became the runner
         TimerService.check(context)
         // Notes: every note both ways, the newer edit of each kept (Notes.kt). Small, so all of them each time.
         runCatching { received += syncNotes(host, p) }

@@ -227,4 +227,22 @@
     <string name="assistant_calling">Звъня на %1$s</string>
     <string name="assistant_calling_in">Обаждане след %1$d s…</string>
     <string name="assistant_mail_kept">Добре, не е изпратено.</string>
+    <string name="brief_failed">Не можа да се направи: %1$s</string>
+    <string name="brief_no_lists">Няма отворени точки.</string>
+    <string name="brief_nothing">Нищо в календара.</string>
+    <string name="brief_place_missing">Още няма място за времето.</string>
+    <string name="brief_rain">дъжд %1$d%%</string>
+    <string name="brief_today_count">Днес: %1$d</string>
+    <string name="brief_w_clear">Ясно</string>
+    <string name="brief_w_partly">Разкъсана облачност</string>
+    <string name="brief_w_cloudy">Облачно</string>
+    <string name="brief_w_fog">Мъгла</string>
+    <string name="brief_w_drizzle">Ръмеж</string>
+    <string name="brief_w_rain">Дъжд</string>
+    <string name="brief_w_snow">Сняг</string>
+    <string name="brief_w_showers">Превалявания</string>
+    <string name="brief_w_storm">Гръмотевична буря</string>
+    <string name="brief_runs_on">Прави се на</string>
+    <string name="brief_runs_computer">Компютър</string>
+    <string name="brief_runs_here">Това устройство</string>
 </resources>

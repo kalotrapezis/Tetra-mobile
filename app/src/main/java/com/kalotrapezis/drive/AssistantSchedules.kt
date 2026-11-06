@@ -80,11 +80,30 @@ internal object AssistantSchedules {
         return s
     }
 
+    /** Deleted; the brief too (the user, 6 Nov), and [addBrief] brings it back. */
     fun remove(tetra: File, id: String) {
         val o = read(tetra); val a = o.getJSONArray("list")
-        o.put("list", JSONArray((0 until a.length()).map { a.getJSONObject(it) }.filter { it.optString("id") != id || it.optString("kind") == "brief" }))
+        o.put("list", JSONArray((0 until a.length()).map { a.getJSONObject(it) }.filter { it.optString("id") != id }))
         write(tetra, o)
     }
+    fun addBrief(tetra: File) {
+        val o = read(tetra); val a = o.getJSONArray("list")
+        if ((0 until a.length()).none { a.getJSONObject(it).optString("kind") == "brief" })
+            a.put(JSONObject().put("id", "brief").put("kind", "brief").put("title", "Η ενημέρωση της ημέρας").put("prompt", "").put("time", "07:30").put("repeat", "daily")
+                .put("days", JSONArray()).put("date", JSONObject.NULL).put("paused", false).put("created", System.currentTimeMillis()))
+        write(tetra, o)
+    }
+
+    /** Run by this device (AssistantRunner): "Run now" answered, and [at] as its last run unless it was by hand. */
+    fun ran(tetra: File, id: String, at: Long?) {
+        val o = read(tetra); val a = o.getJSONArray("list")
+        (0 until a.length()).map { a.getJSONObject(it) }.firstOrNull { it.optString("id") == id }?.let { s -> s.put("runNow", false); at?.let { s.put("last", it) } }
+        write(tetra, o)
+    }
+
+    /** Which device runs them: a computer's host name, or "android:<model>" (AssistantRunner.me); null lets the first computer take it. */
+    fun runner(tetra: File): String? = read(tetra).optString("runner").takeIf { it.isNotBlank() && it != "null" }
+    fun setRunner(tetra: File, who: String?) { val o = read(tetra); o.put("runner", who ?: JSONObject.NULL); write(tetra, o) }
 
     fun setSections(tetra: File, sections: JSONObject) {
         val o = read(tetra); val b = o.optJSONObject("brief") ?: JSONObject().also { o.put("brief", it) }

@@ -198,9 +198,11 @@ class CalendarAlarmReceiver : BroadcastReceiver() {
                 AlarmPlan.SKIP -> runCatching { TimerControl.alarmChange(app, intent.getStringExtra("id").orEmpty(), TimerService.ALARM_SKIP) }
                 AlarmPlan.SNOOZE -> runCatching { TimerControl.alarmChange(app, intent.getStringExtra("id").orEmpty(), TimerService.ALARM_SNOOZE) }
                 AlarmPlan.LOOK -> Unit
+                AssistantRunner.RUN -> runCatching { AssistantRunner.start(app) }
                 else -> runCatching { CalendarAlarms.handle(app, intent) }.onFailure { WriterLog.e("Calendar reminders: ${intent.action} failed", it) }
             }
             runCatching { AlarmPlan.plan(app) }.onFailure { WriterLog.e("Alarms: plan failed", it) } // the alarms' clock too: boot, clock, zone, update
+            if (intent.action != AssistantRunner.RUN) runCatching { AssistantRunner.plan(app) }.onFailure { WriterLog.e("Scheduled AI: plan failed", it) }
             if (intent.action == Intent.ACTION_BOOT_COMPLETED || intent.action == Intent.ACTION_MY_PACKAGE_REPLACED) // proximity alerts end with a restart or an update
                 runCatching { LocationReminders.plan(app) }.onFailure { WriterLog.e("Place reminders: plan failed", it) }
             done.finish()

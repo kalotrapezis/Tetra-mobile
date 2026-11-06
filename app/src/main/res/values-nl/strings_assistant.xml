@@ -227,4 +227,22 @@
     <string name="assistant_calling">Ik bel %1$s</string>
     <string name="assistant_calling_in">Gesprek over %1$d s…</string>
     <string name="assistant_mail_kept">Goed, niet verzonden.</string>
+    <string name="brief_failed">Kon niet worden gemaakt: %1$s</string>
+    <string name="brief_no_lists">Geen open punten.</string>
+    <string name="brief_nothing">Niets in de agenda.</string>
+    <string name="brief_place_missing">Nog geen plaats voor het weer.</string>
+    <string name="brief_rain">regen %1$d%%</string>
+    <string name="brief_today_count">Vandaag: %1$d</string>
+    <string name="brief_w_clear">Helder</string>
+    <string name="brief_w_partly">Licht bewolkt</string>
+    <string name="brief_w_cloudy">Bewolkt</string>
+    <string name="brief_w_fog">Mist</string>
+    <string name="brief_w_drizzle">Motregen</string>
+    <string name="brief_w_rain">Regen</string>
+    <string name="brief_w_snow">Sneeuw</string>
+    <string name="brief_w_showers">Buien</string>
+    <string name="brief_w_storm">Onweer</string>
+    <string name="brief_runs_on">Gemaakt op</string>
+    <string name="brief_runs_computer">Computer</string>
+    <string name="brief_runs_here">Dit apparaat</string>
 </resources>

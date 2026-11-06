@@ -229,4 +229,22 @@
     <string name="assistant_calling">A ligar a %1$s</string>
     <string name="assistant_calling_in">Chamada dentro de %1$d s…</string>
     <string name="assistant_mail_kept">Está bem, não foi enviado.</string>
+    <string name="brief_failed">Não foi possível: %1$s</string>
+    <string name="brief_no_lists">Nada pendente.</string>
+    <string name="brief_nothing">Nada no calendário.</string>
+    <string name="brief_place_missing">Ainda sem local para o tempo.</string>
+    <string name="brief_rain">chuva %1$d%%</string>
+    <string name="brief_today_count">Hoje: %1$d</string>
+    <string name="brief_w_clear">Limpo</string>
+    <string name="brief_w_partly">Pouco nublado</string>
+    <string name="brief_w_cloudy">Nublado</string>
+    <string name="brief_w_fog">Nevoeiro</string>
+    <string name="brief_w_drizzle">Chuvisco</string>
+    <string name="brief_w_rain">Chuva</string>
+    <string name="brief_w_snow">Neve</string>
+    <string name="brief_w_showers">Aguaceiros</string>
+    <string name="brief_w_storm">Trovoada</string>
+    <string name="brief_runs_on">Feito em</string>
+    <string name="brief_runs_computer">Computador</string>
+    <string name="brief_runs_here">Este dispositivo</string>
 </resources>

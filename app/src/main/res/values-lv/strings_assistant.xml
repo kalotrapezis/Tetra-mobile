@@ -229,4 +229,22 @@
     <string name="assistant_calling">Zvanu: %1$s</string>
     <string name="assistant_calling_in">Zvans pēc %1$d s…</string>
     <string name="assistant_mail_kept">Labi, nav nosūtīts.</string>
+    <string name="brief_failed">Neizdevās: %1$s</string>
+    <string name="brief_no_lists">Nav atvērtu punktu.</string>
+    <string name="brief_nothing">Kalendārā nekā nav.</string>
+    <string name="brief_place_missing">Laikapstākļu vieta vēl nav iestatīta.</string>
+    <string name="brief_rain">lietus %1$d%%</string>
+    <string name="brief_today_count">Šodien: %1$d</string>
+    <string name="brief_w_clear">Skaidrs</string>
+    <string name="brief_w_partly">Daļēji mākoņains</string>
+    <string name="brief_w_cloudy">Mākoņains</string>
+    <string name="brief_w_fog">Migla</string>
+    <string name="brief_w_drizzle">Smidzina</string>
+    <string name="brief_w_rain">Lietus</string>
+    <string name="brief_w_snow">Sniegs</string>
+    <string name="brief_w_showers">Lietusgāzes</string>
+    <string name="brief_w_storm">Pērkona negaiss</string>
+    <string name="brief_runs_on">Kur tiek veidots</string>
+    <string name="brief_runs_computer">Dators</string>
+    <string name="brief_runs_here">Šī ierīce</string>
 </resources>

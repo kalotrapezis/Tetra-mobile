@@ -233,4 +233,22 @@
     <string name="assistant_calling">Ag glaoch ar %1$s</string>
     <string name="assistant_calling_in">Glao i gceann %1$d s…</string>
     <string name="assistant_mail_kept">Ceart go leor, níor seoladh é.</string>
+    <string name="brief_failed">Níorbh fhéidir é a dhéanamh: %1$s</string>
+    <string name="brief_no_lists">Níl aon mhír oscailte.</string>
+    <string name="brief_nothing">Níl aon rud san fhéilire.</string>
+    <string name="brief_place_missing">Níl áit don aimsir socraithe fós.</string>
+    <string name="brief_rain">báisteach %1$d%%</string>
+    <string name="brief_today_count">Inniu: %1$d</string>
+    <string name="brief_w_clear">Glan</string>
+    <string name="brief_w_partly">Breacscamallach</string>
+    <string name="brief_w_cloudy">Scamallach</string>
+    <string name="brief_w_fog">Ceo</string>
+    <string name="brief_w_drizzle">Ceobhrán</string>
+    <string name="brief_w_rain">Báisteach</string>
+    <string name="brief_w_snow">Sneachta</string>
+    <string name="brief_w_showers">Ceathanna</string>
+    <string name="brief_w_storm">Stoirm thoirní</string>
+    <string name="brief_runs_on">Déanta ar</string>
+    <string name="brief_runs_computer">Ríomhaire</string>
+    <string name="brief_runs_here">An gléas seo</string>
 </resources>

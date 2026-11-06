@@ -227,4 +227,22 @@
     <string name="assistant_calling">Ringer til %1$s</string>
     <string name="assistant_calling_in">Ringer om %1$d s…</string>
     <string name="assistant_mail_kept">Okay, ikke sendt.</string>
+    <string name="brief_failed">Kunne ikke laves: %1$s</string>
+    <string name="brief_no_lists">Ingen åbne punkter.</string>
+    <string name="brief_nothing">Intet i kalenderen.</string>
+    <string name="brief_place_missing">Intet sted for vejret endnu.</string>
+    <string name="brief_rain">regn %1$d %%</string>
+    <string name="brief_today_count">I dag: %1$d</string>
+    <string name="brief_w_clear">Klart</string>
+    <string name="brief_w_partly">Let skyet</string>
+    <string name="brief_w_cloudy">Overskyet</string>
+    <string name="brief_w_fog">Tåge</string>
+    <string name="brief_w_drizzle">Støvregn</string>
+    <string name="brief_w_rain">Regn</string>
+    <string name="brief_w_snow">Sne</string>
+    <string name="brief_w_showers">Byger</string>
+    <string name="brief_w_storm">Torden</string>
+    <string name="brief_runs_on">Laves på</string>
+    <string name="brief_runs_computer">Computer</string>
+    <string name="brief_runs_here">Denne enhed</string>
 </resources>

@@ -32,6 +32,10 @@ internal class SyncJob : JobService() {
             scope.launch { runCatching { MailEngine.syncAll(applicationContext) }; jobFinished(params, false); MailEngine.schedule(applicationContext, again = true) }
             return true
         }
+        if (params.jobId == AssistantRunner.JOB) { // a scheduled AI action due on this device
+            scope.launch { runCatching { AssistantRunner.runDue(applicationContext) }.onFailure { WriterLog.e("Scheduled AI: run failed", it) }; jobFinished(params, false) }
+            return true
+        }
         if (params.jobId == DataStats.JOB) {
             scope.launch { DataStats.refresh(applicationContext); jobFinished(params, false) }
             return true

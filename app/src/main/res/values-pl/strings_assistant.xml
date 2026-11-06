@@ -231,4 +231,22 @@
     <string name="assistant_calling">Dzwonię do: %1$s</string>
     <string name="assistant_calling_in">Połączenie za %1$d s…</string>
     <string name="assistant_mail_kept">Dobrze, nie wysłano.</string>
+    <string name="brief_failed">Nie udało się: %1$s</string>
+    <string name="brief_no_lists">Brak otwartych pozycji.</string>
+    <string name="brief_nothing">Nic w kalendarzu.</string>
+    <string name="brief_place_missing">Nie ustawiono jeszcze miejsca pogody.</string>
+    <string name="brief_rain">deszcz %1$d%%</string>
+    <string name="brief_today_count">Dziś: %1$d</string>
+    <string name="brief_w_clear">Bezchmurnie</string>
+    <string name="brief_w_partly">Częściowe zachmurzenie</string>
+    <string name="brief_w_cloudy">Pochmurno</string>
+    <string name="brief_w_fog">Mgła</string>
+    <string name="brief_w_drizzle">Mżawka</string>
+    <string name="brief_w_rain">Deszcz</string>
+    <string name="brief_w_snow">Śnieg</string>
+    <string name="brief_w_showers">Przelotne opady</string>
+    <string name="brief_w_storm">Burza</string>
+    <string name="brief_runs_on">Tworzone na</string>
+    <string name="brief_runs_computer">Komputer</string>
+    <string name="brief_runs_here">To urządzenie</string>
 </resources>
