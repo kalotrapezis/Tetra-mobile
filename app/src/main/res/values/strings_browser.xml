@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Vertical tabs</string>
     <string name="browser_side_bar_note">On a tablet in landscape, the address, the tools and the tabs stand in a column on the left. The button beside ♥ hides it to a thin strip, or let Auto-hide put it away as the page scrolls.</string>
     <string name="browser_side_hide">Hide the side bar</string>
+    <string name="browser_hide">Hide</string>
+    <string name="browser_hide_hint">Tap here to bring the side bar back</string>
+    <string name="browser_tab_behind">New tabs in the background</string>
+    <string name="browser_tab_behind_note">Open in new tab, from a held or right-clicked link, opens it behind and keeps you on this page.</string>
 </resources>

@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Cluaisíní ingearacha</string>
     <string name="browser_side_bar_note">Ar tháibléad go cothrománach, tá an seoladh, na huirlisí agus na cluaisíní i gcolún ar chlé. Ceileann an cnaipe in aice le ♥ é mar stiall tanaí, nó lig don cheilt uathoibríoch é a chur i leataobh agus an leathanach ag scrolláil.</string>
     <string name="browser_side_hide">Folaigh an barra taoibh</string>
+    <string name="browser_hide">Folaigh</string>
+    <string name="browser_hide_hint">Tapáil anseo chun an barra taoibh a thabhairt ar ais</string>
+    <string name="browser_tab_behind">Cluaisíní nua sa chúlra</string>
+    <string name="browser_tab_behind_note">Osclaíonn Oscail i gcluaisín nua, ó nasc coinnithe nó le cliceáil dheis, taobh thiar é agus fanann tú ar an leathanach seo.</string>
 </resources>

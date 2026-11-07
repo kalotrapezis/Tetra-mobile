@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Lodrette faner</string>
     <string name="browser_side_bar_note">På en tablet på tværs står adressen, værktøjerne og fanerne i en kolonne til venstre. Knappen ved ♥ skjuler den til en smal stribe, eller lad Skjul automatisk fjerne den, når siden ruller.</string>
     <string name="browser_side_hide">Skjul sidebjælken</string>
+    <string name="browser_hide">Skjul</string>
+    <string name="browser_hide_hint">Tryk her for at få sidebjælken tilbage</string>
+    <string name="browser_tab_behind">Nye faner i baggrunden</string>
+    <string name="browser_tab_behind_note">Åbn i ny fane fra et holdt eller højreklikket link åbner den bagved, så du bliver på siden.</string>
 </resources>

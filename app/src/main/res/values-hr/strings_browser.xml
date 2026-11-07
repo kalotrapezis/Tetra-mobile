@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Okomite kartice</string>
     <string name="browser_side_bar_note">Na tabletu vodoravno su adresa, alati i kartice u stupcu lijevo. Gumb pokraj ♥ skriva ga u tanku traku, ili neka ga automatsko skrivanje skloni dok se stranica pomiče.</string>
     <string name="browser_side_hide">Sakrij bočnu traku</string>
+    <string name="browser_hide">Sakrij</string>
+    <string name="browser_hide_hint">Dodirnite ovdje za povratak bočne trake</string>
+    <string name="browser_tab_behind">Nove kartice u pozadini</string>
+    <string name="browser_tab_behind_note">Otvori u novoj kartici (zadržana veza ili desni klik) otvara je iza, a ti ostaješ na ovoj stranici.</string>
 </resources>

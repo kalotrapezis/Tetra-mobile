@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Vertikale Tabs</string>
     <string name="browser_side_bar_note">Auf dem Tablet im Querformat stehen Adresse, Werkzeuge und Tabs in einer Spalte links. Die Taste neben ♥ blendet sie zu einem schmalen Streifen aus, oder Automatisch ausblenden räumt sie beim Scrollen weg.</string>
     <string name="browser_side_hide">Seitenleiste ausblenden</string>
+    <string name="browser_hide">Ausblenden</string>
+    <string name="browser_hide_hint">Hier tippen, um die Seitenleiste zurückzuholen</string>
+    <string name="browser_tab_behind">Neue Tabs im Hintergrund</string>
+    <string name="browser_tab_behind_note">„In neuem Tab öffnen“ (Link gedrückt halten oder Rechtsklick) öffnet ihn dahinter, du bleibst auf dieser Seite.</string>
 </resources>

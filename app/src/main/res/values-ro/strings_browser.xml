@@ -144,4 +144,8 @@
     <string name="browser_side_bar">File verticale</string>
     <string name="browser_side_bar_note">Pe tabletă pe orizontală, adresa, instrumentele și filele stau într-o coloană în stânga. Butonul de lângă ♥ o ascunde într-o fâșie îngustă, sau lasă ascunderea automată s-o strângă la derularea paginii.</string>
     <string name="browser_side_hide">Ascunde bara laterală</string>
+    <string name="browser_hide">Ascunde</string>
+    <string name="browser_hide_hint">Atinge aici pentru a readuce bara laterală</string>
+    <string name="browser_tab_behind">File noi în fundal</string>
+    <string name="browser_tab_behind_note">Deschide în filă nouă (link ținut apăsat sau clic dreapta) o deschide în spate și rămâi pe această pagină.</string>
 </resources>

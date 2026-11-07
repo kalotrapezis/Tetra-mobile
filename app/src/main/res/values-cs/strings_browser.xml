@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Svislé karty</string>
     <string name="browser_side_bar_note">Na tabletu na šířku jsou adresa, nástroje a karty ve sloupci vlevo. Tlačítko vedle ♥ ji skryje do úzkého pruhu, nebo ji nechte schovávat automaticky při posouvání stránky.</string>
     <string name="browser_side_hide">Skrýt boční panel</string>
+    <string name="browser_hide">Skrýt</string>
+    <string name="browser_hide_hint">Klepnutím sem vrátíte postranní panel</string>
+    <string name="browser_tab_behind">Nové karty na pozadí</string>
+    <string name="browser_tab_behind_note">Otevřít na nové kartě (podržený odkaz nebo pravé tlačítko) ji otevře na pozadí a zůstanete na této stránce.</string>
 </resources>

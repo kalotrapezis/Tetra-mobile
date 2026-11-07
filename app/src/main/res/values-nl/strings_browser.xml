@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Verticale tabbladen</string>
     <string name="browser_side_bar_note">Op een tablet liggend staan het adres, de hulpmiddelen en de tabbladen in een kolom links. De knop naast ♥ verbergt hem tot een smalle strook, of laat Automatisch verbergen hem wegzetten bij het scrollen.</string>
     <string name="browser_side_hide">Zijbalk verbergen</string>
+    <string name="browser_hide">Verbergen</string>
+    <string name="browser_hide_hint">Tik hier om de zijbalk terug te halen</string>
+    <string name="browser_tab_behind">Nieuwe tabbladen op de achtergrond</string>
+    <string name="browser_tab_behind_note">Openen in nieuw tabblad (link vasthouden of rechtsklikken) opent het erachter en je blijft op deze pagina.</string>
 </resources>

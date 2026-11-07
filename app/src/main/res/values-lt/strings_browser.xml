@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Vertikalios kortelės</string>
     <string name="browser_side_bar_note">Planšetėje gulsčiai adresas, įrankiai ir kortelės yra stulpelyje kairėje. Mygtukas šalia ♥ paslepia jį į ploną juostelę, arba leiskite automatiniam slėpimui jį paslėpti slenkant puslapį.</string>
     <string name="browser_side_hide">Slėpti šoninę juostą</string>
+    <string name="browser_hide">Slėpti</string>
+    <string name="browser_hide_hint">Bakstelėkite čia, kad grąžintumėte šoninę juostą</string>
+    <string name="browser_tab_behind">Nauji skirtukai fone</string>
+    <string name="browser_tab_behind_note">Atidaryti naujame skirtuke (palaikius nuorodą ar dešiniuoju pelės klavišu) atidaro jį fone, o jūs liekate šiame puslapyje.</string>
 </resources>

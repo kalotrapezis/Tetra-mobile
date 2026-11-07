@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Вертикални раздели</string>
     <string name="browser_side_bar_note">На таблет хоризонтално адресът, инструментите и разделите стоят в колона вляво. Бутонът до ♥ я скрива в тясна ивица, или оставете автоматичното скриване да я прибира при превъртане.</string>
     <string name="browser_side_hide">Скрий страничната лента</string>
+    <string name="browser_hide">Скриване</string>
+    <string name="browser_hide_hint">Докоснете тук, за да върнете страничната лента</string>
+    <string name="browser_tab_behind">Нови раздели на заден план</string>
+    <string name="browser_tab_behind_note">„Отваряне в нов раздел“ от задържана връзка или с десен бутон я отваря отзад и остава на тази страница.</string>
 </resources>

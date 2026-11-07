@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Separadores verticais</string>
     <string name="browser_side_bar_note">No tablet na horizontal, o endereço, as ferramentas e os separadores ficam numa coluna à esquerda. O botão ao lado de ♥ reduz-a a uma faixa fina, ou deixe a ocultação automática escondê-la ao deslocar a página.</string>
     <string name="browser_side_hide">Ocultar a barra lateral</string>
+    <string name="browser_hide">Ocultar</string>
+    <string name="browser_hide_hint">Toque aqui para trazer de volta a barra lateral</string>
+    <string name="browser_tab_behind">Novos separadores em segundo plano</string>
+    <string name="browser_tab_behind_note">Abrir em novo separador, a partir de uma ligação mantida premida ou com clique direito, abre-o atrás e fica nesta página.</string>
 </resources>

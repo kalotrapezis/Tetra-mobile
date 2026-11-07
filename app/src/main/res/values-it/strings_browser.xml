@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Schede verticali</string>
     <string name="browser_side_bar_note">Sul tablet in orizzontale, indirizzo, strumenti e schede stanno in una colonna a sinistra. Il pulsante accanto a ♥ la riduce a una striscia sottile, oppure lascia che il nascondi automatico la tolga mentre la pagina scorre.</string>
     <string name="browser_side_hide">Nascondi la barra laterale</string>
+    <string name="browser_hide">Nascondi</string>
+    <string name="browser_hide_hint">Tocca qui per far tornare la barra laterale</string>
+    <string name="browser_tab_behind">Nuove schede in background</string>
+    <string name="browser_tab_behind_note">Apri in nuova scheda (link tenuto premuto o clic destro) la apre dietro e resti su questa pagina.</string>
 </resources>

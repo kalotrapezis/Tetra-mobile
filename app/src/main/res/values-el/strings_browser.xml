@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Κάθετες καρτέλες</string>
     <string name="browser_side_bar_note">Σε tablet στο οριζόντιο, η διεύθυνση, τα εργαλεία και οι καρτέλες μπαίνουν σε στήλη αριστερά. Το κουμπί δίπλα στην ♥ την κρύβει σε λεπτή λωρίδα, ή άφησε την Αυτόματη απόκρυψη να την κρύβει όσο κυλά η σελίδα.</string>
     <string name="browser_side_hide">Απόκρυψη της πλαϊνής μπάρας</string>
+    <string name="browser_hide">Απόκρυψη</string>
+    <string name="browser_hide_hint">Πάτα εδώ για να επαναφέρεις την πλαϊνή στήλη</string>
+    <string name="browser_tab_behind">Νέες καρτέλες στο παρασκήνιο</string>
+    <string name="browser_tab_behind_note">Το «Άνοιγμα σε νέα καρτέλα», από σύνδεσμο με παρατεταμένο πάτημα ή δεξί κλικ, την ανοίγει από πίσω και μένεις στη σελίδα σου.</string>
 </resources>

@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Tabs vertikali</string>
     <string name="browser_side_bar_note">Fuq tablet mimdud, l-indirizz, l-għodod u t-tabs jinsabu f\'kolonna fuq ix-xellug. Il-buttuna ħdejn ♥ taħbiha bħala strixxa rqiqa, jew ħalli l-ħabi awtomatiku jneħħiha meta l-paġna tiskrolja.</string>
     <string name="browser_side_hide">Aħbi l-bar tal-ġenb</string>
+    <string name="browser_hide">Aħbi</string>
+    <string name="browser_hide_hint">Agħfas hawn biex terġa\' ġġib il-bar tal-ġenb</string>
+    <string name="browser_tab_behind">Tabs ġodda fl-isfond</string>
+    <string name="browser_tab_behind_note">Iftaħ f’tab ġdida, minn link miżmuma jew bil-klikk tal-lemin, tiftaħha wara u tibqa’ f’din il-paġna.</string>
 </resources>

@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Vertikaalsed kaardid</string>
     <string name="browser_side_bar_note">Tahvelarvuti rõhtpaigutuses on aadress, tööriistad ja kaardid vasakul veerus. Nupp ♥ kõrval peidab selle kitsaks ribaks, või lase automaatpeitmisel see kerimisel ära panna.</string>
     <string name="browser_side_hide">Peida külgriba</string>
+    <string name="browser_hide">Peida</string>
+    <string name="browser_hide_hint">Puuduta siin, et külgriba tagasi tuua</string>
+    <string name="browser_tab_behind">Uued vahekaardid taustal</string>
+    <string name="browser_tab_behind_note">Ava uuel vahekaardil (hoitud või paremklõpsatud lingilt) avab selle taha ja jääd sellele lehele.</string>
 </resources>

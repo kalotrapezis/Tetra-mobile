@@ -8,6 +8,7 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.animateFloat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -804,7 +805,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         val link = h.linkUri; val pic = h.srcUri
         fun copy(s: String) { context.getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(android.content.ClipData.newPlainText(BrowserRules.host(s), s)); message = context.getString(R.string.browser_copied) }
         when (what) {
-            "tab" -> link?.let { open(it) }
+            // Settings › Browser › New tabs in the background (the user, 7 Nov): Open in new tab stays on this page
+            "tab" -> link?.let { if (prefs.getBoolean("tab_behind", false)) { tabs += newTab(nextId++, it, lazy = true); message = context.getString(R.string.browser_held_opened_behind) } else open(it) }
             "behind" -> link?.let { tabs += newTab(nextId++, it, lazy = true); message = context.getString(R.string.browser_held_opened_behind) }
             "copy" -> link?.let(::copy)
             "share" -> (link ?: pic)?.let { runCatching { context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, it), null)) } }
@@ -954,9 +956,10 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                     sideIcon(R.drawable.ic_settings, stringResource(R.string.common_settings)) {
                         context.startActivity(Intent(context, MainActivity::class.java).putExtra(Applet.EXTRA, BROWSER_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
                     }
-                    Surface(onClick = { setPrivate(!private, url) }, shape = CircleShape, color = if (private) Color.White.copy(alpha = 0.15f) else onBar.copy(alpha = 0.08f), modifier = Modifier.weight(1f).height(40.dp)) {
+                    // Hide where Private was (the user, 7 Nov: Private is among the tools already)
+                    Surface(onClick = { lowered = true; editing = false }, shape = CircleShape, color = if (private) Color.White.copy(alpha = 0.15f) else onBar.copy(alpha = 0.08f), modifier = Modifier.weight(1f).height(40.dp)) {
                         Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                            Icon(painterResource(R.drawable.ic_visibility_off), null, Modifier.size(18.dp)); Text(stringResource(R.string.browser_private), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelLarge)
+                            Icon(painterResource(R.drawable.ic_chevron_left), null, Modifier.size(18.dp)); Text(stringResource(R.string.browser_hide), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelLarge)
                         }
                     }
                 }
@@ -967,6 +970,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
      *  height; a tap or a drag out brings the bar or sidebar back. [upright]: the sidebar's, on the left edge. */
     @Composable fun BoxScope.handle(upright: Boolean) {
         var drag by remember { mutableFloatStateOf(0f) }
+        if (upright) HideHint(prefs)
         Box(Modifier.align(Alignment.BottomStart).then(if (upright) Modifier.padding(bottom = 72.dp).size(18.dp, 56.dp)
                 .clip(androidx.compose.foundation.shape.RoundedCornerShape(topEndPercent = 50, bottomEndPercent = 50))
             else Modifier.padding(start = 24.dp).size(56.dp, 18.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(topStartPercent = 50, topEndPercent = 50)))
@@ -983,7 +987,11 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         Row(Modifier.weight(if (player) 0.6f else 1f).fillMaxWidth()) {
         // the sidebar beside the page; with Auto-hide it comes back over the page instead, so the page does not jump
         if (side && !autohide && showBar) sideBar(Modifier)
-        Box(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.background)) {
+        Box(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.background).twoFingerTabs(rightHalf = side || wide) { step ->
+            // two fingers up: the next tab, down: the one before (the user, 7 Nov: one finger scrolls, so two are free)
+            val i = tabs.indexOfFirst { it.id == currentId }
+            tabs.getOrNull(i + step)?.let { t -> switch(t); message = t.title.ifBlank { BrowserRules.host(t.url) }.ifBlank { context.getString(R.string.browser_tab_new) } }
+        }) {
             val panes = splitPair?.takeIf { wide && !player }?.let { p -> listOfNotNull(tabs.firstOrNull { it.id == p.first }, tabs.firstOrNull { it.id == p.second }) }?.takeIf { it.size == 2 }
             @Composable fun pane(t: BrowserTab, m: Modifier) = Box(m.then(if (panes != null && t.id == currentId) Modifier.border(2.dp, BROWSER_COLOR) else Modifier)
                 .pointerInput(t.id, panes != null) { if (panes != null) awaitEachGesture { awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial); if (t.id != currentId) currentId = t.id } }) {
@@ -1274,6 +1282,50 @@ private fun Modifier.swipeLeft(hide: () -> Unit): Modifier = pointerInput(Unit) 
             val d = c.position - down.position
             if (-d.x > need && -d.x > 2 * kotlin.math.abs(d.y)) { c.consume(); hide(); break }
         }
+    }
+}
+
+/**
+ * Two fingers moved up or down together (over 96 dp, mostly upright): [step] +1 for up, -1 for down, once a gesture. On a
+ * tablet only from the page's right half ([rightHalf]), where the thumb rests; a pinch (fingers apart) is left to the page.
+ */
+private fun Modifier.twoFingerTabs(rightHalf: Boolean, step: (Int) -> Unit): Modifier = pointerInput(rightHalf) {
+    awaitEachGesture {
+        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+        val need = 96.dp.toPx()
+        var start: Offset? = null; var gap = 0f
+        while (true) {
+            val e = awaitPointerEvent(PointerEventPass.Initial)
+            val down = e.changes.filter { it.pressed }
+            if (down.isEmpty()) break
+            if (down.size != 2) { if (start != null) break else continue }
+            val mid = (down[0].position + down[1].position) / 2f
+            val apart = (down[0].position - down[1].position).getDistance()
+            if (start == null) {
+                if (rightHalf && down.any { it.position.x < size.width / 2f }) break
+                start = mid; gap = apart; continue
+            }
+            val d = mid - start
+            if (kotlin.math.abs(apart - gap) > need / 2) break // a pinch
+            if (kotlin.math.abs(d.y) > need && kotlin.math.abs(d.y) > 2 * kotlin.math.abs(d.x)) {
+                down.forEach { it.consume() }; step(if (d.y < 0) 1 else -1); break
+            }
+        }
+    }
+}
+
+/** The first time the sidebar is hidden (the user, 7 Nov): the handle glows and a bubble says how to bring it back. */
+@Composable private fun BoxScope.HideHint(prefs: android.content.SharedPreferences) {
+    var hint by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { if (!prefs.getBoolean("side_hide_hint", false)) { hint = true; prefs.edit().putBoolean("side_hide_hint", true).apply() } }
+    if (!hint) return
+    val glow by androidx.compose.animation.core.rememberInfiniteTransition(label = "glow").animateFloat(0.15f, 0.75f,
+        androidx.compose.animation.core.infiniteRepeatable(androidx.compose.animation.core.tween(700), androidx.compose.animation.core.RepeatMode.Reverse), label = "glow")
+    Box(Modifier.align(Alignment.BottomStart).padding(bottom = 62.dp).size(30.dp, 76.dp)
+        .clip(androidx.compose.foundation.shape.RoundedCornerShape(topEndPercent = 50, bottomEndPercent = 50)).background(BROWSER_COLOR.copy(alpha = glow)))
+    Surface(color = islandColor(), contentColor = islandContentColor(), shape = MaterialTheme.shapes.large, shadowElevation = 6.dp,
+        modifier = Modifier.align(Alignment.BottomStart).padding(start = 38.dp, bottom = 74.dp).widthIn(max = 260.dp).clickable { hint = false }) {
+        Text(stringResource(R.string.browser_hide_hint), Modifier.padding(horizontal = 14.dp, vertical = 10.dp), style = MaterialTheme.typography.bodyMedium)
     }
 }
 

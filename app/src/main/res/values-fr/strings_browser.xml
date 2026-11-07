@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Onglets verticaux</string>
     <string name="browser_side_bar_note">Sur une tablette en paysage, l\'adresse, les outils et les onglets se rangent dans une colonne à gauche. Le bouton à côté de ♥ la réduit à une fine bande, ou laissez le masquage automatique la ranger quand la page défile.</string>
     <string name="browser_side_hide">Masquer la barre latérale</string>
+    <string name="browser_hide">Masquer</string>
+    <string name="browser_hide_hint">Touchez ici pour faire revenir la barre latérale</string>
+    <string name="browser_tab_behind">Nouveaux onglets en arrière-plan</string>
+    <string name="browser_tab_behind_note">Ouvrir dans un nouvel onglet (lien maintenu ou clic droit) l’ouvre derrière et vous restez sur cette page.</string>
 </resources>

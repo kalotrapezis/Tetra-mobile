@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Függőleges lapok</string>
     <string name="browser_side_bar_note">Táblagépen fekvő helyzetben a cím, az eszközök és a lapok egy bal oldali oszlopban vannak. A ♥ melletti gomb vékony csíkká rejti, vagy hagyd, hogy az automatikus elrejtés görgetéskor eltüntesse.</string>
     <string name="browser_side_hide">Oldalsáv elrejtése</string>
+    <string name="browser_hide">Elrejtés</string>
+    <string name="browser_hide_hint">Koppints ide az oldalsáv visszahozásához</string>
+    <string name="browser_tab_behind">Új lapok a háttérben</string>
+    <string name="browser_tab_behind_note">A Megnyitás új lapon (nyomva tartott vagy jobb gombbal kattintott linkről) mögé nyitja, és ezen az oldalon maradsz.</string>
 </resources>

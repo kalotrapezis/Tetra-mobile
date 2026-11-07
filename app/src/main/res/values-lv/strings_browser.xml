@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Vertikālas cilnes</string>
     <string name="browser_side_bar_note">Planšetdatorā ainavā adrese, rīki un cilnes ir kolonnā pa kreisi. Poga blakus ♥ to paslēpj šaurā joslā, vai ļaujiet automātiskajai slēpšanai to noņemt, ritinot lapu.</string>
     <string name="browser_side_hide">Slēpt sānjoslu</string>
+    <string name="browser_hide">Paslēpt</string>
+    <string name="browser_hide_hint">Pieskarieties šeit, lai atgrieztu sānjoslu</string>
+    <string name="browser_tab_behind">Jaunas cilnes fonā</string>
+    <string name="browser_tab_behind_note">Atvērt jaunā cilnē (turētai saitei vai ar labo klikšķi) to atver fonā, un jūs paliekat šajā lapā.</string>
 </resources>

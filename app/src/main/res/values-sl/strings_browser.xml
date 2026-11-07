@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Navpični zavihki</string>
     <string name="browser_side_bar_note">Na tablici ležeče so naslov, orodja in zavihki v stolpcu na levi. Gumb poleg ♥ ga skrije v ozek trak, ali naj ga samodejno skrivanje pospravi med drsenjem strani.</string>
     <string name="browser_side_hide">Skrij stransko vrstico</string>
+    <string name="browser_hide">Skrij</string>
+    <string name="browser_hide_hint">Tapnite tukaj, da vrnete stransko vrstico</string>
+    <string name="browser_tab_behind">Novi zavihki v ozadju</string>
+    <string name="browser_tab_behind_note">Odpri v novem zavihku (pridržana povezava ali desni klik) ga odpre zadaj, vi pa ostanete na tej strani.</string>
 </resources>

@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Vertikala flikar</string>
     <string name="browser_side_bar_note">På en surfplatta liggande står adressen, verktygen och flikarna i en kolumn till vänster. Knappen bredvid ♥ gömmer den till en smal remsa, eller låt Dölj automatiskt ta undan den när sidan rullar.</string>
     <string name="browser_side_hide">Dölj sidofältet</string>
+    <string name="browser_hide">Dölj</string>
+    <string name="browser_hide_hint">Tryck här för att få tillbaka sidofältet</string>
+    <string name="browser_tab_behind">Nya flikar i bakgrunden</string>
+    <string name="browser_tab_behind_note">Öppna i ny flik (hållen eller högerklickad länk) öppnar den bakom och du stannar på sidan.</string>
 </resources>

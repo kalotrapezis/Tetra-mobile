@@ -144,4 +144,8 @@
     <string name="browser_side_bar">Pystysuorat välilehdet</string>
     <string name="browser_side_bar_note">Tabletin vaakatilassa osoite, työkalut ja välilehdet ovat sarakkeessa vasemmalla. ♥:n vieressä oleva painike piilottaa sen kapeaksi raidaksi, tai anna automaattisen piilotuksen piilottaa se sivua vieritettäessä.</string>
     <string name="browser_side_hide">Piilota sivupalkki</string>
+    <string name="browser_hide">Piilota</string>
+    <string name="browser_hide_hint">Napauta tästä palauttaaksesi sivupalkin</string>
+    <string name="browser_tab_behind">Uudet välilehdet taustalle</string>
+    <string name="browser_tab_behind_note">Avaa uudessa välilehdessä (pidetty tai hiiren oikealla painettu linkki) avaa sen taakse, ja pysyt tällä sivulla.</string>
 </resources>
