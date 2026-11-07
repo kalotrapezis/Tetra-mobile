@@ -119,4 +119,16 @@ class PillsTest {
         val advice = Pills.advice(slots, zone)
         assertEquals("move", advice.single().kind); assertEquals(LocalTime.of(22, 30), advice.single().time)
     }
+
+    @Test fun aDosePutOffRingsThenAndNotBefore() {
+        val d = dir(); Pills.save(d, evening)
+        val due = at("2026-11-07", "21:00")
+        val later = mapOf(due to due.plusSeconds(20 * 60).toEpochMilli())
+        // 21:00 rang; put off 20 minutes: the next ring is 21:20, not 21:30's reminder, and none by the clock until then
+        assertEquals(due.plusSeconds(20 * 60), Pills.nextRing(Pills.medicines(d), Pills.log(d), due.plusSeconds(60), zone, later)?.first)
+        assertEquals(due.plusSeconds(30 * 60), Pills.nextRing(Pills.medicines(d), Pills.log(d), due.plusSeconds(21 * 60), zone, later)?.first)
+        // until home: no ring by the clock that evening
+        assertEquals(at("2026-11-08", "21:00"), Pills.nextRing(Pills.medicines(d), Pills.log(d), due.plusSeconds(60), zone, mapOf(due to Pills.AT_PLACE))?.first)
+        Pills.setLater(d, due, Pills.AT_PLACE); assertEquals(Pills.AT_PLACE, Pills.later(d)[due]); Pills.setLater(d, due, null); assertTrue(Pills.later(d).isEmpty())
+    }
 }

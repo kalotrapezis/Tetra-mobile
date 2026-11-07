@@ -54,9 +54,9 @@
     <string name="pills_when">Hvornår</string>
     <string name="pills_add_time">Tid</string>
     <string name="pills_stock_title">Lager</string>
-    <string name="pills_per_box">Piller i en pakke</string>
+    <string name="pills_per_box">Piller i en ny pakke</string>
     <string name="pills_boxes_now">Pakker du har</string>
-    <string name="pills_loose_now">Løse piller</string>
+    <string name="pills_loose_now">Piller tilbage i den</string>
     <string name="pills_refill_title">Påmindelse om genbestilling</string>
     <string name="pills_refill_days">Dage før det løber tør</string>
     <string name="pills_refill_times">Antal påmindelser</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Næste</string>
     <string name="pills_say_failed">Det virkede ikke. Prøv igen, eller udfyld det selv.</string>
     <string name="pills_say_nothing">Der blev ikke hørt noget.</string>
+    <string name="pills_total">Nu har du %1$s piller</string>
+    <string name="pills_need_box_size">Skriv, hvor mange piller en ny pakke indeholder</string>
+    <string name="pills_opened">Én af dem er allerede åbnet</string>
 </resources>

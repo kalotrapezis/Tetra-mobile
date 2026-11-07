@@ -54,9 +54,9 @@
     <string name="pills_when">Kedy</string>
     <string name="pills_add_time">Čas</string>
     <string name="pills_stock_title">Zásoba</string>
-    <string name="pills_per_box">Tabliet v balení</string>
+    <string name="pills_per_box">Tabliet v novom balení</string>
     <string name="pills_boxes_now">Balenia, ktoré máš</string>
-    <string name="pills_loose_now">Voľné tablety</string>
+    <string name="pills_loose_now">Tabliet zostáva v ňom</string>
     <string name="pills_refill_title">Pripomienka na doobjednanie</string>
     <string name="pills_refill_days">Dní pred minutím</string>
     <string name="pills_refill_times">Koľko pripomienok</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Ďalej</string>
     <string name="pills_say_failed">Nepodarilo sa. Skús to znova alebo vyplň ručne.</string>
     <string name="pills_say_nothing">Nič nebolo počuť.</string>
+    <string name="pills_total">Teraz máš %1$s tabliet</string>
+    <string name="pills_need_box_size">Napíš, koľko tabliet má nové balenie</string>
+    <string name="pills_opened">Jedno je už otvorené</string>
 </resources>

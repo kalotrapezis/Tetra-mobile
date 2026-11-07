@@ -284,6 +284,7 @@ internal class AssistantTools(
             "pills_list" -> pillsList()
             "pills_save" -> pillsSave(args)
             "pills_taken" -> pillsTaken(args)
+            "pills_later" -> pillsLater(args)
             "timer_start" -> timerStart(args)
             "timer_list" -> timerList()
             "timer_stop" -> timerStop(args)
@@ -458,6 +459,36 @@ internal class AssistantTools(
         changed("pills")
         val what = (if (made) "Added a new medicine. " else "Saved. ") + pillLine(m)
         return ToolResult(what + if (m.times.isEmpty()) "\nIt has no time set, so nothing will remind the user: ask at what time(s) it is taken and call again with times." else "")
+    }
+
+    /**
+     * "I can't now, I'm driving: tell me in 20 minutes" or "when I get home" (the user, 7 Nov): the doses waiting now rung
+     * again then, and not by the clock before. Home is a place saved in Maps (Σπίτι, home), watched by the place reminders.
+     */
+    private fun pillsLater(a: JSONObject): ToolResult {
+        val dir = pills(); val at = now().toInstant()
+        val open = Pills.today(Pills.medicines(dir), Pills.log(dir), at, zone).filter { (it.state == Dose.State.Waiting || it.state == Dose.State.Missed) && it.due <= at.plusSeconds(3600) }
+        val due = open.minByOrNull { kotlin.math.abs(it.due.epochSecond - at.epochSecond) }?.due ?: return ToolResult("No dose is waiting now.")
+        val names = open.filter { it.due == due }.joinToString { it.med.title }
+        val minutes = a.optInt("minutes", 0)
+        val placeSaid = a.optString("place").trim()
+        if (minutes <= 0 && placeSaid.isEmpty()) return ToolResult("Say in how many minutes, or at which place (home).")
+        if (minutes > 0) {
+            val until = at.plusSeconds(minutes * 60L)
+            Pills.setLater(dir, due, until.toEpochMilli()); changed("pills")
+            return ToolResult("$names will be reminded again at ${until.atZone(zone).format(HM)}.")
+        }
+        // only the user's own saved places: "home" must not find a taverna called Σπίτι
+        val words = MapsSearch.fold(placeSaid).split(Regex("[^\\p{L}\\p{N}]+")).filter { it.isNotEmpty() }
+        val home = words.any { it in setOf("σπιτι", "home", "σπιτακι") }
+        val saved = MapsFiles.places(MapsFiles.root(tetra)).firstOrNull { p -> MapsSearch.fold("${p.name} ${p.label}").let { n ->
+            if (home) n.contains("σπιτι") || n.contains("home") else words.all { it in n } } }
+            ?: return ToolResult("There is no place called $placeSaid saved in Maps. Ask the user to save it in Maps (★ on the place), or offer to remind in some minutes instead.")
+        LocationReminders.add(tetra, PlaceReminder(MapsFiles.newId(), "", saved.name, saved.lat, saved.lng, LocationReminders.PILLS + due.toEpochMilli()))
+        Pills.setLater(dir, due, Pills.AT_PLACE)
+        changed("places"); changed("pills")
+        return if (placesOn()) ToolResult("$names will be reminded on arriving at ${saved.name}.")
+        else ToolResult("Saved: $names will be reminded on arriving at ${saved.name}, but place reminders are off, so it cannot ring yet. Settings › Calendar is open: the user turns them on there and allows the location all the time.", go = LocationReminders.SCREEN)
     }
 
     /** "I took it" / "took my pills" (after the reminder): the doses waiting now, or [name]'s; skip when the user says so. */
@@ -914,7 +945,7 @@ internal class AssistantTools(
 
         /** Each tool's app (AiGate.APPS). */
         val APP_OF = mapOf("calendar_add" to "calendar", "calendar_list" to "calendar", "calendar_free" to "calendar",
-            "pills_list" to "pills", "pills_save" to "pills", "pills_taken" to "pills",
+            "pills_list" to "pills", "pills_save" to "pills", "pills_taken" to "pills", "pills_later" to "pills",
             "timer_start" to "timer", "timer_list" to "timer", "timer_stop" to "timer", "alarm_add" to "timer", "alarm_list" to "timer", "alarm_delete" to "timer", "stopwatch" to "timer",
             "notes_search" to "notes", "note_new" to "notes", "note_open" to "notes", "shopping_list" to "notes", "files_find" to "files", "file_open" to "files",
             "contacts_find" to "contacts", "my_card" to "contacts", "relation_remember" to "contacts", "relation_forget" to "contacts", "contact_call" to "phone",
@@ -939,13 +970,16 @@ internal class AssistantTools(
             fn("pills_list", "The user's medicines in Tetra's Pills: dose, times, pills in stock, how many days they last, and today's doses (taken, waiting, missed).", emptyList()),
             fn("pills_save", "Add a medicine to Pills, add a new box or pills to its stock (\"I got a new box of X 120 mg, 90 tablets\": name X, strength 120 mg, boxes 1, per_box 90), or change its dose or times. Creates the medicine when there is none by that name.", listOf("name"),
                 "name" to p("string", "The medicine's name, without the strength."), "strength" to p("string", "As on the box: \"120 mg\", \"5 mg/ml\"; leave out if not said."),
-                "boxes" to p("integer", "Boxes bought now."), "per_box" to p("integer", "Pills (tablets, capsules) in one box, if said."), "pills" to p("number", "Loose pills added, besides boxes."),
+                "boxes" to p("integer", "Unopened boxes bought or in hand."), "per_box" to p("integer", "Pills (tablets, capsules) in a new, full box, if said."),
+                "pills" to p("number", "Pills left in an opened box, or loose, besides the boxes (\"I have 48, a new box has 50\": per_box 50, pills 48)."),
                 "dose" to p("number", "Pills each time (0.5 for half); only if said."),
                 "times" to JSONObject().put("type", "array").put("items", JSONObject().put("type", "string")).put("description", "Every time of day it is taken, HH:MM; the whole new list. Only if said."),
                 "days" to JSONObject().put("type", "array").put("items", JSONObject().put("type", "string").put("enum", JSONArray(AlarmRecord.DAY_CODES))).put("description", "Only some weekdays; leave out for every day."),
                 "until" to p("string", "The last day of a course, YYYY-MM-DD, if said.")),
             fn("pills_taken", "Mark the user's dose as taken (\"I took it\", \"took my pills\") or skipped. Without a name: every dose of the nearest time still waiting.", emptyList(),
                 "name" to p("string", "One medicine, if named."), "strength" to p("string", "Its strength, if two share the name."), "skip" to p("boolean", "Skipped, not taken.")),
+            fn("pills_later", "Put off the user's pill reminder now (\"I can't take them now, I'm driving: tell me in 20 minutes\", \"remind me when I get home\"): the doses waiting now ring again then.", emptyList(),
+                "minutes" to p("integer", "In how many minutes."), "place" to p("string", "Instead of minutes: the place to be reminded at, as the user said it (home, σπίτι, work).")),
             fn("timer_start", "Start a countdown timer in Tetra.", emptyList(),
                 "minutes" to p("integer", "Minutes."), "seconds" to p("integer", "Seconds, besides the minutes."), "label" to p("string", "What it is for, if said.")),
             fn("timer_list", "The running and paused timers and the time left.", emptyList()),

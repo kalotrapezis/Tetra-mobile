@@ -54,9 +54,9 @@
     <string name="pills_when">Mikor</string>
     <string name="pills_add_time">Idő</string>
     <string name="pills_stock_title">Készlet</string>
-    <string name="pills_per_box">Tabletta egy dobozban</string>
-    <string name="pills_boxes_now">Meglévő dobozok</string>
-    <string name="pills_loose_now">Szabad tabletták</string>
+    <string name="pills_per_box">Tabletta egy új dobozban</string>
+    <string name="pills_boxes_now">Dobozaid száma</string>
+    <string name="pills_loose_now">Tabletta maradt benne</string>
     <string name="pills_refill_title">Újrarendelési emlékeztető</string>
     <string name="pills_refill_days">Nappal a kifogyás előtt</string>
     <string name="pills_refill_times">Hány emlékeztető</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Tovább</string>
     <string name="pills_say_failed">Nem sikerült. Próbáld újra, vagy töltsd ki kézzel.</string>
     <string name="pills_say_nothing">Nem hallottam semmit.</string>
+    <string name="pills_total">Most %1$s tablettád van</string>
+    <string name="pills_need_box_size">Írd be, hány tabletta van egy új dobozban</string>
+    <string name="pills_opened">Az egyik már ki van nyitva</string>
 </resources>

@@ -64,14 +64,22 @@ internal object PillsAlarms {
         val p = prefs(c)
         val upTo = Instant.ofEpochMilli(p.getLong("upTo", now.toEpochMilli())).coerceAtLeast(now.minusMillis(Pills.MISSED_MS))
         // each dose time rung once per look, at its latest reminder since: a phone off all evening says it once
-        // the voice once, for the latest; any other dose time rung with it gets its notification only
-        val due = Pills.doses(meds, log, upTo.minusMillis(Pills.MISSED_MS), now.plusSeconds(1), now, zone).filter { it.state == Dose.State.Waiting }
-            .groupBy { it.due }.filterKeys { d -> Pills.AGAIN_MS.any { val t = d.plusMillis(it); t > upTo && t <= now } }.toSortedMap()
+        // the voice once, for the latest; any other dose time rung with it gets its notification only. A dose put off rings
+        // at the time it was put off to (and then forgets it), and not again by the clock before
+        val later = Pills.later(dir)
+        val putOff = later.filterValues { it != Pills.AT_PLACE && it > upTo.toEpochMilli() && it <= now.toEpochMilli() }.keys
+        val due = Pills.doses(meds, log, now.minusSeconds(86_400L), now.plusSeconds(1), now, zone)
+            .filter { it.state == Dose.State.Waiting || it.due in putOff && it.state == Dose.State.Missed }
+            .groupBy { it.due }.filterKeys { d -> d in putOff || later[d] == null && Pills.AGAIN_MS.any { val t = d.plusMillis(it); t > upTo && t <= now } }.toSortedMap()
+        putOff.forEach { Pills.setLater(dir, it, null) }
+        // put-off doses answered meanwhile, or a day old, are forgotten
+        val open = Pills.doses(meds, log, now.minusSeconds(86_400L), now.plusSeconds(1), now, zone).filter { it.state == Dose.State.Waiting || it.state == Dose.State.Missed }.map { it.due }.toSet()
+        later.keys.filter { it !in open && it !in putOff }.forEach { Pills.setLater(dir, it, null) }
         due.entries.forEachIndexed { i, (at, doses) -> ring(c, at, doses, again = now.toEpochMilli() - at.toEpochMilli() > 60_000, speak = speak && i == due.size - 1) }
         p.edit().putLong("upTo", now.toEpochMilli()).apply()
         tidy(c, meds, log, now, zone)
         val am = c.getSystemService(AlarmManager::class.java) ?: return
-        val next = Pills.nextRing(meds, log, now, zone)
+        val next = Pills.nextRing(meds, log, now, zone, Pills.later(dir))
         if (next == null) { am.cancel(ringIntent(c)); return }
         val at = next.first.toEpochMilli()
         if (Build.VERSION.SDK_INT < 31 || am.canScheduleExactAlarms()) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, ringIntent(c))
@@ -162,6 +170,15 @@ internal object PillsAlarms {
             if (runCatching { c.startForegroundService(start) }.onFailure { WriterLog.e("Pills: the voice could not start", it) }.isSuccess) return
         }
         runCatching { NotificationManagerCompat.from(c).notify(idOf(due), build(c, due, doses, silent = false)) }
+    }
+
+    /** A dose put off until a place was reached (LocationReminders): rung now, its voice too, and forgotten. */
+    fun atPlace(c: Context, due: Instant) {
+        val dir = Pills.phoneDir(); val now = Instant.now()
+        Pills.setLater(dir, due, null)
+        val doses = Pills.doses(Pills.medicines(dir), Pills.log(dir), due, due.plusSeconds(60), now, ZoneId.systemDefault()).filter { it.state == Dose.State.Waiting || it.state == Dose.State.Missed }
+        if (doses.isNotEmpty()) ring(c, due, doses, again = true, speak = true)
+        plan(c)
     }
 
     /** The applet's Try it: the reminder as it will come, now, for the doses of [m] (any medicine), nothing written. */

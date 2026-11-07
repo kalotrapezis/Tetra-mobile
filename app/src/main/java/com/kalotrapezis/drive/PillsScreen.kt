@@ -566,7 +566,15 @@ private fun number(s: String) = s.trim().replace(',', '.').toDoubleOrNull()?.tak
 // ——— the guide: a new medicine (or one changed) step by step ———
 
 /** What the guide fills in, as typed: the numbers stay text until saved. */
-private data class Draft(val m: Medicine, val dose: String, val perBox: String, val boxes: String, val loose: String, val refillDays: String, val refillTimes: String, val forDays: String)
+private data class Draft(val m: Medicine, val dose: String, val perBox: String, val boxes: String, val loose: String, val refillDays: String, val refillTimes: String, val forDays: String,
+    /** One of the boxes in hand is open already: [loose] is what is left in it (the user, 7 Nov: "I have 48, a new one has 50"). */
+    val opened: Boolean = false) {
+    /** Full boxes and loose pills to add: an open box counts as what is left in it. */
+    fun stock(): Pair<Int, Double> {
+        val b = boxes.trim().toIntOrNull() ?: 0; val left = number(loose) ?: 0.0
+        return if (opened) maxOf(b - 1, 0) to left else b to 0.0
+    }
+}
 
 /**
  * Five steps (the user, 7 Nov: "a step-by-step guide that takes you by the hand"): the name, how it looks, when, the stock,
@@ -605,7 +613,9 @@ private data class Draft(val m: Medicine, val dose: String, val perBox: String, 
             heard = text
             val (m, extra) = PillsVoiceFill.apply(d.m, o)
             d = d.copy(m = m, dose = o.optDouble("dose").takeIf { !it.isNaN() && it > 0 }?.let { Medicine.amount(Medicine.halves(it)) } ?: d.dose,
-                perBox = extra["per_box"] ?: d.perBox, boxes = extra["boxes"] ?: d.boxes, loose = extra["pills"] ?: d.loose, forDays = extra["for_days"] ?: d.forDays)
+                // what Mistral calls boxes are the unopened ones; pills left in an open box make it one more box, ticked open
+                perBox = extra["per_box"] ?: d.perBox, boxes = if (extra["pills"] != null) (((extra["boxes"]?.toIntOrNull()) ?: 0) + 1).toString() else extra["boxes"] ?: d.boxes,
+                loose = extra["pills"] ?: d.loose, opened = extra["pills"] != null || d.opened, forDays = extra["for_days"] ?: d.forDays)
         }.onFailure { WriterLog.w("Pills: Say it: ${it.message}"); heard = it.shownMessage(context) ?: context.getString(R.string.pills_say_failed) }
     }
     val askMic = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok -> if (ok) sayIt() }
@@ -614,7 +624,7 @@ private data class Draft(val m: Medicine, val dose: String, val perBox: String, 
         save(d.m.copy(name = d.m.name.trim(), strength = d.m.strength.trim(), dose = Medicine.halves(number(d.dose) ?: 1.0), perBox = d.perBox.trim().toIntOrNull() ?: 0,
             refillDays = d.refillDays.trim().toIntOrNull()?.coerceIn(0, 90) ?: 7, refillTimes = d.refillTimes.trim().toIntOrNull()?.coerceIn(0, 30) ?: 3,
             until = days?.let { LocalDate.now().plusDays(it - 1L) } ?: d.m.until),
-            d.boxes.trim().toIntOrNull() ?: 0, number(d.loose) ?: 0.0)
+            d.stock().first, d.stock().second)
     }
     val nameOk = d.m.name.isNotBlank()
     val doseOk = number(d.dose)?.let { Medicine.halves(it) > 0 } == true
@@ -702,9 +712,22 @@ private data class Draft(val m: Medicine, val dose: String, val perBox: String, 
                         3 -> {
                             StepTitle(R.string.pills_q_stock)
                             OutlinedTextField(d.perBox, { d = d.copy(perBox = it.filter(Char::isDigit)) }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.pills_per_box)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                            // a new box's size apart from what is in hand (the user, 7 Nov: "I have 48, but a new one has 50"): the boxes
+                            // not opened yet, and what is left in the one being used
                             if (fresh) {
-                                OutlinedTextField(d.boxes, { d = d.copy(boxes = it.filter(Char::isDigit)) }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.pills_boxes_now)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-                                OutlinedTextField(d.loose, { d = d.copy(loose = it) }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.pills_loose_now)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
+                                OutlinedTextField(d.boxes, { d = d.copy(boxes = it.filter(Char::isDigit)) }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.pills_boxes_now)) },
+                                    singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                                // ticked: one of them is open, and a field asks how many are left in it
+                                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { d = d.copy(opened = !d.opened) }, verticalAlignment = Alignment.CenterVertically) {
+                                    androidx.compose.material3.Checkbox(d.opened, { d = d.copy(opened = it) })
+                                    Text(stringResource(R.string.pills_opened), style = MaterialTheme.typography.bodyLarge)
+                                }
+                                if (d.opened) OutlinedTextField(d.loose, { d = d.copy(loose = it) }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.pills_loose_now)) },
+                                    singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
+                                val (full, left) = d.stock(); val size = d.perBox.toIntOrNull() ?: 0
+                                if (full > 0 && size == 0) Text(stringResource(R.string.pills_need_box_size), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                                else if (full > 0 || left > 0) Text(stringResource(R.string.pills_total, Medicine.amount(Medicine.halves(full * size + left))),
+                                    style = MaterialTheme.typography.titleMedium, color = PILLS_COLOR)
                             } else Text(stockText(d.m, LocalDate.now()), color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(stringResource(R.string.pills_stock_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
@@ -730,7 +753,8 @@ private data class Draft(val m: Medicine, val dose: String, val perBox: String, 
                         Icon(painterResource(R.drawable.ic_mic), null, Modifier.size(18.dp)); Text(" " + stringResource(if (listening) R.string.pills_listening else R.string.pills_say_it))
                     }
                     Spacer(Modifier.weight(1f))
-                    val canGo = when (step) { 0 -> nameOk; 2 -> doseOk; else -> true }
+                    val boxSizeOk = !fresh || d.stock().first == 0 || (d.perBox.toIntOrNull() ?: 0) > 0
+                    val canGo = when (step) { 0 -> nameOk; 2 -> doseOk; 3 -> boxSizeOk; else -> true }
                     Button(onClick = { if (step < steps - 1) step++ else finish() }, enabled = canGo && (step < steps - 1 || nameOk && doseOk),
                         colors = ButtonDefaults.buttonColors(containerColor = PILLS_COLOR, contentColor = Color.White)) {
                         Text(stringResource(if (step < steps - 1) R.string.pills_next else R.string.common_save))
@@ -776,7 +800,7 @@ internal object PillsVoiceFill {
     private const val PROMPT = "Read a medicine from what the user said (Greek or English) and answer only JSON with the fields that were said: " +
         "name (no strength), strength (\"20 mg\"), dose (pills each time; 0.5 for half), times (HH:MM 24 h; \"το πρωί\" alone 08:00, \"μεσημέρι\" 14:00, \"το βράδυ\" 21:00, \"πριν κοιμηθώ\" 23:00), " +
         "days (some weekdays only, as MO TU WE TH FR SA SU), every (every N days), food (with, before, after, empty), for_days (how many days the course lasts), " +
-        "per_box (pills in one box), boxes (boxes bought or in hand), pills (loose pills), shape (round, oval, capsule, liquid), color (white, yellow, orange, pink, red, purple, blue, green, brown)."
+        "per_box (pills in a new, full box), boxes (unopened boxes bought or in hand), pills (pills left in an opened box, or loose; \"I have 48 but a new box has 50\" is per_box 50, pills 48), shape (round, oval, capsule, liquid), color (white, yellow, orange, pink, red, purple, blue, green, brown)."
     private val COLOR_NAMES = listOf("white", "yellow", "orange", "pink", "red", "purple", "blue", "green", "brown")
 
     fun hear(c: android.content.Context): Pair<String, JSONObject> {

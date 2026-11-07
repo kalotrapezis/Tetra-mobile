@@ -54,9 +54,9 @@
     <string name="pills_when">Kdy</string>
     <string name="pills_add_time">Čas</string>
     <string name="pills_stock_title">Zásoba</string>
-    <string name="pills_per_box">Tablet v balení</string>
-    <string name="pills_boxes_now">Balení k dispozici</string>
-    <string name="pills_loose_now">Volné tablety</string>
+    <string name="pills_per_box">Tablet v novém balení</string>
+    <string name="pills_boxes_now">Kolik máš balení</string>
+    <string name="pills_loose_now">Kolik tablet v něm zbývá</string>
     <string name="pills_refill_title">Připomínka doobjednání</string>
     <string name="pills_refill_days">Dní před dochozením</string>
     <string name="pills_refill_times">Kolik připomínek</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Další</string>
     <string name="pills_say_failed">Nepovedlo se. Zkus to znovu nebo to vyplň ručně.</string>
     <string name="pills_say_nothing">Nic jsem neslyšel.</string>
+    <string name="pills_total">Teď máš %1$s tablet</string>
+    <string name="pills_need_box_size">Napiš, kolik tablet má nové balení</string>
+    <string name="pills_opened">Jedno už je otevřené</string>
 </resources>

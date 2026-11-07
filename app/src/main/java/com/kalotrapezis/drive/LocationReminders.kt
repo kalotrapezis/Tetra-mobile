@@ -31,6 +31,8 @@ internal data class PlaceReminder(val id: String, val kind: String, val name: St
 internal data class Watched(val reminder: PlaceReminder, val name: String, val lat: Double, val lng: Double)
 
 internal object LocationReminders {
+    /** A note naming this, then a dose's time in ms: Pills' dose put off until here, not a checklist. */
+    const val PILLS = "pills:"
     const val SCREEN = "settings-calendar" // AI Assist's tap: Settings › Calendar (MainActivity)
     private const val ACTION_NEAR = "com.kalotrapezis.drive.PLACE_NEAR"
     private const val ACTION_MOVED = "com.kalotrapezis.drive.PLACE_MOVED"
@@ -109,6 +111,12 @@ internal object LocationReminders {
         if (i.action != ACTION_NEAR || !i.getBooleanExtra(LocationManager.KEY_PROXIMITY_ENTERING, false) || !enabled(c)) return
         val id = i.getStringExtra("id") ?: return
         val r = list(driveRoot()).firstOrNull { it.id == id } ?: return
+        // a pill put off "until I get home" (Pills.AT_PLACE): rung once, then the spot is no longer watched
+        if (r.note.startsWith(PILLS)) {
+            save(driveRoot(), list(driveRoot()).filter { it.id != id }); planSoon(c)
+            r.note.removePrefix(PILLS).toLongOrNull()?.let { PillsAlarms.atPlace(c, java.time.Instant.ofEpochMilli(it)) }
+            return
+        }
         val p = prefs(c)
         if (System.currentTimeMillis() - p.getLong("rang_$id", 0) < AGAIN_MS) return
         val store = NotesStore(TetraSystem.dir(driveRoot(), "Notes", "Shared"))

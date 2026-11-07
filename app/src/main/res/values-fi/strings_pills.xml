@@ -54,9 +54,9 @@
     <string name="pills_when">Milloin</string>
     <string name="pills_add_time">Aika</string>
     <string name="pills_stock_title">Varasto</string>
-    <string name="pills_per_box">Pilleriä pakkauksessa</string>
+    <string name="pills_per_box">Pilleriä uudessa pakkauksessa</string>
     <string name="pills_boxes_now">Pakkauksia sinulla</string>
-    <string name="pills_loose_now">Irtopillerit</string>
+    <string name="pills_loose_now">Pilleriä jäljellä siinä</string>
     <string name="pills_refill_title">Tilausmuistutus</string>
     <string name="pills_refill_days">Päiviä ennen loppumista</string>
     <string name="pills_refill_times">Montako muistutusta</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Seuraava</string>
     <string name="pills_say_failed">Ei onnistunut. Yritä uudelleen tai täytä käsin.</string>
     <string name="pills_say_nothing">Mitään ei kuulunut.</string>
+    <string name="pills_total">Nyt sinulla on %1$s pilleriä</string>
+    <string name="pills_need_box_size">Kirjoita, montako pilleriä uudessa pakkauksessa on</string>
+    <string name="pills_opened">Yksi niistä on jo avattu</string>
 </resources>

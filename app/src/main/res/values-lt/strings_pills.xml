@@ -54,9 +54,9 @@
     <string name="pills_when">Kada</string>
     <string name="pills_add_time">Laikas</string>
     <string name="pills_stock_title">Atsargos</string>
-    <string name="pills_per_box">Tablečių dėžutėje</string>
-    <string name="pills_boxes_now">Turimos dėžutės</string>
-    <string name="pills_loose_now">Atskiros tabletės</string>
+    <string name="pills_per_box">Tablečių naujoje dėžutėje</string>
+    <string name="pills_boxes_now">Dėžučių, kurias turi</string>
+    <string name="pills_loose_now">Tablečių liko joje</string>
     <string name="pills_refill_title">Pakartotinio užsakymo priminimas</string>
     <string name="pills_refill_days">Dienų iki pasibaigimo</string>
     <string name="pills_refill_times">Kiek priminimų</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Toliau</string>
     <string name="pills_say_failed">Nepavyko. Bandyk dar kartą arba užpildyk rankiniu būdu.</string>
     <string name="pills_say_nothing">Nieko negirdėti.</string>
+    <string name="pills_total">Dabar turi %1$s tabletes</string>
+    <string name="pills_need_box_size">Įrašyk, kiek tablečių yra naujoje dėžutėje</string>
+    <string name="pills_opened">Viena jų jau atidaryta</string>
 </resources>

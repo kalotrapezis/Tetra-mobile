@@ -312,10 +312,31 @@ internal object Pills {
     fun waitingAt(meds: List<Medicine>, log: List<PillEvent>, due: Instant, now: Instant, zone: ZoneId) =
         doses(meds, log, due, due.plusSeconds(60), now, zone).filter { it.state == Dose.State.Waiting }
 
-    /** When to ring next after [after]: a dose's time, or a reminder again for one not answered; with the doses' time. */
-    fun nextRing(meds: List<Medicine>, log: List<PillEvent>, after: Instant, zone: ZoneId): Pair<Instant, Instant>? =
-        doses(meds, log, after.minusMillis(MISSED_MS), after.plusSeconds(8 * 86_400L), after, zone)
+    /**
+     * When to ring next after [after]: a dose's time, a reminder again for one not answered, or the time a dose was put off
+     * to ([later]); with the doses' time. A dose put off rings no reminder again before then (at a place: not by the clock).
+     */
+    fun nextRing(meds: List<Medicine>, log: List<PillEvent>, after: Instant, zone: ZoneId, later: Map<Instant, Long> = emptyMap()): Pair<Instant, Instant>? {
+        val clock = doses(meds, log, after.minusMillis(MISSED_MS), after.plusSeconds(8 * 86_400L), after, zone)
             .filter { it.state == Dose.State.Waiting }
             .flatMap { d -> AGAIN_MS.map { d.due.plusMillis(it) to d.due } }
-            .filter { it.first > after }.minByOrNull { it.first }
+            .filter { (at, due) -> at > after && later[due]?.let { at.toEpochMilli() >= it } != false }
+        val put = later.filter { (_, until) -> until != AT_PLACE && until > after.toEpochMilli() }.map { (due, until) -> Instant.ofEpochMilli(until) to due }
+        return (clock + put).minByOrNull { it.first }
+    }
+
+    /** [later]'s value for a dose put off until the user arrives somewhere (LocationReminders rings it). */
+    const val AT_PLACE = Long.MAX_VALUE
+
+    /** Doses put off (the user, 7 Nov: "I'm driving, tell me in 20 minutes, or when I get home"): their time → when to ring. */
+    fun later(dir: File): Map<Instant, Long> = runCatching {
+        val o = JSONObject(File(dir, "later.json").readText())
+        o.keys().asSequence().associate { Instant.ofEpochMilli(it.toLong()) to o.getLong(it) }
+    }.getOrDefault(emptyMap())
+
+    /** [due]'s doses put off until [until] (epoch ms, or [AT_PLACE]); null: not any more. */
+    @Synchronized fun setLater(dir: File, due: Instant, until: Long?) {
+        val next = later(dir).toMutableMap().apply { if (until == null) remove(due) else put(due, until) }
+        dir.mkdirs(); File(dir, "later.json").writeText(JSONObject(next.mapKeys { it.key.toEpochMilli().toString() }).toString())
+    }
 }

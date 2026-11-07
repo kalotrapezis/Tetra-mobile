@@ -54,9 +54,9 @@
     <string name="pills_when">Quando</string>
     <string name="pills_add_time">Ora</string>
     <string name="pills_stock_title">Scorta</string>
-    <string name="pills_per_box">Pillole per confezione</string>
+    <string name="pills_per_box">Pillole in una confezione nuova</string>
     <string name="pills_boxes_now">Confezioni che hai</string>
-    <string name="pills_loose_now">Pillole sfuse</string>
+    <string name="pills_loose_now">Pillole rimaste al suo interno</string>
     <string name="pills_refill_title">Promemoria di riordino</string>
     <string name="pills_refill_days">Giorni prima che finiscano</string>
     <string name="pills_refill_times">Quanti promemoria</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Avanti</string>
     <string name="pills_say_failed">Non ha funzionato. Riprova o compila a mano.</string>
     <string name="pills_say_nothing">Non si è sentito nulla.</string>
+    <string name="pills_total">Ora hai %1$s pillole</string>
+    <string name="pills_need_box_size">Scrivi quante pillole ha una confezione nuova</string>
+    <string name="pills_opened">Una è già aperta</string>
 </resources>

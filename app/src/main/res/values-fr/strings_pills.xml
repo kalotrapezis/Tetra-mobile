@@ -54,9 +54,9 @@
     <string name="pills_when">Quand</string>
     <string name="pills_add_time">Heure</string>
     <string name="pills_stock_title">Stock</string>
-    <string name="pills_per_box">Comprimés par boîte</string>
+    <string name="pills_per_box">Comprimés dans une boîte neuve</string>
     <string name="pills_boxes_now">Boîtes que vous avez</string>
-    <string name="pills_loose_now">Comprimés en vrac</string>
+    <string name="pills_loose_now">Comprimés restant dedans</string>
     <string name="pills_refill_title">Rappel de réapprovisionnement</string>
     <string name="pills_refill_days">Jours avant la fin du stock</string>
     <string name="pills_refill_times">Nombre de rappels</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Suivant</string>
     <string name="pills_say_failed">Échec. Réessayez ou remplissez à la main.</string>
     <string name="pills_say_nothing">Rien n’a été entendu.</string>
+    <string name="pills_total">Vous avez maintenant %1$s comprimés</string>
+    <string name="pills_need_box_size">Indiquez combien de comprimés contient une boîte neuve</string>
+    <string name="pills_opened">L’une d’elles est déjà ouverte</string>
 </resources>

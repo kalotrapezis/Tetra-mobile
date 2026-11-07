@@ -54,9 +54,9 @@
     <string name="pills_when">När</string>
     <string name="pills_add_time">Tid</string>
     <string name="pills_stock_title">Lager</string>
-    <string name="pills_per_box">Piller per förpackning</string>
+    <string name="pills_per_box">Piller i en ny förpackning</string>
     <string name="pills_boxes_now">Förpackningar du har</string>
-    <string name="pills_loose_now">Lösa piller</string>
+    <string name="pills_loose_now">Piller kvar i den</string>
     <string name="pills_refill_title">Påminnelse om ny beställning</string>
     <string name="pills_refill_days">Dagar innan det tar slut</string>
     <string name="pills_refill_times">Antal påminnelser</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Nästa</string>
     <string name="pills_say_failed">Det gick inte. Försök igen eller fyll i för hand.</string>
     <string name="pills_say_nothing">Inget hördes.</string>
+    <string name="pills_total">Nu har du %1$s piller</string>
+    <string name="pills_need_box_size">Skriv hur många piller en ny förpackning innehåller</string>
+    <string name="pills_opened">En av dem är redan öppnad</string>
 </resources>

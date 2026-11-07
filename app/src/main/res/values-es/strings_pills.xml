@@ -54,9 +54,9 @@
     <string name="pills_when">Cuándo</string>
     <string name="pills_add_time">Hora</string>
     <string name="pills_stock_title">Existencias</string>
-    <string name="pills_per_box">Pastillas por caja</string>
+    <string name="pills_per_box">Pastillas en una caja nueva</string>
     <string name="pills_boxes_now">Cajas que tienes</string>
-    <string name="pills_loose_now">Pastillas sueltas</string>
+    <string name="pills_loose_now">Pastillas que quedan en ella</string>
     <string name="pills_refill_title">Recordatorio de reposición</string>
     <string name="pills_refill_days">Días antes de que se acaben</string>
     <string name="pills_refill_times">Cuántos recordatorios</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Siguiente</string>
     <string name="pills_say_failed">No ha funcionado. Inténtalo de nuevo o rellénalo a mano.</string>
     <string name="pills_say_nothing">No se ha oído nada.</string>
+    <string name="pills_total">Ahora tienes %1$s pastillas</string>
+    <string name="pills_need_box_size">Escribe cuántas pastillas trae una caja nueva</string>
+    <string name="pills_opened">Una de ellas ya está abierta</string>
 </resources>

@@ -55,9 +55,9 @@
     <string name="pills_when">Πότε</string>
     <string name="pills_add_time">Ώρα</string>
     <string name="pills_stock_title">Απόθεμα</string>
-    <string name="pills_per_box">Χάπια στο κουτί</string>
+    <string name="pills_per_box">Χάπια σε καινούριο κουτί</string>
     <string name="pills_boxes_now">Κουτιά που έχεις</string>
-    <string name="pills_loose_now">Χάπια εκτός κουτιού</string>
+    <string name="pills_loose_now">Πόσα έχουν μείνει σε αυτό</string>
     <string name="pills_refill_title">Υπενθύμιση παραγγελίας</string>
     <string name="pills_refill_days">Μέρες πριν τελειώσουν</string>
     <string name="pills_refill_times">Πόσες υπενθυμίσεις</string>
@@ -124,4 +124,7 @@
     <string name="pills_next">Επόμενο</string>
     <string name="pills_say_failed">Δεν έγινε. Δοκίμασε ξανά, ή συμπλήρωσέ το με το χέρι.</string>
     <string name="pills_say_nothing">Δεν ακούστηκε τίποτα.</string>
+    <string name="pills_total">Τώρα έχεις %1$s χάπια</string>
+    <string name="pills_need_box_size">Γράψε πόσα χάπια έχει ένα καινούριο κουτί</string>
+    <string name="pills_opened">Το ένα είναι ήδη ανοιχτό</string>
 </resources>

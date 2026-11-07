@@ -54,9 +54,9 @@
     <string name="pills_when">Wanneer</string>
     <string name="pills_add_time">Tijd</string>
     <string name="pills_stock_title">Voorraad</string>
-    <string name="pills_per_box">Pillen per doosje</string>
+    <string name="pills_per_box">Pillen in een nieuw doosje</string>
     <string name="pills_boxes_now">Doosjes die je hebt</string>
-    <string name="pills_loose_now">Losse pillen</string>
+    <string name="pills_loose_now">Pillen die erin over zijn</string>
     <string name="pills_refill_title">Herinnering om bij te bestellen</string>
     <string name="pills_refill_days">Dagen voordat het op is</string>
     <string name="pills_refill_times">Aantal herinneringen</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Volgende</string>
     <string name="pills_say_failed">Dat is niet gelukt. Probeer het opnieuw of vul het zelf in.</string>
     <string name="pills_say_nothing">Er was niets te horen.</string>
+    <string name="pills_total">Nu heb je %1$s pillen</string>
+    <string name="pills_need_box_size">Schrijf op hoeveel pillen een nieuw doosje bevat</string>
+    <string name="pills_opened">Eén ervan is al open</string>
 </resources>

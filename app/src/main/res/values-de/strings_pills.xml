@@ -54,9 +54,9 @@
     <string name="pills_when">Wann</string>
     <string name="pills_add_time">Uhrzeit</string>
     <string name="pills_stock_title">Vorrat</string>
-    <string name="pills_per_box">Tabletten pro Packung</string>
-    <string name="pills_boxes_now">Vorhandene Packungen</string>
-    <string name="pills_loose_now">Lose Tabletten</string>
+    <string name="pills_per_box">Tabletten in einer neuen Packung</string>
+    <string name="pills_boxes_now">Packungen, die du hast</string>
+    <string name="pills_loose_now">Tabletten, die darin übrig sind</string>
     <string name="pills_refill_title">Nachbestell-Erinnerung</string>
     <string name="pills_refill_days">Tage vor dem Aufbrauchen</string>
     <string name="pills_refill_times">Wie viele Erinnerungen</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Weiter</string>
     <string name="pills_say_failed">Das hat nicht geklappt. Versuch es noch einmal oder füll es von Hand aus.</string>
     <string name="pills_say_nothing">Nichts zu hören.</string>
+    <string name="pills_total">Jetzt hast du %1$s Tabletten</string>
+    <string name="pills_need_box_size">Schreib, wie viele Tabletten eine neue Packung enthält</string>
+    <string name="pills_opened">Eine davon ist schon geöffnet</string>
 </resources>

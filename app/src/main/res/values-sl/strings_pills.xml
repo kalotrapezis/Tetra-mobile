@@ -54,9 +54,9 @@
     <string name="pills_when">Kdaj</string>
     <string name="pills_add_time">Čas</string>
     <string name="pills_stock_title">Zaloga</string>
-    <string name="pills_per_box">Tablet v škatli</string>
+    <string name="pills_per_box">Tablet v novi škatli</string>
     <string name="pills_boxes_now">Škatle, ki jih imaš</string>
-    <string name="pills_loose_now">Proste tablete</string>
+    <string name="pills_loose_now">Tablet je ostalo v njej</string>
     <string name="pills_refill_title">Opomnik za ponovno naročilo</string>
     <string name="pills_refill_days">Dni, preden zmanjka</string>
     <string name="pills_refill_times">Koliko opomnikov</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Naprej</string>
     <string name="pills_say_failed">Ni uspelo. Poskusi znova ali izpolni ročno.</string>
     <string name="pills_say_nothing">Nič ni bilo slišati.</string>
+    <string name="pills_total">Zdaj imaš %1$s tablet</string>
+    <string name="pills_need_box_size">Vpiši, koliko tablet je v novi škatli</string>
+    <string name="pills_opened">Ena je že odprta</string>
 </resources>

@@ -54,9 +54,9 @@
     <string name="pills_when">Кога</string>
     <string name="pills_add_time">Час</string>
     <string name="pills_stock_title">Наличност</string>
-    <string name="pills_per_box">Хапчета в кутия</string>
-    <string name="pills_boxes_now">Налични кутии</string>
-    <string name="pills_loose_now">Хапчета извън кутия</string>
+    <string name="pills_per_box">Хапчета в нова кутия</string>
+    <string name="pills_boxes_now">Кутии, които имаш</string>
+    <string name="pills_loose_now">Колко хапчета са останали в нея</string>
     <string name="pills_refill_title">Напомняне за поръчка</string>
     <string name="pills_refill_days">Дни преди да свършат</string>
     <string name="pills_refill_times">Колко напомняния</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Напред</string>
     <string name="pills_say_failed">Не се получи. Опитай пак или попълни ръчно.</string>
     <string name="pills_say_nothing">Не се чу нищо.</string>
+    <string name="pills_total">Сега имаш %1$s хапчета</string>
+    <string name="pills_need_box_size">Напиши колко хапчета има една нова кутия</string>
+    <string name="pills_opened">Една от тях вече е отворена</string>
 </resources>

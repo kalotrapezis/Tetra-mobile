@@ -54,9 +54,9 @@
     <string name="pills_when">Când</string>
     <string name="pills_add_time">Ora</string>
     <string name="pills_stock_title">Stoc</string>
-    <string name="pills_per_box">Pastile într-o cutie</string>
+    <string name="pills_per_box">Pastile într-o cutie nouă</string>
     <string name="pills_boxes_now">Cutii pe care le ai</string>
-    <string name="pills_loose_now">Pastile libere</string>
+    <string name="pills_loose_now">Pastile rămase în ea</string>
     <string name="pills_refill_title">Memento de reaprovizionare</string>
     <string name="pills_refill_days">Zile înainte să se termine</string>
     <string name="pills_refill_times">Câte mementouri</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Înainte</string>
     <string name="pills_say_failed">Nu a mers. Încearcă din nou sau completează manual.</string>
     <string name="pills_say_nothing">Nu s-a auzit nimic.</string>
+    <string name="pills_total">Acum ai %1$s pastile</string>
+    <string name="pills_need_box_size">Scrie câte pastile are o cutie nouă</string>
+    <string name="pills_opened">Una dintre ele este deja deschisă</string>
 </resources>

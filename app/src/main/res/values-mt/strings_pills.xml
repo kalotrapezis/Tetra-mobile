@@ -54,9 +54,9 @@
     <string name="pills_when">Meta</string>
     <string name="pills_add_time">Ħin</string>
     <string name="pills_stock_title">Stokk</string>
-    <string name="pills_per_box">Pilloli fil-kaxxa</string>
+    <string name="pills_per_box">Pilloli f’kaxxa ġdida</string>
     <string name="pills_boxes_now">Kaxxi li għandek</string>
-    <string name="pills_loose_now">Pilloli maħlula</string>
+    <string name="pills_loose_now">Pilloli li fadal fiha</string>
     <string name="pills_refill_title">Tfakkira tal-ordni mill-ġdid</string>
     <string name="pills_refill_days">Jiem qabel ma jispiċċaw</string>
     <string name="pills_refill_times">Kemm tfakkiriet</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Li jmiss</string>
     <string name="pills_say_failed">Ma ħadmitx. Erġa’ pprova, jew imla’ bl-idejn.</string>
     <string name="pills_say_nothing">Ma nstema’ xejn.</string>
+    <string name="pills_total">Issa għandek %1$s pilloli</string>
+    <string name="pills_need_box_size">Ikteb kemm fiha pilloli kaxxa ġdida</string>
+    <string name="pills_opened">Waħda minnhom diġà miftuħa</string>
 </resources>

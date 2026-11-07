@@ -54,9 +54,9 @@
     <string name="pills_when">Quando</string>
     <string name="pills_add_time">Hora</string>
     <string name="pills_stock_title">Stock</string>
-    <string name="pills_per_box">Comprimidos por caixa</string>
+    <string name="pills_per_box">Comprimidos numa caixa nova</string>
     <string name="pills_boxes_now">Caixas que tens</string>
-    <string name="pills_loose_now">Comprimidos soltos</string>
+    <string name="pills_loose_now">Comprimidos que restam nela</string>
     <string name="pills_refill_title">Lembrete de reposição</string>
     <string name="pills_refill_days">Dias antes de acabar</string>
     <string name="pills_refill_times">Quantos lembretes</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Seguinte</string>
     <string name="pills_say_failed">Não resultou. Tenta de novo ou preenche à mão.</string>
     <string name="pills_say_nothing">Não se ouviu nada.</string>
+    <string name="pills_total">Agora tens %1$s comprimidos</string>
+    <string name="pills_need_box_size">Escreve quantos comprimidos tem uma caixa nova</string>
+    <string name="pills_opened">Uma delas já está aberta</string>
 </resources>

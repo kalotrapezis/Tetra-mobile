@@ -54,9 +54,9 @@
     <string name="pills_when">Cathain</string>
     <string name="pills_add_time">Am</string>
     <string name="pills_stock_title">Stoc</string>
-    <string name="pills_per_box">Piollairí i mbosca</string>
+    <string name="pills_per_box">Piollairí i mbosca nua</string>
     <string name="pills_boxes_now">Boscaí atá agat</string>
-    <string name="pills_loose_now">Piollairí scaoilte</string>
+    <string name="pills_loose_now">Piollairí fágtha ann</string>
     <string name="pills_refill_title">Meabhrúchán athordaithe</string>
     <string name="pills_refill_days">Laethanta sula n-éireoidh siad as</string>
     <string name="pills_refill_times">Cé mhéad meabhrúchán</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Ar aghaidh</string>
     <string name="pills_say_failed">Níor oibrigh sé sin. Bain triail eile as, nó líon isteach de láimh é.</string>
     <string name="pills_say_nothing">Níor chualathas faic.</string>
+    <string name="pills_total">Anois tá %1$s piollaire agat</string>
+    <string name="pills_need_box_size">Scríobh cé mhéad piollaire atá i mbosca nua</string>
+    <string name="pills_opened">Tá ceann acu oscailte cheana</string>
 </resources>

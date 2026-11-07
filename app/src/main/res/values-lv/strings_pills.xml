@@ -54,9 +54,9 @@
     <string name="pills_when">Kad</string>
     <string name="pills_add_time">Laiks</string>
     <string name="pills_stock_title">Krājums</string>
-    <string name="pills_per_box">Tabletes kastītē</string>
-    <string name="pills_boxes_now">Tev esošās kastītes</string>
-    <string name="pills_loose_now">Atsevišķas tabletes</string>
+    <string name="pills_per_box">Tabletes jaunā kastītē</string>
+    <string name="pills_boxes_now">Kastītes, kas tev ir</string>
+    <string name="pills_loose_now">Tabletes, kas palikušas tajā</string>
     <string name="pills_refill_title">Atkārtota pasūtījuma atgādinājums</string>
     <string name="pills_refill_days">Dienas pirms beigām</string>
     <string name="pills_refill_times">Cik atgādinājumu</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Tālāk</string>
     <string name="pills_say_failed">Neizdevās. Mēģini vēlreiz vai aizpildi pats.</string>
     <string name="pills_say_nothing">Nekas netika dzirdēts.</string>
+    <string name="pills_total">Tagad tev ir %1$s tabletes</string>
+    <string name="pills_need_box_size">Ieraksti, cik tablešu ir jaunā kastītē</string>
+    <string name="pills_opened">Viena no tām jau ir atvērta</string>
 </resources>

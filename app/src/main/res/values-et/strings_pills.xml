@@ -54,9 +54,9 @@
     <string name="pills_when">Millal</string>
     <string name="pills_add_time">Kellaaeg</string>
     <string name="pills_stock_title">Varu</string>
-    <string name="pills_per_box">Tablette karbis</string>
-    <string name="pills_boxes_now">Sinu karbid</string>
-    <string name="pills_loose_now">Lahtised tabletid</string>
+    <string name="pills_per_box">Tablette uues karbis</string>
+    <string name="pills_boxes_now">Karpe sul on</string>
+    <string name="pills_loose_now">Tablette järel selles</string>
     <string name="pills_refill_title">Tellimise meeldetuletus</string>
     <string name="pills_refill_days">Päevi enne lõppemist</string>
     <string name="pills_refill_times">Mitu meeldetuletust</string>
@@ -123,4 +123,7 @@
     <string name="pills_next">Edasi</string>
     <string name="pills_say_failed">See ei õnnestunud. Proovi uuesti või täida käsitsi.</string>
     <string name="pills_say_nothing">Midagi ei kuulnud.</string>
+    <string name="pills_total">Nüüd on sul %1$s tabletti</string>
+    <string name="pills_need_box_size">Kirjuta, mitu tabletti on uues karbis</string>
+    <string name="pills_opened">Üks neist on juba avatud</string>
 </resources>
