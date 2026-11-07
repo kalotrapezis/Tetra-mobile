@@ -4,17 +4,17 @@
 Free software, no account, no cloud: nothing leaves your devices.</p>
 
 <p align="center">
-  <a href="https://github.com/kalotrapezis/Tetra-mobile/releases/download/v0.8.0-beta.6/Tetra-0.8.0-beta.6-arm64.apk"><img src="Assets/buttons/download-android.png" alt="Download Tetra for Android (APK)" width="440"></a>
+  <a href="https://github.com/kalotrapezis/Tetra-mobile/releases/download/v0.8.0-beta.7/Tetra-0.8.0-beta.7-arm64.apk"><img src="Assets/buttons/download-android.png" alt="Download Tetra for Android (APK)" width="440"></a>
   <a href="https://github.com/kalotrapezis/Tetra"><img src="Assets/buttons/get-desktop.png" alt="Tetra for the desktop" width="440"></a>
 </p>
 
 ![Tetra on a computer, a tablet and a phone](Assets/cards/tetra-devices.jpg)
 
-Photos, Files, Notes, Office, Calendar, Timer, Maps, Contacts, Phone, Data, Scanner, Codes and a Text editor, as
+Photos, Files, Notes, Office, Calendar, Timer, Pills, Maps, Contacts, Phone, Data, Scanner, Codes and a Text editor, as
 **applets** of one app that share one folder, `/sdcard/Tetra`. [Tetra for the desktop](https://github.com/kalotrapezis/Tetra)
 has the same applets on Linux, and the two sync over your own Wi-Fi.
 
-**0.8.0 Beta 6** ([what's new](https://github.com/kalotrapezis/Tetra-mobile/releases/tag/v0.8.0-beta.6)). A beta: keep
+**0.8.0 Beta 7** ([what's new](https://github.com/kalotrapezis/Tetra-mobile/releases/tag/v0.8.0-beta.7)). A beta: keep
 your own backups. Screenshots use invented sample data.
 
 ## What Tetra does for you
@@ -33,6 +33,9 @@ your own backups. Screenshots use invented sample data.
 - **Calendar and timers, with AI.** Built-in skills (Settings › Calendar or Timer › *Share with Claude*) let Claude,
   ChatGPT or any assistant that can use your computer import a timetable, plan your week or start a timer: they simply
   edit the calendar's and timers' files, and Tetra syncs the result to your phone.
+- **Never forget the evening pill.** Pills reminds you at the dose's time and again until you take it, as a
+  notification or in AI Assist's voice: a ding ding, then your name. It counts the pills of every box, tells you days
+  before they run out, and its Progress shows what you forget and suggests a better time.
 - **Notes and lists, organised.** Keep your notes and shopping lists organised with tags and in sync between the phone
   and the computer. Each note is a plain file in your own Tetra folder.
 - **Photos that know who and where.** Tags, live photos, and People and Documents collections from face recognition
