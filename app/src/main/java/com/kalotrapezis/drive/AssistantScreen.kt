@@ -86,8 +86,18 @@ internal val ASSISTANT_COLOR = Color(0xFFFD6A04)
 
 internal fun openAssistant(c: Context) = c.startActivity(Intent(c, AssistantActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
-/** The voice sheet's conversation lives on between openings, and is forgotten after a minute without a word. */
-private object SheetMemory { var chat: AssistantChat? = null }
+/** The voice sheet's conversation lives on between openings, bubbles and all, and is forgotten after ten minutes without a
+ *  word (the user, 7 Nov: "it may have asked me something"); each one is kept in History as the full app's are. */
+private object SheetMemory {
+    const val FORGET_MS = 10 * 60_000L
+    var chat: AssistantChat? = null
+    var id = java.util.UUID.randomUUID().toString()
+    var bubbles = androidx.compose.runtime.snapshots.SnapshotStateList<Bubble>()
+    var at = 0L
+    fun expire(now: Long = System.currentTimeMillis()) {
+        if (at > 0 && now - at > FORGET_MS) { chat = null; id = java.util.UUID.randomUUID().toString(); bubbles = androidx.compose.runtime.snapshots.SnapshotStateList(); at = 0 }
+    }
+}
 
 private data class Bubble(val mine: Boolean, val text: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
     val images: List<File> = emptyList(), val error: Boolean = false, val files: List<Attach.Ref> = emptyList(), val audio: AudioAsk? = null, val job: String? = null,
@@ -112,14 +122,14 @@ private enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Lis
 private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val chat = remember { if (sheet) SheetMemory.chat ?: assistantChat(context, 60_000).also { SheetMemory.chat = it } else assistantChat(context) }
-    val bubbles = remember { mutableStateListOf<Bubble>().apply { openJob?.let { add(Bubble(false, "", job = it)) } } }
+    val chat = remember { if (sheet) { SheetMemory.expire(); SheetMemory.chat ?: assistantChat(context, SheetMemory.FORGET_MS).also { SheetMemory.chat = it } } else assistantChat(context) }
+    val bubbles = remember { if (sheet) SheetMemory.bubbles else mutableStateListOf<Bubble>().apply { openJob?.let { add(Bubble(false, "", job = it)) } } }
     OpenTiming("AI Assist", true)
     var typed by remember { mutableStateOf("") }
-    var chatId by remember { mutableStateOf(java.util.UUID.randomUUID().toString()) }
+    var chatId by remember { mutableStateOf(if (sheet) SheetMemory.id else java.util.UUID.randomUUID().toString()) }
     var expanded by remember { mutableStateOf(false) } // the island opened by its handle (the phone)
     fun offer(t: String) { typed = t; expanded = false }
-    fun keep() { if (!sheet) runCatching { AssistantChats.save(context, chatId, bubbles.map { it.json() }, chat.saved()) } }
+    fun keep() { if (sheet) SheetMemory.at = System.currentTimeMillis(); runCatching { AssistantChats.save(context, chatId, bubbles.map { it.json() }, chat.saved()) } }
     var phase by remember { mutableStateOf(Phase.Idle) }
     var hearing by remember { mutableStateOf(false) }
     var pending by remember { mutableStateOf<PendingCall?>(null) }
