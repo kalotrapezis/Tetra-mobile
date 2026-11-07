@@ -55,7 +55,7 @@
     <string name="pills_add_time">Tid</string>
     <string name="pills_stock_title">Lager</string>
     <string name="pills_per_box">Piller i en ny förpackning</string>
-    <string name="pills_boxes_now">Förpackningar du har</string>
+    <string name="pills_boxes_now">Nya förpackningar</string>
     <string name="pills_loose_now">Piller kvar i den</string>
     <string name="pills_refill_title">Påminnelse om ny beställning</string>
     <string name="pills_refill_days">Dagar innan det tar slut</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Påminn mig med röst</string>
     <string name="pills_voice_note">Ett ”ding ding” och sedan säger AI Assist det. Vid tyst läge eller Stör ej bara aviseringen.</string>
     <string name="pills_call_name">Vad ska jag kalla dig</string>
-    <string name="pills_call_name_hint">t.ex. Teo</string>
+    <string name="pills_call_name_hint">t.ex. James</string>
     <string name="pills_try">Testa</string>
     <string name="pills_checks">Så att en påminnelse alltid kommer fram</string>
     <string name="pills_fix">Åtgärda</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Inget hördes.</string>
     <string name="pills_total">Nu har du %1$s piller</string>
     <string name="pills_need_box_size">Skriv hur många piller en ny förpackning innehåller</string>
-    <string name="pills_opened">En av dem är redan öppnad</string>
+    <string name="pills_opened">Jag har också en öppnad förpackning</string>
     <string name="pills_here">Påminnelser på den här enheten</string>
     <string name="pills_here_note">Dina mediciner och de intagna doserna synkas mellan telefonen, surfplattan och datorn. Bara enheter med den här knappen på ringer, så du svarar på en dos bara en gång.</string>
 </resources>

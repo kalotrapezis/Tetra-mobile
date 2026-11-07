@@ -55,7 +55,7 @@
     <string name="pills_add_time">Vrijeme</string>
     <string name="pills_stock_title">Zaliha</string>
     <string name="pills_per_box">Tableta u novoj kutiji</string>
-    <string name="pills_boxes_now">Kutija koje imaš</string>
+    <string name="pills_boxes_now">Nove kutije</string>
     <string name="pills_loose_now">Tableta preostalo u njoj</string>
     <string name="pills_refill_title">Podsjetnik za narudžbu</string>
     <string name="pills_refill_days">Dana prije nego što ponestane</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Podsjeti me glasom</string>
     <string name="pills_voice_note">„Ding ding”, a zatim to kaže AI Assist. U tihom načinu ili Ne uznemiravaj, samo obavijest.</string>
     <string name="pills_call_name">Kako da te zovem</string>
-    <string name="pills_call_name_hint">npr. Ivane</string>
+    <string name="pills_call_name_hint">npr. James</string>
     <string name="pills_try">Isprobaj</string>
     <string name="pills_checks">Da podsjetnik uvijek stigne</string>
     <string name="pills_fix">Popravi</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Ništa se nije čulo.</string>
     <string name="pills_total">Sada imaš %1$s tableta</string>
     <string name="pills_need_box_size">Upiši koliko tableta ima nova kutija</string>
-    <string name="pills_opened">Jedna je već otvorena</string>
+    <string name="pills_opened">Imam i otvorenu kutiju</string>
     <string name="pills_here">Podsjetnici na ovom uređaju</string>
     <string name="pills_here_note">Tvoji lijekovi i uzete doze sinkroniziraju se između telefona, tableta i računala. Zvone samo uređaji s uključenim prekidačem, pa na dozu odgovaraš samo jednom.</string>
 </resources>

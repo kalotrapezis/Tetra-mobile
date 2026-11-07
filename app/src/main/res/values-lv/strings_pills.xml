@@ -55,7 +55,7 @@
     <string name="pills_add_time">Laiks</string>
     <string name="pills_stock_title">Krājums</string>
     <string name="pills_per_box">Tabletes jaunā kastītē</string>
-    <string name="pills_boxes_now">Kastītes, kas tev ir</string>
+    <string name="pills_boxes_now">Jaunas kastītes</string>
     <string name="pills_loose_now">Tabletes, kas palikušas tajā</string>
     <string name="pills_refill_title">Atkārtota pasūtījuma atgādinājums</string>
     <string name="pills_refill_days">Dienas pirms beigām</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Atgādināt ar balsi</string>
     <string name="pills_voice_note">„Ding ding”, un tad AI Assist to pasaka. Klusuma režīmā vai režīmā „Netraucēt” tikai paziņojums.</string>
     <string name="pills_call_name">Kā tevi saukt</string>
-    <string name="pills_call_name_hint">piem., Jāni</string>
+    <string name="pills_call_name_hint">piem., James</string>
     <string name="pills_try">Izmēģināt</string>
     <string name="pills_checks">Lai atgādinājums vienmēr atnāktu</string>
     <string name="pills_fix">Labot</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Nekas netika dzirdēts.</string>
     <string name="pills_total">Tagad tev ir %1$s tabletes</string>
     <string name="pills_need_box_size">Ieraksti, cik tablešu ir jaunā kastītē</string>
-    <string name="pills_opened">Viena no tām jau ir atvērta</string>
+    <string name="pills_opened">Man ir arī atvērta kastīte</string>
     <string name="pills_here">Atgādinājumi šajā ierīcē</string>
     <string name="pills_here_note">Tavas zāles un iedzertās devas tiek sinhronizētas starp tālruni, planšetdatoru un datoru. Zvana tikai ierīces ar ieslēgtu šo slēdzi, tāpēc uz devu atbildi tikai vienreiz.</string>
 </resources>

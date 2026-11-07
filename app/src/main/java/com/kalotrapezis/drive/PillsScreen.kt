@@ -215,7 +215,7 @@ internal fun PillsScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit
             archive = { act { Pills.save(dir, m.copy(archived = !m.archived)) } },
             delete = { shown = null; act { Pills.delete(dir, m) } })
     } }
-    editing?.let { m -> MedicineGuide(m, dir, close = { editing = null }) { saved, boxes, loose ->
+    editing?.let { m -> MedicineGuide(m, dir, fresh = meds.none { it.id == m.id }, close = { editing = null }) { saved, boxes, loose ->
         editing = null
         act {
             val fresh = meds.none { it.id == saved.id }
@@ -567,13 +567,10 @@ private fun number(s: String) = s.trim().replace(',', '.').toDoubleOrNull()?.tak
 
 /** What the guide fills in, as typed: the numbers stay text until saved. */
 private data class Draft(val m: Medicine, val dose: String, val perBox: String, val boxes: String, val loose: String, val refillDays: String, val refillTimes: String, val forDays: String,
-    /** One of the boxes in hand is open already: [loose] is what is left in it (the user, 7 Nov: "I have 48, a new one has 50"). */
+    /** An open box besides the new ones: [loose] is what is left in it (the user, 7 Nov: "I have 48, a new one has 50"). */
     val opened: Boolean = false) {
-    /** Full boxes and loose pills to add: an open box counts as what is left in it. */
-    fun stock(): Pair<Int, Double> {
-        val b = boxes.trim().toIntOrNull() ?: 0; val left = number(loose) ?: 0.0
-        return if (opened) maxOf(b - 1, 0) to left else b to 0.0
-    }
+    /** New boxes (each a new box's pills) and what is left in the open one; the box's size alone adds nothing (90 and 0 boxes: 0). */
+    fun stock(): Pair<Int, Double> = (boxes.trim().toIntOrNull() ?: 0) to (if (opened) number(loose) ?: 0.0 else 0.0)
 }
 
 /**
@@ -581,10 +578,11 @@ private data class Draft(val m: Medicine, val dose: String, val perBox: String, 
  * the refill reminder. «Πες το» (AI on and a key) fills them all from one sentence, the steps then shown to be checked.
  */
 @OptIn(ExperimentalLayoutApi::class)
-@Composable private fun MedicineGuide(start: Medicine, dir: File, close: () -> Unit, save: (Medicine, Int, Double) -> Unit) {
+@Composable private fun MedicineGuide(start: Medicine, dir: File, fresh: Boolean, close: () -> Unit, save: (Medicine, Int, Double) -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val fresh = remember { !File(dir, "${start.id}.json").exists() }
+    // [fresh]: a new medicine (asks the stock); one already there is edited, its stock left alone (the user, 7 Nov: run a second
+    // time it added the boxes again, as it looked for the file by its old name and took every medicine for a new one)
     var d by remember { mutableStateOf(Draft(start, Medicine.amount(start.dose), if (start.perBox > 0) start.perBox.toString() else "", if (fresh) "1" else "", "",
         start.refillDays.toString(), start.refillTimes.toString(), "")) }
     var step by remember { mutableIntStateOf(0) }
@@ -613,8 +611,8 @@ private data class Draft(val m: Medicine, val dose: String, val perBox: String, 
             heard = text
             val (m, extra) = PillsVoiceFill.apply(d.m, o)
             d = d.copy(m = m, dose = o.optDouble("dose").takeIf { !it.isNaN() && it > 0 }?.let { Medicine.amount(Medicine.halves(it)) } ?: d.dose,
-                // what Mistral calls boxes are the unopened ones; pills left in an open box make it one more box, ticked open
-                perBox = extra["per_box"] ?: d.perBox, boxes = if (extra["pills"] != null) (((extra["boxes"]?.toIntOrNull()) ?: 0) + 1).toString() else extra["boxes"] ?: d.boxes,
+                // boxes are the new, unopened ones; pills left in an open box tick it, and no new box unless said
+                perBox = extra["per_box"] ?: d.perBox, boxes = extra["boxes"] ?: if (extra["pills"] != null) "0" else d.boxes,
                 loose = extra["pills"] ?: d.loose, opened = extra["pills"] != null || d.opened, forDays = extra["for_days"] ?: d.forDays)
         }.onFailure { WriterLog.w("Pills: Say it: ${it.message}"); heard = it.shownMessage(context) ?: context.getString(R.string.pills_say_failed) }
     }

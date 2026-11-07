@@ -55,7 +55,7 @@
     <string name="pills_add_time">Godzina</string>
     <string name="pills_stock_title">Zapas</string>
     <string name="pills_per_box">Tabletek w nowym opakowaniu</string>
-    <string name="pills_boxes_now">Opakowań, które masz</string>
+    <string name="pills_boxes_now">Nowe opakowania</string>
     <string name="pills_loose_now">Tabletek pozostało w niej</string>
     <string name="pills_refill_title">Przypomnienie o zamówieniu</string>
     <string name="pills_refill_days">Dni przed końcem zapasu</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Przypominaj głosem</string>
     <string name="pills_voice_note">„Ding ding”, a potem mówi to AI Assist. W trybie cichym lub Nie przeszkadzać tylko powiadomienie.</string>
     <string name="pills_call_name">Jak mam się do ciebie zwracać</string>
-    <string name="pills_call_name_hint">np. Tomku</string>
+    <string name="pills_call_name_hint">np. James</string>
     <string name="pills_try">Wypróbuj</string>
     <string name="pills_checks">Aby przypomnienie zawsze dotarło</string>
     <string name="pills_fix">Napraw</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Nic nie usłyszano.</string>
     <string name="pills_total">Teraz masz %1$s tabletek</string>
     <string name="pills_need_box_size">Wpisz, ile tabletek jest w nowym opakowaniu</string>
-    <string name="pills_opened">Jedno jest już otwarte</string>
+    <string name="pills_opened">Mam też otwarte opakowanie</string>
     <string name="pills_here">Przypomnienia na tym urządzeniu</string>
     <string name="pills_here_note">Twoje leki i przyjęte dawki synchronizują się między telefonem, tabletem i komputerem. Dzwonią tylko urządzenia z włączonym tym przełącznikiem, więc na dawkę odpowiadasz tylko raz.</string>
 </resources>

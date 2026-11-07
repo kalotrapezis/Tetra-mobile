@@ -55,7 +55,7 @@
     <string name="pills_add_time">Tijd</string>
     <string name="pills_stock_title">Voorraad</string>
     <string name="pills_per_box">Pillen in een nieuw doosje</string>
-    <string name="pills_boxes_now">Doosjes die je hebt</string>
+    <string name="pills_boxes_now">Nieuwe doosjes</string>
     <string name="pills_loose_now">Pillen die erin over zijn</string>
     <string name="pills_refill_title">Herinnering om bij te bestellen</string>
     <string name="pills_refill_days">Dagen voordat het op is</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Herinner me met spraak</string>
     <string name="pills_voice_note">Een „ding ding” en daarna zegt AI Assist het. Bij stil of Niet storen alleen de melding.</string>
     <string name="pills_call_name">Hoe moet ik je noemen</string>
-    <string name="pills_call_name_hint">bijv. Theo</string>
+    <string name="pills_call_name_hint">bijv. James</string>
     <string name="pills_try">Proberen</string>
     <string name="pills_checks">Zodat een herinnering altijd aankomt</string>
     <string name="pills_fix">Oplossen</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Er was niets te horen.</string>
     <string name="pills_total">Nu heb je %1$s pillen</string>
     <string name="pills_need_box_size">Schrijf op hoeveel pillen een nieuw doosje bevat</string>
-    <string name="pills_opened">Eén ervan is al open</string>
+    <string name="pills_opened">Ik heb ook een open doosje</string>
     <string name="pills_here">Herinneringen op dit apparaat</string>
     <string name="pills_here_note">Je medicijnen en de ingenomen doses worden gesynchroniseerd tussen je telefoon, tablet en computer. Alleen apparaten waarop deze schakelaar aan staat, gaan over, zodat je een dosis maar één keer beantwoordt.</string>
 </resources>

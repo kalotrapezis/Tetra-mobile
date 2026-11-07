@@ -55,7 +55,7 @@
     <string name="pills_add_time">Čas</string>
     <string name="pills_stock_title">Zásoba</string>
     <string name="pills_per_box">Tablet v novém balení</string>
-    <string name="pills_boxes_now">Kolik máš balení</string>
+    <string name="pills_boxes_now">Nová balení</string>
     <string name="pills_loose_now">Kolik tablet v něm zbývá</string>
     <string name="pills_refill_title">Připomínka doobjednání</string>
     <string name="pills_refill_days">Dní před dochozením</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Připomínat hlasem</string>
     <string name="pills_voice_note">Zazní „ding ding“ a pak to řekne AI Assist. V tichém režimu nebo Nerušit jen oznámení.</string>
     <string name="pills_call_name">Jak ti mám říkat</string>
-    <string name="pills_call_name_hint">např. Tomáši</string>
+    <string name="pills_call_name_hint">např. James</string>
     <string name="pills_try">Vyzkoušet</string>
     <string name="pills_checks">Aby připomínka vždy dorazila</string>
     <string name="pills_fix">Opravit</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Nic jsem neslyšel.</string>
     <string name="pills_total">Teď máš %1$s tablet</string>
     <string name="pills_need_box_size">Napiš, kolik tablet má nové balení</string>
-    <string name="pills_opened">Jedno už je otevřené</string>
+    <string name="pills_opened">Mám i otevřené balení</string>
     <string name="pills_here">Připomínky na tomto zařízení</string>
     <string name="pills_here_note">Tvé léky a užité dávky se synchronizují mezi telefonem, tabletem a počítačem. Zvonit budou jen zařízení se zapnutým přepínačem, takže dávku potvrdíš jen jednou.</string>
 </resources>

@@ -55,7 +55,7 @@
     <string name="pills_add_time">Hora</string>
     <string name="pills_stock_title">Stock</string>
     <string name="pills_per_box">Comprimidos numa caixa nova</string>
-    <string name="pills_boxes_now">Caixas que tens</string>
+    <string name="pills_boxes_now">Caixas novas</string>
     <string name="pills_loose_now">Comprimidos que restam nela</string>
     <string name="pills_refill_title">Lembrete de reposição</string>
     <string name="pills_refill_days">Dias antes de acabar</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Lembrar-me por voz</string>
     <string name="pills_voice_note">Um «din din» e depois diz o AI Assist. Em silêncio ou em Não incomodar, só a notificação.</string>
     <string name="pills_call_name">Como te devo chamar</string>
-    <string name="pills_call_name_hint">p. ex., Teo</string>
+    <string name="pills_call_name_hint">p. ex., James</string>
     <string name="pills_try">Experimentar</string>
     <string name="pills_checks">Para que o lembrete chegue sempre</string>
     <string name="pills_fix">Corrigir</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Não se ouviu nada.</string>
     <string name="pills_total">Agora tens %1$s comprimidos</string>
     <string name="pills_need_box_size">Escreve quantos comprimidos tem uma caixa nova</string>
-    <string name="pills_opened">Uma delas já está aberta</string>
+    <string name="pills_opened">Também tenho uma caixa aberta</string>
     <string name="pills_here">Lembretes neste dispositivo</string>
     <string name="pills_here_note">Os teus medicamentos e as doses tomadas sincronizam entre o telemóvel, o tablet e o computador. Só tocam os dispositivos com este interruptor ativado, por isso respondes a cada dose uma só vez.</string>
 </resources>

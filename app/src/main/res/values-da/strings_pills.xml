@@ -55,7 +55,7 @@
     <string name="pills_add_time">Tid</string>
     <string name="pills_stock_title">Lager</string>
     <string name="pills_per_box">Piller i en ny pakke</string>
-    <string name="pills_boxes_now">Pakker du har</string>
+    <string name="pills_boxes_now">Nye pakker</string>
     <string name="pills_loose_now">Piller tilbage i den</string>
     <string name="pills_refill_title">Påmindelse om genbestilling</string>
     <string name="pills_refill_days">Dage før det løber tør</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Mind mig med stemme</string>
     <string name="pills_voice_note">Et »ding ding«, og så siger AI Assist det. På lydløs eller i Forstyr ikke kun notifikationen.</string>
     <string name="pills_call_name">Hvad skal jeg kalde dig</string>
-    <string name="pills_call_name_hint">fx Thomas</string>
+    <string name="pills_call_name_hint">fx James</string>
     <string name="pills_try">Prøv</string>
     <string name="pills_checks">Så en påmindelse altid kommer frem</string>
     <string name="pills_fix">Ret</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Der blev ikke hørt noget.</string>
     <string name="pills_total">Nu har du %1$s piller</string>
     <string name="pills_need_box_size">Skriv, hvor mange piller en ny pakke indeholder</string>
-    <string name="pills_opened">Én af dem er allerede åbnet</string>
+    <string name="pills_opened">Jeg har også en åbnet pakke</string>
     <string name="pills_here">Påmindelser på denne enhed</string>
     <string name="pills_here_note">Din medicin og de doser, du har taget, synkroniseres mellem din telefon, tablet og computer. Kun enheder med denne kontakt slået til ringer, så du svarer på en dosis én gang.</string>
 </resources>

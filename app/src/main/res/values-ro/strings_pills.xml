@@ -55,7 +55,7 @@
     <string name="pills_add_time">Ora</string>
     <string name="pills_stock_title">Stoc</string>
     <string name="pills_per_box">Pastile într-o cutie nouă</string>
-    <string name="pills_boxes_now">Cutii pe care le ai</string>
+    <string name="pills_boxes_now">Cutii noi</string>
     <string name="pills_loose_now">Pastile rămase în ea</string>
     <string name="pills_refill_title">Memento de reaprovizionare</string>
     <string name="pills_refill_days">Zile înainte să se termine</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Amintește-mi cu voce</string>
     <string name="pills_voice_note">Un „ding ding”, apoi o spune AI Assist. Pe silențios sau în Nu deranjați, doar notificarea.</string>
     <string name="pills_call_name">Cum să-ți spun</string>
-    <string name="pills_call_name_hint">de ex. Andrei</string>
+    <string name="pills_call_name_hint">de ex. James</string>
     <string name="pills_try">Încearcă</string>
     <string name="pills_checks">Ca mementoul să ajungă mereu</string>
     <string name="pills_fix">Repară</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Nu s-a auzit nimic.</string>
     <string name="pills_total">Acum ai %1$s pastile</string>
     <string name="pills_need_box_size">Scrie câte pastile are o cutie nouă</string>
-    <string name="pills_opened">Una dintre ele este deja deschisă</string>
+    <string name="pills_opened">Am și o cutie începută</string>
     <string name="pills_here">Mementouri pe acest dispozitiv</string>
     <string name="pills_here_note">Medicamentele tale și dozele luate se sincronizează între telefon, tabletă și computer. Sună doar dispozitivele cu acest comutator activat, așa că răspunzi la o doză o singură dată.</string>
 </resources>

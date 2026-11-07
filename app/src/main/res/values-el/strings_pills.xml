@@ -56,7 +56,7 @@
     <string name="pills_add_time">Ώρα</string>
     <string name="pills_stock_title">Απόθεμα</string>
     <string name="pills_per_box">Χάπια σε καινούριο κουτί</string>
-    <string name="pills_boxes_now">Κουτιά που έχεις</string>
+    <string name="pills_boxes_now">Καινούρια κουτιά</string>
     <string name="pills_loose_now">Πόσα έχουν μείνει σε αυτό</string>
     <string name="pills_refill_title">Υπενθύμιση παραγγελίας</string>
     <string name="pills_refill_days">Μέρες πριν τελειώσουν</string>
@@ -68,7 +68,7 @@
     <string name="pills_voice">Υπενθύμιση με φωνή</string>
     <string name="pills_voice_note">Ένα «ντιν ντιν» και μετά το λέει η Ψηφιακή Βοηθός. Στο αθόρυβο ή στο «Μην ενοχλείτε», μόνο η ειδοποίηση.</string>
     <string name="pills_call_name">Πώς να σε φωνάζω</string>
-    <string name="pills_call_name_hint">π.χ. Θεολόγε</string>
+    <string name="pills_call_name_hint">π.χ. James</string>
     <string name="pills_try">Δοκιμή</string>
     <string name="pills_checks">Για να φτάνει πάντα η υπενθύμιση</string>
     <string name="pills_fix">Διόρθωση</string>
@@ -126,7 +126,7 @@
     <string name="pills_say_nothing">Δεν ακούστηκε τίποτα.</string>
     <string name="pills_total">Τώρα έχεις %1$s χάπια</string>
     <string name="pills_need_box_size">Γράψε πόσα χάπια έχει ένα καινούριο κουτί</string>
-    <string name="pills_opened">Το ένα είναι ήδη ανοιχτό</string>
+    <string name="pills_opened">Έχω και ανοιχτό κουτί</string>
     <string name="pills_here">Υπενθυμίσεις σε αυτή τη συσκευή</string>
     <string name="pills_here_note">Τα φάρμακα και τι πήρες συγχρονίζονται με τις άλλες συσκευές σου. Χτυπούν μόνο όσες το έχουν ανοιχτό, για να απαντάς μία φορά.</string>
 </resources>

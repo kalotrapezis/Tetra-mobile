@@ -55,7 +55,7 @@
     <string name="pills_add_time">Kellaaeg</string>
     <string name="pills_stock_title">Varu</string>
     <string name="pills_per_box">Tablette uues karbis</string>
-    <string name="pills_boxes_now">Karpe sul on</string>
+    <string name="pills_boxes_now">Uued karbid</string>
     <string name="pills_loose_now">Tablette järel selles</string>
     <string name="pills_refill_title">Tellimise meeldetuletus</string>
     <string name="pills_refill_days">Päevi enne lõppemist</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Tuleta mulle häälega meelde</string>
     <string name="pills_voice_note">„Ding-ding“ ja siis ütleb AI Assist selle. Hääletus režiimis või režiimis Ära sega ainult teavitus.</string>
     <string name="pills_call_name">Kuidas sind kutsuda</string>
-    <string name="pills_call_name_hint">nt Mart</string>
+    <string name="pills_call_name_hint">nt James</string>
     <string name="pills_try">Proovi</string>
     <string name="pills_checks">Et meeldetuletus alati kohale jõuaks</string>
     <string name="pills_fix">Paranda</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Midagi ei kuulnud.</string>
     <string name="pills_total">Nüüd on sul %1$s tabletti</string>
     <string name="pills_need_box_size">Kirjuta, mitu tabletti on uues karbis</string>
-    <string name="pills_opened">Üks neist on juba avatud</string>
+    <string name="pills_opened">Mul on ka avatud karp</string>
     <string name="pills_here">Meeldetuletused selles seadmes</string>
     <string name="pills_here_note">Sinu ravimid ja võetud annused sünkroonitakse telefoni, tahvelarvuti ja arvuti vahel. Helisevad ainult seadmed, kus see lüliti on sees, nii et vastad annusele ainult korra.</string>
 </resources>

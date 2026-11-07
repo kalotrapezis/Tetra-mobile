@@ -55,7 +55,7 @@
     <string name="pills_add_time">Am</string>
     <string name="pills_stock_title">Stoc</string>
     <string name="pills_per_box">Piollairí i mbosca nua</string>
-    <string name="pills_boxes_now">Boscaí atá agat</string>
+    <string name="pills_boxes_now">Boscaí nua</string>
     <string name="pills_loose_now">Piollairí fágtha ann</string>
     <string name="pills_refill_title">Meabhrúchán athordaithe</string>
     <string name="pills_refill_days">Laethanta sula n-éireoidh siad as</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Cuir i gcuimhne dom le guth</string>
     <string name="pills_voice_note">«Ding ding», agus ansin deir AI Assist é. Ar chiúin nó i Ná Cuir Isteach, an fógra amháin.</string>
     <string name="pills_call_name">Cad ba cheart a thabhairt ort</string>
-    <string name="pills_call_name_hint">m.sh. a Sheáin</string>
+    <string name="pills_call_name_hint">m.sh. James</string>
     <string name="pills_try">Triail é</string>
     <string name="pills_checks">Ionas go sroichfidh meabhrúchán thú i gcónaí</string>
     <string name="pills_fix">Deisigh</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Níor chualathas faic.</string>
     <string name="pills_total">Anois tá %1$s piollaire agat</string>
     <string name="pills_need_box_size">Scríobh cé mhéad piollaire atá i mbosca nua</string>
-    <string name="pills_opened">Tá ceann acu oscailte cheana</string>
+    <string name="pills_opened">Tá bosca oscailte agam freisin</string>
     <string name="pills_here">Meabhrúcháin ar an ngléas seo</string>
     <string name="pills_here_note">Déantar do chuid leigheasanna agus na dósanna a ghlac tú a shioncronú idir do ghuthán, do tháibléad agus do ríomhaire. Ní bhuaileann ach na gléasanna a bhfuil an lasc seo casta orthu, mar sin freagraíonn tú dáileog uair amháin.</string>
 </resources>

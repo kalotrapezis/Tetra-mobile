@@ -55,7 +55,7 @@
     <string name="pills_add_time">Aika</string>
     <string name="pills_stock_title">Varasto</string>
     <string name="pills_per_box">Pilleriä uudessa pakkauksessa</string>
-    <string name="pills_boxes_now">Pakkauksia sinulla</string>
+    <string name="pills_boxes_now">Uudet pakkaukset</string>
     <string name="pills_loose_now">Pilleriä jäljellä siinä</string>
     <string name="pills_refill_title">Tilausmuistutus</string>
     <string name="pills_refill_days">Päiviä ennen loppumista</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Muistuta äänellä</string>
     <string name="pills_voice_note">”Ding ding” ja sitten AI Assist sanoo sen. Äänettömällä tai Älä häiritse -tilassa vain ilmoitus.</string>
     <string name="pills_call_name">Miksi kutsun sinua</string>
-    <string name="pills_call_name_hint">esim. Teppo</string>
+    <string name="pills_call_name_hint">esim. James</string>
     <string name="pills_try">Kokeile</string>
     <string name="pills_checks">Jotta muistutus tulee aina perille</string>
     <string name="pills_fix">Korjaa</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Mitään ei kuulunut.</string>
     <string name="pills_total">Nyt sinulla on %1$s pilleriä</string>
     <string name="pills_need_box_size">Kirjoita, montako pilleriä uudessa pakkauksessa on</string>
-    <string name="pills_opened">Yksi niistä on jo avattu</string>
+    <string name="pills_opened">Minulla on myös avattu pakkaus</string>
     <string name="pills_here">Muistutukset tällä laitteella</string>
     <string name="pills_here_note">Lääkkeesi ja otetut annokset synkronoidaan puhelimen, tabletin ja tietokoneen välillä. Vain laitteet, joissa tämä kytkin on päällä, soivat, joten vastaat annokseen vain kerran.</string>
 </resources>

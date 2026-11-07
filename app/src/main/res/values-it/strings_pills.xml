@@ -55,7 +55,7 @@
     <string name="pills_add_time">Ora</string>
     <string name="pills_stock_title">Scorta</string>
     <string name="pills_per_box">Pillole in una confezione nuova</string>
-    <string name="pills_boxes_now">Confezioni che hai</string>
+    <string name="pills_boxes_now">Confezioni nuove</string>
     <string name="pills_loose_now">Pillole rimaste al suo interno</string>
     <string name="pills_refill_title">Promemoria di riordino</string>
     <string name="pills_refill_days">Giorni prima che finiscano</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Ricordamelo a voce</string>
     <string name="pills_voice_note">Un «din din» e poi lo dice AI Assist. Con la suoneria disattivata o in Non disturbare, solo la notifica.</string>
     <string name="pills_call_name">Come ti chiamo</string>
-    <string name="pills_call_name_hint">es. Teo</string>
+    <string name="pills_call_name_hint">es. James</string>
     <string name="pills_try">Prova</string>
     <string name="pills_checks">Perché un promemoria arrivi sempre</string>
     <string name="pills_fix">Correggi</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Non si è sentito nulla.</string>
     <string name="pills_total">Ora hai %1$s pillole</string>
     <string name="pills_need_box_size">Scrivi quante pillole ha una confezione nuova</string>
-    <string name="pills_opened">Una è già aperta</string>
+    <string name="pills_opened">Ho anche una confezione aperta</string>
     <string name="pills_here">Promemoria su questo dispositivo</string>
     <string name="pills_here_note">I tuoi farmaci e le dosi assunte si sincronizzano tra telefono, tablet e computer. Suonano solo i dispositivi con questo interruttore attivo, così rispondi a ogni dose una sola volta.</string>
 </resources>

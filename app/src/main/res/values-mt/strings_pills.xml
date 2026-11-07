@@ -55,7 +55,7 @@
     <string name="pills_add_time">Ħin</string>
     <string name="pills_stock_title">Stokk</string>
     <string name="pills_per_box">Pilloli f’kaxxa ġdida</string>
-    <string name="pills_boxes_now">Kaxxi li għandek</string>
+    <string name="pills_boxes_now">Kaxxi ġodda</string>
     <string name="pills_loose_now">Pilloli li fadal fiha</string>
     <string name="pills_refill_title">Tfakkira tal-ordni mill-ġdid</string>
     <string name="pills_refill_days">Jiem qabel ma jispiċċaw</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Fakkarni bil-vuċi</string>
     <string name="pills_voice_note">«Ding ding», u mbagħad AI Assist jgħidha. Fuq silenzjuż jew f’Tdejjaqx, in-notifika biss.</string>
     <string name="pills_call_name">Kif għandi ngħidlek</string>
-    <string name="pills_call_name_hint">eż. Ġanni</string>
+    <string name="pills_call_name_hint">eż. James</string>
     <string name="pills_try">Ipprova</string>
     <string name="pills_checks">Biex tfakkira dejjem tasal</string>
     <string name="pills_fix">Irranġa</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Ma nstema’ xejn.</string>
     <string name="pills_total">Issa għandek %1$s pilloli</string>
     <string name="pills_need_box_size">Ikteb kemm fiha pilloli kaxxa ġdida</string>
-    <string name="pills_opened">Waħda minnhom diġà miftuħa</string>
+    <string name="pills_opened">Għandi wkoll kaxxa miftuħa</string>
     <string name="pills_here">Tfakkriet fuq dan l-apparat</string>
     <string name="pills_here_note">Il-mediċini tiegħek u d-dożi li ħadt jiġu sinkronizzati bejn it-telefon, it-tablet u l-kompjuter tiegħek. Idoqqu biss l-apparati b’dan l-iswiċċ mixgħul, għalhekk twieġeb għal doża darba biss.</string>
 </resources>

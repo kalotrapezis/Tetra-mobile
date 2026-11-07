@@ -56,7 +56,7 @@
     <string name="pills_add_time">Time</string>
     <string name="pills_stock_title">Stock</string>
     <string name="pills_per_box">Pills in a new box</string>
-    <string name="pills_boxes_now">Boxes you have</string>
+    <string name="pills_boxes_now">New boxes</string>
     <string name="pills_loose_now">Pills left in it</string>
     <string name="pills_refill_title">Refill reminder</string>
     <string name="pills_refill_days">Days before running out</string>
@@ -68,7 +68,7 @@
     <string name="pills_voice">Remind me by voice</string>
     <string name="pills_voice_note">A ding ding, then AI Assist says it. On silent or in Do Not Disturb, only the notification.</string>
     <string name="pills_call_name">How to call you</string>
-    <string name="pills_call_name_hint">e.g. Theo</string>
+    <string name="pills_call_name_hint">e.g. James</string>
     <string name="pills_try">Try it</string>
     <string name="pills_checks">So that a reminder always arrives</string>
     <string name="pills_fix">Fix</string>
@@ -126,7 +126,7 @@
     <string name="pills_say_nothing">Nothing was heard.</string>
     <string name="pills_total">Now you have %1$s pills</string>
     <string name="pills_need_box_size">Write how many pills a new box has</string>
-    <string name="pills_opened">One of them is already open</string>
+    <string name="pills_opened">I also have an open box</string>
     <string name="pills_here">Reminders on this device</string>
     <string name="pills_here_note">Your medicines and what you took sync with your other devices. Only the ones with this on ring, so you answer once.</string>
 </resources>

@@ -55,7 +55,7 @@
     <string name="pills_add_time">Час</string>
     <string name="pills_stock_title">Наличност</string>
     <string name="pills_per_box">Хапчета в нова кутия</string>
-    <string name="pills_boxes_now">Кутии, които имаш</string>
+    <string name="pills_boxes_now">Нови кутии</string>
     <string name="pills_loose_now">Колко хапчета са останали в нея</string>
     <string name="pills_refill_title">Напомняне за поръчка</string>
     <string name="pills_refill_days">Дни преди да свършат</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Напомняй ми с глас</string>
     <string name="pills_voice_note">Звук „динг динг“, после AI Assist го казва. В тих режим или „Не безпокойте“ – само известие.</string>
     <string name="pills_call_name">Как да ти казвам</string>
-    <string name="pills_call_name_hint">напр. Георги</string>
+    <string name="pills_call_name_hint">напр. James</string>
     <string name="pills_try">Опитай</string>
     <string name="pills_checks">За да пристига напомнянето винаги</string>
     <string name="pills_fix">Поправи</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Не се чу нищо.</string>
     <string name="pills_total">Сега имаш %1$s хапчета</string>
     <string name="pills_need_box_size">Напиши колко хапчета има една нова кутия</string>
-    <string name="pills_opened">Една от тях вече е отворена</string>
+    <string name="pills_opened">Имам и отворена кутия</string>
     <string name="pills_here">Напомняния на това устройство</string>
     <string name="pills_here_note">Лекарствата ти и приетите дози се синхронизират между телефона, таблета и компютъра ти. Звънят само устройствата с включен превключвател, така че отговаряш на дозата веднъж.</string>
 </resources>

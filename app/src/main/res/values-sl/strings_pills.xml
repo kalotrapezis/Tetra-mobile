@@ -55,7 +55,7 @@
     <string name="pills_add_time">Čas</string>
     <string name="pills_stock_title">Zaloga</string>
     <string name="pills_per_box">Tablet v novi škatli</string>
-    <string name="pills_boxes_now">Škatle, ki jih imaš</string>
+    <string name="pills_boxes_now">Nove škatle</string>
     <string name="pills_loose_now">Tablet je ostalo v njej</string>
     <string name="pills_refill_title">Opomnik za ponovno naročilo</string>
     <string name="pills_refill_days">Dni, preden zmanjka</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Opomni me z glasom</string>
     <string name="pills_voice_note">„Ding ding“, nato to pove AI Assist. V tihem načinu ali Ne moti samo obvestilo.</string>
     <string name="pills_call_name">Kako naj te kličem</string>
-    <string name="pills_call_name_hint">npr. Tomaž</string>
+    <string name="pills_call_name_hint">npr. James</string>
     <string name="pills_try">Preizkusi</string>
     <string name="pills_checks">Da opomnik vedno prispe</string>
     <string name="pills_fix">Popravi</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Nič ni bilo slišati.</string>
     <string name="pills_total">Zdaj imaš %1$s tablet</string>
     <string name="pills_need_box_size">Vpiši, koliko tablet je v novi škatli</string>
-    <string name="pills_opened">Ena je že odprta</string>
+    <string name="pills_opened">Imam tudi odprto škatlo</string>
     <string name="pills_here">Opomniki na tej napravi</string>
     <string name="pills_here_note">Tvoja zdravila in vzete odmerke se sinhronizirajo med telefonom, tablico in računalnikom. Zvonijo samo naprave z vklopljenim stikalom, tako da na odmerek odgovoriš samo enkrat.</string>
 </resources>

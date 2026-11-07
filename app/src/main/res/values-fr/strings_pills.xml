@@ -55,7 +55,7 @@
     <string name="pills_add_time">Heure</string>
     <string name="pills_stock_title">Stock</string>
     <string name="pills_per_box">Comprimés dans une boîte neuve</string>
-    <string name="pills_boxes_now">Boîtes que vous avez</string>
+    <string name="pills_boxes_now">Boîtes neuves</string>
     <string name="pills_loose_now">Comprimés restant dedans</string>
     <string name="pills_refill_title">Rappel de réapprovisionnement</string>
     <string name="pills_refill_days">Jours avant la fin du stock</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Me rappeler par la voix</string>
     <string name="pills_voice_note">Un « ding ding », puis AI Assist le dit. En mode silencieux ou Ne pas déranger, seulement la notification.</string>
     <string name="pills_call_name">Comment vous appeler</string>
-    <string name="pills_call_name_hint">p. ex. Théo</string>
+    <string name="pills_call_name_hint">p. ex. James</string>
     <string name="pills_try">Essayer</string>
     <string name="pills_checks">Pour qu’un rappel arrive toujours</string>
     <string name="pills_fix">Corriger</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Rien n’a été entendu.</string>
     <string name="pills_total">Vous avez maintenant %1$s comprimés</string>
     <string name="pills_need_box_size">Indiquez combien de comprimés contient une boîte neuve</string>
-    <string name="pills_opened">L’une d’elles est déjà ouverte</string>
+    <string name="pills_opened">J’ai aussi une boîte entamée</string>
     <string name="pills_here">Rappels sur cet appareil</string>
     <string name="pills_here_note">Vos médicaments et les doses prises sont synchronisés entre votre téléphone, votre tablette et votre ordinateur. Seuls les appareils où ce réglage est activé sonnent, donc vous ne répondez qu’une fois à chaque dose.</string>
 </resources>

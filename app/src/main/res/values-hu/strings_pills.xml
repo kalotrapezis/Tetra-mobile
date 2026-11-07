@@ -55,7 +55,7 @@
     <string name="pills_add_time">Idő</string>
     <string name="pills_stock_title">Készlet</string>
     <string name="pills_per_box">Tabletta egy új dobozban</string>
-    <string name="pills_boxes_now">Dobozaid száma</string>
+    <string name="pills_boxes_now">Új dobozok</string>
     <string name="pills_loose_now">Tabletta maradt benne</string>
     <string name="pills_refill_title">Újrarendelési emlékeztető</string>
     <string name="pills_refill_days">Nappal a kifogyás előtt</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Emlékeztessen hanggal</string>
     <string name="pills_voice_note">Egy „ding-ding”, majd az AI Assist kimondja. Néma módban vagy Ne zavarjanak módban csak az értesítés.</string>
     <string name="pills_call_name">Hogyan szólítsalak</string>
-    <string name="pills_call_name_hint">pl. Tamás</string>
+    <string name="pills_call_name_hint">pl. James</string>
     <string name="pills_try">Kipróbálás</string>
     <string name="pills_checks">Hogy az emlékeztető mindig megérkezzen</string>
     <string name="pills_fix">Javítás</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Nem hallottam semmit.</string>
     <string name="pills_total">Most %1$s tablettád van</string>
     <string name="pills_need_box_size">Írd be, hány tabletta van egy új dobozban</string>
-    <string name="pills_opened">Az egyik már ki van nyitva</string>
+    <string name="pills_opened">Van egy megkezdett dobozom is</string>
     <string name="pills_here">Emlékeztetők ezen az eszközön</string>
     <string name="pills_here_note">A gyógyszereid és a bevett adagok szinkronizálódnak a telefonod, a táblagéped és a számítógéped között. Csak azok az eszközök csörögnek, amelyeken ez a kapcsoló be van kapcsolva, így egy adagra csak egyszer válaszolsz.</string>
 </resources>

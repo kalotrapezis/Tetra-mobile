@@ -55,7 +55,7 @@
     <string name="pills_add_time">Laikas</string>
     <string name="pills_stock_title">Atsargos</string>
     <string name="pills_per_box">Tablečių naujoje dėžutėje</string>
-    <string name="pills_boxes_now">Dėžučių, kurias turi</string>
+    <string name="pills_boxes_now">Naujos dėžutės</string>
     <string name="pills_loose_now">Tablečių liko joje</string>
     <string name="pills_refill_title">Pakartotinio užsakymo priminimas</string>
     <string name="pills_refill_days">Dienų iki pasibaigimo</string>
@@ -67,7 +67,7 @@
     <string name="pills_voice">Priminti balsu</string>
     <string name="pills_voice_note">„Ding ding“, tada AI Assist pasako. Begarsiu režimu arba režimu „Netrukdyti“ – tik pranešimas.</string>
     <string name="pills_call_name">Kaip tave vadinti</string>
-    <string name="pills_call_name_hint">pvz., Tomai</string>
+    <string name="pills_call_name_hint">pvz., James</string>
     <string name="pills_try">Išbandyti</string>
     <string name="pills_checks">Kad priminimas visada pasiektų</string>
     <string name="pills_fix">Ištaisyti</string>
@@ -125,7 +125,7 @@
     <string name="pills_say_nothing">Nieko negirdėti.</string>
     <string name="pills_total">Dabar turi %1$s tabletes</string>
     <string name="pills_need_box_size">Įrašyk, kiek tablečių yra naujoje dėžutėje</string>
-    <string name="pills_opened">Viena jų jau atidaryta</string>
+    <string name="pills_opened">Turiu ir atidarytą dėžutę</string>
     <string name="pills_here">Priminimai šiame įrenginyje</string>
     <string name="pills_here_note">Tavo vaistai ir išgertos dozės sinchronizuojami tarp telefono, planšetės ir kompiuterio. Skamba tik įrenginiai su įjungtu šiuo jungikliu, todėl į dozę atsakai tik kartą.</string>
 </resources>
