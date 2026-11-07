@@ -647,7 +647,7 @@ private data class Draft(val m: Medicine, val dose: String, val perBox: String, 
                             StepTitle(R.string.pills_q_look)
                             Box(Modifier.align(Alignment.CenterHorizontally)) { PillEmblem(d.m, dir, 120.dp, photoVersion) }
                             Text(stringResource(R.string.pills_shape), style = MaterialTheme.typography.titleSmall)
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Medicine.SHAPES.forEach { s ->
                                     Surface(onClick = { d = d.copy(m = d.m.copy(shape = s)) }, shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceVariant,
                                         border = BorderStroke(2.dp, if (d.m.shape == s) PILLS_COLOR else Color.Transparent)) { PillShape(s, d.m.color, d.m.color2, 56.dp, Modifier.padding(6.dp)) }
@@ -659,7 +659,7 @@ private data class Draft(val m: Medicine, val dose: String, val perBox: String, 
                                 Text(stringResource(if (d.m.shape == "capsule") R.string.pills_color2 else R.string.pills_color_cap), style = MaterialTheme.typography.titleSmall)
                                 Swatches(d.m.color2) { d = d.copy(m = d.m.copy(color2 = it)) }
                             }
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 FilledTonalButton(onClick = { if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) shoot.launch(null) else askCamera.launch(Manifest.permission.CAMERA) }) {
                                     Icon(painterResource(R.drawable.ic_photo_camera), null, Modifier.size(18.dp)); Text(" " + stringResource(R.string.pills_photo_take)) }
                                 FilledTonalButton(onClick = { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }) { Text(stringResource(R.string.pills_photo_pick)) }
@@ -772,8 +772,10 @@ private data class Draft(val m: Medicine, val dose: String, val perBox: String, 
 
 @Composable private fun StepTitle(text: Int) = Text(stringResource(text), style = MaterialTheme.typography.headlineSmall)
 
+/** The colours, onto a second line when the screen is narrow (the user, 7 Nov: the brown did not fit). */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable private fun Swatches(selected: Int, choose: (Int) -> Unit) =
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Medicine.COLORS.forEach { c ->
             Box(Modifier.size(32.dp).clip(CircleShape).background(Color(c)).border(if (c == selected) 3.dp else 1.dp, if (c == selected) PILLS_COLOR else MaterialTheme.colorScheme.outline, CircleShape).clickable { choose(c) })
         }
