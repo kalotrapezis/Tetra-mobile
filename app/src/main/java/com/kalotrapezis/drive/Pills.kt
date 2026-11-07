@@ -351,7 +351,7 @@ internal object Pills {
         val missedDays = s.doses.filter { it.state == Dose.State.Missed }.map { it.due.atZone(zone).dayOfWeek }
         val often = missedDays.groupingBy { it }.eachCount().filterValues { it >= 2 }.keys.sorted()
         val scheduled = s.doses.map { it.due.atZone(zone).dayOfWeek }.toSet()
-        if (s.missed >= 3 && often.isNotEmpty() && often.size * 2 <= scheduled.size) return@mapNotNull Advice(s, "days", days = often) // not when it is every day it is due
+        if (s.missed >= 3 && often.isNotEmpty() && often.size * 2 < scheduled.size) return@mapNotNull Advice(s, "days", days = often) // not when it is every day it is due
         // forgotten at night: the box beside the bed
         if (s.missed * 5 >= s.due && Pills.part(s.time) >= 2) return@mapNotNull Advice(s, "bedside")
         if (s.missed * 5 >= s.due) Advice(s, "earlier", s.time.minusMinutes(30)) else null
