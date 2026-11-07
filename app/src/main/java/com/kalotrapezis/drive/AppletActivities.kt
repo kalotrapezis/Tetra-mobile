@@ -77,6 +77,11 @@ class TimerActivity : AppletActivity() {
     @Composable override fun Content(word: String?, back: () -> Unit) = TimerScreen(back = back, hasAccess = Environment.isExternalStorageManager(), grant = ::grant)
 }
 
+class PillsActivity : AppletActivity() {
+    override val applet = Applet.Pills
+    @Composable override fun Content(word: String?, back: () -> Unit) = PillsScreen(back = back, hasAccess = Environment.isExternalStorageManager(), grant = ::grant)
+}
+
 class MapsActivity : AppletActivity() {
     override val applet = Applet.Maps
     @Composable override fun Content(word: String?, back: () -> Unit) {
@@ -122,6 +127,7 @@ private fun appletWindow(word: String): Class<*>? = when {
     word == Applet.TextEditor.name || word.startsWith("text:") -> TextEditorActivity::class.java
     word == Applet.Calendar.name || word.startsWith(CalendarActivity.NEW) -> CalendarActivity::class.java
     word == Applet.Timer.name -> TimerActivity::class.java
+    word == Applet.Pills.name -> PillsActivity::class.java
     word == Applet.Maps.name || word.startsWith("maps-") -> MapsActivity::class.java
     word == Applet.Contacts.name || word.startsWith("contact:") || word.startsWith("contact-new:") -> ContactsActivity::class.java
     word == Applet.Mail.name || word.startsWith("mail:") || word.startsWith("mail-write:") -> MailActivity::class.java

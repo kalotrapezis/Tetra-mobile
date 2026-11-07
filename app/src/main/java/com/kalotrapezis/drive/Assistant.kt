@@ -281,6 +281,9 @@ internal class AssistantTools(
             "calendar_add" -> calendarAdd(args)
             "calendar_list" -> calendarList(args)
             "calendar_free" -> calendarFree(args)
+            "pills_list" -> pillsList()
+            "pills_save" -> pillsSave(args)
+            "pills_taken" -> pillsTaken(args)
             "timer_start" -> timerStart(args)
             "timer_list" -> timerList()
             "timer_stop" -> timerStop(args)
@@ -408,6 +411,75 @@ internal class AssistantTools(
     }
 
     // ---- Timer ----
+    // Pills (Pills.kt): the user's medicines, their times, stock and today's doses
+    private fun pills() = Pills.dir(tetra)
+    private fun pillLine(m: Medicine): String {
+        val left = m.daysLeft()
+        return "${m.title}: ${Medicine.amount(m.dose)} pill(s) at " + (m.times.joinToString(", ") { it.format(HM) }.ifEmpty { "NO TIME SET" }) +
+            (if (m.days.isNotEmpty()) " on " + AlarmRecord.WEEK.filter { it in m.days }.joinToString(",") { AlarmRecord.DAY_CODES[it.ordinal] } else "") +
+            (if (m.counted) "; stock ${Medicine.amount(m.stock)}" else "; stock not counted") + (if (m.perBox > 0) " (boxes of ${m.perBox})" else "") +
+            (left?.let { "; lasts $it day(s), till ${m.lastDay(now().toLocalDate())}" + if (m.low()) ", LOW: time to order more" else "" } ?: "")
+    }
+
+    private fun pillsList(): ToolResult {
+        val meds = Pills.medicines(pills()).filter { !it.archived }
+        if (meds.isEmpty()) return ToolResult("No medicines in Tetra's Pills yet.")
+        val at = now().toInstant()
+        val today = Pills.today(meds, Pills.log(pills()), at, zone)
+        val stats = Pills.slots(meds, Pills.log(pills()), at, zone).filter { it.due > 0 }.joinToString("\n") { s ->
+            "- ${s.med.title} at ${s.time.format(HM)}: of ${s.due} doses ${s.onTime} on time, ${s.late} late, ${s.missed} missed or skipped; ${s.lateMinutes} min late on average" }
+        return ToolResult(meds.joinToString("\n") { "- " + pillLine(it) } + (if (stats.isNotEmpty()) "\nThe last 30 days:\n$stats" else "") + "\nToday's doses:\n" +
+            today.joinToString("\n") { "- ${it.due.atZone(zone).format(HM)} ${it.med.title}: ${it.state.name.lowercase()}" }.ifEmpty { "none" })
+    }
+
+    /** A new box ("I got a new box of X 120 mg, 90 tablets"), a new medicine, or its times changed: one tool. */
+    private fun pillsSave(a: JSONObject): ToolResult {
+        val dir = pills(); val name = a.optString("name").trim()
+        if (name.isEmpty()) return ToolResult("Say which medicine.")
+        val strength = a.optString("strength").trim()
+        val found = Pills.find(Pills.medicines(dir), name, strength)
+        if (found.size > 1) return ToolResult("More than one medicine matches: ${found.joinToString { it.title }}. Ask the user which, then call again with its strength.")
+        val times = a.optJSONArray("times")?.let { t -> (0 until t.length()).mapNotNull { runCatching { java.time.LocalTime.parse(t.getString(it).trim().padStart(5, '0')) }.getOrNull() } }
+        val days = a.optJSONArray("days")?.let { d -> (0 until d.length()).mapNotNull { AlarmRecord.DAY_CODES.indexOf(d.optString(it).uppercase().take(2)).takeIf { i -> i >= 0 }?.let { i -> AlarmRecord.WEEK[i] } }.toSet() }
+        val perBox = a.optInt("per_box", 0).takeIf { it > 0 }
+        var m = found.firstOrNull()
+        val made = m == null
+        if (m == null) m = Medicine(Pills.newId(), name.replaceFirstChar { it.uppercase() }, strength, perBox = perBox ?: 0, since = now().toInstant())
+        m = m.copy(
+            strength = strength.ifEmpty { m.strength },
+            dose = a.optDouble("dose", Double.NaN).takeIf { !it.isNaN() && it > 0 }?.let(Medicine::halves) ?: m.dose,
+            times = times?.distinct()?.sorted() ?: m.times, days = days ?: m.days,
+            until = a.optString("until").takeIf { it.length == 10 }?.let { runCatching { java.time.LocalDate.parse(it) }.getOrNull() } ?: m.until)
+        Pills.save(dir, m)
+        val boxes = a.optInt("boxes", 0).coerceAtLeast(0); val loose = a.optDouble("pills", 0.0).takeIf { !it.isNaN() } ?: 0.0
+        if (boxes > 0 && (perBox ?: m.perBox) <= 0) { changed("pills"); return ToolResult("${if (made) "Added the medicine ${m.title}, but" else "For ${m.title}"} Tetra does not know how many pills a box holds. Ask the user, then call again with per_box.") }
+        if (boxes > 0 || loose > 0) m = Pills.addStock(dir, m, boxes, loose, perBox, now().toInstant(), "AI Assist")
+        else if (perBox != null) m = m.copy(perBox = perBox).also { Pills.save(dir, it) }
+        changed("pills")
+        val what = (if (made) "Added a new medicine. " else "Saved. ") + pillLine(m)
+        return ToolResult(what + if (m.times.isEmpty()) "\nIt has no time set, so nothing will remind the user: ask at what time(s) it is taken and call again with times." else "")
+    }
+
+    /** "I took it" / "took my pills" (after the reminder): the doses waiting now, or [name]'s; skip when the user says so. */
+    private fun pillsTaken(a: JSONObject): ToolResult {
+        val dir = pills(); val meds = Pills.medicines(dir); val at = now().toInstant()
+        val name = a.optString("name").trim()
+        val want = if (name.isEmpty()) meds else Pills.find(meds, name, a.optString("strength"))
+        if (want.isEmpty()) return ToolResult("No medicine called $name in Pills.")
+        val skip = a.optBoolean("skip")
+        val open = Pills.today(want, Pills.log(dir), at, zone).filter { it.state == Dose.State.Waiting || it.state == Dose.State.Missed }
+            .filter { it.due <= at.plusSeconds(3 * 3600) } // a dose up to three hours early, not tomorrow's
+        val doses = if (name.isEmpty()) open.filter { d -> open.minByOrNull { kotlin.math.abs(it.due.epochSecond - at.epochSecond) }?.due == d.due } else open.groupBy { it.med.id }.mapNotNull { (_, l) -> l.minByOrNull { kotlin.math.abs(it.due.epochSecond - at.epochSecond) } }
+        if (doses.isEmpty()) {
+            if (name.isEmpty() || skip) return ToolResult("No dose is waiting now.")
+            val m = Pills.take(dir, want.first(), null, at); changed("pills")
+            return ToolResult("Logged one dose of ${m.title} now, outside its times; stock ${Medicine.amount(m.stock)}.")
+        }
+        val after = doses.map { d -> if (skip) Pills.skip(dir, d.med, d.due, at) else Pills.take(dir, d.med, d.due, at) }
+        changed("pills")
+        return ToolResult((if (skip) "Skipped: " else "Marked taken: ") + doses.zip(after).joinToString("; ") { (d, m) -> "${m.title} of ${d.due.atZone(zone).format(HM)}, stock ${Medicine.amount(m.stock)}" + if (m.low()) " (LOW, lasts ${m.daysLeft()} days)" else "" })
+    }
+
     private fun timers() = TimerFiles.root(tetra)
 
     private fun timerStart(a: JSONObject): ToolResult {
@@ -842,6 +914,7 @@ internal class AssistantTools(
 
         /** Each tool's app (AiGate.APPS). */
         val APP_OF = mapOf("calendar_add" to "calendar", "calendar_list" to "calendar", "calendar_free" to "calendar",
+            "pills_list" to "pills", "pills_save" to "pills", "pills_taken" to "pills",
             "timer_start" to "timer", "timer_list" to "timer", "timer_stop" to "timer", "alarm_add" to "timer", "alarm_list" to "timer", "alarm_delete" to "timer", "stopwatch" to "timer",
             "notes_search" to "notes", "note_new" to "notes", "note_open" to "notes", "shopping_list" to "notes", "files_find" to "files", "file_open" to "files",
             "contacts_find" to "contacts", "my_card" to "contacts", "relation_remember" to "contacts", "relation_forget" to "contacts", "contact_call" to "phone",
@@ -863,6 +936,16 @@ internal class AssistantTools(
                 "from" to p("string", "First day, YYYY-MM-DD."), "to" to p("string", "Last day, YYYY-MM-DD; leave out for one day.")),
             fn("calendar_free", "Free times on a day between 08:00 and 21:00.", listOf("date"),
                 "date" to p("string", "YYYY-MM-DD."), "minutes" to p("integer", "How long the free time must be; 60 if not said.")),
+            fn("pills_list", "The user's medicines in Tetra's Pills: dose, times, pills in stock, how many days they last, and today's doses (taken, waiting, missed).", emptyList()),
+            fn("pills_save", "Add a medicine to Pills, add a new box or pills to its stock (\"I got a new box of X 120 mg, 90 tablets\": name X, strength 120 mg, boxes 1, per_box 90), or change its dose or times. Creates the medicine when there is none by that name.", listOf("name"),
+                "name" to p("string", "The medicine's name, without the strength."), "strength" to p("string", "As on the box: \"120 mg\", \"5 mg/ml\"; leave out if not said."),
+                "boxes" to p("integer", "Boxes bought now."), "per_box" to p("integer", "Pills (tablets, capsules) in one box, if said."), "pills" to p("number", "Loose pills added, besides boxes."),
+                "dose" to p("number", "Pills each time (0.5 for half); only if said."),
+                "times" to JSONObject().put("type", "array").put("items", JSONObject().put("type", "string")).put("description", "Every time of day it is taken, HH:MM; the whole new list. Only if said."),
+                "days" to JSONObject().put("type", "array").put("items", JSONObject().put("type", "string").put("enum", JSONArray(AlarmRecord.DAY_CODES))).put("description", "Only some weekdays; leave out for every day."),
+                "until" to p("string", "The last day of a course, YYYY-MM-DD, if said.")),
+            fn("pills_taken", "Mark the user's dose as taken (\"I took it\", \"took my pills\") or skipped. Without a name: every dose of the nearest time still waiting.", emptyList(),
+                "name" to p("string", "One medicine, if named."), "strength" to p("string", "Its strength, if two share the name."), "skip" to p("boolean", "Skipped, not taken.")),
             fn("timer_start", "Start a countdown timer in Tetra.", emptyList(),
                 "minutes" to p("integer", "Minutes."), "seconds" to p("integer", "Seconds, besides the minutes."), "label" to p("string", "What it is for, if said.")),
             fn("timer_list", "The running and paused timers and the time left.", emptyList()),

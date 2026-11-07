@@ -202,6 +202,8 @@
             android:taskAffinity="com.kalotrapezis.drive.calendar" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
         <activity android:name=".TimerActivity" android:exported="false" android:label="@string/home_label_timer" android:icon="@mipmap/applet_timer" android:roundIcon="@mipmap/applet_timer"
             android:taskAffinity="com.kalotrapezis.drive.timer" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
+        <activity android:name=".PillsActivity" android:exported="false" android:label="@string/app_pills" android:icon="@mipmap/applet_pills" android:roundIcon="@mipmap/applet_pills"
+            android:taskAffinity="com.kalotrapezis.drive.pills" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
         <activity android:name=".MapsActivity" android:exported="false" android:label="@string/home_label_maps" android:icon="@mipmap/applet_maps" android:roundIcon="@mipmap/applet_maps"
             android:taskAffinity="com.kalotrapezis.drive.maps" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout" />
         <activity android:name=".ContactsActivity" android:exported="false" android:label="@string/home_label_contacts" android:icon="@mipmap/applet_contacts" android:roundIcon="@mipmap/applet_contacts"
@@ -239,6 +241,9 @@
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <activity-alias android:name=".AppTimer" android:targetActivity=".TimerActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_timer" android:icon="@mipmap/applet_timer" android:roundIcon="@mipmap/applet_timer">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".AppPills" android:targetActivity=".PillsActivity" android:enabled="false" android:exported="true" android:label="@string/app_pills" android:icon="@mipmap/applet_pills" android:roundIcon="@mipmap/applet_pills">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <activity-alias android:name=".AppMaps" android:targetActivity=".MapsActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_maps" android:icon="@mipmap/applet_maps" android:roundIcon="@mipmap/applet_maps">
@@ -362,6 +367,9 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+        <!-- Pills (PillsAlarms.kt): its alarm and its notification's Taken and Skip; boot and the clock come through CalendarAlarmReceiver -->
+        <receiver android:name=".PillsReceiver" android:exported="false" />
+        <service android:name=".PillsVoiceService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
         <receiver android:name=".SyncActionReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="com.kalotrapezis.drive.PAUSE" />

@@ -14,8 +14,9 @@
     <color name="applet_maps">#25C4FE</color>
     <color name="applet_timer">#04D5CC</color>
     <color name="applet_data">#17191D</color>
-    <color name="applet_assistant">#FD6A04</color>
+    <color name="applet_assistant">#FC6A04</color>
     <color name="applet_mail">#FD0DA4</color>
     <color name="applet_messages">#024F5D</color>
     <color name="applet_browser">#1A87FD</color>
+    <color name="applet_pills">#EE5D8B</color>
 </resources>

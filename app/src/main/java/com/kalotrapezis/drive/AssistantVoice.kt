@@ -166,6 +166,7 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
         changed = { what -> when (what) {
             "calendar" -> { ScopedSync.soon(app, "calendar", 0, orWhole = true); CalendarAlarms.planSoon(app) }
             "timer" -> { ScopedSync.soon(app, "timer", 0, orWhole = true); TimerService.check(app) }
+            "pills" -> { PillsAlarms.planSoon(app); android.os.Handler(android.os.Looper.getMainLooper()).post { PillsAlarms.changed.intValue++ } }
             "notes" -> NotesSync.soon(app)
             "places" -> LocationReminders.planSoon(app)
             "contacts" -> { ScopedSync.soon(app, "contacts", 0, orWhole = true); ContactsAccount.soon(app) }

@@ -306,6 +306,7 @@ class MainActivity : ComponentActivity() {
         WriterLog.init(this) // the log from the start: a crash anywhere is written down
         CalendarIndex.dir = cacheDir // the Calendar's events kept between starts
         CalendarAlarms.planSoon(this) // the Calendar's next reminder, from the files as they are now
+        PillsAlarms.planSoon(this) // and the next pill
         LocationReminders.planSoon(this) // the places watched again: a force stop or a permission taken back ends them
         ContactsPreload.warm(this) // Contacts open full, not "no contacts" for a second
         PhoneLog.warm(this) // and the Phone's Recents
@@ -786,6 +787,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
         }
         // a map turned old (MapsAge): Settings › Maps
         if (applet.value == MapsAge.SCREEN && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Maps; screen = Screen.Settings; return@LaunchedEffect }
+        if (applet.value == PILLS_SETTINGS && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Pills; screen = Screen.Settings; return@LaunchedEffect }
         if (applet.value == BROWSER_SETTINGS && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Browser; screen = Screen.Settings; return@LaunchedEffect }
         if (applet.value == LocationReminders.SCREEN && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Calendar; screen = Screen.Settings; return@LaunchedEffect }
         if (applet.value == MailActivity.SETTINGS && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Mail; screen = Screen.Settings; return@LaunchedEffect }
@@ -1059,6 +1061,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                         "text" -> openApplet(context, Applet.TextEditor.name)
                         "calendar" -> openApplet(context, Applet.Calendar.name)
                         "timer" -> openApplet(context, Applet.Timer.name)
+                        "pills" -> openApplet(context, Applet.Pills.name)
                         "maps" -> openApplet(context, Applet.Maps.name)
                         "contacts" -> openApplet(context, Applet.Contacts.name)
                         "phone" -> openPhone(context)
@@ -1238,6 +1241,7 @@ private fun Home(
         "mail" -> HomeWideCard(stringResource(R.string.app_mail), stringResource(R.string.mail_home_detail), R.drawable.mail_art, openMail)
         "sms" -> HomeWideCard(stringResource(R.string.app_sms), stringResource(R.string.sms_home_detail), R.drawable.sms_art, openSms)
         "browser" -> HomeWideCard(stringResource(R.string.app_browser), stringResource(R.string.browser_home_detail), R.drawable.browser_art, openBrowser)
+        "pills" -> HomeWideCard(stringResource(R.string.app_pills), stringResource(R.string.pills_home_detail), R.drawable.pills_art, { openApplet(context, Applet.Pills.name) })
         "maps" -> HomeMapsGroup(wide, openMaps)
     } }
     // each part small: just its icon, as a launcher's (Scanner and Codes are two apps, so two icons)
@@ -1259,6 +1263,7 @@ private fun Home(
         "mail" -> listOf(HomeIcon(R.string.app_mail, R.drawable.mail_art, openMail))
         "sms" -> listOf(HomeIcon(R.string.app_sms, R.drawable.sms_art, openSms))
         "browser" -> listOf(HomeIcon(R.string.app_browser, R.drawable.browser_art, openBrowser))
+        "pills" -> listOf(HomeIcon(R.string.app_pills, R.drawable.pills_art, { openApplet(context, Applet.Pills.name) }))
         "maps" -> listOf(HomeIcon(R.string.app_maps, R.drawable.maps_art, { openMaps(null) }))
         else -> emptyList()
     }

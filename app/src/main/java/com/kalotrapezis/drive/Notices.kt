@@ -56,7 +56,7 @@ internal object Notices {
         "calls_on_phone_nobadge" to "phone", "phone_blocked_nobadge" to "phone", "where_nobadge" to "phone",
         "assistant_briefs_nobadge" to "assistant", "assistant_audio_nobadge" to "assistant", "data_warnings_nobadge" to "data", "data_speed" to "data",
         "maps_old_nobadge" to "maps", "analysis_nobadge" to "gallery", "sync_nobadge" to "sync", "listening_nobadge" to "sync", "files_from_computer_nobadge" to "sync",
-        "browser_media" to "browser", AssistantRemote.CHANNEL to "assistant",
+        "browser_media" to "browser", AssistantRemote.CHANNEL to "assistant", PillsAlarms.CHANNEL to "pills",
     )
     /**
      * What a number on Home counts (the user, 4 Nov: "for example the phone I don't have a call and I have a 1, I go in,
@@ -69,7 +69,7 @@ internal object Notices {
     /** Home's art for each (MainActivity's icons()). */
     val ART = mapOf("sync" to R.drawable.sync_art, "gallery" to R.drawable.gallery_art, "notes" to R.drawable.notes_art, "calendar" to R.drawable.calendar_art,
         "timer" to R.drawable.timer_art, "contacts" to R.drawable.contacts_art, "phone" to R.drawable.phone_art, "data" to R.drawable.data_art,
-        "assistant" to R.drawable.assistant_art, "mail" to R.drawable.mail_art, "sms" to R.drawable.sms_art, "browser" to R.drawable.browser_art, "maps" to R.drawable.maps_art)
+        "assistant" to R.drawable.assistant_art, "mail" to R.drawable.mail_art, "sms" to R.drawable.sms_art, "browser" to R.drawable.browser_art, "maps" to R.drawable.maps_art, "pills" to R.drawable.pills_art)
 
     class Notice(val applet: String, val title: String, val text: String, val at: Long, val ongoing: Boolean, val open: PendingIntent?, val tag: String?, val id: Int,
         val channel: String? = null)

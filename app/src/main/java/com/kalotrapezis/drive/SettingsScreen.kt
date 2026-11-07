@@ -64,6 +64,7 @@ internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, 
     Calendar(R.string.app_calendar, Category.Calendar.icon, Category.Calendar.color, R.string.settings_calendar_summary, listOf(R.string.settings_reminders_here, R.string.settings_test_reminder, R.string.settings_notifications,
         R.string.settings_exact_alarms, R.string.settings_battery, R.string.settings_hyper_island, R.string.settings_autostart, R.string.common_import, R.string.settings_export_all, R.string.settings_share_claude)),
     Timer(R.string.app_timer, Category.Timer.icon, Category.Timer.color, R.string.settings_share_claude, listOf(R.string.settings_share_claude)),
+    Pills(R.string.app_pills, R.drawable.ic_pill, PILLS_COLOR, R.string.pills_settings_summary, listOf(R.string.pills_voice, R.string.pills_call_name, R.string.pills_try, R.string.pills_checks)),
     Maps(R.string.app_maps, Category.Maps.icon, Category.Maps.color, R.string.settings_maps_summary, listOf(R.string.settings_map, R.string.settings_on_foot, R.string.settings_by_car, R.string.settings_directions_in, R.string.settings_test_voice, R.string.settings_voice_settings, R.string.settings_sharp_bends,
         R.string.settings_save_parking, R.string.settings_open_at_car, R.string.settings_accessible_parking, R.string.settings_export_places, R.string.settings_import_places, R.string.settings_import_google,
         R.string.settings_installed_maps, R.string.settings_send_log)),
@@ -170,6 +171,7 @@ internal fun SettingsTab(
                     SettingsPage.Contacts -> ContactsPage()
                     SettingsPage.Mail -> MailPage(openPart)
                     SettingsPage.Browser -> BrowserSettingsPage()
+                    SettingsPage.Pills -> PillsSettingsPage()
                     SettingsPage.Phone -> PhonePage()
                     SettingsPage.Data -> DataPage()
                     SettingsPage.Assistant -> AssistantPage()
@@ -482,6 +484,7 @@ internal fun SettingsTab(
     var keep by remember { mutableStateOf(prefs.getString("keep_history", BrowserRules.DAY) ?: BrowserRules.DAY) }
     var top by remember { mutableStateOf(prefs.getBoolean("top_bar", false)) }
     var side by remember { mutableStateOf(prefs.getBoolean("side_bar", true)) }
+    var behind by remember { mutableStateOf(prefs.getBoolean("tab_behind", false)) }
     SettingsSection(stringResource(R.string.browser_history)) {
         ChoiceRow(stringResource(R.string.browser_history_keep), null, listOf(BrowserRules.ON_EXIT to stringResource(R.string.browser_keep_exit),
             BrowserRules.DAY to stringResource(R.string.browser_keep_day), BrowserRules.NEVER to stringResource(R.string.browser_keep_never)), keep) {
@@ -496,6 +499,9 @@ internal fun SettingsTab(
         }
         if (LocalConfiguration.current.smallestScreenWidthDp >= 600)
             SwitchRow(stringResource(R.string.browser_side_bar), stringResource(R.string.browser_side_bar_note), side) { side = it; prefs.edit().putBoolean("side_bar", it).apply() }
+    }
+    SettingsSection {
+        SwitchRow(stringResource(R.string.browser_tab_behind), stringResource(R.string.browser_tab_behind_note), behind) { behind = it; prefs.edit().putBoolean("tab_behind", it).apply() }
     }
     // what this device shares with the others through Tetra's sync (the user, 3 Nov: "options in the settings what to sync in the
     // browser"); each switch is this device's own, and off keeps what is here (BrowserSync.kt)
@@ -620,7 +626,7 @@ internal fun SettingsTab(
     }
     if (AiGate.on) SettingsSection(stringResource(R.string.ai_apps), stringResource(R.string.ai_apps_note)) {
         listOf("mail" to R.string.app_mail, "calendar" to R.string.app_calendar, "notes" to R.string.app_notes, "files" to R.string.app_files, "photos" to R.string.app_photos,
-            "timer" to R.string.app_timer, "contacts" to R.string.app_contacts, "phone" to R.string.app_phone, "sms" to R.string.app_sms, "maps" to R.string.app_maps, "browser" to R.string.app_browser, "web" to R.string.ai_app_web).forEach { (app, name) ->
+            "timer" to R.string.app_timer, "contacts" to R.string.app_contacts, "phone" to R.string.app_phone, "sms" to R.string.app_sms, "maps" to R.string.app_maps, "browser" to R.string.app_browser, "pills" to R.string.app_pills, "web" to R.string.ai_app_web).forEach { (app, name) ->
             SwitchRow(stringResource(name), null, AiGate.allows(app)) { on -> runCatching { AiGate.set(AiGate.state.copy(apps = AiGate.state.apps + (app to on))) }.onFailure { WriterLog.e("AI: an app's switch", it) } }
         }
     }
