@@ -149,7 +149,7 @@ internal fun PillsScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> Unit
         }
     }
     LaunchedEffect(Unit) { PillsAlarms.planSoon(context); while (true) { delay(60_000); now = Instant.now() } } // a dose turns missed by itself
-    fun reload() { version++; PillsAlarms.planSoon(context) }
+    fun reload() { version++; PillsAlarms.planSoon(context); ScopedSync.soon(context, "pills", orWhole = true) } // to the tablet and the computer at once
     fun act(block: () -> Unit) = scope.launch { withContext(Dispatchers.IO) { runCatching(block).onFailure { WriterLog.e("Pills: a change failed", it) } }; reload() }
     fun openSettings() = context.startActivity(Intent(context, MainActivity::class.java).putExtra(Applet.EXTRA, PILLS_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
 
@@ -860,6 +860,7 @@ internal fun pillsHealth(c: android.content.Context): List<PillsCheck> {
     val c = LocalContext.current
     val prefs = remember { PillsAlarms.prefs(c) }
     var voice by remember { mutableStateOf(PillsAlarms.voice(c)) }
+    var here by remember { mutableStateOf(PillsAlarms.ringsHere(c)) }
     var call by remember { mutableStateOf(PillsAlarms.callName(c)) }
     var checked by remember { mutableIntStateOf(0) }
     val health = remember(checked) { pillsHealth(c) }
@@ -871,6 +872,15 @@ internal fun pillsHealth(c: android.content.Context): List<PillsCheck> {
     }
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxWidth()) {
+            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.pills_here), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.pills_here_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Switch(here, { here = it; PillsAlarms.setRingsHere(c, it) })
+            }
+        }
+        if (here) Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {

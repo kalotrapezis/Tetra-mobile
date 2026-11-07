@@ -126,4 +126,6 @@
     <string name="pills_total">Nu har du %1$s piller</string>
     <string name="pills_need_box_size">Skriv, hvor mange piller en ny pakke indeholder</string>
     <string name="pills_opened">Én af dem er allerede åbnet</string>
+    <string name="pills_here">Påmindelser på denne enhed</string>
+    <string name="pills_here_note">Din medicin og de doser, du har taget, synkroniseres mellem din telefon, tablet og computer. Kun enheder med denne kontakt slået til ringer, så du svarer på en dosis én gang.</string>
 </resources>

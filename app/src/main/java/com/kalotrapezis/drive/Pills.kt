@@ -13,17 +13,22 @@ import kotlin.math.roundToInt
 
 /*
  * Pills (the user, 7 Nov 2026: "I often forget the evening pill"): medicines, their times, the stock in hand, refill
- * reminders and a history. Files in Tetra/.System/Pills/Data, on this phone only (synced, a tablet would ring them too):
+ * reminders and a history, in Tetra/.System/Pills/Shared, synced with the tablet and the computer (desktop pills.js reads
+ * and writes the same; the contract is the comment below). As the Timer's, a device writes only its own files, since
+ * sync keeps both versions of a file two devices changed:
  *
- *   <id>.json   a medicine            {"id":"pill-k3f9a2","name":"Depon","strength":"500 mg","dose":1,"times":["21:00"],
- *                                      "days":[],"until":null,"perBox":20,"stock":34.5,"refillDays":7,"refillTimes":3,
- *                                      "archived":false,"refillAsked":0,"refillOn":null}
- *   <id>.jpg    its photo, the emblem
- *   log.jsonl   one line per event, never rewritten: {"at":"…Z","med":"pill-…","kind":"taken","due":"…Z","amount":1,"stock":33.5}
+ *   pill-<id>.<device>.json  a medicine; the highest `rev` among an id's files is it, `deleted` a tombstone
+ *       {"id":"pill-k3f9a2b1","name":"Lipitor","strength":"20 mg","dose":1,"times":["21:00"],"days":[],"every":1,"until":null,
+ *        "perBox":30,"refillDays":7,"refillTimes":3,"refillAsked":0,"refillOn":null,"archived":false,"since":"…Z",
+ *        "shape":"capsule","color":"#FFF7F5F0","color2":"#FFE5487A","food":"","rev":3,"by":"24129PN74G","deleted":false}
+ *   pill-<id>.jpg            its photo, the emblem
+ *   log.<device>.jsonl       this device's events, never rewritten; every device's are read together, by time
+ *       {"at":"…Z","med":"pill-…","kind":"taken","due":"…Z","amount":1,"stock":0}   kinds: taken, skipped, undo, stock
+ *       (amount added; note "count": stock is the number counted)
  *
  * A dose is one medicine at one time of one day ([Dose.due], an instant). Its state is the last taken/skipped/undo
- * event with that due; none, and it is waiting, then missed once its last reminder has gone by. Taken takes the dose
- * from the stock, undo gives it back; so pressing Taken twice (the row and the notification) cannot count twice.
+ * event with that due; none, and it is waiting, then missed once its last reminder has gone by. The stock is worked out
+ * from the events ([stockOf]), never kept: Taken pressed on two devices before they sync counts once.
  */
 
 internal data class Medicine(
@@ -58,6 +63,10 @@ internal data class Medicine(
     val food: String = "",
     /** Every [every] days from the day it was added (1: by [days], or every day). */
     val every: Int = 1,
+    /** The record's version among the devices' files ([Pills.save] adds one), who wrote it, and a deleted one's mark. */
+    val rev: Int = 0,
+    val by: String = "",
+    val deleted: Boolean = false,
 ) {
     val title get() = if (strength.isBlank()) name else "$name $strength"
 
@@ -79,10 +88,11 @@ internal data class Medicine(
     fun json(): String = JSONObject().put("id", id).put("name", name).put("strength", strength).put("dose", dose)
         .put("times", JSONArray(times.sorted().map { "%02d:%02d".format(it.hour, it.minute) }))
         .put("days", JSONArray(AlarmRecord.WEEK.filter { it in days }.map { AlarmRecord.DAY_CODES[it.ordinal] }))
-        .put("until", until?.toString() ?: JSONObject.NULL).put("perBox", perBox).put("stock", stock).put("refillDays", refillDays)
+        .put("until", until?.toString() ?: JSONObject.NULL).put("perBox", perBox).put("refillDays", refillDays)
         .put("refillTimes", refillTimes).put("archived", archived).put("refillAsked", refillAsked)
-        .put("refillOn", refillOn?.toString() ?: JSONObject.NULL).put("since", since?.toString() ?: JSONObject.NULL).put("counted", counted)
-        .put("shape", shape).put("color", "#%08X".format(color)).put("color2", "#%08X".format(color2)).put("food", food).put("every", every).toString(1) + "\n"
+        .put("refillOn", refillOn?.toString() ?: JSONObject.NULL).put("since", since?.toString() ?: JSONObject.NULL)
+        .put("shape", shape).put("color", "#%08X".format(color)).put("color2", "#%08X".format(color2)).put("food", food).put("every", every)
+        .put("rev", rev).put("by", by).put("deleted", deleted).toString(1) + "\n"
 
     companion object {
         fun parse(text: String): Medicine? = runCatching {
@@ -91,12 +101,13 @@ internal data class Medicine(
             val times = o.optJSONArray("times")?.let { a -> (0 until a.length()).mapNotNull { runCatching { LocalTime.parse(a.getString(it).trim().padStart(5, '0')) }.getOrNull() } }.orEmpty()
             val days = o.optJSONArray("days")?.let { a -> (0 until a.length()).mapNotNull { AlarmRecord.DAY_CODES.indexOf(a.optString(it).uppercase().take(2)).takeIf { i -> i >= 0 }?.let { i -> AlarmRecord.WEEK[i] } } }.orEmpty().toSet()
             Medicine(o.getString("id"), o.getString("name"), o.optString("strength"), o.optDouble("dose", 1.0).takeIf { !it.isNaN() } ?: 1.0,
-                times.distinct().sorted(), days, date("until"), o.optInt("perBox"), o.optDouble("stock", 0.0).takeIf { !it.isNaN() } ?: 0.0,
+                times.distinct().sorted(), days, date("until"), o.optInt("perBox"), 0.0, // the stock: from the logs (Pills.stockOf), never the file's
                 o.optInt("refillDays", 7), o.optInt("refillTimes", 3), o.optBoolean("archived"), o.optInt("refillAsked"), date("refillOn"),
                 o.optString("since", "").takeIf { it.isNotEmpty() && it != "null" }?.let { Instant.parse(it) },
-                if (o.has("counted")) o.optBoolean("counted") else o.optInt("perBox") > 0 || o.optDouble("stock", 0.0) > 0,
+                false,
                 o.optString("shape").takeIf { it in SHAPES } ?: "round", color(o.optString("color")), color(o.optString("color2")),
-                o.optString("food").takeIf { it in FOODS }.orEmpty(), o.optInt("every", 1).coerceIn(1, 365))
+                o.optString("food").takeIf { it in FOODS }.orEmpty(), o.optInt("every", 1).coerceIn(1, 365),
+                o.optInt("rev", 0), o.optString("by"), o.optBoolean("deleted"))
         }.getOrNull()
 
         const val WHITE = 0xFFF7F5F0.toInt()
@@ -121,7 +132,7 @@ internal data class PillEvent(val at: Instant, val med: String, val kind: String
         const val TAKEN = "taken"
         const val SKIPPED = "skipped"
         const val UNDO = "undo"
-        /** A box or pills added (amount > 0), or the count corrected (amount the difference). */
+        /** A box or pills added (amount), or with note "count" the count corrected to [stock]. */
         const val STOCK = "stock"
         fun parse(line: String): PillEvent? = runCatching {
             val o = JSONObject(line)
@@ -142,33 +153,62 @@ internal object Pills {
     val AGAIN_MS = listOf(0L, 30 * 60_000L, 60 * 60_000L)
     val MISSED_MS = AGAIN_MS.last() + 30 * 60_000L
 
-    fun dir(tetra: File) = TetraSystem.dir(tetra, "Pills", "Data")
-    fun phoneDir() = dir(TetraFolder.root(android.os.Environment.getExternalStorageDirectory()))
+    fun dir(tetra: File) = TetraSystem.dir(tetra, "Pills", "Shared")
+    fun phoneDir() = TetraFolder.root(android.os.Environment.getExternalStorageDirectory()).let { migrate(it); dir(it) }
+
+    /** This device in file names: its name with only letters, digits, - and _ (the Timer's rule). */
+    var me: () -> String = { android.os.Build.MODEL ?: "Android" }
+    private fun tag() = me().replace(Regex("[^A-Za-z0-9_-]"), "").ifEmpty { "device" }
 
     fun newId() = "pill-" + java.util.UUID.randomUUID().toString().take(8)
 
-    fun medicines(dir: File): List<Medicine> = dir.listFiles { f -> f.isFile && f.name.startsWith("pill-") && f.name.endsWith(".json") }.orEmpty()
-        .mapNotNull { runCatching { Medicine.parse(it.readText()) }.getOrNull() }.sortedWith(compareBy({ it.archived }, { it.times.minOrNull() ?: LocalTime.MAX }, { it.name.lowercase() }))
+    /** Every medicine not deleted, the winner of its files, with its stock worked out from [log]. */
+    fun medicines(dir: File, log: List<PillEvent> = log(dir)): List<Medicine> =
+        records(dir).filter { !it.deleted }.map { m -> stockOf(m.id, log).let { (stock, counted) -> m.copy(stock = stock, counted = counted) } }
+            .sortedWith(compareBy({ it.archived }, { it.times.minOrNull() ?: LocalTime.MAX }, { it.name.lowercase() }))
+
+    /** Each id's winner among the devices' files (and a sync's "pill-x (2).json"): highest rev, then deleted, then the shorter name. */
+    private fun records(dir: File): List<Medicine> = dir.listFiles { f -> f.isFile && f.name.startsWith("pill-") && f.name.endsWith(".json") }.orEmpty()
+        .mapNotNull { f -> runCatching { Medicine.parse(f.readText()) }.getOrNull()?.let { it to f.name.length } }
+        .groupBy { it.first.id }.values.map { same -> same.maxWith(compareBy({ it.first.rev }, { it.first.deleted }, { -it.second })).first }
 
     fun photo(dir: File, id: String) = File(dir, "$id.jpg")
 
-    /** Written beside, then renamed: never half a file. */
+    /** This device's file of [m], one version on: written beside, then renamed, never half a file. */
     fun save(dir: File, m: Medicine): Medicine {
         dir.mkdirs()
-        val f = File(dir, "${m.id}.json"); val tmp = File(dir, ".${m.id}.json.tmp")
-        tmp.writeText(m.json()); if (!tmp.renameTo(f)) { f.writeText(m.json()); tmp.delete() }
-        return m
+        val next = m.copy(rev = (records(dir).firstOrNull { it.id == m.id }?.rev ?: m.rev) + 1, by = me())
+        val f = File(dir, "${m.id}.${tag()}.json"); val tmp = File(dir, ".${m.id}.${tag()}.json.tmp")
+        tmp.writeText(next.json()); if (!tmp.renameTo(f)) { f.writeText(next.json()); tmp.delete() }
+        return next
     }
 
-    fun delete(dir: File, m: Medicine) { File(dir, "${m.id}.json").delete(); photo(dir, m.id).delete() }
+    /** A tombstone, so the other devices' files of it do not bring it back. */
+    fun delete(dir: File, m: Medicine) { save(dir, m.copy(deleted = true)); photo(dir, m.id).delete() }
 
-    fun log(dir: File): List<PillEvent> = File(dir, "log.jsonl").takeIf { it.isFile }?.readLines()?.mapNotNull { PillEvent.parse(it) }.orEmpty()
+    /** Every device's events, by time, a line two logs share once. */
+    fun log(dir: File): List<PillEvent> = dir.listFiles { f -> f.isFile && f.name.startsWith("log") && f.name.endsWith(".jsonl") }.orEmpty()
+        .flatMap { f -> runCatching { f.readLines() }.getOrDefault(emptyList()) }.distinct().mapNotNull { PillEvent.parse(it) }.sortedBy { it.at }
 
-    @Synchronized private fun append(dir: File, e: PillEvent) { dir.mkdirs(); File(dir, "log.jsonl").appendText(e.json() + "\n") }
+    @Synchronized private fun append(dir: File, e: PillEvent) { dir.mkdirs(); File(dir, "log.${tag()}.jsonl").appendText(e.json() + "\n") }
 
-    /** The state of every dose: the last answer for each (medicine, due). */
+    /** The state of every dose: the last answer (by time) for each (medicine, due). */
     private fun answers(log: List<PillEvent>): Map<Pair<String, Instant>, PillEvent> =
-        log.filter { it.due != null && it.kind in setOf(PillEvent.TAKEN, PillEvent.SKIPPED, PillEvent.UNDO) }.associateBy { it.med to it.due!! }
+        log.filter { it.due != null && it.kind in setOf(PillEvent.TAKEN, PillEvent.SKIPPED, PillEvent.UNDO) }.sortedBy { it.at }.associateBy { it.med to it.due!! }
+
+    /**
+     * The pills in hand of [med], and whether they are counted at all: the last count (or 0), plus what was added since,
+     * less the doses whose last answer is a Taken pressed since, less the extra ones taken since; never below 0.
+     */
+    fun stockOf(med: String, log: List<PillEvent>): Pair<Double, Boolean> {
+        val mine = log.filter { it.med == med }
+        val count = mine.lastOrNull { it.kind == PillEvent.STOCK && it.note == "count" }
+        val from = count?.at ?: Instant.MIN
+        val added = mine.filter { it.kind == PillEvent.STOCK && it.note != "count" && it.at > from }.sumOf { it.amount }
+        val taken = answers(mine).values.filter { it.kind == PillEvent.TAKEN && it.at > from }.sumOf { it.amount } +
+            mine.filter { it.kind == PillEvent.TAKEN && it.due == null && it.at > from }.sumOf { it.amount }
+        return Medicine.halves(((count?.stock ?: 0.0) + added - taken).coerceAtLeast(0.0)) to mine.any { it.kind == PillEvent.STOCK }
+    }
 
     /** The doses due in [from, to), earliest first, with their states at [now]. */
     fun doses(meds: List<Medicine>, log: List<PillEvent>, from: Instant, to: Instant, now: Instant, zone: ZoneId): List<Dose> {
@@ -195,63 +235,72 @@ internal object Pills {
             .filter { it.due >= start || it.state == Dose.State.Missed || it.state == Dose.State.Waiting }
     }
 
-    /** Taken (at [at], the dose's time or later): the stock less the dose, once however often it is pressed. */
+    /** Taken (at [at], the dose's time or later; no [due]: an extra one): the dose off the stock, once however often it is pressed. */
     @Synchronized fun take(dir: File, m: Medicine, due: Instant?, at: Instant): Medicine {
-        val now = current(dir, m)
-        if (due != null && answers(log(dir))[now.id to due]?.kind == PillEvent.TAKEN) return now
-        val next = now.copy(stock = (now.stock - now.dose).coerceAtLeast(0.0))
-        // what really came off (never below 0), so Undo gives back no more than that
-        save(dir, next); append(dir, PillEvent(at, m.id, PillEvent.TAKEN, due, now.stock - next.stock, next.stock))
-        return next
+        if (due != null && answers(log(dir))[m.id to due]?.kind == PillEvent.TAKEN) return current(dir, m)
+        val before = current(dir, m)
+        append(dir, PillEvent(at, m.id, PillEvent.TAKEN, due, before.dose, (before.stock - before.dose).coerceAtLeast(0.0)))
+        return current(dir, m)
     }
 
     @Synchronized fun skip(dir: File, m: Medicine, due: Instant, at: Instant): Medicine {
-        val now = current(dir, m)
-        val last = answers(log(dir))[now.id to due]
-        if (last?.kind == PillEvent.SKIPPED) return now
-        val back = if (last?.kind == PillEvent.TAKEN) last.amount else 0.0
-        val next = if (back != 0.0) now.copy(stock = now.stock + back).also { save(dir, it) } else now
-        append(dir, PillEvent(at, m.id, PillEvent.SKIPPED, due, -back, next.stock))
-        return next
+        if (answers(log(dir))[m.id to due]?.kind == PillEvent.SKIPPED) return current(dir, m)
+        append(dir, PillEvent(at, m.id, PillEvent.SKIPPED, due))
+        return current(dir, m)
     }
 
-    /** Back to waiting; a taken dose's pills back in the stock. */
+    /** Back to waiting: a taken dose's pills count again, as the stock is worked out from the last answer. */
     @Synchronized fun undo(dir: File, m: Medicine, due: Instant, at: Instant): Medicine {
-        val now = current(dir, m)
-        val was = answers(log(dir))[now.id to due] ?: return now
-        if (was.kind == PillEvent.UNDO) return now
-        val back = if (was.kind == PillEvent.TAKEN) was.amount else 0.0
-        val next = now.copy(stock = now.stock + back)
-        if (back != 0.0) save(dir, next)
-        append(dir, PillEvent(at, m.id, PillEvent.UNDO, due, back, next.stock))
-        return next
+        val was = answers(log(dir))[m.id to due] ?: return current(dir, m)
+        if (was.kind == PillEvent.UNDO) return current(dir, m)
+        append(dir, PillEvent(at, m.id, PillEvent.UNDO, due))
+        return current(dir, m)
     }
 
     /** [boxes] boxes and/or [pills] pills added (a box's size learnt when given); the refill reminders start over. */
     @Synchronized fun addStock(dir: File, m: Medicine, boxes: Int, pills: Double, perBox: Int?, at: Instant, note: String = ""): Medicine {
-        val now = current(dir, m).let { if (perBox != null && perBox > 0) it.copy(perBox = perBox) else it }
+        var now = current(dir, m)
+        if ((perBox != null && perBox > 0 && perBox != now.perBox) || now.refillAsked > 0) now = save(dir, now.copy(perBox = perBox?.takeIf { it > 0 } ?: now.perBox, refillAsked = 0, refillOn = null))
         val added = boxes * now.perBox + pills
-        val next = now.copy(stock = Medicine.halves(now.stock + added), refillAsked = 0, refillOn = null, counted = now.counted || added > 0)
-        save(dir, next); append(dir, PillEvent(at, m.id, PillEvent.STOCK, null, added, next.stock, note))
-        return next
+        if (added > 0) append(dir, PillEvent(at, m.id, PillEvent.STOCK, null, added, now.stock + added, note))
+        return current(dir, m)
     }
 
     /** The count corrected to what is really in hand. */
     @Synchronized fun setStock(dir: File, m: Medicine, stock: Double, at: Instant): Medicine {
-        val now = current(dir, m)
-        val next = now.copy(stock = Medicine.halves(stock.coerceAtLeast(0.0)), refillAsked = if (stock > now.stock) 0 else now.refillAsked, counted = true)
-        if (next.stock == now.stock && now.counted) return now
-        save(dir, next); append(dir, PillEvent(at, m.id, PillEvent.STOCK, null, next.stock - now.stock, next.stock, "count"))
-        return next
+        val now = current(dir, m); val v = Medicine.halves(stock.coerceAtLeast(0.0))
+        if (v == now.stock && now.counted) return now
+        if (v > now.stock && now.refillAsked > 0) save(dir, now.copy(refillAsked = 0, refillOn = null))
+        append(dir, PillEvent(at, m.id, PillEvent.STOCK, null, v - now.stock, v, "count"))
+        return current(dir, m)
     }
 
     /** A refill reminder said today ([PillsAlarms]): counted once a day, under the same lock as Taken. */
     @Synchronized fun refillSaid(dir: File, id: String, today: LocalDate) {
-        val m = runCatching { Medicine.parse(File(dir, "$id.json").readText()) }.getOrNull() ?: return
+        val m = records(dir).firstOrNull { it.id == id && !it.deleted } ?: return
         if (m.refillOn != today) save(dir, m.copy(refillAsked = m.refillAsked + 1, refillOn = today))
     }
 
-    private fun current(dir: File, m: Medicine) = runCatching { Medicine.parse(File(dir, "${m.id}.json").readText()) }.getOrNull() ?: m
+    private fun current(dir: File, m: Medicine) = medicines(dir).firstOrNull { it.id == m.id } ?: m
+
+    /**
+     * The phone's first Pills (7 Nov, .System/Pills/Data, not synced) moved into Shared once: each medicine as this device's
+     * file, the log as this device's log, the photos as they are. later.json stays in Data, this device's own.
+     */
+    @Synchronized fun migrate(tetra: File) {
+        val old = TetraSystem.dir(tetra, "Pills", "Data"); val new = dir(tetra)
+        val files = old.listFiles { f -> f.isFile && f.name.startsWith("pill-") || f.name == "log.jsonl" }.orEmpty()
+        if (files.isEmpty()) return
+        new.mkdirs()
+        files.forEach { f ->
+            when {
+                f.name == "log.jsonl" -> { File(new, "log.${tag()}.jsonl").appendText(f.readText()); f.delete() }
+                f.name.endsWith(".json") -> Medicine.parse(f.readText())?.let { m -> if (records(new).none { it.id == m.id }) save(new, m) }.also { f.delete() }
+                else -> if (!File(new, f.name).exists()) f.renameTo(File(new, f.name)) else f.delete()
+            }
+        }
+        android.util.Log.i("Pills", "moved ${files.size} files from Data to Shared")
+    }
 
     /** A name said or typed ("depon", "Depon 500", "το depon των 500 mg"): the medicine it means, if one alone. */
     fun find(meds: List<Medicine>, name: String, strength: String = ""): List<Medicine> {
@@ -330,13 +379,16 @@ internal object Pills {
 
     /** Doses put off (the user, 7 Nov: "I'm driving, tell me in 20 minutes, or when I get home"): their time → when to ring. */
     fun later(dir: File): Map<Instant, Long> = runCatching {
-        val o = JSONObject(File(dir, "later.json").readText())
+        val o = JSONObject(laterFile(dir).readText())
         o.keys().asSequence().associate { Instant.ofEpochMilli(it.toLong()) to o.getLong(it) }
     }.getOrDefault(emptyMap())
 
     /** [due]'s doses put off until [until] (epoch ms, or [AT_PLACE]); null: not any more. */
     @Synchronized fun setLater(dir: File, due: Instant, until: Long?) {
         val next = later(dir).toMutableMap().apply { if (until == null) remove(due) else put(due, until) }
-        dir.mkdirs(); File(dir, "later.json").writeText(JSONObject(next.mapKeys { it.key.toEpochMilli().toString() }).toString())
+        laterFile(dir).apply { parentFile?.mkdirs() }.writeText(JSONObject(next.mapKeys { it.key.toEpochMilli().toString() }).toString())
     }
+
+    /** Put-off doses are this device's own (only it rings them): Pills/Data/later.json, beside the synced folder. */
+    private fun laterFile(dir: File) = File(dir.absoluteFile.parentFile, "Data/later.json")
 }

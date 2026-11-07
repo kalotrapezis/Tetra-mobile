@@ -45,6 +45,9 @@ internal object PillsAlarms {
 
     fun prefs(c: Context) = c.getSharedPreferences("pills", Context.MODE_PRIVATE)
     fun voice(c: Context) = prefs(c).getBoolean("voice", true)
+    /** Reminders ring on this device: a phone's yes, a tablet's no at first, so one dose is not answered twice (the user, 7 Nov). */
+    fun ringsHere(c: Context) = prefs(c).getBoolean("here", c.resources.configuration.smallestScreenWidthDp < 600)
+    fun setRingsHere(c: Context, on: Boolean) { prefs(c).edit().putBoolean("here", on).apply(); planSoon(c) }
     /** How the voice calls the user, as it should be said ("Θεολόγε": Greek's vocative, typed by the user, never guessed). */
     fun callName(c: Context) = prefs(c).getString("call", "").orEmpty()
 
@@ -62,6 +65,10 @@ internal object PillsAlarms {
         val meds = Pills.medicines(dir); val log = Pills.log(dir)
         val now = Instant.now(); val zone = ZoneId.systemDefault()
         val p = prefs(c)
+        if (!ringsHere(c)) { // not this device: nothing rings, and a notification it showed goes
+            c.getSystemService(AlarmManager::class.java)?.cancel(ringIntent(c)); p.edit().putLong("upTo", now.toEpochMilli()).apply()
+            tidy(c, emptyList(), log, now, zone); return
+        }
         val upTo = Instant.ofEpochMilli(p.getLong("upTo", now.toEpochMilli())).coerceAtLeast(now.minusMillis(Pills.MISSED_MS))
         // each dose time rung once per look, at its latest reminder since: a phone off all evening says it once
         // the voice once, for the latest; any other dose time rung with it gets its notification only. A dose put off rings
@@ -208,6 +215,7 @@ internal object PillsAlarms {
         waiting.forEach { if (action == TAKE) Pills.take(dir, it.med, it.due, now) else Pills.skip(dir, it.med, it.due, now) }
         NotificationManagerCompat.from(c).cancel(idOf(due))
         android.os.Handler(android.os.Looper.getMainLooper()).post { changed.intValue++ }
+        ScopedSync.soon(c, "pills", orWhole = true) // the other devices hear of it at once
         plan(c)
     }
 }

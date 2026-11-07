@@ -126,4 +126,6 @@
     <string name="pills_total">Nu har du %1$s piller</string>
     <string name="pills_need_box_size">Skriv hur många piller en ny förpackning innehåller</string>
     <string name="pills_opened">En av dem är redan öppnad</string>
+    <string name="pills_here">Påminnelser på den här enheten</string>
+    <string name="pills_here_note">Dina mediciner och de intagna doserna synkas mellan telefonen, surfplattan och datorn. Bara enheter med den här knappen på ringer, så du svarar på en dos bara en gång.</string>
 </resources>

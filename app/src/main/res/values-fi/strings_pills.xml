@@ -126,4 +126,6 @@
     <string name="pills_total">Nyt sinulla on %1$s pilleriä</string>
     <string name="pills_need_box_size">Kirjoita, montako pilleriä uudessa pakkauksessa on</string>
     <string name="pills_opened">Yksi niistä on jo avattu</string>
+    <string name="pills_here">Muistutukset tällä laitteella</string>
+    <string name="pills_here_note">Lääkkeesi ja otetut annokset synkronoidaan puhelimen, tabletin ja tietokoneen välillä. Vain laitteet, joissa tämä kytkin on päällä, soivat, joten vastaat annokseen vain kerran.</string>
 </resources>

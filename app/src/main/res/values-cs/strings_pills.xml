@@ -126,4 +126,6 @@
     <string name="pills_total">Teď máš %1$s tablet</string>
     <string name="pills_need_box_size">Napiš, kolik tablet má nové balení</string>
     <string name="pills_opened">Jedno už je otevřené</string>
+    <string name="pills_here">Připomínky na tomto zařízení</string>
+    <string name="pills_here_note">Tvé léky a užité dávky se synchronizují mezi telefonem, tabletem a počítačem. Zvonit budou jen zařízení se zapnutým přepínačem, takže dávku potvrdíš jen jednou.</string>
 </resources>

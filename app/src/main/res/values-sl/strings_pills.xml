@@ -126,4 +126,6 @@
     <string name="pills_total">Zdaj imaš %1$s tablet</string>
     <string name="pills_need_box_size">Vpiši, koliko tablet je v novi škatli</string>
     <string name="pills_opened">Ena je že odprta</string>
+    <string name="pills_here">Opomniki na tej napravi</string>
+    <string name="pills_here_note">Tvoja zdravila in vzete odmerke se sinhronizirajo med telefonom, tablico in računalnikom. Zvonijo samo naprave z vklopljenim stikalom, tako da na odmerek odgovoriš samo enkrat.</string>
 </resources>

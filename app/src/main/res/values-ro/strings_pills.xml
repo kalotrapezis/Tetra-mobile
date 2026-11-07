@@ -126,4 +126,6 @@
     <string name="pills_total">Acum ai %1$s pastile</string>
     <string name="pills_need_box_size">Scrie câte pastile are o cutie nouă</string>
     <string name="pills_opened">Una dintre ele este deja deschisă</string>
+    <string name="pills_here">Mementouri pe acest dispozitiv</string>
+    <string name="pills_here_note">Medicamentele tale și dozele luate se sincronizează între telefon, tabletă și computer. Sună doar dispozitivele cu acest comutator activat, așa că răspunzi la o doză o singură dată.</string>
 </resources>

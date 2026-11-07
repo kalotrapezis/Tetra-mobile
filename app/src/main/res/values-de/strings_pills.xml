@@ -126,4 +126,6 @@
     <string name="pills_total">Jetzt hast du %1$s Tabletten</string>
     <string name="pills_need_box_size">Schreib, wie viele Tabletten eine neue Packung enthält</string>
     <string name="pills_opened">Eine davon ist schon geöffnet</string>
+    <string name="pills_here">Erinnerungen auf diesem Gerät</string>
+    <string name="pills_here_note">Deine Medikamente und die eingenommenen Dosen werden zwischen Handy, Tablet und Computer synchronisiert. Nur Geräte mit eingeschaltetem Schalter klingeln, sodass du eine Dosis nur einmal beantwortest.</string>
 </resources>

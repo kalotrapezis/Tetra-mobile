@@ -126,4 +126,6 @@
     <string name="pills_total">Dabar turi %1$s tabletes</string>
     <string name="pills_need_box_size">Įrašyk, kiek tablečių yra naujoje dėžutėje</string>
     <string name="pills_opened">Viena jų jau atidaryta</string>
+    <string name="pills_here">Priminimai šiame įrenginyje</string>
+    <string name="pills_here_note">Tavo vaistai ir išgertos dozės sinchronizuojami tarp telefono, planšetės ir kompiuterio. Skamba tik įrenginiai su įjungtu šiuo jungikliu, todėl į dozę atsakai tik kartą.</string>
 </resources>

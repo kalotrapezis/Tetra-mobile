@@ -54,7 +54,7 @@ internal class SyncJob : JobService() {
             scope.launch {
                 val error = runCatching { SyncClient(applicationContext, store).scopeOnly(part) }.onFailure { WriterLog.w("Scoped sync $part: ${it.message}") }.exceptionOrNull()
                 // the look carries the Timer's part too: a timer started on the computer reaches a closed Tetra here
-                if (params.jobId == ScopedSync.CALENDAR_LOOK) listOf("timer", "contacts", "data").forEach { runCatching { SyncClient(applicationContext, store).scopeOnly(it) } }
+                if (params.jobId == ScopedSync.CALENDAR_LOOK) listOf("timer", "contacts", "data", "pills").forEach { runCatching { SyncClient(applicationContext, store).scopeOnly(it) } }
                 if (params.jobId == ScopedSync.CALENDAR_LOOK) runCatching { MapsAge.check(applicationContext) }
                 val tooOld = ScopedSync.tooOld(error) // the whole sync carries it
                 jobFinished(params, error != null && !tooOld && params.jobId != ScopedSync.CALENDAR_LOOK) // a change waiting is tried again; a look waits for the next
@@ -157,6 +157,7 @@ internal object ScopedSync {
     private const val DATA_WAITING = 4151 // 4150 is Data's hourly look (DataStats.JOB)
     private const val MAIL_WAITING = 4152
     private const val BROWSER_WAITING = 4154 // 4153 is Mail's look (MailEngine.JOB)
+    private const val PILLS_WAITING = 4156
     private val running = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val pending = java.util.concurrent.ConcurrentHashMap<String, Job>() // a timer's push never cancels an event's
 
@@ -185,7 +186,7 @@ internal object ScopedSync {
     /** Run by Android as soon as there is a network, and again until the computer has it. */
     private fun wait(context: Context, scope: String) {
         val jobs = context.getSystemService(JobScheduler::class.java) ?: return
-        jobs.schedule(JobInfo.Builder(when (scope) { "timer" -> TIMER_WAITING; "contacts" -> CONTACTS_WAITING; "phone" -> PHONE_WAITING; "data" -> DATA_WAITING; "mail" -> MAIL_WAITING; "browser" -> BROWSER_WAITING; else -> CALENDAR_WAITING }, ComponentName(context, SyncJob::class.java))
+        jobs.schedule(JobInfo.Builder(when (scope) { "timer" -> TIMER_WAITING; "contacts" -> CONTACTS_WAITING; "phone" -> PHONE_WAITING; "data" -> DATA_WAITING; "mail" -> MAIL_WAITING; "browser" -> BROWSER_WAITING; "pills" -> PILLS_WAITING; else -> CALENDAR_WAITING }, ComponentName(context, SyncJob::class.java))
             .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
             .setBackoffCriteria(60_000, JobInfo.BACKOFF_POLICY_EXPONENTIAL)
             .setExtras(android.os.PersistableBundle().apply { putString(SCOPE, scope) })

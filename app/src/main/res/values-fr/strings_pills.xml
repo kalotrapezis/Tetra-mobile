@@ -126,4 +126,6 @@
     <string name="pills_total">Vous avez maintenant %1$s comprimés</string>
     <string name="pills_need_box_size">Indiquez combien de comprimés contient une boîte neuve</string>
     <string name="pills_opened">L’une d’elles est déjà ouverte</string>
+    <string name="pills_here">Rappels sur cet appareil</string>
+    <string name="pills_here_note">Vos médicaments et les doses prises sont synchronisés entre votre téléphone, votre tablette et votre ordinateur. Seuls les appareils où ce réglage est activé sonnent, donc vous ne répondez qu’une fois à chaque dose.</string>
 </resources>

@@ -126,4 +126,6 @@
     <string name="pills_total">Teraz masz %1$s tabletek</string>
     <string name="pills_need_box_size">Wpisz, ile tabletek jest w nowym opakowaniu</string>
     <string name="pills_opened">Jedno jest już otwarte</string>
+    <string name="pills_here">Przypomnienia na tym urządzeniu</string>
+    <string name="pills_here_note">Twoje leki i przyjęte dawki synchronizują się między telefonem, tabletem i komputerem. Dzwonią tylko urządzenia z włączonym tym przełącznikiem, więc na dawkę odpowiadasz tylko raz.</string>
 </resources>

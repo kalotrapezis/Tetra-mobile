@@ -126,4 +126,6 @@
     <string name="pills_total">Nüüd on sul %1$s tabletti</string>
     <string name="pills_need_box_size">Kirjuta, mitu tabletti on uues karbis</string>
     <string name="pills_opened">Üks neist on juba avatud</string>
+    <string name="pills_here">Meeldetuletused selles seadmes</string>
+    <string name="pills_here_note">Sinu ravimid ja võetud annused sünkroonitakse telefoni, tahvelarvuti ja arvuti vahel. Helisevad ainult seadmed, kus see lüliti on sees, nii et vastad annusele ainult korra.</string>
 </resources>

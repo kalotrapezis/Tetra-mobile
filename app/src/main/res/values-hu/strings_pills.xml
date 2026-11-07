@@ -126,4 +126,6 @@
     <string name="pills_total">Most %1$s tablettád van</string>
     <string name="pills_need_box_size">Írd be, hány tabletta van egy új dobozban</string>
     <string name="pills_opened">Az egyik már ki van nyitva</string>
+    <string name="pills_here">Emlékeztetők ezen az eszközön</string>
+    <string name="pills_here_note">A gyógyszereid és a bevett adagok szinkronizálódnak a telefonod, a táblagéped és a számítógéped között. Csak azok az eszközök csörögnek, amelyeken ez a kapcsoló be van kapcsolva, így egy adagra csak egyszer válaszolsz.</string>
 </resources>

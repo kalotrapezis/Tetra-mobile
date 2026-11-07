@@ -126,4 +126,6 @@
     <string name="pills_total">Agora tens %1$s comprimidos</string>
     <string name="pills_need_box_size">Escreve quantos comprimidos tem uma caixa nova</string>
     <string name="pills_opened">Uma delas já está aberta</string>
+    <string name="pills_here">Lembretes neste dispositivo</string>
+    <string name="pills_here_note">Os teus medicamentos e as doses tomadas sincronizam entre o telemóvel, o tablet e o computador. Só tocam os dispositivos com este interruptor ativado, por isso respondes a cada dose uma só vez.</string>
 </resources>

@@ -127,4 +127,6 @@
     <string name="pills_total">Now you have %1$s pills</string>
     <string name="pills_need_box_size">Write how many pills a new box has</string>
     <string name="pills_opened">One of them is already open</string>
+    <string name="pills_here">Reminders on this device</string>
+    <string name="pills_here_note">Your medicines and what you took sync with your other devices. Only the ones with this on ring, so you answer once.</string>
 </resources>

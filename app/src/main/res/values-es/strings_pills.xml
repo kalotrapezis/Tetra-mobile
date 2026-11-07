@@ -126,4 +126,6 @@
     <string name="pills_total">Ahora tienes %1$s pastillas</string>
     <string name="pills_need_box_size">Escribe cuántas pastillas trae una caja nueva</string>
     <string name="pills_opened">Una de ellas ya está abierta</string>
+    <string name="pills_here">Recordatorios en este dispositivo</string>
+    <string name="pills_here_note">Tus medicamentos y las dosis tomadas se sincronizan entre tu teléfono, tableta y ordenador. Solo suenan los dispositivos con este interruptor activado, así respondes a cada dosis una sola vez.</string>
 </resources>

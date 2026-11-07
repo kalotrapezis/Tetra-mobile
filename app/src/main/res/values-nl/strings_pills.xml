@@ -126,4 +126,6 @@
     <string name="pills_total">Nu heb je %1$s pillen</string>
     <string name="pills_need_box_size">Schrijf op hoeveel pillen een nieuw doosje bevat</string>
     <string name="pills_opened">Eén ervan is al open</string>
+    <string name="pills_here">Herinneringen op dit apparaat</string>
+    <string name="pills_here_note">Je medicijnen en de ingenomen doses worden gesynchroniseerd tussen je telefoon, tablet en computer. Alleen apparaten waarop deze schakelaar aan staat, gaan over, zodat je een dosis maar één keer beantwoordt.</string>
 </resources>

@@ -413,7 +413,7 @@ internal class AssistantTools(
 
     // ---- Timer ----
     // Pills (Pills.kt): the user's medicines, their times, stock and today's doses
-    private fun pills() = Pills.dir(tetra)
+    private fun pills() = Pills.dir(tetra).also { runCatching { Pills.migrate(tetra) } }
     private fun pillLine(m: Medicine): String {
         val left = m.daysLeft()
         return "${m.title}: ${Medicine.amount(m.dose)} pill(s) at " + (m.times.joinToString(", ") { it.format(HM) }.ifEmpty { "NO TIME SET" }) +

@@ -126,4 +126,6 @@
     <string name="pills_total">Anois tá %1$s piollaire agat</string>
     <string name="pills_need_box_size">Scríobh cé mhéad piollaire atá i mbosca nua</string>
     <string name="pills_opened">Tá ceann acu oscailte cheana</string>
+    <string name="pills_here">Meabhrúcháin ar an ngléas seo</string>
+    <string name="pills_here_note">Déantar do chuid leigheasanna agus na dósanna a ghlac tú a shioncronú idir do ghuthán, do tháibléad agus do ríomhaire. Ní bhuaileann ach na gléasanna a bhfuil an lasc seo casta orthu, mar sin freagraíonn tú dáileog uair amháin.</string>
 </resources>
