@@ -367,54 +367,48 @@ internal object PhonePrefs {
 
 /**
  * While a call rings (Settings › Phone, both off at first): raised to the ear it is answered, turned face down it goes
- * quiet. The ear: the proximity sensor near while the phone stands up, after it was seen uncovered for half a second (a
- * phone in a pocket stays covered, so it never answers there). Face down: gravity on the screen's side for 0.4 s after the
- * phone was seen face up (already face down when the call came, it keeps ringing).
+ * quiet. The decision, what counts as a raise and what does not, is PhoneGesture's; this only feeds it the sensors.
  */
 internal object PhoneGestures : android.hardware.SensorEventListener {
     private var sensors: android.hardware.SensorManager? = null
     private var call: Call? = null
     private var app: Context? = null
-    private var raise = false; private var flip = false
-    private var near = false; private var standing = false; private var farSince = 0L; private var uncovered = false; private var faceUp = false; private var downSince = 0L
+    private var rule: PhoneGesture? = null
 
     fun watch(c: Context, ringing: Call?) {
         if (ringing === call) return
-        sensors?.unregisterListener(this); sensors = null; call = null
+        sensors?.unregisterListener(this); sensors = null; call = null; rule = null
         if (ringing == null) return
-        raise = PhonePrefs.raiseAnswer(c); flip = PhonePrefs.flipSilence(c)
+        val raise = PhonePrefs.raiseAnswer(c); val flip = PhonePrefs.flipSilence(c)
         if (!raise && !flip) return
         val m = c.getSystemService(android.hardware.SensorManager::class.java) ?: return
+        val light = if (raise) m.getDefaultSensor(android.hardware.Sensor.TYPE_LIGHT) else null
         call = ringing; app = c.applicationContext; sensors = m
-        near = false; standing = false; farSince = 0L; uncovered = false; faceUp = false; downSince = 0L
+        rule = PhoneGesture(raise, flip, light != null) { WriterLog.i(it) }
+        WriterLog.i("Phone gesture: watching a ringing call (raise=$raise flip=$flip light sensor=${light != null})")
         m.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER)?.let { m.registerListener(this, it, android.hardware.SensorManager.SENSOR_DELAY_UI) }
         if (raise) m.getDefaultSensor(android.hardware.Sensor.TYPE_PROXIMITY)?.let { m.registerListener(this, it, android.hardware.SensorManager.SENSOR_DELAY_UI) }
+        light?.let { m.registerListener(this, it, android.hardware.SensorManager.SENSOR_DELAY_UI) }
     }
 
     override fun onAccuracyChanged(sensor: android.hardware.Sensor?, accuracy: Int) {}
     override fun onSensorChanged(e: android.hardware.SensorEvent) {
         val ringing = call ?: return
         val c = app ?: return
-        if (e.sensor.type == android.hardware.Sensor.TYPE_PROXIMITY) {
-            near = e.values[0] < minOf(e.sensor.maximumRange, 5f) // most report only 0 or their range
-            farSince = if (near) 0L else farSince.takeIf { it > 0 } ?: e.timestamp
-        } else {
-            val (x, y, z) = e.values
-            standing = z < 6f && (y > 3f || kotlin.math.abs(x) > 3f)
-            if (z > 7f) faceUp = true
-            if (flip && faceUp && z < -8f) {
-                if (downSince == 0L) downSince = e.timestamp
-                else if (e.timestamp - downSince > 400_000_000L) {
-                    WriterLog.i("Phone: a ringing call silenced, the phone turned face down")
-                    runCatching { c.getSystemService(TelecomManager::class.java).silenceRinger() }.onFailure { WriterLog.w("Phone: not silenced (${it.message})") }
-                    watch(c, null); return
-                }
-            } else downSince = 0L
+        val r = rule ?: return
+        val v = e.values
+        val verdict = when (e.sensor.type) {
+            android.hardware.Sensor.TYPE_PROXIMITY -> r.proximity(e.timestamp, v[0] < minOf(e.sensor.maximumRange, 5f)) // most report only 0 or their range
+            android.hardware.Sensor.TYPE_LIGHT -> r.light(e.timestamp, v[0])
+            else -> r.gravity(e.timestamp, v[0], v[1], v[2])
         }
-        if (!near && farSince > 0L && e.timestamp - farSince > 500_000_000L) uncovered = true
-        if (raise && uncovered && near && standing) {
-            WriterLog.i("Phone: a ringing call answered, the phone raised to the ear")
-            PhoneCalls.answer(ringing); watch(c, null)
+        when (verdict) {
+            PhoneGesture.Verdict.ANSWER -> { PhoneCalls.answer(ringing); watch(c, null) }
+            PhoneGesture.Verdict.SILENCE -> {
+                runCatching { c.getSystemService(TelecomManager::class.java).silenceRinger() }.onFailure { WriterLog.w("Phone: not silenced (${it.message})") }
+                watch(c, null)
+            }
+            null -> {}
         }
     }
 }
