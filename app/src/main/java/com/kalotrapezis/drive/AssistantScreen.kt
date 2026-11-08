@@ -565,13 +565,22 @@ private fun LiveScreen(phase: LivePhase, level: Float, you: String, ai: String, 
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(stringResource(R.string.app_assistant), style = MaterialTheme.typography.titleLarge)
-            // a tap on the player swaps the record and the cassette, remembered
+            // the record, the cassette or the TV (8 Nov: "an option in Live: vinyl, cassette or TV"): chosen under it, or a tap on it for the next, remembered
             val prefs = LocalContext.current.getSharedPreferences("assistant", android.content.Context.MODE_PRIVATE)
-            var cassette by remember { mutableStateOf(prefs.getBoolean("cassette", false)) }
-            Box(Modifier.weight(1f).fillMaxWidth().clickable(remember { MutableInteractionSource() }, null) { cassette = !cassette; prefs.edit().putBoolean("cassette", cassette).apply() },
+            var style by remember { mutableIntStateOf(prefs.getInt("liveStyle", if (prefs.getBoolean("cassette", false)) 1 else 0)) }
+            fun pick(i: Int) { style = i; prefs.edit().putInt("liveStyle", i).apply() }
+            Box(Modifier.weight(1f).fillMaxWidth().clickable(remember { MutableInteractionSource() }, null) { pick((style + 1) % 3) },
                 contentAlignment = Alignment.Center) {
-                if (cassette) Cassette(phase, level, Modifier.fillMaxWidth(0.92f).widthIn(max = 520.dp))
-                else Vinyl(phase, level, Modifier.fillMaxWidth(0.82f).widthIn(max = 420.dp))
+                when (style) {
+                    1 -> Cassette(phase, level, Modifier.fillMaxWidth(0.92f).widthIn(max = 520.dp))
+                    2 -> VhsTv(0, true, Modifier.fillMaxWidth(0.92f).widthIn(max = 520.dp)) { TalkScreen(phase, level > 0.05f, Modifier.fillMaxWidth().height(200.dp), TalkCue.of(ai), TalkMood.of(ai), characterColor(AssistantVoices.id(LocalContext.current))) }
+                    else -> Vinyl(phase, level, Modifier.fillMaxWidth(0.82f).widthIn(max = 420.dp))
+                }
+            }
+            Row(Modifier.padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(R.string.assistant_live_vinyl, R.string.assistant_live_cassette, R.string.assistant_live_tv).forEachIndexed { i, label ->
+                    FilterChip(selected = style == i, onClick = { pick(i) }, label = { Text(stringResource(label)) })
+                }
             }
             Surface(Modifier.fillMaxWidth().widthIn(max = 560.dp), shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
                 Column(Modifier.padding(18.dp).heightIn(min = 96.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -643,7 +652,7 @@ private fun rememberTurn(phase: LivePhase, level: Float): Turn {
  * answers, as a record changes song; off the record while connecting and when it stops.
  */
 @Composable
-private fun Vinyl(phase: LivePhase, level: Float, modifier: Modifier) {
+internal fun Vinyl(phase: LivePhase, level: Float, modifier: Modifier) {
     val label = androidx.compose.ui.graphics.ImageBitmap.imageResource(R.drawable.assistant_art)
     val turn = rememberTurn(phase, level)
     // the needle's distance from the middle, as a share of the record's radius

@@ -362,26 +362,34 @@ internal val HOME_TILE = 50.dp
             o.optString("title").ifBlank { AssistantBriefs.title(f) } to f
         }.getOrNull() }
     }
+    val talking = rememberHomeTalk()
     // a square (medium) card: Live's cassette, still on Home (8 Nov: "this new widget of the assistant is perfect for the cassette"),
     // the latest brief's title under it, the mic in its corner
     if (LocalHomeMedium.current) return Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize().padding(10.dp)) {
-            Column(Modifier.fillMaxSize().clickable { brief?.let { b -> c.startActivity(Intent(c, BriefActivity::class.java).putExtra("file", b.second.absolutePath)) } ?: openChat() },
+            val now = talking.phase
+            Column(Modifier.fillMaxSize().clickable { if (now != null) talking.end() else brief?.let { b -> c.startActivity(Intent(c, BriefActivity::class.java).putExtra("file", b.second.absolutePath)) } ?: openChat() },
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                Cassette(LivePhase.Stopping, 0f, Modifier.weight(1f, fill = false).fillMaxWidth(0.8f))
+                // talking: the robot on a small TV, on the widget itself (8 Nov); resting: the cassette and the brief's title
+                if (now != null) TalkPlayer(talking, now, Modifier.weight(1f, fill = false).fillMaxWidth(0.9f))
+                else Cassette(LivePhase.Stopping, 0f, Modifier.weight(1f, fill = false).fillMaxWidth(0.8f))
                 Text(brief?.first ?: stringResource(R.string.app_assistant), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 6.dp))
             }
-            IconButton(onClick = { talk(c) }, modifier = Modifier.align(Alignment.BottomEnd).size(48.dp)) {
-                Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp)) {
+            IconButton(onClick = { talking.tap { talk(c) } }, modifier = Modifier.align(Alignment.BottomEnd).size(48.dp)) {
+                Surface(shape = CircleShape, color = if (now == LivePhase.Listening) Color(0xFFD32F2F) else MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp)) {
                     Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.ic_mic), contentDescription = stringResource(R.string.assistant_tap_to_talk), tint = MaterialTheme.colorScheme.onPrimary) }
                 }
+            }
+            // ✕ at the top right while it talks: stops it (8 Nov)
+            if (now != null) IconButton(onClick = { talking.end() }, modifier = Modifier.align(Alignment.TopEnd).size(40.dp)) {
+                Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_close))
             }
         }
     }
     Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxSize()) {
         Row(Modifier.padding(start = 12.dp, end = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Row(Modifier.weight(1f).clip(MaterialTheme.shapes.medium).clickable(onClick = openChat).padding(4.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                ArtImage(R.drawable.assistant_art, 36.dp)
+                talking.phase?.let { TalkScreen(it, talking.hearing, Modifier.size(44.dp)) } ?: ArtImage(R.drawable.assistant_art, 36.dp)
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.app_assistant), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                     val b = brief
@@ -390,7 +398,7 @@ internal val HOME_TILE = 50.dp
                     else Text(stringResource(R.string.assistant_home_detail), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
-            IconButton(onClick = { talk(c) }, modifier = Modifier.size(52.dp)) {
+            IconButton(onClick = { talking.tap { talk(c) } }, modifier = Modifier.size(52.dp)) {
                 Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(44.dp)) {
                     Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.ic_mic), contentDescription = stringResource(R.string.assistant_tap_to_talk), tint = MaterialTheme.colorScheme.onPrimary) }
                 }
