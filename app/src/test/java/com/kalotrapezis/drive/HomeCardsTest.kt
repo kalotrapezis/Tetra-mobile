@@ -67,4 +67,14 @@ class HomeCardsTest {
         assertNull(HomeCards.urgencyColor(0))
         assertEquals(3, (1..3).mapNotNull { HomeCards.urgencyColor(it) }.toSet().size)
     }
+
+    @Test fun `missed calls - two days only, none from before the clear, newest first`() {
+        val now = 10 * 86_400_000L; val h = 3_600_000L
+        fun call(id: Long, at: Long, type: Int = android.provider.CallLog.Calls.MISSED_TYPE) = LoggedCall(id, "69$id", at, 0, type)
+        val log = listOf(call(1, now - h), call(2, now - 30 * h), call(3, now - 50 * h), call(4, now - 2 * h, android.provider.CallLog.Calls.INCOMING_TYPE), call(5, now - 3 * h))
+        assertEquals(listOf(1L, 5L), HomeCards.missedToShow(log, 0, now).map { it.id })
+        assertEquals(listOf(1L, 5L, 2L), HomeCards.missedToShow(log, 0, now, n = 9).map { it.id })
+        assertEquals(listOf(1L), HomeCards.missedToShow(log, now - 2 * h, now).map { it.id })
+        assertEquals(emptyList<Long>(), HomeCards.missedToShow(log, now, now).map { it.id })
+    }
 }

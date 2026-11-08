@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,6 +34,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -117,6 +122,13 @@ internal object HomeCards {
 
     /** The urgency dot's colour: none, low, needs attention, urgent. */
     fun urgencyColor(score: Int): Color? = when (score) { 3 -> Color(0xFFE53935); 2 -> Color(0xFFFB8C00); 1 -> Color(0xFFFDD835); else -> null }
+
+    /** How long a missed call stays on Home (8 Nov: yesterday's still showed, as if today's, and could not be cleared). */
+    const val MISSED_MS = 2 * 86_400_000L
+
+    /** The missed calls Home shows: of the last [MISSED_MS], after the user last cleared them, the newest [n]. */
+    fun missedToShow(calls: List<LoggedCall>, clearedAt: Long, now: Long = System.currentTimeMillis(), n: Int = 2) =
+        calls.filter { it.missed && it.at > maxOf(clearedAt, now - MISSED_MS) }.sortedByDescending { it.at }.take(n)
 
     /** Text on a card's own colour: dark on a light one (Data's lime, Notes' yellow), white on a deep one. */
     fun onColor(c: Color): Color = if (c.luminance() > 0.45f) Color(0xFF1B1B1B) else Color.White
@@ -519,23 +531,47 @@ private fun birthdays(days: Long): List<Birthday> = runCatching {
     }
 }
 
-/** The last missed calls (Android's call log, a phone only), a name when the number is a contact's; a tap opens Missed. */
+/**
+ * The last missed calls of two days (Android's call log, a phone only), a name when the number is a contact's, when each came
+ * («13:40», «Χθες 13:40», «Τετ 13:40»); a tap opens Missed, ✕ clears them until the next one.
+ */
 @Composable internal fun HomeMissedCalls() {
     val c = LocalContext.current
-    val missed by produceState(emptyList<Pair<String, Long>>(), HomeCards.tick.intValue) {
+    val prefs = remember(c) { c.getSharedPreferences("home", Context.MODE_PRIVATE) }
+    var clearedAt by remember { mutableLongStateOf(prefs.getLong(MISSED_CLEARED, 0L)) }
+    val missed by produceState(emptyList<Pair<String, Long>>(), HomeCards.tick.intValue, clearedAt) {
         value = withContext(Dispatchers.IO) { runCatching {
             if (PhoneRelay.noCalls(c)) return@runCatching emptyList()
             val names = ContactsPreload.all.orEmpty().flatMap { ct -> ct.info.phones.map { ContactsWays.key(it.value) to ct.info.name } }.filter { it.first.length >= 5 }.toMap()
-            PhoneLog.read(c, 200).filter { it.missed }.take(2).map { (names[ContactsWays.key(it.number)] ?: it.number) to it.at }
+            HomeCards.missedToShow(PhoneLog.read(c, 200), clearedAt).map { (names[ContactsWays.key(it.number)] ?: it.number) to it.at }
         }.getOrDefault(emptyList()) }
     }
-    missed.forEach { (who, at) ->
-        Row(Modifier.fillMaxWidth().clickable { openPhone(c, "missed") }.padding(bottom = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Icon(painterResource(R.drawable.ic_call_missed), contentDescription = null, tint = Color(0xFFE53935), modifier = Modifier.size(14.dp))
-            PanelLine(who, Modifier.weight(1f), bold = true)
-            PanelLine(TIME.format(Instant.ofEpochMilli(at).atZone(ZoneId.systemDefault())))
+    if (missed.isEmpty()) return
+    val zone = ZoneId.systemDefault(); val today = java.time.LocalDate.now(zone)
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    val yesterday = stringResource(R.string.common_yesterday)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            missed.forEach { (who, at) ->
+                Row(Modifier.fillMaxWidth().clickable { openPhone(c, "missed") }.padding(bottom = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Icon(painterResource(R.drawable.ic_call_missed), contentDescription = null, tint = Color(0xFFE53935), modifier = Modifier.size(14.dp))
+                    PanelLine(who, Modifier.weight(1f), bold = true)
+                    PanelLine(whenText(at, zone, today, locale).let { if (PhoneLog.day(at, zone) == today.minusDays(1)) "$yesterday $it" else it })
+                }
+            }
+        }
+        Box(Modifier.size(32.dp).clip(CircleShape).clickable { System.currentTimeMillis().let { prefs.edit().putLong(MISSED_CLEARED, it).apply(); clearedAt = it } }, contentAlignment = Alignment.Center) {
+            Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_clear), modifier = Modifier.size(16.dp))
         }
     }
+}
+
+private const val MISSED_CLEARED = "missedClearedAt"
+
+/** A list's leftover scroll and fling stay in it (8 Nov: at the notes' end "everything scrolls together"), Home does not move. */
+private val KeepScroll = object : NestedScrollConnection {
+    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource) = available
+    override suspend fun onPostFling(consumed: Velocity, available: Velocity) = available
 }
 
 /** Notes, large: tall and narrow (8 Nov: "the pinned notes in the very large one, long and narrow, with a scroll"). */
@@ -548,7 +584,7 @@ private fun birthdays(days: Long): List<Birthday> = runCatching {
     }
     HomeWidget(Category.Notes.color, R.drawable.notes_art, stringResource(R.string.app_notes), open, panel = false, action = { HomeWidgetAction("+", null, newNote) }) {
         if (notes.isEmpty()) { Text(stringResource(R.string.home_notes_none), style = MaterialTheme.typography.bodySmall); return@HomeWidget }
-        androidx.compose.foundation.lazy.LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        androidx.compose.foundation.lazy.LazyColumn(Modifier.fillMaxSize().nestedScroll(KeepScroll), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             items(notes.size) { i ->
                 val n = notes[i]
                 val tint = n.color?.let { runCatching { Color(android.graphics.Color.parseColor(it)) }.getOrNull() } ?: MaterialTheme.colorScheme.surface
