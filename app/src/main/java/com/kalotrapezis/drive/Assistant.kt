@@ -771,13 +771,27 @@ internal class AssistantTools(
     }
 
     // ---- Files ----
+    /** Word by word (FileMatch): the name has every word; else its folders count too; else the closest, said so. */
     private fun filesFind(a: JSONObject): ToolResult {
-        val q = ContactsFiles.plain(a.getString("query"))
-        val found = DriveRules.allItems(tetra).filter { !it.isDirectory && ContactsFiles.plain(it.file.name).contains(q) }
-            .sortedByDescending { it.lastModified }.take(8)
+        val said = a.getString("query")
+        val q = FileMatch.query(said)
+        WriterLog.i("AI Assist: files_find \"$said\" → words $q")
+        if (q.isEmpty()) return ToolResult("Say part of the file's name.")
+        val all = DriveRules.allItems(tetra).filter { !it.isDirectory }
+        val scored = all.map { it to FileMatch.score(q, it.file.name) }
+        var found = scored.filter { it.second == q.size }.map { it.first }
+        var near = false
+        if (found.isEmpty()) found = all.filter { FileMatch.score(q, it.relativePath) == q.size }
+        if (found.isEmpty()) {
+            val best = scored.maxOfOrNull { it.second } ?: 0
+            if (best > 0 && best * 2 >= q.size) { found = scored.filter { it.second == best }.map { it.first }; near = true }
+        }
+        val total = found.size
+        found = found.sortedByDescending { it.lastModified }.take(8)
         files = found.map { it.file }
         if (found.isEmpty()) return ToolResult("No file's name has that.")
-        return ToolResult(found.mapIndexed { i, it -> "${i + 1}. ${it.relativePath}" }.joinToString("\n"), cards = listOf(ResultCard.Files(found.map { it.file }, tetra)))
+        val head = (if (near) "No name has all those words; the closest:\n" else "") + (if (total > found.size) "$total found, the newest ${found.size}:\n" else "")
+        return ToolResult(head + found.mapIndexed { i, it -> "${i + 1}. ${it.relativePath}" }.joinToString("\n"), cards = listOf(ResultCard.Files(found.map { it.file }, tetra)))
     }
 
     /** An estimate and a card that waits for the user's yes: nothing is spent until then (the computer makes it: AudioJobs). */
@@ -1106,7 +1120,7 @@ internal class AssistantTools(
                 "text" to p("string", "The note's text, as said."), "title" to p("string", "A title, only if the user gave one.")),
             fn("shopping_list", "Make a new checklist note (a shopping list).", listOf("items"),
                 "title" to p("string", "The note's title; Ψώνια if not said."), "items" to JSONObject().put("type", "array").put("items", JSONObject().put("type", "string")).put("description", "One entry per item.")),
-            fn("files_find", "Find files in Tetra whose name contains some words; answers a numbered list.", listOf("query"), "query" to p("string", "Part of the file's name.")),
+            fn("files_find", "Find files in Tetra by words of their name (any order, without the dots or the extension); answers a numbered list.", listOf("query"), "query" to p("string", "Words of the file's name, as the user said them.")),
             fn("file_open", "Open a file from the last files_find list.", listOf("choice"), CHOICE),
             fn("contacts_find", "Find the user's contacts by name, by their relation to the user (\"my sister\"), or by what they do (keywords); answers a numbered list of names (with the kind of number when one has several).", emptyList(),
                 "name" to p("string", "The name as said."), "relation" to p("string", RELATION),
