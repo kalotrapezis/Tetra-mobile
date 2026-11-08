@@ -802,7 +802,7 @@ internal fun Cassette(phase: LivePhase, level: Float, modifier: Modifier) {
  * over it, and a small stand. [still] (animations off in the phone's settings): on at once.
  */
 @Composable
-private fun VhsTv(answer: Int, still: Boolean, modifier: Modifier, off: Boolean = false, screen: @Composable () -> Unit) {
+internal fun VhsTv(answer: Int, still: Boolean, modifier: Modifier, off: Boolean = false, screen: @Composable () -> Unit) {
     val on = remember(answer) { androidx.compose.animation.core.Animatable(if (still) 1f else 0f) }
     LaunchedEffect(answer) { if (!still) on.animateTo(1f, androidx.compose.animation.core.tween(700)) }
     // switching off (8 Nov: "the CRT's eye when the talk ends"): the picture folds to a line, the line to a dot, the dot fades

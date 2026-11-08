@@ -639,6 +639,8 @@ internal fun SettingsTab(
     var decorations by remember { mutableStateOf(AiLook.decorated(context)) }
     SettingsSection(stringResource(R.string.ai_decorations), null) {
         SwitchRow(stringResource(R.string.ai_decorations), stringResource(R.string.ai_decorations_note), decorations) { decorations = it; AiLook.set(context, it); TvWidget.refresh(context) }
+        var presenter by remember { mutableStateOf(Presenter.on(context)) }
+        if (decorations) SwitchRow(stringResource(R.string.ai_presenter), stringResource(R.string.ai_presenter_note), presenter) { presenter = it; Presenter.set(context, it) }
     }
     // Voxtral's context_bias (the VOICE app's terms): the user's own spellings, and the favourites' names only when switched on
     var words by remember { mutableStateOf(AssistantWords.words(context)) }
