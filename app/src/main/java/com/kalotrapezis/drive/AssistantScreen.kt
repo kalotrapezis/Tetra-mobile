@@ -156,6 +156,7 @@ private enum class Phase { Idle, Listening, Thinking }
 internal enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Listening(40f), Thinking(90f), Speaking(200f), Stopping(0f) }
 
 @Composable
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -192,7 +193,11 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
     var liveLast by remember { mutableLongStateOf(0L) }
     var liveNow by remember { mutableLongStateOf(0L) }
     var voice by remember { mutableStateOf<AnswerVoice?>(null) } // the answer being read aloud
-    fun hush() { reader.stop(); voice?.stop(); voice = null }
+    // the sheet's TV (8 Nov): what the robot shows while the answer is heard
+    var talking by remember { mutableStateOf(false) }
+    var tvCue by remember { mutableStateOf(TalkCue.None) }
+    var tvMood by remember { mutableStateOf(TalkMood.Normal) }
+    fun hush() { reader.stop(); voice?.stop(); voice = null; talking = false }
     fun endLive(@androidx.annotation.StringRes why: Int? = null) {
         val l = live ?: return
         live = null; l.end(); hush()
@@ -295,11 +300,16 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         val speech = if (aloud || inLive) AnswerVoice(context, reader, chat.bill.part("voice"), scope).also { voice = it } else null
         val cut = Sentences()
         AssistantTools.beside = Beside.can(context)
-        val r = withContext(Dispatchers.IO) { runCatching { chat.ask(text, file = file) { words ->
+        val said = StringBuilder(); tvCue = TalkCue.None; tvMood = TalkMood.Normal
+        chat.onTool = { name -> TalkCue.ofTool(name).takeIf { it != TalkCue.None }?.let { found -> scope.launch { tvCue = found } } }
+        val r = withContext(Dispatchers.IO) { runCatching { try { chat.ask(text, file = file) { words ->
+            said.append(words); val cue = TalkCue.of(said); val mood = TalkMood.of(said)
+            scope.launch { talking = speech != null; tvCue = cue; tvMood = mood }
             cut.push(words).forEach { speech?.say(it) }
             if (inLive) scope.launch { liveAi += words; if (speech != null) livePhase = LivePhase.Speaking }
-        } } }
+        } } finally { chat.onTool = null } } }
         speech?.say(cut.rest()); speech?.finish()
+        scope.launch { speech?.await(); talking = false }
         phase = Phase.Idle; spent = chat.bill.usd
         val reply = r.getOrElse { speech?.stop(); say(it.shownMessage(context) ?: context.getString(R.string.assistant_server, 0), true); WriterLog.w("Assistant: ${it.message}"); listenAgain(); return@launch }
         bubbles += Bubble(false, reply.text, reply.choices, reply.call, reply.images, audio = reply.audio, cards = reply.cards, confirm = reply.confirm)
@@ -417,10 +427,30 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
                     }
                     // the plain mic (the user, 8 Nov): Live's cassette while it listens and thinks, a VHS-era TV with the answer on its screen
                     val still = remember { android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f }
-                    if (hasKey && phase != Phase.Idle) Cassette(when { still -> LivePhase.Stopping; phase == Phase.Listening -> LivePhase.Listening; else -> LivePhase.Thinking },
-                        if (hearing) 0.6f else 0f, Modifier.padding(top = 12.dp).fillMaxWidth(0.55f).widthIn(max = 280.dp).align(Alignment.CenterHorizontally))
-                    if (hasKey && phase == Phase.Idle && bubbles.lastOrNull()?.mine == false) VhsTv(bubbles.size, still, Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) { list(Modifier.fillMaxWidth().heightIn(max = 360.dp)) }
-                    else list(Modifier.fillMaxWidth().heightIn(max = 420.dp))
+                    // the TV, bigger, all along (8 Nov): no text on it, the robot showing what goes on, and pixel buttons for what can be
+                    // tapped; the words stay in the full AI Assist and its History, the same conversation
+                    if (hasKey) {
+                        val shown = when { phase == Phase.Listening -> LivePhase.Listening; phase == Phase.Thinking -> LivePhase.Thinking; talking -> LivePhase.Speaking; else -> LivePhase.Stopping }
+                        val color = remember { characterColor(AssistantVoices.id(context)) }
+                        VhsTv(0, true, Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) { TalkScreen(shown, hearing, Modifier.fillMaxWidth().height(230.dp), tvCue, tvMood, color) }
+                        val last = bubbles.lastOrNull()?.takeIf { !it.mine && phase == Phase.Idle }
+                        androidx.compose.foundation.layout.FlowRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            dialing?.let { PixelButton(context.getString(R.string.common_cancel) + " · $dialLeft", Color(0xFFEF9A9A), R.drawable.ic_call_end) { cancelDial() } }
+                            if (last != null) {
+                                pending?.let { p -> PixelButton(p.name, Color(0xFFA5D6A7), R.drawable.ic_call) { call(p) } }
+                                confirming?.let { c -> PixelButton(context.getString(R.string.common_yes), Color(0xFFA5D6A7)) { decide(c, true) }; PixelButton(context.getString(R.string.common_no), Color(0xFFEF9A9A)) { decide(c, false) } }
+                                pendingAudio?.let { a -> PixelButton(context.getString(R.string.common_yes), Color(0xFFA5D6A7), R.drawable.ic_play) { startAudio(a) }; PixelButton(context.getString(R.string.common_no), Color(0xFFEF9A9A)) { skipAudio() } }
+                                last.choices.forEach { ch -> PixelButton(ch.label, color.copy(alpha = 1f)) { choose(ch) } }
+                                last.cards.forEach { card -> when (card) {
+                                    is ResultCard.Web -> card.sources.take(4).forEach { src -> PixelButton(src.title.ifBlank { runCatching { Uri.parse(src.url).host }.getOrNull() ?: src.url }, Color(0xFF81D4FA), R.drawable.ic_link) { go(AssistantTools.browserAt(src.url)); close() } }
+                                    is ResultCard.Files -> card.files.take(4).forEach { f -> PixelButton(f.name, Color(0xFFFFE082), if (f.extension.lowercase() in setOf("mp3", "m4a", "wav", "ogg", "opus")) R.drawable.ic_play else R.drawable.ic_file) { open(f); close() } }
+                                    else -> Unit
+                                } }
+                                // the words, and anything else it made: the full AI Assist, the same conversation
+                                PixelButton(context.getString(R.string.common_open), Color(0xFFE0E0E0), R.drawable.ic_chat) { openAssistant(context); close() }
+                            }
+                        }
+                    } else list(Modifier.fillMaxWidth().heightIn(max = 420.dp))
                     Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         MicButton(phase, hearing, ::mic)
                         Text(status ?: stringResource(R.string.assistant_tap_to_talk), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)

@@ -10,6 +10,11 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
@@ -274,6 +279,21 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.weather(cue: TalkCu
             listOf(0.2f, 0.55f).forEach { k -> val c = Offset(size.width / 2, size.height * k)
                 drawCircle(trim, radius = size.width * 0.45f, center = c); drawCircle(Color(0xFF2A2420), radius = size.width * 0.3f, center = c) }
             drawCircle(Color(0xFFE53935), radius = size.width * 0.12f, center = Offset(size.width / 2, size.height * 0.88f))
+        }
+    }
+}
+
+/** A button in the TV's world: square, an ink border and a hard shadow, a monospace label (8 Nov: "a pixelated button to show the sources"). */
+@Composable internal fun PixelButton(text: String, color: Color, icon: Int? = null, onClick: () -> Unit) {
+    val ink = Color(0xFF2A2420)
+    Box(Modifier.padding(end = 4.dp, bottom = 4.dp)) {
+        Box(Modifier.matchParentSize().offset(3.dp, 3.dp).background(Color.Black.copy(alpha = 0.45f)))
+        androidx.compose.foundation.layout.Row(Modifier.background(color).border(2.dp, ink).clickable(onClick = onClick).padding(horizontal = 10.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            icon?.let { androidx.compose.material3.Icon(androidx.compose.ui.res.painterResource(it), contentDescription = null, Modifier.padding(end = 6.dp).size(16.dp), tint = ink) }
+            androidx.compose.material3.Text(text, color = ink, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                style = androidx.compose.material3.MaterialTheme.typography.labelLarge, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                modifier = Modifier.widthIn(max = 220.dp))
         }
     }
 }
