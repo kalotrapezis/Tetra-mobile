@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The test package's own screens: a sign-in form of another app, for Passwords' autofill (AutofillProbe.kt). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity android:name="com.kalotrapezis.drive.AutofillProbe" android:exported="true" android:label="Autofill probe" />
+    </application>
+</manifest>

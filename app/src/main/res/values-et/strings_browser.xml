@@ -20,8 +20,6 @@
     <string name="browser_history">Ajalugu</string>
     <string name="browser_history_note">Hoitakse 24 tundi, siis unustatakse</string>
     <string name="browser_no_history">Viimase 24 tunni jooksul mitte midagi</string>
-    <string name="browser_saved">Paroolid ja kaardid</string>
-    <string name="browser_none_saved">Midagi pole veel salvestatud</string>
     <string name="browser_saved_note">Krüpteeritult, ainult selles telefonis</string>
     <string name="browser_passwords">Paroolid</string>
     <string name="browser_addresses">Aadressid</string>

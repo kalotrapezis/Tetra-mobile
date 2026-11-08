@@ -20,8 +20,6 @@
     <string name="browser_history">History</string>
     <string name="browser_history_note">Kept for 24 hours, then forgotten</string>
     <string name="browser_no_history">Nothing in the last 24 hours</string>
-    <string name="browser_saved">Passwords and cards</string>
-    <string name="browser_none_saved">Nothing saved yet</string>
     <string name="browser_saved_note">Kept encrypted, on this phone only</string>
     <string name="browser_passwords">Passwords</string>
     <string name="browser_addresses">Addresses</string>

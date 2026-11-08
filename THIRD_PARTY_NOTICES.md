@@ -98,3 +98,11 @@ of the components GeckoView is built from are in its source, `toolkit/content/li
 
 The Browser installs, on its first start, uBlock Origin (GPL v3, Raymond Hill) and Dark
 Reader (MIT, Dark Reader Ltd) from addons.mozilla.org; they are not part of Tetra's package.
+
+## EFF's large word list (Passwords)
+
+Passwords › Create › Words picks from the Electronic Frontier Foundation's large word list
+for passphrases (`app/src/main/assets/eff_large_wordlist.txt`, 7,776 words, unchanged), by
+the EFF, licensed under Creative Commons Attribution 3.0 (CC BY 3.0):
+https://creativecommons.org/licenses/by/3.0/ — from
+https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases

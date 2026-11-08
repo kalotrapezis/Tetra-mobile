@@ -130,10 +130,11 @@ internal data class DeviceTabs(val id: String, val name: String, val at: Long, v
 internal object BrowserSync {
     const val FOLDER = "Browser"
     const val BOOKMARKS = "sync_bookmarks"; const val TABS = "sync_tabs"; const val PASSWORDS = "sync_passwords"
+    const val TWO_FACTOR = "sync_2fa" // Passwords' 2FA codes (Authenticator.kt), with the passwords' passphrase; off until chosen
 
     fun root(tetra: File) = File(tetra, TetraSystem.onDisk(FOLDER))
     fun root() = root(TetraFolder.root(android.os.Environment.getExternalStorageDirectory()))
-    fun on(c: Context, what: String) = c.getSharedPreferences("browser", Context.MODE_PRIVATE).getBoolean(what, what != PASSWORDS)
+    fun on(c: Context, what: String) = c.getSharedPreferences("browser", Context.MODE_PRIVATE).getBoolean(what, what != PASSWORDS && what != TWO_FACTOR)
 
     /**
      * This device's file name: its model and a piece of Android's id for this app on it, so two of the same model (or two

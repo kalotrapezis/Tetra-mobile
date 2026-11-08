@@ -2661,6 +2661,10 @@ real devices.
   same records and merge, encrypted end to end. `Passwords/key.json`: Argon2id (m 46 MiB, t 1, p 1) salt and a check box; the key
   under the Keystore on each device (asked once). `<device>.enc`: AES-256-GCM, fresh nonce, device name as AAD. "Forgot it": a new
   key.json, made later, wins; the others ask again; vaults stay. Off: the vault stays, the key is forgotten.
+- **2FA codes** (the Passwords applet, 4 Nov; off until chosen, under Passwords in Settings › Browser › Sync, and only while
+  Passwords is on here): `TwoFactor/<device>.enc`, the passwords' key and merge, records keyed by issuer + account + secret,
+  `2fa|<device>` as AAD (a passwords file does not open as 2FA). Off: the codes stay, the base is forgotten. A login's note (the
+  applet's, Google's export's) is a fourth field in its record, left out when empty, so older records read the same.
 - **Switches** are each device's own: off stops reading and writing that part; Open tabs off writes an empty list.
 
 **Checked:** BrowserSyncTest, BrowserPasswordsTest (RFC 9106 vector, wrong passphrase, tampering, merge, no plaintext), desktop

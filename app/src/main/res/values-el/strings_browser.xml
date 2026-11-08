@@ -20,8 +20,6 @@
     <string name="browser_history">Ιστορικό</string>
     <string name="browser_history_note">Κρατιέται 24 ώρες και μετά ξεχνιέται</string>
     <string name="browser_no_history">Τίποτα τις τελευταίες 24 ώρες</string>
-    <string name="browser_saved">Κωδικοί και κάρτες</string>
-    <string name="browser_none_saved">Δεν έχει αποθηκευτεί τίποτα ακόμη</string>
     <string name="browser_saved_note">Κρυπτογραφημένα, μόνο σε αυτό το κινητό</string>
     <string name="browser_passwords">Κωδικοί</string>
     <string name="browser_addresses">Διευθύνσεις</string>

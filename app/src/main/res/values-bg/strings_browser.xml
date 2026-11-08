@@ -20,8 +20,6 @@
     <string name="browser_history">История</string>
     <string name="browser_history_note">Пази се 24 часа, после се забравя</string>
     <string name="browser_no_history">Нищо през последните 24 часа</string>
-    <string name="browser_saved">Пароли и карти</string>
-    <string name="browser_none_saved">Още нищо не е запазено</string>
     <string name="browser_saved_note">Шифровано, само на този телефон</string>
     <string name="browser_passwords">Пароли</string>
     <string name="browser_addresses">Адреси</string>

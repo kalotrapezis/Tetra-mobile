@@ -95,7 +95,7 @@ internal const val BROWSER_SETTINGS = "settings-browser" // the sidebar's ⚙: S
 internal val BROWSER_COLOR = Color(0xFF1A87FD) // the blue of the user's icon (Assets/BrowserApp.png)
 private val PRIVATE_COLOR = Color(0xFF2B2140)
 
-private enum class BrowserPanel { Bookmarks, History, Saved, Import }
+private enum class BrowserPanel { Bookmarks, History, Import }
 
 /**
  * The Browser in a window of its own (the user, 2 Nov: "I can't use the maps and the browser together, to play music in the
@@ -680,7 +680,9 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         watch.startWatching()
         // opened, and back from elsewhere (Settings › Browser › Sync, a while away): looked at again, the switches as they are now
         // (an observer added now is told ON_RESUME at once)
-        val back = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME) { syncMarks(BookmarkLibrary(bookmarks, bookFolders), false); readOthers(); syncVault(vault, false); shareTabs() } }
+        val back = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+            if (!private) vault = BrowserSecrets.vault(context) // the Passwords applet may have changed it meanwhile
+            syncMarks(BookmarkLibrary(bookmarks, bookFolders), false); readOthers(); syncVault(vault, false); shareTabs() } }
         lifecycle.lifecycle.addObserver(back)
         onDispose { lifecycle.lifecycle.removeObserver(back); watch.stopWatching(); main.removeCallbacks(marksSoon); main.removeCallbacks(tabsSoon); main.removeCallbacks(vaultSoon) }
     }
@@ -741,7 +743,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         "html" -> BrowserTool(R.drawable.ic_code, stringResource(R.string.browser_html), tab.html, url.isNotEmpty()) { toggleHtml(tab) }
         "bookmarks" -> BrowserTool(R.drawable.ic_bookmark, stringResource(R.string.browser_bookmarks)) { panel = BrowserPanel.Bookmarks }
         "history" -> if (private) null else BrowserTool(R.drawable.ic_history, stringResource(R.string.browser_history)) { panel = BrowserPanel.History }
-        "saved" -> if (private) null else BrowserTool(R.drawable.ic_lock, stringResource(R.string.browser_saved)) { panel = BrowserPanel.Saved }
+        // the Passwords applet (the user, 4 Nov: "Instead of making a better password page, create a password manager in tetra"), this page's site looked up
+        "saved" -> if (private) null else BrowserTool(R.drawable.ic_lock, stringResource(R.string.app_passwords)) { openApplet(context, PasswordsActivity.WORD + host) }
         "copy" -> BrowserTool(R.drawable.ic_copy, stringResource(R.string.browser_copy_url), enabled = url.isNotEmpty()) {
             context.getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(android.content.ClipData.newPlainText(host, url))
             message = context.getString(R.string.browser_copied)
@@ -1159,7 +1162,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             confirmButton = { TextButton(onClick = { if (name.isNotBlank()) groups[g] = name.trim(); naming = null }) { Text(stringResource(R.string.common_ok)) } },
             dismissButton = { TextButton(onClick = { naming = null }) { Text(stringResource(R.string.common_cancel)) } })
     }
-    if (filling) BrowserFillStrip(fitting.first, fitting.second, fitting.third, dismiss = { filling = false }) { data, forHost ->
+    if (filling) BrowserFillStrip(fitting.first, fitting.second, fitting.third, dismiss = { filling = false },
+        manage = { filling = false; openApplet(context, PasswordsActivity.WORD + host) }) { data, forHost ->
         filling = false
         // the page may have moved on while the strip was open: a password goes only to its own host
         if (forHost == null || BrowserRules.sameHost(BrowserRules.host(tab.url), forHost)) tab.send(JSONObject().put("fill", data))
@@ -1500,7 +1504,7 @@ private fun Modifier.sideTouches(): Modifier = composed {
     }
 }
 
-private fun addressLabel(a: Map<String, String>) = a["name"] ?: listOfNotNull(a["given-name"], a["family-name"]).joinToString(" ").ifEmpty { a["email"] ?: a["street-address"] ?: a.values.first() }
+internal fun addressLabel(a: Map<String, String>) = a["name"] ?: listOfNotNull(a["given-name"], a["family-name"]).joinToString(" ").ifEmpty { a["email"] ?: a["street-address"] ?: a.values.first() }
 
 /**
  * The first page: the favourites as tiles (the user, 2 Nov: "or nothing"), then their folders ("so we can have Radios", 2 Nov),
@@ -1593,7 +1597,7 @@ private fun BrowserPanelView(p: BrowserPanel, close: () -> Unit, visits: List<Vi
             item {
                 Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 4.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(when (p) { BrowserPanel.Bookmarks -> R.string.browser_bookmarks; BrowserPanel.History -> R.string.browser_history
-                        BrowserPanel.Saved -> R.string.browser_saved; BrowserPanel.Import -> R.string.browser_import }), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
+                        BrowserPanel.Import -> R.string.browser_import }), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
                     if (p == BrowserPanel.History && visits.isNotEmpty()) TextButton(onClick = clearHistory) { Text(stringResource(R.string.common_clear)) }
                     IconButton(onClick = close) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_close)) }
                 }
@@ -1606,15 +1610,6 @@ private fun BrowserPanelView(p: BrowserPanel, close: () -> Unit, visits: List<Vi
                     item { note(stringResource(when { visits.isEmpty() -> R.string.browser_no_history; keepHistory == BrowserRules.ON_EXIT -> R.string.browser_history_exit_note
                         keepHistory == BrowserRules.NEVER -> R.string.browser_history_never_note; else -> R.string.browser_history_note })) }
                     items(visits, key = { it.url }) { v -> BrowserRow(v.title, v.url, click = { open(v.url) }) }
-                }
-                BrowserPanel.Saved -> {
-                    item { note(stringResource(if (vault.empty) R.string.browser_none_saved else if (BrowserSync.on(LocalContext.current, BrowserSync.PASSWORDS)) R.string.browser_saved_note_synced else R.string.browser_saved_note)) }
-                    if (vault.logins.isNotEmpty()) item { head(stringResource(R.string.browser_passwords)) }
-                    items(vault.logins, key = { "l" + it.host + "\u0000" + it.user }) { l -> BrowserRow(l.user.ifEmpty { "—" }, l.host, click = {}, remove = { keep(vault.copy(logins = vault.logins - l)) }) }
-                    if (vault.addresses.isNotEmpty()) item { head(stringResource(R.string.browser_addresses)) }
-                    items(vault.addresses) { a -> BrowserRow(addressLabel(a), a.values.joinToString(", "), click = {}, remove = { keep(vault.copy(addresses = vault.addresses - a)) }) }
-                    if (vault.cards.isNotEmpty()) item { head(stringResource(R.string.browser_cards)) }
-                    items(vault.cards, key = { "c" + it.number }) { c -> BrowserRow("•••• ${c.last4}", listOf(c.name, "${c.month}/${c.year}").filter { it.isNotBlank() && it != "/" }.joinToString(" · "), click = {}, remove = { keep(vault.copy(cards = vault.cards - c)) }) }
                 }
                 BrowserPanel.Import -> item {
                     note(stringResource(R.string.browser_import_note))
@@ -1636,7 +1631,7 @@ private fun BrowserPanelView(p: BrowserPanel, close: () -> Unit, visits: List<Vi
 /** Fill: what fits this page, a strip from the bottom (no popup lists on a touch screen); `fill` gets the values and, for a password, its host. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BrowserFillStrip(logins: List<SavedLogin>, addresses: List<Map<String, String>>, cards: List<SavedCard>, dismiss: () -> Unit, fill: (JSONObject, String?) -> Unit) {
+private fun BrowserFillStrip(logins: List<SavedLogin>, addresses: List<Map<String, String>>, cards: List<SavedCard>, dismiss: () -> Unit, manage: () -> Unit, fill: (JSONObject, String?) -> Unit) {
     BrowserSheet(onDismissRequest = dismiss) {
         Column(Modifier.navigationBarsPadding().padding(start = 12.dp, end = 12.dp, bottom = 24.dp)) {
             Text(stringResource(R.string.browser_fill_title), Modifier.padding(horizontal = 8.dp, vertical = 8.dp), style = MaterialTheme.typography.titleMedium)
@@ -1645,6 +1640,10 @@ private fun BrowserFillStrip(logins: List<SavedLogin>, addresses: List<Map<Strin
             cards.forEach { c -> BrowserRow("•••• ${c.last4}", c.name, click = {
                 fill(JSONObject().put("cc-number", c.number).put("cc-name", c.name).put("cc-exp-month", c.month).put("cc-exp-year", c.year).put("cc-exp", "${c.month}/${c.year.takeLast(2)}"), null)
             }) }
+            // the Passwords applet: this site's logins found, to see, change or add one
+            TextButton(onClick = manage, Modifier.padding(top = 4.dp)) {
+                Icon(painterResource(R.drawable.ic_key), null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.pw_manage))
+            }
         }
     }
 }
