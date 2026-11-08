@@ -2604,6 +2604,44 @@ internal fun WriterScreen(back: () -> Unit, open: String?) {
     fun nextMisspelled() {
         if (!spell.next()) message = if (spelling) context.getString(R.string.words_no_spelling_mistakes) else context.getString(R.string.words_spelling_off)
     }
+    // Review › ✦ Suggestions (WriterSuggest): AI Assist's edits for the selection or the document, each marked on the page
+    // until accepted (one step of Undo) or rejected; asked only on Send, only while AI Assist may use Words.
+    LaunchedEffect(Unit) { withContext(Dispatchers.IO) { AiGate.load(context) } }
+    val hasAiKey = remember { AssistantKey.get(context) != null }
+    val suggestOn = AiGate.allows("writer") && hasAiKey
+    var suggestAsking by remember { mutableStateOf(false) }
+    var suggestBusy by remember { mutableStateOf<String?>(null) }
+    var suggestions by remember { mutableStateOf(emptyList<WriterSuggest.Suggestion>()) }
+    val suggestShown by remember { derivedStateOf { WriterSuggest.locate(state.annotatedString.text, suggestions) } }
+    val hereSuggestion by remember { derivedStateOf { state.selection.min.let { at -> suggestShown.firstOrNull { at in it.at..it.end } ?: suggestShown.firstOrNull { it.at >= at } } ?: suggestShown.firstOrNull() } }
+    fun goSuggestion(s: WriterSuggest.Suggestion?) { s ?: return; state.selection = androidx.compose.ui.text.TextRange(s.at, s.end); goText = s.at to System.nanoTime() }
+    fun acceptSuggestion(s: WriterSuggest.Suggestion) {
+        val rest = WriterSuggest.after(suggestShown, s)
+        state.history.group { replaceKeepingLook(s.at, s.end, s.replace) }
+        suggestions = rest; WriterLog.i("suggestion accepted")
+        goSuggestion(rest.firstOrNull { it.at >= s.at } ?: rest.firstOrNull())
+    }
+    fun acceptAllSuggestions() {
+        val all = suggestShown
+        state.history.group { all.asReversed().forEach { replaceKeepingLook(it.at, it.end, it.replace) } }
+        suggestions = emptyList(); message = context.getString(R.string.words_replaced_count, all.size); WriterLog.i("suggestions: all ${all.size} accepted")
+    }
+    fun askSuggestions(ask: String) {
+        val text = state.annotatedString.text; val sel = state.selection
+        val (base, part) = if (sel.collapsed) 0 to text else sel.min to text.substring(sel.min, sel.max)
+        suggestions = emptyList(); suggestBusy = context.getString(R.string.words_suggest_asking)
+        WriterLog.i("suggestions: asked for ${part.length} letters${if (ask.isBlank()) "" else ", with an instruction"}")
+        scope.launch {
+            runCatching { withContext(Dispatchers.IO) { WriterSuggest.ask(context, part, base, ask) { n, of -> if (of > 1) suggestBusy = context.getString(R.string.words_suggest_asking_n, n, of) } } }
+                .onSuccess { (list, cut) ->
+                    suggestions = WriterSuggest.locate(state.annotatedString.text, list)
+                    message = if (suggestions.isEmpty()) context.getString(R.string.words_suggest_none) else if (cut) context.getString(R.string.words_suggest_cut) else null
+                    goSuggestion(suggestions.firstOrNull())
+                }
+                .onFailure { WriterLog.e("suggestions", it); message = it.shownMessage(context) }
+            suggestBusy = null
+        }
+    }
     /** The next (or previous) change, selected. */
     fun goChange(forward: Boolean, from: Int = state.selection.min) {
         val starts = changesShown.map { it.second to it.third }.distinct().sortedBy { it.first }
@@ -3505,6 +3543,11 @@ internal fun WriterScreen(back: () -> Unit, open: String?) {
                                 }
                                 // Spelling: a red wavy line under each word that looks misspelled.
                                 if (spell.shown.isNotEmpty()) androidx.compose.foundation.Canvas(Modifier.matchParentSize().padding(margins)) { spellingLines(l, spell.shown) }
+                                // ✦ Suggestions: each one's letters shaded, deeper for the one in the bar.
+                                if (suggestShown.isNotEmpty()) androidx.compose.foundation.Canvas(Modifier.matchParentSize().padding(margins)) {
+                                    suggestShown.forEach { s -> if (s.end <= text.length) shadeLetters(l, s.at, s.end,
+                                        if (s == hereSuggestion) Color(0x669C27B0) else Color(0x2A9C27B0), (BASE_SP * shownZoom / 100).sp.toPx()) }
+                                }
                                 // Tracked changes: inserted letters underlined, deleted struck through (their colour is the author's,
                                 // set on the letters), a paragraph mark's change a ¶, and a bar in the margin beside each changed line.
                                 if (changesShown.isNotEmpty()) androidx.compose.foundation.Canvas(Modifier.matchParentSize().padding(margins)) {
@@ -3861,6 +3904,11 @@ internal fun WriterScreen(back: () -> Unit, open: String?) {
             selectedPicture?.second?.let { k -> pictures[k]?.math?.let { m -> androidx.compose.runtime.key(k) { EquationBar(m, w) { putEquation(k, it) } } } }
             // A word that looks misspelled, the cursor in it: the spell checker's suggestions, a tap puts one in.
             SpellingBar(spell)
+            // ✦ Suggestions waiting: the one at the cursor with its replacement and reason, Accept / Reject / Accept all.
+            if (suggestBusy != null || suggestShown.isNotEmpty()) SuggestBar(suggestBusy, hereSuggestion, suggestShown.indexOf(hereSuggestion), suggestShown.size, w,
+                go = { d -> goSuggestion(suggestShown.getOrNull(Math.floorMod(suggestShown.indexOf(hereSuggestion) + d, suggestShown.size))) },
+                accept = { hereSuggestion?.let(::acceptSuggestion) }, reject = { hereSuggestion?.let { s -> suggestions = suggestShown - s; goSuggestion((suggestShown - s).firstOrNull { it.at >= s.at }) } },
+                acceptAll = { acceptAllSuggestions() }, close = { suggestions = emptyList() })
             // The form field the cursor is in: its choices, a date, a tick (a text field fills by typing, or Fill in).
             hereControl?.let { (pr, _, r) -> FormBar(pr, controlsShown.filter { it.first == pr }.joinToString("") { it.second }, w,
                 choosePicture = { state.selection = androidx.compose.ui.text.TextRange(r.first, r.first + 1); replacePicture.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }) { newPr, text -> fillControl(pr, newPr, text) } }
@@ -4371,6 +4419,7 @@ internal fun WriterScreen(back: () -> Unit, open: String?) {
                         message = context.getString(if (spelling) R.string.words_spelling_on_msg else R.string.words_spelling_off_msg)
                     }
                     Tool(R.drawable.ic_chevron_right, stringResource(R.string.words_next_spelling_mistake), w, enabled = loaded && spelling) { nextMisspelled() }
+                    if (suggestOn) RibbonButton(stringResource(R.string.words_suggest), w, R.drawable.ic_sparkle, enabled = loaded && suggestBusy == null) { suggestAsking = true }
                     // Word's Speech group: Read aloud from the cursor, a paragraph at a time (Greek or English each).
                     RibbonButton(stringResource(if (reader.speaking) R.string.words_stop_reading else R.string.words_read_aloud), w, R.drawable.ic_volume_up, enabled = loaded, on = reader.speaking) {
                         if (reader.speaking) reader.stop() else {
@@ -4657,6 +4706,7 @@ internal fun WriterScreen(back: () -> Unit, open: String?) {
     if (hyphenOptions) HyphenOptionsDialog(remember { HyphenOptions.read(OfficeFormats.unzip(original ?: OfficeFormats.write(OfficeDoc(emptyList()), kind)), kind) }, { hyphenOptions = false }) { hyphenOptions = false; setHyphenOptions(it) }
     if (noteNumbering) NoteNumbersDialog(meta.footFormat, meta.endFormat, kind == OfficeKind.Docx, { noteNumbering = false }) { foot, end -> noteNumbering = false; setNoteFormats(foot, end) }
     noteEditing?.let { (n, number) -> NoteDialog(n, number, { noteEditing = null }, { saveNote(n, it) }, { saveNote(n, null) }) }
+    if (suggestAsking) SuggestDialog(!state.selection.collapsed, { suggestAsking = false }) { ask -> suggestAsking = false; askSuggestions(ask) }
     if (askingName) ReviewerNameDialog(prefs.getString("author", "").orEmpty(), { askingName = false }) { name ->
         prefs.edit().putString("author", name).apply()
         askingName = false; setTracking(true)

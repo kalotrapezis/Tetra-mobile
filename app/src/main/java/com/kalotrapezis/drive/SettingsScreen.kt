@@ -626,7 +626,7 @@ internal fun SettingsTab(
     }
     if (AiGate.on) SettingsSection(stringResource(R.string.ai_apps), stringResource(R.string.ai_apps_note)) {
         listOf("mail" to R.string.app_mail, "calendar" to R.string.app_calendar, "notes" to R.string.app_notes, "files" to R.string.app_files, "photos" to R.string.app_photos,
-            "timer" to R.string.app_timer, "contacts" to R.string.app_contacts, "phone" to R.string.app_phone, "sms" to R.string.app_sms, "maps" to R.string.app_maps, "browser" to R.string.app_browser, "pills" to R.string.app_pills, "web" to R.string.ai_app_web).forEach { (app, name) ->
+            "timer" to R.string.app_timer, "contacts" to R.string.app_contacts, "phone" to R.string.app_phone, "sms" to R.string.app_sms, "maps" to R.string.app_maps, "browser" to R.string.app_browser, "pills" to R.string.app_pills, "writer" to R.string.app_words, "web" to R.string.ai_app_web).forEach { (app, name) ->
             SwitchRow(stringResource(name), null, AiGate.allows(app)) { on -> runCatching { AiGate.set(AiGate.state.copy(apps = AiGate.state.apps + (app to on))) }.onFailure { WriterLog.e("AI: an app's switch", it) } }
         }
     }

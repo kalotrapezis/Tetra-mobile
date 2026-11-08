@@ -12,6 +12,11 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [x] (writer-suggestions session, 8 Nov; branch `claude/writer-suggestions-b9b2cf`, not merged) **Words: Review › ✦ Suggestions** — AI Assist
+      (mistral-small) suggests find/replace edits with a short reason for the selection or the document, optionally after an
+      instruction ("πιο ακαδημαϊκό ύφος"); each shaded on the page with Accept / Reject / Accept all, one Undo step each; an
+      unfound or no-op one dropped. Pieces of 4000 letters, at most 12 per press. Hidden unless AI Assist is on, a key is set
+      and the new "writer" switch (Settings › AI Assist › Words) allows it. `WriterSuggest.kt`, `WriterSuggestTest`. Not checked on a device.
 - [x] (browser-sync session, 3 Nov; branch `browser-sync`, not merged; desktop bc9f2b4 on main) **Browser: bookmarks, open tabs and
       (chosen) passwords between the phone and the tablet** (the user: "bookmarks and tabs"; "sync passwords as well but have some
       encryption"; "options in the settings what to sync"). `.System/Browser/Shared` (synced as `Browser/…`, part `browser`; the desktop
