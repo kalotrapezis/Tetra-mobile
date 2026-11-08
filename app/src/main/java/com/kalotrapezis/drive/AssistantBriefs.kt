@@ -1,5 +1,10 @@
 package com.kalotrapezis.drive
 
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.activity.compose.setContent
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -91,10 +96,24 @@ class BriefActivity : ComponentActivity() {
         val f = File(intent.getStringExtra("file").orEmpty())
         // only a page of the briefs' folder: an intent cannot point this at another file
         val html = if (f.parentFile?.canonicalPath == AssistantBriefs.dir().canonicalPath) runCatching { f.readText() }.getOrNull() else null
-        setContentView(WebView(this).apply {
-            settings.javaScriptEnabled = false
-            fitsSystemWindows = true
-            loadDataWithBaseURL(null, html ?: "<p>…</p>", "text/html", "utf-8", null)
-        })
+        // the page, and a way on to AI Assist from it (8 Nov, the user: opened from Home's cassette, "there is no way to open
+        // the Assistant from inside the report")
+        setContent {
+            TetraTheme {
+                androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize()) {
+                    androidx.compose.ui.viewinterop.AndroidView(factory = { c -> WebView(c).apply {
+                        settings.javaScriptEnabled = false
+                        fitsSystemWindows = true
+                        loadDataWithBaseURL(null, html ?: "<p>…</p>", "text/html", "utf-8", null)
+                    } }, modifier = androidx.compose.ui.Modifier.fillMaxSize())
+                    androidx.compose.material3.ExtendedFloatingActionButton(
+                        onClick = { openAssistant(this@BriefActivity) },
+                        icon = { ArtImage(R.drawable.assistant_art, 28.dp) },
+                        text = { androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.app_assistant)) },
+                        modifier = androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.BottomEnd).navigationBarsPadding().padding(16.dp),
+                    )
+                }
+            }
+        }
     }
 }
