@@ -119,6 +119,9 @@ class BrowserActivity : androidx.activity.ComponentActivity() {
     companion object { const val PLAY = "com.kalotrapezis.drive.browser.PLAY" }
 }
 
+/** A page opened from Home's Browser widget: in its tab if one has it, else a new one; nothing played. */
+internal fun openBrowserAt(c: Context, url: String) = openBrowser(c, "browser-play:" + JSONObject().put("url", url).put("open", true).put("at", System.currentTimeMillis()))
+
 internal fun openBrowser(c: Context, play: String? = null) = c.startActivity(Intent(c, BrowserActivity::class.java).putExtra(BrowserActivity.PLAY, play)
     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP))
 
@@ -573,9 +576,10 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         o.optString("url").takeIf { it.isNotEmpty() }?.let { address ->
             val t = tabs.firstOrNull { it.url == address } ?: if (tab.url.isEmpty()) tab else open()
             val loaded = t.url == address && t.pending == null // a kept tab not yet opened loads now, and plays once loaded
-            if (!loaded) { t.pending = null; t.autoplay = true }
+            val play = !o.optBoolean("open") // Home's favourites (8 Nov) open the page and play nothing
+            if (!loaded) { t.pending = null; t.autoplay = play }
             if (t.id != currentId) switch(t)
-            if (loaded) t.send(JSONObject().put("autoplay", true)) else load(t, address)
+            if (loaded) { if (play) t.send(JSONObject().put("autoplay", true)) } else load(t, address)
             if (o.optBoolean("behind")) {
                 kotlinx.coroutines.withTimeoutOrNull(8000) { while (!t.media.playing) delay(250) }
                 (context as? android.app.Activity)?.moveTaskToBack(true)

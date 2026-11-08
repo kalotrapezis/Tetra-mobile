@@ -338,6 +338,8 @@ class MainActivity : ComponentActivity() {
         SystemFolderChoice.load(this)
         // a mouse or a finger noticed anywhere, for Office's ribbon (at the top with a mouse)
         if (savedInstanceState == null) applet.value = intent.getStringExtra(Applet.EXTRA) ?: SmsRole.compose(intent) ?: calendar?.let { Applet.Calendar.name } ?: applet.value // a mail to write may be there already
+        // states made here, before any screen reads them: AI's switch first made by a sync job mid-composition crashed Home (8 Nov)
+        AiGate.on; HomeCards.tick.intValue
         setContent { androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.noticePointer()) { LocalDriveApp(external, office, applet) } }
     }
 }
@@ -759,6 +761,10 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
             }
         }.start()
     }
+    // Home's Scanner widget: a PDF or pictures opened into the scanner's pages, as the scanner's own Open does
+    val homeScanPicker = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+        if (uris.isNotEmpty()) importScan(true) { into -> uris.flatMap { ScanFiles.importPages(context, it, into) } }
+    }
     // Back from the camera returns to the document while it has pages; only an empty scan leaves the scanner.
     fun leaveScanner() {
         scanRetake = null
@@ -932,6 +938,9 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                     openMail = { openApplet(context, Applet.Mail.name) },
                     openSms = { openApplet(context, Applet.Messages.name) },
                     openBrowser = { openBrowser(context) },
+                    // Home's Files favourites and Scanner's Open file (8 Nov)
+                    openDriveItem = { rel, dir -> if (dir) { screen = Screen.Drive; drivePane = DrivePane.Files; driveFolder = rel; loadDrive(rel) } else openDriveFile(rel, false)?.let { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() } },
+                    openScanFile = { homeScanPicker.launch(arrayOf("application/pdf", "image/*")) },
                 )
                 Screen.Drive -> DriveTab(
                     home = { screen = Screen.Home },
@@ -1126,6 +1135,8 @@ private fun Home(
     openMail: () -> Unit,
     openSms: () -> Unit,
     openBrowser: () -> Unit,
+    openDriveItem: (String, Boolean) -> Unit = { _, _ -> },
+    openScanFile: () -> Unit = {},
 ) {
     // A tablet shows the groups two by two (asked 2026-09-26); a phone one under another.
     val wide = LocalConfiguration.current.screenWidthDp >= 700
@@ -1134,107 +1145,78 @@ private fun Home(
     val syncSummary by produceState(homeSyncSummary, context) { value = withContext(Dispatchers.IO) { SyncStore(context.applicationContext).summary() }.also { homeSyncSummary = it } }
     OpenTiming("Home", true)
     // each part's group, as Home has always shown them
+    // Each large part one HomeWidget (the council, 8 Nov): the app's icon and name in the header open it, the content fills
+    // the rest; tiles in one row, lists on a panel. Photos keep their picture (it is the content) and Scanner its two apps.
     val large: @Composable (String) -> Unit = { id -> when (id) {
         "gallery" -> {
             // Gallery's green, as the new Gallery picture in the Photos card (asked 16 Oct), the way Notes and Office have theirs
+            // the photo is the content (8 Nov: "nice that it shows the photos, but the buttons next to it too big"): two thirds of
+            // the width, Screenshots and Documents small beside it; a narrow (medium) card shows the photo alone
             HomeGroup(Category.Gallery.color) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HomePhotosCard(openPhotos, showPhotoBackdrop, hasPhotoAccess, photoMetadata, Modifier.weight(1f))
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        HomeCompactCard(stringResource(R.string.home_screenshots), R.drawable.ic_screenshot, openScreenshots)
-                        HomeCompactCard(stringResource(R.string.home_documents), R.drawable.ic_file, openDocuments)
-                    }
-                }
-            }
-        }
-        "files" -> {
-            HomeGroup(MaterialTheme.colorScheme.tertiaryContainer) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HomeArtCard(stringResource(R.string.app_files), R.drawable.files_art, openFiles, Modifier.weight(1f), artSize = 76) // the user's own tile (17 Oct), as Office's
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        HomeCompactCard(stringResource(R.string.home_favorites), R.drawable.ic_favorite_border, openFavorites)
-                        HomeCompactCard(stringResource(R.string.home_recent), R.drawable.ic_home, openRecent)
-                    }
-                }
-            }
-        }
-        "notes" -> {
-            HomeGroup(Category.Notes.color) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HomeArtCard(stringResource(R.string.app_notes), R.drawable.notes_art, openNotes, Modifier.weight(1f), artSize = 76) // the user's yellow tile (24 Oct), as the others
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        HomeCompactCard(stringResource(R.string.home_checklist), R.drawable.ic_checklist) { newNote(true) }
-                        HomeCompactCard(stringResource(R.string.home_new_note), R.drawable.ic_note_add) { newNote(false) }
-                    }
-                }
-            }
-        }
-        "scanner" -> { HomePdfToolsCard(openScanner, openCodes) }
-        // Office (asked 2026-09-27): orange, Writer first; Excel and PowerPoint to come.
-        "office" -> {
-            HomeGroup(Category.Office.color) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HomeArtCard(stringResource(R.string.app_office), R.drawable.office_art, openOffice, Modifier.weight(1f), artSize = 76)
-                    // the four apps' Open, two by two (asked 17 Oct): each the picker for its own kind of file
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        listOf(listOf(OfficePick.Words, OfficePick.Tables), listOf(OfficePick.Slides, OfficePick.Pdf)).forEach { row ->
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { row.forEach { k -> HomeOpenTile(k, wide, Modifier.weight(1f)) { pickOffice(k) } } }
+                androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val beside = maxWidth > 320.dp
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        HomePhotosCard(openPhotos, showPhotoBackdrop, hasPhotoAccess, photoMetadata, Modifier.weight(2f))
+                        if (beside) Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            HomeMiniTile(stringResource(R.string.home_screenshots), R.drawable.ic_screenshot, MaterialTheme.colorScheme.onSurface, Modifier.fillMaxWidth(), openScreenshots)
+                            HomeMiniTile(stringResource(R.string.home_documents), R.drawable.ic_file, MaterialTheme.colorScheme.onSurface, Modifier.fillMaxWidth(), openDocuments)
                         }
                     }
                 }
             }
         }
-        // The text editor: a group of its own, purple (asked 2026-09-27).
-        "text" -> {
-            HomeGroup(Category.Text.color) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HomeArtCard(stringResource(R.string.app_text_editor), R.drawable.text_editor_art, { openTextEditor(null) }, Modifier.weight(1f), artSize = 76) // a solid tile: kept clear of the title
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        HomeCompactCard(stringResource(R.string.home_new_file), R.drawable.ic_note_add) { openTextEditor("new") }
-                        HomeCompactCard(stringResource(R.string.home_open_file), R.drawable.ic_folder) { openTextEditor("open") }
-                    }
-                }
+        "files" -> if (!LocalHomeMedium.current) HomeFavouriteFiles(openFiles, openDriveItem) else HomeWidget(MaterialTheme.colorScheme.tertiaryContainer, R.drawable.files_art, stringResource(R.string.app_files), openFiles, panel = false) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                HomeTile(stringResource(R.string.home_favorites), R.drawable.ic_favorite_border, MaterialTheme.colorScheme.tertiary, Modifier.weight(1f), openFavorites)
+                HomeTile(stringResource(R.string.home_recent), R.drawable.ic_home, MaterialTheme.colorScheme.tertiary, Modifier.weight(1f), openRecent)
             }
         }
-        // The Calendar (18 Oct): pink, the user's icon; New, Schedule, Birthday, Reminder beside it.
-        "calendar" -> {
-            HomeGroup(Category.Calendar.color) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HomeArtCard(stringResource(R.string.app_calendar), R.drawable.calendar_art, openCalendar, Modifier.weight(1f), artSize = 76)
-                    // the next three events (8 Nov); none, then the four tiles as Office's (18 Oct: "New : Shedule : burthday : reminder")
-                    HomeCalendarNext(Modifier.weight(1f), openCalendar) { m -> Column(m, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        listOf(listOf(NewKind.Event, NewKind.Schedule), listOf(NewKind.Birthday, NewKind.Reminder)).forEach { row ->
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { row.forEach { k -> HomeTile(stringResource(k.text), k.icon, lookTint(Color(0xFFF77FB3), Color(0xFFC2185B)), Modifier.weight(1f)) { newEvent(k) } } }
-                        }
-                    } }
-                }
+        "notes" -> if (!LocalHomeMedium.current) HomePinnedNotes(openNotes) { newNote(false) } else HomeWidget(Category.Notes.color, R.drawable.notes_art, stringResource(R.string.app_notes), openNotes, panel = false) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                HomeTile(stringResource(R.string.home_checklist), R.drawable.ic_checklist, lookTint(Color(0xFFFFE082), Color(0xFF8D6E00)), Modifier.weight(1f)) { newNote(true) }
+                HomeTile(stringResource(R.string.home_new_note), R.drawable.ic_note_add, lookTint(Color(0xFFFFE082), Color(0xFF8D6E00)), Modifier.weight(1f)) { newNote(false) }
             }
         }
-        // The Timer (18 Oct): teal; four times beside it that start at a tap, Tetra staying on Home (the user: "add 6m 15m 20m
-        // 30m options to imediatly start without even opening the UI") — the notification and the island show it running
-        "timer" -> {
-            HomeGroup(Category.Timer.color) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HomeArtCard(stringResource(R.string.app_timer), R.drawable.timer_art, openTimer, Modifier.weight(1f), artSize = 76)
-                    // the user's pinned timers first (8 Nov: "one or more of the favourite timers to start immediately"), then the four times
-                    val words = rememberUiWords()
-                    val pinned by produceState(emptyList<Pair<String, String>>()) {
-                        while (true) { value = withContext(Dispatchers.IO) { runCatching { TimerFiles.cards(TimerControl.dir()).filter { it.pinned }.map { it.id to it.label.ifEmpty { durationText(words, it.seconds) } } }.getOrDefault(emptyList()) }; delay(5_000) }
-                    }
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        HomeCards.timerSlots(pinned) { context.getString(R.string.home_minutes, it) }.chunked(2).forEach { row ->
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                row.forEach { s -> HomeTile(s.label, if (s.id != null) R.drawable.ic_push_pin else R.drawable.ic_play, lookTint(Color(0xFF80CBC4), Color(0xFF00796B)), Modifier.weight(1f)) {
-                                    val m = s.minutes ?: 0
-                                    Thread {
-                                        if (s.id != null) { runCatching { TimerControl.change(context, s.id, TimerService.RESTART) }.onFailure { WriterLog.e("Timer: Home's pinned ${s.id} failed", it) }; return@Thread }
-                                        val failed = runCatching { TimerControl.start(context, m * 60L) }.onFailure { WriterLog.e("Timer: Home's $m min failed", it) }.exceptionOrNull()
-                                        android.os.Handler(android.os.Looper.getMainLooper()).post { Toast.makeText(context, failed?.let { it.message ?: context.getString(R.string.home_timer_failed) } ?: context.getString(R.string.home_timer_started, m), Toast.LENGTH_SHORT).show() }
-                                    }.start()
-                                } }
-                            }
+        // Scanner & Codes (8 Nov): scan, codes, and «Άνοιγμα αρχείου» for a PDF or pictures, into the scanner's pages
+        "scanner" -> HomeWidget(Category.Scanner.color, R.drawable.scanner_art, stringResource(R.string.app_scanner), openScanner, panel = false) {
+            HomeTiles(listOf(Triple(R.string.app_scanner, R.drawable.scanner_art, openScanner), Triple(R.string.app_codes, R.drawable.codes_art, openCodes), Triple(R.string.home_open_file, R.drawable.ic_folder, openScanFile),
+                Triple(R.string.codes_from_image, R.drawable.ic_gallery, { openApplet(context, CodesActivity.IMAGE) }))) { (label, icon, go), m ->
+                HomeTile(stringResource(label), icon, if (icon == R.drawable.ic_folder || icon == R.drawable.ic_gallery) MaterialTheme.colorScheme.onSurface else Color.Unspecified, m, go)
+            }
+        }
+        // Office (asked 2026-09-27): orange; the four apps' Open in one row (asked 17 Oct), each the picker for its own kind
+        "office" -> HomeWidget(Category.Office.color, R.drawable.office_art, stringResource(R.string.app_office), openOffice, panel = false) {
+            HomeTiles(listOf(OfficePick.Words, OfficePick.Tables, OfficePick.Slides, OfficePick.Pdf)) { k, m -> HomeOpenTile(k, wide, m) { pickOffice(k) } }
+        }
+        // The text editor: purple (asked 2026-09-27).
+        "text" -> if (!LocalHomeMedium.current) HomeRecentTexts({ openTextEditor(null) }) { openTextEditor("new") } else HomeWidget(Category.Text.color, R.drawable.text_editor_art, stringResource(R.string.app_text_editor), { openTextEditor(null) }, panel = false) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                HomeTile(stringResource(R.string.home_new_file), R.drawable.ic_note_add, lookTint(Color(0xFFD1B3FF), Color(0xFF5E35B1)), Modifier.weight(1f)) { openTextEditor("new") }
+                HomeTile(stringResource(R.string.home_open_file), R.drawable.ic_folder, lookTint(Color(0xFFD1B3FF), Color(0xFF5E35B1)), Modifier.weight(1f)) { openTextEditor("open") }
+            }
+        }
+        // The Calendar: the next events (8 Nov), «+» in the header; none, then the four kinds (18 Oct: "New : Shedule : burthday : reminder")
+        "calendar" -> HomeCalendarGroup(openCalendar, { newEvent(NewKind.Event) }) {
+            HomeTiles(listOf(NewKind.Event, NewKind.Schedule, NewKind.Birthday, NewKind.Reminder)) { k, m -> HomeTile(stringResource(k.text), k.icon, lookTint(Color(0xFFF77FB3), Color(0xFFC2185B)), m) { newEvent(k) } }
+        }
+        // The Timer (18 Oct): teal; four that start at a tap, Tetra staying on Home (the user: "add 6m 15m 20m 30m options to
+        // imediatly start"), the user's pinned timers first (8 Nov: "one or more of the favourite timers to start immediately")
+        "timer" -> if (LocalHomeMedium.current) HomeClockGroup(openTimer) else {
+            val words = rememberUiWords()
+            var started by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+            val pinned by produceState(emptyList<Pair<String, String>>(), HomeCards.tick.intValue, started) {
+                value = withContext(Dispatchers.IO) { runCatching { TimerFiles.cards(TimerControl.dir()).filter { it.pinned }.map { it.id to it.label.ifEmpty { durationText(words, it.seconds) } } }.getOrDefault(emptyList()) }
+            }
+            HomeWidget(Category.Timer.color, R.drawable.timer_art, stringResource(R.string.app_timer), openTimer, panel = false) {
+                HomeTiles(HomeCards.timerSlots(pinned) { context.getString(R.string.home_minutes, it) }) { s, m ->
+                        HomeTile(s.label, if (s.id != null) R.drawable.ic_push_pin else R.drawable.ic_play, lookTint(Color(0xFF80CBC4), Color(0xFF00796B)), m) {
+                            val m = s.minutes ?: 0
+                            Thread {
+                                if (s.id != null) { runCatching { TimerControl.change(context, s.id, TimerService.RESTART) }.onFailure { WriterLog.e("Timer: Home's pinned ${s.id} failed", it) }; started++; return@Thread }
+                                val failed = runCatching { TimerControl.start(context, m * 60L) }.onFailure { WriterLog.e("Timer: Home's $m min failed", it) }.exceptionOrNull()
+                                android.os.Handler(android.os.Looper.getMainLooper()).post { Toast.makeText(context, failed?.let { it.message ?: context.getString(R.string.home_timer_failed) } ?: context.getString(R.string.home_timer_started, m), Toast.LENGTH_SHORT).show() }
+                            }.start()
                         }
-                    }
                 }
             }
         }
@@ -1247,7 +1229,7 @@ private fun Home(
         "assistant" -> if (AiGate.on) HomeAssistantCard { openAssistant(context) }
         "mail" -> HomeMailGroup(openMail)
         "sms" -> HomeWideCard(stringResource(R.string.app_sms), stringResource(R.string.sms_home_detail), R.drawable.sms_art, openSms)
-        "browser" -> HomeWideCard(stringResource(R.string.app_browser), stringResource(R.string.browser_home_detail), R.drawable.browser_art, openBrowser)
+        "browser" -> HomeBrowserGroup(openBrowser)
         "pills" -> HomePillsGroup { openApplet(context, Applet.Pills.name) }
         "maps" -> HomeMapsGroup(wide, openMaps)
     } }
@@ -1338,12 +1320,16 @@ private fun Home(
  * showing where it will land, the page scrolling when it nears the top or the bottom. While editing, the parts' own
  * buttons rest (a tap opens nothing) and the empty cells show, two spare rows under the last part to drop into.
  */
+/** Medium parts that stay a big icon (none now: a medium part is its widget, smaller). */
+private val ICON_MEDIUM = emptySet<String>() // 8 Nov: "the big icons, make them all widgets"
+
 @Composable private fun HomeGrid(
     layout: List<HomeItem>, cols: Int, editing: Boolean, edit: () -> Unit, set: (List<HomeItem>) -> Unit, scroll: androidx.compose.foundation.ScrollState,
     large: @Composable (String) -> Unit, icons: (String) -> List<HomeIcon>, counts: Map<String, Int> = emptyMap(),
 ) = BoxWithConstraints(Modifier.fillMaxWidth()) {
+    HomeTicker() // the live cards' one clock, only while Home is on screen
     val density = LocalDensity.current
-    val cellW = maxWidth / cols; val cellH = 94.dp // a group's 176 dp and the 12 dp between parts, in two rows
+    val cellW = maxWidth / cols; val cellH = 47.dp // half the old 94 dp (8 Nov: the grid twice as fine); an icon is 2 by 2, as before
     val cw = with(density) { cellW.toPx() }; val ch = with(density) { cellH.toPx() }
     val screenH = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
     val edge = with(density) { 96.dp.toPx() }
@@ -1364,7 +1350,7 @@ private fun Home(
             delay(16)
         }
     }
-    val rows = HomeLayout.height(layout, cols) + if (editing) 2 else 0
+    val rows = HomeLayout.height(layout, cols) + if (editing) 4 else 0
     Box(Modifier.fillMaxWidth().height(cellH * rows).onGloballyPositioned { gridTop = it.positionInRoot().y }) {
         if (editing) {
             val cellColour = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.06f)
@@ -1374,7 +1360,9 @@ private fun Home(
                 val gap = 6.dp.toPx(); val r = CornerRadius(16.dp.toPx())
                 // only the empty cells: a small or medium part has no card of its own to hide them
                 val covered = layout.filter { !it.hidden }.flatMap { p -> HomeLayout.size(p, cols).let { (w, h) -> (0 until w).flatMap { dx -> (0 until h).map { dy -> p.col + dx to p.row + dy } } } }.toSet()
-                for (row in 0 until rows) for (col in 0 until cols) if ((col to row) !in covered) drawRoundRect(cellColour, Offset(col * cw + gap, row * ch + gap), Size(cw - 2 * gap, ch - 2 * gap), r)
+                // the free room in blocks of 2 by 2 (an icon's), not every fine cell
+                for (row in 0 until rows step 2) for (col in 0 until cols step 2) if ((0..1).all { dx -> (0..1).all { dy -> (col + dx to row + dy) !in covered } })
+                    drawRoundRect(cellColour, Offset(col * cw + gap, row * ch + gap), Size(2 * cw - 2 * gap, 2 * ch - 2 * gap), r)
                 held?.let { h ->
                     val (c, rw) = target(h); val (w, hh) = HomeLayout.size(h, cols)
                     drawRoundRect(frame.copy(alpha = 0.18f), Offset(c * cw + gap, rw * ch + gap), Size(w * cw - 2 * gap, hh * ch - 2 * gap), r)
@@ -1393,10 +1381,10 @@ private fun Home(
                         end = { current.firstOrNull { it.id == item.id }?.let { now -> val (c, r) = target(now); save(HomeLayout.drop(current, now.id, c, r, cols)) }; dragging = null; drag = Offset.Zero })
                     .padding(6.dp),
             ) {
-                if (item.size == HomeSize.Large) large(item.id)
+                if (item.size == HomeSize.Large || (item.size == HomeSize.Medium && item.id !in ICON_MEDIUM)) androidx.compose.runtime.CompositionLocalProvider(LocalHomeMedium provides (item.size == HomeSize.Medium)) { large(item.id) }
                 else Row(Modifier.fillMaxSize()) { icons(item.id).forEach { HomeSmallIcon(it, Modifier.weight(1f).fillMaxHeight(), if (item.small) 52.dp else 112.dp) } }
                 // its own count, not the whole app's (the user, 4 Nov)
-                counts[item.id]?.let { n -> if (!editing) Badge(Modifier.align(Alignment.TopEnd)) { Text("$n") } }
+                counts[item.id]?.let { n -> if (!editing && item.small) Badge(Modifier.align(Alignment.TopEnd)) { Text("$n") } } // a widget shows its own in its header
                 if (editing) Box(Modifier.matchParentSize().pointerInput(Unit) { awaitEachGesture { awaitFirstDown(requireUnconsumed = false) } }) {
                     // on top of the part, so its own buttons get no tap; the frame says it can be moved
                     Box(Modifier.matchParentSize().border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), MaterialTheme.shapes.large))
@@ -1503,30 +1491,11 @@ internal object HomeArt {
     val slots by produceState(List<Place?>(MapsFiles.SLOTS) { null }) {
         value = withContext(Dispatchers.IO) { MapsFiles.slots(MapsFiles.places(MapsFiles.root(driveRoot()))) }
     }
-    HomeGroup(Category.Maps.color) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            HomeArtCard(stringResource(R.string.app_maps), R.drawable.maps_art, { openMaps(null) }, Modifier.weight(1f), artSize = 76)
-            Column(Modifier.weight(if (wide) 1f else 1.6f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                // a phone: the first eight, half-size, two a row (the user, 21 Oct: "half the size, so we can have 8"); each by its Home name
-                val tint = lookTint(Color(0xFF81D4FA), Color(0xFF0277BD))
-                if (wide) slots.take(4).chunked(2).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        row.forEach { p ->
-                            if (p == null) HomeTile(stringResource(R.string.common_add), R.drawable.ic_add, tint.copy(alpha = 0.6f), Modifier.weight(1f)) { openMaps(null) }
-                            else HomeTile(p.short, placeIcon(p.icon), tint, Modifier.weight(1f)) { openMaps(p) }
-                        }
-                    }
-                } else Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    slots.take(MapsFiles.PHONE_SLOTS).chunked(2).forEach { row ->
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            row.forEach { p ->
-                                if (p == null) HomeMiniTile(stringResource(R.string.common_add), R.drawable.ic_add, tint.copy(alpha = 0.6f), Modifier.weight(1f)) { openMaps(null) }
-                                else HomeMiniTile(p.short, placeIcon(p.icon), tint, Modifier.weight(1f)) { openMaps(p) }
-                            }
-                        }
-                    }
-                }
-            }
+    HomeWidget(Category.Maps.color, R.drawable.maps_art, stringResource(R.string.app_maps), { openMaps(null) }, panel = false) {
+        val tint = lookTint(Color(0xFF81D4FA), Color(0xFF0277BD))
+        HomeTiles(slots.take(MapsFiles.PHONE_SLOTS), minWidth = 96.dp, height = 34.dp, gap = 6.dp) { p, m ->
+            if (p == null) HomeMiniTile(stringResource(R.string.common_add), R.drawable.ic_add, tint.copy(alpha = 0.6f), m) { openMaps(null) }
+            else HomeMiniTile(p.short, placeIcon(p.icon), tint, m) { openMaps(p) }
         }
     }
 }
@@ -1535,7 +1504,7 @@ private var homeSyncSummary = ""
 
 /** Four favourites for Home, from Contacts' read-ahead (ContactsPreload): no second read of every contact's file. */
 private fun homeFavourites(all: List<Contact>?, phones: Boolean) =
-    all.orEmpty().map { it.info }.filter { it.favourite && (!phones || it.phones.isNotEmpty()) }.sortedBy { ContactsFiles.sortKey(it, false) }.take(4)
+    all.orEmpty().map { it.info }.filter { it.favourite && (!phones || it.phones.isNotEmpty()) }.sortedBy { ContactsFiles.sortKey(it, false) }.take(8)
 // read as the read-ahead reads (a file again only when it changed), not through it: its load published the whole list
 // again to an open Contacts, which then kept taps waiting ~1.3 s on the phone (25 Oct)
 private suspend fun homeFavourites(phones: Boolean, or: List<ContactInfo>) = withContext(Dispatchers.IO) {
@@ -1548,21 +1517,10 @@ private suspend fun homeFavourites(phones: Boolean, or: List<ContactInfo>) = wit
  */
 @Composable private fun HomeContactsGroup(open: (String?) -> Unit) {
     val favs by produceState(remember { homeFavourites(ContactsPreload.all, false) }) { value = homeFavourites(false, value) }
-    HomeGroup(Category.Contacts.color) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            HomeArtCard(stringResource(R.string.app_contacts), R.drawable.contacts_art, { open(null) }, Modifier.weight(1f), artSize = 76)
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                (favs + List(4 - favs.size) { null }).chunked(2).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { row.forEach { f ->
-                        Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f), modifier = Modifier.weight(1f).height(73.dp).clickable { open(f?.uid) }) {
-                            Column(Modifier.fillMaxSize().padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                                if (f != null) ContactAvatar(f, 40.dp) else Icon(painterResource(R.drawable.ic_add), contentDescription = null, tint = lookTint(Color(0xFFD7A982), Color(0xFF8D5A3B)), modifier = Modifier.size(28.dp))
-                                Text(f?.let { it.given.ifBlank { it.name } } ?: stringResource(R.string.common_add), style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            }
-                        }
-                    } }
-                }
-            }
+    HomeWidget(Category.Contacts.color, R.drawable.contacts_art, stringResource(R.string.app_contacts), { open(null) }, panel = false) {
+        HomeTiles(favs + null) { f, m ->
+            if (f != null) HomeFaceTile(f, m) { open(f.uid) }
+            else HomeTile(stringResource(R.string.common_add), R.drawable.ic_add, lookTint(Color(0xFFD7A982), Color(0xFF8D5A3B)), m) { open(null) }
         }
     }
 }
@@ -1580,64 +1538,61 @@ internal fun openPhone(c: Context, tab: String? = null) = c.startActivity(Intent
         if (PhoneRelay.noCalls(context)) scope.launch { val said = withContext(Dispatchers.IO) { PhoneRelay.place(context, n, f.name) }; Toast.makeText(context, said, Toast.LENGTH_SHORT).show() }
         else if (!placePhoneCall(context, n)) openPhone(context)
     }
-    HomeGroup(Category.Phone.color) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            HomeArtCard(stringResource(R.string.app_phone), R.drawable.phone_art, { openPhone(context) }, Modifier.weight(1f), artSize = 76)
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                // the favourites first; the slots left: Keypad, Recents, Contacts
-                val spare = listOf(Triple(R.string.home_keypad, R.drawable.ic_dialpad, "keypad"), Triple(R.string.home_recents, R.drawable.ic_history, "recents"), Triple(R.string.app_contacts, R.drawable.ic_contacts, "contacts"))
-                (favs.map { it to null } + spare.take(4 - favs.size).map { null to it }).chunked(2).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { row.forEach { (f, s) ->
-                        Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f), modifier = Modifier.weight(1f).height(73.dp).clickable { if (f != null) call(f) else openPhone(context, s?.third) }) {
-                            Column(Modifier.fillMaxSize().padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                                if (f != null) ContactAvatar(f, 40.dp) else Icon(painterResource(s!!.second), contentDescription = null, modifier = Modifier.size(26.dp))
-                                Text(f?.let { it.given.ifBlank { it.name } } ?: stringResource(s!!.first), style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            }
-                        }
-                    } }
-                }
-            }
+    // the favourites first, then Keypad, Recents, Contacts, as many as fit
+    val spare = listOf(Triple(R.string.home_keypad, R.drawable.ic_dialpad, "keypad"), Triple(R.string.home_recents, R.drawable.ic_history, "recents"), Triple(R.string.app_contacts, R.drawable.ic_contacts, "contacts"))
+    HomeWidget(Category.Phone.color, R.drawable.phone_art, stringResource(R.string.app_phone), { openPhone(context) }, panel = false) {
+        HomeMissedCalls() // 8 Nov: "the phone can show actual missed calls"
+        HomeTiles(favs.map { it to null } + spare.map { null to it }) { (f, s), m ->
+            if (f != null) HomeFaceTile(f, m) { call(f) }
+            else HomeTile(stringResource(s!!.first), s.second, MaterialTheme.colorScheme.onSurface, m) { openPhone(context, s.third) }
         }
     }
 }
 
-/** Data on Home (Plan.md § Data): its art, the plan at a glance, and Usage · Devices · Signal. */
+/**
+ * Data on Home (8 Nov, the user: "if it is just info the only thing it does is open… the percentage ring, the day's
+ * consumption or the forecast, the cycle graph"): one card that shows the plan and opens Data; no shortcut tiles.
+ */
 @Composable private fun HomeDataGroup() {
     val context = LocalContext.current
-    val line by produceState("") {
+    val tick = HomeCards.tick.intValue / 5
+    // a phone's limited plan: its status; otherwise one line (a tablet's hotspot use, an unlimited plan's use, or Set up)
+    val st by produceState<Pair<DataStatus?, String>>(null to "", tick) {
         value = withContext(Dispatchers.IO) { runCatching {
             val plan = DataFiles.plan()
             val phone = DataFiles.all().values.maxByOrNull { m -> DataFiles.days(m).sumOf { it.mobile } }.orEmpty()
-            // a tablet: what it took over the phone's hotspot this month; a phone: its plan
-            if (PhoneRelay.noCalls(context)) DataFiles.days(DataFiles.all()[DataFiles.device()].orEmpty()).filter { it.day.withDayOfMonth(1) == java.time.LocalDate.now().withDayOfMonth(1) }
-                .sumOf { it.viaHotspot }.takeIf { it > 0 }?.let { context.getString(R.string.home_data_hotspot, DataRules.bytes(it)) }.orEmpty()
-            else if (plan == null) context.getString(R.string.home_data_set_up) else DataRules.status(plan, DataFiles.days(phone), java.time.LocalDate.now()).let { s ->
-                if (plan.limited) context.getString(R.string.home_data_left, s.used * 100 / s.size.coerceAtLeast(1), s.daysLeft) else DataRules.bytes(s.used)
+            // a tablet: the phone's plan as well (8 Nov: "Data just writes it, it has no pie"), its own hotspot use the line under it
+            val hotspot = if (!PhoneRelay.noCalls(context)) "" else DataFiles.days(DataFiles.all()[DataFiles.device()].orEmpty()).filter { it.day.withDayOfMonth(1) == java.time.LocalDate.now().withDayOfMonth(1) }
+                .sumOf { it.viaHotspot }.let { context.getString(R.string.home_data_hotspot, DataRules.bytes(it)) }
+            when {
+                plan == null -> null to hotspot.ifEmpty { context.getString(R.string.home_data_set_up) }
+                else -> DataRules.status(plan, DataFiles.days(phone), java.time.LocalDate.now()).let { s -> if (plan.limited) s to hotspot else null to hotspot.ifEmpty { DataRules.bytes(s.used) } }
             }
-        }.getOrDefault("") }
+        }.getOrDefault(null to "") }
     }
-    // a limited plan's share as a ring (the user, 8 Nov: "the data app with a graph or a circle with the consumption")
-    val share by produceState<Float?>(null) {
-        value = withContext(Dispatchers.IO) { runCatching {
-            val plan = DataFiles.plan()?.takeIf { it.limited && !PhoneRelay.noCalls(context) } ?: return@runCatching null
-            val phone = DataFiles.all().values.maxByOrNull { m -> DataFiles.days(m).sumOf { it.mobile } }.orEmpty()
-            DataRules.status(plan, DataFiles.days(phone), java.time.LocalDate.now()).let { s -> s.used.toFloat() / s.size.coerceAtLeast(1) }
-        }.getOrNull() }
-    }
-    HomeGroup(Color(0xFF8ED11F)) { // the icon's lime, a step deeper so the tiles' text reads on it
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            HomeArtCard(stringResource(R.string.app_data), R.drawable.data_art, { openData(context) }, Modifier.weight(1f), artSize = 76)
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                listOf(listOf(Triple(line.ifEmpty { stringResource(R.string.home_data_usage) }, R.drawable.ic_data_usage, "usage"), Triple(stringResource(R.string.home_data_devices), R.drawable.ic_devices, "devices")),
-                    listOf(Triple(stringResource(R.string.home_data_signal), R.drawable.ic_wifi, "signal"), Triple(stringResource(R.string.home_data_drops), R.drawable.ic_signal_bars, "signal"))).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { row.forEach { (label, icon, tab) ->
-                        val tint = lookTint(Color(0xFFC5F27A), Color(0xFF4E8A0A))
-                        val ring = share
-                        if (tab == "usage" && ring != null) HomeRingTile(label, ring, tint, Modifier.weight(1f)) { openData(context, tab) }
-                        else HomeTile(label, icon, tint, Modifier.weight(1f)) { openData(context, tab) }
-                    } }
+    val (s, line) = st
+    val ink = lookTint(Color(0xFFC5F27A), Color(0xFF4E8A0A))
+    val pct = s?.let { (it.used * 100 / it.size.coerceAtLeast(1)).toInt() }
+    HomeWidget(Color(0xFF8ED11F), R.drawable.data_art, stringResource(R.string.app_data), { openData(context) }, badge = pct?.let { "$it %" }) {
+        Column(Modifier.fillMaxSize().clickable { openData(context) }) {
+            if (s == null) { Text(line.ifEmpty { stringResource(R.string.home_data_usage) }, style = MaterialTheme.typography.titleMedium); return@Column }
+            val day = DateTimeFormatter.ofPattern("d MMM", LocalConfiguration.current.locales[0])
+            val runsOut = s.projection > s.size
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                    HomeRing(s.used.toFloat() / s.size.coerceAtLeast(1), ink, Modifier.matchParentSize())
+                    Text("$pct", style = MaterialTheme.typography.labelLarge)
+                }
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.data_today_budget, DataRules.bytes(s.today), DataRules.bytes(s.budget)), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(stringResource(R.string.data_forecast, DataRules.bytes(s.projection), s.cycle.end.minusDays(1).format(day)) + if (runsOut) " ⚠" else " ✓",
+                        style = MaterialTheme.typography.bodySmall, color = if (runsOut) MaterialTheme.colorScheme.error else Color.Unspecified, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(stringResource(R.string.data_days_left, s.daysLeft, s.cycle.end.format(day)), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (line.isNotEmpty()) Text(line, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
+            // the cycle so far, a bar a day, against the day's budget (the line)
+            if (!LocalHomeMedium.current) HomeBars(s.perDay, s.budget, ink, Modifier.fillMaxWidth().weight(1f).padding(top = 6.dp)) // the large one: the cycle
         }
     }
 }
@@ -1694,25 +1649,34 @@ private fun HomePhotosCard(click: () -> Unit, showBackdrop: Boolean, hasPhotoAcc
 
 /** One of Home's small tiles (Office's Open, Calendar's New…): a name under its icon in its colour. */
 @Composable private fun HomeTile(label: String, icon: Int, tint: Color, modifier: Modifier, click: () -> Unit) {
-    Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f), modifier = modifier.height(73.dp).clickable(onClick = click)) {
-        Column(Modifier.fillMaxSize().padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f), modifier = modifier.height(HOME_TILE).clickable(onClick = click)) {
+        Column(Modifier.fillMaxSize().padding(2.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             // a tile in its own colours (tint Unspecified) a little bigger than a plain icon, so its picture reads
-            if (tint == Color.Unspecified) Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(28.dp))
-            else Icon(painterResource(icon), contentDescription = null, tint = tint, modifier = Modifier.size(22.dp))
-            Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
+            if (tint == Color.Unspecified) Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(22.dp))
+            else Icon(painterResource(icon), contentDescription = null, tint = tint, modifier = Modifier.size(18.dp))
+            Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 2.dp))
         }
     }
 }
 
+/** A favourite on Home: their face (or initial) over their first name, one tap to call or open them. */
+@Composable private fun HomeFaceTile(f: ContactInfo, modifier: Modifier, click: () -> Unit) =
+    Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f), modifier = modifier.clickable(onClick = click)) {
+        Column(Modifier.fillMaxSize().padding(2.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            ContactAvatar(f, 26.dp)
+            Text(f.given.ifBlank { f.name }, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+
 /** A HomeTile with a ring in place of its icon: the plan's share used, its percent inside. */
 @Composable private fun HomeRingTile(label: String, share: Float, tint: Color, modifier: Modifier, click: () -> Unit) {
-    Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f), modifier = modifier.height(73.dp).clickable(onClick = click)) {
-        Column(Modifier.fillMaxSize().padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
+    Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f), modifier = modifier.height(HOME_TILE).clickable(onClick = click)) {
+        Column(Modifier.fillMaxSize().padding(2.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            Box(Modifier.size(26.dp), contentAlignment = Alignment.Center) {
                 HomeRing(share, tint, Modifier.matchParentSize())
                 Text("${(share * 100).roundToInt()}", style = MaterialTheme.typography.labelSmall)
             }
-            Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 2.dp))
+            Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 1.dp))
         }
     }
 }

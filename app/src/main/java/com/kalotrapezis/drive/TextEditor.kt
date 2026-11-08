@@ -99,6 +99,25 @@ import java.util.UUID
 internal object TextFileRules {
     data class Loaded(val text: String, val crlf: Boolean, val bom: Boolean)
 
+    /** What a file is before it is opened: text, not text at all, or text too big to edit smoothly. */
+    enum class Kind { Text, Binary, Huge }
+    /** Past this an editor field lays out slowly enough to freeze (8 Nov: a file of slides froze it until reinstalled). */
+    const val HUGE = 512 * 1024
+
+    /**
+     * Not text (8 Nov, the user: "you can open whatever file you like, even a ppt, and then it crashes and I can't undo"):
+     * a ZIP (Word, PowerPoint, Excel, OpenDocument), a PDF, a NUL byte, or more than 1 in 20 control bytes at the start.
+     * [size] is the whole file's, when only its start was read.
+     */
+    fun kind(head: ByteArray, size: Long = head.size.toLong()): Kind {
+        val h = head.copyOf(minOf(head.size, 8192))
+        fun starts(vararg b: Int) = h.size >= b.size && b.indices.all { h[it] == b[it].toByte() }
+        if (starts(0x50, 0x4B, 0x03, 0x04) || starts(0x25, 0x50, 0x44, 0x46) || h.any { it == 0.toByte() }) return Kind.Binary
+        val control = h.count { val b = it.toInt() and 0xFF; b < 9 || b in 14..31 || b == 127 }
+        if (h.isNotEmpty() && control * 20 > h.size) return Kind.Binary
+        return if (size > HUGE) Kind.Huge else Kind.Text
+    }
+
     fun read(bytes: ByteArray): Loaded {
         val bom = bytes.size >= 3 && bytes[0] == 0xEF.toByte() && bytes[1] == 0xBB.toByte() && bytes[2] == 0xBF.toByte()
         val raw = String(bytes, if (bom) 3 else 0, bytes.size - if (bom) 3 else 0, Charsets.UTF_8)
@@ -343,6 +362,7 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
     var symbols by remember { mutableStateOf(false) } // the bar shows the symbols row instead of the controls
     var naming by remember { mutableStateOf<String?>(null) } // a tab being saved under a new name
     var closing by remember { mutableStateOf<String?>(null) } // a tab with unsaved changes being closed
+    var warning by remember { mutableStateOf<Triple<Uri, String, Long>?>(null) } // a file not opened yet: not text (-1), or its size when huge
     var message by remember { mutableStateOf<String?>(null) }
     val w = islandContentColor()
 
@@ -353,12 +373,24 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
         tabs.add(t); text[t.id] = TextFieldValue(""); saved[t.id] = ""; current = t.id; persist()
     }
     suspend fun load(t: TextEditorStore.Tab): TextFileRules.Loaded? = withContext(Dispatchers.IO) {
-        runCatching { t.uri?.let { u -> context.contentResolver.openInputStream(Uri.parse(u))?.use { TextFileRules.read(it.readBytes()) } } }.getOrNull()
+        runCatching { t.uri?.let { u -> context.contentResolver.openInputStream(Uri.parse(u))?.use { it.readBytes() } } }.getOrNull()
+            ?.takeIf { TextFileRules.kind(it) != TextFileRules.Kind.Binary }?.let { TextFileRules.read(it) }
     }
-    suspend fun openUri(uri: Uri) {
+    /** The start of a file and its size, to see what it is before reading it all. */
+    suspend fun peek(uri: Uri): Pair<ByteArray, Long>? = withContext(Dispatchers.IO) { runCatching {
+        val size = context.contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize } ?: -1L
+        context.contentResolver.openInputStream(uri)?.use { s -> val b = ByteArray(8192); val n = s.read(b).coerceAtLeast(0); b.copyOf(n) to size }
+    }.getOrNull() }
+    suspend fun openUri(uri: Uri, anyway: Boolean = false) {
         tabs.firstOrNull { it.uri == uri.toString() }?.let { current = it.id; persist(); return }
         runCatching { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
         val name = withContext(Dispatchers.IO) { displayName(context, uri) }
+        val (head, size) = peek(uri) ?: run { message = context.getString(R.string.text_open_failed, name); return }
+        when (TextFileRules.kind(head, size)) {
+            TextFileRules.Kind.Binary -> { warning = Triple(uri, name, -1L); return }
+            TextFileRules.Kind.Huge -> if (!anyway) { warning = Triple(uri, name, size); return }
+            TextFileRules.Kind.Text -> {}
+        }
         val file = load(TextEditorStore.Tab("", uri.toString(), name)) ?: run { message = context.getString(R.string.text_open_failed, name); return }
         val t = TextEditorStore.Tab(UUID.randomUUID().toString(), uri.toString(), name, file.crlf, file.bom)
         tabs.add(t); text[t.id] = TextFieldValue(file.text); saved[t.id] = file.text; current = t.id; persist(); store.mark(t.uri, true)
@@ -368,6 +400,12 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
     // The open tabs come back as they were: the file's text, or the unsaved draft over it.
     LaunchedEffect(Unit) {
         for (t in tabs.toList()) {
+            // a tab of a file that is not text (opened before this check) would freeze the editor at every start: closed
+            val head = t.uri?.let { peek(Uri.parse(it)) }
+            if (head != null && TextFileRules.kind(head.first, head.second) == TextFileRules.Kind.Binary) {
+                tabs.remove(t); withContext(Dispatchers.IO) { store.setDraft(t.id, null) }; persist()
+                message = context.getString(R.string.text_closed_not_text, t.name); continue
+            }
             val file = load(t)?.text ?: ""
             saved[t.id] = file
             text[t.id] = TextFieldValue(withContext(Dispatchers.IO) { store.draft(t.id) } ?: file)
@@ -575,6 +613,21 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
             },
             confirmButton = { TextButton(onClick = { saveAs(id, typed) }) { Text(stringResource(R.string.common_save), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
             dismissButton = { TextButton(onClick = { naming = null }) { Text(stringResource(R.string.common_cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
+        )
+    }
+    warning?.let { (uri, name, size) ->
+        val binary = size < 0
+        AlertDialog(
+            onDismissRequest = { warning = null },
+            title = { Text(stringResource(if (binary) R.string.text_not_text_title else R.string.text_huge_title)) },
+            text = { Text(if (binary) stringResource(R.string.text_not_text_body, name) else stringResource(R.string.text_huge_body, name, android.text.format.Formatter.formatShortFileSize(context, size))) },
+            confirmButton = {
+                if (binary) TextButton(onClick = { warning = null
+                    runCatching { context.startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW).setDataAndType(uri, context.contentResolver.getType(uri) ?: "*/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), name)) }
+                }) { Text(stringResource(R.string.text_open_with), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                else TextButton(onClick = { warning = null; scope.launch { openUri(uri, anyway = true) } }) { Text(stringResource(R.string.text_open_anyway), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            },
+            dismissButton = { TextButton(onClick = { warning = null }) { Text(stringResource(R.string.common_cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
         )
     }
     closing?.let { id ->
