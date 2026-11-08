@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Jeden liek vydrží ešte %1$d dní: čas objednať.</string>
     <string name="pills_chat_reminder">Pripomienka: %1$s (dávka %2$s)</string>
     <string name="pills_chat_reminder_private">Pripomienka: čas na tabletku (dávka %1$s)</string>
+    <string name="pills_on_time">Včas</string>
+    <string name="pills_late">Neskôr</string>
 </resources>

@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Mairfidh leigheas amháin %1$d lá eile: am é a ordú.</string>
     <string name="pills_chat_reminder">Meabhrúchán: %1$s (dáileog %2$s)</string>
     <string name="pills_chat_reminder_private">Meabhrúchán: am do phiollaí (dáileog %1$s)</string>
+    <string name="pills_on_time">In am</string>
+    <string name="pills_late">Níos déanaí</string>
 </resources>

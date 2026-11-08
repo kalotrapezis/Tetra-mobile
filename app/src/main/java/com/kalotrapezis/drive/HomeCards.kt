@@ -171,8 +171,8 @@ internal val HOME_TILE = 50.dp
  * items than columns spread over the width. A square on a tablet takes two rows of five, a wide card more.
  */
 @Composable internal fun <T> HomeTiles(items: List<T>, minWidth: androidx.compose.ui.unit.Dp = 72.dp, height: androidx.compose.ui.unit.Dp = HOME_TILE, gap: androidx.compose.ui.unit.Dp = 8.dp,
-    tile: @Composable (T, Modifier) -> Unit) = androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-    val cols = ((maxWidth + gap) / (minWidth + gap)).toInt().coerceIn(1, 8)
+    maxCols: Int = 8, tile: @Composable (T, Modifier) -> Unit) = androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    val cols = ((maxWidth + gap) / (minWidth + gap)).toInt().coerceIn(1, maxCols)
     val rows = ((maxHeight + gap) / (height + gap)).toInt().coerceIn(1, 6)
     val shown = items.take(cols * rows)
     val across = minOf(cols, shown.size.coerceAtLeast(1))

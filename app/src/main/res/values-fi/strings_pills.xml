@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Yksi lääke riittää vielä %1$d päivää: aika tilata.</string>
     <string name="pills_chat_reminder">Muistutus: %1$s (annos %2$s)</string>
     <string name="pills_chat_reminder_private">Muistutus: lääkkeesi aika (annos %1$s)</string>
+    <string name="pills_on_time">Ajallaan</string>
+    <string name="pills_late">Myöhemmin</string>
 </resources>

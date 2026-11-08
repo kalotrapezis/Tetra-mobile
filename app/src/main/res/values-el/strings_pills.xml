@@ -137,4 +137,6 @@
     <string name="pills_refill_line_private">Ένα φάρμακο φτάνει για %1$d μέρες ακόμα: ώρα για παραγγελία.</string>
     <string name="pills_chat_reminder">Υπενθύμιση: %1$s (δόση %2$s)</string>
     <string name="pills_chat_reminder_private">Υπενθύμιση: ώρα για το χάπι σου (δόση %1$s)</string>
+    <string name="pills_on_time">Στην ώρα</string>
+    <string name="pills_late">Αργότερα</string>
 </resources>

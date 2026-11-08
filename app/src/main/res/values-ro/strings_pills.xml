@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Un medicament mai ajunge %1$d zile: e timpul să comanzi.</string>
     <string name="pills_chat_reminder">Memento: %1$s (doza de %2$s)</string>
     <string name="pills_chat_reminder_private">Memento: e ora pastilei (doza de %1$s)</string>
+    <string name="pills_on_time">La timp</string>
+    <string name="pills_late">Mai târziu</string>
 </resources>

@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Едно лекарство стига за още %1$d дни: време е за поръчка.</string>
     <string name="pills_chat_reminder">Напомняне: %1$s (доза %2$s)</string>
     <string name="pills_chat_reminder_private">Напомняне: време за хапчето ти (доза %1$s)</string>
+    <string name="pills_on_time">Навреме</string>
+    <string name="pills_late">По-късно</string>
 </resources>

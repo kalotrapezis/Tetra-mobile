@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Jeden lek wystarczy jeszcze na %1$d dni: czas zamówić.</string>
     <string name="pills_chat_reminder">Przypomnienie: %1$s (dawka %2$s)</string>
     <string name="pills_chat_reminder_private">Przypomnienie: czas na tabletkę (dawka %1$s)</string>
+    <string name="pills_on_time">Na czas</string>
+    <string name="pills_late">Później</string>
 </resources>

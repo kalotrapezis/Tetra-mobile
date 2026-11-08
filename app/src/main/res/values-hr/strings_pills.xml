@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Jedan lijek traje još %1$d dana: vrijeme je za narudžbu.</string>
     <string name="pills_chat_reminder">Podsjetnik: %1$s (doza %2$s)</string>
     <string name="pills_chat_reminder_private">Podsjetnik: vrijeme za tabletu (doza %1$s)</string>
+    <string name="pills_on_time">Na vrijeme</string>
+    <string name="pills_late">Kasnije</string>
 </resources>

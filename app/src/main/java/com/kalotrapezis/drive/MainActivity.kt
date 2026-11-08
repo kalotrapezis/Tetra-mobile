@@ -1493,7 +1493,8 @@ internal object HomeArt {
     }
     HomeWidget(Category.Maps.color, R.drawable.maps_art, stringResource(R.string.app_maps), { openMaps(null) }, panel = false) {
         val tint = lookTint(Color(0xFF81D4FA), Color(0xFF0277BD))
-        HomeTiles(slots.take(MapsFiles.PHONE_SLOTS), minWidth = 96.dp, height = 34.dp, gap = 6.dp) { p, m ->
+        // eight places, four a row (8 Nov: "the large one takes 8, not 6, as on the phone, a little narrower")
+        HomeTiles(slots.take(MapsFiles.PHONE_SLOTS), minWidth = 70.dp, height = 34.dp, gap = 6.dp, maxCols = 4) { p, m ->
             if (p == null) HomeMiniTile(stringResource(R.string.common_add), R.drawable.ic_add, tint.copy(alpha = 0.6f), m) { openMaps(null) }
             else HomeMiniTile(p.short, placeIcon(p.icon), tint, m) { openMaps(p) }
         }

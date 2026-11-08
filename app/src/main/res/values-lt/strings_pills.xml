@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Vieno vaisto užteks dar %1$d dienų: laikas užsisakyti.</string>
     <string name="pills_chat_reminder">Priminimas: %1$s (dozė %2$s)</string>
     <string name="pills_chat_reminder_private">Priminimas: laikas tabletei (dozė %1$s)</string>
+    <string name="pills_on_time">Laiku</string>
+    <string name="pills_late">Vėliau</string>
 </resources>
