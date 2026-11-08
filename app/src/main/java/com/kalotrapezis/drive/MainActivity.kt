@@ -1235,7 +1235,7 @@ private fun Home(
         "sms" -> HomeWideCard(stringResource(R.string.app_sms), stringResource(R.string.sms_home_detail), R.drawable.sms_art, openSms)
         "browser" -> HomeBrowserGroup(openBrowser)
         "pills" -> HomePillsGroup { openApplet(context, Applet.Pills.name) }
-        "passwords" -> HomeWideCard(stringResource(R.string.app_passwords), stringResource(R.string.passwords_home_detail), R.drawable.passwords_art, { openApplet(context, Applet.Passwords.name) })
+        "passwords" -> HomePasswordsGroup { openApplet(context, Applet.Passwords.name) }
         "maps" -> HomeMapsGroup(wide, openMaps)
     } }
     // each part small: just its icon, as a launcher's (Scanner and Codes are two apps, so two icons)

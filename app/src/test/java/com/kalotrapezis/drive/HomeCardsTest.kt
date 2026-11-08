@@ -77,4 +77,13 @@ class HomeCardsTest {
         assertEquals(listOf(1L), HomeCards.missedToShow(log, now - 2 * h, now).map { it.id })
         assertEquals(emptyList<Long>(), HomeCards.missedToShow(log, now, now).map { it.id })
     }
+
+    @Test fun `passwords - the hearted logins by site, and the hearted 2FA code first`() {
+        val logins = listOf(SavedLogin("z.gr", "a", "p1", pinned = true), SavedLogin("b.gr", "b", "p2"), SavedLogin("a.gr", "c", "p3", pinned = true))
+        assertEquals(listOf("a.gr", "z.gr"), HomeCards.favouriteLogins(logins).map { it.host })
+        val codes = listOf(OtpEntry("One", "x", "JBSWY3DP"), OtpEntry("Two", "y", "JBSWY3DP", pinned = true))
+        assertEquals("Two", HomeCards.codeToShow(codes)?.issuer)
+        assertEquals("One", HomeCards.codeToShow(codes.take(1))?.issuer)
+        assertNull(HomeCards.codeToShow(emptyList()))
+    }
 }

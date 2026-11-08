@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -129,6 +130,15 @@ internal object HomeCards {
     /** The missed calls Home shows: of the last [MISSED_MS], after the user last cleared them, the newest [n]. */
     fun missedToShow(calls: List<LoggedCall>, clearedAt: Long, now: Long = System.currentTimeMillis(), n: Int = 2) =
         calls.filter { it.missed && it.at > maxOf(clearedAt, now - MISSED_MS) }.sortedByDescending { it.at }.take(n)
+
+    /** Passwords' tiles: the ♥ logins, by site. */
+    fun favouriteLogins(logins: List<SavedLogin>) = logins.filter { it.pinned }.sortedBy { it.host }
+
+    /** The 2FA code Home shows: the first ♥ one, else the first. */
+    fun codeToShow(codes: List<OtpEntry>) = codes.firstOrNull { it.pinned } ?: codes.firstOrNull()
+
+    /** Unlocked on Home this long, then locked again (and at once when Home goes). */
+    const val UNLOCKED_MS = 60_000L
 
     /** Text on a card's own colour: dark on a light one (Data's lime, Notes' yellow), white on a deep one. */
     fun onColor(c: Color): Color = if (c.luminance() > 0.45f) Color(0xFF1B1B1B) else Color.White
@@ -378,7 +388,7 @@ internal val HOME_TILE = 50.dp
                         style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
                 }
                 else if (now != null) TalkPlayer(talking, now, Modifier.weight(1f, fill = false).fillMaxWidth(0.9f))
-                else Cassette(LivePhase.Stopping, 0f, Modifier.weight(1f, fill = false).fillMaxWidth(0.8f))
+                else MiniTv(Modifier.weight(1f, fill = false).fillMaxWidth(0.8f)) { RestingMascot() } // resting: the mascot on its TV, blinking (8 Nov's new look)
                 Text(brief?.first ?: stringResource(R.string.app_assistant), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 6.dp))
             }
             IconButton(onClick = { talking.tap { talk(c) } }, modifier = Modifier.align(Alignment.BottomEnd).size(48.dp)) {
@@ -395,7 +405,8 @@ internal val HOME_TILE = 50.dp
     Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxSize()) {
         Row(Modifier.padding(start = 12.dp, end = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Row(Modifier.weight(1f).clip(MaterialTheme.shapes.medium).clickable(onClick = openChat).padding(4.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                talking.phase?.takeIf { AiLook.decorated(c) }?.let { TalkScreen(it, talking.hearing, Modifier.size(44.dp)) } ?: ArtImage(R.drawable.assistant_art, 36.dp)
+                if (AiLook.decorated(c)) MiniTv(Modifier.height(52.dp)) { talking.phase?.let { TalkScreen(it, talking.hearing, Modifier.fillMaxSize(), talking.cue, talking.mood, characterColor(AssistantVoices.id(c))) } ?: RestingMascot() }
+                else ArtImage(R.drawable.assistant_art, 36.dp)
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.app_assistant), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                     val b = brief
@@ -411,6 +422,12 @@ internal val HOME_TILE = 50.dp
             }
         }
     }
+}
+
+/** The mascot at rest on the widget's TV, in its voice's colour. */
+@Composable private fun RestingMascot() {
+    val c = LocalContext.current
+    TalkScreen(LivePhase.Stopping, false, Modifier.fillMaxSize(), color = remember { characterColor(AssistantVoices.id(c)) })
 }
 
 /** The assist sheet: it listens as soon as it opens, the same as the assist gesture. */
@@ -626,6 +643,76 @@ private val KeepScroll = object : NestedScrollConnection {
             Row(Modifier.fillMaxWidth().clickable(onClick = open), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Icon(painterResource(R.drawable.ic_file_text), contentDescription = null, modifier = Modifier.size(14.dp))
                 PanelLine(name)
+            }
+        }
+    }
+}
+
+/**
+ * Passwords on Home: the next 2FA code with its countdown and the ♥ logins as tiles (a tap copies the password, a long
+ * press opens it). Locked, it shows only sites and names; a tap unlocks first (fingerprint or screen lock), and it locks
+ * again after [HomeCards.UNLOCKED_MS] or when Home goes. Unlocked, the window takes no screenshots, as the applet's.
+ */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable internal fun HomePasswordsGroup(open: () -> Unit) {
+    val c = LocalContext.current
+    var unlocked by remember { mutableStateOf(false) }
+    var said by remember { mutableStateOf<String?>(null) }
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    androidx.compose.runtime.DisposableEffect(lifecycle) {
+        val o = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == Lifecycle.Event.ON_STOP) unlocked = false }
+        lifecycle.addObserver(o); onDispose { lifecycle.removeObserver(o) }
+    }
+    androidx.compose.runtime.DisposableEffect(unlocked) {
+        val w = if (unlocked) c.activity()?.window else null
+        w?.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+        onDispose { w?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE) }
+    }
+    LaunchedEffect(unlocked) { if (unlocked) { delay(HomeCards.UNLOCKED_MS); unlocked = false } }
+    val data by produceState(emptyList<SavedLogin>() to emptyList<OtpEntry>(), HomeCards.tick.intValue / 5, unlocked) {
+        value = withContext(Dispatchers.IO) { runCatching { HomeCards.favouriteLogins(PasswordStore.load(c).logins) to AuthSecrets.load(c) }.getOrDefault(emptyList<SavedLogin>() to emptyList()) }
+    }
+    val (favs, codes) = data
+    val code = HomeCards.codeToShow(codes)
+    val now by produceState(System.currentTimeMillis(), unlocked) { while (unlocked) { value = System.currentTimeMillis(); delay(1_000 - value % 1_000) } }
+    fun unlock(then: () -> Unit) {
+        val allowed = android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_STRONG or android.hardware.biometrics.BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        if (c.getSystemService(android.hardware.biometrics.BiometricManager::class.java).canAuthenticate(allowed) != android.hardware.biometrics.BiometricManager.BIOMETRIC_SUCCESS) { unlocked = true; then(); return } // no screen lock: as the applet
+        val a = c.activity() ?: return
+        authenticateVault(a, { unlocked = true; said = null; then() }, { said = it }, c.getString(R.string.pw_unlock), c.getString(R.string.home_vault_unlock_detail))
+    }
+    fun copy(label: String, text: String, toast: Int) { SecretClip.copy(c, label, text); android.widget.Toast.makeText(c, toast, android.widget.Toast.LENGTH_SHORT).show() }
+    HomeWidget(PASSWORDS_COLOR, R.drawable.passwords_art, stringResource(R.string.app_passwords), open, panel = false,
+        action = { if (unlocked) HomeWidgetAction(stringResource(R.string.home_pw_lock), R.drawable.ic_lock) { unlocked = false } else HomeWidgetAction(stringResource(R.string.home_pw_unlock), R.drawable.ic_lock_open) { unlock {} } }) {
+        said?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error, maxLines = 1) }
+        val panel = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)
+        if (code != null) Surface(shape = MaterialTheme.shapes.large, color = panel, modifier = Modifier.fillMaxWidth().height(HOME_TILE)
+            .clickable { val go = { copy(code.issuer, Totp.code(code), R.string.pw_copied) }; if (unlocked) go() else unlock(go) }) {
+            Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(code.issuer.ifBlank { code.account }, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                // locked: never the code
+                Text(if (unlocked) Totp.grouped(Totp.code(code, now)) else "••• •••", fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, style = MaterialTheme.typography.titleLarge, maxLines = 1)
+                if (unlocked) {
+                    val left = Totp.left(code, now)
+                    Box(Modifier.size(28.dp), contentAlignment = Alignment.Center) {
+                        HomeRing(left / code.period.toFloat(), if (left <= 5) Color(0xFFE53935) else PASSWORDS_COLOR, Modifier.fillMaxSize())
+                        Text("$left", style = MaterialTheme.typography.labelSmall)
+                    }
+                } else Icon(painterResource(R.drawable.ic_lock), contentDescription = stringResource(R.string.home_pw_unlock), modifier = Modifier.size(20.dp))
+            }
+        }
+        if (favs.isEmpty()) { if (code == null) Text(stringResource(R.string.home_pw_none), style = MaterialTheme.typography.bodySmall); return@HomeWidget }
+        Spacer(Modifier.height(8.dp))
+        Box(Modifier.fillMaxWidth().weight(1f)) {
+            HomeTiles(favs, minWidth = 96.dp) { l, m ->
+                Surface(shape = MaterialTheme.shapes.large, color = panel, modifier = m.clip(MaterialTheme.shapes.large).combinedClickable(
+                    onLongClick = { openApplet(c, PasswordsActivity.WORD + l.host) },
+                    onClick = { val go = { copy(l.host, l.password, R.string.pw_password_copied) }; if (unlocked) go() else unlock(go) })) {
+                    Column(Modifier.fillMaxSize().padding(horizontal = 8.dp), verticalArrangement = Arrangement.Center) {
+                        Text(l.host.removePrefix("www."), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        if (l.user.isNotBlank()) Text(l.user, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
             }
         }
     }
