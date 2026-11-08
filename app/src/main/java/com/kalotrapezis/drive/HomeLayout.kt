@@ -27,7 +27,7 @@ internal object HomeLayout {
     /** A large part's cells on a tablet (16 across), by what it shows: lists taller, a few tiles square. */
     // always more than a medium part's 4 by 4 (8 Nov: "some have no large now, Notes and Data"): the large one shows more
     private val LARGE_WIDE = mapOf("mail" to (6 to 6), "calendar" to (6 to 6), "pills" to (6 to 4), "notes" to (4 to 8), "text" to (6 to 4), "files" to (6 to 4),
-        "timer" to (6 to 4), "data" to (6 to 4), "contacts" to (6 to 4), "phone" to (6 to 4), "office" to (6 to 4), "maps" to (6 to 4), "browser" to (6 to 4),
+        "timer" to (6 to 4), "data" to (6 to 4), "contacts" to (6 to 4), "phone" to (6 to 4), "office" to (6 to 4), "maps" to (6 to 4), "browser" to (6 to 4), "passwords" to (6 to 4),
         "sms" to (6 to 2), "sync" to (4 to 2), SETTINGS to (4 to 2), "assistant" to (8 to 2))
     /** On a phone (8 across): the whole width (a medium part is the square), lists taller. */
     private val LARGE_NARROW = mapOf("mail" to (8 to 6), "calendar" to (8 to 6), "notes" to (4 to 8), "sms" to (8 to 2))
