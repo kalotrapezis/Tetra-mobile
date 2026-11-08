@@ -151,7 +151,7 @@ internal data class Bubble(val mine: Boolean, val text: String, val choices: Lis
 private enum class Phase { Idle, Listening, Thinking }
 
 /** The live screen's record: what it is doing decides how it turns. */
-private enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Listening(40f), Thinking(90f), Speaking(200f), Stopping(0f) }
+internal enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Listening(40f), Thinking(90f), Speaking(200f), Stopping(0f) }
 
 @Composable
 private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> Unit) {
@@ -691,7 +691,7 @@ private fun Vinyl(phase: LivePhase, level: Float, modifier: Modifier) {
  * turning round at either end, as an auto-reverse deck does.
  */
 @Composable
-private fun Cassette(phase: LivePhase, level: Float, modifier: Modifier) {
+internal fun Cassette(phase: LivePhase, level: Float, modifier: Modifier) {
     val label = androidx.compose.ui.graphics.ImageBitmap.imageResource(R.drawable.assistant_art)
     val turn = rememberTurn(phase, level)
     androidx.compose.foundation.Canvas(modifier.aspectRatio(1.58f)) {

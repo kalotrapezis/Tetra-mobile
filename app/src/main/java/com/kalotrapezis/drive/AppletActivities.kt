@@ -61,7 +61,8 @@ class NotesActivity : AppletActivity() {
 class CodesActivity : AppletActivity() {
     override val applet = Applet.Codes
     override val lightBars get() = false // the camera's dark frame in both looks
-    @Composable override fun Content(word: String?, back: () -> Unit) = CodeScannerTab(back = back)
+    @Composable override fun Content(word: String?, back: () -> Unit) = CodeScannerTab(back = back, pickImage = word == IMAGE)
+    companion object { const val IMAGE = "codes-image" } // Home's Scanner widget: straight to a picture's code
 }
 
 class CalendarActivity : AppletActivity() {
@@ -123,7 +124,7 @@ class SmsActivity : AppletActivity() {
 /** Which applet window an Applet.EXTRA word opens; null: Tetra's own window (Photos, Files, Office, Settings…). */
 private fun appletWindow(word: String): Class<*>? = when {
     word == Applet.Notes.name || word.startsWith("note:") || word == NotesActivity.NEW_NOTE || word == NotesActivity.NEW_CHECKLIST -> NotesActivity::class.java
-    word == Applet.Codes.name -> CodesActivity::class.java
+    word == Applet.Codes.name || word == CodesActivity.IMAGE -> CodesActivity::class.java
     word == Applet.TextEditor.name || word.startsWith("text:") -> TextEditorActivity::class.java
     word == Applet.Calendar.name || word.startsWith(CalendarActivity.NEW) -> CalendarActivity::class.java
     word == Applet.Timer.name -> TimerActivity::class.java

@@ -32,10 +32,35 @@ class HomeCardsTest {
         val med = Medicine("pill-x", "Vitamin D", times = listOf(LocalTime.of(9, 0)))
         val at = { h: Long -> Instant.parse("2026-11-08T00:00:00Z").plusSeconds(h * 3600) }
         val doses = listOf(Dose(med, at(8), Dose.State.Taken), Dose(med, at(14), Dose.State.Waiting), Dose(med, at(9), Dose.State.Missed), Dose(med, at(21), Dose.State.Waiting))
-        assertEquals(at(9), HomeCards.toTake(doses))
-        assertNull(HomeCards.toTake(listOf(Dose(med, at(8), Dose.State.Taken), Dose(med, at(9), Dose.State.Skipped))))
+        assertEquals(at(9), HomeCards.toTake(doses, now = at(12)))
+        assertNull(HomeCards.toTake(listOf(Dose(med, at(8), Dose.State.Taken), Dose(med, at(9), Dose.State.Skipped)), now = at(12)))
+        // 8 Nov: at 11:38 «Το πήρα» would have taken the 14:00 dose; a later dose waits for its time (half an hour before at most)
+        val later = listOf(Dose(med, at(8), Dose.State.Taken), Dose(med, at(14), Dose.State.Waiting))
+        assertNull(HomeCards.toTake(later, now = at(11).plusSeconds(38 * 60)))
+        assertEquals(at(14), HomeCards.toTake(later, now = at(13).plusSeconds(40 * 60)))
+        assertEquals("1/2", HomeCards.takenOf(later))
         assertEquals("09:00  Vitamin D × 1", HomeCards.doseLine(doses[2], "09:00", private = false))
         assertEquals("09:00", HomeCards.doseLine(doses[2], "09:00", private = true))
+    }
+
+    @Test fun `the pill button takes the next dose not answered, whenever it is (8 Nov)`() {
+        val med = Medicine("pill-x", "Vitamin D", times = listOf(LocalTime.of(9, 0)))
+        val at = { h: Long -> Instant.parse("2026-11-08T00:00:00Z").plusSeconds(h * 3600) }
+        assertEquals(at(14), HomeCards.nextToTake(listOf(Dose(med, at(8), Dose.State.Taken), Dose(med, at(21), Dose.State.Waiting), Dose(med, at(14), Dose.State.Waiting)))?.due)
+        assertNull(HomeCards.nextToTake(listOf(Dose(med, at(8), Dose.State.Taken))))
+    }
+
+    @Test fun `history squares - strong on time, light late, empty missed, nothing for doses to come`() {
+        val med = Medicine("pill-x", "Vitamin D", times = listOf(LocalTime.of(9, 0)))
+        val at = { h: Long -> Instant.parse("2026-11-08T00:00:00Z").plusSeconds(h * 3600) }
+        val doses = listOf(Dose(med, at(9), Dose.State.Taken, at(9).plusSeconds(10 * 60)), Dose(med, at(14), Dose.State.Taken, at(15)),
+            Dose(med, at(8), Dose.State.Missed), Dose(med, at(21), Dose.State.Waiting), Dose(med, at(10), Dose.State.Skipped))
+        assertEquals(listOf(0, 2, 0, 1), HomeCards.waffle(doses)) // in time order: 08 missed, 09 on time, 10 skipped, 14 an hour late
+    }
+
+    @Test fun `text on a card's colour - dark on light colours, white on deep ones`() {
+        assertEquals(androidx.compose.ui.graphics.Color.White, HomeCards.onColor(androidx.compose.ui.graphics.Color(0xFF00796B)))
+        assertEquals(androidx.compose.ui.graphics.Color(0xFF1B1B1B), HomeCards.onColor(androidx.compose.ui.graphics.Color(0xFF8ED11F)))
     }
 
     @Test fun `urgency dot - none for 0, a colour for 1 to 3`() {

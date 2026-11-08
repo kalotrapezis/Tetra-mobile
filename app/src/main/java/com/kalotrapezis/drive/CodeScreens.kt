@@ -114,7 +114,7 @@ private fun codeResult(value: String, url: String?): CodeResult = PaymentCodes.f
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @androidx.annotation.OptIn(markerClass = [ExperimentalGetImage::class])
-internal fun CodeScannerTab(back: () -> Unit, onCode: ((String) -> Boolean)? = null) {
+internal fun CodeScannerTab(back: () -> Unit, onCode: ((String) -> Boolean)? = null, pickImage: Boolean = false) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val haptics = LocalHapticFeedback.current
@@ -133,6 +133,18 @@ internal fun CodeScannerTab(back: () -> Unit, onCode: ((String) -> Boolean)? = n
     val executor = remember { Executors.newSingleThreadExecutor() }
     val barcodes = remember { BarcodeScanning.getClient() }
     val scope = rememberCoroutineScope()
+    // a code in a picture (8 Nov, the user: "an open button with the barcode scanner to open images"): the same reader, the same result sheet
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        runCatching { InputImage.fromFilePath(context, uri) }.onSuccess { image ->
+            barcodes.process(image).addOnSuccessListener(ContextCompat.getMainExecutor(context)) { found ->
+                val code = found.firstOrNull { !it.rawValue.isNullOrBlank() }
+                if (code == null) Toast.makeText(context, R.string.codes_none_in_image, Toast.LENGTH_LONG).show()
+                else result = codeResult(code.rawValue!!, code.url?.url?.takeIf { code.valueType == Barcode.TYPE_URL })
+            }.addOnFailureListener { WriterLog.e("Codes: a picture not read", it); Toast.makeText(context, R.string.codes_none_in_image, Toast.LENGTH_LONG).show() }
+        }.onFailure { WriterLog.e("Codes: a picture not opened", it) }
+    }
+    LaunchedEffect(pickImage) { if (pickImage) imagePicker.launch("image/*") } // Home's «Κωδικός από εικόνα»
     var pairStatus by remember { mutableStateOf<String?>(null) }
     var pairing by remember { mutableStateOf(false) }
     fun pair(raw: String, qr: PairingQr) {
@@ -272,6 +284,7 @@ internal fun CodeScannerTab(back: () -> Unit, onCode: ((String) -> Boolean)? = n
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     ScanPill(stringResource(R.string.app_codes), R.drawable.ic_qr_code, mode == CodeMode.Codes) { mode = CodeMode.Codes; error = null }
                     ScanPill(stringResource(R.string.codes_text), R.drawable.ic_text_scan, mode == CodeMode.Text) { mode = CodeMode.Text; error = null }
+                    if (onCode == null) ScanPill(stringResource(R.string.codes_image), R.drawable.ic_gallery, false) { imagePicker.launch("image/*") }
                 }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
             }
