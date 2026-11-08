@@ -102,8 +102,8 @@ class BriefActivity : ComponentActivity() {
         setContent {
             TetraTheme {
                 // the presenter (AI decorations): the page as a small news show first; Page shows it as it is
-                var asPage by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(html == null || !Presenter.on(this@BriefActivity)) }
-                if (!asPage) NewsShow(title.ifBlank { getString(R.string.app_assistant) }, html!!, { asPage = true }, { finish() })
+                val asPage = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(html == null || !Presenter.on(this@BriefActivity)) }
+                if (!asPage.value) NewsShow(title.ifBlank { getString(R.string.app_assistant) }, html!!, { asPage.value = true }, { finish() })
                 else androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize()) {
                     androidx.compose.ui.viewinterop.AndroidView(factory = { c -> WebView(c).apply {
                         settings.javaScriptEnabled = false
