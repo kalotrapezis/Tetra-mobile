@@ -15,10 +15,10 @@ import org.json.JSONObject
  *
  *   Tetra/.System/Assistant/Shared/schedules.json, synced as "AI Assist/schedules.json"
  *   { list: [{ id, kind: prompt|brief, title, prompt, time: HH:MM, repeat: once|daily|weekly|monthly|yearly, days: [0-6, 0 = Sunday],
- *              date: YYYY-MM-DD, paused, created, last, runNow }], brief: { sections, place }, runner }
+ *              date: YYYY-MM-DD, paused, created, last, runNow }], brief: { sections, place }, runner, removed: { id: ms } }
  *
- * Each change rewrites the whole file and keeps every key it does not know (the computer's own).
- * shortcut: the later writer wins; the computer writes only "last" and "runNow", so a clash costs one run's time at most.
+ * Each change rewrites the whole file and keeps every key it does not know (the computer's own). When both changed it before
+ * a sync, the computer merges the two by id (schedule.js mergeSchedules); a deletion is kept in "removed" (id → when) for that.
  */
 internal object AssistantSchedules {
     val REPEATS = listOf("once", "daily", "weekly", "monthly", "yearly")
@@ -84,6 +84,8 @@ internal object AssistantSchedules {
     fun remove(tetra: File, id: String) {
         val o = read(tetra); val a = o.getJSONArray("list")
         o.put("list", JSONArray((0 until a.length()).map { a.getJSONObject(it) }.filter { it.optString("id") != id }))
+        // remembered as gone, so the computer's merge (schedule.js mergeSchedules) does not bring it back from its own copy
+        (o.optJSONObject("removed") ?: JSONObject().also { o.put("removed", it) }).put(id, System.currentTimeMillis())
         write(tetra, o)
     }
     fun addBrief(tetra: File) {
