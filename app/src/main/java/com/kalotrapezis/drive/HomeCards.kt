@@ -371,7 +371,13 @@ internal val HOME_TILE = 50.dp
             Column(Modifier.fillMaxSize().clickable { if (now != null) talking.end() else brief?.let { b -> c.startActivity(Intent(c, BriefActivity::class.java).putExtra("file", b.second.absolutePath)) } ?: openChat() },
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 // talking: the robot on a small TV, on the widget itself (8 Nov); resting: the cassette and the brief's title
-                if (now != null) TalkPlayer(talking, now, Modifier.weight(1f, fill = false).fillMaxWidth(0.9f))
+                val decorated = remember(now) { AiLook.decorated(c) }
+                if (!decorated) { // plain (AI decorations off): the robot, and what it is doing in words
+                    ArtImage(R.drawable.assistant_art, 64.dp)
+                    if (now != null) Text(stringResource(when (now) { LivePhase.Listening -> R.string.assistant_listening; LivePhase.Thinking -> R.string.assistant_thinking; else -> R.string.app_assistant }),
+                        style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+                }
+                else if (now != null) TalkPlayer(talking, now, Modifier.weight(1f, fill = false).fillMaxWidth(0.9f))
                 else Cassette(LivePhase.Stopping, 0f, Modifier.weight(1f, fill = false).fillMaxWidth(0.8f))
                 Text(brief?.first ?: stringResource(R.string.app_assistant), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 6.dp))
             }
@@ -389,7 +395,7 @@ internal val HOME_TILE = 50.dp
     Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxSize()) {
         Row(Modifier.padding(start = 12.dp, end = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Row(Modifier.weight(1f).clip(MaterialTheme.shapes.medium).clickable(onClick = openChat).padding(4.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                talking.phase?.let { TalkScreen(it, talking.hearing, Modifier.size(44.dp)) } ?: ArtImage(R.drawable.assistant_art, 36.dp)
+                talking.phase?.takeIf { AiLook.decorated(c) }?.let { TalkScreen(it, talking.hearing, Modifier.size(44.dp)) } ?: ArtImage(R.drawable.assistant_art, 36.dp)
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.app_assistant), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                     val b = brief
