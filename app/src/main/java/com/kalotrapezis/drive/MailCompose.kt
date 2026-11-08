@@ -118,18 +118,19 @@ internal object MailTo {
  */
 internal object MailAssist {
     /** The chat for the draft: the conversation, oldest first ([from] to what each said), and what the user typed as notes. */
-    fun messages(thread: List<Pair<String, String>>, me: String, notes: String): JSONArray = JSONArray()
+    /** [style]: how the user writes from [me] (MailAi, the computer's), when it knows. */
+    fun messages(thread: List<Pair<String, String>>, me: String, notes: String, style: MailAi.Style? = null): JSONArray = JSONArray()
         .put(JSONObject().put("role", "system").put("content",
             "You write e-mail replies for $me. Write only the body of a proper e-mail reply: a greeting, clear paragraphs, a closing line — not a chat message. " +
             "No subject line and no signature (Tetra adds it). Write in the language of the conversation. If the user's notes are given, the reply says what they say, " +
-            "in good form; do not invent facts, dates or promises that are not in the conversation or the notes."))
+            "in good form; do not invent facts, dates or promises that are not in the conversation or the notes." + MailAi.prompt(style)))
         .put(JSONObject().put("role", "user").put("content", "The conversation, oldest first:\n\n" +
             thread.joinToString("\n\n") { (from, text) -> "--- $from:\n$text" } +
             (if (notes.isNotBlank()) "\n\nMy notes for the reply:\n$notes" else "\n\nDraft my reply to the last message.")))
 
-    fun draft(c: Context, thread: List<Pair<String, String>>, me: String, notes: String): String {
+    fun draft(c: Context, thread: List<Pair<String, String>>, me: String, notes: String, style: MailAi.Style? = null): String {
         if (!AiGate.allows("mail")) throw DriveProblem("AI Assist may not use Mail.", R.string.ai_is_off)
-        val body = JSONObject().put("model", Mistral.CHAT).put("messages", messages(thread, me, notes)).put("temperature", 0.4)
+        val body = JSONObject().put("model", Mistral.CHAT).put("messages", messages(thread, me, notes, style)).put("temperature", 0.4)
         return JSONObject(AssistantNet.post(AssistantNet.key(c), "/chat/completions", body.toString()))
             .getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content").trim()
     }
@@ -332,7 +333,7 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
                 val mails = draft.thread.ifEmpty { listOfNotNull(of) }
                 val said = mails.map { e -> e.from.ifEmpty { e.fromAddress } + " <" + e.fromAddress + ">" to (MailFiles.eml(root, e)?.let { f -> runCatching { Mime.read(f.readBytes()) }.getOrNull() }
                     ?.let { m -> MailThreads.own(m.text ?: MailSignatures.plain(m.html.orEmpty())) } ?: e.snippet) }
-                MailAssist.draft(context.applicationContext, said, me?.address ?: from, notes)
+                (me?.address ?: from).let { addr -> MailAssist.draft(context.applicationContext, said, addr, notes, MailAi.style(root, addr)) }
             } }
             drafting = false
             r.onSuccess { text -> body = text + body.substring(quoteAt) }

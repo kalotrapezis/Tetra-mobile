@@ -64,6 +64,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -168,6 +170,8 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
         value = withContext(Dispatchers.IO) { runCatching { MailFiles.accounts(root, MailSecret.ids(context)) to MailFiles.index(root, MailEngine.device()) }.onFailure { WriterLog.e("Mail: reading the archive", it) }.getOrDefault(emptyList<MailAccount>() to emptyList()) }
     }
     val accounts = data?.first.orEmpty()
+    // the computer's mail AI (MailAi): each mail's urgency, read again with the index; no file, no dots
+    val urgency by produceState(emptyMap<String, MailAi.Urgency>(), version) { value = withContext(Dispatchers.IO) { MailAi.urgency(root) } }
     // what was asked here and the computer has not done yet, shown as done (step 1: show it, then trust index.jsonl)
     var changed by remember { mutableStateOf(mapOf<String, MailEntry?>()) }
     // «Αποθήκη»: the same folders, list and pages over every mail kept here, deleted ones too (MailArchive); read only
@@ -396,7 +400,7 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
                             click = { if (selected.isNotEmpty()) selected = if (e.id in selected) selected - e.id else selected + e.id else { autoOpened = false; openId = e.id } },
                             long = { selected = if (e.id in selected) selected - e.id else selected + e.id },
                             here = remember(e.file, version) { e.file != null && File(root, e.file).isFile },
-                            heart = { act(if (e.flagged) "unfavorite" else "favorite", listOf(e.id)) })
+                            heart = { act(if (e.flagged) "unfavorite" else "favorite", listOf(e.id)) }, urgency = urgency[e.id]?.score ?: 0)
                     }
                 }
             }
@@ -666,9 +670,17 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
 @Composable private fun StateDot(color: Color, ring: Boolean = false) =
     Box(Modifier.size(8.dp).clip(CircleShape).then(if (ring) Modifier.border(1.5.dp, color, CircleShape) else Modifier.background(color)))
 
+/** An unread mail's urgency by the computer's mail AI (MailAi): 1 worth a look, 2 important, 3 urgent. */
+private val URGENCY = listOf(Color(0xFF4BA3D3), Color(0xFFD9668A), Color(0xFFE5484D))
+private val URGENCY_NAMES = listOf(R.string.mail_ai_urgency_1, R.string.mail_ai_urgency_2, R.string.mail_ai_urgency_3)
+@Composable private fun UrgencyDot(score: Int) {
+    val name = stringResource(URGENCY_NAMES[score - 1])
+    Box(Modifier.size(10.dp).clip(CircleShape).background(URGENCY[score - 1]).semantics { contentDescription = name })
+}
+
 /** One mail in the list (MAIL_PLAN §9): the account's colour as a bar, ♥ at the right, its state's dot. */
 @Composable private fun MailRow(e: MailEntry, account: MailAccount?, count: Int = 1, picked: Boolean, choosing: Boolean, chosen: Boolean, click: () -> Unit, long: () -> Unit, here: Boolean, heart: () -> Unit,
-    stored: Boolean = false) {
+    stored: Boolean = false, urgency: Int = 0) {
     Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large)
         .background(if (picked) MAIL_COLOR.copy(alpha = 0.32f) else if (chosen) MAIL_COLOR.copy(alpha = 0.16f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
         .combinedClickable(onLongClick = long, onClick = click).heightIn(min = 72.dp)) {
@@ -679,6 +691,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
                     .then(if (picked) Modifier else Modifier.background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f), CircleShape)), contentAlignment = Alignment.Center) {
                     if (picked) Icon(painterResource(R.drawable.ic_check), stringResource(R.string.contacts_selected), Modifier.size(14.dp), tint = Color.White)
                 }
+                if (!e.seen && urgency > 0) UrgencyDot(urgency)
                 Text(e.from.ifEmpty { e.fromAddress } + if (count > 1) "  ($count)" else "", Modifier.weight(1f), // (3): a conversation of three
                     fontWeight = if (e.seen) null else FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(shortTime(e.date), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -752,6 +765,7 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
     val context = LocalContext.current
     var failed by remember(e.id) { mutableStateOf<String?>(null) }
     var got by remember(e.id) { mutableIntStateOf(0) } // an attachment fetched: the cards again
+    val urgent by produceState<MailAi.Urgency?>(null, e.id) { value = withContext(Dispatchers.IO) { MailAi.urgency(root)[e.id] } }
     /** A Mail file this device does not keep, from the computer (MAIL_PLAN §2: older mail on demand). */
     fun fetch(rel: String): File = SyncClient(context.applicationContext, SyncStore(context.applicationContext)).mailFile(rel)
     val message by produceState<Mime.Message?>(null, e.id, e.file) {
@@ -814,6 +828,11 @@ internal fun mailWhy(c: android.content.Context, e: Throwable): String = c.getSt
                 Text(parts.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 message?.cc?.takeIf { it.isNotBlank() }?.let { Text(stringResource(R.string.mail_cc, it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 if (!e.saved) Text("● " + stringResource(R.string.mail_server_only), style = MaterialTheme.typography.bodySmall, color = ORANGE)
+                // why the computer's mail AI thinks it matters (MailAi)
+                urgent?.takeIf { it.score > 0 && it.why.isNotEmpty() }?.let { u -> Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    UrgencyDot(u.score)
+                    Text(stringResource(URGENCY_NAMES[u.score - 1]) + " · " + u.why, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } }
                 if (stored || e.gone) Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                     if (stored) StoredTag()
                     if (e.gone) Text(stringResource(R.string.mail_local_only), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

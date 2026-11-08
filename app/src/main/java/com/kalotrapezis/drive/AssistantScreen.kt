@@ -136,7 +136,7 @@ internal object SharedChat {
 
 internal data class Bubble(val mine: Boolean, val text: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
     val images: List<File> = emptyList(), val error: Boolean = false, val files: List<Attach.Ref> = emptyList(), val audio: AudioAsk? = null, val job: String? = null,
-    val cards: List<ResultCard> = emptyList()) {
+    val cards: List<ResultCard> = emptyList(), val confirm: AssistantGuard.Confirm? = null) {
     /** As History keeps it: the file's name and path, never its text. */
     fun json(): org.json.JSONObject = org.json.JSONObject().put("mine", mine).put("text", text).put("error", error).apply {
         if (files.isNotEmpty()) put("files", org.json.JSONArray(files.map { org.json.JSONObject().put("name", it.name).put("path", it.path).put("pages", it.pages) }))
@@ -169,6 +169,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
     var hearing by remember { mutableStateOf(false) }
     var pending by remember { mutableStateOf<PendingCall?>(null) }
     var pendingAudio by remember { mutableStateOf<AudioAsk?>(null) } // audio_make's estimate, waiting for the user's yes
+    var confirming by remember { mutableStateOf<AssistantGuard.Confirm?>(null) } // a change asked after outside text (AssistantGuard)
     var attached by remember { mutableStateOf<Attach.Doc?>(null) } // goes with the next message
     var attaching by remember { mutableStateOf(false) }
     var hasKey by remember { mutableStateOf(AssistantKey.get(context) != null) }
@@ -198,7 +199,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         livePhase = LivePhase.Stopping
         scope.launch { delay(1_500); if (live == null) liveShown = false } // the record slows to a stop first
     }
-    DisposableEffect(Unit) { onDispose { live?.end() } }
+    DisposableEffect(Unit) { onDispose { live?.end(); AssistantAutoMemory.soon(context, chat.saved()) } }
     BackHandler { if (live != null) endLive() else close() }
 
     fun say(text: String, error: Boolean = false) { bubbles += Bubble(false, text, error = error) }
@@ -234,6 +235,16 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         AudioService.start(context, id) // in the foreground: it goes on when the app is left
         bubbles += Bubble(false, context.getString(R.string.assistant_attach_started), job = id)
         keep()
+    }
+    /** The user's yes or no to a held change: run exactly as it was asked, never decided by the model. */
+    fun decide(c: AssistantGuard.Confirm, yes: Boolean) = scope.launch {
+        confirming = null
+        if (!yes) { say(context.getString(R.string.assistant_confirm_cancelled)); keep(); return@launch }
+        val reply = withContext(Dispatchers.IO) { runCatching { chat.approve(c) } }.getOrElse { say(it.shownMessage(context) ?: it.message.orEmpty(), true); return@launch }
+        bubbles += Bubble(false, context.getString(R.string.assistant_confirm_done), reply.choices, null, reply.images, cards = reply.cards)
+        keep()
+        reply.call?.let(::call) // the yes was the user's own
+        reply.open?.let(::open); reply.go?.let(::go)
     }
     fun skipAudio() { pendingAudio = null; say(context.getString(R.string.assistant_attach_skipped)) }
     fun attachFrom(uri: Uri) = scope.launch {
@@ -273,6 +284,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         // a yes or no to a waiting call is heard by the phone, never decided by the model
         pending?.let { p -> AssistantChat.yesNo(text)?.let { yes -> if (yes) call(p) else { pending = null; say(context.getString(R.string.assistant_call_cancelled)) }; return@launch } }
         // and to the audio's estimate (a short yes only: "ναι, αλλά 10 λεπτά" goes to the model): nothing is spent before it
+        confirming?.let { c -> AssistantChat.yesNo(text)?.let { yes -> decide(c, yes); return@launch } }
         pendingAudio?.let { a -> (if (text.trim().split(Regex("\\s+")).size <= 3) AssistantChat.yesNo(text) else null)?.let { yes -> if (yes) startAudio(a) else skipAudio(); listenAgain(); return@launch } }
         phase = Phase.Thinking
         live?.muted = true; if (inLive) livePhase = LivePhase.Thinking
@@ -288,9 +300,9 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         speech?.say(cut.rest()); speech?.finish()
         phase = Phase.Idle; spent = chat.bill.usd
         val reply = r.getOrElse { speech?.stop(); say(it.shownMessage(context) ?: context.getString(R.string.assistant_server, 0), true); WriterLog.w("Assistant: ${it.message}"); listenAgain(); return@launch }
-        bubbles += Bubble(false, reply.text, reply.choices, reply.call, reply.images, audio = reply.audio, cards = reply.cards)
+        bubbles += Bubble(false, reply.text, reply.choices, reply.call, reply.images, audio = reply.audio, cards = reply.cards, confirm = reply.confirm)
         keep()
-        pendingAudio = reply.audio
+        pendingAudio = reply.audio; confirming = reply.confirm
         // a call asked for by voice goes without a tap; one only found waits for the card's Call
         wantCall = HandsFree.asked(text) || (wantCall && reply.call == null && reply.cards.any { it is ResultCard.Contact })
         reply.call?.let { it.copy(speaker = it.speaker || HandsFree.loud(text)) }?.let { p -> if (wantCall) { speech?.await(); dial(p, inLive); return@launch } else pending = p }
@@ -306,7 +318,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         // the sheet: a question or a list waits for the answer by voice (a few seconds); anything else is done
         when {
             reply.open != null -> close()
-            reply.text.trimEnd().endsWith('?') || reply.choices.isNotEmpty() || reply.cards.isNotEmpty() || reply.call != null -> hear(6_000)
+            reply.text.trimEnd().endsWith('?') || reply.choices.isNotEmpty() || reply.cards.isNotEmpty() || reply.call != null || reply.confirm != null -> hear(6_000)
             reply.images.isEmpty() -> { delay(1_500); close() }
         }
     }
@@ -326,7 +338,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         hush(); stopNow.set(false); phase = Phase.Listening
         val pcm = withContext(Dispatchers.IO) { runCatching { listen(waitMs, { stopNow.get() || !isActive }, { hearing = it }, AssistantPause.ms(context), AssistantAudio.mic(context)) }.getOrNull() }
         hearing = false
-        if (pcm == null) { phase = Phase.Idle; if (sheet && pending == null && dialing == null && bubbles.lastOrNull()?.images.isNullOrEmpty() && bubbles.lastOrNull()?.cards.isNullOrEmpty()) close(); return@launch }
+        if (pcm == null) { phase = Phase.Idle; if (sheet && pending == null && confirming == null && dialing == null && bubbles.lastOrNull()?.images.isNullOrEmpty() && bubbles.lastOrNull()?.cards.isNullOrEmpty()) close(); return@launch }
         phase = Phase.Thinking
         val text = withContext(Dispatchers.IO) { runCatching { AssistantNet.transcribe(AssistantNet.key(context), pcm, AssistantWords.terms(context), chat.bill.part("dictation")) } }
         phase = Phase.Idle; spent = chat.bill.usd
@@ -388,7 +400,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
                 { f -> scope.launch { attaching = true; withContext(Dispatchers.IO) { runCatching { Attach.reader(context)(f) } }.onSuccess { attached = it }.onFailure { say(it.shownMessage(context) ?: "", true) }; attaching = false } },
                 ::say, dialing, dialLeft, ::cancelDial)
             itemsIndexed(bubbles) { i, b -> BubbleView(b, pending.takeIf { i == bubbles.size - 1 }, ::choose, ::call, { pending = null; say(context.getString(R.string.assistant_call_cancelled)) }, ::open,
-                pendingAudio.takeIf { i == bubbles.size - 1 }, { startAudio(it) }, ::skipAudio, actions) }
+                pendingAudio.takeIf { i == bubbles.size - 1 }, { startAudio(it) }, ::skipAudio, actions, confirming.takeIf { i == bubbles.size - 1 }, ::decide) }
         }
     }
 
@@ -426,7 +438,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
                 IconButton(onClick = { aloud = !aloud; prefs.edit().putBoolean("aloud", aloud).apply(); if (!aloud) hush() }) {
                     Icon(painterResource(if (aloud) R.drawable.ic_volume_up else R.drawable.ic_volume_off), contentDescription = stringResource(R.string.assistant_read_aloud))
                 }
-                IconButton(onClick = { SharedChat.forget(); SharedChat.file(context).delete(); pending = null; pendingAudio = null; attached = null; hush(); spent = 0.0 }) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.assistant_new_chat)) }
+                IconButton(onClick = { AssistantAutoMemory.soon(context, chat.saved()); SharedChat.forget(); SharedChat.file(context).delete(); pending = null; pendingAudio = null; confirming = null; attached = null; hush(); spent = 0.0 }) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.assistant_new_chat)) }
             }
             // the phone: the input is the island, its handle opens Scheduled, History, Skills and Memory (the user, 1 Nov: "not
             // much, it does not have a big context window"); a tablet has the room for them in a sidebar beside the chat
@@ -436,6 +448,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
             val sectionContent: @Composable (Modifier) -> Unit = { m -> Box(m) { when (section) {
                 AssistSection.Scheduled -> ScheduledTab(::offer)
                 AssistSection.History -> HistoryTab(::offer) { saved ->
+                    AssistantAutoMemory.soon(context, chat.saved()); confirming = null
                     chat.restore(saved.messages); bubbles.clear(); bubbles += saved.bubbles.map(Bubble::of)
                     // its file is read again only if the chat asks for it
                     chat.attach(bubbles.flatMap { it.files }.lastOrNull()?.let { File(it.path) })
@@ -733,7 +746,8 @@ private fun MicButton(phase: Phase, hearing: Boolean, tap: () -> Unit) {
 
 @Composable
 private fun BubbleView(b: Bubble, pending: PendingCall?, choose: (AssistantChoice) -> Unit, call: (PendingCall) -> Unit, cancel: () -> Unit, open: (File) -> Unit,
-    audio: AudioAsk?, startAudio: (AudioAsk) -> Unit, skipAudio: () -> Unit, actions: CardActions) {
+    audio: AudioAsk?, startAudio: (AudioAsk) -> Unit, skipAudio: () -> Unit, actions: CardActions,
+    confirming: AssistantGuard.Confirm? = null, decide: (AssistantGuard.Confirm, Boolean) -> Unit = { _, _ -> }) {
     Column(Modifier.fillMaxWidth(), horizontalAlignment = if (b.mine) Alignment.End else Alignment.Start) {
         // the file that went with it: its name and pages, never its text
         b.files.forEach { f -> Surface(Modifier.padding(bottom = 4.dp).widthIn(max = 560.dp), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
@@ -779,6 +793,17 @@ private fun BubbleView(b: Bubble, pending: PendingCall?, choose: (AssistantChoic
         }
         b.job?.let { AudioJobCard(it) }
         if (b.cards.isNotEmpty()) ResultCards(b.cards, actions)
+        // a change asked after outside text (a mail, the web): what it would do, and the user's own yes
+        if (confirming != null && b.confirm == confirming) Surface(Modifier.padding(top = 6.dp).widthIn(max = 560.dp), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.tertiaryContainer) {
+            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(stringResource(R.string.assistant_confirm_title), style = MaterialTheme.typography.labelMedium)
+                if (confirming.what.isNotBlank()) Text(confirming.what, style = MaterialTheme.typography.bodyLarge, maxLines = 4, overflow = TextOverflow.Ellipsis)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { decide(confirming, true) }) { Text(stringResource(R.string.assistant_confirm_yes), maxLines = 1) }
+                    TextButton(onClick = { decide(confirming, false) }) { Text(stringResource(R.string.common_cancel), maxLines = 1) }
+                }
+            }
+        }
         if (pending != null && b.call == pending) Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = { call(pending) }) {
                 Icon(painterResource(R.drawable.ic_call), contentDescription = null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
