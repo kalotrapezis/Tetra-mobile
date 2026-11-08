@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home's live cards (HomeCards.kt) -->
+<resources>
+    <string name="home_pills_none">Dnes žádné dávky</string>
+    <string name="home_pills_done">Dnes vše vzato</string>
+    <string name="home_mail_unread">%1$d nepřečtených</string>
+    <string name="home_mail_none">Žádná nepřečtená pošta</string>
+</resources>

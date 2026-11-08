@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home's live cards (HomeCards.kt) -->
+<resources>
+    <string name="home_pills_none">Gan dáileoga inniu</string>
+    <string name="home_pills_done">Gach rud tógtha inniu</string>
+    <string name="home_mail_unread">%1$d gan léamh</string>
+    <string name="home_mail_none">Gan ríomhphost gan léamh</string>
+</resources>

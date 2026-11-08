@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home's live cards (HomeCards.kt) -->
+<resources>
+    <string name="home_pills_none">Ei annoksia tänään</string>
+    <string name="home_pills_done">Kaikki otettu tänään</string>
+    <string name="home_mail_unread">%1$d lukematonta</string>
+    <string name="home_mail_none">Ei lukemattomia viestejä</string>
+</resources>
