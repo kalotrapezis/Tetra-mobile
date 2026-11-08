@@ -497,7 +497,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () -
             // much, it does not have a big context window"); a tablet has the room for them in a sidebar beside the chat
             // the window's own width, not the device's: a tablet in split screen, or a narrow window, gets the phone's island
             val wide = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp >= 720
-            var section by remember { mutableStateOf(AssistSection.Skills) }
+            var section by remember { mutableStateOf(AssistSection.Scheduled) } // the drawer opens on Scheduled (8 Nov), not the chips of what it can do
             val sectionContent: @Composable (Modifier) -> Unit = { m -> Box(m) { when (section) {
                 AssistSection.Scheduled -> ScheduledTab(::offer)
                 AssistSection.History -> HistoryTab(::offer) { saved ->

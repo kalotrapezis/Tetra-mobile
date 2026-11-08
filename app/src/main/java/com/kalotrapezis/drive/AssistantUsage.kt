@@ -63,7 +63,18 @@ internal class Usage(val dir: File, device: String, private val zone: ZoneId = Z
     class Mp3(val title: String, val seconds: Double, val usd: Double, val at: Long, val device: String)
     class Budget(val monthly: Double?, val warned: String)
     class Summary(val today: Double, val month: Double, val all: Double, val since: Long, val days: List<Pair<LocalDate, Double>>, val byFeature: List<Group>,
-        val byModel: List<Group>, val byDevice: List<Group>, val files: List<Group>, val mp3s: List<Mp3>, val budget: Budget)
+        val byModel: List<Group>, val byDevice: List<Group>, val files: List<Group>, val mp3s: List<Mp3>, val budget: Budget, val history: History = History(emptyList(), emptyList(), emptyList()))
+    /** One row of the history: a day ("2026-11-08"), a month ("2026-11") or a year ("2026"), what it cost, how many uses. */
+    class Period(val key: String, val usd: Double, val n: Int)
+    /** Every day, month and year with spending, newest first: the month files are all kept, nothing ends after 30 days (8 Nov). */
+    class History(val days: List<Period>, val months: List<Period>, val years: List<Period>)
+
+    /** The history from [all] lines; an MP3's line repeats its job's cost, so it is left out. */
+    fun history(all: List<Line>): History {
+        val paid = all.filter { it.f != "mp3" }
+        fun by(key: (Line) -> String) = paid.groupBy(key).map { (k, xs) -> Period(k, xs.sumOf { it.usd }, xs.size) }.filter { it.usd > 0 || it.n > 0 }.sortedByDescending { it.key }
+        return History(by { day(it.t).toString() }, by { monthKey(it.t) }, by { monthKey(it.t).take(4) })
+    }
 
     private fun day(ms: Long) = Instant.ofEpochMilli(ms).atZone(zone).toLocalDate()
     private fun monthKey(ms: Long) = day(ms).toString().take(7)
@@ -113,7 +124,7 @@ internal class Usage(val dir: File, device: String, private val zone: ZoneId = Z
         val days = (29 downTo 0).map { today.minusDays(it.toLong()) }.let { ds -> val by = all.groupBy { day(it.t) }; ds.map { d -> d to (by[d]?.sumOf { it.usd } ?: 0.0) } }
         return Summary(all.filter { day(it.t) == today }.sumOf { it.usd }, all.filter { monthKey(it.t) == monthKey(now) }.sumOf { it.usd }, all.sumOf { it.usd },
             all.minOfOrNull { it.t }?.coerceAtMost(now) ?: now, days, group(paid) { it.f }, group(paid) { it.m }, group(all) { it.device }, group(paid) { it.file }.take(10),
-            all.filter { it.f == "mp3" }.sortedByDescending { it.t }.take(20).map { Mp3(it.title.ifEmpty { it.file }, it.s, it.cost, it.t, it.device) }, budget())
+            all.filter { it.f == "mp3" }.sortedByDescending { it.t }.take(20).map { Mp3(it.title.ifEmpty { it.file }, it.s, it.cost, it.t, it.device) }, budget(), history(all))
     }
 
     companion object {
@@ -171,6 +182,7 @@ private fun UsageScreen(back: () -> Unit) {
     val u by produceState<Usage.Summary?>(null, version) { value = withContext(Dispatchers.IO) { usage.summary() } }
     val meter = remember { AssistantMeter.read(context).total }
     var budget by remember { mutableStateOf("") }
+    var saved by remember { mutableStateOf(false) }
     LaunchedEffect(u?.budget?.monthly) { budget = u?.budget?.monthly?.let { "%.2f".format(java.util.Locale.ROOT, it).removeSuffix(".00") } ?: "" }
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     fun date(d: LocalDate) = d.format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(locale))
@@ -196,6 +208,7 @@ private fun UsageScreen(back: () -> Unit) {
                 // the meter's odometer is older than this record: what came before it, without a breakdown
                 (meter - s.all).takeIf { it > 0.00005 }?.let { Text(stringResource(R.string.usage_before, Bill.text(it)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 Days(s.days) { date(it) }
+                HistoryTable(s.history, locale) { date(it) }
                 s.budget.monthly?.let { b ->
                     Text(stringResource(R.string.usage_budget_used, Bill.text(s.month), Bill.text(b)), style = MaterialTheme.typography.labelMedium)
                     Box(Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
@@ -203,11 +216,14 @@ private fun UsageScreen(back: () -> Unit) {
                             s.month >= b -> Color(0xFFD32F2F); s.month >= 0.8 * b -> Color(0xFFE8A100); else -> Color.Gray }))
                     }
                 }
+                // Save only when it changes, and «Saved ✓» after (8 Nov: "I pressed save and it still says save, as if not pressed")
+                val typed = budget.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0 }
+                val changed = typed != s.budget.monthly
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(budget, { budget = it }, Modifier.weight(1f), label = { Text(stringResource(R.string.usage_budget)) }, placeholder = { Text(stringResource(R.string.usage_budget_none)) },
+                    OutlinedTextField(budget, { budget = it; saved = false }, Modifier.weight(1f), label = { Text(stringResource(R.string.usage_budget)) }, placeholder = { Text(stringResource(R.string.usage_budget_none)) },
                         singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
-                    Button(onClick = { runCatching { usage.setBudget(budget.replace(',', '.').toDoubleOrNull() ?: 0.0) }.onFailure { WriterLog.e("AI Assist: the budget was not kept", it) }
-                        ScopedSync.soon(context, "assistant", 0, orWhole = true); version++ }) { Text(stringResource(R.string.common_save)) }
+                    Button(enabled = changed, onClick = { runCatching { usage.setBudget(typed ?: 0.0) }.onSuccess { saved = true }.onFailure { WriterLog.e("AI Assist: the budget was not kept", it) }
+                        ScopedSync.soon(context, "assistant", 0, orWhole = true); version++ }) { Text(stringResource(if (saved && !changed) R.string.usage_saved else R.string.common_save)) }
                 }
                 Text(stringResource(R.string.usage_budget_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (s.byFeature.isEmpty()) Text(stringResource(R.string.usage_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -289,4 +305,36 @@ private fun Breakdown(title: String, rows: List<Usage.Group>, label: (String) ->
         }
         Text(Bill.text(r.usd), style = MaterialTheme.typography.labelLarge)
     } }
+}
+
+/** The history (8 Nov: "a table that keeps the days, months and year"): every day, month or year with spending, newest first. */
+@Composable
+private fun HistoryTable(h: Usage.History, locale: java.util.Locale, date: (LocalDate) -> String) {
+    if (h.days.isEmpty()) return
+    var tab by remember { mutableIntStateOf(0) }
+    Text(stringResource(R.string.usage_history), style = MaterialTheme.typography.titleSmall)
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(R.string.usage_tab_days, R.string.usage_tab_months, R.string.usage_tab_years).forEachIndexed { i, label ->
+            FilterChip(selected = tab == i, onClick = { tab = i }, label = { Text(stringResource(label)) })
+        }
+    }
+    val rows = when (tab) { 1 -> h.months; 2 -> h.years; else -> h.days }
+    var all by remember(tab) { mutableStateOf(false) }
+    val month = java.time.format.DateTimeFormatter.ofPattern("LLLL yyyy", locale)
+    Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 6.dp)) {
+            (if (all) rows else rows.take(31)).forEach { p ->
+                Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(when (tab) {
+                        1 -> runCatching { java.time.YearMonth.parse(p.key).format(month).replaceFirstChar { it.titlecase(locale) } }.getOrDefault(p.key)
+                        2 -> p.key
+                        else -> runCatching { date(LocalDate.parse(p.key)) }.getOrDefault(p.key)
+                    }, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                    Text("× ${p.n}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(end = 12.dp))
+                    Text(Bill.text(p.usd), style = MaterialTheme.typography.bodyMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+                }
+            }
+            if (!all && rows.size > 31) TextButton(onClick = { all = true }) { Text(stringResource(R.string.usage_more, rows.size - 31)) }
+        }
+    }
 }

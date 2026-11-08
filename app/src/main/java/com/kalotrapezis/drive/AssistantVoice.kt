@@ -266,8 +266,21 @@ internal object AssistantPause {
 internal object AssistantWords {
     const val DEFAULT = "Καλοτραπέζης, Θεολόγος, Tetra, ΥΠΕΧΩΔΕ"
     private fun prefs(c: Context) = c.getSharedPreferences("assistant", Context.MODE_PRIVATE)
-    fun words(c: Context): String = prefs(c).getString("words", DEFAULT) ?: DEFAULT
-    fun setWords(c: Context, words: String) = prefs(c).edit().putString("words", words).apply()
+    /** Kept in Tetra, beside the memory, so every device has them (8 Nov: "so I do not type them a hundred times"). */
+    fun file(): java.io.File = java.io.File(TetraSystem.dir(driveRoot(), "Assistant", "Shared"), "words.txt")
+    /** The shared words; the first time, what this phone had kept on its own goes there. */
+    fun words(c: Context): String {
+        val f = file()
+        runCatching { if (f.isFile) return f.readText().trim() }
+        val mine = prefs(c).getString("words", null)
+        if (mine != null && mine != DEFAULT) runCatching { f.parentFile?.mkdirs(); f.writeText(mine) }
+        return mine ?: DEFAULT
+    }
+    fun setWords(c: Context, words: String) {
+        prefs(c).edit().putString("words", words).apply()
+        runCatching { file().apply { parentFile?.mkdirs() }.writeText(words) }.onFailure { WriterLog.w("AI Assist: the words were not kept in Tetra", it) }
+        ScopedSync.soon(c, "assistant", delayMs = 2_500, orWhole = true)
+    }
     /** Off unless switched on: the favourites' names then go to Mistral too. */
     fun contacts(c: Context) = prefs(c).getBoolean("contactWords", false)
     fun setContacts(c: Context, on: Boolean) = prefs(c).edit().putBoolean("contactWords", on).apply()
