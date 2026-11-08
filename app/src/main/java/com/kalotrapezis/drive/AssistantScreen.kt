@@ -35,6 +35,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.compositeOver
@@ -151,7 +153,7 @@ internal data class Bubble(val mine: Boolean, val text: String, val choices: Lis
 private enum class Phase { Idle, Listening, Thinking }
 
 /** The live screen's record: what it is doing decides how it turns. */
-private enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Listening(40f), Thinking(90f), Speaking(200f), Stopping(0f) }
+internal enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Listening(40f), Thinking(90f), Speaking(200f), Stopping(0f) }
 
 @Composable
 private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> Unit) {
@@ -413,7 +415,12 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
                         Text(stringResource(R.string.app_assistant), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         if (spent > 0) Text(Bill.text(spent), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
-                    list(Modifier.fillMaxWidth().heightIn(max = 420.dp))
+                    // the plain mic (the user, 8 Nov): Live's cassette while it listens and thinks, a VHS-era TV with the answer on its screen
+                    val still = remember { android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f }
+                    if (hasKey && phase != Phase.Idle) Cassette(when { still -> LivePhase.Stopping; phase == Phase.Listening -> LivePhase.Listening; else -> LivePhase.Thinking },
+                        if (hearing) 0.6f else 0f, Modifier.padding(top = 12.dp).fillMaxWidth(0.55f).widthIn(max = 280.dp).align(Alignment.CenterHorizontally))
+                    if (hasKey && phase == Phase.Idle && bubbles.lastOrNull()?.mine == false) VhsTv(bubbles.size, still, Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) { list(Modifier.fillMaxWidth().heightIn(max = 360.dp)) }
+                    else list(Modifier.fillMaxWidth().heightIn(max = 420.dp))
                     Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         MicButton(phase, hearing, ::mic)
                         Text(status ?: stringResource(R.string.assistant_tap_to_talk), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -691,7 +698,7 @@ private fun Vinyl(phase: LivePhase, level: Float, modifier: Modifier) {
  * turning round at either end, as an auto-reverse deck does.
  */
 @Composable
-private fun Cassette(phase: LivePhase, level: Float, modifier: Modifier) {
+internal fun Cassette(phase: LivePhase, level: Float, modifier: Modifier) {
     val label = androidx.compose.ui.graphics.ImageBitmap.imageResource(R.drawable.assistant_art)
     val turn = rememberTurn(phase, level)
     androidx.compose.foundation.Canvas(modifier.aspectRatio(1.58f)) {
@@ -731,6 +738,57 @@ private fun Cassette(phase: LivePhase, level: Float, modifier: Modifier) {
         }
         drawPath(bottom, Color.White.copy(alpha = 0.08f))
         listOf(0.3f, 0.5f, 0.7f).forEach { x -> drawCircle(Color.Black.copy(alpha = 0.5f), radius = h * 0.03f, center = androidx.compose.ui.geometry.Offset(w * x, h * 0.9f)) }
+    }
+}
+
+/**
+ * A VHS-era television around the sheet's answer: rabbit ears, a cabinet with knobs and a grille, a rounded CRT whose
+ * picture opens from a line with a tracking band rolling down as it switches on ([answer] changes: on again), scan lines
+ * over it, and a small stand. [still] (animations off in the phone's settings): on at once.
+ */
+@Composable
+private fun VhsTv(answer: Int, still: Boolean, modifier: Modifier, screen: @Composable () -> Unit) {
+    val on = remember(answer) { androidx.compose.animation.core.Animatable(if (still) 1f else 0f) }
+    LaunchedEffect(answer) { if (!still) on.animateTo(1f, androidx.compose.animation.core.tween(700)) }
+    val cabinet = Color(0xFF3B3430); val trim = Color(0xFF5A4E46)
+    Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        androidx.compose.foundation.Canvas(Modifier.width(120.dp).height(26.dp)) { // the rabbit ears
+            val foot = androidx.compose.ui.geometry.Offset(size.width / 2, size.height)
+            drawLine(Color(0xFF9A9A9A), foot, androidx.compose.ui.geometry.Offset(size.width * 0.12f, 0f), strokeWidth = 4f)
+            drawLine(Color(0xFF9A9A9A), foot, androidx.compose.ui.geometry.Offset(size.width * 0.88f, size.height * 0.1f), strokeWidth = 4f)
+            drawCircle(cabinet, radius = size.height * 0.3f, center = foot)
+        }
+        Surface(shape = RoundedCornerShape(26.dp), color = cabinet, border = androidx.compose.foundation.BorderStroke(2.dp, trim)) {
+            Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                val glass = Color(0xFF12201D)
+                Box(Modifier.weight(1f).clip(RoundedCornerShape(30.dp)).background(glass)
+                    .drawWithContent {
+                        drawContent()
+                        val lines = Color.Black.copy(alpha = 0.16f); var y = 0f
+                        while (y < size.height) { drawLine(lines, androidx.compose.ui.geometry.Offset(0f, y), androidx.compose.ui.geometry.Offset(size.width, y), strokeWidth = 1.5f); y += 6f }
+                        // the glass's curve: darker at the edges
+                        drawRect(androidx.compose.ui.graphics.Brush.radialGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.35f)), radius = size.maxDimension * 0.75f))
+                        if (on.value < 1f) { // switching on: the tracking band rolls down
+                            val band = size.height * on.value
+                            drawRect(Color.White.copy(alpha = 0.22f * (1 - on.value)), androidx.compose.ui.geometry.Offset(0f, band - 18f), androidx.compose.ui.geometry.Size(size.width, 36f))
+                        }
+                    }) {
+                    Box(Modifier.graphicsLayer { val t = on.value; scaleY = 0.02f + 0.98f * t * (2 - t); alpha = (t * 2).coerceAtMost(1f) }) { screen() }
+                }
+                androidx.compose.foundation.Canvas(Modifier.width(30.dp).height(150.dp)) { // the knobs and the speaker grille
+                    val x = size.width / 2
+                    listOf(0.12f, 0.34f).forEach { k -> val c = androidx.compose.ui.geometry.Offset(x, size.height * k)
+                        drawCircle(trim, radius = size.width * 0.42f, center = c); drawCircle(Color(0xFF2A2420), radius = size.width * 0.3f, center = c)
+                        drawLine(Color(0xFFBFB3A6), c, c + androidx.compose.ui.geometry.Offset(0f, -size.width * 0.28f), strokeWidth = 3f) }
+                    var y = size.height * 0.56f
+                    while (y < size.height * 0.95f) { drawLine(Color.Black.copy(alpha = 0.45f), androidx.compose.ui.geometry.Offset(size.width * 0.15f, y), androidx.compose.ui.geometry.Offset(size.width * 0.85f, y), strokeWidth = 3f); y += 9f }
+                    drawCircle(if (on.value > 0f) Color(0xFFE53935) else Color(0xFF552222), radius = 3.5f, center = androidx.compose.ui.geometry.Offset(x, size.height * 0.5f)) // the power light
+                }
+            }
+        }
+        androidx.compose.foundation.Canvas(Modifier.width(160.dp).height(14.dp)) { // the stand
+            drawPath(androidx.compose.ui.graphics.Path().apply { moveTo(size.width * 0.3f, 0f); lineTo(size.width * 0.7f, 0f); lineTo(size.width * 0.82f, size.height); lineTo(size.width * 0.18f, size.height); close() }, trim)
+        }
     }
 }
 

@@ -21,6 +21,10 @@ How to write here:
       Tetra's Browser, `"open": true`); web cards' sources open in Tetra's Browser, plus «Search in the Browser»; brief_show (outside
       text: the brief retells mails) as a card that opens BriefActivity. data_status and brief_show have no per-app switch (no "data"
       app in AiGate.APPS). AssistantMoreToolsTest. Not checked on a device.
+      Then (the user: "even in the simple mic, as loading it could have the cassette and when it has the answer change to a VHS
+      television, to show information"): the sheet shows Live's Cassette while it listens and thinks, and its answer (text and cards)
+      on a VHS-era TV's screen (VhsTv: rabbit ears, knobs, scan lines, a switch-on line and tracking band; still when animations are off).
+      Cassette and LivePhase are internal, as on claude/home-widget. Not checked on a device.
 - [x] (pills-private-convo session, 8 Nov; branch `claude/pills-private-convo-9d6534`, merged 8 Nov) **Pills: private reminders; the
       reminder in AI Assist's chat; pills_taken reads back.** Settings › Pills › Private reminders (off): notification and voice name
       no medicine (lock screen: a public version, time only), refill lines too. A ring writes its line into the one open chat
