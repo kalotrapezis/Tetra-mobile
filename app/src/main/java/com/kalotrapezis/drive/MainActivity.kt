@@ -392,7 +392,9 @@ internal val TetraColors = darkColorScheme(
 internal data class ExternalMedia(val uri: Uri, val mimeType: String?)
 private val EXTERNAL_VIEW_ACTIONS = setOf(Intent.ACTION_VIEW, "android.provider.action.REVIEW", "com.android.camera.action.REVIEW")
 
-private fun authenticateVault(activity: Activity, success: () -> Unit, failure: (String) -> Unit) {
+internal fun authenticateVault(activity: Activity, success: () -> Unit, failure: (String) -> Unit,
+                               title: String = activity.getString(R.string.home_vault_unlock), subtitle: String = activity.getString(R.string.home_vault_unlock_detail),
+                               cancelled: () -> Unit = {}) {
     val allowed = BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
     val manager = activity.getSystemService(BiometricManager::class.java)
     if (manager.canAuthenticate(allowed) != BiometricManager.BIOMETRIC_SUCCESS) {
@@ -400,14 +402,14 @@ private fun authenticateVault(activity: Activity, success: () -> Unit, failure: 
         return
     }
     BiometricPrompt.Builder(activity)
-        .setTitle(activity.getString(R.string.home_vault_unlock))
-        .setSubtitle(activity.getString(R.string.home_vault_unlock_detail))
+        .setTitle(title)
+        .setSubtitle(subtitle)
         .setAllowedAuthenticators(allowed)
         .build()
         .authenticate(CancellationSignal(), activity.mainExecutor, object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) = success()
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                if (errorCode != BiometricPrompt.BIOMETRIC_ERROR_USER_CANCELED && errorCode != BiometricPrompt.BIOMETRIC_ERROR_CANCELED) failure(errString.toString())
+                if (errorCode != BiometricPrompt.BIOMETRIC_ERROR_USER_CANCELED && errorCode != BiometricPrompt.BIOMETRIC_ERROR_CANCELED) failure(errString.toString()) else cancelled()
             }
         })
 }
@@ -795,6 +797,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
         if (applet.value == MapsAge.SCREEN && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Maps; screen = Screen.Settings; return@LaunchedEffect }
         if (applet.value == PILLS_SETTINGS && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Pills; screen = Screen.Settings; return@LaunchedEffect }
         if (applet.value == BROWSER_SETTINGS && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Browser; screen = Screen.Settings; return@LaunchedEffect }
+        if (applet.value == PASSWORDS_SETTINGS && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Passwords; screen = Screen.Settings; return@LaunchedEffect }
         if (applet.value == LocationReminders.SCREEN && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Calendar; screen = Screen.Settings; return@LaunchedEffect }
         if (applet.value == MailActivity.SETTINGS && screen != Screen.Guide) { applet.value = null; settingsStart = SettingsPage.Mail; screen = Screen.Settings; return@LaunchedEffect }
         // Mail's «Άνοιγμα φακέλου»: its folder in Files
@@ -1078,6 +1081,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                         "mail" -> openApplet(context, Applet.Mail.name)
                         "sms" -> openApplet(context, Applet.Messages.name)
                         "browser" -> openBrowser(context)
+                        "passwords" -> openApplet(context, Applet.Passwords.name)
                         // «Αποθήκη» › «Άνοιγμα φακέλου»: Mail's folder in Files, though it is under .System
                         else -> if (id == MailFiles.FOLDER || id.startsWith(MailFiles.FOLDER + "/")) { screen = Screen.Drive; drivePane = DrivePane.Files; driveFolder = id; loadDrive(id) }
                     } },
@@ -1231,6 +1235,7 @@ private fun Home(
         "sms" -> HomeWideCard(stringResource(R.string.app_sms), stringResource(R.string.sms_home_detail), R.drawable.sms_art, openSms)
         "browser" -> HomeBrowserGroup(openBrowser)
         "pills" -> HomePillsGroup { openApplet(context, Applet.Pills.name) }
+        "passwords" -> HomeWideCard(stringResource(R.string.app_passwords), stringResource(R.string.passwords_home_detail), R.drawable.passwords_art, { openApplet(context, Applet.Passwords.name) })
         "maps" -> HomeMapsGroup(wide, openMaps)
     } }
     // each part small: just its icon, as a launcher's (Scanner and Codes are two apps, so two icons)
@@ -1253,6 +1258,7 @@ private fun Home(
         "sms" -> listOf(HomeIcon(R.string.app_sms, R.drawable.sms_art, openSms))
         "browser" -> listOf(HomeIcon(R.string.app_browser, R.drawable.browser_art, openBrowser))
         "pills" -> listOf(HomeIcon(R.string.app_pills, R.drawable.pills_art, { openApplet(context, Applet.Pills.name) }))
+        "passwords" -> listOf(HomeIcon(R.string.app_passwords, R.drawable.passwords_art, { openApplet(context, Applet.Passwords.name) }))
         "maps" -> listOf(HomeIcon(R.string.app_maps, R.drawable.maps_art, { openMaps(null) }))
         else -> emptyList()
     }

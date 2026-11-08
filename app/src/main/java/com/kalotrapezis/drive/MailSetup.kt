@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -15,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -29,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -137,6 +140,13 @@ internal fun MailAddAccount(dismiss: () -> Unit) {
                     }
                     if (!microsoft) OutlinedTextField(password, { password = it; problem = null }, singleLine = true, label = { Text(stringResource(R.string.mail_password)) },
                         visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), modifier = Modifier.fillMaxWidth())
+                    // kept in Passwords on another device (MailPasswords): given after the fingerprint or the screen lock
+                    val saved = remember(imap.host, address) { runCatching { MailPasswords.candidates(BrowserSecrets.vault(context).logins, address, imap.host) }.getOrDefault(emptyList()) }
+                    if (!microsoft && saved.isNotEmpty()) TextButton(onClick = {
+                        val act = context.activity() ?: return@TextButton
+                        authenticateVault(act, { password = saved.first().password; problem = null; WriterLog.i("Mail: the password filled from Passwords") }, { problem = it },
+                            context.getString(R.string.pw_unlock), context.getString(R.string.home_vault_unlock_detail))
+                    }) { Icon(painterResource(R.drawable.ic_key), null); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.pw_from_passwords)) }
                 }
                 else -> {
                     Text(stringResource(R.string.mail_done_text, address.trim()))

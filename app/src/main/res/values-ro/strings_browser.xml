@@ -20,8 +20,6 @@
     <string name="browser_history">Istoric</string>
     <string name="browser_history_note">Păstrat 24 de ore, apoi uitat</string>
     <string name="browser_no_history">Nimic în ultimele 24 de ore</string>
-    <string name="browser_saved">Parole și carduri</string>
-    <string name="browser_none_saved">Încă nimic salvat</string>
     <string name="browser_saved_note">Criptat, doar pe acest telefon</string>
     <string name="browser_passwords">Parole</string>
     <string name="browser_addresses">Adrese</string>

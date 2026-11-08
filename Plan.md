@@ -43,6 +43,23 @@ How to write here:
       instruction ("πιο ακαδημαϊκό ύφος"); each shaded on the page with Accept / Reject / Accept all, one Undo step each; an
       unfound or no-op one dropped. Pieces of 4000 letters, at most 12 per press. Hidden unless AI Assist is on, a key is set
       and the new "writer" switch (Settings › AI Assist › Words) allows it. `WriterSuggest.kt`, `WriterSuggestTest`. Not checked on a device.
+- [~] (password-manager session, 4 Nov; branch `claude/password-manager-29e709`, not merged) **Passwords: a password manager and
+      2FA as an applet of its own** (the user: "the passwords page on the webrowser have no search what so ever. no edit no delete no
+      new or save. Instead of making a better password page, create a password manager in tetra, one page with two tabs Passwords and
+      create a password, one page 2FA, add importing from Google and this Text file… Do the island with passwords and 2FA"). Council
+      (features, design) then the user: GNOME Authenticator's .txt (otpauth:// lines), 2FA sync opt-in and off, locked every time it
+      comes back, the user's purple padlock icon. The Browser's vault stays the store (logins gain a note; sync format unchanged without
+      one); 2FA in its own Keystore store, synced in `Browser/TwoFactor/<device>.enc` with the passwords' passphrase ("2fa" bound in).
+      The Browser's key and Fill open it. Not in v1: export, folders, breach checks.
+      Then Android's autofill service (the user: "Can I set it as Android autocomplete?"): Passwords › More › Fill passwords in
+      other apps asks Android; a form's logins after the fingerprint or PIN (AutofillUnlock), a login typed elsewhere kept. In a
+      known browser by the page's site; in an app only logins kept for that exact package (no app's word for a site trusted).
+      AutofillFormTest. On an emulator (AutofillProbe, a form in the test package): save offered and kept, then the row,
+      the PIN, the login filled; the keyboard's strip rows added (Gboard showed nothing without them). Not in Chrome 133 (it
+      has no "another service" switch yet) and not on the phone.
+      Then Mail (the user: "where else do we need passwords? mail?"): an account's password is kept in Passwords too, as a login of
+      its IMAP server noted "Tetra Mail" (added, adopted from the PC, or changed in Settings), so it syncs; Mail's setup offers
+      "Fill from Passwords" after the fingerprint or PIN. Google's account password is never offered for Gmail (an app password is).
 - [x] (browser-sync session, 3 Nov; branch `browser-sync`, not merged; desktop bc9f2b4 on main) **Browser: bookmarks, open tabs and
       (chosen) passwords between the phone and the tablet** (the user: "bookmarks and tabs"; "sync passwords as well but have some
       encryption"; "options in the settings what to sync"). `.System/Browser/Shared` (synced as `Browser/…`, part `browser`; the desktop

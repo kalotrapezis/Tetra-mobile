@@ -20,8 +20,6 @@
     <string name="browser_history">Storja</string>
     <string name="browser_history_note">Tinżamm 24 siegħa, imbagħad tintesa</string>
     <string name="browser_no_history">Xejn fl-aħħar 24 siegħa</string>
-    <string name="browser_saved">Passwords u kards</string>
-    <string name="browser_none_saved">Għad m’hemm xejn issejvjat</string>
     <string name="browser_saved_note">Kriptat, fuq dan it-telefon biss</string>
     <string name="browser_passwords">Passwords</string>
     <string name="browser_addresses">Indirizzi</string>
