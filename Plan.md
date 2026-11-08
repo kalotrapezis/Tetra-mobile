@@ -12,19 +12,24 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
-- [x] (pills-private-convo session, 8 Nov; branch `claude/pills-private-convo-9d6534`, not merged) **Pills: private reminders; the
+- [x] (pills-private-convo session, 8 Nov; branch `claude/pills-private-convo-9d6534`, merged 8 Nov) **Pills: private reminders; the
       reminder in AI Assist's chat; pills_taken reads back.** Settings › Pills › Private reminders (off): notification and voice name
       no medicine (lock screen: a public version, time only), refill lines too. A ring writes its line into the one open chat
       (SharedChat, kept in files/assistant_open.json; the model's line keeps names, the bubble drops them when private) and starts
       its ten minutes again; every way into AI Assist (sheet, notification, icon) goes on with it within ten minutes. pills_taken /
       pills_later report the state read back from the files, and say so when nothing waits. PillsChatTest. Not checked on a device.
-- [x] (assistant-safety-mailai session, 8 Nov; branch `claude/assistant-safety-mailai-5de496`, not merged) **AI Assist: outside text cannot act;
+- [x] (assistant-safety-mailai session, 8 Nov; branch `claude/assistant-safety-mailai-5de496`, merged 8 Nov) **AI Assist: outside text cannot act;
       auto memory; the mail AI's urgency and style shown** (the desktop's design). After a mail, web, SMS or attached file's text is in a
       turn, a change (memory, call, calendar, timers, notes, schedules, pills…) waits for the user's yes (a card or a spoken «ναι»);
       outside text goes to the model as `<untrusted>` data (AssistantGuard). After a chat, up to 3 facts from the user's own words only,
       `source: "auto"` in memory.json (AssistantAutoMemory; Settings › AI Assist › Personal details switch). Mail: unread rows get a dot
       by ai/urgency.jsonl's score, the mail its "why"; ✦ Πρόταση writes in ai/style.json's greeting, closing, tone, phrases (MailAi).
       AssistantSafetyTest. Not checked on a device.
+- [x] (writer-suggestions session, 8 Nov; branch `claude/writer-suggestions-b9b2cf`, merged 8 Nov) **Words: Review › ✦ Suggestions** — AI Assist
+      (mistral-small) suggests find/replace edits with a short reason for the selection or the document, optionally after an
+      instruction ("πιο ακαδημαϊκό ύφος"); each shaded on the page with Accept / Reject / Accept all, one Undo step each; an
+      unfound or no-op one dropped. Pieces of 4000 letters, at most 12 per press. Hidden unless AI Assist is on, a key is set
+      and the new "writer" switch (Settings › AI Assist › Words) allows it. `WriterSuggest.kt`, `WriterSuggestTest`. Not checked on a device.
 - [x] (browser-sync session, 3 Nov; branch `browser-sync`, not merged; desktop bc9f2b4 on main) **Browser: bookmarks, open tabs and
       (chosen) passwords between the phone and the tablet** (the user: "bookmarks and tabs"; "sync passwords as well but have some
       encryption"; "options in the settings what to sync"). `.System/Browser/Shared` (synced as `Browser/…`, part `browser`; the desktop
