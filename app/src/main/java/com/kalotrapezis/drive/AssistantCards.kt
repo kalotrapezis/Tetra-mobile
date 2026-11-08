@@ -49,7 +49,9 @@ internal fun ResultCards(cards: List<ResultCard>, a: CardActions) {
         else if (contacts.size > 1) { var shown by remember(contacts) { mutableStateOf<String?>(null) }
             contacts.forEach { c -> if (shown == c.uid) ContactCard(c, a, open = true) else ContactCard(c, a, open = false) { shown = c.uid } } }
         cards.forEach { c -> when (c) {
-            is ResultCard.Web -> WebCard(c)
+            is ResultCard.Web -> WebCard(c, a)
+            is ResultCard.Data -> DataCard(c)
+            is ResultCard.Brief -> BriefCard(c)
             is ResultCard.Files -> FilesCard(c, a)
             is ResultCard.Mail -> MailCard(c, a)
             is ResultCard.Mails -> MailsCard(c, a)
@@ -127,14 +129,50 @@ private fun ContactCard(c: ResultCard.Contact, a: CardActions, open: Boolean, ex
     }
 }
 
-/** The web's sources: a tap opens the page. */
+/** The web's sources: a tap opens the page in Tetra's Browser; the search itself there too. */
 @Composable
-private fun WebCard(c: ResultCard.Web) {
-    val context = LocalContext.current
-    c.sources.take(5).forEach { s -> CardBox(Color(0xFF25C4FE), onClick = { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(s.url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } }) {
+private fun WebCard(c: ResultCard.Web, a: CardActions) {
+    c.sources.take(5).forEach { s -> CardBox(Color(0xFF25C4FE), onClick = { a.go(AssistantTools.browserAt(s.url)) }) {
         Text(s.title.ifBlank { s.url }, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
         Text(runCatching { Uri.parse(s.url).host?.removePrefix("www.") }.getOrNull() ?: s.url, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
     } }
+    if (c.query.isNotBlank()) TextButton(onClick = { a.go(AssistantTools.browserAt(BrowserRules.SEARCH + java.net.URLEncoder.encode(c.query.trim(), "UTF-8"))) }) {
+        Text(stringResource(R.string.assistant_card_search_browser)) }
+}
+
+/** The mobile data: a ring of the plan used, and the lines that answer «θα μου φτάσουν;»; a tap opens Data. */
+@Composable
+private fun DataCard(c: ResultCard.Data) {
+    val context = LocalContext.current
+    fun b(n: Long) = DataRules.bytes(n)
+    CardBox(Color(0xFF8ED11F), onClick = { openData(context, "usage") }) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (c.size > 0) Box(contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(progress = { (c.used.toFloat() / c.size).coerceIn(0f, 1f) }, Modifier.size(56.dp), strokeWidth = 6.dp, trackColor = MaterialTheme.colorScheme.surfaceVariant)
+                Text("${c.used * 100 / c.size}%", style = MaterialTheme.typography.labelMedium)
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                if (c.hotspot) { Text(stringResource(R.string.assistant_card_data_hotspot, b(c.used)), style = MaterialTheme.typography.titleSmall); return@Column }
+                Text(if (c.size > 0) stringResource(R.string.assistant_card_data_used, b(c.used), b(c.size)) else stringResource(R.string.assistant_card_data_used_unlimited, b(c.used)), style = MaterialTheme.typography.titleSmall)
+                if (c.size > 0) Text(stringResource(R.string.assistant_card_data_left, b(maxOf(0, c.left)), c.daysLeft), style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.assistant_card_data_pace, b(c.today), b(c.average)), style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.assistant_card_data_forecast, b(c.projection)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (c.size > 0) Text(if (c.cut > 0) stringResource(R.string.assistant_card_data_cut, b(c.cut), c.daysLeft) else stringResource(R.string.assistant_card_data_on_track),
+                    style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+/** The latest daily brief: its title, time and first lines; a tap opens the page. */
+@Composable
+private fun BriefCard(c: ResultCard.Brief) {
+    val context = LocalContext.current
+    CardBox(AppColor.assistant, onClick = { runCatching { context.startActivity(Intent(context, BriefActivity::class.java).putExtra("file", c.file.absolutePath).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } }) {
+        Text(c.title.ifBlank { stringResource(R.string.assistant_card_brief) }, style = MaterialTheme.typography.titleSmall)
+        Text(Instant.ofEpochMilli(c.at).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        c.lines.forEach { Text(it, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+    }
 }
 
 /** Files: a row each (icon, name, folder, size, date); a tap opens it; Beside and «Chat about it». */

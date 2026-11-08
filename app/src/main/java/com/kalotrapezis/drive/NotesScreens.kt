@@ -102,8 +102,7 @@ import java.util.UUID
 
 private enum class NotesView(@androidx.annotation.StringRes val label: Int) { Home(R.string.app_home), Archived(R.string.notes_archived), Trash(R.string.notes_trash) }
 
-// Keep's palette, which the imported notes already use.
-private val NOTE_COLORS = listOf("#F28B82", "#FBBC04", "#FFF475", "#CCFF90", "#A7FFEB", "#CBF0F8", "#AECBFA", "#D7AEFB", "#FDCFE8", "#E6C9A8", "#E8EAED")
+private val NOTE_COLORS = NoteColors.NAMES.values.toList()
 private fun noteColor(hex: String?): Color? = hex?.let { runCatching { Color(android.graphics.Color.parseColor(it)) }.getOrNull() }
 private val InkOnColor = Color(0xFF1B1D1F)
 // Sheets are solid: over a page of coloured notes a see-through one was hard to read (asked 2026-09-26).

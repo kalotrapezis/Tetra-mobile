@@ -37,7 +37,8 @@ internal sealed class ResultCard {
     data class Number(val label: String, val value: String, val default: Boolean)
     data class Contact(val uid: String, val name: String, val photo: String?, val numbers: List<Number>) : ResultCard()
     data class Source(val title: String, val url: String)
-    data class Web(val sources: List<Source>) : ResultCard()
+    /** [query]: what was searched, for the card's «search in the Browser». */
+    data class Web(val sources: List<Source>, val query: String = "") : ResultCard()
     data class Files(val files: List<File>, val root: File) : ResultCard()
     /** A mail written, waiting for Send: from the user's [account] ([from], its address), to [to]. */
     data class Mail(val account: String, val from: String, val to: String, val subject: String, val body: String) : ResultCard()
@@ -47,6 +48,14 @@ internal sealed class ResultCard {
     data class Timer(val label: String, val endsAt: Long) : ResultCard()
     /** An SMS written, waiting for Send: to [name] ([number] itself when it is no contact). */
     data class Sms(val name: String, val number: String, val text: String) : ResultCard()
+    /**
+     * This device's mobile data in the cycle ([size] 0: an unlimited plan); [cut] the most a day to stay within the plan when the
+     * forecast goes over it, else 0. [hotspot]: a tablet without a SIM, [used] what it took over the phone's hotspot this month.
+     */
+    data class Data(val used: Long, val size: Long, val left: Long, val daysLeft: Int, val today: Long, val average: Long, val projection: Long,
+        val cut: Long, val hotspot: Boolean = false) : ResultCard()
+    /** The latest daily brief (latest.json): its title, first lines and time; a tap opens [file]. */
+    data class Brief(val title: String, val lines: List<String>, val at: Long, val file: File) : ResultCard()
 
     companion object {
         /** A contact's numbers, the default marked (none marked: the first, when it has one only). */
@@ -253,6 +262,8 @@ internal class AssistantTools(
     private val volume: (String, Int?) -> Int = { _, _ -> 0 },
     /** A command to another device through the computer (AssistantRemote): { ok, device } or { error, devices }. */
     private val send: (JSONObject) -> JSONObject = { JSONObject().put("error", "This phone is not paired with a computer.") },
+    /** A tablet without a SIM: its own id in Data's files, whose hotspot use data_status answers; null on a phone. */
+    private val hotspotDevice: String? = null,
 ) {
     /** The file attached in this chat: read, or only its path until attachment_read needs it again (a chat from History). */
     private var doc: Attach.Doc? = null
@@ -270,6 +281,8 @@ internal class AssistantTools(
     private var factsShown = emptyList<AssistantMemory.Fact>()
     private var schedulesShown = emptyList<JSONObject>()
     private var smsShown = emptyList<SmsThread>()
+    /** The note note_new or shopping_list just made: note_pin and note_color without a choice mean it. */
+    private var noteMade: String? = null
 
     /** The personal details (AssistantMemory): in every chat's instructions. */
     fun facts() = AssistantMemory.list(tetra)
@@ -281,6 +294,7 @@ internal class AssistantTools(
         "memory_forget" -> factsShown.getOrNull(n - 1)?.text
         "schedule_change", "schedule_delete" -> schedulesShown.getOrNull(n - 1)?.optString("title")
         "mail_export" -> mailsShown.getOrNull(n - 1)?.subject
+        "note_pin", "note_color" -> notesFound.getOrNull(n - 1)?.title
         else -> null
     } }
 
@@ -305,6 +319,14 @@ internal class AssistantTools(
             "notes_search" -> notesSearch(args)
             "note_new" -> noteNew(args)
             "note_open" -> pick(notesFound, args) { n -> ToolResult("Opened the note.", go = "note:${n.id}") }
+            "note_pin" -> noteChange(args) { n -> args.optBoolean("pinned", true).let { on ->
+                notes().update(n.id) { it.put("isPinned", on) }; "${if (on) "Pinned" else "Unpinned"} \"${noteTitle(n)}\"." } }
+            "note_color" -> NoteColors.hex(args.optString("color")).let { hex -> if (hex == null && !NoteColors.none(args.optString("color"))) ToolResult("Notes has these colours: ${NoteColors.NAMES.keys.joinToString()}, or none.")
+                else noteChange(args) { n -> notes().update(n.id) { if (hex == null) it.remove("color") else it.put("color", hex) }; "\"${noteTitle(n)}\" is ${args.optString("color").trim().lowercase()} now." } }
+            "data_status" -> dataStatus()
+            "brief_show" -> briefShow()
+            // a page in Tetra's own Browser: opened, nothing played
+            "open_url" -> args.optString("url").trim().let { u -> webAddress(u)?.let { ToolResult("Opened $it in Tetra's Browser.", go = browserAt(it)) } ?: ToolResult("Only a web address (http or https) opens there.") }
             "navigate" -> navigate(args)
             "photos_place" -> photosPlace(args)
             "place_reminder" -> placeReminder(args)
@@ -360,7 +382,7 @@ internal class AssistantTools(
                 if (x.optString("kind") == "brief") ToolResult("The daily brief cannot be deleted; pause it instead (schedule_change with paused).")
                 else { AssistantSchedules.remove(tetra, x.getString("id")); schedulesShown = schedulesShown - x; changed("schedules"); ToolResult("Deleted \"${x.optString("title")}\".") } }
             "web_search" -> search(args.getString("query")).let { (text, sources) ->
-                ToolResult(text + if (sources.isEmpty()) "" else "\nSources: " + sources.take(3).joinToString("; ") { it.title }, cards = if (sources.isEmpty()) emptyList() else listOf(ResultCard.Web(sources))) }
+                ToolResult(text + if (sources.isEmpty()) "" else "\nSources: " + sources.take(3).joinToString("; ") { it.title }, cards = if (sources.isEmpty()) emptyList() else listOf(ResultCard.Web(sources, args.getString("query")))) }
             "make_image" -> image(args.getString("prompt")).let { ToolResult("The picture is on the screen, saved as ${it.name}.", image = it) }
             "attachment_read" -> ToolResult(attached()?.let { Attach.read(it, args.optInt("part", 0).takeIf { n -> n > 0 }, args.optString("query")) } ?: "No file is attached in this chat.")
             "audio_make" -> audioMake(args)
@@ -621,11 +643,22 @@ internal class AssistantTools(
         }.joinToString("\n"), choices = hits.map { AssistantChoice(title(it), go = "note:${it.id}") })
     }
 
+    private fun noteTitle(n: Note) = n.title.ifBlank { n.content.lineSequence().firstOrNull { it.isNotBlank() }?.take(40) ?: "(untitled)" }
+
+    /** The note from the last notes_search ([a]'s choice), else the one just made; [change] writes it and says what it did. */
+    private fun noteChange(a: JSONObject, change: (Note) -> String): ToolResult {
+        val n = a.optInt("choice", 0)
+        val note = if (n > 0) notesFound.getOrNull(n - 1) ?: return ToolResult("No choice $n: the last notes list had ${notesFound.size}.")
+            else noteMade?.let { notes().get(it) } ?: return ToolResult("Which note? Find it with notes_search first.")
+        return ToolResult(change(note)).also { changed("notes") }
+    }
+
     private fun noteNew(a: JSONObject): ToolResult {
         val text = a.getString("text").trim().ifEmpty { return ToolResult("Say what the note says.") }
         val store = notes()
         val n = store.create(checklist = false)
         store.setText(n.id, a.optString("title").trim(), text, null)
+        noteMade = n.id
         changed("notes")
         return ToolResult("Saved the note in Notes.", cards = listOf(ResultCard.Note(n.id, a.optString("title").trim(), text.lines().filter { it.isNotBlank() }.take(4))))
     }
@@ -698,9 +731,43 @@ internal class AssistantTools(
         val store = notes()
         val n = store.create(checklist = true)
         store.setText(n.id, a.optString("title").ifBlank { "Ψώνια" }, "", items.mapIndexed { i, t -> CheckItem(java.util.UUID.randomUUID().toString(), t, false, i) })
+        noteMade = n.id
         changed("notes")
         return ToolResult("Made the list \"${a.optString("title").ifBlank { "Ψώνια" }}\" with ${items.size} items in Notes.",
             cards = listOf(ResultCard.Note(n.id, a.optString("title").ifBlank { "Ψώνια" }, items.take(6).map { "☐ $it" })))
+    }
+
+    // ---- Data: as Home's Data group reads it ----
+    private fun dataStatus(): ToolResult {
+        val root = File(tetra, TetraSystem.onDisk(DataFiles.FOLDER))
+        val all = DataFiles.all(root)
+        val today = now().toLocalDate()
+        hotspotDevice?.let { me ->
+            val used = DataFiles.days(all[me].orEmpty()).filter { it.day.withDayOfMonth(1) == today.withDayOfMonth(1) }.sumOf { it.viaHotspot }
+            return ToolResult("This tablet has no SIM: this month it used ${DataRules.bytes(used)} over the phone's hotspot.", cards = listOf(ResultCard.Data(used, 0, 0, 0, 0, 0, 0, 0, hotspot = true)))
+        }
+        val plan = DataFiles.plan(root) ?: return ToolResult("No data plan is set up: the user sets one in Tetra's Data.")
+        val phone = all.values.maxByOrNull { m -> DataFiles.days(m).sumOf { it.mobile } }.orEmpty()
+        val s = DataRules.status(plan, DataFiles.days(phone), today)
+        fun b(n: Long) = DataRules.bytes(n)
+        val pace = "today ${b(s.today)}, on average ${b(s.average)} a day; ${s.daysLeft} days left in the cycle (it renews on ${s.cycle.end})"
+        if (!plan.limited) return ToolResult("Unlimited plan: ${b(s.used)} used this cycle; $pace.", cards = listOf(ResultCard.Data(s.used, 0, 0, s.daysLeft, s.today, s.average, s.projection, 0)))
+        val over = s.projection > s.size
+        val cut = if (over) s.budget else 0L
+        val verdict = when { s.left <= 0 -> "The plan is used up."; over -> "Forecast ${b(s.projection)} by the cycle's end, over the plan: to stay within it, use at most ${b(cut)} a day for the ${s.daysLeft} days left."
+            else -> "Forecast ${b(s.projection)} by the cycle's end: on track." }
+        return ToolResult("${b(s.used)} of ${b(s.size)} used (${s.used * 100 / s.size.coerceAtLeast(1)}%), ${b(maxOf(0, s.left))} left; $pace. $verdict",
+            cards = listOf(ResultCard.Data(s.used, s.size, s.left, s.daysLeft, s.today, s.average, s.projection, cut)))
+    }
+
+    // ---- The daily brief: latest.json in AI Assist/Briefs (AssistantBriefs) ----
+    private fun briefShow(): ToolResult {
+        val dir = File(TetraSystem.dir(tetra, "Assistant", "Shared"), "Briefs")
+        val o = runCatching { JSONObject(File(dir, "latest.json").readText()) }.getOrNull() ?: return ToolResult("No daily brief has come yet.")
+        val text = o.optString("text").trim(); val at = o.optLong("at")
+        val shown = Instant.ofEpochMilli(at).atZone(zone).format(SHOWN)
+        return ToolResult("The brief \"${o.optString("title")}\" of $shown is on the screen. It says:\n${text.take(1500)}",
+            cards = listOf(ResultCard.Brief(o.optString("title"), text.lines().map { it.trim() }.filter { it.isNotEmpty() }.take(4), at, File(dir, File(o.optString("file")).name))))
     }
 
     // ---- Files ----
@@ -970,15 +1037,21 @@ internal class AssistantTools(
         private const val RELATION = "Spouse, Partner, Mother, Father, Parent, Brother, Sister, Child, Friend, Assistant or Manager in English; any other in the user's own word (κουμπάρος)."
         private val ONLY_ONE = setOf("Spouse", "Partner", "Mother", "Father", "Assistant", "Manager")
 
+        /** A page opened in Tetra's Browser and nothing played ("open": true; the Browser's PLAY word). */
+        fun browserAt(url: String) = "browser-play:" + JSONObject().put("url", url).put("open", true).put("at", System.currentTimeMillis())
+        /** [u] as a web address: http(s) as it is, a bare "site.gr/…" with https; null for any other scheme. */
+        fun webAddress(u: String): String? = when { Regex("^https?://\\S+$", RegexOption.IGNORE_CASE).matches(u) -> u
+            !u.contains("://") && !u.contains(' ') && Regex("^[\\w-]+(\\.[\\w-]+)+(/.*)?$").matches(u) -> "https://$u"; else -> null }
+
         /** Each tool's app (AiGate.APPS). */
         val APP_OF = mapOf("calendar_add" to "calendar", "calendar_list" to "calendar", "calendar_free" to "calendar",
             "pills_list" to "pills", "pills_save" to "pills", "pills_taken" to "pills", "pills_later" to "pills",
             "timer_start" to "timer", "timer_list" to "timer", "timer_stop" to "timer", "alarm_add" to "timer", "alarm_list" to "timer", "alarm_delete" to "timer", "stopwatch" to "timer",
-            "notes_search" to "notes", "note_new" to "notes", "note_open" to "notes", "shopping_list" to "notes", "files_find" to "files", "file_open" to "files",
+            "notes_search" to "notes", "note_new" to "notes", "note_open" to "notes", "note_pin" to "notes", "note_color" to "notes", "shopping_list" to "notes", "files_find" to "files", "file_open" to "files",
             "contacts_find" to "contacts", "my_card" to "contacts", "relation_remember" to "contacts", "relation_forget" to "contacts", "contact_call" to "phone",
             "navigate" to "maps", "place_reminder" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail", "mail_stored_find" to "mail", "mail_export" to "mail",
             "sms_list" to "sms", "sms_read" to "sms", "sms_write" to "sms",
-            "web_search" to "web", "make_image" to "web", "youtube" to "web", "media_play" to "browser", "radio_play" to "browser", "send_to_device" to "browser", "attachment_read" to "files", "audio_make" to "files")
+            "web_search" to "web", "make_image" to "web", "youtube" to "web", "media_play" to "browser", "radio_play" to "browser", "open_url" to "browser", "send_to_device" to "browser", "attachment_read" to "files", "audio_make" to "files")
         /** The tools of the apps the assistant may use now: the others are not even offered. */
         fun allowed(): JSONArray = JSONArray((0 until SCHEMA.length()).map { SCHEMA.getJSONObject(it) }
             .filter { AiGate.state.keeps(APP_OF[it.getJSONObject("function").getString("name")]) && (beside || it.getJSONObject("function").getString("name") != "open_beside") })
@@ -1025,6 +1098,10 @@ internal class AssistantTools(
             fn("note_open", "Open a note from the last notes_search list in Tetra's Notes.", listOf("choice"), CHOICE),
             fn("open_beside", "Open a note, file or mail from the last list beside AI Assist, in split screen, when the user asks for it beside (\"δίπλα\"); AI Assist stays on its side.", listOf("kind", "choice"),
                 "kind" to JSONObject().put("type", "string").put("enum", JSONArray(listOf("note", "file", "mail"))).put("description", "The last list it is from: notes_search, files_find or a mail list."), CHOICE),
+            fn("note_pin", "Pin a note to the top of Notes, or unpin it: one from the last notes_search list, or without a choice the note just made.", emptyList(),
+                CHOICE, "pinned" to p("boolean", "false to unpin; true if not said.")),
+            fn("note_color", "Colour a note as Notes does: one from the last notes_search list, or without a choice the note just made.", listOf("color"),
+                CHOICE, "color" to JSONObject().put("type", "string").put("enum", JSONArray(NoteColors.NAMES.keys.toList() + "none")).put("description", "The colour; none for the plain one.")),
             fn("note_new", "Make a new text note with what the user dictates.", listOf("text"),
                 "text" to p("string", "The note's text, as said."), "title" to p("string", "A title, only if the user gave one.")),
             fn("shopping_list", "Make a new checklist note (a shopping list).", listOf("items"),
@@ -1096,6 +1173,9 @@ internal class AssistantTools(
                 "sections" to JSONObject().put("type", "object").put("description", "Only for the daily brief: which sections it has (calendar, mail, weather, notes = open checklists), as true/false; only those that change.")
                     .put("properties", JSONObject().apply { listOf("calendar", "mail", "weather", "notes").forEach { put(it, JSONObject().put("type", "boolean")) } })),
             fn("schedule_delete", "Delete a scheduled action from the last schedule_list.", listOf("choice"), CHOICE),
+            fn("open_url", "Open a web page in Tetra's own Browser: an address the user says, or a source of a web_search.", listOf("url"), "url" to p("string", "The address (https://…).")),
+            fn("data_status", "This device's mobile data: used and left of the plan, days left in the cycle, today, the daily average, the forecast for the cycle's end and how much a day keeps it within the plan; on a tablet without a SIM, its use over the phone's hotspot this month.", emptyList()),
+            fn("brief_show", "Show the latest daily brief (η αναφορά, η ενημέρωση της ημέρας) as a card the user taps to read it whole; answers its text.", emptyList()),
             fn("web_search", "Search the web for current facts, news, opening hours, prices.", listOf("query"), "query" to p("string", "What to search for.")),
             fn("make_image", "Draw a picture from a description.", listOf("prompt"), "prompt" to p("string", "What the picture shows, in detail.")),
             fn("attachment_read", "Read more of the file attached in this chat: one part by its number, or the passages about something.", emptyList(),
@@ -1135,6 +1215,8 @@ internal class AssistantTools(
             «Θυμήσου ότι…», a lasting fact about the user or what they like: memory_add, then say it is kept. «Ξέχασε ότι…»: memory_list, then memory_forget.
             "Κάθε Δευτέρα στις 8 πες μου…", "κάθε μέρα", "μία φορά τον χρόνο": schedule_add, the prompt in the user's words; then say when it runs. To change, pause or delete one: schedule_list first.
             The daily brief («πρωινή αναφορά», «ενημέρωση της ημέρας») is built in: never schedule_add it; schedule_list, then schedule_change it (time, paused: false, sections).
+            «Πόσα data έφαγα;», «πόσα μου μένουν;», «θα μου φτάσουν;»: data_status, then the figures that answer it and its verdict (on track, or how much a day to stay within the plan).
+            «Η αναφορά», «τι είπε η αναφορά», «δείξε μου την ενημέρωση»: brief_show, then a few words on what it says. «Άνοιξε το …» a site or a source: open_url. «Καρφίτσωσε / χρωμάτισε τη σημείωση»: notes_search (or the note just made), then note_pin or note_color.
             A file attached to the user's message: answer from it; attachment_read the parts not given, never guess them. «Κάνε το ραδιοφωνική εκπομπή», «διάβασέ το μου», an MP3 of it: call audio_make at once, before saying anything; never make up minutes, cost or time yourself.
         """.trimIndent() + AssistantGuard.RULE + if (facts.isEmpty()) "" else "\nWhat the user asked you to remember about them (use it when it helps; never read it out unasked):\n" + facts.joinToString("\n") { "- ${it.text}" }
     }
