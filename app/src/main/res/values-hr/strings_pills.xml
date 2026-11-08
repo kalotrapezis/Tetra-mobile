@@ -128,4 +128,12 @@
     <string name="pills_opened">Imam i otvorenu kutiju</string>
     <string name="pills_here">Podsjetnici na ovom uređaju</string>
     <string name="pills_here_note">Tvoji lijekovi i uzete doze sinkroniziraju se između telefona, tableta i računala. Zvone samo uređaji s uključenim prekidačem, pa na dozu odgovaraš samo jednom.</string>
+    <string name="pills_private">Privatni podsjetnici</string>
+    <string name="pills_private_note">Obavijest i glas ne navode ime lijeka, ni na zaključanom zaslonu.</string>
+    <string name="pills_private_text">Otvori Tablete da vidiš što uzeti.</string>
+    <string name="pills_voice_line_private">%1$s, sada je %2$s. Uzmi svoju tabletu.</string>
+    <string name="pills_voice_line_private_plain">Sada je %1$s. Uzmi svoju tabletu.</string>
+    <string name="pills_refill_line_private">Jedan lijek traje još %1$d dana: vrijeme je za narudžbu.</string>
+    <string name="pills_chat_reminder">Podsjetnik: %1$s (doza %2$s)</string>
+    <string name="pills_chat_reminder_private">Podsjetnik: vrijeme za tabletu (doza %1$s)</string>
 </resources>

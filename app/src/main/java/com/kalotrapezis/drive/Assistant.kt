@@ -468,7 +468,7 @@ internal class AssistantTools(
     private fun pillsLater(a: JSONObject): ToolResult {
         val dir = pills(); val at = now().toInstant()
         val open = Pills.today(Pills.medicines(dir), Pills.log(dir), at, zone).filter { (it.state == Dose.State.Waiting || it.state == Dose.State.Missed) && it.due <= at.plusSeconds(3600) }
-        val due = open.minByOrNull { kotlin.math.abs(it.due.epochSecond - at.epochSecond) }?.due ?: return ToolResult("No dose is waiting now.")
+        val due = open.minByOrNull { kotlin.math.abs(it.due.epochSecond - at.epochSecond) }?.due ?: return ToolResult(noneWaiting(dir, at, "put off"))
         val names = open.filter { it.due == due }.joinToString { it.med.title }
         val minutes = a.optInt("minutes", 0)
         val placeSaid = a.optString("place").trim()
@@ -476,7 +476,8 @@ internal class AssistantTools(
         if (minutes > 0) {
             val until = at.plusSeconds(minutes * 60L)
             Pills.setLater(dir, due, until.toEpochMilli()); changed("pills")
-            return ToolResult("$names will be reminded again at ${until.atZone(zone).format(HM)}.")
+            if (Pills.later(dir)[due] != until.toEpochMilli()) return ToolResult("NOT SAVED: read back from Pills, the dose of ${due.atZone(zone).format(HM)} is not put off. Tell the user plainly it did not work.")
+            return ToolResult("$names (dose ${due.atZone(zone).format(HM)}) will be reminded again at ${until.atZone(zone).format(HM)}; read back from Pills: put off.")
         }
         // only the user's own saved places: "home" must not find a taverna called Σπίτι
         val words = MapsSearch.fold(placeSaid).split(Regex("[^\\p{L}\\p{N}]+")).filter { it.isNotEmpty() }
@@ -487,6 +488,7 @@ internal class AssistantTools(
         LocationReminders.add(tetra, PlaceReminder(MapsFiles.newId(), "", saved.name, saved.lat, saved.lng, LocationReminders.PILLS + due.toEpochMilli()))
         Pills.setLater(dir, due, Pills.AT_PLACE)
         changed("places"); changed("pills")
+        if (Pills.later(dir)[due] != Pills.AT_PLACE) return ToolResult("NOT SAVED: read back from Pills, the dose of ${due.atZone(zone).format(HM)} is not put off. Tell the user plainly it did not work.")
         return if (placesOn()) ToolResult("$names will be reminded on arriving at ${saved.name}.")
         else ToolResult("Saved: $names will be reminded on arriving at ${saved.name}, but place reminders are off, so it cannot ring yet. Settings › Calendar is open: the user turns them on there and allows the location all the time.", go = LocationReminders.SCREEN)
     }
@@ -502,13 +504,28 @@ internal class AssistantTools(
             .filter { it.due <= at.plusSeconds(3 * 3600) } // a dose up to three hours early, not tomorrow's
         val doses = if (name.isEmpty()) open.filter { d -> open.minByOrNull { kotlin.math.abs(it.due.epochSecond - at.epochSecond) }?.due == d.due } else open.groupBy { it.med.id }.mapNotNull { (_, l) -> l.minByOrNull { kotlin.math.abs(it.due.epochSecond - at.epochSecond) } }
         if (doses.isEmpty()) {
-            if (name.isEmpty() || skip) return ToolResult("No dose is waiting now.")
+            if (name.isEmpty() || skip) return ToolResult(noneWaiting(dir, at, if (skip) "skipped" else "marked taken"))
             val m = Pills.take(dir, want.first(), null, at); changed("pills")
             return ToolResult("Logged one dose of ${m.title} now, outside its times; stock ${Medicine.amount(m.stock)}.")
         }
         val after = doses.map { d -> if (skip) Pills.skip(dir, d.med, d.due, at) else Pills.take(dir, d.med, d.due, at) }
         changed("pills")
-        return ToolResult((if (skip) "Skipped: " else "Marked taken: ") + doses.zip(after).joinToString("; ") { (d, m) -> "${m.title} of ${d.due.atZone(zone).format(HM)}, stock ${Medicine.amount(m.stock)}" + if (m.low()) " (LOW, lasts ${m.daysLeft()} days)" else "" })
+        // read back from the files: the answer says what is so, never what was meant (the user, 8 Nov)
+        val want2 = if (skip) Dose.State.Skipped else Dose.State.Taken
+        val back = Pills.medicines(dir).let { ms -> Pills.log(dir).let { log -> doses.map { d -> d to Pills.doses(ms, log, d.due, d.due.plusSeconds(60), at, zone).firstOrNull { it.med.id == d.med.id }?.state } } }
+        val failed = back.filter { it.second != want2 }
+        val done = doses.zip(after).filter { (d, _) -> failed.none { it.first == d } }
+        return ToolResult(listOfNotNull(
+            done.takeIf { it.isNotEmpty() }?.let { l -> (if (skip) "Skipped (read back from Pills): " else "Marked taken (read back from Pills): ") + l.joinToString("; ") { (d, m) -> "${m.title} of ${d.due.atZone(zone).format(HM)}, stock ${Medicine.amount(m.stock)}" + if (m.low()) " (LOW, lasts ${m.daysLeft()} days)" else "" } },
+            failed.takeIf { it.isNotEmpty() }?.let { l -> "NOT MARKED: read back from Pills, " + l.joinToString("; ") { (d, st) -> "${d.med.title} of ${d.due.atZone(zone).format(HM)} is ${st?.name?.lowercase() ?: "not found"}" } + ". Tell the user plainly it did not get marked." }
+        ).joinToString("\n"))
+    }
+
+    /** Nothing waiting, so nothing was [what]: said so, with the dose last answered today (the user took it already, maybe). */
+    private fun noneWaiting(dir: File, at: java.time.Instant, what: String): String {
+        val last = Pills.today(Pills.medicines(dir), Pills.log(dir), at, zone).filter { it.state == Dose.State.Taken || it.state == Dose.State.Skipped }.maxByOrNull { it.due }
+        return "No dose is waiting now, so nothing was $what. Tell the user so plainly; never say it was done." +
+            (last?.let { " The last dose answered today: ${it.med.title} of ${it.due.atZone(zone).format(HM)}, ${it.state.name.lowercase()}" + (it.at?.let { a -> " at ${a.atZone(zone).format(HM)}" } ?: "") + "." } ?: "")
     }
 
     private fun timers() = TimerFiles.root(tetra)
@@ -1176,9 +1193,12 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
     fun clear() { messages.clear(); bill.reset(); tools.attach(null as File?) }
     /** The conversation as it is, for the History (AssistantChats); [restore] takes one back to go on with it. */
     fun saved() = JSONArray(messages.map { JSONObject(it.toString()) })
+    /** A line said to the user outside a turn (a pill reminder), so the next words are read with it in mind. */
+    fun note(text: String, at: Long = System.currentTimeMillis()) { messages += noteMessage(text); lastAt = at }
     fun restore(a: JSONArray) { messages.clear(); for (i in 0 until a.length()) a.optJSONObject(i)?.let { messages += it }; lastAt = System.currentTimeMillis() }
 
     companion object {
+        fun noteMessage(text: String): JSONObject = JSONObject().put("role", "assistant").put("content", text)
         const val ROUNDS = 5 // tool rounds in one turn at most: find, then act, with room to spare
         private val FIND = Regex("βρ[εέ]ς|δε[ιί]ξε|ψ[αά]ξε|\\bfind\\b|\\bshow\\b", RegexOption.IGNORE_CASE)
         private val MP3 = Regex("\\bmp3\\b|\\bm4a\\b|ήχο|εκπομπ|radio show|διάβασ[εέ] (?:το|μου)|read it to me", RegexOption.IGNORE_CASE)

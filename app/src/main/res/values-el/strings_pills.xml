@@ -129,4 +129,12 @@
     <string name="pills_opened">Έχω και ανοιχτό κουτί</string>
     <string name="pills_here">Υπενθυμίσεις σε αυτή τη συσκευή</string>
     <string name="pills_here_note">Τα φάρμακα και τι πήρες συγχρονίζονται με τις άλλες συσκευές σου. Χτυπούν μόνο όσες το έχουν ανοιχτό, για να απαντάς μία φορά.</string>
+    <string name="pills_private">Ιδιωτικές υπενθυμίσεις</string>
+    <string name="pills_private_note">Η ειδοποίηση και η φωνή δεν λένε το όνομα του φαρμάκου, ούτε στην οθόνη κλειδώματος.</string>
+    <string name="pills_private_text">Άνοιξε τα Χάπια για να δεις τι να πάρεις.</string>
+    <string name="pills_voice_line_private">%1$s, είναι %2$s. Πάρε το χάπι σου.</string>
+    <string name="pills_voice_line_private_plain">Είναι %1$s. Πάρε το χάπι σου.</string>
+    <string name="pills_refill_line_private">Ένα φάρμακο φτάνει για %1$d μέρες ακόμα: ώρα για παραγγελία.</string>
+    <string name="pills_chat_reminder">Υπενθύμιση: %1$s (δόση %2$s)</string>
+    <string name="pills_chat_reminder_private">Υπενθύμιση: ώρα για το χάπι σου (δόση %1$s)</string>
 </resources>

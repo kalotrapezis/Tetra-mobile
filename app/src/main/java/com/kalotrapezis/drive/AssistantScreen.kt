@@ -86,20 +86,55 @@ internal val ASSISTANT_COLOR = Color(0xFFFD6A04)
 
 internal fun openAssistant(c: Context) = c.startActivity(Intent(c, AssistantActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
-/** The voice sheet's conversation lives on between openings, bubbles and all, and is forgotten after ten minutes without a
- *  word (the user, 7 Nov: "it may have asked me something"); each one is kept in History as the full app's are. */
-private object SheetMemory {
+/**
+ * AI Assist's one open conversation, the same from every way in (the sheet, a notification, the applet's icon), bubbles and
+ * all, forgotten after ten minutes without a word (the user, 7 Nov: "it may have asked me something"); a pill reminder
+ * writes its line into it and starts the ten minutes again (8 Nov), so «το πήρα» right after is that dose. Kept in
+ * files/assistant_open.json as well: a ring while the app's process slept is there when the user answers. History keeps
+ * each one as before.
+ */
+internal object SharedChat {
     const val FORGET_MS = 10 * 60_000L
     var chat: AssistantChat? = null
     var id = java.util.UUID.randomUUID().toString()
-    var bubbles = androidx.compose.runtime.snapshots.SnapshotStateList<Bubble>()
+    val bubbles = androidx.compose.runtime.snapshots.SnapshotStateList<Bubble>() // one list, cleared in place: an open screen sees a ring's line
     var at = 0L
-    fun expire(now: Long = System.currentTimeMillis()) {
-        if (at > 0 && now - at > FORGET_MS) { chat = null; id = java.util.UUID.randomUUID().toString(); bubbles = androidx.compose.runtime.snapshots.SnapshotStateList(); at = 0 }
+    private var messages = org.json.JSONArray() // the model's turns while this process has made no chat yet
+    private var loaded: File? = null
+
+    fun file(c: Context) = File(c.filesDir, "assistant_open.json")
+    fun stale(at: Long, now: Long) = at > 0 && now - at > FORGET_MS
+
+    /** What was kept, read once per process; past the ten minutes, a new conversation. */
+    @Synchronized fun load(f: File, now: Long = System.currentTimeMillis()) {
+        if (loaded != f) {
+            loaded = f; chat = null; forget()
+            runCatching { val o = org.json.JSONObject(f.readText()); val b = o.getJSONArray("bubbles")
+                id = o.getString("id"); at = o.getLong("at"); messages = o.getJSONArray("messages")
+                bubbles += (0 until b.length()).map { Bubble.of(b.getJSONObject(it)) } }
+        }
+        if (stale(at, now)) forget()
     }
+    @Synchronized fun forget() { chat?.clear(); bubbles.clear(); messages = org.json.JSONArray(); id = java.util.UUID.randomUUID().toString(); at = 0 }
+    /** A reminder rung: [forModel] for the model, [shown] as AI Assist's bubble. */
+    @Synchronized fun ring(f: File, forModel: String, shown: String, now: Long = System.currentTimeMillis()) {
+        load(f, now)
+        chat?.note(forModel, now) ?: messages.put(AssistantChat.noteMessage(forModel))
+        bubbles += Bubble(false, shown); at = now; save(f)
+    }
+    fun ring(c: Context, forModel: String, shown: String) = ring(file(c), forModel, shown)
+    @Synchronized fun save(f: File) = runCatching {
+        f.writeText(org.json.JSONObject().put("id", id).put("at", at).put("bubbles", org.json.JSONArray(bubbles.map { it.json() })).put("messages", chat?.saved() ?: messages).toString())
+    }.onFailure { WriterLog.e("AI Assist: could not keep the open chat", it) }
+    /** The open chat, made from what was kept when this process has none yet. */
+    @Synchronized fun chat(c: Context, now: Long = System.currentTimeMillis(), make: () -> AssistantChat = { assistantChat(c) }): AssistantChat {
+        load(file(c), now); return chat ?: make().also { it.restore(messages); chat = it }
+    }
+    /** Messages for the model, when no chat is live (the tests). */
+    @Synchronized fun kept(): org.json.JSONArray = chat?.saved() ?: org.json.JSONArray(messages.toString())
 }
 
-private data class Bubble(val mine: Boolean, val text: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
+internal data class Bubble(val mine: Boolean, val text: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
     val images: List<File> = emptyList(), val error: Boolean = false, val files: List<Attach.Ref> = emptyList(), val audio: AudioAsk? = null, val job: String? = null,
     val cards: List<ResultCard> = emptyList()) {
     /** As History keeps it: the file's name and path, never its text. */
@@ -122,14 +157,14 @@ private enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Lis
 private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val chat = remember { if (sheet) { SheetMemory.expire(); SheetMemory.chat ?: assistantChat(context, SheetMemory.FORGET_MS).also { SheetMemory.chat = it } } else assistantChat(context) }
-    val bubbles = remember { if (sheet) SheetMemory.bubbles else mutableStateListOf<Bubble>().apply { openJob?.let { add(Bubble(false, "", job = it)) } } }
+    // every way in goes on with the open conversation (the user, 8 Nov), the sheet's or the full screen's
+    val chat = remember { SharedChat.chat(context) }
+    val bubbles = remember { SharedChat.bubbles.apply { openJob?.let { add(Bubble(false, "", job = it)) } } }
     OpenTiming("AI Assist", true)
     var typed by remember { mutableStateOf("") }
-    var chatId by remember { mutableStateOf(if (sheet) SheetMemory.id else java.util.UUID.randomUUID().toString()) }
     var expanded by remember { mutableStateOf(false) } // the island opened by its handle (the phone)
     fun offer(t: String) { typed = t; expanded = false }
-    fun keep() { if (sheet) SheetMemory.at = System.currentTimeMillis(); runCatching { AssistantChats.save(context, chatId, bubbles.map { it.json() }, chat.saved()) } }
+    fun keep() { SharedChat.at = System.currentTimeMillis(); runCatching { AssistantChats.save(context, SharedChat.id, bubbles.map { it.json() }, chat.saved()) }; SharedChat.save(SharedChat.file(context)) }
     var phase by remember { mutableStateOf(Phase.Idle) }
     var hearing by remember { mutableStateOf(false) }
     var pending by remember { mutableStateOf<PendingCall?>(null) }
@@ -391,7 +426,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
                 IconButton(onClick = { aloud = !aloud; prefs.edit().putBoolean("aloud", aloud).apply(); if (!aloud) hush() }) {
                     Icon(painterResource(if (aloud) R.drawable.ic_volume_up else R.drawable.ic_volume_off), contentDescription = stringResource(R.string.assistant_read_aloud))
                 }
-                IconButton(onClick = { chat.clear(); bubbles.clear(); pending = null; pendingAudio = null; attached = null; hush(); spent = 0.0; chatId = java.util.UUID.randomUUID().toString() }) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.assistant_new_chat)) }
+                IconButton(onClick = { SharedChat.forget(); SharedChat.file(context).delete(); pending = null; pendingAudio = null; attached = null; hush(); spent = 0.0 }) { Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.assistant_new_chat)) }
             }
             // the phone: the input is the island, its handle opens Scheduled, History, Skills and Memory (the user, 1 Nov: "not
             // much, it does not have a big context window"); a tablet has the room for them in a sidebar beside the chat
@@ -404,7 +439,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
                     chat.restore(saved.messages); bubbles.clear(); bubbles += saved.bubbles.map(Bubble::of)
                     // its file is read again only if the chat asks for it
                     chat.attach(bubbles.flatMap { it.files }.lastOrNull()?.let { File(it.path) })
-                    chatId = saved.id; pending = null; pendingAudio = null; expanded = false }
+                    SharedChat.id = saved.id; SharedChat.at = System.currentTimeMillis(); pending = null; pendingAudio = null; expanded = false }
                 AssistSection.Skills -> SkillsTab(::offer)
                 AssistSection.Memory -> MemoryTab()
             } } }

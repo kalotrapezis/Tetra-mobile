@@ -128,4 +128,12 @@
     <string name="pills_opened">Għandi wkoll kaxxa miftuħa</string>
     <string name="pills_here">Tfakkriet fuq dan l-apparat</string>
     <string name="pills_here_note">Il-mediċini tiegħek u d-dożi li ħadt jiġu sinkronizzati bejn it-telefon, it-tablet u l-kompjuter tiegħek. Idoqqu biss l-apparati b’dan l-iswiċċ mixgħul, għalhekk twieġeb għal doża darba biss.</string>
+    <string name="pills_private">Tfakkiriet privati</string>
+    <string name="pills_private_note">In-notifika u l-vuċi ma jsemmux il-mediċina, lanqas fuq l-iskrin imsakkar.</string>
+    <string name="pills_private_text">Iftaħ il-Pilloli biex tara x’għandek tieħu.</string>
+    <string name="pills_voice_line_private">%1$s, il-ħin %2$s. Ħu l-pillola tiegħek.</string>
+    <string name="pills_voice_line_private_plain">Il-ħin %1$s. Ħu l-pillola tiegħek.</string>
+    <string name="pills_refill_line_private">Mediċina waħda għad għandha %1$d jiem: wasal il-ħin li tordnaha.</string>
+    <string name="pills_chat_reminder">Tfakkira: %1$s (doża %2$s)</string>
+    <string name="pills_chat_reminder_private">Tfakkira: wasal il-ħin tal-pillola (doża %1$s)</string>
 </resources>

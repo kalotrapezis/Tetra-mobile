@@ -128,4 +128,12 @@
     <string name="pills_opened">Mám i otevřené balení</string>
     <string name="pills_here">Připomínky na tomto zařízení</string>
     <string name="pills_here_note">Tvé léky a užité dávky se synchronizují mezi telefonem, tabletem a počítačem. Zvonit budou jen zařízení se zapnutým přepínačem, takže dávku potvrdíš jen jednou.</string>
+    <string name="pills_private">Soukromá připomenutí</string>
+    <string name="pills_private_note">Oznámení ani hlas neuvádějí název léku, ani na zamčené obrazovce.</string>
+    <string name="pills_private_text">Otevři Tablety a podívej se, co si vzít.</string>
+    <string name="pills_voice_line_private">%1$s, je %2$s. Vezmi si pilulku.</string>
+    <string name="pills_voice_line_private_plain">Je %1$s. Vezmi si pilulku.</string>
+    <string name="pills_refill_line_private">Jeden lék vydrží ještě %1$d dní: čas objednat.</string>
+    <string name="pills_chat_reminder">Připomenutí: %1$s (dávka %2$s)</string>
+    <string name="pills_chat_reminder_private">Připomenutí: čas na pilulku (dávka %1$s)</string>
 </resources>
