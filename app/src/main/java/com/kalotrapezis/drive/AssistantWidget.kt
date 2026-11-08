@@ -212,7 +212,10 @@ internal enum class TalkMood { Normal, Cold, Hot;
  * The robot on the screen, as the user drew it: a round face with two diamond eyes that blink; rings while it listens,
  * a thought cloud of three dots while it thinks, a moving mouth while it speaks, and the answer's [cue] up at the left.
  */
-@Composable internal fun TalkScreen(phase: LivePhase, hearing: Boolean, modifier: Modifier = Modifier, cue: TalkCue = TalkCue.None, mood: TalkMood = TalkMood.Normal, color: Color = CHARACTER_COLORS[0]) {
+@Composable internal fun TalkScreen(phase: LivePhase, hearing: Boolean, modifier: Modifier = Modifier, cue: TalkCue = TalkCue.None, mood: TalkMood = TalkMood.Normal, color: Color = CHARACTER_COLORS[0], enter: Boolean = false) {
+    // switched on: it walks in from the left (8 Nov)
+    val walk = remember { androidx.compose.animation.core.Animatable(if (enter) 1f else 0f) }
+    androidx.compose.runtime.LaunchedEffect(Unit) { if (enter) walk.animateTo(0f, tween(1100, easing = FastOutSlowInEasing)) }
     // a long think with nothing to show: no signal, the snow and its hiss (8 Nov)
     var standby by remember { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(phase, cue) { standby = false; if (phase == LivePhase.Thinking && cue == TalkCue.None) { kotlinx.coroutines.delay(STANDBY_MS); standby = true } }
@@ -225,7 +228,8 @@ internal enum class TalkMood { Normal, Cold, Hot;
         val side = minOf(size.width, size.height)
         val r = side * 0.36f
         val shiver = if (mood == TalkMood.Cold) kotlin.math.sin(t * 40 * Math.PI).toFloat() * side * 0.012f else 0f // trembling
-        val face = Offset(size.width * 0.62f + shiver, size.height * 0.58f)
+        val step = if (walk.value > 0f) kotlin.math.abs(kotlin.math.sin(walk.value * 6 * Math.PI)).toFloat() * side * 0.03f else 0f // a hop at each step
+        val face = Offset(size.width * 0.62f + shiver - walk.value * size.width * 0.9f, size.height * 0.58f - step)
         val skin = if (mood == TalkMood.Hot) Color(0xFFE53935) else if (mood == TalkMood.Cold) Color(0xFF64B5F6) else ink
         if (phase == LivePhase.Listening) for (k in 0 until 3) { // rings going out, stronger while a voice is heard
             val p = (t + k / 3f) % 1f

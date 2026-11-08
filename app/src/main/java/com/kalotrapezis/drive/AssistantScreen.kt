@@ -14,6 +14,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
@@ -437,7 +438,17 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () -
                     if (hasKey && decorated) {
                         val shown = when { phase == Phase.Listening -> LivePhase.Listening; phase == Phase.Thinking -> LivePhase.Thinking; talking -> LivePhase.Speaking; else -> LivePhase.Stopping }
                         val color = remember { characterColor(AssistantVoices.id(context)) }
-                        VhsTv(0, still, Modifier.padding(horizontal = 12.dp, vertical = 8.dp), off = tvOff) { TalkScreen(shown, hearing, Modifier.fillMaxWidth().height(230.dp), tvCue, tvMood, color) }
+                        // switched on: it walks in and says hello for a moment (8 Nov: "say hi, what's going on?")
+                        val hello = remember { context.resources.getStringArray(R.array.tv_hello).random() }
+                        var greeting by remember { mutableStateOf(!still) }
+                        LaunchedEffect(Unit) { delay(3_000); greeting = false }
+                        VhsTv(0, still, Modifier.padding(horizontal = 12.dp, vertical = 8.dp), off = tvOff) {
+                            Box {
+                                TalkScreen(shown, hearing, Modifier.fillMaxWidth().height(230.dp), tvCue, tvMood, color, enter = !still)
+                                if (greeting) Text(hello, Modifier.align(Alignment.TopCenter).padding(top = 14.dp).background(Color(0xFFF4F1EA)).border(2.dp, Color(0xFF2A2420)).padding(horizontal = 10.dp, vertical = 4.dp),
+                                    color = Color(0xFF2A2420), fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
+                            }
+                        }
                         val last = bubbles.lastOrNull()?.takeIf { !it.mine && phase == Phase.Idle }
                         androidx.compose.foundation.layout.FlowRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             dialing?.let { PixelButton(context.getString(R.string.common_cancel) + " · $dialLeft", Color(0xFFEF9A9A), R.drawable.ic_call_end) { cancelDial() } }

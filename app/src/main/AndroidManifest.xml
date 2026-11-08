@@ -70,6 +70,11 @@
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/local_drive_paths" />
         </provider>
         <receiver android:name=".DriveOpenerReceiver" android:exported="false" />
+        <!-- the AI Assist TV on the phone's home screen (8 Nov) -->
+        <receiver android:name=".TvWidget" android:exported="true" android:label="@string/tv_widget_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_tv" />
+        </receiver>
         <!-- Tetra Maps in Android Auto (MapsCar.kt); a navigation app not from Play shows there with Android Auto's Unknown sources on -->
         <service android:name=".MapsCarService" android:exported="true" android:label="@string/home_label_maps" android:icon="@mipmap/applet_maps">
             <intent-filter>
