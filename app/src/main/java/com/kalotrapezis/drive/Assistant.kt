@@ -63,7 +63,7 @@ internal data class ToolResult(val forModel: String, val choices: List<Assistant
 /** The model's answer to one turn, with everything the tools left for the screen. */
 internal data class AssistantReply(val text: String, val choices: List<AssistantChoice> = emptyList(), val call: PendingCall? = null,
     val images: List<File> = emptyList(), val open: File? = null, val go: String? = null, val beside: Boolean = false, val audio: AudioAsk? = null,
-    val cards: List<ResultCard> = emptyList())
+    val cards: List<ResultCard> = emptyList(), val confirm: AssistantGuard.Confirm? = null)
 
 /**
  * What a conversation has cost so far, by Mistral's list prices (the user: "the bill came"; shown in the chat's top bar and
@@ -273,6 +273,16 @@ internal class AssistantTools(
 
     /** The personal details (AssistantMemory): in every chat's instructions. */
     fun facts() = AssistantMemory.list(tetra)
+
+    /** What a tool's choice points at in the last list, for a confirmation's card (AssistantGuard). */
+    fun picked(name: String, args: JSONObject): String? = args.optInt("choice", 0).takeIf { it > 0 }?.let { n -> when (name) {
+        "contact_call" -> contacts.getOrNull(n - 1)?.name
+        "alarm_delete" -> alarmsShown.getOrNull(n - 1)?.time?.toString()
+        "memory_forget" -> factsShown.getOrNull(n - 1)?.text
+        "schedule_change", "schedule_delete" -> schedulesShown.getOrNull(n - 1)?.optString("title")
+        "mail_export" -> mailsShown.getOrNull(n - 1)?.subject
+        else -> null
+    } }
 
     fun run(name: String, args: JSONObject): ToolResult = runCatching {
         // an app the user keeps the assistant out of (Settings › Βοηθός AI): neither read nor acted in
@@ -1109,7 +1119,7 @@ internal class AssistantTools(
             "Κάθε Δευτέρα στις 8 πες μου…", "κάθε μέρα", "μία φορά τον χρόνο": schedule_add, the prompt in the user's words; then say when it runs. To change, pause or delete one: schedule_list first.
             The daily brief («πρωινή αναφορά», «ενημέρωση της ημέρας») is built in: never schedule_add it; schedule_list, then schedule_change it (time, paused: false, sections).
             A file attached to the user's message: answer from it; attachment_read the parts not given, never guess them. «Κάνε το ραδιοφωνική εκπομπή», «διάβασέ το μου», an MP3 of it: call audio_make at once, before saying anything; never make up minutes, cost or time yourself.
-        """.trimIndent() + if (facts.isEmpty()) "" else "\nWhat the user asked you to remember about them (use it when it helps; never read it out unasked):\n" + facts.joinToString("\n") { "- ${it.text}" }
+        """.trimIndent() + AssistantGuard.RULE + if (facts.isEmpty()) "" else "\nWhat the user asked you to remember about them (use it when it helps; never read it out unasked):\n" + facts.joinToString("\n") { "- ${it.text}" }
     }
 }
 
@@ -1130,19 +1140,21 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
         lastAt = at
         file?.let(tools::attach)
         val from = messages.size
-        messages += JSONObject().put("role", "user").put("content", if (file != null) "$text\n\n${Attach.forModel(file)}" else text)
+        messages += JSONObject().put("role", "user").put("content", if (file != null) "$text\n\n${AssistantGuard.wrap("attachment", Attach.forModel(file))}" else text)
         // an MP3 of the file asked for: mistral-small sometimes makes up the estimate instead of asking audio_make, so it is made to
         val must = if (tools.docFile != null && MP3.containsMatchIn(text)) "audio_make" else null
         // «βρες την επαφή»: shown, never called (the user: "it found the contact, and the only option was to call")
         findOnly = FIND.containsMatchIn(text) && !HandsFree.asked(text)
-        try { return turn(onText, must) } finally {
+        try { return turn(onText, must, outside = file != null) } finally {
             // the file's text goes once: after the turn only its name stays, for the next request and the kept chat
             if (file != null) messages[from].put("content", "$text\n\n${Attach.kept(file)}")
             for (m in messages.drop(from)) if (m.optString("role") == "tool" && m.optString("name") == "attachment_read") m.put("content", "[read from ${tools.docFile?.name ?: "the file"}; read it again if needed]")
         }
     }
 
-    private fun turn(onText: ((String) -> Unit)?, must: String?): AssistantReply {
+    /** [outside]: someone else's text is in this turn already (an attached file); a mail, web or SMS tool's answer makes it so. */
+    private fun turn(onText: ((String) -> Unit)?, must: String?, outside: Boolean): AssistantReply {
+        var outside = outside; var confirm: AssistantGuard.Confirm? = null
         val choices = mutableListOf<AssistantChoice>(); val images = mutableListOf<File>()
         var call: PendingCall? = null; var open: File? = null; var go: String? = null; var beside = false; var audio: AudioAsk? = null
         var cards = emptyList<ResultCard>()
@@ -1155,11 +1167,14 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
             val calls = m.optJSONArray("tool_calls")
             messages += JSONObject().put("role", "assistant").put("content", m.opt("content")?.takeIf { it != JSONObject.NULL } ?: "")
                 .apply { if (calls != null && calls.length() > 0) put("tool_calls", calls) }
-            if (calls == null || calls.length() == 0) return AssistantReply(text(m), choices, call, images, open, go, beside, audio, cards)
+            if (calls == null || calls.length() == 0) return AssistantReply(text(m), choices, call, images, open, go, beside, audio, cards, confirm)
             for (i in 0 until calls.length()) {
                 val c = calls.getJSONObject(i); val f = c.getJSONObject("function")
                 val args = when (val a = f.opt("arguments")) { is JSONObject -> a; is String -> runCatching { JSONObject(a.ifBlank { "{}" }) }.getOrDefault(JSONObject()); else -> JSONObject() }
-                val r = tools.run(f.getString("name"), args)
+                val name = f.getString("name")
+                // after outside text, a change waits for the user's yes (AssistantGuard); shortcut: one held call per turn, the last, until the model ever asks several at once
+                val r = if (outside && name in AssistantGuard.ACTS) { confirm = AssistantGuard.Confirm(name, args, AssistantGuard.what(name, args, tools.picked(name, args))); ToolResult(AssistantGuard.held(name)) }
+                    else tools.run(name, args).let { if (name in AssistantGuard.EXTERNAL) { outside = true; it.copy(forModel = AssistantGuard.wrap(name, it.forModel)) } else it }
                 if (r.choices.isNotEmpty()) { choices.clear(); choices += r.choices }
                 r.call?.let { call = it }; r.image?.let { images += it }; images += r.photos; r.open?.let { open = it }; r.go?.let { go = it }; if (r.open != null || r.go != null) beside = r.beside
                 r.audio?.let { audio = it }
@@ -1168,7 +1183,17 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
                 messages += JSONObject().put("role", "tool").put("name", f.getString("name")).put("tool_call_id", c.optString("id")).put("content", r.forModel)
             }
         }
-        return AssistantReply("", choices, call, images, open, go, beside, audio, cards)
+        return AssistantReply("", choices, call, images, open, go, beside, audio, cards, confirm)
+    }
+
+    /** The user's yes to a [AssistantGuard.Confirm]: the tool run as it was asked, and the chat told. */
+    fun approve(c: AssistantGuard.Confirm): AssistantReply {
+        val r = tools.run(c.name, c.args)
+        WriterLog.i("AI Assist: ${c.name} (approved) → ${r.forModel.take(160).replace('\n', ' ')}")
+        messages += JSONObject().put("role", "user").put("content", "Yes, do it (${c.name}).")
+        messages += JSONObject().put("role", "assistant").put("content", "Done: ${r.forModel}")
+        lastAt = System.currentTimeMillis()
+        return AssistantReply("", r.choices, r.call, listOfNotNull(r.image) + r.photos, r.open, r.go, r.beside, r.audio, r.cards)
     }
 
     /** A kept chat's file, read again only if it is asked about. */

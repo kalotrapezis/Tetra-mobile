@@ -12,6 +12,13 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [x] (assistant-safety-mailai session, 8 Nov; branch `claude/assistant-safety-mailai-5de496`, not merged) **AI Assist: outside text cannot act;
+      auto memory; the mail AI's urgency and style shown** (the desktop's design). After a mail, web, SMS or attached file's text is in a
+      turn, a change (memory, call, calendar, timers, notes, schedules, pills…) waits for the user's yes (a card or a spoken «ναι»);
+      outside text goes to the model as `<untrusted>` data (AssistantGuard). After a chat, up to 3 facts from the user's own words only,
+      `source: "auto"` in memory.json (AssistantAutoMemory; Settings › AI Assist › Personal details switch). Mail: unread rows get a dot
+      by ai/urgency.jsonl's score, the mail its "why"; ✦ Πρόταση writes in ai/style.json's greeting, closing, tone, phrases (MailAi).
+      AssistantSafetyTest. Not checked on a device.
 - [x] (browser-sync session, 3 Nov; branch `browser-sync`, not merged; desktop bc9f2b4 on main) **Browser: bookmarks, open tabs and
       (chosen) passwords between the phone and the tablet** (the user: "bookmarks and tabs"; "sync passwords as well but have some
       encryption"; "options in the settings what to sync"). `.System/Browser/Shared` (synced as `Browser/…`, part `browser`; the desktop

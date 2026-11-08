@@ -203,7 +203,10 @@ internal fun SettingsTab(
     var adding by remember { mutableStateOf("") }
     var problem by remember { mutableStateOf<String?>(null) }
     fun change(id: String, text: String) { runCatching { facts = AssistantMemory.change(driveRoot(), id, text, MailEngine.device()) }.onFailure { WriterLog.e("Assistant: personal details", it) } }
+    val context = LocalContext.current
+    var auto by remember { mutableStateOf(AssistantAutoMemory.on(context)) }
     SettingsSection(stringResource(R.string.ai_memory), stringResource(R.string.ai_memory_note)) {
+        SwitchRow(stringResource(R.string.ai_memory_auto), stringResource(R.string.ai_memory_auto_note), auto) { auto = it; AssistantAutoMemory.set(context, it) }
         facts.forEach { f ->
             var text by remember(f.id, f.text) { mutableStateOf(f.text) }
             Row(Modifier.fillMaxWidth().background(rowColor()).padding(start = 12.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
