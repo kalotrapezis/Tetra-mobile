@@ -157,9 +157,37 @@ internal enum class TalkCue { None, Search, Rain, Snow, Cloud, Sun;
     }
 }
 
-/** The robot's colour by the voice chosen (8 Nov: "yellow, pink, white, green, blue… like different characters"); the phone's own voice keeps the orange. */
+/** The app's mascot in pixels, 28 × 24 (Assets/robot-pixel.svg): D edge, O shade, Y shell, L shine, V visor, E eyes, H ear pads, W its voice, S the sparkle, G the glow. */
+private val MASCOT = listOf(
+    "............................",
+    "...........DDD..............",
+    "........DDDYYYDDD...........",
+    ".......DYLYYYYYYYD..........",
+    ".....DDYLLLYYYYYYYDD........",
+    ".....DYLLLLLYYYYYYYD........",
+    "....DYYYLLLYYYYYYYYYD.......",
+    "....DYYYYLYYYYYYYYYOD.......",
+    "..DODYYYVVVVVVVVVVYOODOD...W",
+    "..OHOYYVVVVVVVVVVVVYOOHO...W",
+    "..OHOYYVVEEVVVVEEVVYOOHO.W.W",
+    "..OHOYYVEVVEVVEVVEVYOOHO.W.W",
+    "..OHOYYVEVVEVVEVVEVYOOHO.W.W",
+    "..OHOYYVVVVVVVVVVVVOOOHO...W",
+    "..DODYYVVVVVVVVVVVVODDOD...W",
+    "....DYYYVVVVVVVVVVOOD.......",
+    ".....DYYYYYYYYYYYOOD........",
+    ".....DDYYYYYYYYYOODD..S.....",
+    ".......DOOOOOOOOOD....S.....",
+    "........DDDOOODDD...SSHSS...",
+    "...........DDD........S.....",
+    "......................S.....",
+    "........GGGGGGGGGG..........",
+    "..........GGGGGG............",
+)
+
+/** The robot's colour by the voice chosen (8 Nov: "yellow, pink, white, green, blue… like different characters"); the phone's own voice keeps the mascot's yellow. */
 internal val CHARACTER_COLORS = listOf(Color(0xFFFFC93C), Color(0xFFF06292), Color(0xFFECEFF1), Color(0xFF66BB6A), Color(0xFF42A5F5))
-internal fun characterColor(voice: String?): Color = if (voice.isNullOrEmpty()) ASSISTANT_COLOR else CHARACTER_COLORS[Math.floorMod(voice.hashCode(), CHARACTER_COLORS.size)]
+internal fun characterColor(voice: String?): Color = if (voice.isNullOrEmpty()) CHARACTER_COLORS[0] else CHARACTER_COLORS[Math.floorMod(voice.hashCode(), CHARACTER_COLORS.size)]
 
 /** How the weather feels, on the face (8 Nov: "it could tremble when cold, or be red with a hat when hot"). */
 internal enum class TalkMood { Normal, Cold, Hot;
@@ -180,14 +208,14 @@ internal enum class TalkMood { Normal, Cold, Hot;
  * The robot on the screen, as the user drew it: a round face with two diamond eyes that blink; rings while it listens,
  * a thought cloud of three dots while it thinks, a moving mouth while it speaks, and the answer's [cue] up at the left.
  */
-@Composable internal fun TalkScreen(phase: LivePhase, hearing: Boolean, modifier: Modifier = Modifier, cue: TalkCue = TalkCue.None, mood: TalkMood = TalkMood.Normal, color: Color = ASSISTANT_COLOR) {
+@Composable internal fun TalkScreen(phase: LivePhase, hearing: Boolean, modifier: Modifier = Modifier, cue: TalkCue = TalkCue.None, mood: TalkMood = TalkMood.Normal, color: Color = CHARACTER_COLORS[0]) {
     val loop = rememberInfiniteTransition(label = "talk")
     val t by loop.animateFloat(0f, 1f, infiniteRepeatable(tween(1200, easing = LinearEasing)), label = "t")
     val blink by loop.animateFloat(0f, 1f, infiniteRepeatable(tween(3600, easing = LinearEasing)), label = "blink")
     val ink = color; val soft = Color(0xFFF4F1EA)
     Canvas(modifier) {
         val side = minOf(size.width, size.height)
-        val r = side * 0.3f
+        val r = side * 0.36f
         val shiver = if (mood == TalkMood.Cold) kotlin.math.sin(t * 40 * Math.PI).toFloat() * side * 0.012f else 0f // trembling
         val face = Offset(size.width * 0.62f + shiver, size.height * 0.58f)
         val skin = if (mood == TalkMood.Hot) Color(0xFFE53935) else if (mood == TalkMood.Cold) Color(0xFF64B5F6) else ink
@@ -195,27 +223,35 @@ internal enum class TalkMood { Normal, Cold, Hot;
             val p = (t + k / 3f) % 1f
             drawCircle(ink.copy(alpha = (1 - p) * (if (hearing) 0.8f else 0.35f)), radius = r * (1.05f + p * 0.5f), center = face, style = Stroke(side * 0.02f))
         }
-        drawCircle(skin.copy(alpha = if (mood == TalkMood.Hot) 0.45f else 0.18f), radius = r, center = face)
-        drawCircle(skin, radius = r, center = face, style = Stroke(side * 0.025f))
-        if (mood == TalkMood.Hot) { // a sun hat: the brim and the crown
-            drawRoundRect(Color(0xFFFFE082), Offset(face.x - r * 1.15f, face.y - r * 0.98f), Size(r * 2.3f, r * 0.2f), CornerRadius(r * 0.1f))
-            drawRoundRect(Color(0xFFFFE082), Offset(face.x - r * 0.6f, face.y - r * 1.45f), Size(r * 1.2f, r * 0.55f), CornerRadius(r * 0.25f))
-            drawRect(Color(0xFFE53935), Offset(face.x - r * 0.6f, face.y - r * 1.05f), Size(r * 1.2f, r * 0.1f))
+        // the app's mascot in pixels (8 Nov: "put the app's mascot, not my sketch"), coloured by its voice, the weather on it
+        val cell = side * 0.7f / MASCOT.size
+        val top = Offset(face.x - cell * MASCOT[0].length / 2f, face.y - cell * MASCOT.size / 2f)
+        val shell = mapOf('Y' to skin, 'L' to androidx.compose.ui.graphics.lerp(skin, Color.White, 0.5f), 'O' to androidx.compose.ui.graphics.lerp(skin, Color.Black, 0.18f),
+            'D' to androidx.compose.ui.graphics.lerp(skin, Color.Black, 0.5f))
+        val shut = blink > 0.94f
+        MASCOT.forEachIndexed { y, row -> row.forEachIndexed { x, ch ->
+            val c: Color? = when (ch) {
+                'Y', 'L', 'O', 'D' -> shell[ch]
+                'V' -> Color(0xFF3B2418)
+                'E' -> if (shut) Color(0xFF3B2418) else Color(0xFFFFD86B)
+                'H' -> Color(0xFFFFF1C2)
+                // its voice: the waves go while it speaks, the outer one after the inner
+                'W' -> if (phase == LivePhase.Speaking && kotlin.math.sin((t * 4 - (if (x > 25) 0.25f else 0f)) * 2 * Math.PI) > 0) soft else null
+                'S' -> soft.copy(alpha = 0.55f + 0.45f * kotlin.math.abs(kotlin.math.sin(t * Math.PI)).toFloat()) // the sparkle twinkles
+                'G' -> skin.copy(alpha = 0.35f)
+                else -> null
+            }
+            if (c != null) drawRect(c, top + Offset(x * cell, y * cell), Size(cell + 0.6f, cell + 0.6f))
+        } }
+        if (mood == TalkMood.Hot) { // a sun hat over the helmet: the brim and the crown with its band
+            drawRect(Color(0xFFFFE082), top + Offset(4 * cell, 1 * cell), Size(18 * cell, 2 * cell))
+            drawRect(Color(0xFFFFE082), top + Offset(8 * cell, -3 * cell), Size(10 * cell, 4 * cell))
+            drawRect(Color(0xFFE53935), top + Offset(8 * cell, 0f), Size(10 * cell, cell))
         }
         if (mood == TalkMood.Cold) for (k in 0 until 3) { // a breath of frost
             val p = (t + k / 3f) % 1f
-            drawCircle(soft.copy(alpha = 0.6f * (1 - p)), radius = side * 0.015f * (1 + p), center = face + Offset(-r * (0.4f + p * 0.6f), r * 0.45f))
+            drawRect(soft.copy(alpha = 0.6f * (1 - p)), top + Offset((4 - p * 4) * cell, (16 + k) * cell), Size(cell, cell))
         }
-        // the diamond eyes, shut for a moment now and then
-        val shut = if (blink > 0.94f) 0.15f else 1f
-        val look = if (phase == LivePhase.Thinking) Offset(-r * 0.12f, -r * 0.12f) else Offset.Zero // looking up at the thought
-        listOf(-0.36f, 0.36f).forEach { k ->
-            val e = face + Offset(r * k, -r * 0.12f) + look; val d = r * 0.16f
-            drawPath(androidx.compose.ui.graphics.Path().apply { moveTo(e.x, e.y - d * shut); lineTo(e.x + d, e.y); lineTo(e.x, e.y + d * shut); lineTo(e.x - d, e.y); close() }, soft)
-        }
-        // the mouth: a line, opening and closing while it speaks
-        val open = if (phase == LivePhase.Speaking) (0.15f + 0.85f * kotlin.math.abs(kotlin.math.sin(t * 4 * Math.PI)).toFloat()) * r * 0.22f else r * 0.02f
-        drawRoundRect(soft, Offset(face.x - r * 0.22f, face.y + r * 0.38f - open / 2), Size(r * 0.44f, open + side * 0.012f), CornerRadius(side * 0.02f))
         // up at the left: the thought, or what the answer is about
         val at = Offset(size.width * 0.24f, size.height * 0.22f); val w = side * 0.36f; val h = side * 0.18f
         when {
