@@ -635,6 +635,11 @@ internal fun SettingsTab(
     }
     if (AiGate.on) AssistantMemorySection(version.intValue)
     SettingsSection { AssistantKeyField() }
+    // AI decorations (8 Nov): the record, the cassette, the TV with the robot, the snow and the CRT; off, the plain conversation
+    var decorations by remember { mutableStateOf(AiLook.decorated(context)) }
+    SettingsSection(stringResource(R.string.ai_decorations), null) {
+        SwitchRow(stringResource(R.string.ai_decorations), stringResource(R.string.ai_decorations_note), decorations) { decorations = it; AiLook.set(context, it) }
+    }
     // Voxtral's context_bias (the VOICE app's terms): the user's own spellings, and the favourites' names only when switched on
     var words by remember { mutableStateOf(AssistantWords.words(context)) }
     var contactWords by remember { mutableStateOf(AssistantWords.contacts(context)) }

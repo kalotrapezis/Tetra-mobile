@@ -157,9 +157,14 @@ internal enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Li
 
 @Composable
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
-private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> Unit) {
+private fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val decorated = remember { AiLook.decorated(context) }
+    // the sheet's TV switches off before it goes: the line, the dot, its «fsst»
+    var tvOff by remember { mutableStateOf(false) }
+    val close: () -> Unit = { if (!sheet || !decorated || AssistantKey.get(context) == null) closeNow() else if (!tvOff) { tvOff = true; Zap.play(); scope.launch { delay(520); closeNow() } } }
+    LaunchedEffect(Unit) { if (sheet && decorated && AssistantKey.get(context) != null) Zap.play() } // and on, as it opens
     // every way in goes on with the open conversation (the user, 8 Nov), the sheet's or the full screen's
     val chat = remember { SharedChat.chat(context) }
     val bubbles = remember { SharedChat.bubbles.apply { openJob?.let { add(Bubble(false, "", job = it)) } } }
@@ -429,10 +434,10 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
                     val still = remember { android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f }
                     // the TV, bigger, all along (8 Nov): no text on it, the robot showing what goes on, and pixel buttons for what can be
                     // tapped; the words stay in the full AI Assist and its History, the same conversation
-                    if (hasKey) {
+                    if (hasKey && decorated) {
                         val shown = when { phase == Phase.Listening -> LivePhase.Listening; phase == Phase.Thinking -> LivePhase.Thinking; talking -> LivePhase.Speaking; else -> LivePhase.Stopping }
                         val color = remember { characterColor(AssistantVoices.id(context)) }
-                        VhsTv(0, true, Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) { TalkScreen(shown, hearing, Modifier.fillMaxWidth().height(230.dp), tvCue, tvMood, color) }
+                        VhsTv(0, still, Modifier.padding(horizontal = 12.dp, vertical = 8.dp), off = tvOff) { TalkScreen(shown, hearing, Modifier.fillMaxWidth().height(230.dp), tvCue, tvMood, color) }
                         val last = bubbles.lastOrNull()?.takeIf { !it.mine && phase == Phase.Idle }
                         androidx.compose.foundation.layout.FlowRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             dialing?.let { PixelButton(context.getString(R.string.common_cancel) + " · $dialLeft", Color(0xFFEF9A9A), R.drawable.ic_call_end) { cancelDial() } }
@@ -786,9 +791,12 @@ internal fun Cassette(phase: LivePhase, level: Float, modifier: Modifier) {
  * over it, and a small stand. [still] (animations off in the phone's settings): on at once.
  */
 @Composable
-private fun VhsTv(answer: Int, still: Boolean, modifier: Modifier, screen: @Composable () -> Unit) {
+private fun VhsTv(answer: Int, still: Boolean, modifier: Modifier, off: Boolean = false, screen: @Composable () -> Unit) {
     val on = remember(answer) { androidx.compose.animation.core.Animatable(if (still) 1f else 0f) }
     LaunchedEffect(answer) { if (!still) on.animateTo(1f, androidx.compose.animation.core.tween(700)) }
+    // switching off (8 Nov: "the CRT's eye when the talk ends"): the picture folds to a line, the line to a dot, the dot fades
+    val gone = remember { androidx.compose.animation.core.Animatable(0f) }
+    LaunchedEffect(off) { if (off) gone.animateTo(1f, androidx.compose.animation.core.tween(480)) }
     val cabinet = Color(0xFF3B3430); val trim = Color(0xFF5A4E46)
     Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         androidx.compose.foundation.Canvas(Modifier.width(120.dp).height(26.dp)) { // the rabbit ears
@@ -807,12 +815,18 @@ private fun VhsTv(answer: Int, still: Boolean, modifier: Modifier, screen: @Comp
                         while (y < size.height) { drawLine(lines, androidx.compose.ui.geometry.Offset(0f, y), androidx.compose.ui.geometry.Offset(size.width, y), strokeWidth = 1.5f); y += 6f }
                         // the glass's curve: darker at the edges
                         drawRect(androidx.compose.ui.graphics.Brush.radialGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.35f)), radius = size.maxDimension * 0.75f))
+                        if (gone.value > 0.35f) { val k = ((gone.value - 0.35f) / 0.65f).coerceIn(0f, 1f) // the dot
+                            drawCircle(Color.White.copy(alpha = 1 - k * 0.9f), radius = size.minDimension * 0.05f * (1 - k * 0.7f), center = center)
+                            drawCircle(Color.White.copy(alpha = 0.25f * (1 - k)), radius = size.minDimension * 0.14f, center = center) }
                         if (on.value < 1f) { // switching on: the tracking band rolls down
                             val band = size.height * on.value
                             drawRect(Color.White.copy(alpha = 0.22f * (1 - on.value)), androidx.compose.ui.geometry.Offset(0f, band - 18f), androidx.compose.ui.geometry.Size(size.width, 36f))
                         }
                     }) {
-                    Box(Modifier.graphicsLayer { val t = on.value; scaleY = 0.02f + 0.98f * t * (2 - t); alpha = (t * 2).coerceAtMost(1f) }) { screen() }
+                    Box(Modifier.graphicsLayer { val t = on.value; val g = gone.value
+                        scaleY = (0.02f + 0.98f * t * (2 - t)) * (1 - (g / 0.35f).coerceAtMost(1f) * 0.98f)
+                        scaleX = 1 - ((g - 0.2f) / 0.3f).coerceIn(0f, 1f)
+                        alpha = (t * 2).coerceAtMost(1f) }) { screen() }
                 }
                 androidx.compose.foundation.Canvas(Modifier.width(30.dp).height(150.dp)) { // the knobs and the speaker grille
                     val x = size.width / 2

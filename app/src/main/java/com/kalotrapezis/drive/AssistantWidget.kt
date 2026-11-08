@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.text.drawText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -214,7 +213,7 @@ internal enum class TalkMood { Normal, Cold, Hot;
  * a thought cloud of three dots while it thinks, a moving mouth while it speaks, and the answer's [cue] up at the left.
  */
 @Composable internal fun TalkScreen(phase: LivePhase, hearing: Boolean, modifier: Modifier = Modifier, cue: TalkCue = TalkCue.None, mood: TalkMood = TalkMood.Normal, color: Color = CHARACTER_COLORS[0]) {
-    // a long think with nothing to show: the test card, PLEASE STAND BY (8 Nov: "put the please stand by in the waiting")
+    // a long think with nothing to show: no signal, the snow and its hiss (8 Nov)
     var standby by remember { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(phase, cue) { standby = false; if (phase == LivePhase.Thinking && cue == TalkCue.None) { kotlinx.coroutines.delay(STANDBY_MS); standby = true } }
     if (standby) return StandBy(modifier)
@@ -346,25 +345,59 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.weather(cue: TalkCu
 
 internal const val STANDBY_MS = 3_500L
 
-/** An old test card of our own: grey glass, a ring with its wedges and scale, the cross, and the words across it. */
+/**
+ * No signal: the TV's snow, and its hiss, quietly (8 Nov: "instead of the stand by put snow, with its sound but low").
+ * The hiss stops as soon as the robot answers or the TV goes.
+ */
 @Composable internal fun StandBy(modifier: Modifier = Modifier) {
-    val words = androidx.compose.ui.text.rememberTextMeasurer()
-    val flicker by rememberInfiniteTransition(label = "standby").animateFloat(0.88f, 1f, infiniteRepeatable(tween(140), RepeatMode.Reverse), label = "flicker")
-    Canvas(modifier.background(Color(0xFFBDBDB4))) {
-        val side = minOf(size.width, size.height); val c = center; val r = side * 0.42f
-        val ink = Color(0xFF3A3A36).copy(alpha = flicker)
-        drawLine(ink, Offset(0f, c.y), Offset(size.width, c.y), strokeWidth = 2f); drawLine(ink, Offset(c.x, 0f), Offset(c.x, size.height), strokeWidth = 2f)
-        listOf(Color(0xFF8D8D85), Color(0xFF6F6F68), Color(0xFFA5A59D), Color(0xFF55554F)).forEachIndexed { i, g ->
-            drawArc(g.copy(alpha = flicker), -60f + i * 90f, 32f, true, Offset(c.x - r, c.y - r), Size(2 * r, 2 * r)) }
-        drawCircle(ink, radius = r, center = c, style = Stroke(side * 0.02f))
-        for (k in 1..3) drawCircle(ink, radius = r * 0.08f * k, center = c, style = Stroke(1.5f))
-        for (k in -4..4) drawLine(ink, Offset(c.x + k * r * 0.05f, c.y - r), Offset(c.x + k * r * 0.05f, c.y - r * 0.55f), strokeWidth = 1.2f)
-        val label = words.measure("PLEASE STAND BY", androidx.compose.ui.text.TextStyle(color = Color(0xFFF5F5EE), fontSize = (side / 9f).toSp(),
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Black, letterSpacing = (side / 40f).toSp(),
-            shadow = androidx.compose.ui.graphics.Shadow(Color.Black.copy(alpha = 0.6f), Offset(3f, 3f), 2f)))
-        drawText(label, topLeft = Offset(c.x - label.size.width / 2f, c.y - label.size.height / 2f))
+    var frame by remember { mutableStateOf(0L) }
+    androidx.compose.runtime.LaunchedEffect(Unit) { while (true) androidx.compose.runtime.withFrameNanos { frame = it } }
+    androidx.compose.runtime.DisposableEffect(Unit) { val hiss = Hiss(); hiss.start(); onDispose { hiss.stop() } }
+    Canvas(modifier.background(Color(0xFF202020))) {
+        val dot = maxOf(4f, minOf(size.width, size.height) / 50f)
+        val cols = (size.width / dot).toInt() + 1; val rows = (size.height / dot).toInt() + 1
+        val r = java.util.Random(frame)
+        for (y in 0 until rows) for (x in 0 until cols) {
+            val v = r.nextFloat()
+            if (v > 0.45f) drawRect(Color(v, v, v), Offset(x * dot, y * dot), Size(dot, dot))
+        }
+        // a rolling band, as an old set has
+        val band = (frame / 8_000_000L % rows.toLong()).toFloat() * dot
+        drawRect(Color.White.copy(alpha = 0.08f), Offset(0f, band), Size(size.width, dot * 4))
     }
 }
+
+/** The snow's hiss: soft noise, low, on its own thread. */
+private class Hiss {
+    @Volatile private var on = false
+    private var thread: Thread? = null
+    fun start() {
+        on = true
+        thread = Thread {
+            val rate = 22_050
+            val track = runCatching {
+                android.media.AudioTrack.Builder()
+                    .setAudioAttributes(android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_MEDIA).setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+                    .setAudioFormat(android.media.AudioFormat.Builder().setEncoding(android.media.AudioFormat.ENCODING_PCM_FLOAT).setSampleRate(rate).setChannelMask(android.media.AudioFormat.CHANNEL_OUT_MONO).build())
+                    .setBufferSizeInBytes(rate / 5 * 4).setTransferMode(android.media.AudioTrack.MODE_STREAM).build()
+            }.getOrNull() ?: return@Thread
+            val buf = FloatArray(rate / 20); val r = java.util.Random(); var last = 0f
+            try {
+                track.play()
+                var fade = 0f
+                while (on) {
+                    for (i in buf.indices) { last = last * 0.6f + (r.nextFloat() * 2 - 1) * 0.4f; fade = minOf(1f, fade + 1f / rate); buf[i] = last * HISS_LEVEL * fade } // softened, faded in
+                    track.write(buf, 0, buf.size, android.media.AudioTrack.WRITE_BLOCKING)
+                }
+            } catch (e: Exception) { WriterLog.w("AI Assist: the hiss stopped: ${e.message}") }
+            finally { runCatching { track.pause(); track.flush() }; track.release() }
+        }.apply { isDaemon = true; start() }
+    }
+    fun stop() { on = false; thread = null }
+}
+
+/** How loud the hiss is: low. */
+private const val HISS_LEVEL = 0.05f
 
 /** A tool's card, up at the left: a phone, the address book, a pill, a clock, a note, a calendar page, a letter, a speech bubble, a pin, a file. */
 private fun androidx.compose.ui.graphics.drawscope.DrawScope.toolCard(cue: TalkCue, at: Offset, h: Float, t: Float, side: Float) {
@@ -439,4 +472,28 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.toolCard(cue: TalkC
         }
         else -> Unit
     }
+}
+
+/** AI decorations (Settings › AI Assist, 8 Nov): the record, the cassette, the TV and its cues, the snow and the CRT; off, plain — the conversation and its buttons. */
+internal object AiLook {
+    private fun prefs(c: Context) = c.getSharedPreferences("assistant", Context.MODE_PRIVATE)
+    fun decorated(c: Context) = prefs(c).getBoolean("decorations", true)
+    fun set(c: Context, on: Boolean) = prefs(c).edit().putBoolean("decorations", on).apply()
+}
+
+/** The CRT's «fsst» as it switches on or off: a short burst of noise, falling away. */
+internal object Zap {
+    fun play() = Thread {
+        val rate = 22_050; val n = rate / 4
+        val buf = FloatArray(n); val r = java.util.Random(); var last = 0f
+        for (i in 0 until n) { last = last * 0.4f + (r.nextFloat() * 2 - 1) * 0.6f; val env = (1 - i.toFloat() / n).let { it * it }; buf[i] = last * env * 0.12f }
+        runCatching {
+            val t = android.media.AudioTrack.Builder()
+                .setAudioAttributes(android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_MEDIA).setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+                .setAudioFormat(android.media.AudioFormat.Builder().setEncoding(android.media.AudioFormat.ENCODING_PCM_FLOAT).setSampleRate(rate).setChannelMask(android.media.AudioFormat.CHANNEL_OUT_MONO).build())
+                .setBufferSizeInBytes(n * 4).setTransferMode(android.media.AudioTrack.MODE_STATIC).build()
+            t.write(buf, 0, n, android.media.AudioTrack.WRITE_BLOCKING); t.play()
+            Thread.sleep(400); t.release()
+        }.onFailure { WriterLog.w("AI Assist: the zap: ${it.message}") }
+    }.apply { isDaemon = true; start() }
 }
