@@ -1234,6 +1234,9 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
     val bill get() = api.bill
 
     /** The user's [text] answered, the tools run on the way; [onText] gets the answer's words as they come; [file] goes with it, this turn only. */
+    /** Each tool as the model calls it (Home's widget: a magnifier while it searches). */
+    @Volatile var onTool: ((String) -> Unit)? = null
+
     fun ask(text: String, at: Long = System.currentTimeMillis(), file: Attach.Doc? = null, onText: ((String) -> Unit)? = null): AssistantReply {
         if (at - lastAt > forgetMs) messages.clear()
         lastAt = at
@@ -1271,6 +1274,7 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
                 val c = calls.getJSONObject(i); val f = c.getJSONObject("function")
                 val args = when (val a = f.opt("arguments")) { is JSONObject -> a; is String -> runCatching { JSONObject(a.ifBlank { "{}" }) }.getOrDefault(JSONObject()); else -> JSONObject() }
                 val name = f.getString("name")
+                onTool?.invoke(name)
                 // after outside text, a change waits for the user's yes (AssistantGuard); shortcut: one held call per turn, the last, until the model ever asks several at once
                 val r = if (outside && name in AssistantGuard.ACTS) { confirm = AssistantGuard.Confirm(name, args, AssistantGuard.what(name, args, tools.picked(name, args))); ToolResult(AssistantGuard.held(name)) }
                     else tools.run(name, args).let { if (name in AssistantGuard.EXTERNAL) { outside = true; it.copy(forModel = AssistantGuard.wrap(name, it.forModel)) } else it }
