@@ -304,7 +304,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, close: () -> U
         chat.onTool = { name -> TalkCue.ofTool(name).takeIf { it != TalkCue.None }?.let { found -> scope.launch { tvCue = found } } }
         val r = withContext(Dispatchers.IO) { runCatching { try { chat.ask(text, file = file) { words ->
             said.append(words); val cue = TalkCue.of(said); val mood = TalkMood.of(said)
-            scope.launch { talking = speech != null; tvCue = cue; tvMood = mood }
+            scope.launch { talking = speech != null; if (cue != TalkCue.None || tvCue.weather) tvCue = cue.takeIf { it != TalkCue.None } ?: tvCue; tvMood = mood }
             cut.push(words).forEach { speech?.say(it) }
             if (inLive) scope.launch { liveAi += words; if (speech != null) livePhase = LivePhase.Speaking }
         } } finally { chat.onTool = null } } }

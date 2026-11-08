@@ -14,7 +14,11 @@ class TalkCueTest {
 
     @Test fun `a search tool shows the magnifier, others nothing`() {
         assertEquals(TalkCue.Search, TalkCue.ofTool("web_search"))
-        assertEquals(TalkCue.None, TalkCue.ofTool("note_pin"))
+        assertEquals(TalkCue.Note, TalkCue.ofTool("note_pin"))
+        assertEquals(TalkCue.Call, TalkCue.ofTool("contact_call"))
+        assertEquals(TalkCue.Contacts, TalkCue.ofTool("contacts_find"))
+        assertEquals(TalkCue.Pill, TalkCue.ofTool("pills_taken"))
+        assertEquals(TalkCue.None, TalkCue.ofTool("no_such_tool"))
     }
 
     @Test fun `cold trembles, hot wears the hat, by words or by degrees`() {
@@ -25,9 +29,9 @@ class TalkCueTest {
         assertEquals(TalkMood.Normal, TalkMood.of("18 βαθμοί και λιακάδα."))
     }
 
-    @Test fun `each voice keeps one colour, the phone's voice the orange`() {
-        assertEquals(ASSISTANT_COLOR, characterColor(null))
-        assertEquals(ASSISTANT_COLOR, characterColor(""))
+    @Test fun `each voice keeps one colour, the phone's voice the mascot's yellow`() {
+        assertEquals(CHARACTER_COLORS[0], characterColor(null))
+        assertEquals(CHARACTER_COLORS[0], characterColor(""))
         assertEquals(characterColor("voice-a"), characterColor("voice-a"))
         assert(characterColor("voice-a") in CHARACTER_COLORS)
     }
