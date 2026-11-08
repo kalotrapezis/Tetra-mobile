@@ -128,4 +128,12 @@
     <string name="pills_opened">Turiu ir atidarytą dėžutę</string>
     <string name="pills_here">Priminimai šiame įrenginyje</string>
     <string name="pills_here_note">Tavo vaistai ir išgertos dozės sinchronizuojami tarp telefono, planšetės ir kompiuterio. Skamba tik įrenginiai su įjungtu šiuo jungikliu, todėl į dozę atsakai tik kartą.</string>
+    <string name="pills_private">Privatūs priminimai</string>
+    <string name="pills_private_note">Pranešimas ir balsas nenurodo vaisto pavadinimo, net užrakinimo ekrane.</string>
+    <string name="pills_private_text">Atidaryk Tabletes ir pažiūrėk, ką gerti.</string>
+    <string name="pills_voice_line_private">%1$s, dabar %2$s. Išgerk savo tabletę.</string>
+    <string name="pills_voice_line_private_plain">Dabar %1$s. Išgerk savo tabletę.</string>
+    <string name="pills_refill_line_private">Vieno vaisto užteks dar %1$d dienų: laikas užsisakyti.</string>
+    <string name="pills_chat_reminder">Priminimas: %1$s (dozė %2$s)</string>
+    <string name="pills_chat_reminder_private">Priminimas: laikas tabletei (dozė %1$s)</string>
 </resources>

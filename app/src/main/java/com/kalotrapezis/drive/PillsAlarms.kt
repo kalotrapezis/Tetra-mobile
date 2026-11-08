@@ -50,6 +50,9 @@ internal object PillsAlarms {
     fun setRingsHere(c: Context, on: Boolean) { prefs(c).edit().putBoolean("here", on).apply(); planSoon(c) }
     /** How the voice calls the user, as it should be said ("Θεολόγε": Greek's vocative, typed by the user, never guessed). */
     fun callName(c: Context) = prefs(c).getString("call", "").orEmpty()
+    /** Private (the user, 8 Nov): neither the notification nor the voice names the medicine. */
+    fun private(c: Context) = prefs(c).getBoolean("private", false)
+    fun str(c: Context) = Str { id, a -> c.getString(id, *a) }
 
     fun planSoon(c: Context) { val app = c.applicationContext; Thread { runCatching { plan(app) }.onFailure { WriterLog.e("Pills: plan failed", it) } }.start() }
 
@@ -119,16 +122,21 @@ internal object PillsAlarms {
 
     /** The words under the title: each medicine and how many; a low stock's line after it, once a day up to its count. */
     private fun lines(c: Context, doses: List<Dose>, count: Boolean): Pair<String, List<String>> {
-        val what = doses.joinToString(", ") { "${it.med.title} × ${Medicine.amount(it.med.dose)}" }
+        val private = private(c)
+        val what = if (private) c.getString(R.string.pills_private_text) else names(doses)
         val dir = Pills.phoneDir(); val today = java.time.LocalDate.now()
         val low = doses.map { it.med }.distinctBy { it.id }.mapNotNull { m0 ->
             val m = Pills.medicines(dir).firstOrNull { it.id == m0.id } ?: m0
             if (!m.low() || m.refillAsked >= m.refillTimes && m.refillOn != today) return@mapNotNull null
             if (count) Pills.refillSaid(dir, m.id, today)
-            c.getString(R.string.pills_refill_line, m.title, m.daysLeft() ?: 0)
+            refillLine(str(c), m, private)
         }
         return what to low
     }
+
+    fun names(doses: List<Dose>) = doses.joinToString(", ") { "${it.med.title} × ${Medicine.amount(it.med.dose)}" }
+    fun refillLine(s: Str, m: Medicine, private: Boolean) =
+        if (private) s.get(R.string.pills_refill_line_private, m.daysLeft() ?: 0) else s.get(R.string.pills_refill_line, m.title, m.daysLeft() ?: 0)
 
     fun build(c: Context, due: Instant, doses: List<Dose>, silent: Boolean, count: Boolean = true): android.app.Notification {
         channel(c)
@@ -138,10 +146,14 @@ internal object PillsAlarms {
         val text = (listOf(what) + low).joinToString("\n")
         fun act(a: String) = PendingIntent.getBroadcast(c, id * 4 + a.length, Intent(c, PillsReceiver::class.java).setAction(a).putExtra("due", due.toEpochMilli()), flags())
         val open = PendingIntent.getActivity(c, id, appletIntent(c, Applet.Pills.name), flags())
+        // private: the lock screen shows this one, the time only
+        val public = if (!private(c)) null else NotificationCompat.Builder(c, CHANNEL).setSmallIcon(R.drawable.ic_pill).setColor(COLOR)
+            .setContentTitle(c.getString(R.string.pills_reminder_title, time)).setContentText(c.getString(R.string.pills_private_text)).build()
         return NotificationCompat.Builder(c, CHANNEL).setSmallIcon(R.drawable.ic_pill).setColor(COLOR)
             .setContentTitle(c.getString(R.string.pills_reminder_title, time)).setContentText(what)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setCategory(NotificationCompat.CATEGORY_REMINDER).setPriority(NotificationCompat.PRIORITY_HIGH)
+            .apply { if (public != null) setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setPublicVersion(public) }
             .setContentIntent(open).setAutoCancel(false).setOngoing(true).setSilent(silent).setOnlyAlertOnce(false)
             .addAction(R.drawable.ic_check, c.getString(if (doses.size > 1) R.string.pills_taken_all else R.string.pills_taken), act(TAKE))
             .addAction(R.drawable.ic_close, c.getString(R.string.pills_skip), act(SKIP))
@@ -157,12 +169,25 @@ internal object PillsAlarms {
     }
 
     /** What the voice says: "Θεολόγε, είναι 21:00. Μην ξεχάσεις να πάρεις: Depon 500 mg." and the low stocks; the time now (21:30 when reminded again). */
-    fun words(c: Context, doses: List<Dose>, low: List<String>): String {
-        val names = doses.joinToString(", ") { d -> d.med.title + (foodWords(c, d.med.food)?.let { " $it" } ?: "") }
-        val call = callName(c).trim(); val time = hhmm(c, Instant.now())
-        val first = if (call.isEmpty()) c.getString(R.string.pills_voice_line, time, names) else c.getString(R.string.pills_voice_line_named, call, time, names)
+    fun words(c: Context, doses: List<Dose>, low: List<String>): String =
+        words(str(c), callName(c), hhmm(c, Instant.now()), doses.joinToString(", ") { d -> d.med.title + (foodWords(c, d.med.food)?.let { " $it" } ?: "") }, low, private(c))
+
+    /** Private: "Θεολόγε, είναι 21:00. Πάρε το χάπι σου." and no name at all. */
+    fun words(s: Str, call: String, time: String, names: String, low: List<String>, private: Boolean): String {
+        val n = call.trim()
+        val first = when {
+            private && n.isEmpty() -> s.get(R.string.pills_voice_line_private_plain, time)
+            private -> s.get(R.string.pills_voice_line_private, n, time)
+            n.isEmpty() -> s.get(R.string.pills_voice_line, time, names)
+            else -> s.get(R.string.pills_voice_line_named, n, time, names)
+        }
         return (listOf(first) + low).joinToString(" ")
     }
+
+    /** The ring's line in AI Assist's chat: the model's keeps the names (it must know which dose "I took it" means; it is never on the lock screen), the bubble the user sees drops them in private mode. */
+    fun chatLines(s: Str, due: String, doses: List<Dose>, private: Boolean): Pair<String, String> =
+        "Reminder (said to the user just now): time for ${names(doses)} (dose $due). If the user says they took it, put it off or skip it, this is the dose." to
+            if (private) s.get(R.string.pills_chat_reminder_private, due) else s.get(R.string.pills_chat_reminder, names(doses), due)
 
     private fun foodWords(c: Context, food: String) = when (food) {
         "with" -> c.getString(R.string.pills_food_with); "before" -> c.getString(R.string.pills_food_before)
@@ -171,6 +196,8 @@ internal object PillsAlarms {
 
     private fun ring(c: Context, due: Instant, doses: List<Dose>, again: Boolean, speak: Boolean) {
         WriterLog.i("Pills: ringing ${doses.size} dose(s) of $due${if (again) " again" else ""}${if (speak) "" else ", no voice"}")
+        // into AI Assist's open conversation, so «το πήρα» right after is this dose (and the ten minutes start again)
+        runCatching { val (model, shown) = chatLines(str(c), hhmm(c, due), doses, private(c)); SharedChat.ring(c, model, shown) }.onFailure { WriterLog.e("Pills: the chat line failed", it) }
         if (speak && canSpeak(c)) {
             val (_, low) = lines(c, doses, count = false)
             val start = Intent(c, PillsVoiceService::class.java).putExtra("due", due.toEpochMilli()).putExtra("words", words(c, doses, low))
@@ -351,3 +378,6 @@ class PillsVoiceService : Service() {
         WriterLog.w("Pills: no text-to-speech")
     }
 }
+
+/** A string by its id, as Context.getString; a plain function in the unit tests. */
+internal fun interface Str { fun get(id: Int, vararg a: Any): String }

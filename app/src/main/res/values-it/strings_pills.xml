@@ -128,4 +128,12 @@
     <string name="pills_opened">Ho anche una confezione aperta</string>
     <string name="pills_here">Promemoria su questo dispositivo</string>
     <string name="pills_here_note">I tuoi farmaci e le dosi assunte si sincronizzano tra telefono, tablet e computer. Suonano solo i dispositivi con questo interruttore attivo, così rispondi a ogni dose una sola volta.</string>
+    <string name="pills_private">Promemoria privati</string>
+    <string name="pills_private_note">La notifica e la voce non nominano il farmaco, nemmeno sulla schermata di blocco.</string>
+    <string name="pills_private_text">Apri Pillole per vedere cosa prendere.</string>
+    <string name="pills_voice_line_private">%1$s, sono le %2$s. Prendi la tua pillola.</string>
+    <string name="pills_voice_line_private_plain">Sono le %1$s. Prendi la tua pillola.</string>
+    <string name="pills_refill_line_private">Un farmaco dura ancora %1$d giorni: è ora di ordinarlo.</string>
+    <string name="pills_chat_reminder">Promemoria: %1$s (dose delle %2$s)</string>
+    <string name="pills_chat_reminder_private">Promemoria: è ora della tua pillola (dose delle %1$s)</string>
 </resources>

@@ -860,6 +860,7 @@ internal fun pillsHealth(c: android.content.Context): List<PillsCheck> {
     val c = LocalContext.current
     val prefs = remember { PillsAlarms.prefs(c) }
     var voice by remember { mutableStateOf(PillsAlarms.voice(c)) }
+    var private by remember { mutableStateOf(PillsAlarms.private(c)) }
     var here by remember { mutableStateOf(PillsAlarms.ringsHere(c)) }
     var call by remember { mutableStateOf(PillsAlarms.callName(c)) }
     var checked by remember { mutableIntStateOf(0) }
@@ -882,6 +883,13 @@ internal fun pillsHealth(c: android.content.Context): List<PillsCheck> {
         }
         if (here) Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.pills_private), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.pills_private_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(private, { private = it; prefs.edit().putBoolean("private", it).apply() })
+                }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text(stringResource(R.string.pills_voice), style = MaterialTheme.typography.titleMedium)

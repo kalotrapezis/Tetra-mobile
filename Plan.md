@@ -12,6 +12,12 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [x] (pills-private-convo session, 8 Nov; branch `claude/pills-private-convo-9d6534`, not merged) **Pills: private reminders; the
+      reminder in AI Assist's chat; pills_taken reads back.** Settings › Pills › Private reminders (off): notification and voice name
+      no medicine (lock screen: a public version, time only), refill lines too. A ring writes its line into the one open chat
+      (SharedChat, kept in files/assistant_open.json; the model's line keeps names, the bubble drops them when private) and starts
+      its ten minutes again; every way into AI Assist (sheet, notification, icon) goes on with it within ten minutes. pills_taken /
+      pills_later report the state read back from the files, and say so when nothing waits. PillsChatTest. Not checked on a device.
 - [x] (browser-sync session, 3 Nov; branch `browser-sync`, not merged; desktop bc9f2b4 on main) **Browser: bookmarks, open tabs and
       (chosen) passwords between the phone and the tablet** (the user: "bookmarks and tabs"; "sync passwords as well but have some
       encryption"; "options in the settings what to sync"). `.System/Browser/Shared` (synced as `Browser/…`, part `browser`; the desktop

@@ -128,4 +128,12 @@
     <string name="pills_opened">J’ai aussi une boîte entamée</string>
     <string name="pills_here">Rappels sur cet appareil</string>
     <string name="pills_here_note">Vos médicaments et les doses prises sont synchronisés entre votre téléphone, votre tablette et votre ordinateur. Seuls les appareils où ce réglage est activé sonnent, donc vous ne répondez qu’une fois à chaque dose.</string>
+    <string name="pills_private">Rappels privés</string>
+    <string name="pills_private_note">La notification et la voix ne nomment pas le médicament, même sur l’écran de verrouillage.</string>
+    <string name="pills_private_text">Ouvre Comprimés pour voir quoi prendre.</string>
+    <string name="pills_voice_line_private">%1$s, il est %2$s. Prends ton comprimé.</string>
+    <string name="pills_voice_line_private_plain">Il est %1$s. Prends ton comprimé.</string>
+    <string name="pills_refill_line_private">Un médicament dure encore %1$d jours : il est temps de commander.</string>
+    <string name="pills_chat_reminder">Rappel : %1$s (prise de %2$s)</string>
+    <string name="pills_chat_reminder_private">Rappel : l’heure de ton comprimé (prise de %1$s)</string>
 </resources>
