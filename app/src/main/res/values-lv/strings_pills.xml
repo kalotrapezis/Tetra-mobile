@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Vienas zāles pietiks vēl %1$d dienām: laiks pasūtīt.</string>
     <string name="pills_chat_reminder">Atgādinājums: %1$s (deva %2$s)</string>
     <string name="pills_chat_reminder_private">Atgādinājums: laiks tabletei (deva %1$s)</string>
+    <string name="pills_on_time">Laikā</string>
+    <string name="pills_late">Vēlāk</string>
 </resources>

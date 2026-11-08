@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">En medicin räcker %1$d dagar till: dags att beställa.</string>
     <string name="pills_chat_reminder">Påminnelse: %1$s (dos %2$s)</string>
     <string name="pills_chat_reminder_private">Påminnelse: dags för ditt piller (dos %1$s)</string>
+    <string name="pills_on_time">I tid</string>
+    <string name="pills_late">Senare</string>
 </resources>

@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Eno zdravilo bo zadoščalo še %1$d dni: čas za naročilo.</string>
     <string name="pills_chat_reminder">Opomnik: %1$s (odmerek %2$s)</string>
     <string name="pills_chat_reminder_private">Opomnik: čas za tableto (odmerek %1$s)</string>
+    <string name="pills_on_time">Pravočasno</string>
+    <string name="pills_late">Pozneje</string>
 </resources>

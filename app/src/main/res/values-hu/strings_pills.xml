@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Egy gyógyszer még %1$d napig elég: ideje rendelni.</string>
     <string name="pills_chat_reminder">Emlékeztető: %1$s (%2$s adag)</string>
     <string name="pills_chat_reminder_private">Emlékeztető: itt a gyógyszer ideje (%1$s adag)</string>
+    <string name="pills_on_time">Időben</string>
+    <string name="pills_late">Később</string>
 </resources>

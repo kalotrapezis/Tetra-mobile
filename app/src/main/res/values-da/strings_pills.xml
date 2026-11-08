@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">En medicin rækker %1$d dage mere: tid til at bestille.</string>
     <string name="pills_chat_reminder">Påmindelse: %1$s (dosis %2$s)</string>
     <string name="pills_chat_reminder_private">Påmindelse: tid til din pille (dosis %1$s)</string>
+    <string name="pills_on_time">Til tiden</string>
+    <string name="pills_late">Senere</string>
 </resources>

@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Üks ravim jätkub veel %1$d päevaks: aeg tellida.</string>
     <string name="pills_chat_reminder">Meeldetuletus: %1$s (annus %2$s)</string>
     <string name="pills_chat_reminder_private">Meeldetuletus: tableti aeg (annus %1$s)</string>
+    <string name="pills_on_time">Õigel ajal</string>
+    <string name="pills_late">Hiljem</string>
 </resources>

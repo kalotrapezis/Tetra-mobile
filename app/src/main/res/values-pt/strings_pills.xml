@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Um medicamento dura mais %1$d dias: altura de encomendar.</string>
     <string name="pills_chat_reminder">Lembrete: %1$s (dose das %2$s)</string>
     <string name="pills_chat_reminder_private">Lembrete: hora do teu comprimido (dose das %1$s)</string>
+    <string name="pills_on_time">A horas</string>
+    <string name="pills_late">Mais tarde</string>
 </resources>

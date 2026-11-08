@@ -428,6 +428,9 @@ private val HHMM = DateTimeFormatter.ofPattern("HH:mm")
     val slots = remember(meds, log, now.epochSecond / 3600) { Pills.slots(meds.filter { !it.archived }, log, now, zone) }
     val due = slots.sumOf { it.due }
     if (due == 0) { Text(stringResource(R.string.pills_progress_empty), color = MaterialTheme.colorScheme.onSurfaceVariant); return }
+    // the month at a glance, at the top (8 Nov, the user: "the month's progress with the squares, at the very top"): every dose
+    // of every medicine, oldest first, in the same colours as the rows below
+    MonthSquares(slots.flatMap { it.doses.takeLast(30) }.filter { it.state != Dose.State.Waiting }.sortedBy { it.due })
     val takenSlots = slots.filter { it.onTime + it.late > 0 }
     val lateAvg = if (takenSlots.isEmpty()) 0L else takenSlots.sumOf { it.lateMinutes * (it.onTime + it.late) } / takenSlots.sumOf { it.onTime + it.late }
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -463,6 +466,39 @@ private val HHMM = DateTimeFormatter.ofPattern("HH:mm")
         }
     }
     Text(stringResource(R.string.pills_progress_key), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+}
+
+/** All doses as a grid of squares: dark on time, light late, red outline forgotten, grey skipped; rows as many as they need. */
+@Composable private fun MonthSquares(doses: List<Dose>) {
+    if (doses.isEmpty()) return
+    val skipped = MaterialTheme.colorScheme.outline
+    Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxWidth()) {
+        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.padding(14.dp).fillMaxWidth()) {
+            val cell = 20.dp; val gap = 4.dp
+            val cols = ((maxWidth + gap) / (cell + gap)).toInt().coerceAtLeast(1)
+            val rows = (doses.size + cols - 1) / cols
+            androidx.compose.foundation.Canvas(Modifier.fillMaxWidth().height(cell * rows + gap * (rows - 1).coerceAtLeast(0))) {
+                val c = cell.toPx(); val g = gap.toPx(); val r = androidx.compose.ui.geometry.CornerRadius(3.dp.toPx())
+                doses.forEachIndexed { i, d ->
+                    val at = androidx.compose.ui.geometry.Offset((i % cols) * (c + g), (i / cols) * (c + g)); val sz = androidx.compose.ui.geometry.Size(c, c)
+                    when (d.state) {
+                        Dose.State.Taken -> drawRoundRect(if (d.lateMin() > 30) PILLS_COLOR.copy(alpha = 0.4f) else PILLS_COLOR, at, sz, r)
+                        Dose.State.Missed -> drawRoundRect(MISSED_RED, at + androidx.compose.ui.geometry.Offset(1f, 1f), androidx.compose.ui.geometry.Size(c - 2f, c - 2f), r, style = androidx.compose.ui.graphics.drawscope.Stroke(1.5.dp.toPx()))
+                        else -> drawRoundRect(skipped, at, sz, r)
+                    }
+                }
+            }
+        }
+    }
+    // the key under it, as the user's picture has it: a square and its word for each kind
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
+        listOf(PILLS_COLOR to R.string.pills_on_time, PILLS_COLOR.copy(alpha = 0.4f) to R.string.pills_late, MISSED_RED to R.string.pills_state_missed, skipped to R.string.pills_state_skipped).forEach { (color, word) ->
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                Box(Modifier.size(12.dp).clip(RoundedCornerShape(3.dp)).then(if (word == R.string.pills_state_missed) Modifier.border(1.5.dp, color, RoundedCornerShape(3.dp)) else Modifier.background(color)))
+                Text(stringResource(word), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
 }
 
 @Composable private fun Metric(value: String, label: String, modifier: Modifier) =

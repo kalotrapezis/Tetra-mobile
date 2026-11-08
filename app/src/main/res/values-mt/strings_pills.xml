@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Mediċina waħda għad għandha %1$d jiem: wasal il-ħin li tordnaha.</string>
     <string name="pills_chat_reminder">Tfakkira: %1$s (doża %2$s)</string>
     <string name="pills_chat_reminder_private">Tfakkira: wasal il-ħin tal-pillola (doża %1$s)</string>
+    <string name="pills_on_time">Fil-ħin</string>
+    <string name="pills_late">Aktar tard</string>
 </resources>

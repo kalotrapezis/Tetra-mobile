@@ -137,4 +137,6 @@
     <string name="pills_refill_line_private">A medicine lasts %1$d more days: time to order.</string>
     <string name="pills_chat_reminder">Reminder: %1$s (dose %2$s)</string>
     <string name="pills_chat_reminder_private">Reminder: time for your pill (dose %1$s)</string>
+    <string name="pills_on_time">On time</string>
+    <string name="pills_late">Late</string>
 </resources>

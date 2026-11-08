@@ -136,4 +136,6 @@
     <string name="pills_refill_line_private">Un farmaco dura ancora %1$d giorni: è ora di ordinarlo.</string>
     <string name="pills_chat_reminder">Promemoria: %1$s (dose delle %2$s)</string>
     <string name="pills_chat_reminder_private">Promemoria: è ora della tua pillola (dose delle %1$s)</string>
+    <string name="pills_on_time">In orario</string>
+    <string name="pills_late">Più tardi</string>
 </resources>
