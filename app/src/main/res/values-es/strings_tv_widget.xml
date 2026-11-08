@@ -8,4 +8,5 @@
         <item>¡Buenas!</item>
         <item>¡Aquí estoy!</item>
     </string-array>
+    <string name="tv_talk_open">Abrir la respuesta en AI Assist</string>
 </resources>

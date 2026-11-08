@@ -95,3 +95,34 @@ off, d = tv(False)
 d.point((W // 2 - 8, H // 2), fill=(255, 255, 255)); d.point((W // 2 - 9, H // 2), fill=(120, 120, 120)); d.point((W // 2 - 7, H // 2), fill=(120, 120, 120))
 save(off, "off")
 print("frames in", os.path.normpath(OUT))
+
+# talking on the widget itself (8 Nov): listening rings, a thought cloud filling with dots, its voice's waves, and snow
+def talk(rings=0, dots=-1, waves=False, bars=None):
+    im, d = tv(True)
+    smudges(im, lambda x, y: False)
+    if rings:
+        for r in ([12] if rings == 1 else [12, 17]):
+            d.ellipse((32 - r - 1, 27 - r, 32 + r - 1, 27 + r), outline=(253, 106, 4))
+    mascot_clip(im, 19, 15, waves=waves, sparkle=not waves)
+    if bars:  # its voice: three bars beside it, a different height each frame
+        for k, h in enumerate(bars): d.rectangle((50 + k * 3, 27 - h, 51 + k * 3, 27 + h), fill=(255, 226, 160))
+    if dots >= 0:
+        d.rounded_rectangle((6, 6, 21, 13), 3, fill=(244, 241, 234))
+        d.rectangle((17, 14, 18, 15), fill=(244, 241, 234)); d.point((20, 17), fill=(244, 241, 234))
+        for k in range(dots + 1): d.rectangle((9 + k * 4, 9, 10 + k * 4, 10), fill=(59, 52, 48))
+    lines(im)
+    return im
+
+
+save(talk(rings=1), "listen0"); save(talk(rings=2), "listen1")
+for k in range(3): save(talk(dots=k), f"think{k}")
+save(talk(bars=(2, 5, 3)), "speak0")
+save(talk(waves=True, bars=(5, 2, 6)), "speak1")
+import random
+for k in range(3):
+    im, d = tv(True); rnd = random.Random(k)
+    for y in range(GY0 + 1, GY1):
+        for x in range(GX0 + 1, GX1):
+            v = rnd.randint(30, 230) if rnd.random() > 0.35 else 20
+            im.putpixel((x, y), (v, v, v, 255))
+    save(im, f"snow{k}")

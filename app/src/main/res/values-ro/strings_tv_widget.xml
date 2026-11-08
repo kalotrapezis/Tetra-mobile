@@ -8,4 +8,5 @@
         <item>Bună!</item>
         <item>Sunt aici!</item>
     </string-array>
+    <string name="tv_talk_open">Deschide răspunsul în AI Assist</string>
 </resources>

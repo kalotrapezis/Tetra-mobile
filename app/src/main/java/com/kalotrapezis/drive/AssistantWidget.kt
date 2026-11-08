@@ -55,9 +55,14 @@ import java.util.concurrent.atomic.AtomicBoolean
  * (a call, choices, a card, a file, an app) goes on in AI Assist with the conversation, which is the same one.
  */
 @Stable
-internal class HomeTalk(private val c: Context, private val scope: CoroutineScope, private val reader: ReadAloud) {
+internal class HomeTalk(private val c: Context, private val scope: CoroutineScope, private val reader: ReadAloud, private val openScreen: () -> Unit = { openAssistant(c) }) {
+    /** Told when [phase] changes: the home screen's TV follows it (TvTalkService). */
+    var changed: (() -> Unit)? = null
+    private val phaseState = mutableStateOf<LivePhase?>(null)
     /** null: resting. */
-    var phase by mutableStateOf<LivePhase?>(null); private set
+    var phase: LivePhase?
+        get() = phaseState.value
+        private set(v) { if (phaseState.value != v) { phaseState.value = v; changed?.invoke() } }
     var hearing by mutableStateOf(false); private set
     var cue by mutableStateOf(TalkCue.None); private set
     var mood by mutableStateOf(TalkMood.Normal); private set
@@ -112,7 +117,7 @@ internal class HomeTalk(private val c: Context, private val scope: CoroutineScop
         }
         phase = LivePhase.Speaking
         speech.await(); voice = null
-        if (needsScreen(reply)) { openAssistant(c); return }
+        if (needsScreen(reply)) { openScreen(); return }
         if (reply.text.trimEnd().endsWith('?')) turn(6_000) // a question waits for the answer, as the sheet does
     }
 

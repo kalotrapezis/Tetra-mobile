@@ -8,4 +8,5 @@
         <item>Helló!</item>
         <item>Itt vagyok!</item>
     </string-array>
+    <string name="tv_talk_open">Válasz megnyitása az AI Assistban</string>
 </resources>
