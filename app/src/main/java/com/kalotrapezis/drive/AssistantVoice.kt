@@ -188,7 +188,8 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
         stations = { BrowserRules.bookmarks(app.getSharedPreferences("browser", Context.MODE_PRIVATE).getString("bookmarks", null)) },
         mapsStation = { BrowserMedia.station(app) },
         volume = { change, percent -> AssistantVolume.change(app, change, percent) },
-        send = { c -> SyncClient(app, SyncStore(app)).assistDo(c) })
+        send = { c -> SyncClient(app, SyncStore(app)).assistDo(c) },
+        hotspotDevice = if (PhoneRelay.noCalls(app)) DataFiles.device() else null)
     return AssistantChat(api, tools, forgetMs)
 }
 

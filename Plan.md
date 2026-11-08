@@ -12,6 +12,15 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
+- [ ] (assistant-tools session, 8 Nov; branch `claude/assistant-safety-mailai-5de496`, not merged) **AI Assist: data, pin/colour notes,
+      open a page, the brief as a card** (the user: how much mobile data was used / is left / the month's forecast and whether to cut
+      back; pin or recolour notes; open a website or the web search results or the daily report as a card in the chat or in Tetra's own
+      browser). data_status (read; the plan's used/left/%/days left/today/average/forecast and «on track» or «at most X a day for the
+      N days left»; a tablet without a SIM: its hotspot use this month) with a ring card that opens Data; note_pin / note_color (acts;
+      the last notes_search list or the note just made; Keep's palette by name, written as Notes does: isPinned, color); open_url (acts;
+      Tetra's Browser, `"open": true`); web cards' sources open in Tetra's Browser, plus «Search in the Browser»; brief_show (outside
+      text: the brief retells mails) as a card that opens BriefActivity. data_status and brief_show have no per-app switch (no "data"
+      app in AiGate.APPS). AssistantMoreToolsTest. Not checked on a device.
 - [x] (pills-private-convo session, 8 Nov; branch `claude/pills-private-convo-9d6534`, merged 8 Nov) **Pills: private reminders; the
       reminder in AI Assist's chat; pills_taken reads back.** Settings › Pills › Private reminders (off): notification and voice name
       no medicine (lock screen: a public version, time only), refill lines too. A ring writes its line into the one open chat

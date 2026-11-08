@@ -292,6 +292,14 @@ internal class NotesStore(val root: File, private val deviceId: String = "tetra-
 }
 
 /** Unchecked in their order, then the checked ones below — as every Notes app shows a checklist. */
+/** Keep's palette, which the imported notes already use, by Keep's names (AI Assist's note_color says them). */
+internal object NoteColors {
+    val NAMES = linkedMapOf("red" to "#F28B82", "orange" to "#FBBC04", "yellow" to "#FFF475", "green" to "#CCFF90", "teal" to "#A7FFEB", "blue" to "#CBF0F8",
+        "dark blue" to "#AECBFA", "purple" to "#D7AEFB", "pink" to "#FDCFE8", "brown" to "#E6C9A8", "gray" to "#E8EAED")
+    fun hex(name: String) = NAMES[name.trim().lowercase().replace('_', ' ').replace("grey", "gray")]
+    fun none(name: String) = name.trim().lowercase() in setOf("none", "default", "")
+}
+
 internal fun List<CheckItem>.sortedForList() = sortedWith(compareBy<CheckItem> { it.checked }.thenBy { it.order })
 
 /**
