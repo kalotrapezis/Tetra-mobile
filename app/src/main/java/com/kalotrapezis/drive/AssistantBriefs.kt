@@ -98,9 +98,13 @@ class BriefActivity : ComponentActivity() {
         val html = if (f.parentFile?.canonicalPath == AssistantBriefs.dir().canonicalPath) runCatching { f.readText() }.getOrNull() else null
         // the page, and a way on to AI Assist from it (8 Nov, the user: opened from Home's cassette, "there is no way to open
         // the Assistant from inside the report")
+        val title = runCatching { AssistantBriefs.title(f) }.getOrNull().orEmpty()
         setContent {
             TetraTheme {
-                androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize()) {
+                // the presenter (AI decorations): the page as a small news show first; Page shows it as it is
+                var asPage by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(html == null || !Presenter.on(this@BriefActivity)) }
+                if (!asPage) NewsShow(title.ifBlank { getString(R.string.app_assistant) }, html!!, { asPage = true }, { finish() })
+                else androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize()) {
                     androidx.compose.ui.viewinterop.AndroidView(factory = { c -> WebView(c).apply {
                         settings.javaScriptEnabled = false
                         fitsSystemWindows = true

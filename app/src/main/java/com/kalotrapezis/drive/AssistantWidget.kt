@@ -238,23 +238,7 @@ internal enum class TalkMood { Normal, Cold, Hot;
         // the app's mascot in pixels (8 Nov: "put the app's mascot, not my sketch"), coloured by its voice, the weather on it
         val cell = side * 0.7f / MASCOT.size
         val top = Offset(face.x - cell * MASCOT[0].length / 2f, face.y - cell * MASCOT.size / 2f)
-        val shell = mapOf('Y' to skin, 'L' to androidx.compose.ui.graphics.lerp(skin, Color.White, 0.5f), 'O' to androidx.compose.ui.graphics.lerp(skin, Color.Black, 0.18f),
-            'D' to androidx.compose.ui.graphics.lerp(skin, Color.Black, 0.5f))
-        val shut = blink > 0.94f
-        MASCOT.forEachIndexed { y, row -> row.forEachIndexed { x, ch ->
-            val c: Color? = when (ch) {
-                'Y', 'L', 'O', 'D' -> shell[ch]
-                'V' -> Color(0xFF3B2418)
-                'E' -> if (shut) Color(0xFF3B2418) else Color(0xFFFFD86B)
-                'H' -> Color(0xFFFFF1C2)
-                // its voice: the waves go while it speaks, the outer one after the inner
-                'W' -> if (phase == LivePhase.Speaking && kotlin.math.sin((t * 4 - (if (x > 25) 0.25f else 0f)) * 2 * Math.PI) > 0) soft else null
-                'S' -> soft.copy(alpha = 0.55f + 0.45f * kotlin.math.abs(kotlin.math.sin(t * Math.PI)).toFloat()) // the sparkle twinkles
-                'G' -> skin.copy(alpha = 0.35f)
-                else -> null
-            }
-            if (c != null) drawRect(c, top + Offset(x * cell, y * cell), Size(cell + 0.6f, cell + 0.6f))
-        } }
+        drawMascot(top, cell, skin, blink > 0.94f, phase == LivePhase.Speaking, t)
         if (mood == TalkMood.Hot) { // a sun hat over the helmet: the brim and the crown with its band
             drawRect(Color(0xFFFFE082), top + Offset(4 * cell, 1 * cell), Size(18 * cell, 2 * cell))
             drawRect(Color(0xFFFFE082), top + Offset(8 * cell, -3 * cell), Size(10 * cell, 4 * cell))
@@ -500,4 +484,25 @@ internal object Zap {
             Thread.sleep(400); t.release()
         }.onFailure { WriterLog.w("AI Assist: the zap: ${it.message}") }
     }.apply { isDaemon = true; start() }
+}
+
+/** The pixel mascot at [top], [cell] a pixel: [skin] its shell, eyes [shut] for a blink, its voice's waves going while it [speaks], the sparkle twinkling with [t]. */
+internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawMascot(top: Offset, cell: Float, skin: Color, shut: Boolean, speaks: Boolean, t: Float) {
+    val soft = Color(0xFFF4F1EA)
+    val shell = mapOf('Y' to skin, 'L' to androidx.compose.ui.graphics.lerp(skin, Color.White, 0.5f), 'O' to androidx.compose.ui.graphics.lerp(skin, Color.Black, 0.18f),
+        'D' to androidx.compose.ui.graphics.lerp(skin, Color.Black, 0.5f))
+    MASCOT.forEachIndexed { y, row -> row.forEachIndexed { x, ch ->
+        val c: Color? = when (ch) {
+            'Y', 'L', 'O', 'D' -> shell[ch]
+            'V' -> Color(0xFF3B2418)
+            'E' -> if (shut) Color(0xFF3B2418) else Color(0xFFFFD86B)
+            'H' -> Color(0xFFFFF1C2)
+            // its voice: the waves go while it speaks, the outer one after the inner
+            'W' -> if (speaks && kotlin.math.sin((t * 4 - (if (x > 25) 0.25f else 0f)) * 2 * Math.PI) > 0) soft else null
+            'S' -> soft.copy(alpha = 0.55f + 0.45f * kotlin.math.abs(kotlin.math.sin(t * Math.PI)).toFloat())
+            'G' -> skin.copy(alpha = 0.35f)
+            else -> null
+        }
+        if (c != null) drawRect(c, top + Offset(x * cell, y * cell), Size(cell + 0.6f, cell + 0.6f))
+    } }
 }
