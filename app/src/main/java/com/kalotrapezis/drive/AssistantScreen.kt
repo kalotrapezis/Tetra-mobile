@@ -442,15 +442,26 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () -
                         val hello = remember { context.resources.getStringArray(R.array.tv_hello).random() }
                         var greeting by remember { mutableStateOf(!still) }
                         LaunchedEffect(Unit) { delay(3_000); greeting = false }
-                        VhsTv(0, still, Modifier.padding(horizontal = 12.dp, vertical = 8.dp), off = tvOff) {
+                        // the TV keeps its shape; a wide screen (a tablet) gets the room around it, a nightstand with its lamp and a wardrobe (8 Nov)
+                        BoxWithConstraints(Modifier.fillMaxWidth()) {
+                            val wide = maxWidth > 600.dp; val tvWidth = minOf(maxWidth, 460.dp)
+                            Box(Modifier.fillMaxWidth()) {
+                                if (wide) Room(Modifier.matchParentSize())
+                                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.Center) {
+                                    if (wide) Furniture(left = true, Modifier.weight(1f).height(260.dp))
+                                    VhsTv(0, still, Modifier.padding(horizontal = 12.dp, vertical = 8.dp).width(tvWidth), off = tvOff) {
                             Box {
                                 TalkScreen(shown, hearing, Modifier.fillMaxWidth().height(230.dp), tvCue, tvMood, color, enter = !still)
                                 if (greeting) Text(hello, Modifier.align(Alignment.TopCenter).padding(top = 14.dp).background(Color(0xFFF4F1EA)).border(2.dp, Color(0xFF2A2420)).padding(horizontal = 10.dp, vertical = 4.dp),
                                     color = Color(0xFF2A2420), fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
                             }
                         }
+                                    if (wide) Furniture(left = false, Modifier.weight(1f).height(260.dp))
+                                }
+                            }
+                        }
                         val last = bubbles.lastOrNull()?.takeIf { !it.mine && phase == Phase.Idle }
-                        androidx.compose.foundation.layout.FlowRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        androidx.compose.foundation.layout.FlowRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)) {
                             dialing?.let { PixelButton(context.getString(R.string.common_cancel) + " · $dialLeft", Color(0xFFEF9A9A), R.drawable.ic_call_end) { cancelDial() } }
                             if (last != null) {
                                 pending?.let { p -> PixelButton(p.name, Color(0xFFA5D6A7), R.drawable.ic_call) { call(p) } }

@@ -506,3 +506,47 @@ internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawMascot(top: Of
         if (c != null) drawRect(c, top + Offset(x * cell, y * cell), Size(cell + 0.6f, cell + 0.6f))
     } }
 }
+
+/** The room behind the TV on a wide screen: a warm wall, a skirting board and a wooden floor. */
+@Composable internal fun Room(modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val floor = size.height * 0.84f
+        drawRect(Color(0xFF3E3530), Offset.Zero, Size(size.width, floor))
+        drawRect(Color(0xFF2E2622), Offset(0f, floor - 6f), Size(size.width, 6f))
+        drawRect(Color(0xFF7A5536), Offset(0f, floor), Size(size.width, size.height - floor))
+        var x = 0f; var k = 0
+        while (x < size.width) { drawLine(Color(0xFF5E4029), Offset(x, floor), Offset(x, size.height), strokeWidth = 2f); x += 70f + (k++ % 3) * 25f } // the planks
+    }
+}
+
+/** Beside the TV: [left] a nightstand with its lamp glowing; else a wardrobe with a little plant. */
+@Composable internal fun Furniture(left: Boolean, modifier: Modifier = Modifier) {
+    val glow by rememberInfiniteTransition(label = "lamp").animateFloat(0.85f, 1f, infiniteRepeatable(tween(2600), RepeatMode.Reverse), label = "glow")
+    Canvas(modifier) {
+        val floor = size.height * 0.84f; val wood = Color(0xFF8D5A35); val dark = Color(0xFF5E3A20); val knob = Color(0xFFE0C08A)
+        if (left) {
+            val w = minOf(size.width * 0.55f, 130.dp.toPx()); val h = w * 0.85f; val x = size.width - w - 16.dp.toPx(); val top = floor - h
+            drawRect(wood, Offset(x, top), Size(w, h)); drawRect(dark, Offset(x, top), Size(w, h * 0.08f))
+            for (k in 0 until 2) { val y = top + h * (0.18f + k * 0.4f); drawRect(dark, Offset(x + w * 0.08f, y), Size(w * 0.84f, h * 0.34f), style = Stroke(2f)); drawCircle(knob, radius = 4f, center = Offset(x + w / 2, y + h * 0.17f)) }
+            // the lamp on it: its glow, the shade, the stand
+            val cx = x + w / 2; val base = top
+            drawCircle(Color(0xFFFFD27F).copy(alpha = 0.18f * glow), radius = w * 0.9f, center = Offset(cx, base - w * 0.75f))
+            drawRect(Color(0xFFBFA27A), Offset(cx - 3f, base - w * 0.55f), Size(6f, w * 0.55f))
+            drawOval(Color(0xFFBFA27A), Offset(cx - w * 0.18f, base - 8f), Size(w * 0.36f, 10f))
+            val shade = androidx.compose.ui.graphics.Path().apply { moveTo(cx - w * 0.16f, base - w * 0.95f); lineTo(cx + w * 0.16f, base - w * 0.95f); lineTo(cx + w * 0.3f, base - w * 0.55f); lineTo(cx - w * 0.3f, base - w * 0.55f); close() }
+            drawPath(shade, Color(0xFFFFE0A3).copy(alpha = glow))
+        } else {
+            val w = minOf(size.width * 0.6f, 150.dp.toPx()); val h = size.height * 0.8f; val x = 16.dp.toPx(); val top = floor - h
+            drawRect(wood, Offset(x, top), Size(w, h)); drawRect(dark, Offset(x, top), Size(w, h * 0.05f))
+            drawLine(dark, Offset(x + w / 2, top + h * 0.06f), Offset(x + w / 2, floor - 4f), strokeWidth = 3f) // two doors
+            drawCircle(knob, radius = 4f, center = Offset(x + w / 2 - 10f, top + h * 0.5f)); drawCircle(knob, radius = 4f, center = Offset(x + w / 2 + 10f, top + h * 0.5f))
+            drawRect(dark, Offset(x + 6f, floor - 6f), Size(w - 12f, 6f))
+            // a little plant beside it
+            val px = x + w + 26.dp.toPx(); val pot = 22.dp.toPx()
+            if (px + pot < size.width) {
+                drawRect(Color(0xFFB5643C), Offset(px - pot / 2, floor - pot), Size(pot, pot))
+                listOf(-0.6f, 0f, 0.6f).forEach { a -> drawOval(Color(0xFF5E9E4A), Offset(px - pot * 0.25f + a * pot * 0.6f, floor - pot * 2.1f + kotlin.math.abs(a) * pot * 0.4f), Size(pot * 0.5f, pot * 1.1f)) }
+            }
+        }
+    }
+}
