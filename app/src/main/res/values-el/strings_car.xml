@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tetra Car (CarScreen.kt) -->
+<resources>
+    <string name="app_car">Tetra Αυτοκίνητο</string>
+    <string name="car_media">Πολυμέσα</string>
+    <string name="car_apps">Εφαρμογές</string>
+    <string name="car_layout">Διάταξη</string>
+</resources>

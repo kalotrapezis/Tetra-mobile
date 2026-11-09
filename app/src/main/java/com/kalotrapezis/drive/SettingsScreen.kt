@@ -417,6 +417,12 @@ internal fun SettingsTab(
                 Switch(checked = on, onCheckedChange = { on = it; a.show(context, it) })
             }
         }
+        // Tetra Car: an icon, and a choice of home screen on a head unit
+        var car by remember { mutableStateOf(CarIcon.shown(context)) }
+        SettingRow(stringResource(R.string.app_car), onClick = { car = !car; CarIcon.show(context, car) }, leading = {
+            Icon(painterResource(R.drawable.ic_directions_car), contentDescription = null, tint = Color.White,
+                modifier = Modifier.size(32.dp).background(Color(0xFF2B3A4A), RoundedCornerShape(8.dp)).padding(5.dp))
+        }) { Switch(checked = car, onCheckedChange = { car = it; CarIcon.show(context, it) }) }
     }
 }
 

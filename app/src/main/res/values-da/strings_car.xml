@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tetra Car (CarScreen.kt) -->
+<resources>
+    <string name="app_car">Tetra Bil</string>
+    <string name="car_media">Medier</string>
+    <string name="car_apps">Apps</string>
+    <string name="car_layout">Layout</string>
+</resources>

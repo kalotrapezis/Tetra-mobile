@@ -113,6 +113,9 @@
         <activity android:name=".UsageActivity" android:exported="false" android:label="@string/usage_title" />
         <activity android:name=".BrowserActivity" android:exported="false" android:label="@string/app_browser" android:icon="@mipmap/applet_browser" android:roundIcon="@mipmap/applet_browser" android:taskAffinity="com.kalotrapezis.drive.browser"
             android:launchMode="singleTask" android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode" />
+        <!-- Tetra Car: Maps, Media, Phone, Messages and the Browser side by side on a head unit, a dock and AI Assist's mic -->
+        <activity android:name=".CarActivity" android:exported="false" android:label="@string/app_car" android:icon="@mipmap/applet_car" android:roundIcon="@mipmap/applet_car" android:taskAffinity="com.kalotrapezis.drive.car"
+            android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode" />
         <activity android:name=".DataActivity" android:exported="false" android:label="@string/home_label_data" android:icon="@mipmap/applet_data" android:roundIcon="@mipmap/applet_data" android:taskAffinity="com.kalotrapezis.drive.data" />
         <receiver android:name=".PhoneCallReceiver" android:exported="false" />
         <receiver android:name=".PhoneRelayReceiver" android:exported="false" />
@@ -272,6 +275,11 @@
         </activity-alias>
         <activity-alias android:name=".AppBrowser" android:targetActivity=".BrowserActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_browser" android:icon="@mipmap/applet_browser" android:roundIcon="@mipmap/applet_browser">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <!-- Settings › App icons › Tetra Car: its icon, and a choice of home screen (the head unit's launcher) -->
+        <activity-alias android:name=".AppCar" android:targetActivity=".CarActivity" android:enabled="false" android:exported="true" android:label="@string/app_car" android:icon="@mipmap/applet_car" android:roundIcon="@mipmap/applet_car">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.HOME" /><category android:name="android.intent.category.DEFAULT" /></intent-filter>
         </activity-alias>
         <activity-alias android:name=".AppPasswords" android:targetActivity=".PasswordsActivity" android:enabled="false" android:exported="true" android:label="@string/home_label_passwords" android:icon="@mipmap/applet_passwords" android:roundIcon="@mipmap/applet_passwords">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>

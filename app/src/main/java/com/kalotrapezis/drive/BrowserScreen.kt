@@ -572,6 +572,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     LaunchedEffect(sound.media, background) { if (background && sound.media.has) BrowserMedia.show(context, sound.media.title, sound.media.playing) else BrowserMedia.stop(context) }
     LaunchedEffect(play) {
         val o = play?.let { runCatching { JSONObject(it.removePrefix("browser-play:")) }.getOrNull() } ?: return@LaunchedEffect
+        // Tetra Car's Media: Player mode, on the page asked for or on what plays now
+        if (o.optBoolean("player") && !o.has("url")) { player = true; menu = false; panel = null; return@LaunchedEffect }
         // Maps' ♪: its station played, then this window goes behind Maps again once the sound has started (or after 8 s)
         o.optString("url").takeIf { it.isNotEmpty() }?.let { address ->
             val t = tabs.firstOrNull { it.url == address } ?: if (tab.url.isEmpty()) tab else open()
@@ -580,6 +582,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             if (!loaded) { t.pending = null; t.autoplay = play }
             if (t.id != currentId) switch(t)
             if (loaded) { if (play) t.send(JSONObject().put("autoplay", true)) } else load(t, address)
+            if (o.optBoolean("player")) { player = true; menu = false; panel = null }
             if (o.optBoolean("behind")) {
                 kotlinx.coroutines.withTimeoutOrNull(8000) { while (!t.media.playing) delay(250) }
                 (context as? android.app.Activity)?.moveTaskToBack(true)

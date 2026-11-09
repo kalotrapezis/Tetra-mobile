@@ -108,7 +108,7 @@ internal fun phoneRoot() = java.io.File(TetraFolder.root(android.os.Environment.
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PhoneApp(keypad: MutableState<Boolean>, tabState: MutableState<PhoneTab>, number: MutableState<String>, missed: State<Int>, blockedAsk: MutableState<String?>, back: () -> Unit) {
+internal fun PhoneApp(keypad: MutableState<Boolean>, tabState: MutableState<PhoneTab>, number: MutableState<String>, missed: State<Int>, blockedAsk: MutableState<String?>, back: () -> Unit) {
     val context = LocalContext.current
     var version by remember { mutableIntStateOf(0) }
     val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current

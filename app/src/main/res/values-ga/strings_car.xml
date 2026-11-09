@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tetra Car (CarScreen.kt) -->
+<resources>
+    <string name="app_car">Tetra Carr</string>
+    <string name="car_media">Meáin</string>
+    <string name="car_apps">Aipeanna</string>
+    <string name="car_layout">Leagan amach</string>
+</resources>
