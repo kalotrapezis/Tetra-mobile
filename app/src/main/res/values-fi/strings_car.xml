@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">Alhaalla</string>
     <string name="car_dock_left">Vasemmalla</string>
     <string name="car_dock_right">Oikealla</string>
+    <string name="car_open">Avaa itsestään</string>
+    <string name="car_home">Käytä aloitusnäyttönä</string>
+    <string name="car_home_summary">Varmin tapa: auton näyttö avaa Tetra Carin joka käynnistyksellä. Valitse siellä Tetra Car.</string>
+    <string name="car_open_boot">Avaa laitteen käynnistyessä</string>
+    <string name="car_open_bt">Avaa, kun tämä Bluetooth yhdistyy</string>
+    <string name="car_bluetooth_phone">Puhelimen Bluetooth</string>
+    <string name="car_bluetooth_phone_none">Valitse puhelimesi: kun se yhdistyy, Tetra Car voi avautua itsestään.</string>
 </resources>

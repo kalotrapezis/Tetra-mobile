@@ -132,6 +132,14 @@ internal object Car {
     @Volatile var message: ((CarMessage) -> Unit)? = null
     private fun prefs(c: Context) = c.getSharedPreferences("car", Context.MODE_PRIVATE)
     fun reads(c: Context) = prefs(c).getBoolean("read_sms", true)
+    /** Open by itself (the user, 9 Nov: "open Tetra Car app on boot or on connection with phone"): at start, or as the chosen Bluetooth joins. */
+    fun opensOnBoot(c: Context) = prefs(c).getBoolean("open_boot", false)
+    fun opensOnBluetooth(c: Context) = prefs(c).getBoolean("open_bt", false)
+    fun setOpens(c: Context, boot: Boolean? = null, bluetooth: Boolean? = null) = prefs(c).edit().apply { boot?.let { putBoolean("open_boot", it) }; bluetooth?.let { putBoolean("open_bt", it) } }.apply()
+    /** Android lets an app open a screen from the background only with "Display over other apps" (or as the home screen). */
+    fun mayOpen(c: Context) = android.provider.Settings.canDrawOverlays(c)
+    fun askOpen(c: Context) = c.startActivity(Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION, android.net.Uri.parse("package:${c.packageName}")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    fun open(c: Context) = runCatching { c.startActivity(Intent(c, CarActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }.onFailure { WriterLog.w("Car: not opened by itself", it) }
     private val dock = mutableStateOf<DockSide?>(null)
     /** Where Tetra Car's dock sits (Settings › Tetra Car, radio buttons): one state, so an open Tetra Car follows a change at once. */
     fun side(c: Context): DockSide = dock.value ?: runCatching { DockSide.valueOf(prefs(c).getString("dock", null)!!) }.getOrDefault(DockSide.Bottom).also { dock.value = it }

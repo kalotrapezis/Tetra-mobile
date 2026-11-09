@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">All</string>
     <string name="car_dock_left">Vasakul</string>
     <string name="car_dock_right">Paremal</string>
+    <string name="car_open">Ava ise</string>
+    <string name="car_home">Kasuta avaekraanina</string>
+    <string name="car_home_summary">Kindlaim viis: auto ekraan avab iga käivitusega Tetra Car’i. Vali seal Tetra Car.</string>
+    <string name="car_open_boot">Ava seadme käivitumisel</string>
+    <string name="car_open_bt">Ava, kui see Bluetooth ühendub</string>
+    <string name="car_bluetooth_phone">Telefoni Bluetooth</string>
+    <string name="car_bluetooth_phone_none">Vali oma telefon: kui see ühendub, võib Tetra Car ise avaneda.</string>
 </resources>

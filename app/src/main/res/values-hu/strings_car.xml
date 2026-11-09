@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">Alul</string>
     <string name="car_dock_left">Bal oldalt</string>
     <string name="car_dock_right">Jobb oldalt</string>
+    <string name="car_open">Magától megnyílik</string>
+    <string name="car_home">Kezdőképernyőként</string>
+    <string name="car_home_summary">A legbiztosabb: az autó kijelzője minden indításkor a Tetra Cart nyitja meg. Ott válaszd a Tetra Cart.</string>
+    <string name="car_open_boot">Megnyitás az eszköz indulásakor</string>
+    <string name="car_open_bt">Megnyitás, amikor ez a Bluetooth csatlakozik</string>
+    <string name="car_bluetooth_phone">A telefon Bluetooth-a</string>
+    <string name="car_bluetooth_phone_none">Válaszd ki a telefonod: amikor csatlakozik, a Tetra Car magától megnyílhat.</string>
 </resources>

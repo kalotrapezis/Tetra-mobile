@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">Isfel</string>
     <string name="car_dock_left">Fuq ix-xellug</string>
     <string name="car_dock_right">Fuq il-lemin</string>
+    <string name="car_open">Iftaħ waħdu</string>
+    <string name="car_home">Uża bħala l-iskrin ewlieni</string>
+    <string name="car_home_summary">L-iżjed mod żgur: l-iskrin tal-karozza jiftaħ Tetra Car kull darba li jibda. Agħżel Tetra Car hemm.</string>
+    <string name="car_open_boot">Iftaħ meta l-apparat jibda</string>
+    <string name="car_open_bt">Iftaħ meta dan il-Bluetooth jikkonnettja</string>
+    <string name="car_bluetooth_phone">Il-Bluetooth tat-telefon</string>
+    <string name="car_bluetooth_phone_none">Agħżel it-telefon tiegħek: meta jikkonnettja, Tetra Car jista’ jinfetaħ waħdu.</string>
 </resources>

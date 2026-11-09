@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">Onderaan</string>
     <string name="car_dock_left">Links</string>
     <string name="car_dock_right">Rechts</string>
+    <string name="car_open">Vanzelf openen</string>
+    <string name="car_home">Als startscherm gebruiken</string>
+    <string name="car_home_summary">De zekerste manier: het scherm van de auto opent Tetra Car bij elke start. Kies daar Tetra Car.</string>
+    <string name="car_open_boot">Openen bij het starten van het apparaat</string>
+    <string name="car_open_bt">Openen als deze Bluetooth verbindt</string>
+    <string name="car_bluetooth_phone">Bluetooth van de telefoon</string>
+    <string name="car_bluetooth_phone_none">Kies je telefoon: als die verbindt, kan Tetra Car vanzelf openen.</string>
 </resources>

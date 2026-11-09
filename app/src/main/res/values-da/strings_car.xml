@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">Nederst</string>
     <string name="car_dock_left">Til venstre</string>
     <string name="car_dock_right">Til højre</string>
+    <string name="car_open">Åbn af sig selv</string>
+    <string name="car_home">Brug som startskærm</string>
+    <string name="car_home_summary">Den sikreste måde: bilens skærm åbner Tetra Car, hver gang den starter. Vælg Tetra Car dér.</string>
+    <string name="car_open_boot">Åbn når enheden starter</string>
+    <string name="car_open_bt">Åbn når denne Bluetooth forbinder</string>
+    <string name="car_bluetooth_phone">Telefonens Bluetooth</string>
+    <string name="car_bluetooth_phone_none">Vælg din telefon: når den forbinder, kan Tetra Car åbne af sig selv.</string>
 </resources>

@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">Jos</string>
     <string name="car_dock_left">În stânga</string>
     <string name="car_dock_right">În dreapta</string>
+    <string name="car_open">Deschide singur</string>
+    <string name="car_home">Folosește ca ecran de pornire</string>
+    <string name="car_home_summary">Cel mai sigur: ecranul mașinii deschide Tetra Car la fiecare pornire. Alege acolo Tetra Car.</string>
+    <string name="car_open_boot">Deschide la pornirea dispozitivului</string>
+    <string name="car_open_bt">Deschide când se conectează acest Bluetooth</string>
+    <string name="car_bluetooth_phone">Bluetooth-ul telefonului</string>
+    <string name="car_bluetooth_phone_none">Alege-ți telefonul: când se conectează, Tetra Car se poate deschide singur.</string>
 </resources>

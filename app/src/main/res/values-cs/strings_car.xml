@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">Dole</string>
     <string name="car_dock_left">Vlevo</string>
     <string name="car_dock_right">Vpravo</string>
+    <string name="car_open">Otevřít samo</string>
+    <string name="car_home">Použít jako domovskou obrazovku</string>
+    <string name="car_home_summary">Nejjistější cesta: obrazovka auta se při každém startu otevře v Tetra Car. Vyber tam Tetra Car.</string>
+    <string name="car_open_boot">Otevřít při spuštění zařízení</string>
+    <string name="car_open_bt">Otevřít při připojení tohoto Bluetooth</string>
+    <string name="car_bluetooth_phone">Bluetooth telefonu</string>
+    <string name="car_bluetooth_phone_none">Vyber svůj telefon: když se připojí, Tetra Car se může otevřít sám.</string>
 </resources>

@@ -67,7 +67,7 @@ internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, 
     Timer(R.string.app_timer, Category.Timer.icon, Category.Timer.color, R.string.settings_share_claude, listOf(R.string.settings_share_claude)),
     Pills(R.string.app_pills, R.drawable.ic_pill, PILLS_COLOR, R.string.pills_settings_summary, listOf(R.string.pills_voice, R.string.pills_call_name, R.string.pills_try, R.string.pills_checks)),
     // Tetra Car (the user, 9 Nov: "you could make a car category in the settings")
-    Car(R.string.app_car, R.drawable.ic_directions_car, CAR_APP_COLOR, R.string.car_settings_summary, listOf(R.string.app_car, R.string.car_dock, R.string.car_read_sms, R.string.car_answer_calls,
+    Car(R.string.app_car, R.drawable.ic_directions_car, CAR_APP_COLOR, R.string.car_settings_summary, listOf(R.string.app_car, R.string.car_open, R.string.car_home, R.string.car_open_boot, R.string.car_open_bt, R.string.car_dock, R.string.car_read_sms, R.string.car_answer_calls,
         R.string.car_quiet, R.string.car_bluetooth, R.string.car_pair_car)),
     Maps(R.string.app_maps, Category.Maps.icon, Category.Maps.color, R.string.settings_maps_summary, listOf(R.string.settings_map, R.string.settings_on_foot, R.string.settings_by_car, R.string.settings_directions_in, R.string.settings_test_voice, R.string.settings_voice_settings, R.string.settings_sharp_bends,
         R.string.settings_save_parking, R.string.settings_open_at_car, R.string.settings_accessible_parking, R.string.settings_export_places, R.string.settings_import_places, R.string.settings_import_google,
@@ -441,17 +441,18 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
         SwitchRow(stringResource(R.string.car_quiet), stringResource(R.string.car_quiet_summary), quiet) { on ->
             quiet = on; CarQuiet.want(context, on); if (on && !CarQuiet.allowed(context)) CarQuiet.ask(context)
         }
-        // which paired Bluetooth device is the car: only it puts the phone in the car (Car.inCar, quiet, calls answered)
-        if (!PhoneRelay.noCalls(context)) {
+        // which paired Bluetooth device is the car (on the phone: in the car, quiet, calls answered), or the phone (on the car's screen: Tetra Car opens)
+        val unit = PhoneRelay.noCalls(context)
+        run {
             var choosing by remember { mutableStateOf(false) }
             var chosen by remember { mutableStateOf(Car.cars(context)) }
             val askBt = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { ok -> if (ok) choosing = true }
             val bonded = remember(choosing) { carBluetoothDevices(context) }
-            SettingRow(stringResource(R.string.car_bluetooth), bonded.filter { it.first in chosen }.joinToString(", ") { it.second }.ifEmpty { stringResource(R.string.car_bluetooth_none) }, onClick = {
+            SettingRow(stringResource(if (unit) R.string.car_bluetooth_phone else R.string.car_bluetooth), bonded.filter { it.first in chosen }.joinToString(", ") { it.second }.ifEmpty { stringResource(if (unit) R.string.car_bluetooth_phone_none else R.string.car_bluetooth_none) }, onClick = {
                 if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == android.content.pm.PackageManager.PERMISSION_GRANTED) choosing = true else askBt.launch(Manifest.permission.BLUETOOTH_CONNECT)
             })
             if (choosing) AlertDialog(onDismissRequest = { choosing = false }, confirmButton = { TextButton({ choosing = false }) { Text(stringResource(R.string.common_close)) } },
-                title = { Text(stringResource(R.string.car_bluetooth)) },
+                title = { Text(stringResource(if (unit) R.string.car_bluetooth_phone else R.string.car_bluetooth)) },
                 text = { Column { bonded.forEach { (address, name) ->
                     val on = address in chosen
                     Row(Modifier.fillMaxWidth().clickable { chosen = if (on) chosen - address else chosen + address; Car.setCars(context, chosen) }, verticalAlignment = Alignment.CenterVertically) {
@@ -462,6 +463,19 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
         // the car's own link (CarWire): the phone scans the code Tetra Car shows on the car's screen
         if (!PhoneRelay.noCalls(context)) SettingRow(stringResource(R.string.car_pair_car), CarWire.link(context)?.let { stringResource(R.string.codes_paired, it.name) } ?: stringResource(R.string.car_pair_car_summary),
             onClick = { openApplet(context, Applet.Codes.name) })
+    }
+    // opening by itself: as the home screen (the surest), at start, or as the chosen Bluetooth joins
+    SettingsSection(stringResource(R.string.car_open)) {
+        SettingRow(stringResource(R.string.car_home), stringResource(R.string.car_home_summary), onClick = {
+            if (!CarIcon.shown(context)) CarIcon.show(context, true) // the home screen is the icon's alias
+            runCatching { context.startActivity(Intent(android.provider.Settings.ACTION_HOME_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+        })
+        var boot by remember { mutableStateOf(Car.opensOnBoot(context)) }
+        SwitchRow(stringResource(R.string.car_open_boot), null, boot) { on -> boot = on; Car.setOpens(context, boot = on); if (on && !Car.mayOpen(context)) Car.askOpen(context) }
+        var bt by remember { mutableStateOf(Car.opensOnBluetooth(context)) }
+        SwitchRow(stringResource(R.string.car_open_bt), stringResource(if (PhoneRelay.noCalls(context)) R.string.car_bluetooth_phone else R.string.car_bluetooth), bt) { on ->
+            bt = on; Car.setOpens(context, bluetooth = on); if (on && !Car.mayOpen(context)) Car.askOpen(context)
+        }
     }
     // where the dock sits (the user, 9 Nov: "a radio buttons group on the settings, not in the layouts")
     SettingsSection(stringResource(R.string.car_dock)) {

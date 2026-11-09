@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">Em baixo</string>
     <string name="car_dock_left">À esquerda</string>
     <string name="car_dock_right">À direita</string>
+    <string name="car_open">Abrir sozinho</string>
+    <string name="car_home">Usar como ecrã inicial</string>
+    <string name="car_home_summary">O mais seguro: o ecrã do carro abre o Tetra Car sempre que arranca. Escolhe lá o Tetra Car.</string>
+    <string name="car_open_boot">Abrir ao iniciar o dispositivo</string>
+    <string name="car_open_bt">Abrir quando este Bluetooth ligar</string>
+    <string name="car_bluetooth_phone">Bluetooth do telemóvel</string>
+    <string name="car_bluetooth_phone_none">Escolhe o teu telemóvel: quando ligar, o Tetra Car pode abrir sozinho.</string>
 </resources>
