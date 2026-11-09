@@ -160,6 +160,8 @@ private class BrowserTab(val id: Int, val session: GeckoSession, val view: Gecko
     var queue = false // the page has ‹ and › of its own
     var first by mutableStateOf<MediaSite?>(null) // AI Assist's search: its first result still to play
     var firstList = false // and that search was for playlists: a playlist's first song, the list going on after it
+    var retry = emptyList<String>() // that search again in Greeklish when it finds nothing (Spotify), one spelling after another
+    var mix = false // the user's own mixes page: one of them played (Spotify's Daily Mix)
     var autoplay = false // reached by Player mode's ‹ ›: its media started when it has loaded
     var desktop by mutableStateOf(false) // the desktop site: a desktop agent, kept per tab
     var html by mutableStateOf(false) // HTML only: no JavaScript, no autoplay
@@ -168,6 +170,14 @@ private class BrowserTab(val id: Int, val session: GeckoSession, val view: Gecko
     var pending: String? = null // a kept tab's address, loaded when it is first opened
     var port: WebExtension.Port? = null
     val waiting = mutableListOf<JSONObject>() // said before this page's script was there (a small page stops loading first): given when it comes
+    /** The desktop site from its next page on (Spotify's web player); false when it was already. */
+    fun desktopOn(): Boolean {
+        if (desktop) return false
+        desktop = true
+        session.settings.userAgentMode = GeckoSessionSettings.USER_AGENT_MODE_DESKTOP
+        session.settings.viewportMode = GeckoSessionSettings.VIEWPORT_MODE_DESKTOP
+        return true
+    }
     /** A word to the page's script (fill, a media key, autoplay); kept for it until it connects, dropped when another page starts. */
     fun send(o: JSONObject) { port?.postMessage(o) ?: run { waiting += o; WriterLog.i("Browser: ${o.keys().asSequence().firstOrNull()} waits for the page script") } }
 }
@@ -316,7 +326,16 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     /** A page's script said something (assets/tetra-ext/content.js): the form fields there, a form sent, the media's state. */
     fun heard(tab: BrowserTab, o: JSONObject) {
         o.optString("error", null)?.let { WriterLog.w("Browser: page script, ${it.take(200)}") }
-        o.optString("first", null)?.let { WriterLog.i("Browser: AI Assist plays ${it.take(120)}") }
+        o.optString("first", null)?.let {
+            WriterLog.i("Browser: AI Assist plays ${it.take(120)}")
+            tab.retry = emptyList()
+            if (tab.first?.press == true) { tab.first = null; tab.autoplay = true } // its page opens paused: Play pressed once it has loaded
+        }
+        if (o.optBoolean("none")) tab.first?.let { site -> tab.retry.firstOrNull()?.let { q -> // nothing found: the next spelling
+            tab.retry = tab.retry.drop(1)
+            WriterLog.i("Browser: nothing found on ${site.id}, asked again in Greeklish")
+            tab.session.loadUri(MediaSites.searchUrl(site, q, tab.firstList))
+        } }
         o.optString("icon", null)?.let { if (!private && tab.url.startsWith("http")) BrowserIcons.learn(context, tab.url, it) } // its circle's picture
         o.optString("kinds", null)?.let { s -> tab.kinds = s.split(',').filter { it.isNotBlank() }.toSet() }
         o.optString("media", null)?.let { s -> runCatching { JSONObject(s) }.getOrNull()?.let { m ->
@@ -387,7 +406,10 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                 tab.progress = 100
                 if (tab.url.isEmpty()) return // a new session's about:blank, before its first page
                 if (tab.autoplay) { tab.autoplay = false; WriterLog.i("Browser: autoplay on ${BrowserRules.host(tab.url)}"); tab.send(JSONObject().put("autoplay", true)) }
-                tab.first?.let { site -> if (MediaSites.isSearch(site, tab.url)) { WriterLog.i("Browser: AI Assist's first result looked for on ${BrowserRules.host(tab.url)}"); tab.send(JSONObject().put("first", if (tab.firstList && site.firstList.isNotEmpty()) site.firstList else site.first)) } }
+                tab.first?.takeIf { tab.mix && BrowserRules.host(tab.url) in it.hosts }?.let { site -> tab.mix = false; WriterLog.i("Browser: a mix looked for on ${site.id}")
+                    tab.send(JSONObject().put("first", "a[href*=\"/playlist/\"]").put("text", "Daily Mix").put("random", true).put("wait", 30000)) }
+                tab.first?.let { site -> if (MediaSites.isSearch(site, tab.url)) { WriterLog.i("Browser: AI Assist's first result looked for on ${BrowserRules.host(tab.url)}"); tab.send(JSONObject().put("first", if (tab.firstList && site.firstList.isNotEmpty()) site.firstList else site.first)
+                    .apply { if (tab.retry.isNotEmpty()) put("wait", 15000) }) } } // Greeklish waits: asked after 15 s without a result
                 if (private || !success || !tab.url.startsWith("http")) return
                 visits = BrowserRules.visit(visits, Visit(tab.url, tab.title, System.currentTimeMillis()), keepHistory)
                 prefs.edit().putString("history", BrowserRules.visitsJson(visits)).apply()
@@ -572,6 +594,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     LaunchedEffect(sound.media, background) { if (background && sound.media.has) BrowserMedia.show(context, sound.media.title, sound.media.playing) else BrowserMedia.stop(context) }
     LaunchedEffect(play) {
         val o = play?.let { runCatching { JSONObject(it.removePrefix("browser-play:")) }.getOrNull() } ?: return@LaunchedEffect
+        // Tetra Car's Media: Player mode, on the page asked for or on what plays now
+        if (o.optBoolean("player") && !o.has("url")) { player = true; menu = false; panel = null; return@LaunchedEffect }
         // Maps' ♪: its station played, then this window goes behind Maps again once the sound has started (or after 8 s)
         o.optString("url").takeIf { it.isNotEmpty() }?.let { address ->
             val t = tabs.firstOrNull { it.url == address } ?: if (tab.url.isEmpty()) tab else open()
@@ -579,7 +603,9 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             val play = !o.optBoolean("open") // Home's favourites (8 Nov) open the page and play nothing
             if (!loaded) { t.pending = null; t.autoplay = play }
             if (t.id != currentId) switch(t)
+            if (o.optBoolean("desktop") && t.desktopOn() && loaded) t.session.reload() // Tetra Car's Spotify: its web player is the desktop site's
             if (loaded) { if (play) t.send(JSONObject().put("autoplay", true)) } else load(t, address)
+            if (o.optBoolean("player")) { player = true; menu = false; panel = null }
             if (o.optBoolean("behind")) {
                 kotlinx.coroutines.withTimeoutOrNull(8000) { while (!t.media.playing) delay(250) }
                 (context as? android.app.Activity)?.moveTaskToBack(true)
@@ -589,6 +615,10 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         val site = MediaSites.byId(o.optString("site"))
         val t = if (tab.url.isEmpty()) tab else open() // in a tab of its own, unless this one is empty
         t.first = site; t.firstList = o.optBoolean("list"); player = true; menu = false; panel = null
+        if (site.desktop) t.desktopOn()
+        t.mix = o.optBoolean("mix") && site.mixes.isNotEmpty()
+        if (t.mix) { t.retry = emptyList(); load(t, site.mixes); return@LaunchedEffect } // «παίξε Spotify»: one of the user's Daily Mixes
+        t.retry = if (site.greeklish) MediaSites.retries(o.optString("q")) else emptyList()
         load(t, MediaSites.searchUrl(site, o.optString("q"), t.firstList))
     }
 

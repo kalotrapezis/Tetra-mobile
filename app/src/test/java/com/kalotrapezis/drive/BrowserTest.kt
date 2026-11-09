@@ -164,6 +164,34 @@ class BrowserTest {
         assertEquals("", JSONObject(MediaSites.buttons(null)).getString("next"))
     }
 
+    @Test fun spotifySearchesInGreekThenGreeklish() {
+        val sp = MediaSites.byId("spotify")
+        assertEquals("spotify", MediaSites.of("open.spotify.com")?.id)
+        assertEquals("https://open.spotify.com/search/Haris%20Alexiou/tracks", MediaSites.searchUrl(sp, " Haris Alexiou "))
+        assertEquals("https://open.spotify.com/search/chill/playlists", MediaSites.searchUrl(sp, "chill", list = true))
+        assertTrue(MediaSites.isSearch(sp, MediaSites.searchUrl(sp, "adele")))
+        assertFalse(MediaSites.isSearch(sp, "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC"))
+        assertEquals("antonis remos", MediaSites.greeklish("Αντώνης Ρέμος"))
+        assertEquals("despina vandi", MediaSites.greeklish("Δέσποινα Βανδή"))
+        assertEquals("notis sfakianakis", MediaSites.greeklish("Νότης Σφακιανάκης"))
+        assertEquals("bes 2 - dimitris basis", MediaSites.greeklish("Μπες 2 - Δημήτρης Μπάσης"))
+        assertEquals("giorgos dalaras", MediaSites.greeklish("Γιώργος Νταλάρας")) // as Spotify writes him
+        assertEquals("eleftheria arvanitaki", MediaSites.greeklish("Ελευθερία Αρβανιτάκη"))
+        // as Spotify writes them (9 Nov)
+        assertEquals("giannis parios", MediaSites.greeklish("Γιάννης Πάριος"))
+        assertEquals("pix lax", MediaSites.greeklish("Πυξ Λαξ"))
+        assertEquals("haris & panos katsimihas", MediaSites.greeklish("Χάρης & Πάνος Κατσιμίχας"))
+        assertEquals("na gini to nero fotia", MediaSites.greeklish("Να γίνει το νερό φωτιά"))
+        assertEquals("an den iha ke sena", MediaSites.greeklish("Αν δεν είχα και σένα"))
+        assertEquals("mia sinousia mistiki", MediaSites.greeklish("Μια συνουσία μυστική"))
+        assertEquals(listOf("lavrentis maheritsas", "lavrentis machairitsas"), MediaSites.retries("Λαυρέντης Μαχαιρίτσας")) // Spotify: «Lavrentis Machairitsas»
+        assertEquals(listOf("dimitris mitropanos"), MediaSites.retries("Δημήτρης Μητροπάνος")) // the same both ways: once
+        assertEquals("pyx lax", MediaSites.greeklish("Πυξ Λαξ", sound = false))
+        assertNull(MediaSites.greeklish("Imagine Dragons")) // nothing Greek: no second search
+        assertEquals(emptyList<String>(), MediaSites.retries("Imagine Dragons"))
+        assertEquals("[data-testid=now-playing-widget] button[aria-checked=false]", JSONObject(MediaSites.buttons(sp)).getString("like"))
+    }
+
     @Test fun hopThroughOneSitesFavourites() {
         val b = listOf(Bookmark("https://live24.gr/radio/derti.jsp", "Derti"), Bookmark("https://www.wikipedia.org/", "W"),
             Bookmark("https://live24.gr/radio/sfera.jsp", "Sfera"), Bookmark("https://live24.gr/radio/melodia98.jsp", "Melodia"))

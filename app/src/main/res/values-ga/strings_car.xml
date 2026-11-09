@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tetra Car (CarScreen.kt) -->
+<resources>
+    <string name="app_car">Tetra Carr</string>
+    <string name="car_media">Meáin</string>
+    <string name="car_apps">Aipeanna</string>
+    <string name="car_layout">Leagan amach</string>
+    <string name="car_sms_said">Teachtaireacht ó %1$s: %2$s. Ar mhaith leat freagra a thabhairt?</string>
+    <string name="car_sms_say_it">Abair do theachtaireacht.</string>
+    <string name="car_sms_send_it">“%1$s”. An seolfaidh mé é?</string>
+    <string name="car_sms_sent">Seolta.</string>
+    <string name="car_quiet">Ciúnas sa charr</string>
+    <string name="car_quiet_summary">Fanann fógraí aipeanna eile fad a bhíonn tú ag tiomáint; tagann glaonna agus do theachtaireachtaí léite os ard tríd.</string>
+</resources>

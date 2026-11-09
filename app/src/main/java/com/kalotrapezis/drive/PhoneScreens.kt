@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -88,7 +89,7 @@ internal fun placePhoneCall(c: Context, number: String, speaker: Boolean = false
 
 @Suppress("DEPRECATION")
 @Composable
-private fun PhoneCallScreen(done: () -> Unit) {
+internal fun PhoneCallScreen(done: () -> Unit) {
     val context = LocalContext.current
     @Suppress("UNUSED_EXPRESSION") PhoneCalls.tick // read again on every change
     val live = PhoneCalls.top()
@@ -105,14 +106,16 @@ private fun PhoneCallScreen(done: () -> Unit) {
     var typed by remember { mutableStateOf("") }
     var replying by remember { mutableStateOf(false) }
     if (replying) QuickReply(call) { replying = false }
+    val short = LocalConfiguration.current.screenHeightDp < 560 // Tetra Car's pane, a landscape phone: the hang-up still on the screen
+    val face = if (short) 64.dp else 120.dp
     Box(Modifier.fillMaxSize().background(callWash(PHONE_COLOR)), contentAlignment = Alignment.TopCenter) {
     Column(Modifier.fillMaxHeight().widthIn(max = 460.dp).systemBarsPadding().padding(horizontal = 24.dp, vertical = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(Modifier.height(40.dp))
-        if (contact != null) ContactAvatar(contact, 120.dp)
-        else Box(Modifier.size(120.dp).clip(CircleShape).background(PHONE_COLOR), contentAlignment = Alignment.Center) {
-            Icon(painterResource(R.drawable.ic_person), contentDescription = null, tint = Color.White, modifier = Modifier.size(66.dp))
+        Spacer(Modifier.height(if (short) 0.dp else 40.dp))
+        if (contact != null) ContactAvatar(contact, face)
+        else Box(Modifier.size(face).clip(CircleShape).background(PHONE_COLOR), contentAlignment = Alignment.Center) {
+            Icon(painterResource(R.drawable.ic_person), contentDescription = null, tint = Color.White, modifier = Modifier.size(face * 0.55f))
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(if (short) 8.dp else 16.dp))
         Text(PhoneCalls.title(context, call), style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
         val number = PhoneCalls.number(call)
         val label = contact?.phones?.firstOrNull { ContactsWays.key(it.value) == ContactsWays.key(number.orEmpty()) }?.label
@@ -152,7 +155,7 @@ private fun PhoneCallScreen(done: () -> Unit) {
                 })
             }
         }
-        if (!ended && call.state != Call.STATE_RINGING) RoundButton(R.drawable.ic_call_end, stringResource(R.string.phone_end), CALL_RED, 76.dp, modifier = Modifier.padding(bottom = 24.dp)) { PhoneCalls.hangUp(call) }
+        if (!ended && call.state != Call.STATE_RINGING) RoundButton(R.drawable.ic_call_end, stringResource(R.string.phone_end), CALL_RED, if (short) 64.dp else 76.dp, modifier = Modifier.padding(top = if (short) 8.dp else 0.dp, bottom = if (short) 0.dp else 24.dp)) { PhoneCalls.hangUp(call) }
     }
     }
 }

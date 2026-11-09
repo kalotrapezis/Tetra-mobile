@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tetra Car (CarScreen.kt) -->
+<resources>
+    <string name="app_car">Tetra Auto</string>
+    <string name="car_media">Media</string>
+    <string name="car_apps">App</string>
+    <string name="car_layout">Layout</string>
+    <string name="car_sms_said">Messaggio da %1$s: %2$s. Vuoi rispondere?</string>
+    <string name="car_sms_say_it">Di’ il tuo messaggio.</string>
+    <string name="car_sms_send_it">«%1$s». Lo invio?</string>
+    <string name="car_sms_sent">Inviato.</string>
+    <string name="car_quiet">Silenzio in auto</string>
+    <string name="car_quiet_summary">Le notifiche delle altre app aspettano mentre guidi; le chiamate e i tuoi messaggi letti ad alta voce passano.</string>
+</resources>

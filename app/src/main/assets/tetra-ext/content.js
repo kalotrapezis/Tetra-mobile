@@ -87,21 +87,25 @@ function mediaDo(a, b) { var m = cur(); b = b || {};
   if (a == 'play') { if (m) m.play(); }
   else if (a == 'pause') { if (m) m.pause(); }
   else if (a == 'next') click(b.next);
+  else if (a == 'like') { if (!click(b.like)) post({ error: 'like: no button on ' + location.host }); }
   else if (a == 'prev') { var now = Date.now(), again = now - prevAt < 2000; prevAt = now;
     if (m && m.currentTime > 5 && !again) m.currentTime = 0; else if (!click(b.prev)) { if (again && history.length > 1) history.back(); else if (m) m.currentTime = 0; } }
   setTimeout(media, 300); }
 function autoplay() { var n = 0, said = 0, t = setInterval(function () { var m = cur();
   if (m && !m.paused) { clearInterval(t); return; }
-  if (m && (m.currentSrc || m.src)) m.play().catch(function (e) { if (!said) { said = 1; post({ error: 'autoplay: ' + e }); } }); else if (n == 4) click('.jp-play,[class*=play-button],button[aria-label*=Play i],button[title*=Play i]');
+  if (m && (m.currentSrc || m.src)) m.play().catch(function (e) { if (!said) { said = 1; post({ error: 'autoplay: ' + e }); } }); else if (n == 4) click('[data-testid=play-button],.jp-play,[class*=play-button],button[aria-label*=Play i],button[title*=Play i]');
   if (++n > 30) clearInterval(t); }, 500); }
 // AI Assist's search: its first result, past shorts and ads. Looked for as the page draws its results, for up to a minute:
 // YouTube's mobile page draws them seconds after it has loaded, slower in Gecko than the WebView's 10 s allowed (4 Nov)
 var firstOff = null;
-function first(sel) { if (firstOff) firstOff();
-  function look() { var l = document.querySelectorAll(sel);
+// text: only links that say it (Spotify's "Daily Mix"); random: any one of them, not the first
+function first(sel, wait, text, random) { if (firstOff) firstOff(); var lastN = -1, stableAt = 0;
+  function look() { var l = Array.prototype.filter.call(document.querySelectorAll(sel), function (a) { return !text || ((a.textContent || '') + ' ' + (a.getAttribute('aria-label') || '') + ' ' + (a.title || '')).indexOf(text) >= 0; });
+    if (random) { if (l.length != lastN) { lastN = l.length; stableAt = Date.now(); return; } // the page still drawing its mixes: all of them first
+      if (!l.length || Date.now() - stableAt < 1500) return; l = [l[Math.floor(Math.random() * l.length)]]; }
     for (var i = 0; i < l.length; i++) { var a = l[i]; if (!a.href || a.href.indexOf('/shorts/') >= 0 || a.closest('[class*=promoted],[class*=ad-slot],ytm-reel-shelf-renderer,ytm-shorts-lockup-view-model')) continue;
       firstOff(); post({ first: a.href }); location.href = a.href; return; } }
-  var seen = new MutationObserver(look), t = setInterval(look, 500), end = setTimeout(function () { firstOff(); post({ error: 'first: no result on ' + location.host + ' after 60 s' }); }, 60000);
+  var seen = new MutationObserver(look), t = setInterval(look, 500), end = setTimeout(function () { firstOff(); post({ error: 'first: no result on ' + location.host, none: 1 }); }, wait || 60000);
   firstOff = function () { seen.disconnect(); clearInterval(t); clearTimeout(end); document.removeEventListener('visibilitychange', look); firstOff = null; };
   seen.observe(document.documentElement, { childList: true, subtree: true }); document.addEventListener('visibilitychange', look); look(); }
 
@@ -110,7 +114,7 @@ function heard(m) {
   if (m.fill) fill(m.fill);
   if (m.media) mediaDo(m.media, m.buttons);
   if (m.autoplay) autoplay();
-  if (m.first) first(m.first);
+  if (m.first) first(m.first, m.wait, m.text, m.random);
   if (m.report) { last = null; report(); }
 }
 connect();
