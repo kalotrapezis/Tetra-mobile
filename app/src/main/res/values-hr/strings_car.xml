@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">Dolje</string>
     <string name="car_dock_left">Lijevo</string>
     <string name="car_dock_right">Desno</string>
+    <string name="car_open">Otvori samo</string>
+    <string name="car_home">Koristi kao početni zaslon</string>
+    <string name="car_home_summary">Najsigurnije: zaslon auta otvara Tetra Car pri svakom pokretanju. Ondje odaberi Tetra Car.</string>
+    <string name="car_open_boot">Otvori pri pokretanju uređaja</string>
+    <string name="car_open_bt">Otvori kad se ovaj Bluetooth poveže</string>
+    <string name="car_bluetooth_phone">Bluetooth telefona</string>
+    <string name="car_bluetooth_phone_none">Odaberi svoj telefon: kad se poveže, Tetra Car se može otvoriti sam.</string>
 </resources>

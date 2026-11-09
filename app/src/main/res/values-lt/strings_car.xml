@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">Apačioje</string>
     <string name="car_dock_left">Kairėje</string>
     <string name="car_dock_right">Dešinėje</string>
+    <string name="car_open">Atidaryti savaime</string>
+    <string name="car_home">Naudoti kaip pradžios ekraną</string>
+    <string name="car_home_summary">Patikimiausia: automobilio ekranas kiekvieną kartą atidaro Tetra Car. Ten pasirink Tetra Car.</string>
+    <string name="car_open_boot">Atidaryti įjungus įrenginį</string>
+    <string name="car_open_bt">Atidaryti prisijungus šiam Bluetooth</string>
+    <string name="car_bluetooth_phone">Telefono Bluetooth</string>
+    <string name="car_bluetooth_phone_none">Pasirink savo telefoną: kai jis prisijungs, Tetra Car gali atsidaryti savaime.</string>
 </resources>

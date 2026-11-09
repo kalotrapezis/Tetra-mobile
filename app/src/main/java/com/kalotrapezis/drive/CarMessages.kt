@@ -261,7 +261,15 @@ class CarBluetoothReceiver : android.content.BroadcastReceiver() {
         val car = runCatching { Car.isCar(c, device?.address) }.getOrDefault(false)
         if (!car || Car.running) return
         val on = intent.action == android.bluetooth.BluetoothDevice.ACTION_ACL_CONNECTED
-        WriterLog.i("Car: the car's Bluetooth ${if (on) "joined" else "left"}")
+        WriterLog.i("Car: the ${if (PhoneRelay.noCalls(c)) "phone" else "car"}'s Bluetooth ${if (on) "joined" else "left"}")
         CarQuiet.set(c, on)
+        if (on && Car.opensOnBluetooth(c)) Car.open(c) // the user, 9 Nov: "open Tetra Car … on connection with phone"
+    }
+}
+
+/** The device started (a head unit with the ignition): Tetra Car opened, when asked to (Settings › Tetra Car). */
+class CarBootReceiver : android.content.BroadcastReceiver() {
+    override fun onReceive(c: Context, intent: Intent) {
+        if (Car.opensOnBoot(c) && !Car.running) { WriterLog.init(c); WriterLog.i("Car: opened at start"); Car.open(c) }
     }
 }

@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">Apakšā</string>
     <string name="car_dock_left">Pa kreisi</string>
     <string name="car_dock_right">Pa labi</string>
+    <string name="car_open">Atvērt pašam</string>
+    <string name="car_home">Izmantot kā sākuma ekrānu</string>
+    <string name="car_home_summary">Drošākais veids: auto ekrāns katrā startā atver Tetra Car. Izvēlies tur Tetra Car.</string>
+    <string name="car_open_boot">Atvērt, ierīcei startējot</string>
+    <string name="car_open_bt">Atvērt, kad šis Bluetooth savienojas</string>
+    <string name="car_bluetooth_phone">Tālruņa Bluetooth</string>
+    <string name="car_bluetooth_phone_none">Izvēlies savu tālruni: kad tas savienojas, Tetra Car var atvērties pats.</string>
 </resources>

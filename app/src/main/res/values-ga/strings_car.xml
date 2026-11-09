@@ -24,4 +24,11 @@
     <string name="car_dock_bottom">Ag an mbun</string>
     <string name="car_dock_left">Ar chlé</string>
     <string name="car_dock_right">Ar dheis</string>
+    <string name="car_open">Oscail leis féin</string>
+    <string name="car_home">Úsáid mar scáileán baile</string>
+    <string name="car_home_summary">An bealach is cinnte: osclaíonn scáileán an chairr Tetra Car gach uair a thosaíonn sé. Roghnaigh Tetra Car ansin.</string>
+    <string name="car_open_boot">Oscail nuair a thosaíonn an gléas</string>
+    <string name="car_open_bt">Oscail nuair a nascann an Bluetooth seo</string>
+    <string name="car_bluetooth_phone">Bluetooth an ghutháin</string>
+    <string name="car_bluetooth_phone_none">Roghnaigh do ghuthán: nuair a nascann sé, is féidir le Tetra Car oscailt leis féin.</string>
 </resources>
