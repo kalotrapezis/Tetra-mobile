@@ -66,6 +66,9 @@ internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, 
         R.string.settings_exact_alarms, R.string.settings_battery, R.string.settings_hyper_island, R.string.settings_autostart, R.string.common_import, R.string.settings_export_all, R.string.settings_share_claude)),
     Timer(R.string.app_timer, Category.Timer.icon, Category.Timer.color, R.string.settings_share_claude, listOf(R.string.settings_share_claude)),
     Pills(R.string.app_pills, R.drawable.ic_pill, PILLS_COLOR, R.string.pills_settings_summary, listOf(R.string.pills_voice, R.string.pills_call_name, R.string.pills_try, R.string.pills_checks)),
+    // Tetra Car (the user, 9 Nov: "you could make a car category in the settings")
+    Car(R.string.app_car, R.drawable.ic_directions_car, CAR_APP_COLOR, R.string.car_settings_summary, listOf(R.string.app_car, R.string.car_dock, R.string.car_read_sms, R.string.car_answer_calls,
+        R.string.car_quiet, R.string.car_bluetooth, R.string.car_pair_car)),
     Maps(R.string.app_maps, Category.Maps.icon, Category.Maps.color, R.string.settings_maps_summary, listOf(R.string.settings_map, R.string.settings_on_foot, R.string.settings_by_car, R.string.settings_directions_in, R.string.settings_test_voice, R.string.settings_voice_settings, R.string.settings_sharp_bends,
         R.string.settings_save_parking, R.string.settings_open_at_car, R.string.settings_accessible_parking, R.string.settings_export_places, R.string.settings_import_places, R.string.settings_import_google,
         R.string.settings_installed_maps, R.string.settings_send_log)),
@@ -169,6 +172,7 @@ internal fun SettingsTab(
                     SettingsPage.Calendar -> CalendarPage()
                     SettingsPage.Timer -> SettingsSection("Claude") { SkillRows("tetra-timer", "Timer", stringResource(R.string.settings_timer_skill)) }
                     SettingsPage.Maps -> MapsPage()
+                    SettingsPage.Car -> CarSettingsPage()
                     SettingsPage.Contacts -> ContactsPage()
                     SettingsPage.Mail -> MailPage(openPart)
                     SettingsPage.Browser -> BrowserSettingsPage()
@@ -417,11 +421,20 @@ internal fun SettingsTab(
                 Switch(checked = on, onCheckedChange = { on = it; a.show(context, it) })
             }
         }
+    }
+}
+
+internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
+
+/** Settings › Tetra Car: its icon, what it does in the car, the car's Bluetooth and the link to the car's screen. */
+@Composable private fun CarSettingsPage() {
+    val context = LocalContext.current
+    SettingsSection(stringResource(R.string.app_car)) {
         // Tetra Car: an icon, and a choice of home screen on a head unit
         var car by remember { mutableStateOf(CarIcon.shown(context)) }
         SettingRow(stringResource(R.string.app_car), onClick = { car = !car; CarIcon.show(context, car) }, leading = {
             Icon(painterResource(R.drawable.ic_directions_car), contentDescription = null, tint = Color.White,
-                modifier = Modifier.size(32.dp).background(Color(0xFF2B3A4A), RoundedCornerShape(8.dp)).padding(5.dp))
+                modifier = Modifier.size(32.dp).background(CAR_APP_COLOR, RoundedCornerShape(8.dp)).padding(5.dp))
         }) { Switch(checked = car, onCheckedChange = { car = it; CarIcon.show(context, it) }) }
         // quiet in the car: Android's Do Not Disturb access asked for when it is switched on without it
         var quiet by remember { mutableStateOf(CarQuiet.wanted(context) && CarQuiet.allowed(context)) }
@@ -449,6 +462,22 @@ internal fun SettingsTab(
         // the car's own link (CarWire): the phone scans the code Tetra Car shows on the car's screen
         if (!PhoneRelay.noCalls(context)) SettingRow(stringResource(R.string.car_pair_car), CarWire.link(context)?.let { stringResource(R.string.codes_paired, it.name) } ?: stringResource(R.string.car_pair_car_summary),
             onClick = { openApplet(context, Applet.Codes.name) })
+    }
+    // where the dock sits (the user, 9 Nov: "a radio buttons group on the settings, not in the layouts")
+    SettingsSection(stringResource(R.string.car_dock)) {
+        var side by remember { mutableStateOf(Car.side(context)) }
+        listOf(DockSide.Bottom to R.string.car_dock_bottom, DockSide.Left to R.string.car_dock_left, DockSide.Right to R.string.car_dock_right).forEach { (d, label) ->
+            Row(Modifier.fillMaxWidth().clickable { side = d; Car.setSide(context, d) }.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(side == d, { side = d; Car.setSide(context, d) }); Text(stringResource(label))
+            }
+        }
+    }
+    // what happens in the car (Tetra Car open, the car's Bluetooth, or the car's screen paired): also AI Assist's car_assist
+    SettingsSection(stringResource(R.string.car_settings_summary)) {
+        var reads by remember { mutableStateOf(Car.reads(context)) }
+        SwitchRow(stringResource(R.string.car_read_sms), null, reads) { reads = it; Car.set(context, it, null) }
+        var answers by remember { mutableStateOf(Car.answers(context)) }
+        SwitchRow(stringResource(R.string.car_answer_calls), null, answers) { answers = it; Car.set(context, null, it) }
     }
 }
 

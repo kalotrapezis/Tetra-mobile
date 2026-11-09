@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Skannaa koodi, jonka Tetra Car näyttää auton näytöllä: puhelut ja viestit siellä, suorana, ilman synkronointia.</string>
     <string name="car_bluetooth">Auton Bluetooth</string>
     <string name="car_bluetooth_none">Valitse, mikä paritettu laite on auto: vain se laittaa autotilan päälle.</string>
+    <string name="car_settings_summary">Autossa</string>
+    <string name="car_read_sms">Lue viestit ääneen</string>
+    <string name="car_answer_calls">Vastaa puheluihin 2 sekunnin kuluttua</string>
+    <string name="car_dock">Palkki</string>
+    <string name="car_dock_bottom">Alhaalla</string>
+    <string name="car_dock_left">Vasemmalla</string>
+    <string name="car_dock_right">Oikealla</string>
 </resources>

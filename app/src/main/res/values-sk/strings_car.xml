@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Naskenuj kód, ktorý Tetra Car ukazuje na obrazovke auta: hovory a správy tam, naživo, bez synchronizácie.</string>
     <string name="car_bluetooth">Bluetooth auta</string>
     <string name="car_bluetooth_none">Vyber, ktoré spárované zariadenie je auto: len ono zapne režim auta.</string>
+    <string name="car_settings_summary">V aute</string>
+    <string name="car_read_sms">Čítať správy nahlas</string>
+    <string name="car_answer_calls">Prijímať hovory po 2 sekundách</string>
+    <string name="car_dock">Lišta</string>
+    <string name="car_dock_bottom">Dole</string>
+    <string name="car_dock_left">Vľavo</string>
+    <string name="car_dock_right">Vpravo</string>
 </resources>

@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Scanează codul pe care Tetra Car îl arată pe ecranul mașinii: apelurile și mesajele acolo, live, fără sincronizare.</string>
     <string name="car_bluetooth">Bluetooth-ul mașinii</string>
     <string name="car_bluetooth_none">Alege care dispozitiv asociat este mașina: doar el pune telefonul în modul mașină.</string>
+    <string name="car_settings_summary">În mașină</string>
+    <string name="car_read_sms">Citește mesajele cu voce tare</string>
+    <string name="car_answer_calls">Răspunde la apeluri după 2 secunde</string>
+    <string name="car_dock">Bară</string>
+    <string name="car_dock_bottom">Jos</string>
+    <string name="car_dock_left">În stânga</string>
+    <string name="car_dock_right">În dreapta</string>
 </resources>

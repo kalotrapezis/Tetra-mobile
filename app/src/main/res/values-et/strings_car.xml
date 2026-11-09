@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Skanni kood, mida Tetra Car auto ekraanil näitab: kõned ja sõnumid seal, otse, ilma sünkroonimata.</string>
     <string name="car_bluetooth">Auto Bluetooth</string>
     <string name="car_bluetooth_none">Vali, milline seotud seade on auto: ainult see lülitab autorežiimi sisse.</string>
+    <string name="car_settings_summary">Autos</string>
+    <string name="car_read_sms">Sõnumite ettelugemine</string>
+    <string name="car_answer_calls">Kõnedele vastamine 2 sekundi pärast</string>
+    <string name="car_dock">Riba</string>
+    <string name="car_dock_bottom">All</string>
+    <string name="car_dock_left">Vasakul</string>
+    <string name="car_dock_right">Paremal</string>
 </resources>

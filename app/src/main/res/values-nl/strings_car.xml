@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Scan de code die Tetra Car op het scherm van de auto toont: oproepen en berichten daar, live, zonder synchronisatie.</string>
     <string name="car_bluetooth">Bluetooth van de auto</string>
     <string name="car_bluetooth_none">Kies welk gekoppeld apparaat de auto is: alleen dat zet de telefoon in automodus.</string>
+    <string name="car_settings_summary">In de auto</string>
+    <string name="car_read_sms">Berichten voorlezen</string>
+    <string name="car_answer_calls">Oproepen na 2 seconden beantwoorden</string>
+    <string name="car_dock">Balk</string>
+    <string name="car_dock_bottom">Onderaan</string>
+    <string name="car_dock_left">Links</string>
+    <string name="car_dock_right">Rechts</string>
 </resources>

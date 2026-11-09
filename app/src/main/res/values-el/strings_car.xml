@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Σκάναρε τον κωδικό που δείχνει το Tetra Car στην οθόνη του αυτοκινήτου: κλήσεις και μηνύματα εκεί, ζωντανά, χωρίς συγχρονισμό.</string>
     <string name="car_bluetooth">Bluetooth του αυτοκινήτου</string>
     <string name="car_bluetooth_none">Διάλεξε ποια συζευγμένη συσκευή είναι το αυτοκίνητο: μόνο αυτή βάζει το κινητό σε λειτουργία αυτοκινήτου.</string>
+    <string name="car_settings_summary">Στο αυτοκίνητο</string>
+    <string name="car_read_sms">Ανάγνωση μηνυμάτων φωναχτά</string>
+    <string name="car_answer_calls">Απάντηση κλήσεων μετά από 2 δευτερόλεπτα</string>
+    <string name="car_dock">Μπάρα</string>
+    <string name="car_dock_bottom">Κάτω</string>
+    <string name="car_dock_left">Αριστερά</string>
+    <string name="car_dock_right">Δεξιά</string>
 </resources>

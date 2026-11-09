@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Skenē kodu, ko Tetra Car rāda auto ekrānā: zvani un ziņas tur, tiešraidē, bez sinhronizācijas.</string>
     <string name="car_bluetooth">Auto Bluetooth</string>
     <string name="car_bluetooth_none">Izvēlies, kura savienotā ierīce ir auto: tikai tā ieslēdz auto režīmu.</string>
+    <string name="car_settings_summary">Automašīnā</string>
+    <string name="car_read_sms">Nolasīt ziņas skaļi</string>
+    <string name="car_answer_calls">Atbildēt uz zvaniem pēc 2 sekundēm</string>
+    <string name="car_dock">Josla</string>
+    <string name="car_dock_bottom">Apakšā</string>
+    <string name="car_dock_left">Pa kreisi</string>
+    <string name="car_dock_right">Pa labi</string>
 </resources>

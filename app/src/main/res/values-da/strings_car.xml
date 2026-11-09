@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Scan koden, som Tetra Car viser på bilens skærm: opkald og beskeder dér, live, uden synkronisering.</string>
     <string name="car_bluetooth">Bilens Bluetooth</string>
     <string name="car_bluetooth_none">Vælg hvilken parret enhed der er bilen: kun den sætter telefonen i biltilstand.</string>
+    <string name="car_settings_summary">I bilen</string>
+    <string name="car_read_sms">Læs beskeder højt</string>
+    <string name="car_answer_calls">Besvar opkald efter 2 sekunder</string>
+    <string name="car_dock">Dock</string>
+    <string name="car_dock_bottom">Nederst</string>
+    <string name="car_dock_left">Til venstre</string>
+    <string name="car_dock_right">Til højre</string>
 </resources>

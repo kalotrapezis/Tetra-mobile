@@ -132,6 +132,10 @@ internal object Car {
     @Volatile var message: ((CarMessage) -> Unit)? = null
     private fun prefs(c: Context) = c.getSharedPreferences("car", Context.MODE_PRIVATE)
     fun reads(c: Context) = prefs(c).getBoolean("read_sms", true)
+    private val dock = mutableStateOf<DockSide?>(null)
+    /** Where Tetra Car's dock sits (Settings › Tetra Car, radio buttons): one state, so an open Tetra Car follows a change at once. */
+    fun side(c: Context): DockSide = dock.value ?: runCatching { DockSide.valueOf(prefs(c).getString("dock", null)!!) }.getOrDefault(DockSide.Bottom).also { dock.value = it }
+    fun setSide(c: Context, d: DockSide) { dock.value = d; prefs(c).edit().putString("dock", d.name).apply() }
     fun answers(c: Context) = prefs(c).getBoolean("answer_calls", true)
     fun set(c: Context, read: Boolean?, answer: Boolean?) = prefs(c).edit().apply { read?.let { putBoolean("read_sms", it) }; answer?.let { putBoolean("answer_calls", it) } }.apply()
 
@@ -276,7 +280,7 @@ private fun CarScreen() {
     var tiles by remember { mutableStateOf(false) }
     var layouts by remember { mutableStateOf(false) }
     var apps by remember { mutableStateOf(false) }
-    var side by remember { mutableStateOf(runCatching { DockSide.valueOf(prefs.getString("dock", null)!!) }.getOrDefault(DockSide.Bottom)) }
+    val side = Car.side(context) // Settings › Tetra Car › Dock: changed there, followed here at once
     // AI Assist's «άνοιξε …» reaches the panes while this screen is up
     var message by remember { mutableStateOf<CarMessage?>(null) }
     androidx.compose.runtime.DisposableEffect(Unit) {
@@ -344,7 +348,6 @@ private fun CarScreen() {
                 }
             }
             CarDock(state, side, layouts, setLayouts = { layouts = it }, layout = { set(state.laid(it)) },
-                setSide = { side = it; prefs.edit().putString("dock", it.name).apply() },
                 open = { set(state.put(it)); if (it == CarApp.Browser) tiles = false }, media = ::media, apps = { apps = true })
         }) { (panes, dock), c ->
             val d = dock.measure(if (side == DockSide.Bottom) c.copy(minHeight = 0) else c.copy(minWidth = 0))
@@ -396,15 +399,13 @@ private fun CarPanes(state: CarState, opened: List<CarApp>, coverAt: Int?, cover
 }
 
 @Composable
-private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayouts: (Boolean) -> Unit, layout: (CarLayout) -> Unit, setSide: (DockSide) -> Unit,
+private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayouts: (Boolean) -> Unit, layout: (CarLayout) -> Unit,
                     open: (CarApp) -> Unit, media: () -> Unit, apps: () -> Unit) {
     val context = LocalContext.current
     val down = side != DockSide.Bottom // down a side: icons without their names, so it fits a short screen
-    val strip: @Composable () -> Unit = { // the layouts' strip, with its way back (the user's sliding strips); then where the dock sits
+    val strip: @Composable () -> Unit = { // the layouts' strip, with its way back (the user's sliding strips)
         IconButton({ setLayouts(false) }) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
         CarLayout.entries.forEach { l -> Box(Modifier.size(80.dp, if (down) 46.dp else 56.dp).clip(RoundedCornerShape(12.dp)).clickable { layout(l); setLayouts(false) }, contentAlignment = Alignment.Center) { LayoutGlyph(l, l == state.layout) } }
-        Spacer(Modifier.size(if (down) 8.dp else 16.dp))
-        DockSide.entries.forEach { d -> Box(Modifier.size(80.dp, if (down) 46.dp else 56.dp).clip(RoundedCornerShape(12.dp)).clickable { setSide(d); setLayouts(false) }, contentAlignment = Alignment.Center) { SideGlyph(d, d == side) } }
     }
     val buttons: @Composable () -> Unit = {
         DockApp(R.drawable.maps_art, R.string.app_maps, CarApp.Maps in state.panes, down) { open(CarApp.Maps) }
@@ -450,21 +451,6 @@ private fun DockButton(label: Int, shown: Boolean, down: Boolean, tap: () -> Uni
     }
 }
 
-/** Where the dock sits, drawn as a screen with its bar. */
-@Composable
-private fun SideGlyph(d: DockSide, on: Boolean) {
-    val color = if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-    Canvas(Modifier.size(48.dp, 30.dp)) {
-        val r = CornerRadius(4.dp.toPx()); val bar = 7.dp.toPx()
-        if (on) drawRoundRect(color.copy(alpha = 0.35f), cornerRadius = r) // the chosen one filled, as the layouts'
-        drawRoundRect(color, cornerRadius = r, style = Stroke(2.dp.toPx()))
-        when (d) {
-            DockSide.Bottom -> drawRoundRect(color, Offset(0f, size.height - bar), Size(size.width, bar), r)
-            DockSide.Left -> drawRoundRect(color, Offset.Zero, Size(bar, size.height), r)
-            DockSide.Right -> drawRoundRect(color, Offset(size.width - bar, 0f), Size(bar, size.height), r)
-        }
-    }
-}
 
 /** A layout drawn as its panes. */
 @Composable

@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Skennja l-kodiċi li juri Tetra Car fuq l-iskrin tal-karozza: telefonati u messaġġi hemm, live, mingħajr sinkronizzazzjoni.</string>
     <string name="car_bluetooth">Il-Bluetooth tal-karozza</string>
     <string name="car_bluetooth_none">Agħżel liema apparat imqabbad hu l-karozza: hu biss idaħħal it-telefon fil-modalità tal-karozza.</string>
+    <string name="car_settings_summary">Fil-karozza</string>
+    <string name="car_read_sms">Aqra l-messaġġi b’leħen għoli</string>
+    <string name="car_answer_calls">Wieġeb it-telefonati wara 2 sekondi</string>
+    <string name="car_dock">Bar</string>
+    <string name="car_dock_bottom">Isfel</string>
+    <string name="car_dock_left">Fuq ix-xellug</string>
+    <string name="car_dock_right">Fuq il-lemin</string>
 </resources>

@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Nuskenuok kodą, kurį Tetra Car rodo automobilio ekrane: skambučiai ir žinutės ten, tiesiogiai, be sinchronizavimo.</string>
     <string name="car_bluetooth">Automobilio Bluetooth</string>
     <string name="car_bluetooth_none">Pasirink, kuris susietas įrenginys yra automobilis: tik jis įjungia automobilio režimą.</string>
+    <string name="car_settings_summary">Automobilyje</string>
+    <string name="car_read_sms">Skaityti žinutes garsiai</string>
+    <string name="car_answer_calls">Atsiliepti į skambučius po 2 sekundžių</string>
+    <string name="car_dock">Juosta</string>
+    <string name="car_dock_bottom">Apačioje</string>
+    <string name="car_dock_left">Kairėje</string>
+    <string name="car_dock_right">Dešinėje</string>
 </resources>
