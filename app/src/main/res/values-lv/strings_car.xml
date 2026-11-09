@@ -5,4 +5,10 @@
     <string name="car_media">Mediji</string>
     <string name="car_apps">Lietotnes</string>
     <string name="car_layout">Izkārtojums</string>
+    <string name="car_sms_said">Ziņa no %1$s: %2$s. Vai vēlies atbildēt?</string>
+    <string name="car_sms_say_it">Pasaki savu ziņu.</string>
+    <string name="car_sms_send_it">“%1$s”. Vai nosūtīt?</string>
+    <string name="car_sms_sent">Nosūtīts.</string>
+    <string name="car_quiet">Klusums automašīnā</string>
+    <string name="car_quiet_summary">Citu lietotņu paziņojumi gaida, kamēr brauc; zvani un skaļi nolasītas ziņas tiek cauri.</string>
 </resources>

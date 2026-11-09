@@ -5,4 +5,10 @@
     <string name="car_media">Media</string>
     <string name="car_apps">Aplicații</string>
     <string name="car_layout">Aspect</string>
+    <string name="car_sms_said">Mesaj de la %1$s: %2$s. Vrei să răspunzi?</string>
+    <string name="car_sms_say_it">Spune mesajul tău.</string>
+    <string name="car_sms_send_it">„%1$s”. Să-l trimit?</string>
+    <string name="car_sms_sent">Trimis.</string>
+    <string name="car_quiet">Liniște în mașină</string>
+    <string name="car_quiet_summary">Notificările altor aplicații așteaptă cât conduci; apelurile și mesajele citite cu voce tare trec.</string>
 </resources>

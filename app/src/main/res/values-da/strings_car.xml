@@ -5,4 +5,10 @@
     <string name="car_media">Medier</string>
     <string name="car_apps">Apps</string>
     <string name="car_layout">Layout</string>
+    <string name="car_sms_said">Besked fra %1$s: %2$s. Vil du svare?</string>
+    <string name="car_sms_say_it">Sig din besked.</string>
+    <string name="car_sms_send_it">“%1$s”. Skal jeg sende den?</string>
+    <string name="car_sms_sent">Sendt.</string>
+    <string name="car_quiet">Ro i bilen</string>
+    <string name="car_quiet_summary">Andre apps’ notifikationer venter, mens du kører; opkald og dine beskeder læst højt kommer igennem.</string>
 </resources>

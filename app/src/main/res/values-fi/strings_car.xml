@@ -5,4 +5,10 @@
     <string name="car_media">Media</string>
     <string name="car_apps">Sovellukset</string>
     <string name="car_layout">Asettelu</string>
+    <string name="car_sms_said">Viesti lähettäjältä %1$s: %2$s. Haluatko vastata?</string>
+    <string name="car_sms_say_it">Sano viestisi.</string>
+    <string name="car_sms_send_it">”%1$s”. Lähetänkö sen?</string>
+    <string name="car_sms_sent">Lähetetty.</string>
+    <string name="car_quiet">Hiljaisuus autossa</string>
+    <string name="car_quiet_summary">Muiden sovellusten ilmoitukset odottavat ajon ajan; puhelut ja ääneen luetut viestit tulevat läpi.</string>
 </resources>

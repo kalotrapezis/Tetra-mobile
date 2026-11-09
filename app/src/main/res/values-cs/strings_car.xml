@@ -5,4 +5,10 @@
     <string name="car_media">Média</string>
     <string name="car_apps">Aplikace</string>
     <string name="car_layout">Rozvržení</string>
+    <string name="car_sms_said">Zpráva od %1$s: %2$s. Chceš odpovědět?</string>
+    <string name="car_sms_say_it">Řekni svou zprávu.</string>
+    <string name="car_sms_send_it">„%1$s“. Mám ji odeslat?</string>
+    <string name="car_sms_sent">Odesláno.</string>
+    <string name="car_quiet">Ticho v autě</string>
+    <string name="car_quiet_summary">Oznámení ostatních aplikací během jízdy počkají; hovory a tvé zprávy čtené nahlas projdou.</string>
 </resources>

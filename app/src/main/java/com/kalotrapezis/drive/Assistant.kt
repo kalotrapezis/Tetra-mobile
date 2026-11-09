@@ -264,6 +264,8 @@ internal class AssistantTools(
     private val send: (JSONObject) -> JSONObject = { JSONObject().put("error", "This phone is not paired with a computer.") },
     /** A tablet without a SIM: its own id in Data's files, whose hotspot use data_status answers; null on a phone. */
     private val hotspotDevice: String? = null,
+    /** Tetra on the phone, for the car's settings (Car); null in the tests. */
+    private val appContext: android.content.Context? = null,
 ) {
     /** The file attached in this chat: read, or only its path until attachment_read needs it again (a chat from History). */
     private var doc: Attach.Doc? = null
@@ -335,6 +337,19 @@ internal class AssistantTools(
             "media_play" -> args.getString("query").trim().let { q -> MediaSites.byId(args.optString("site")).let { site -> args.optBoolean("playlist").let { list ->
                 ToolResult("Playing the first ${if (list && site.lists.isNotEmpty()) "playlist" else "result"} for \"$q\" on ${site.id.replace('_', ' ')} in Tetra's Browser.",
                     go = "browser-play:" + JSONObject().put("site", site.id).put("q", q).put("list", list)) } } }
+            // «άνοιξε …», «φέρε μπροστά …» (the user, 9 Nov): in Tetra Car beside the map (carOpenApp)
+            "app_open" -> args.getString("name").trim().let { n -> ToolResult("Opening $n${if (Car.running) " beside the map in Tetra Car" else ""}.", go = "app:$n") }
+            "car_assist" -> args.let { a ->
+                val read = if (a.has("read_messages")) a.getBoolean("read_messages") else null
+                val answer = if (a.has("answer_calls")) a.getBoolean("answer_calls") else null
+                appContext?.let { c -> Car.set(c, read, answer)
+                    ToolResult("In the car: messages ${if (Car.reads(c)) "read aloud" else "not read"}, calls ${if (Car.answers(c)) "answered after 2 seconds" else "not answered by themselves"}.")
+                } ?: ToolResult("Not on this device.")
+            }
+            // Spotify (the user, 9 Nov): «παίξε Spotify» one of their Daily Mixes; what plays added to their Liked Songs
+            "spotify_mix" -> ToolResult("Playing one of the user's Spotify Daily Mixes in Tetra's Browser.", go = "browser-play:" + JSONObject().put("site", "spotify").put("mix", true))
+            "media_like" -> if (BrowserMedia.control == null || BrowserMedia.title.isEmpty()) ToolResult("Nothing is playing in Tetra's Browser.")
+                else { BrowserMedia.act("like"); ToolResult("Asked the site to add \"${BrowserMedia.title}\" to the user's favourites (Spotify's Liked Songs); it works on Spotify only.") }
             // the radio (the user, 4 Nov: "play radio and play the driving radio"): a saved station by name, else Maps' ♪
             "radio_play" -> args.optString("name").trim().let { said ->
                 val pick = if (said.isEmpty()) null else MediaSites.station(stations(), said)
@@ -1065,7 +1080,7 @@ internal class AssistantTools(
             "contacts_find" to "contacts", "my_card" to "contacts", "relation_remember" to "contacts", "relation_forget" to "contacts", "contact_call" to "phone",
             "navigate" to "maps", "place_reminder" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail", "mail_stored_find" to "mail", "mail_export" to "mail",
             "sms_list" to "sms", "sms_read" to "sms", "sms_write" to "sms",
-            "web_search" to "web", "make_image" to "web", "youtube" to "web", "media_play" to "browser", "radio_play" to "browser", "open_url" to "browser", "send_to_device" to "browser", "attachment_read" to "files", "audio_make" to "files")
+            "web_search" to "web", "make_image" to "web", "youtube" to "web", "media_play" to "browser", "spotify_mix" to "browser", "app_open" to "browser", "car_assist" to "phone", "media_like" to "browser", "radio_play" to "browser", "open_url" to "browser", "send_to_device" to "browser", "attachment_read" to "files", "audio_make" to "files")
         /** The tools of the apps the assistant may use now: the others are not even offered. */
         fun allowed(): JSONArray = JSONArray((0 until SCHEMA.length()).map { SCHEMA.getJSONObject(it) }
             .filter { AiGate.state.keeps(APP_OF[it.getJSONObject("function").getString("name")]) && (beside || it.getJSONObject("function").getString("name") != "open_beside") })
@@ -1142,8 +1157,14 @@ internal class AssistantTools(
             fn("youtube", "Open the YouTube app on a search, only when the user names the YouTube app.", listOf("query"), "query" to p("string", "The song or video, with the artist if said.")),
             fn("media_play", "Play a song, a video or a playlist in Tetra's Browser: the site's search opens and its first result plays, in Player mode.", listOf("query"),
                 "query" to p("string", "The song or video, with the artist if said; for a playlist the kind of music (disco, 80s rock, chill)."),
-                "site" to p("string", "youtube (the default) or youtube_music when the user says YouTube Music."),
+                "site" to p("string", "youtube (the default), youtube_music when the user says YouTube Music, spotify when the user says Spotify."),
                 "playlist" to p("boolean", "true for a kind of music rather than one song: a genre, a mood, an era, an artist's songs in general, or when the user says playlist or music (\"play disco\", \"βάλε χαλαρή μουσική\"); false for one named song or video.")),
+            fn("app_open", "Open an app or bring it to the front («άνοιξε το Spotify», «φέρε μπροστά τα μηνύματα»). In Tetra Car, Maps, Phone, Messages and the Browser open in a pane beside the map, another app beside Tetra Car.", listOf("name"),
+                "name" to p("string", "The app's name as the user said it.")),
+            fn("car_assist", "In the car (Tetra Car open, or the phone on the car's Bluetooth) new messages are read aloud with a spoken reply offered, and calls are answered by themselves after 2 seconds; switch either on or off («μη διαβάζεις τα μηνύματα», «μη σηκώνεις τις κλήσεις»).", emptyList(),
+                "read_messages" to p("boolean", "Read new messages aloud in the car."), "answer_calls" to p("boolean", "Answer calls by themselves in the car.")),
+            fn("spotify_mix", "Play one of the user's own Spotify Daily Mixes (Spotify makes up to six), when they ask for Spotify without a song («παίξε Spotify», «βάλε Spotify»).", emptyList()),
+            fn("media_like", "Add the song playing now to the user's favourites on Spotify (Liked Songs) («βάλ' το στα αγαπημένα», «μου αρέσει αυτό»).", emptyList()),
             fn("radio_play", "Play the radio: a station the user saved (by its name), or with no name the station chosen for driving (Maps).", emptyList(),
                 "name" to p("string", "The station's name if said (Kosmos, Μελωδία, ΕΡΤ); leave out for \"the radio\" or \"the driving radio\".")),
             fn("send_to_device", "Do something on another of the user's devices (the computer, the tablet): play a song, a video or a playlist, a radio station, open a link (a search result), show a text (an answer just given), or open the daily brief.", listOf("device", "what"),
@@ -1217,7 +1238,7 @@ internal class AssistantTools(
             "Χρονόμετρο" is both a timer and a stopwatch: with a length ("βάλε χρονόμετρο 10 λεπτά") timer_start; without ("ξεκίνα χρονόμετρο", "σταμάτα το χρονόμετρο", "πόση ώρα πάει") the stopwatch.
             "Ξυπνητήρι", "ξύπνα με": alarm_add ("κάθε μέρα" all seven days, "τις καθημερινές" MO–FR; "αύριο στις 6" a date). To remove one, alarm_list then alarm_delete.
             "Όταν πάω σούπερ μάρκετ δείξε μου τα ψώνια": place_reminder with kind supermarket and note Ψώνια; then say it rings on arrival.
-            A song or a video («βάλε στο YouTube …», «παίξε …», «play … on YouTube»): media_play; a kind of music («play disco on YouTube», «βάλε ελληνικά 80s», «κάτι χαλαρό για διάβασμα»): media_play with playlist true; «βάλε ραδιόφωνο», «το ραδιόφωνο του αυτοκινήτου», «βάλε Kosmos»: radio_play; «δυνάμωσε», «χαμήλωσε», «σίγαση», «ένταση στο 30»: volume; on another device («βάλε disco στο tablet», «στείλε την απάντηση στον υπολογιστή», «άνοιξε την ενημέρωση στο PC», «βάλε ραδιόφωνο στο tablet»): send_to_device; «στο YouTube Music»: media_play with site youtube_music; the YouTube app only when named: youtube. "Κάνε σημείωση": note_new.
+            A song or a video («βάλε στο YouTube …», «παίξε …», «play … on YouTube»): media_play; a kind of music («play disco on YouTube», «βάλε ελληνικά 80s», «κάτι χαλαρό για διάβασμα»): media_play with playlist true; «βάλε ραδιόφωνο», «το ραδιόφωνο του αυτοκινήτου», «βάλε Kosmos»: radio_play; «δυνάμωσε», «χαμήλωσε», «σίγαση», «ένταση στο 30»: volume; on another device («βάλε disco στο tablet», «στείλε την απάντηση στον υπολογιστή», «άνοιξε την ενημέρωση στο PC», «βάλε ραδιόφωνο στο tablet»): send_to_device; «στο YouTube Music»: media_play with site youtube_music; «στο Spotify»: media_play with site spotify; «παίξε Spotify» with no song: spotify_mix; «βάλ' το στα αγαπημένα» while music plays: media_like; the YouTube app only when named: youtube. "Κάνε σημείωση": note_new.
             Mail: "νέα μηνύματα;", "ήρθε κάτι;": mail_new, then say how many and from whom. "Τι χρειάζεται απάντηση;", "σημαντικά mail": mail_attention, then name
             only those that need an answer or an action and in a few words why (a deadline, a question to the user, a payment). "Βρες το mail από τη Μαρία": mail_find.
             "Στείλε mail στον …": mail_write, written as a proper e-mail in the language the user speaks; after it, say it waits for their Send.

@@ -25,6 +25,25 @@ How to write here:
       television, to show information"): the sheet shows Live's Cassette while it listens and thinks, and its answer (text and cards)
       on a VHS-era TV's screen (VhsTv: rabbit ears, knobs, scan lines, a switch-on line and tracking band; still when animations are off).
       Cassette and LivePhase are internal, as on claude/home-widget. Not checked on a device.
+- [x] (car-mode session, 9 Nov; branch `car-mode`, not merged) **Tetra Car: in the car** (the user: "διαβάζει τα μηνύματα … να με ρωτάει αν
+      θέλω να απαντήσω … να σηκώνει τηλέφωνο μετά από 2 δευτερόλεπτα"; "replace it … then bring back the app"; "the map is the only thing
+      important"; "stop the music on call or message"; "block notifications"). In the car = Tetra Car open, or the phone on a car's
+      Bluetooth (class car audio / hands-free, Car.inCar). A message: read aloud, «θέλεις να απαντήσεις;», the reply heard (AI Assist's
+      transcription, no model), read back, «να το στείλω;», sent on a yes (carTalk) — in Tetra Car in the side pane, the map kept, then the
+      page there comes back; on a phone, CarSmsActivity over the lock screen through a full-screen notice. A call: answered after 2 s, the
+      call screen (compact under 560 dp high) in the side pane until it ends. The Browser's music paused for both, played after. Quiet:
+      a Do Not Disturb rule of Tetra's own (driving type on Android 15), calls, repeat callers, alarms and the car channel through; on with
+      Tetra Car or the car's Bluetooth (CarBluetoothReceiver), Settings › Tetra Car › Quiet in the car asks Android's access. AI Assist:
+      app_open («άνοιξε», «φέρε μπροστά»: a page of Tetra Car beside the map, another app beside it), car_assist (reading/answering on or
+      off). Side dock: Maps, Media, Phone pinned; Messages and the Browser while shown. On an emulator: SMS and a call in the pane, both
+      given back. **Open:** none on a real phone or head unit — the head unit has no SIM of its own (its SMS and calls are the phone's,
+      by the unit's Bluetooth); Quiet not seen (the emulator had no access granted); spoken replies not heard (no microphone there).
+- [x] (car-mode session, 9 Nov; branch `car-mode`, not merged) **AI Assist and the Browser: Spotify** (the user: "να ψάχνει τραγούδια, να τα
+      παίζει … στα αγαπημένα … παίξε spotify να παίζει κάποιο mix"). MediaSites' spotify: open.spotify.com as the desktop site, its search
+      (/search/{q}/tracks or /playlists), the first song's or list's page, then its Play pressed; nothing in 15 s → the same search in
+      Greeklish (MediaSites.greeklish, "θα πρέπει να κάνει 2 αναζητήσεις … σε Greeklish"); `spotify_mix` («παίξε Spotify»): one of the
+      user's Daily Mixes from the home page, at random once all are drawn; `media_like`: the now-playing ♥ (Liked Songs). Tetra
+      extension 1.9. BrowserTest. **Open:** none of it tried logged in to Spotify — its markup (data-testid) and Widevine untried.
 - [x] (car-mode session, 9 Nov; branch `car-mode`, not merged) **Tetra Car: a head unit's home screen** (the user: "our own Car UI
       in the app … AI, browser for youtube or radio, maps, messages and phone"; Android Auto lists a sideloaded Tetra only after a
       DHU run, every time). CarScreen.kt: Maps, Browser, Phone and Messages in panes — Full, 60/40, 50/50, three (the dock's last
@@ -32,7 +51,8 @@ How to write here:
       running off the screen. Dock: Maps · Media · Phone · AI Assist's mic · Messages · Browser · Apps, and ‹ ⏯ › of what plays.
       Media (the user: "open the browser with this UI and 3 options"; "add the spotify as well"): YouTube Music, YouTube, Spotify (its web player, the desktop site), Live24.gr (a ♥ live24 station,
       else Maps' ♪, else the site) in Player mode (`browser-play` "player": true); Media again: the three. The steering wheel's
-      voice key opens AI Assist. Settings › App icons › Tetra Car: its icon, also a choice of home screen. CarStateTest; on an
+      voice key opens AI Assist. The dock along the bottom or down a side (the user: "κανονικά έχει τη μπάρα στο πλάι"; the layouts'
+      strip, icons only there; one Layout, so a move keeps the pages running). Settings › App icons › Tetra Car: its icon, also a choice of home screen. CarStateTest; on an
       emulator at 1024×600 160 dpi: panes, layouts, tiles, Live24 in Player mode, Apps. **Open:** not on a real head unit; the
       x86_64 emulator has no Gecko after a restart (arm-only); the pages' own ‹ do nothing in a pane; YouTube's tile opens a new
       tab when m.youtube.com redirects; no parking-brake check for video; Spotify needs the unit's Widevine (DRM), not seen playing.

@@ -37,4 +37,24 @@ class CarStateTest {
         assertEquals("https://live24.gr/radio/x", carLive24(emptyList(), "https://live24.gr/radio/x"))
         assertEquals("https://www.live24.gr", carLive24(emptyList(), "https://notlive24.gr/a"))
     }
+
+    @Test fun anAppOpensBesideTheMap() {
+        // one pane: two, the map and the app
+        assertEquals(CarState(CarLayout.Wide, listOf(CarApp.Maps, CarApp.Messages), 1), CarState(CarLayout.Full, listOf(CarApp.Maps), 0).beside(CarApp.Messages))
+        // the map not shown: it comes back in the first pane
+        assertEquals(CarState(CarLayout.Half, listOf(CarApp.Maps, CarApp.Messages), 1), CarState(CarLayout.Half, listOf(CarApp.Phone, CarApp.Browser), 1).beside(CarApp.Messages))
+        // shown already: only focused; the map's own pane never taken
+        assertEquals(1, CarState(CarLayout.Wide, listOf(CarApp.Maps, CarApp.Phone), 0).beside(CarApp.Phone).focus)
+        assertEquals(listOf(CarApp.Maps, CarApp.Browser), CarState(CarLayout.Wide, listOf(CarApp.Maps, CarApp.Phone), 0).beside(CarApp.Browser).panes)
+    }
+
+    @Test fun pagesByTheirNames() {
+        assertEquals(CarApp.Messages, carAppFor("τα Μηνύματα"))
+        assertEquals(CarApp.Maps, carAppFor("τον χάρτη"))
+        assertEquals(CarApp.Phone, carAppFor("Τηλέφωνο"))
+        assertEquals(CarApp.Browser, carAppFor("Spotify"))
+        assertEquals(null, carAppFor("Viber"))
+        assertEquals(true, Car.isCar(android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO))
+        assertEquals(false, Car.isCar(android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES))
+    }
 }

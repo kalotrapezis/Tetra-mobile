@@ -316,7 +316,11 @@ internal object FirefoxImport {
  */
 internal data class MediaSite(val id: String, val hosts: Set<String>, val next: String = "", val prev: String = "", val search: String = "", val first: String = "",
     /** Its search for playlists only, and a playlist's link that starts it playing (empty: the plain search). */
-    val lists: String = "", val firstList: String = "")
+    val lists: String = "", val firstList: String = "",
+    /** [desktop]: opened as the desktop site; [press]: its result's page needs Play pressed; [greeklish]: nothing found in Greek, asked again in Latin letters. */
+    val desktop: Boolean = false, val press: Boolean = false, val greeklish: Boolean = false,
+    /** [like]: what plays now added to the user's favourites (Spotify's Liked Songs); [mixes]: the page with the user's own mixes. */
+    val like: String = "", val mixes: String = "")
 
 internal object MediaSites {
     // shortcut: these selectors are YouTube's and YouTube Music's own markup as of Nov 2026, untried on a phone; mend them when a click misses
@@ -326,19 +330,52 @@ internal object MediaSites {
             // sp=EgIQAw: YouTube's "Playlists" filter; each result's /watch?v=…&list=… plays the list from its first song (4 Nov)
             "https://m.youtube.com/results?sp=EgIQAw%3D%3D&search_query=", "a[href*=\"/watch?v=\"][href*=\"list=\"]"),
         MediaSite("youtube_music", setOf("music.youtube.com"), ".next-button", ".previous-button", "https://music.youtube.com/search?q=", "a[href*=\"watch?v=\"]"),
+        // Spotify's web player (the user, 9 Nov): its desktop site (phones are sent to its app); a song's or a list's page, then its Play;
+        // its search finds little in Greek ("θα πρέπει να κάνει 2 αναζητήσεις"), so Greeklish after
+        MediaSite("spotify", setOf("open.spotify.com"), "[data-testid=control-button-skip-forward]", "[data-testid=control-button-skip-back]",
+            "https://open.spotify.com/search/{q}/tracks", "a[href*=\"/track/\"]", "https://open.spotify.com/search/{q}/playlists", "a[href*=\"/playlist/\"]",
+            desktop = true, press = true, greeklish = true,
+            // shortcut: Spotify's own markup as of Nov 2026, not tried logged in; mend when a click misses
+            like = "[data-testid=now-playing-widget] button[aria-checked=false]", mixes = "https://open.spotify.com/"),
     )
 
     fun of(host: String) = ALL.firstOrNull { host.lowercase() in it.hosts }
     fun byId(id: String?) = ALL.firstOrNull { it.id == id } ?: ALL.first() // plain YouTube is the default
 
     /** AI Assist's search on [site]: its results page, the first result played from there. */
-    fun searchUrl(site: MediaSite, query: String, list: Boolean = false) = (if (list && site.lists.isNotEmpty()) site.lists else site.search) + URLEncoder.encode(query.trim(), "UTF-8")
+    fun searchUrl(site: MediaSite, query: String, list: Boolean = false): String {
+        val t = if (list && site.lists.isNotEmpty()) site.lists else site.search
+        val q = URLEncoder.encode(query.trim(), "UTF-8")
+        return if ("{q}" in t) t.replace("{q}", q.replace("+", "%20")) else t + q // in a path, a space is %20
+    }
+
+    private val LATIN = mapOf('α' to "a", 'β' to "v", 'γ' to "g", 'δ' to "d", 'ε' to "e", 'ζ' to "z", 'η' to "i", 'θ' to "th", 'ι' to "i", 'κ' to "k",
+        'λ' to "l", 'μ' to "m", 'ν' to "n", 'ξ' to "x", 'ο' to "o", 'π' to "p", 'ρ' to "r", 'σ' to "s", 'ς' to "s", 'τ' to "t", 'υ' to "i", 'φ' to "f",
+        'χ' to "h", 'ψ' to "ps", 'ω' to "o")
+
+    /**
+     * [query] in Greeklish as Spotify writes Greek names and titles, by their sound («Yannis Parios», «Haris & Panos Katsimihas»,
+     * «Na Gini To Nero Fotia», «An Den Iha Ke Sena»): ει, οι, υ, η → i, αι → e, χ → h; null when it has no Greek.
+     * Not [sound]: letter by letter, as Spotify writes others («Lavrentis Machairitsas», «Pyx Lax»): ει, οι, αι kept, υ → y, χ → ch.
+     */
+    fun greeklish(query: String, sound: Boolean = true): String? {
+        val s = java.text.Normalizer.normalize(query.lowercase(), java.text.Normalizer.Form.NFD).replace(Regex("\\p{M}"), "")
+        if (s.none { it in LATIN }) return null
+        val t = s.replace("ου", "ou").replace(Regex("([αε])υ(?=[θκξπστφχψ])")) { if (it.groupValues[1] == "α") "af" else "ef" }.replace("αυ", "av").replace("ευ", "ev")
+            .let { if (sound) it.replace("ει", "i").replace("οι", "i").replace("υι", "i").replace("αι", "e") else it.replace("υ", "y").replace("χ", "ch") }
+            .replace("γγ", "ng").replace("γκ", "gk")
+            .replace(Regex("(?<!\\p{L})μπ"), "b").replace(Regex("(?<!\\p{L})ντ"), "d").replace(Regex("(?<!\\p{L})gk"), "g")
+        return buildString { for (c in t) append(LATIN[c] ?: c.toString()) }.trim()
+    }
+
+    /** The searches after the Greek one, each only when the one before found nothing: by sound, then letter by letter. */
+    fun retries(query: String): List<String> = listOfNotNull(greeklish(query), greeklish(query, sound = false)).distinct()
 
     /**
      * [url] is [site]'s results page: by its host and path, not the address it was sent to — a tablet's desktop site
      * (www.youtube.com/results?app=desktop…) and the way back from the consent page change the address (4 Nov).
      */
-    fun isSearch(site: MediaSite, url: String) = runCatching { java.net.URI(url).let { u -> u.host?.lowercase() in site.hosts && u.path in setOf("/results", "/search") } }.getOrDefault(false)
+    fun isSearch(site: MediaSite, url: String) = runCatching { java.net.URI(url).let { u -> u.host?.lowercase() in site.hosts && (u.path in setOf("/results", "/search") || u.path.startsWith("/search/")) } }.getOrDefault(false)
 
     /**
      * A saved station (a ♥ in Player mode is a bookmark) by the words said: the one whose name or address has the most
@@ -355,7 +392,7 @@ internal object MediaSites {
     fun listId(url: String?) = url?.let { Regex("[?&]list=([^&#]+)").find(it)?.groupValues?.get(1) }
 
     /** The site's own buttons for [site], for the page script (empty: the page's media keys alone). */
-    fun buttons(site: MediaSite?) = JSONObject().put("next", site?.next.orEmpty()).put("prev", site?.prev.orEmpty()).put("first", site?.first.orEmpty()).toString()
+    fun buttons(site: MediaSite?) = JSONObject().put("next", site?.next.orEmpty()).put("prev", site?.prev.orEmpty()).put("first", site?.first.orEmpty()).put("like", site?.like.orEmpty()).toString()
 }
 
 /**

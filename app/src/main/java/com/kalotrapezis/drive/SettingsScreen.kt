@@ -423,6 +423,11 @@ internal fun SettingsTab(
             Icon(painterResource(R.drawable.ic_directions_car), contentDescription = null, tint = Color.White,
                 modifier = Modifier.size(32.dp).background(Color(0xFF2B3A4A), RoundedCornerShape(8.dp)).padding(5.dp))
         }) { Switch(checked = car, onCheckedChange = { car = it; CarIcon.show(context, it) }) }
+        // quiet in the car: Android's Do Not Disturb access asked for when it is switched on without it
+        var quiet by remember { mutableStateOf(CarQuiet.wanted(context) && CarQuiet.allowed(context)) }
+        SwitchRow(stringResource(R.string.car_quiet), stringResource(R.string.car_quiet_summary), quiet) { on ->
+            quiet = on; CarQuiet.want(context, on); if (on && !CarQuiet.allowed(context)) CarQuiet.ask(context)
+        }
     }
 }
 

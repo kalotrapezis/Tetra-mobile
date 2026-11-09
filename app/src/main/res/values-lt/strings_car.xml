@@ -5,4 +5,10 @@
     <string name="car_media">Medija</string>
     <string name="car_apps">Programos</string>
     <string name="car_layout">Išdėstymas</string>
+    <string name="car_sms_said">Žinutė nuo %1$s: %2$s. Ar nori atsakyti?</string>
+    <string name="car_sms_say_it">Pasakyk savo žinutę.</string>
+    <string name="car_sms_send_it">„%1$s“. Ar išsiųsti?</string>
+    <string name="car_sms_sent">Išsiųsta.</string>
+    <string name="car_quiet">Tyla automobilyje</string>
+    <string name="car_quiet_summary">Kitų programų pranešimai laukia, kol vairuoji; skambučiai ir garsiai skaitomos žinutės praeina.</string>
 </resources>

@@ -58,7 +58,10 @@ class SmsDeliverReceiver : BroadcastReceiver() {
             })
         }.onFailure { WriterLog.e("Messages: an arriving SMS not stored", it) }
         WriterLog.i("Messages: an SMS arrived (${body.length} characters)")
-        if (PhoneSpam.matches(PhoneSpam.read(), from, PhoneCountry.of(c)) == null) SmsRole.notify(c, from, body) // the spam list's: kept, not announced
+        if (PhoneSpam.matches(PhoneSpam.read(), from, PhoneCountry.of(c)) != null) return // the spam list's: kept, not announced
+        SmsRole.notify(c, from, body)
+        val wait = goAsync() // in the car: read aloud (CarSmsActivity), once Bluetooth has said whether it is
+        CarSmsActivity.arrived(c, from, body) { wait.finish() }
     }
 }
 

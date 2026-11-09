@@ -5,4 +5,10 @@
     <string name="car_media">Midja</string>
     <string name="car_apps">Apps</string>
     <string name="car_layout">Tqassim</string>
+    <string name="car_sms_said">Messaġġ minn %1$s: %2$s. Trid twieġeb?</string>
+    <string name="car_sms_say_it">Għid il-messaġġ tiegħek.</string>
+    <string name="car_sms_send_it">“%1$s”. Nibagħtu?</string>
+    <string name="car_sms_sent">Mibgħut.</string>
+    <string name="car_quiet">Kwiet fil-karozza</string>
+    <string name="car_quiet_summary">In-notifiki ta’ apps oħra jistennew waqt li ssuq; it-telefonati u l-messaġġi moqrija b’leħen għoli jgħaddu.</string>
 </resources>

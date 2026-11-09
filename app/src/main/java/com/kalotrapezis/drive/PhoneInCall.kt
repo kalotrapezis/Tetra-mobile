@@ -92,8 +92,15 @@ internal object PhoneCalls {
         // a ringing call over the lock screen or a dark screen at once; on a phone in use, its heads-up (the full-screen intent)
         val ringing = call.state == Call.STATE_RINGING
         val quiet = s.getSystemService(KeyguardManager::class.java).isKeyguardLocked || !s.getSystemService(PowerManager::class.java).isInteractive
-        if (!ringing || quiet) runCatching { s.startActivity(Intent(s, PhoneCallActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+        // Tetra Car open: the call takes its side pane instead (CarScreen)
+        if ((!ringing || quiet) && !Car.running) runCatching { s.startActivity(Intent(s, PhoneCallActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
             .onFailure { WriterLog.w("Phone: the call screen did not open (${it.message})") }
+        // in the car (the user, 9 Nov: "να σηκώνει τηλέφωνο μετά από 2 δευτερόλεπτα"): answered by itself, unless it stopped ringing
+        if (ringing && calls.size == 1 && Car.answers(s)) Car.inCar(s) { car ->
+            if (car) android.os.Handler(s.mainLooper).postDelayed({
+                if (call in calls && call.state == Call.STATE_RINGING) { WriterLog.i("Phone: answered by itself in the car"); call.answer(android.telecom.VideoProfile.STATE_AUDIO_ONLY) }
+            }, 2_000)
+        }
     }
 
     fun removed(s: PhoneInCallService, call: Call) {

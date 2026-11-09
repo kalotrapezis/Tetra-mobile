@@ -5,4 +5,10 @@
     <string name="car_media">Multimédia</string>
     <string name="car_apps">Apps</string>
     <string name="car_layout">Disposição</string>
+    <string name="car_sms_said">Mensagem de %1$s: %2$s. Queres responder?</string>
+    <string name="car_sms_say_it">Diz a tua mensagem.</string>
+    <string name="car_sms_send_it">«%1$s». Envio?</string>
+    <string name="car_sms_sent">Enviada.</string>
+    <string name="car_quiet">Silêncio no carro</string>
+    <string name="car_quiet_summary">As notificações de outras apps esperam enquanto conduzes; as chamadas e as mensagens lidas em voz alta passam.</string>
 </resources>

@@ -223,6 +223,7 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () -
     }.onFailure { WriterLog.e("Assistant: could not open ${f.name}", it); say(context.getString(R.string.assistant_cannot_open), true) }
     fun go(v: String) = runCatching {
         if (v.startsWith("youtube:")) openYouTube(context, v.removePrefix("youtube:"))
+        else if (v.startsWith("app:")) { if (!carOpenApp(context, v.removePrefix("app:"))) say(context.getString(R.string.assistant_cannot_open), true) }
         else context.startActivity(appletIntent(context, v))
     }.onFailure { WriterLog.e("Assistant: could not open $v", it); say(context.getString(R.string.assistant_cannot_open), true) }
     var dialing by remember { mutableStateOf<PendingCall?>(null) } // a call asked by voice, placed after its name is said

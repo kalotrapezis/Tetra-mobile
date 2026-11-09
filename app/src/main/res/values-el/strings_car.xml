@@ -5,4 +5,10 @@
     <string name="car_media">Πολυμέσα</string>
     <string name="car_apps">Εφαρμογές</string>
     <string name="car_layout">Διάταξη</string>
+    <string name="car_sms_said">Μήνυμα από %1$s: %2$s. Θέλεις να απαντήσεις;</string>
+    <string name="car_sms_say_it">Πες το μήνυμά σου.</string>
+    <string name="car_sms_send_it">«%1$s». Να το στείλω;</string>
+    <string name="car_sms_sent">Στάλθηκε.</string>
+    <string name="car_quiet">Ησυχία στο αυτοκίνητο</string>
+    <string name="car_quiet_summary">Οι ειδοποιήσεις των άλλων εφαρμογών περιμένουν όσο οδηγείς· οι κλήσεις και τα μηνύματά σου που διαβάζονται φωναχτά περνούν.</string>
 </resources>
