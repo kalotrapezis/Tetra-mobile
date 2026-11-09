@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Nosūtīts.</string>
     <string name="car_quiet">Klusums automašīnā</string>
     <string name="car_quiet_summary">Citu lietotņu paziņojumi gaida, kamēr brauc; zvani un skaļi nolasītas ziņas tiek cauri.</string>
+    <string name="car_pair_phone">Savienot tālruni</string>
+    <string name="car_pair_hint">Tālrunī: Tetra › Iestatījumi › Lietotņu ikonas › Savienot ar auto, tad skenē šo kodu.</string>
+    <string name="car_pair_car">Savienot ar auto</string>
+    <string name="car_pair_car_summary">Skenē kodu, ko Tetra Car rāda auto ekrānā: zvani un ziņas tur, tiešraidē, bez sinhronizācijas.</string>
+    <string name="car_bluetooth">Auto Bluetooth</string>
+    <string name="car_bluetooth_none">Izvēlies, kura savienotā ierīce ir auto: tikai tā ieslēdz auto režīmu.</string>
 </resources>

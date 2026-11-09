@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Saadetud.</string>
     <string name="car_quiet">Vaikus autos</string>
     <string name="car_quiet_summary">Teiste rakenduste teavitused ootavad, kuni sõidad; kõned ja etteloetud sõnumid tulevad läbi.</string>
+    <string name="car_pair_phone">Seo telefon</string>
+    <string name="car_pair_hint">Telefonis: Tetra › Seaded › Rakenduste ikoonid › Seo autoga, siis skanni see kood.</string>
+    <string name="car_pair_car">Seo autoga</string>
+    <string name="car_pair_car_summary">Skanni kood, mida Tetra Car auto ekraanil näitab: kõned ja sõnumid seal, otse, ilma sünkroonimata.</string>
+    <string name="car_bluetooth">Auto Bluetooth</string>
+    <string name="car_bluetooth_none">Vali, milline seotud seade on auto: ainult see lülitab autorežiimi sisse.</string>
 </resources>

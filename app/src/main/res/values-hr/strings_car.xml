@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Poslano.</string>
     <string name="car_quiet">Tišina u autu</string>
     <string name="car_quiet_summary">Obavijesti drugih aplikacija čekaju dok voziš; pozivi i poruke pročitane naglas prolaze.</string>
+    <string name="car_pair_phone">Upari telefon</string>
+    <string name="car_pair_hint">Na telefonu: Tetra › Postavke › Ikone aplikacija › Upari s autom, pa skeniraj ovaj kod.</string>
+    <string name="car_pair_car">Upari s autom</string>
+    <string name="car_pair_car_summary">Skeniraj kod koji Tetra Car prikazuje na zaslonu auta: pozivi i poruke tamo, uživo, bez sinkronizacije.</string>
+    <string name="car_bluetooth">Bluetooth auta</string>
+    <string name="car_bluetooth_none">Odaberi koji je upareni uređaj auto: samo on uključuje način za auto.</string>
 </resources>

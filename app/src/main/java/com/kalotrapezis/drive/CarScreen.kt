@@ -79,6 +79,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -104,9 +106,13 @@ class CarActivity : ComponentActivity() {
         WriterLog.i("Tetra Car opened")
         Car.running = true
         CarQuiet.set(this, true)
+        // the car's link to the phone (CarWire): this unit's server for the phone's calls and messages, and a hello every 30 s
+        server = runCatching { SyncServer.acquire(applicationContext, SyncStore(applicationContext)) }.onFailure { WriterLog.w("Car: no server for the phone", it) }.getOrNull()
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) { while (true) { CarWire.hello(applicationContext); kotlinx.coroutines.delay(30_000) } }
         setContent { TetraTheme { CarScreen() } }
     }
-    override fun onDestroy() { Car.running = false; CarQuiet.set(this, false); super.onDestroy() }
+    private var server: SyncServer? = null
+    override fun onDestroy() { Car.running = false; CarQuiet.set(this, false); if (server != null) runCatching { SyncServer.release() }; super.onDestroy() }
     // the steering wheel's voice key, where the head unit passes it on: AI Assist listens
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_VOICE_ASSIST || keyCode == KeyEvent.KEYCODE_SEARCH) { carListen(this); return true }
@@ -129,18 +135,23 @@ internal object Car {
     fun answers(c: Context) = prefs(c).getBoolean("answer_calls", true)
     fun set(c: Context, read: Boolean?, answer: Boolean?) = prefs(c).edit().apply { read?.let { putBoolean("read_sms", it) }; answer?.let { putBoolean("answer_calls", it) } }.apply()
 
-    /** A car's hands-free, by its Bluetooth class: not headphones, not the computer. */
-    fun isCar(deviceClass: Int?) = deviceClass == android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO || deviceClass == android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE
+    /**
+     * The car's Bluetooth, chosen by the user in Settings › Tetra Car (the user, 9 Nov: "otherwise every bluetooth speaker will
+     * open the car app"): its addresses, one per car. None chosen: Bluetooth never puts the phone in the car.
+     */
+    fun cars(c: Context): Set<String> = prefs(c).getStringSet("bt_cars", emptySet()).orEmpty()
+    fun setCars(c: Context, addresses: Set<String>) = prefs(c).edit().putStringSet("bt_cars", addresses).apply()
+    fun isCar(c: Context, address: String?) = address != null && address in cars(c)
 
     /** In the car: Tetra Car open here, or a car connected on Bluetooth's hands-free; [then] on the main thread or Bluetooth's. */
     @android.annotation.SuppressLint("MissingPermission") // checked first
     fun inCar(c: Context, then: (Boolean) -> Unit) {
-        if (running) return then(true)
+        if (running || CarWire.alive()) return then(true) // Tetra Car open here, or on the car's screen and saying hello
         val bt = c.getSystemService(android.bluetooth.BluetoothManager::class.java)?.adapter
-        if (bt == null || !bt.isEnabled || c.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) return then(false)
+        if (cars(c).isEmpty() || bt == null || !bt.isEnabled || c.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) return then(false)
         val asked = runCatching { bt.getProfileProxy(c.applicationContext, object : android.bluetooth.BluetoothProfile.ServiceListener {
             override fun onServiceConnected(profile: Int, proxy: android.bluetooth.BluetoothProfile) {
-                val car = runCatching { proxy.connectedDevices.any { isCar(it.bluetoothClass?.deviceClass) } }.getOrDefault(false)
+                val car = runCatching { proxy.connectedDevices.any { isCar(c, it.address) } }.getOrDefault(false)
                 runCatching { bt.closeProfileProxy(profile, proxy) }
                 then(car)
             }
@@ -275,7 +286,8 @@ private fun CarScreen() {
     }
     // a call or a message takes the side pane for a while (the user, 9 Nov: "replace it … then bring back the app"); the map stays,
     // and with the map alone on the screen, the screen splits until it is over
-    val calling = PhoneCalls.calls.isNotEmpty()
+    val remote by CarWire.call // the phone's call, through the car's link (on a head unit)
+    val calling = PhoneCalls.calls.isNotEmpty() || remote != null
     val covering = calling || message != null
     val shownState = if (covering && state.panes.all { it == CarApp.Maps }) state.laid(CarLayout.Wide) else state
     val coverAt = if (!covering) null else shownState.panes.indices.let { all -> all.firstOrNull { shownState.panes[it] != CarApp.Maps && it == shownState.focus } ?: all.firstOrNull { shownState.panes[it] != CarApp.Maps } ?: 0 }
@@ -309,7 +321,7 @@ private fun CarScreen() {
         // one layout for both children whichever side the dock is on: the pages are never put elsewhere in the tree (the route, the sound go on)
         Layout(modifier = Modifier.fillMaxSize(), content = {
             CarPanes(shownState, opened, coverAt, cover = {
-                if (calling) CarCallPane() else message?.let { m -> CarSmsPane(m) { message = null } }
+                if (PhoneCalls.calls.isNotEmpty()) CarCallPane() else remote?.let { CarRemoteCallPane(it) } ?: message?.let { m -> CarSmsPane(m) { message = null } }
             }, modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = if (side == DockSide.Bottom) 0.dp else 8.dp),
                 focus = { app -> state.panes.indexOf(app).takeIf { it >= 0 && it != state.focus }?.let { set(state.focused(it)) } }) { app ->
                 CompositionLocalProvider(LocalOnBackPressedDispatcherOwner provides backs.getValue(app)) {
@@ -530,10 +542,16 @@ private fun CarApps(close: () -> Unit) {
         }
     }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        var pairing by remember { mutableStateOf(false) }
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(close) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
-            Text(stringResource(R.string.car_apps), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.car_apps), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
+            // the car's own link to the phone (CarWire): its QR, scanned once by the phone
+            if (PhoneRelay.noCalls(context)) androidx.compose.material3.TextButton({ pairing = true }) {
+                Icon(painterResource(R.drawable.ic_phone), null, Modifier.size(20.dp)); Text("  " + stringResource(R.string.car_pair_phone))
+            }
         }
+        if (pairing) CarPairDialog { pairing = false }
         LazyVerticalGrid(GridCells.Adaptive(112.dp), Modifier.fillMaxSize().padding(8.dp)) {
             items(all, key = { it.first.flattenToString() }) { (component, label, icon) ->
                 Column(Modifier.clip(RoundedCornerShape(12.dp)).clickable {
@@ -568,4 +586,61 @@ private fun CarCallPane() {
         onDispose { PhoneCalls.screenShown = false; PhoneCalls.changed(context) }
     }
     PhoneCallScreen(done = {})
+}
+
+/** The phone's call on the car's screen (CarWire): who, how it stands, and its buttons, pressed on the phone. */
+@Composable
+private fun CarRemoteCallPane(s: JSONObject) {
+    val context = LocalContext.current
+    val state = s.optString("state")
+    fun press(what: String) = Thread { CarWire.ask(context, JSONObject().put("call", what)).optString("error").takeIf { it.isNotEmpty() }?.let { WriterLog.w("Car: $what: $it") } }.start()
+    var now by remember { mutableStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(state) { while (state == "active") { now = System.currentTimeMillis(); delay(1000) } }
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
+        Box(Modifier.size(72.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
+            Icon(painterResource(R.drawable.ic_person), null, Modifier.size(40.dp), tint = Color.White)
+        }
+        Text(s.optString("name").ifBlank { s.optString("number") }, style = MaterialTheme.typography.headlineSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(when (state) {
+            "active" -> s.optLong("since").takeIf { it > 0 }?.let { ((now - it) / 1000).let { t -> "%d:%02d".format(t / 60, t % 60) } }.orEmpty()
+            "ringing" -> stringResource(R.string.phone_answer) + "?"
+            else -> ""
+        }, style = MaterialTheme.typography.titleMedium)
+        Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+            if (state == "ringing") {
+                RoundButton(R.drawable.ic_call_end, stringResource(R.string.phone_decline), CALL_RED, 64.dp) { press("decline") }
+                RoundButton(R.drawable.ic_call, stringResource(R.string.phone_answer), CALL_GREEN, 64.dp) { press("answer") }
+            } else if (state != "ended") {
+                val muted = s.optBoolean("muted"); val loud = s.optBoolean("speaker")
+                RoundButton(R.drawable.ic_mic_off, stringResource(if (muted) R.string.phone_unmute else R.string.phone_mute), if (muted) MaterialTheme.colorScheme.primary else null, 56.dp) { press(if (muted) "unmute" else "mute") }
+                RoundButton(R.drawable.ic_call_end, stringResource(R.string.phone_end), CALL_RED, 64.dp) { press("end") }
+                RoundButton(R.drawable.ic_volume_up, stringResource(R.string.phone_speaker), if (loud) MaterialTheme.colorScheme.primary else null, 56.dp) { press(if (loud) "unspeaker" else "speaker") }
+            }
+        }
+    }
+}
+
+/** Tetra Car's code for the phone to scan (Settings › Tetra Car › Pair with the car on the phone), until it is paired. */
+@Composable
+private fun CarPairDialog(close: () -> Unit) {
+    val context = LocalContext.current
+    var qr by remember { mutableStateOf<String?>(null) }
+    var paired by remember { mutableStateOf<String?>(null) }
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        val server = runCatching { SyncServer.acquire(context.applicationContext, SyncStore(context.applicationContext)) }.getOrNull()
+        qr = server?.let { runCatching { CarWire.carQr(it) }.getOrNull() }
+        onDispose { if (server != null) runCatching { SyncServer.release() } }
+    }
+    val before = remember { CarWire.link(context)?.theirToken }
+    LaunchedEffect(Unit) { while (paired == null) { CarWire.link(context)?.takeIf { it.theirToken != before }?.let { paired = it.name }; delay(1000) } }
+    val bitmap = remember(qr) { qr?.let { runCatching { qrBitmap(it).asImageBitmap() }.getOrNull() } }
+    androidx.compose.material3.AlertDialog(onDismissRequest = close, confirmButton = { androidx.compose.material3.TextButton(close) { Text(stringResource(R.string.common_close)) } },
+        title = { Text(stringResource(R.string.car_pair_phone)) },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                paired?.let { Text(stringResource(R.string.codes_paired, it), style = MaterialTheme.typography.titleMedium) }
+                    ?: bitmap?.let { Image(it, null, Modifier.size(240.dp).background(Color.White).padding(8.dp)) }
+                if (paired == null) Text(stringResource(R.string.car_pair_hint))
+            }
+        })
 }

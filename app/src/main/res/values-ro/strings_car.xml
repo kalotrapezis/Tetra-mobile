@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Trimis.</string>
     <string name="car_quiet">Liniște în mașină</string>
     <string name="car_quiet_summary">Notificările altor aplicații așteaptă cât conduci; apelurile și mesajele citite cu voce tare trec.</string>
+    <string name="car_pair_phone">Asociază telefonul</string>
+    <string name="car_pair_hint">Pe telefon: Tetra › Setări › Pictogramele aplicațiilor › Asociază cu mașina, apoi scanează acest cod.</string>
+    <string name="car_pair_car">Asociază cu mașina</string>
+    <string name="car_pair_car_summary">Scanează codul pe care Tetra Car îl arată pe ecranul mașinii: apelurile și mesajele acolo, live, fără sincronizare.</string>
+    <string name="car_bluetooth">Bluetooth-ul mașinii</string>
+    <string name="car_bluetooth_none">Alege care dispozitiv asociat este mașina: doar el pune telefonul în modul mașină.</string>
 </resources>

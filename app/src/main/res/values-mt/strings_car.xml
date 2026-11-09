@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Mibgħut.</string>
     <string name="car_quiet">Kwiet fil-karozza</string>
     <string name="car_quiet_summary">In-notifiki ta’ apps oħra jistennew waqt li ssuq; it-telefonati u l-messaġġi moqrija b’leħen għoli jgħaddu.</string>
+    <string name="car_pair_phone">Qabbad it-telefon</string>
+    <string name="car_pair_hint">Fuq it-telefon: Tetra › Settings › Ikoni tal-apps › Qabbad mal-karozza, imbagħad skennja dan il-kodiċi.</string>
+    <string name="car_pair_car">Qabbad mal-karozza</string>
+    <string name="car_pair_car_summary">Skennja l-kodiċi li juri Tetra Car fuq l-iskrin tal-karozza: telefonati u messaġġi hemm, live, mingħajr sinkronizzazzjoni.</string>
+    <string name="car_bluetooth">Il-Bluetooth tal-karozza</string>
+    <string name="car_bluetooth_none">Agħżel liema apparat imqabbad hu l-karozza: hu biss idaħħal it-telefon fil-modalità tal-karozza.</string>
 </resources>

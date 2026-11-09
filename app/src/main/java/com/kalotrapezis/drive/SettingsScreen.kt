@@ -428,6 +428,27 @@ internal fun SettingsTab(
         SwitchRow(stringResource(R.string.car_quiet), stringResource(R.string.car_quiet_summary), quiet) { on ->
             quiet = on; CarQuiet.want(context, on); if (on && !CarQuiet.allowed(context)) CarQuiet.ask(context)
         }
+        // which paired Bluetooth device is the car: only it puts the phone in the car (Car.inCar, quiet, calls answered)
+        if (!PhoneRelay.noCalls(context)) {
+            var choosing by remember { mutableStateOf(false) }
+            var chosen by remember { mutableStateOf(Car.cars(context)) }
+            val askBt = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { ok -> if (ok) choosing = true }
+            val bonded = remember(choosing) { carBluetoothDevices(context) }
+            SettingRow(stringResource(R.string.car_bluetooth), bonded.filter { it.first in chosen }.joinToString(", ") { it.second }.ifEmpty { stringResource(R.string.car_bluetooth_none) }, onClick = {
+                if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == android.content.pm.PackageManager.PERMISSION_GRANTED) choosing = true else askBt.launch(Manifest.permission.BLUETOOTH_CONNECT)
+            })
+            if (choosing) AlertDialog(onDismissRequest = { choosing = false }, confirmButton = { TextButton({ choosing = false }) { Text(stringResource(R.string.common_close)) } },
+                title = { Text(stringResource(R.string.car_bluetooth)) },
+                text = { Column { bonded.forEach { (address, name) ->
+                    val on = address in chosen
+                    Row(Modifier.fillMaxWidth().clickable { chosen = if (on) chosen - address else chosen + address; Car.setCars(context, chosen) }, verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(on, { chosen = if (on) chosen - address else chosen + address; Car.setCars(context, chosen) }); Text(name)
+                    }
+                } } })
+        }
+        // the car's own link (CarWire): the phone scans the code Tetra Car shows on the car's screen
+        if (!PhoneRelay.noCalls(context)) SettingRow(stringResource(R.string.car_pair_car), CarWire.link(context)?.let { stringResource(R.string.codes_paired, it.name) } ?: stringResource(R.string.car_pair_car_summary),
+            onClick = { openApplet(context, Applet.Codes.name) })
     }
 }
 
@@ -1274,3 +1295,9 @@ internal fun SettingsTab(
         }
     }
 }
+
+/** The phone's paired Bluetooth devices, address and name, for Settings › Tetra Car › The car's Bluetooth. */
+@android.annotation.SuppressLint("MissingPermission") // asked before the list is opened
+private fun carBluetoothDevices(c: Context): List<Pair<String, String>> = runCatching {
+    c.getSystemService(android.bluetooth.BluetoothManager::class.java).adapter.bondedDevices.map { it.address to (it.name ?: it.address) }.sortedBy { it.second.lowercase() }
+}.getOrDefault(emptyList())

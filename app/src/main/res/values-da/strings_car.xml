@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Sendt.</string>
     <string name="car_quiet">Ro i bilen</string>
     <string name="car_quiet_summary">Andre apps’ notifikationer venter, mens du kører; opkald og dine beskeder læst højt kommer igennem.</string>
+    <string name="car_pair_phone">Par din telefon</string>
+    <string name="car_pair_hint">På telefonen: Tetra › Indstillinger › App-ikoner › Par med bilen, og scan så denne kode.</string>
+    <string name="car_pair_car">Par med bilen</string>
+    <string name="car_pair_car_summary">Scan koden, som Tetra Car viser på bilens skærm: opkald og beskeder dér, live, uden synkronisering.</string>
+    <string name="car_bluetooth">Bilens Bluetooth</string>
+    <string name="car_bluetooth_none">Vælg hvilken parret enhed der er bilen: kun den sætter telefonen i biltilstand.</string>
 </resources>

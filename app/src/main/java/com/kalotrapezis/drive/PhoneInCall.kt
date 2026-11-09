@@ -118,6 +118,7 @@ internal object PhoneCalls {
     // (the phone's own calls stay its own, as before Tetra was the phone app).
     private val toComputer = mutableSetOf<Call>()
     fun report(c: Context, call: Call) {
+        CarWire.callChanged(c, call) // the car's screen, while it is there (CarWire)
         if (call.parent != null || !PhonePrefs.pcCalls(c)) return // a merged call's people: the merged call speaks for them
         val incoming = call.details.callDirection == Call.Details.DIRECTION_INCOMING
         if (call !in toComputer) { if (call.state == Call.STATE_DISCONNECTED || !(incoming || PhoneCall.computerAsked(number(call)))) return; toComputer.add(call) }

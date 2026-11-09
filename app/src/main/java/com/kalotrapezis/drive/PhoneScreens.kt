@@ -80,6 +80,8 @@ class PhoneCallActivity : ComponentActivity() {
 
 /** Places a call (CALL_PHONE, which the Phone app role grants), on the loudspeaker when [speaker]; false without the permission. */
 internal fun placePhoneCall(c: Context, number: String, speaker: Boolean = false): Boolean {
+    // Tetra Car on a head unit: the paired phone places it (CarWire)
+    if (CarWire.usable(c)) { Thread { CarWire.ask(c, org.json.JSONObject().put("place", number)).optString("error").takeIf { it.isNotEmpty() }?.let { WriterLog.w("Car: call not placed: $it") } }.start(); return true }
     if (c.checkSelfPermission(Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) return false
     PhoneCalls.speakerAt = if (speaker) System.currentTimeMillis() else 0L
     val extras = Bundle().apply { if (speaker) putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true) }

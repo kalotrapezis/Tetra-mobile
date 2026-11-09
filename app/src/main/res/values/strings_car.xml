@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Sent.</string>
     <string name="car_quiet">Quiet in the car</string>
     <string name="car_quiet_summary">Other apps\' notifications wait while you drive; calls and your messages read aloud come through.</string>
+    <string name="car_pair_phone">Pair your phone</string>
+    <string name="car_pair_hint">On your phone: Tetra › Settings › App icons › Pair with the car, then scan this code.</string>
+    <string name="car_pair_car">Pair with the car</string>
+    <string name="car_pair_car_summary">Scan the code Tetra Car shows on the car’s screen: its calls and messages there, live, with nothing synced.</string>
+    <string name="car_bluetooth">The car’s Bluetooth</string>
+    <string name="car_bluetooth_none">Choose which paired device is the car: only it puts the phone in car mode.</string>
 </resources>

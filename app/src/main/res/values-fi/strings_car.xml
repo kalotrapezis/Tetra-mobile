@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Lähetetty.</string>
     <string name="car_quiet">Hiljaisuus autossa</string>
     <string name="car_quiet_summary">Muiden sovellusten ilmoitukset odottavat ajon ajan; puhelut ja ääneen luetut viestit tulevat läpi.</string>
+    <string name="car_pair_phone">Yhdistä puhelin</string>
+    <string name="car_pair_hint">Puhelimessa: Tetra › Asetukset › Sovelluskuvakkeet › Yhdistä autoon, ja skannaa tämä koodi.</string>
+    <string name="car_pair_car">Yhdistä autoon</string>
+    <string name="car_pair_car_summary">Skannaa koodi, jonka Tetra Car näyttää auton näytöllä: puhelut ja viestit siellä, suorana, ilman synkronointia.</string>
+    <string name="car_bluetooth">Auton Bluetooth</string>
+    <string name="car_bluetooth_none">Valitse, mikä paritettu laite on auto: vain se laittaa autotilan päälle.</string>
 </resources>

@@ -54,7 +54,5 @@ class CarStateTest {
         assertEquals(CarApp.Phone, carAppFor("Τηλέφωνο"))
         assertEquals(CarApp.Browser, carAppFor("Spotify"))
         assertEquals(null, carAppFor("Viber"))
-        assertEquals(true, Car.isCar(android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO))
-        assertEquals(false, Car.isCar(android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES))
     }
 }

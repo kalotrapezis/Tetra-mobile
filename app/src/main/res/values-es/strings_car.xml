@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Enviado.</string>
     <string name="car_quiet">Silencio en el coche</string>
     <string name="car_quiet_summary">Las notificaciones de otras apps esperan mientras conduces; las llamadas y tus mensajes leídos en voz alta pasan.</string>
+    <string name="car_pair_phone">Vincular el teléfono</string>
+    <string name="car_pair_hint">En el teléfono: Tetra › Ajustes › Iconos de apps › Vincular con el coche, y escanea este código.</string>
+    <string name="car_pair_car">Vincular con el coche</string>
+    <string name="car_pair_car_summary">Escanea el código que Tetra Car muestra en la pantalla del coche: llamadas y mensajes allí, en directo, sin sincronizar.</string>
+    <string name="car_bluetooth">Bluetooth del coche</string>
+    <string name="car_bluetooth_none">Elige qué dispositivo vinculado es el coche: solo él pone el teléfono en modo coche.</string>
 </resources>

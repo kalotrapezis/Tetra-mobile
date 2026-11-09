@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Изпратено.</string>
     <string name="car_quiet">Тишина в колата</string>
     <string name="car_quiet_summary">Известията на другите приложения чакат, докато шофираш; обажданията и прочетените на глас съобщения минават.</string>
+    <string name="car_pair_phone">Сдвои телефона</string>
+    <string name="car_pair_hint">На телефона: Tetra › Настройки › Икони на приложенията › Сдвояване с колата, после сканирай този код.</string>
+    <string name="car_pair_car">Сдвояване с колата</string>
+    <string name="car_pair_car_summary">Сканирай кода, който Tetra Car показва на екрана на колата: обажданията и съобщенията там, на живо, без синхронизиране.</string>
+    <string name="car_bluetooth">Bluetooth на колата</string>
+    <string name="car_bluetooth_none">Избери кое сдвоено устройство е колата: само то включва режима за кола.</string>
 </resources>
