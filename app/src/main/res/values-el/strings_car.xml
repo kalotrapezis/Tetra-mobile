@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Στάλθηκε.</string>
     <string name="car_quiet">Ησυχία στο αυτοκίνητο</string>
     <string name="car_quiet_summary">Οι ειδοποιήσεις των άλλων εφαρμογών περιμένουν όσο οδηγείς· οι κλήσεις και τα μηνύματά σου που διαβάζονται φωναχτά περνούν.</string>
+    <string name="car_pair_phone">Σύνδεση κινητού</string>
+    <string name="car_pair_hint">Στο κινητό: Tetra › Ρυθμίσεις › Εικονίδια εφαρμογών › Σύνδεση με το αυτοκίνητο, και σκάναρε αυτόν τον κωδικό.</string>
+    <string name="car_pair_car">Σύνδεση με το αυτοκίνητο</string>
+    <string name="car_pair_car_summary">Σκάναρε τον κωδικό που δείχνει το Tetra Car στην οθόνη του αυτοκινήτου: κλήσεις και μηνύματα εκεί, ζωντανά, χωρίς συγχρονισμό.</string>
+    <string name="car_bluetooth">Bluetooth του αυτοκινήτου</string>
+    <string name="car_bluetooth_none">Διάλεξε ποια συζευγμένη συσκευή είναι το αυτοκίνητο: μόνο αυτή βάζει το κινητό σε λειτουργία αυτοκινήτου.</string>
 </resources>

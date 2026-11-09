@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Seolta.</string>
     <string name="car_quiet">Ciúnas sa charr</string>
     <string name="car_quiet_summary">Fanann fógraí aipeanna eile fad a bhíonn tú ag tiomáint; tagann glaonna agus do theachtaireachtaí léite os ard tríd.</string>
+    <string name="car_pair_phone">Péireáil do ghuthán</string>
+    <string name="car_pair_hint">Ar an nguthán: Tetra › Socruithe › Deilbhíní aipe › Péireáil leis an gcarr, ansin scanáil an cód seo.</string>
+    <string name="car_pair_car">Péireáil leis an gcarr</string>
+    <string name="car_pair_car_summary">Scanáil an cód a thaispeánann Tetra Car ar scáileán an chairr: glaonna agus teachtaireachtaí ansin, beo, gan sioncronú.</string>
+    <string name="car_bluetooth">Bluetooth an chairr</string>
+    <string name="car_bluetooth_none">Roghnaigh cén gléas péireáilte an carr: is é amháin a chuireann an guthán i mód cairr.</string>
 </resources>

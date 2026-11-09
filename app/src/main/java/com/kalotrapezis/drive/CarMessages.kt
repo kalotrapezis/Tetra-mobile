@@ -47,6 +47,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.ConcurrentHashMap
+import org.json.JSONObject
 
 /**
  * A message in the car (the user, 9 Nov): read aloud, «θέλεις να απαντήσεις;», the reply said and read back, «να το στείλω;»;
@@ -79,6 +80,10 @@ class CarSmsActivity : ComponentActivity() {
         /** An SMS arrived (SmsDeliverReceiver): in the car, this screen; [done] when that is decided. */
         fun arrived(c: Context, from: String, body: String, done: () -> Unit) {
             if (!Car.reads(c)) return done()
+            if (CarWire.alive()) { // Tetra Car on the car's screen: it reads it there, the reply comes back here (CarWire)
+                Thread { CarWire.tell(c, JSONObject().put("type", "sms").put("from", from).put("name", PhoneCalls.contactFor(from)?.name ?: from).put("body", body)); done() }.start()
+                return
+            }
             Car.inCar(c) { yes ->
                 if (!yes) return@inCar done()
                 Thread {
@@ -109,14 +114,15 @@ class CarSmsActivity : ComponentActivity() {
     }
 }
 
-internal data class CarMessage(val from: String, val name: String, val body: String)
+/** [remote]: arrived on the paired phone (CarWire), and its reply is sent there. */
+internal data class CarMessage(val from: String, val name: String, val body: String, val remote: Boolean = false)
 
 /**
  * The talk about a message (CarSmsActivity, or Tetra Car's side pane): read aloud, «θέλεις να απαντήσεις;», the reply heard and
  * read back, «να το στείλω;», sent on a yes; anything else ends it. [music]: the Browser's sound paused here, and played after.
  */
 internal suspend fun carTalk(c: Context, from: String, name: String, body: String, step: androidx.compose.runtime.MutableIntState,
-                             reply: androidx.compose.runtime.MutableState<String>, music: Boolean) {
+                             reply: androidx.compose.runtime.MutableState<String>, music: Boolean, remote: Boolean = false) {
     val audio = c.getSystemService(AudioManager::class.java)
     val focus = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT).build()
     val paused = music && BrowserMedia.control != null && BrowserMedia.playing // the user, 9 Nov: "stop the music on call or message"
@@ -129,7 +135,7 @@ internal suspend fun carTalk(c: Context, from: String, name: String, body: Strin
     try {
         CarSpeech.say(c, c.getString(R.string.car_sms_said, name, body))
         val key = runCatching { AssistantNet.key(c) }.getOrNull()
-        if (key == null || !hasMic(c) || !SmsBox.canSend(c)) { WriterLog.i("Car: a message read, no reply asked (key, microphone or SMS)"); return }
+        if (key == null || !hasMic(c) || !(remote || SmsBox.canSend(c))) { WriterLog.i("Car: a message read, no reply asked (key, microphone or SMS)"); return }
         step.intValue = 1
         if (AssistantChat.yesNo(heard(key, 6_000) ?: return) != true) return
         step.intValue = 2
@@ -138,8 +144,9 @@ internal suspend fun carTalk(c: Context, from: String, name: String, body: Strin
         reply.value = text; step.intValue = 3
         CarSpeech.say(c, c.getString(R.string.car_sms_send_it, text))
         if (AssistantChat.yesNo(heard(key, 6_000) ?: return) == true) {
-            SmsBox.send(c, from, text)
-            CarSpeech.say(c, c.getString(R.string.car_sms_sent))
+            val sent = if (!remote) { SmsBox.send(c, from, text); true }
+                else withContext(Dispatchers.IO) { !CarWire.ask(c, JSONObject().put("sms", JSONObject().put("to", from).put("text", text))).has("error") }
+            if (sent) CarSpeech.say(c, c.getString(R.string.car_sms_sent)) else WriterLog.w("Car: the reply did not reach the phone")
         }
     } finally {
         audio.abandonAudioFocusRequest(focus)
@@ -153,7 +160,7 @@ internal fun CarSmsPane(m: CarMessage, done: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val step = androidx.compose.runtime.remember(m) { androidx.compose.runtime.mutableIntStateOf(0) }
     val reply = androidx.compose.runtime.remember(m) { mutableStateOf("") }
-    androidx.compose.runtime.LaunchedEffect(m) { carTalk(context, m.from, m.name, m.body, step, reply, music = false); done() }
+    androidx.compose.runtime.LaunchedEffect(m) { carTalk(context, m.from, m.name, m.body, step, reply, music = false, remote = m.remote); done() }
     CarSmsCard(m.name, m.body, step.intValue, reply.value, dim = false, close = done)
 }
 
@@ -251,7 +258,7 @@ class CarBluetoothReceiver : android.content.BroadcastReceiver() {
     override fun onReceive(c: Context, intent: Intent) {
         val device = if (android.os.Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(android.bluetooth.BluetoothDevice.EXTRA_DEVICE, android.bluetooth.BluetoothDevice::class.java)
             else @Suppress("DEPRECATION") intent.getParcelableExtra(android.bluetooth.BluetoothDevice.EXTRA_DEVICE)
-        val car = runCatching { Car.isCar(device?.bluetoothClass?.deviceClass) }.getOrDefault(false)
+        val car = runCatching { Car.isCar(c, device?.address) }.getOrDefault(false)
         if (!car || Car.running) return
         val on = intent.action == android.bluetooth.BluetoothDevice.ACTION_ACL_CONNECTED
         WriterLog.i("Car: the car's Bluetooth ${if (on) "joined" else "left"}")

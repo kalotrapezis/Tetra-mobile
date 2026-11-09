@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Gesendet.</string>
     <string name="car_quiet">Ruhe im Auto</string>
     <string name="car_quiet_summary">Mitteilungen anderer Apps warten, solange du fährst; Anrufe und vorgelesene Nachrichten kommen durch.</string>
+    <string name="car_pair_phone">Telefon koppeln</string>
+    <string name="car_pair_hint">Auf dem Telefon: Tetra › Einstellungen › App-Symbole › Mit dem Auto koppeln, dann diesen Code scannen.</string>
+    <string name="car_pair_car">Mit dem Auto koppeln</string>
+    <string name="car_pair_car_summary">Scanne den Code, den Tetra Car auf dem Bildschirm des Autos zeigt: Anrufe und Nachrichten dort, live, ohne Synchronisierung.</string>
+    <string name="car_bluetooth">Bluetooth des Autos</string>
+    <string name="car_bluetooth_none">Wähle, welches gekoppelte Gerät das Auto ist: nur es schaltet den Automodus ein.</string>
 </resources>

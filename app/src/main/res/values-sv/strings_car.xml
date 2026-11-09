@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Skickat.</string>
     <string name="car_quiet">Tyst i bilen</string>
     <string name="car_quiet_summary">Andra appars aviseringar väntar medan du kör; samtal och meddelanden som läses upp kommer fram.</string>
+    <string name="car_pair_phone">Para ihop telefonen</string>
+    <string name="car_pair_hint">På telefonen: Tetra › Inställningar › Appikoner › Para ihop med bilen, och skanna sedan den här koden.</string>
+    <string name="car_pair_car">Para ihop med bilen</string>
+    <string name="car_pair_car_summary">Skanna koden som Tetra Car visar på bilens skärm: samtal och meddelanden där, live, utan synkning.</string>
+    <string name="car_bluetooth">Bilens Bluetooth</string>
+    <string name="car_bluetooth_none">Välj vilken parkopplad enhet som är bilen: bara den sätter telefonen i billäge.</string>
 </resources>

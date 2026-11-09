@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Išsiųsta.</string>
     <string name="car_quiet">Tyla automobilyje</string>
     <string name="car_quiet_summary">Kitų programų pranešimai laukia, kol vairuoji; skambučiai ir garsiai skaitomos žinutės praeina.</string>
+    <string name="car_pair_phone">Susieti telefoną</string>
+    <string name="car_pair_hint">Telefone: Tetra › Nustatymai › Programų piktogramos › Susieti su automobiliu, tada nuskenuok šį kodą.</string>
+    <string name="car_pair_car">Susieti su automobiliu</string>
+    <string name="car_pair_car_summary">Nuskenuok kodą, kurį Tetra Car rodo automobilio ekrane: skambučiai ir žinutės ten, tiesiogiai, be sinchronizavimo.</string>
+    <string name="car_bluetooth">Automobilio Bluetooth</string>
+    <string name="car_bluetooth_none">Pasirink, kuris susietas įrenginys yra automobilis: tik jis įjungia automobilio režimą.</string>
 </resources>

@@ -25,6 +25,16 @@ How to write here:
       television, to show information"): the sheet shows Live's Cassette while it listens and thinks, and its answer (text and cards)
       on a VHS-era TV's screen (VhsTv: rabbit ears, knobs, scan lines, a switch-on line and tracking band; still when animations are off).
       Cassette and LivePhase are internal, as on claude/home-widget. Not checked on a device.
+- [x] (car-mode session, 9 Nov; branch `car-wire`, not merged) **Tetra Car ↔ phone: the car's own link** (the user: "this one to one
+      communication just for the car app … the only exception"; "the assistant … requests"; "every bluetooth speaker will open the car
+      app"). CarWire: the unit shows a QR (Tetra Car › Apps › Pair your phone; Sync's code marked "car"), the phone scans it (Settings ›
+      App icons › Pair with the car → Codes), each keeps one link in its own prefs — Sync's pairing and peers untouched. SyncServer's
+      /car/pair, /car/hello (the unit every 30 s: the phone is "in the car" for 90 s, quiet on), /car/event (phone → unit: a message, a
+      call's state), /car/do (unit → phone: answer, decline, end, mute, speaker, place, send an SMS). On the unit a message's talk sends
+      its reply through the phone, a call shows in the side pane with its buttons, AI Assist's calls are placed by the phone; the AI
+      itself is asked by the unit over the hotspot. The phone's gateway is tried when the unit's address changed. The car's Bluetooth
+      is chosen from the paired devices (Settings › The car's Bluetooth), no longer guessed by its class. On an emulator: /car/…
+      refuses unpaired requests and wrong codes, Sync unchanged. **Open:** pairing and the live link never run between two devices.
 - [x] (car-mode session, 9 Nov; branch `car-mode`, not merged) **Tetra Car: in the car** (the user: "διαβάζει τα μηνύματα … να με ρωτάει αν
       θέλω να απαντήσω … να σηκώνει τηλέφωνο μετά από 2 δευτερόλεπτα"; "replace it … then bring back the app"; "the map is the only thing
       important"; "stop the music on call or message"; "block notifications"). In the car = Tetra Car open, or the phone on a car's

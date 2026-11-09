@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Odesláno.</string>
     <string name="car_quiet">Ticho v autě</string>
     <string name="car_quiet_summary">Oznámení ostatních aplikací během jízdy počkají; hovory a tvé zprávy čtené nahlas projdou.</string>
+    <string name="car_pair_phone">Spárovat telefon</string>
+    <string name="car_pair_hint">V telefonu: Tetra › Nastavení › Ikony aplikací › Spárovat s autem, pak naskenuj tento kód.</string>
+    <string name="car_pair_car">Spárovat s autem</string>
+    <string name="car_pair_car_summary">Naskenuj kód, který Tetra Car ukazuje na obrazovce auta: hovory a zprávy tam, živě, bez synchronizace.</string>
+    <string name="car_bluetooth">Bluetooth auta</string>
+    <string name="car_bluetooth_none">Vyber, které spárované zařízení je auto: jen ono zapne režim auta.</string>
 </resources>

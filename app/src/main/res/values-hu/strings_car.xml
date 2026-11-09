@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Elküldve.</string>
     <string name="car_quiet">Csend az autóban</string>
     <string name="car_quiet_summary">Más alkalmazások értesítései várnak vezetés közben; a hívások és a felolvasott üzenetek átjönnek.</string>
+    <string name="car_pair_phone">Telefon párosítása</string>
+    <string name="car_pair_hint">A telefonon: Tetra › Beállítások › Alkalmazásikonok › Párosítás az autóval, majd olvasd be ezt a kódot.</string>
+    <string name="car_pair_car">Párosítás az autóval</string>
+    <string name="car_pair_car_summary">Olvasd be a kódot, amit a Tetra Car az autó kijelzőjén mutat: hívások és üzenetek ott, élőben, szinkronizálás nélkül.</string>
+    <string name="car_bluetooth">Az autó Bluetooth-a</string>
+    <string name="car_bluetooth_none">Válaszd ki, melyik párosított eszköz az autó: csak az kapcsolja be az autós módot.</string>
 </resources>

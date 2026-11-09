@@ -153,8 +153,9 @@ internal fun CodeScannerTab(back: () -> Unit, onCode: ((String) -> Boolean)? = n
         pairStatus = context.getString(R.string.codes_pairing)
         pairing = true
         scope.launch {
-            pairStatus = runCatching { withContext(Dispatchers.IO) { SyncStore(context.applicationContext).let { SyncClient(context.applicationContext, it).pair(qr) } } }
-                .fold({ context.getString(R.string.codes_paired, it.name) }, { it.message ?: context.getString(R.string.codes_pairing_failed) })
+            // Tetra Car's QR: the car's own link (CarWire), Sync's pairing left as it is
+            pairStatus = runCatching { withContext(Dispatchers.IO) { if (CarWire.isCarQr(raw)) CarWire.pair(context.applicationContext, qr) else SyncStore(context.applicationContext).let { SyncClient(context.applicationContext, it).pair(qr).name } } }
+                .fold({ context.getString(R.string.codes_paired, it) }, { it.message ?: context.getString(R.string.codes_pairing_failed) })
             pairing = false
         }
     }

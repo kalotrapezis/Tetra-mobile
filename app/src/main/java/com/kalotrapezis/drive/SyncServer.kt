@@ -272,6 +272,13 @@ internal class SyncServer(private val context: Context, private val store: SyncS
                 reply(output, if ("transit" in e.message.orEmpty()) 422 else 400, JSONObject().put("error", e.message))
             }
         }
+        // Tetra Car's own link (CarWire): live calls and messages between the car's screen and the phone; never sync, never peers
+        if (method == "POST" && path.startsWith("/car/") && length in 0..65536) {
+            val raw = ByteArray(length.toInt()).also { var read = 0; while (read < length.toInt()) { val n = stream.read(it, read, length.toInt() - read); if (n < 0) break; read += n } }
+            val (status, answer) = CarWire.serve(context, path.substringBefore('?'), runCatching { JSONObject(String(raw, Charsets.UTF_8)) }.getOrDefault(JSONObject()),
+                bearer, { useCode(it) }, fingerprint, port)
+            return reply(output, status, answer)
+        }
         if (method != "POST" || path != "/pair" || length !in 1..8192) return reply(output, 404, JSONObject().put("error", "Unknown request."))
         val body = ByteArray(length.toInt()).also { var read = 0; while (read < length.toInt()) { val n = stream.read(it, read, length.toInt() - read); if (n < 0) break; read += n } }
         reply(output, 200, pair(runCatching { JSONObject(String(body, Charsets.UTF_8)) }.getOrDefault(JSONObject())))

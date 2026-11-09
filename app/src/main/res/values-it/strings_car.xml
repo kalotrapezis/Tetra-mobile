@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Inviato.</string>
     <string name="car_quiet">Silenzio in auto</string>
     <string name="car_quiet_summary">Le notifiche delle altre app aspettano mentre guidi; le chiamate e i tuoi messaggi letti ad alta voce passano.</string>
+    <string name="car_pair_phone">Abbina il telefono</string>
+    <string name="car_pair_hint">Sul telefono: Tetra › Impostazioni › Icone app › Abbina all’auto, poi scansiona questo codice.</string>
+    <string name="car_pair_car">Abbina all’auto</string>
+    <string name="car_pair_car_summary">Scansiona il codice che Tetra Car mostra sullo schermo dell’auto: chiamate e messaggi lì, dal vivo, senza sincronizzare.</string>
+    <string name="car_bluetooth">Bluetooth dell’auto</string>
+    <string name="car_bluetooth_none">Scegli quale dispositivo abbinato è l’auto: solo lui mette il telefono in modalità auto.</string>
 </resources>

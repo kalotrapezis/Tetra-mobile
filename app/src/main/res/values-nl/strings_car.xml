@@ -11,4 +11,10 @@
     <string name="car_sms_sent">Verstuurd.</string>
     <string name="car_quiet">Rust in de auto</string>
     <string name="car_quiet_summary">Meldingen van andere apps wachten terwijl je rijdt; oproepen en voorgelezen berichten komen door.</string>
+    <string name="car_pair_phone">Telefoon koppelen</string>
+    <string name="car_pair_hint">Op de telefoon: Tetra › Instellingen › App-pictogrammen › Koppelen met de auto, en scan dan deze code.</string>
+    <string name="car_pair_car">Koppelen met de auto</string>
+    <string name="car_pair_car_summary">Scan de code die Tetra Car op het scherm van de auto toont: oproepen en berichten daar, live, zonder synchronisatie.</string>
+    <string name="car_bluetooth">Bluetooth van de auto</string>
+    <string name="car_bluetooth_none">Kies welk gekoppeld apparaat de auto is: alleen dat zet de telefoon in automodus.</string>
 </resources>
