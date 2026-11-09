@@ -346,6 +346,8 @@ private fun CarMediaTiles(modifier: Modifier, pick: (JSONObject) -> Unit) {
     val choices = listOf(
         Triple("YouTube Music", Color(0xFFC62828), JSONObject().put("url", "https://music.youtube.com").put("open", true)),
         Triple("YouTube", Color(0xFFE53935), JSONObject().put("url", "https://m.youtube.com").put("open", true)),
+        // Spotify's web player (the user, 9 Nov: "as a webpage add the spotify as well"): its desktop site, as it sends phones to its app
+        Triple("Spotify", Color(0xFF1E8E3E), JSONObject().put("url", "https://open.spotify.com").put("open", true).put("desktop", true)),
         Triple("Live24.gr", Color(0xFF1565C0), JSONObject().put("url", live)),
     )
     BoxWithConstraints(modifier.background(MaterialTheme.colorScheme.surface).padding(12.dp)) {
@@ -357,8 +359,11 @@ private fun CarMediaTiles(modifier: Modifier, pick: (JSONObject) -> Unit) {
                 }
             }
         }
-        if (maxWidth > maxHeight) Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { choices.forEach { tile(Modifier.weight(1f).fillMaxSize(), it) } }
-        else Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) { choices.forEach { tile(Modifier.weight(1f).fillMaxWidth(), it) } }
+        // a row in a wide pane, a column in a tall one, else two by two
+        val rows = when { maxWidth > maxHeight * 1.8f -> listOf(choices); maxHeight > maxWidth * 1.8f -> choices.map { listOf(it) }; else -> choices.chunked(2) }
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            rows.forEach { row -> Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { row.forEach { tile(Modifier.weight(1f).fillMaxSize(), it) } } }
+        }
     }
 }
 

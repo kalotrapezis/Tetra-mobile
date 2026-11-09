@@ -30,12 +30,12 @@ How to write here:
       DHU run, every time). CarScreen.kt: Maps, Browser, Phone and Messages in panes — Full, 60/40, 50/50, three (the dock's last
       button, a strip with ‹) — each page told its pane's size (LocalConfiguration) and its own Back; a page once shown keeps
       running off the screen. Dock: Maps · Media · Phone · AI Assist's mic · Messages · Browser · Apps, and ‹ ⏯ › of what plays.
-      Media (the user: "open the browser with this UI and 3 options"): YouTube Music, YouTube, Live24.gr (a ♥ live24 station,
+      Media (the user: "open the browser with this UI and 3 options"; "add the spotify as well"): YouTube Music, YouTube, Spotify (its web player, the desktop site), Live24.gr (a ♥ live24 station,
       else Maps' ♪, else the site) in Player mode (`browser-play` "player": true); Media again: the three. The steering wheel's
       voice key opens AI Assist. Settings › App icons › Tetra Car: its icon, also a choice of home screen. CarStateTest; on an
       emulator at 1024×600 160 dpi: panes, layouts, tiles, Live24 in Player mode, Apps. **Open:** not on a real head unit; the
       x86_64 emulator has no Gecko after a restart (arm-only); the pages' own ‹ do nothing in a pane; YouTube's tile opens a new
-      tab when m.youtube.com redirects; no parking-brake check for video.
+      tab when m.youtube.com redirects; no parking-brake check for video; Spotify needs the unit's Widevine (DRM), not seen playing.
 - [x] (pills-private-convo session, 8 Nov; branch `claude/pills-private-convo-9d6534`, merged 8 Nov) **Pills: private reminders; the
       reminder in AI Assist's chat; pills_taken reads back.** Settings › Pills › Private reminders (off): notification and voice name
       no medicine (lock screen: a public version, time only), refill lines too. A ring writes its line into the one open chat

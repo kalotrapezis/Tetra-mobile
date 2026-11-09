@@ -581,6 +581,12 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             val play = !o.optBoolean("open") // Home's favourites (8 Nov) open the page and play nothing
             if (!loaded) { t.pending = null; t.autoplay = play }
             if (t.id != currentId) switch(t)
+            if (o.optBoolean("desktop") && !t.desktop) { // Tetra Car's Spotify: its web player is the desktop site's
+                t.desktop = true
+                t.session.settings.userAgentMode = GeckoSessionSettings.USER_AGENT_MODE_DESKTOP
+                t.session.settings.viewportMode = GeckoSessionSettings.VIEWPORT_MODE_DESKTOP
+                if (loaded) t.session.reload()
+            }
             if (loaded) { if (play) t.send(JSONObject().put("autoplay", true)) } else load(t, address)
             if (o.optBoolean("player")) { player = true; menu = false; panel = null }
             if (o.optBoolean("behind")) {
