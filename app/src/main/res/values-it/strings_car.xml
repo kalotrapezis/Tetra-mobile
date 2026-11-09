@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Scansiona il codice che Tetra Car mostra sullo schermo dell’auto: chiamate e messaggi lì, dal vivo, senza sincronizzare.</string>
     <string name="car_bluetooth">Bluetooth dell’auto</string>
     <string name="car_bluetooth_none">Scegli quale dispositivo abbinato è l’auto: solo lui mette il telefono in modalità auto.</string>
+    <string name="car_settings_summary">In auto</string>
+    <string name="car_read_sms">Leggi i messaggi ad alta voce</string>
+    <string name="car_answer_calls">Rispondi alle chiamate dopo 2 secondi</string>
+    <string name="car_dock">Barra</string>
+    <string name="car_dock_bottom">In basso</string>
+    <string name="car_dock_left">A sinistra</string>
+    <string name="car_dock_right">A destra</string>
 </resources>

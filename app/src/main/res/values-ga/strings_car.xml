@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Scanáil an cód a thaispeánann Tetra Car ar scáileán an chairr: glaonna agus teachtaireachtaí ansin, beo, gan sioncronú.</string>
     <string name="car_bluetooth">Bluetooth an chairr</string>
     <string name="car_bluetooth_none">Roghnaigh cén gléas péireáilte an carr: is é amháin a chuireann an guthán i mód cairr.</string>
+    <string name="car_settings_summary">Sa charr</string>
+    <string name="car_read_sms">Léigh teachtaireachtaí os ard</string>
+    <string name="car_answer_calls">Freagair glaonna tar éis 2 shoicind</string>
+    <string name="car_dock">Barra</string>
+    <string name="car_dock_bottom">Ag an mbun</string>
+    <string name="car_dock_left">Ar chlé</string>
+    <string name="car_dock_right">Ar dheis</string>
 </resources>

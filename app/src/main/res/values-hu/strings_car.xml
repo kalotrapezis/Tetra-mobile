@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Olvasd be a kódot, amit a Tetra Car az autó kijelzőjén mutat: hívások és üzenetek ott, élőben, szinkronizálás nélkül.</string>
     <string name="car_bluetooth">Az autó Bluetooth-a</string>
     <string name="car_bluetooth_none">Válaszd ki, melyik párosított eszköz az autó: csak az kapcsolja be az autós módot.</string>
+    <string name="car_settings_summary">Az autóban</string>
+    <string name="car_read_sms">Üzenetek felolvasása</string>
+    <string name="car_answer_calls">Hívások fogadása 2 másodperc után</string>
+    <string name="car_dock">Sáv</string>
+    <string name="car_dock_bottom">Alul</string>
+    <string name="car_dock_left">Bal oldalt</string>
+    <string name="car_dock_right">Jobb oldalt</string>
 </resources>

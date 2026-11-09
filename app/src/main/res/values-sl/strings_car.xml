@@ -17,4 +17,11 @@
     <string name="car_pair_car_summary">Skeniraj kodo, ki jo Tetra Car pokaže na zaslonu avta: klici in sporočila tam, v živo, brez sinhronizacije.</string>
     <string name="car_bluetooth">Bluetooth avta</string>
     <string name="car_bluetooth_none">Izberi, katera seznanjena naprava je avto: le ta vklopi način za avto.</string>
+    <string name="car_settings_summary">V avtu</string>
+    <string name="car_read_sms">Beri sporočila na glas</string>
+    <string name="car_answer_calls">Sprejmi klice po 2 sekundah</string>
+    <string name="car_dock">Vrstica</string>
+    <string name="car_dock_bottom">Spodaj</string>
+    <string name="car_dock_left">Levo</string>
+    <string name="car_dock_right">Desno</string>
 </resources>
