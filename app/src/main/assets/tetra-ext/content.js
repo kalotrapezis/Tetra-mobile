@@ -43,6 +43,8 @@ function tok(e) {
   if (/card.?num|cc.?num/.test(n)) return 'cc-number';
   if (a == 'username') return 'username';
   if (ADDR.indexOf(a) >= 0) return a;
+  // a state or region named so, not by its autocomplete (the user, 10 Nov: "a state field, Περιφέρεια")
+  if (/^(region|state|province)$/.test(a) || (!a && /(^|[^a-z])(region|state|province)([^a-z]|$)/.test(n))) return 'address-level1';
   if (t == 'email') return 'email';
   if (t == 'tel') return 'tel';
   return '';

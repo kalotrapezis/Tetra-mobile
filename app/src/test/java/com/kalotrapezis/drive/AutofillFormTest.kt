@@ -1,7 +1,9 @@
 package com.kalotrapezis.drive
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** Passwords as Android's autofill (PasswordsAutofill.kt): which field is which, and whose logins a form is offered. */
@@ -43,5 +45,41 @@ class AutofillFormTest {
         // what a save is kept as
         assertEquals("accounts.example.com", AutofillForm.hostFor("Accounts.Example.com", "com.android.chrome"))
         assertEquals("com.evil.app", AutofillForm.hostFor("example.com", "com.evil.app"))
+    }
+
+    @Test fun aCodesField() {
+        fun o(id: String, inputType: Int = 1, hints: List<String> = emptyList(), type: String = "", ac: String = "", words: String = "", max: Int = -1, mode: String = "") =
+            AutofillForm.Field(id, hints, type, ac, inputType, words, maxLength = max, inputMode = mode)
+        // Android's hints, HTML's one-time-code
+        assertTrue(AutofillForm.isOtp(o("a", hints = listOf("smsOTPCode"))))
+        assertTrue(AutofillForm.isOtp(o("b", hints = listOf("2faAppOTPCode"))))
+        assertTrue(AutofillForm.isOtp(o("c", type = "text", ac = "one-time-code")))
+        // by its words: numbers, 6–8 long or not said
+        assertTrue(AutofillForm.isOtp(o("d", 2, words = "totp_input", max = 6)))
+        assertTrue(AutofillForm.isOtp(o("e", type = "tel", words = "verification code")))
+        assertTrue(AutofillForm.isOtp(o("f", type = "text", mode = "numeric", words = "κωδικός")))
+        // not: a post code, a text field, a code of 4, a PIN (a password), a user's field
+        assertFalse(AutofillForm.isOtp(o("g", 2, words = "postal code")))
+        assertFalse(AutofillForm.isOtp(o("h", type = "text", words = "promo code")))
+        assertFalse(AutofillForm.isOtp(o("i", 2, words = "sms code", max = 4)))
+        assertFalse(AutofillForm.isOtp(o("j", 0x12, words = "pin code")))
+        // a code's page: the code's field, not a user's; with a password on it, the login's
+        val page = listOf(o("u", type = "email", words = "email"), o("otp", type = "text", ac = "one-time-code"))
+        assertEquals("otp", AutofillForm.otp(page)!!.id)
+        assertNull(AutofillForm.otp(page + o("p", type = "password")))
+        assertNull(AutofillForm.find(listOf(o("otp", type = "text", ac = "one-time-code"))))
+    }
+
+    @Test fun whoseCodes() {
+        val gh = OtpEntry("GitHub", "maria", "JBSWY3DP"); val g = OtpEntry("Google", "maria@gmail.com", "JBSWY3DP")
+        val mail = OtpEntry("", "nikos@proton.me", "JBSWY3DP"); val all = listOf(gh, g, mail)
+        // a page by its site's name, an app by its package's words, an account by its e-mail's domain
+        assertEquals(listOf(gh), AutofillForm.codesFor(all, "github.com", "com.android.chrome"))
+        assertEquals(listOf(g), AutofillForm.codesFor(all, "accounts.google.com", "org.mozilla.firefox"))
+        assertEquals(listOf(gh), AutofillForm.codesFor(all, null, "com.github.android"))
+        assertEquals(listOf(mail), AutofillForm.codesFor(all, "account.proton.me", "com.android.chrome"))
+        // unsure: all of them to choose from; an app's word for a site is not taken
+        assertEquals(all, AutofillForm.codesFor(all, "example.com", "com.android.chrome"))
+        assertEquals(all, AutofillForm.codesFor(all, "github.com", "com.example.app"))
     }
 }

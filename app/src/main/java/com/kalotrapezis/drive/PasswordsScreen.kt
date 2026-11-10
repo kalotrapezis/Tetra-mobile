@@ -105,7 +105,7 @@ private sealed class PwItem(val index: Int) {
     class Card(i: Int, val c: SavedCard) : PwItem(i)
     class Address(i: Int, val a: Map<String, String>) : PwItem(i)
     val title get() = when (this) { is Login -> l.host; is Card -> "•••• ${c.last4}"; is Address -> addressLabel(a) }
-    val detail get() = when (this) { is Login -> l.user.ifEmpty { "—" }; is Card -> listOf(c.name, "${c.month}/${c.year}").filter { it.isNotBlank() && it != "/" }.joinToString(" · "); is Address -> a.values.joinToString(", ") }
+    val detail get() = when (this) { is Login -> listOf(l.user.ifEmpty { "—" }, l.note).filter(String::isNotBlank).joinToString(" · "); is Card -> listOf(c.name, "${c.month}/${c.year}").filter { it.isNotBlank() && it != "/" }.joinToString(" · "); is Address -> a.values.joinToString(", ") }
     fun matches(q: String) = q.isBlank() || when (this) {
         is Login -> listOf(l.host, l.user, l.note); is Card -> listOf(c.name, c.last4); is Address -> a.values.toList()
     }.any { it.contains(q.trim(), ignoreCase = true) }
@@ -482,12 +482,13 @@ private fun PwDetail(item: PwItem, close: () -> Unit, closeable: Boolean, copy: 
         dismissButton = { TextButton(onClick = { asking = false }) { Text(stringResource(R.string.common_cancel)) } })
 }
 
-// the address fields the Browser fills, by the names pages give them (BrowserVault.ADDRESS)
-private val ADDRESS_FIELDS = listOf("name", "email", "tel", "organization", "street-address", "postal-code", "address-level2", "address-level1", "country-name")
+// the address fields the Browser fills, by the names pages give them (BrowserVault.ADDRESS); then a note of the user's own,
+// never filled (the user, 10 Nov: "I didn't see a notes field or a state field")
+private val ADDRESS_FIELDS = listOf("name", "email", "tel", "organization", "street-address", "postal-code", "address-level2", "address-level1", "country-name", "note")
 @Composable private fun addressField(k: String) = stringResource(when (k) {
     "name", "given-name", "family-name", "additional-name" -> R.string.common_name; "email" -> R.string.pw_email; "tel" -> R.string.pw_phone
     "organization" -> R.string.pw_organization; "street-address", "address-line1", "address-line2" -> R.string.pw_street; "postal-code" -> R.string.pw_postcode
-    "address-level2" -> R.string.pw_city; "address-level1" -> R.string.pw_region; else -> R.string.pw_country
+    "address-level2" -> R.string.pw_city; "address-level1" -> R.string.pw_region; "note" -> R.string.pw_note; else -> R.string.pw_country
 })
 
 /** A form in a dialog with ✓ (Save) and × (Cancel), as the house's many-fields rule. */
@@ -538,7 +539,7 @@ private val ADDRESS_FIELDS = listOf("name", "email", "tel", "organization", "str
     val values = remember { keys.associateWith { mutableStateOf(a[it].orEmpty()) } }
     FormDialog(stringResource(if (a.isEmpty()) R.string.pw_add_address else R.string.common_edit), values.values.count { it.value.isNotBlank() } >= 1, close,
         { save(values.mapValues { it.value.value.trim() }.filterValues { it.isNotEmpty() }) }) {
-        keys.forEach { k -> val v = values.getValue(k); OutlinedTextField(v.value, { v.value = it }, label = { Text(addressField(k)) }, singleLine = k != "street-address") }
+        keys.forEach { k -> val v = values.getValue(k); OutlinedTextField(v.value, { v.value = it }, label = { Text(addressField(k)) }, singleLine = k != "street-address" && k != "note") }
     }
 }
 

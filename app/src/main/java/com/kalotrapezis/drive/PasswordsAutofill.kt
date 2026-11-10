@@ -33,7 +33,7 @@ import android.widget.Toast
 internal object AutofillForm {
     /** A text field: [id] the AutofillId (Any, so tests need no Android), [words] its id, hint and HTML name lower-cased. */
     data class Field(val id: Any?, val hints: List<String> = emptyList(), val htmlType: String = "", val autocomplete: String = "",
-                     val inputType: Int = 0, val words: String = "", val value: String = "")
+                     val inputType: Int = 0, val words: String = "", val value: String = "", val maxLength: Int = -1, val inputMode: String = "")
     data class Form(val user: Field?, val passwords: List<Field>)
 
     private const val CLASS = 0xF; private const val TEXT = 1; private const val NUMBER = 2; private const val VARIATION = 0xFF0
@@ -47,9 +47,46 @@ internal object AutofillForm {
 
     private fun isText(f: Field) = f.inputType and CLASS == TEXT || f.htmlType in setOf("text", "email", "tel", "")
 
-    fun isUser(f: Field) = !isPassword(f) && (f.hints.any { it.lowercase() in setOf("username", "emailaddress", "email", "phone") } ||
+    fun isUser(f: Field) = !isPassword(f) && !isOtp(f) && (f.hints.any { it.lowercase() in setOf("username", "emailaddress", "email", "phone") } ||
         f.autocomplete in setOf("username", "email", "tel") || (f.inputType and CLASS == TEXT && (f.inputType and VARIATION) in EMAIL_VARIATIONS) ||
         (isText(f) && USER_WORDS.containsMatchIn(f.words)))
+
+    private val OTP_WORDS = Regex("code|otp|2fa|mfa|totp|verif|κωδικ")
+    private val NOT_OTP_WORDS = Regex("post|zip|promo|coupon|country|area")
+
+    /**
+     * A one-time code's field (the user, 10 Nov: "Can Android tell when a field is a 2FA field?"): Android's hint
+     * (smsOTPCode, 2faAppOTPCode, and smsOTPCode1… for a box a digit), HTML's autocomplete="one-time-code"; else a field
+     * of numbers, 6–8 long or of no stated length, whose id or hint says code, otp, 2fa or κωδικός (a post code is not).
+     */
+    fun isOtp(f: Field): Boolean {
+        if (isPassword(f)) return false
+        if (f.hints.any { it.contains("otp", true) } || f.autocomplete == "one-time-code") return true
+        val numeric = f.inputType and CLASS == NUMBER || f.htmlType in setOf("number", "tel") || f.inputMode == "numeric"
+        return numeric && (f.maxLength == -1 || f.maxLength in 6..8) && OTP_WORDS.containsMatchIn(f.words) && !NOT_OTP_WORDS.containsMatchIn(f.words)
+    }
+
+    /** The field to give a 2FA code to: one of [fields] when the page asks no password (a code's page comes after the password's). */
+    fun otp(fields: List<Field>): Field? = fields.firstOrNull(::isOtp)?.takeIf { find(fields)?.passwords.isNullOrEmpty() }
+
+    private val GENERIC = setOf("com", "org", "net", "android", "app", "apps", "mobile", "www", "auth", "login", "accounts")
+
+    /**
+     * The 2FA codes for this page or app: those whose issuer (or the account's e-mail domain) is the site's name (github
+     * for github.com) or a word of the app's package (com.github.android); when none fits, all of them, to choose from.
+     * shortcut: a package is matched by its words, not by who signed it; harmless, as every code is offered when unsure.
+     */
+    fun codesFor(entries: List<OtpEntry>, webDomain: String?, pkg: String): List<OtpEntry> {
+        val d = webDomain?.trim()?.lowercase()?.removePrefix("www.").orEmpty()
+        val names = (if (pkg in BROWSERS && d.isNotEmpty()) listOf(BrowserRules.site(d).substringBefore('.')) else pkg.lowercase().split('.'))
+            .filter { it.length >= 3 && it !in GENERIC }
+        fun plain(s: String) = s.lowercase().filter(Char::isLetterOrDigit)
+        val fit = entries.filter { e ->
+            val i = plain(e.issuer); val mailDomain = e.account.lowercase().substringAfter('@', "")
+            names.any { n -> n in i || (i.length >= 3 && i in n) || (mailDomain.isNotEmpty() && n in mailDomain) }
+        }
+        return fit.ifEmpty { entries }
+    }
 
     /**
      * The form among [fields] (in screen order): its password fields, and the user's field — one that says so, before the
@@ -93,7 +130,8 @@ internal object AutofillForm {
                 val attrs = n.htmlInfo?.attributes.orEmpty().associate { it.first.lowercase() to it.second.orEmpty() }
                 out += Field(n.autofillId, n.autofillHints?.filterNotNull().orEmpty(), attrs["type"].orEmpty().lowercase(), attrs["autocomplete"].orEmpty().lowercase(),
                     n.inputType, listOfNotNull(n.idEntry, n.hint, attrs["name"], attrs["id"]).joinToString(" ").lowercase(),
-                    n.autofillValue?.takeIf { it.isText }?.textValue?.toString().orEmpty())
+                    n.autofillValue?.takeIf { it.isText }?.textValue?.toString().orEmpty(),
+                    attrs["maxlength"]?.toIntOrNull() ?: n.maxTextLength, attrs["inputmode"].orEmpty().lowercase())
             }
             for (i in 0 until n.childCount) walk(n.getChildAt(i))
         }
@@ -132,6 +170,20 @@ internal object AutofillForm {
         }
         return if (any) b.build() else null
     }
+
+    /** A row a 2FA code ([codes]' issuer and account), its code now in [field]: worked out at the unlock, so it is fresh. */
+    @Suppress("DEPRECATION")
+    fun codeDatasets(c: Context, field: Field, codes: List<OtpEntry>, inlineAsk: android.view.inputmethod.InlineSuggestionsRequest? = null): FillResponse? {
+        if (codes.isEmpty()) return null
+        val b = FillResponse.Builder()
+        codes.forEachIndexed { i, e ->
+            val title = e.issuer.ifEmpty { e.account }.ifEmpty { "2FA" }; val text = e.account.takeIf { e.issuer.isNotEmpty() }.orEmpty()
+            val d = Dataset.Builder(row(c, title, text))
+            inline(c, spec(inlineAsk, i), title, text)?.let { d.setInlinePresentation(it) }
+            b.addDataset(d.setValue(field.id as AutofillId, AutofillValue.forText(Totp.code(e))).build())
+        }
+        return b.build()
+    }
 }
 
 class PasswordsAutofill : AutofillService() {
@@ -142,14 +194,22 @@ class PasswordsAutofill : AutofillService() {
             val pkg = s.activityComponent.packageName
             if (pkg == packageName) return@runCatching null // Tetra's Browser fills its own pages
             val (fields, domain) = AutofillForm.read(s)
+            AutofillForm.otp(fields)?.let { otp ->
+                // a 2FA code: as the logins, given only after the fingerprint or the screen lock
+                val codes = AuthSecrets.load(this).takeIf { it.isNotEmpty() } ?: return@runCatching null
+                val n = AutofillForm.codesFor(codes, domain, pkg).size
+                WriterLog.i("Autofill: a 2FA code's field, $n of ${codes.size} codes fit")
+                val title = getString(R.string.pw_autofill_code_unlock, n); val where = AutofillForm.hostFor(domain, pkg)
+                return@runCatching FillResponse.Builder().setAuthentication(arrayOf(otp.id as AutofillId), unlockIntent().intentSender, AutofillForm.row(this, title, where),
+                    AutofillForm.inline(this, AutofillForm.spec(request.inlineSuggestionsRequest, 0), title, where)).build()
+            }
             val form = AutofillForm.find(fields) ?: return@runCatching null
             val ids = (listOfNotNull(form.user) + form.passwords).map { it.id as AutofillId }
             val found = AutofillForm.matches(BrowserSecrets.vault(this).logins, domain, pkg)
             val b = FillResponse.Builder()
             if (found.isNotEmpty()) {
                 // the logins are given only after the fingerprint or the screen lock: until then, one row says how many there are
-                val pi = PendingIntent.getActivity(this, (System.nanoTime() and 0xFFFFFF).toInt(), Intent(this, AutofillUnlock::class.java),
-                    PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE)
+                val pi = unlockIntent()
                 val title = getString(R.string.pw_autofill_unlock, found.size); val where = AutofillForm.hostFor(domain, pkg)
                 b.setAuthentication(ids.toTypedArray(), pi.intentSender, AutofillForm.row(this, title, where),
                     AutofillForm.inline(this, AutofillForm.spec(request.inlineSuggestionsRequest, 0), title, where))
@@ -161,6 +221,9 @@ class PasswordsAutofill : AutofillService() {
         }.onFailure { WriterLog.e("Autofill: a form not read", it) }.getOrNull()
         callback.onSuccess(r)
     }
+
+    private fun unlockIntent() = PendingIntent.getActivity(this, (System.nanoTime() and 0xFFFFFF).toInt(), Intent(this, AutofillUnlock::class.java),
+        PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE)
 
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
         runCatching {
@@ -198,9 +261,11 @@ class AutofillUnlock : Activity() {
         val r = runCatching {
             val s = intent.getParcelableExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, AssistStructure::class.java)!!
             val (fields, domain) = AutofillForm.read(s)
-            val form = AutofillForm.find(fields)!!
-            AutofillForm.datasets(this, form, AutofillForm.matches(BrowserSecrets.vault(this).logins, domain, s.activityComponent.packageName),
-                intent.getParcelableExtra(AutofillManager.EXTRA_INLINE_SUGGESTIONS_REQUEST, android.view.inputmethod.InlineSuggestionsRequest::class.java))
+            val pkg = s.activityComponent.packageName
+            val ask = intent.getParcelableExtra(AutofillManager.EXTRA_INLINE_SUGGESTIONS_REQUEST, android.view.inputmethod.InlineSuggestionsRequest::class.java)
+            val otp = AutofillForm.otp(fields)
+            if (otp != null) AutofillForm.codeDatasets(this, otp, AutofillForm.codesFor(AuthSecrets.load(this), domain, pkg), ask)
+            else AutofillForm.datasets(this, AutofillForm.find(fields)!!, AutofillForm.matches(BrowserSecrets.vault(this).logins, domain, pkg), ask)
         }.onFailure { WriterLog.e("Autofill: the logins not given", it) }.getOrNull()
         setResult(if (r != null) RESULT_OK else RESULT_CANCELED, Intent().apply { if (r != null) putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, r) })
         finish()
