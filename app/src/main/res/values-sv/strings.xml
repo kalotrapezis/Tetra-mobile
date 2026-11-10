@@ -4609,6 +4609,15 @@
     <string name="settings_remove_map">Ta bort</string>
     <string name="settings_remove_map_title">Ta bort kartan över %1$s?</string>
     <string name="settings_remove_map_body">Dess filer hamnar i Papperskorgen, här och på dina andra enheter. Dina sparade platser blir kvar.</string>
+    <string name="settings_import_map">Importera en karta</string>
+    <string name="settings_import_map_summary">En .tetramap-fil som exporterats från en annan enhet</string>
+    <string name="settings_export_map_title">Exportera kartan över %1$s</string>
+    <string name="settings_export_map_body">En enda .tetramap-fil med kartan, dess vägar och dess sökning, för en enhet utan synkronisering, som bilen. Spara den som en fil eller dela den med en annan app.</string>
+    <string name="settings_exporting_map">Exporterar %1$s…</string>
+    <string name="settings_importing_map">Importerar en karta…</string>
+    <string name="settings_map_exported">%1$s har exporterats</string>
+    <string name="settings_map_imported">Kartan över %1$s är installerad</string>
+    <string name="settings_map_not_imported">Det gick inte att importera kartan: %1$s</string>
     <string name="maps_lane_middle">från mittenfilen</string>
     <string name="maps_bend_right">Skarp högerkurva</string>
     <string name="maps_bend_left">Skarp vänsterkurva</string>

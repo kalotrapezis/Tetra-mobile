@@ -4609,6 +4609,15 @@
     <string name="settings_remove_map">Eltávolítás</string>
     <string name="settings_remove_map_title">Eltávolítod a térképet: %1$s?</string>
     <string name="settings_remove_map_body">A fájljai a Kukába kerülnek, itt és a többi eszközödön is. A mentett helyeid megmaradnak.</string>
+    <string name="settings_import_map">Térkép importálása</string>
+    <string name="settings_import_map_summary">Másik eszközről exportált .tetramap-fájl</string>
+    <string name="settings_export_map_title">Térkép exportálása: %1$s</string>
+    <string name="settings_export_map_body">Egyetlen .tetramap-fájl a térképpel, az útjaival és a keresésével, szinkronizálás nélküli eszközhöz, például az autóhoz. Mentse fájlként, vagy ossza meg egy másik alkalmazással.</string>
+    <string name="settings_exporting_map">Exportálás: %1$s…</string>
+    <string name="settings_importing_map">Térkép importálása…</string>
+    <string name="settings_map_exported">Exportálva: %1$s</string>
+    <string name="settings_map_imported">A térkép telepítve: %1$s</string>
+    <string name="settings_map_not_imported">A térkép nem importálható: %1$s</string>
     <string name="maps_lane_middle">a középső sávból</string>
     <string name="maps_bend_right">Éles jobbkanyar következik</string>
     <string name="maps_bend_left">Éles balkanyar következik</string>

@@ -4701,6 +4701,15 @@
     <string name="settings_remove_map">Noņemt</string>
     <string name="settings_remove_map_title">Vai noņemt kartes: %1$s?</string>
     <string name="settings_remove_map_body">Tās faili nonāk Miskastē, šeit un jūsu citās ierīcēs. Jūsu saglabātās vietas paliek.</string>
+    <string name="settings_import_map">Importēt karti</string>
+    <string name="settings_import_map_summary">No citas ierīces eksportēts .tetramap fails</string>
+    <string name="settings_export_map_title">Eksportēt karti: %1$s</string>
+    <string name="settings_export_map_body">Viens .tetramap fails ar karti, tās ceļiem un meklēšanu ierīcei bez sinhronizācijas, piemēram, automašīnai. Saglabājiet to kā failu vai kopīgojiet ar citu lietotni.</string>
+    <string name="settings_exporting_map">Eksportē: %1$s…</string>
+    <string name="settings_importing_map">Importē karti…</string>
+    <string name="settings_map_exported">Eksportēts: %1$s</string>
+    <string name="settings_map_imported">Karte ir instalēta: %1$s</string>
+    <string name="settings_map_not_imported">Neizdevās importēt karti: %1$s</string>
     <string name="maps_lane_middle">pa vidējo joslu</string>
     <string name="maps_bend_right">Priekšā ass pagrieziens pa labi</string>
     <string name="maps_bend_left">Priekšā ass pagrieziens pa kreisi</string>

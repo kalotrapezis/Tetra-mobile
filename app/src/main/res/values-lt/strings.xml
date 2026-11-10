@@ -4793,6 +4793,15 @@
     <string name="settings_remove_map">Pašalinti</string>
     <string name="settings_remove_map_title">Pašalinti žemėlapį: %1$s?</string>
     <string name="settings_remove_map_body">Jo failai keliauja į Šiukšlinę, čia ir kituose jūsų įrenginiuose. Jūsų išsaugotos vietos lieka.</string>
+    <string name="settings_import_map">Importuoti žemėlapį</string>
+    <string name="settings_import_map_summary">Iš kito įrenginio eksportuotas .tetramap failas</string>
+    <string name="settings_export_map_title">Eksportuoti žemėlapį: %1$s</string>
+    <string name="settings_export_map_body">Vienas .tetramap failas su žemėlapiu, jo keliais ir paieška įrenginiui be sinchronizavimo, pavyzdžiui, automobiliui. Išsaugokite jį kaip failą arba bendrinkite su kita programėle.</string>
+    <string name="settings_exporting_map">Eksportuojama: %1$s…</string>
+    <string name="settings_importing_map">Importuojamas žemėlapis…</string>
+    <string name="settings_map_exported">Eksportuota: %1$s</string>
+    <string name="settings_map_imported">Žemėlapis įdiegtas: %1$s</string>
+    <string name="settings_map_not_imported">Nepavyko importuoti žemėlapio: %1$s</string>
     <string name="maps_lane_middle">vidurine eismo juosta</string>
     <string name="maps_bend_right">Priekyje staigus posūkis į dešinę</string>
     <string name="maps_bend_left">Priekyje staigus posūkis į kairę</string>

@@ -4617,6 +4617,15 @@
     <string name="settings_remove_map">Αφαίρεση</string>
     <string name="settings_remove_map_title">Αφαίρεση του χάρτη: %1$s;</string>
     <string name="settings_remove_map_body">Τα αρχεία του πάνε στον Κάδο, εδώ και στις άλλες συσκευές σας. Τα αποθηκευμένα μέρη σας μένουν.</string>
+    <string name="settings_import_map">Εισαγωγή χάρτη</string>
+    <string name="settings_import_map_summary">Ένα αρχείο .tetramap που εξήχθη από άλλη συσκευή</string>
+    <string name="settings_export_map_title">Εξαγωγή του χάρτη: %1$s</string>
+    <string name="settings_export_map_body">Ένα αρχείο .tetramap με τον χάρτη, τους δρόμους και την αναζήτησή του, για συσκευή χωρίς συγχρονισμό, όπως το αυτοκίνητο. Αποθηκεύστε το ως αρχείο ή μοιραστείτε το με άλλη εφαρμογή.</string>
+    <string name="settings_exporting_map">Εξαγωγή: %1$s…</string>
+    <string name="settings_importing_map">Εισαγωγή χάρτη…</string>
+    <string name="settings_map_exported">Έγινε η εξαγωγή: %1$s</string>
+    <string name="settings_map_imported">Ο χάρτης εγκαταστάθηκε: %1$s</string>
+    <string name="settings_map_not_imported">Δεν ήταν δυνατή η εισαγωγή του χάρτη: %1$s</string>
     <string name="maps_lane_middle">από τη μεσαία λωρίδα</string>
     <string name="maps_bend_right">Ακολουθεί απότομη στροφή δεξιά</string>
     <string name="maps_bend_left">Ακολουθεί απότομη στροφή αριστερά</string>

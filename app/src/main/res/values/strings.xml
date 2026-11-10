@@ -4619,6 +4619,15 @@
     <string name="settings_remove_map">Remove</string>
     <string name="settings_remove_map_title">Remove the map of %1$s?</string>
     <string name="settings_remove_map_body">Its files go to the Trash, here and on your other devices. Your saved places stay.</string>
+    <string name="settings_import_map">Import a map</string>
+    <string name="settings_import_map_summary">A .tetramap file exported from another device</string>
+    <string name="settings_export_map_title">Export the map of %1$s</string>
+    <string name="settings_export_map_body">One .tetramap file with the map, its roads and its search, for a device that does not sync, like the car. Save it as a file or share it with another app.</string>
+    <string name="settings_exporting_map">Exporting %1$s…</string>
+    <string name="settings_importing_map">Importing a map…</string>
+    <string name="settings_map_exported">%1$s exported</string>
+    <string name="settings_map_imported">The map of %1$s is installed</string>
+    <string name="settings_map_not_imported">Could not import the map: %1$s</string>
     <string name="maps_lane_middle">from the middle lane</string>
     <string name="maps_bend_right">Sharp bend to the right ahead</string>
     <string name="maps_bend_left">Sharp bend to the left ahead</string>

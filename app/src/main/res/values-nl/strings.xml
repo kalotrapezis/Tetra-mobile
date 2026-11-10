@@ -4609,6 +4609,15 @@
     <string name="settings_remove_map">Verwijderen</string>
     <string name="settings_remove_map_title">De kaart van %1$s verwijderen?</string>
     <string name="settings_remove_map_body">De bestanden gaan naar de Prullenbak, hier en op je andere apparaten. Je opgeslagen plaatsen blijven staan.</string>
+    <string name="settings_import_map">Kaart importeren</string>
+    <string name="settings_import_map_summary">Een .tetramap-bestand dat op een ander apparaat is geëxporteerd</string>
+    <string name="settings_export_map_title">Kaart van %1$s exporteren</string>
+    <string name="settings_export_map_body">Eén .tetramap-bestand met de kaart, de wegen en de zoekfunctie, voor een apparaat zonder synchronisatie, zoals de auto. Sla het op als bestand of deel het met een andere app.</string>
+    <string name="settings_exporting_map">%1$s exporteren…</string>
+    <string name="settings_importing_map">Kaart importeren…</string>
+    <string name="settings_map_exported">%1$s geëxporteerd</string>
+    <string name="settings_map_imported">De kaart van %1$s is geïnstalleerd</string>
+    <string name="settings_map_not_imported">Kan de kaart niet importeren: %1$s</string>
     <string name="maps_lane_middle">via de middelste rijstrook</string>
     <string name="maps_bend_right">Scherpe bocht naar rechts</string>
     <string name="maps_bend_left">Scherpe bocht naar links</string>

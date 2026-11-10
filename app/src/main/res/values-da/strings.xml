@@ -4609,6 +4609,15 @@
     <string name="settings_remove_map">Fjern</string>
     <string name="settings_remove_map_title">Fjern kortet over %1$s?</string>
     <string name="settings_remove_map_body">Dets filer flyttes til papirkurven, her og på dine andre enheder. Dine gemte steder bliver.</string>
+    <string name="settings_import_map">Importér et kort</string>
+    <string name="settings_import_map_summary">En .tetramap-fil eksporteret fra en anden enhed</string>
+    <string name="settings_export_map_title">Eksportér kortet over %1$s</string>
+    <string name="settings_export_map_body">Én .tetramap-fil med kortet, dets veje og dets søgning, til en enhed uden synkronisering, som bilen. Gem den som en fil, eller del den med en anden app.</string>
+    <string name="settings_exporting_map">Eksporterer %1$s…</string>
+    <string name="settings_importing_map">Importerer et kort…</string>
+    <string name="settings_map_exported">%1$s er eksporteret</string>
+    <string name="settings_map_imported">Kortet over %1$s er installeret</string>
+    <string name="settings_map_not_imported">Kortet kunne ikke importeres: %1$s</string>
     <string name="maps_lane_middle">fra den midterste vognbane</string>
     <string name="maps_bend_right">Skarpt sving til højre forude</string>
     <string name="maps_bend_left">Skarpt sving til venstre forude</string>

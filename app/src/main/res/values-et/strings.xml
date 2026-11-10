@@ -4609,6 +4609,15 @@
     <string name="settings_remove_map">Eemalda</string>
     <string name="settings_remove_map_title">Kas eemaldada kaart: %1$s?</string>
     <string name="settings_remove_map_body">Selle failid lähevad prügikasti, siin ja teie teistes seadmetes. Teie salvestatud kohad jäävad alles.</string>
+    <string name="settings_import_map">Impordi kaart</string>
+    <string name="settings_import_map_summary">Teisest seadmest eksporditud .tetramap-fail</string>
+    <string name="settings_export_map_title">Ekspordi kaart: %1$s</string>
+    <string name="settings_export_map_body">Üks .tetramap-fail kaardi, selle teede ja otsinguga seadmele, mis ei sünkrooni, näiteks autole. Salvesta see failina või jaga teise rakendusega.</string>
+    <string name="settings_exporting_map">Eksportimine: %1$s…</string>
+    <string name="settings_importing_map">Kaardi importimine…</string>
+    <string name="settings_map_exported">Eksporditud: %1$s</string>
+    <string name="settings_map_imported">Kaart on paigaldatud: %1$s</string>
+    <string name="settings_map_not_imported">Kaarti ei saanud importida: %1$s</string>
     <string name="maps_lane_middle">keskmiselt sõidurajalt</string>
     <string name="maps_bend_right">Ees on järsk kurv paremale</string>
     <string name="maps_bend_left">Ees on järsk kurv vasakule</string>

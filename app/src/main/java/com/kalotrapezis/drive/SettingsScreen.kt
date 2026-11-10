@@ -71,7 +71,7 @@ internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, 
         R.string.car_quiet, R.string.car_bluetooth, R.string.car_pair_car)),
     Maps(R.string.app_maps, Category.Maps.icon, Category.Maps.color, R.string.settings_maps_summary, listOf(R.string.settings_map, R.string.settings_on_foot, R.string.settings_by_car, R.string.settings_directions_in, R.string.settings_test_voice, R.string.settings_voice_settings, R.string.settings_sharp_bends,
         R.string.settings_save_parking, R.string.settings_open_at_car, R.string.settings_accessible_parking, R.string.settings_export_places, R.string.settings_import_places, R.string.settings_import_google,
-        R.string.settings_installed_maps, R.string.settings_send_log)),
+        R.string.settings_installed_maps, R.string.settings_import_map, R.string.settings_send_log)),
     Contacts(R.string.app_contacts, Category.Contacts.icon, Category.Contacts.color, R.string.settings_contacts_summary, listOf(R.string.settings_in_phone_contacts, R.string.settings_birthdays_into)),
     Phone(R.string.app_phone, Category.Phone.icon, Category.Phone.color, R.string.settings_phone_summary, listOf(R.string.settings_phone_app, R.string.settings_buzz_answer, R.string.settings_buzz_end,
         R.string.settings_silence_unknown, R.string.settings_decline_hidden, R.string.settings_pc_calls, R.string.settings_phone_permission, R.string.settings_open_phone)),
@@ -1029,14 +1029,68 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
     val files by produceState<List<MapsFiles.Installed>?>(null, mapsVersion) { value = withContext(Dispatchers.IO) { MapsFiles.installed(mapsContext, mapsRoot) } }
     var removing by remember { mutableStateOf<Pair<String, String>?>(null) }
     val removeScope = rememberCoroutineScope()
+    // a map out as one .tetramap file and in again, for a device that does not sync: the car's head unit (the user, 10 Nov)
+    var exporting by remember { mutableStateOf<MapsFiles.Installed?>(null) }
+    var work by remember { mutableStateOf<String?>(null) }
+    var workDone by remember { mutableFloatStateOf(0f) }
+    fun archive(title: String, failed: Int, job: ((Float) -> Unit) -> () -> Unit) {
+        work = title; workDone = 0f
+        removeScope.launch {
+            val r = withContext(Dispatchers.IO) { runCatching { job { workDone = it } } }
+            work = null; mapsVersion++
+            r.onSuccess { it() }.onFailure { WriterLog.e("Maps: $title", it); Toast.makeText(mapsContext, mapsContext.getString(failed, it.message.orEmpty()), Toast.LENGTH_LONG).show() }
+        }
+    }
+    val saveMap = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(MapsArchive.MIME)) { uri ->
+        val m = exporting ?: return@rememberLauncherForActivityResult
+        exporting = null
+        if (uri == null) return@rememberLauncherForActivityResult
+        archive(mapsContext.getString(R.string.settings_exporting_map, m.name), R.string.settings_not_exported_maps) { p ->
+            runCatching { mapsContext.contentResolver.openOutputStream(uri)!!.use { MapsArchive.export(mapsRoot, m.id, it, p) } }
+                .onFailure { runCatching { android.provider.DocumentsContract.deleteDocument(mapsContext.contentResolver, uri) } }.getOrThrow() // no half map left behind
+            ({ Toast.makeText(mapsContext, mapsContext.getString(R.string.settings_map_exported, m.name), Toast.LENGTH_LONG).show() })
+        }
+    }
+    val pickMap = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        archive(mapsContext.getString(R.string.settings_importing_map), R.string.settings_map_not_imported) { p ->
+            val id = mapsContext.contentResolver.openInputStream(uri)!!.use { MapsArchive.import(mapsRoot, it, p) }
+            val name = MapsFiles.maps(mapsRoot).firstOrNull { it.id == id }?.name ?: id
+            ({ Toast.makeText(mapsContext, mapsContext.getString(R.string.settings_map_imported, name), Toast.LENGTH_LONG).show() })
+        }
+    }
     SettingsSection(stringResource(R.string.settings_installed_maps), stringResource(R.string.settings_installed_maps_note)) {
         if (files?.isEmpty() == true) SettingRow(stringResource(R.string.maps_no_map))
         // an old map says so beside its button: the computer remakes it (Settings › Maps there)
         files?.forEach { m -> SettingRow(m.name, if (m.old) m.about + "\n" + stringResource(R.string.maps_old_remake) else m.about) {
             if (m.old) Text(stringResource(R.string.maps_old), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelLarge, maxLines = 1)
+            TextButton(onClick = { exporting = m }, enabled = work == null) { Text(stringResource(R.string.common_export), maxLines = 1) }
             TextButton(onClick = { removing = m.id to m.name }) { Text(stringResource(R.string.settings_remove_map), maxLines = 1) }
         } }
+        SettingRow(stringResource(R.string.settings_import_map), stringResource(R.string.settings_import_map_summary),
+            onClick = { if (work == null) pickMap.launch(arrayOf(MapsArchive.MIME, "application/zip", "application/octet-stream", "*/*")) })
     }
+    exporting?.let { m -> AlertDialog(onDismissRequest = { exporting = null }, title = { Text(stringResource(R.string.settings_export_map_title, m.name)) },
+        text = { Text(stringResource(R.string.settings_export_map_body)) },
+        confirmButton = { Row {
+            TextButton(onClick = { saveMap.launch("${m.id}.${MapsArchive.EXTENSION}") }) { Text(stringResource(R.string.common_save), maxLines = 1) }
+            TextButton(onClick = {
+                exporting = null
+                archive(mapsContext.getString(R.string.settings_exporting_map, m.name), R.string.settings_not_exported_maps) { p ->
+                    // in the cache, for the app it goes to; the one shared before goes first (hundreds of MB)
+                    val dir = java.io.File(mapsContext.cacheDir, "share").apply { mkdirs() }
+                    dir.listFiles().orEmpty().filter { it.name.endsWith(".${MapsArchive.EXTENSION}") }.forEach { it.delete() }
+                    val file = java.io.File(dir, "${m.id}.${MapsArchive.EXTENSION}")
+                    runCatching { file.outputStream().use { MapsArchive.export(mapsRoot, m.id, it, p) } }.onFailure { file.delete() }.getOrThrow()
+                    val uri = androidx.core.content.FileProvider.getUriForFile(mapsContext, "${mapsContext.packageName}.files", file)
+                    ({ mapsContext.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType(MapsArchive.MIME).putExtra(Intent.EXTRA_STREAM, uri)
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), mapsContext.getString(R.string.files_share_named, file.name))) })
+                }
+            }) { Text(stringResource(R.string.common_share), maxLines = 1) }
+        } },
+        dismissButton = { TextButton(onClick = { exporting = null }) { Text(stringResource(R.string.common_cancel), maxLines = 1) } }) }
+    work?.let { t -> AlertDialog(onDismissRequest = {}, title = { Text(t) },
+        text = { LinearProgressIndicator(progress = { workDone }, modifier = Modifier.fillMaxWidth()) }, confirmButton = {}) }
     removing?.let { (id, name) -> AlertDialog(onDismissRequest = { removing = null }, title = { Text(stringResource(R.string.settings_remove_map_title, name)) },
         text = { Text(stringResource(R.string.settings_remove_map_body)) },
         confirmButton = { TextButton(onClick = { removing = null; removeScope.launch { withContext(Dispatchers.IO) { MapsFiles.removeMap(mapsRoot, id) }; mapsVersion++ } }) {
