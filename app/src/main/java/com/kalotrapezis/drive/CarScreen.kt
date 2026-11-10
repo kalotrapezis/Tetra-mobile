@@ -122,6 +122,38 @@ class CarActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Home's saved places on the car (the user, 10 Nov: "the home faves in the car as a page with bubbles and an X or go to map"): big
+ * bubbles, one tap the route there; ✕, Map or Back to the map. The same places as Home's Maps card and the map's ♥.
+ */
+@Composable
+private fun CarPlaces(go: (Place) -> Unit, close: () -> Unit) {
+    val saved by produceState<List<Place>?>(null) {
+        value = withContext(Dispatchers.IO) { runCatching { MapsFiles.slots(MapsFiles.places(MapsFiles.root(driveRoot()))).filterNotNull() }.getOrDefault(emptyList()) }
+    }
+    BackHandler(onBack = close)
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.home_favorites), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
+            androidx.compose.material3.TextButton(close) { Icon(painterResource(R.drawable.ic_map), null); Text("  " + stringResource(R.string.app_maps)) }
+            IconButton(close) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_close)) }
+        }
+        val list = saved ?: return@Column
+        if (list.isEmpty()) Text(stringResource(R.string.car_favorites_none), style = MaterialTheme.typography.bodyLarge)
+        LazyVerticalGrid(GridCells.Adaptive(140.dp), verticalArrangement = Arrangement.spacedBy(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            items(list, key = { it.id }) { p ->
+                Column(Modifier.clip(RoundedCornerShape(24.dp)).clickable { go(p) }.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(Modifier.size(88.dp).clip(CircleShape).background(Color(0xFF25C4FE)), contentAlignment = Alignment.Center) {
+                        Icon(painterResource(placeIcon(p.icon)), null, Modifier.size(44.dp), tint = Color.White)
+                    }
+                    Text(p.short, Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                }
+            }
+        }
+    }
+}
+
 /** The time, for the dock down a side (the user, 10 Nov: "the player buttons at the top I don't like, just the time there"). */
 @Composable
 private fun CarClock(modifier: Modifier = Modifier) {
@@ -138,6 +170,8 @@ internal object Car {
     @Volatile var running = false
     /** AI Assist's «άνοιξε τα μηνύματα»: that page beside the map; null when Tetra Car is not open. */
     @Volatile var show: ((CarApp) -> Unit)? = null
+    /** AI Assist's answer (an Applet.EXTRA word: maps-go:, browser-play:, sms:…) in Tetra Car's panes; false: not one of theirs. */
+    @Volatile var go: ((String) -> Boolean)? = null
     /** AI Assist in Tetra Car's side pane (its TV); null when Tetra Car is not open. */
     @Volatile var assist: (() -> Unit)? = null
     /** A message arrived: Tetra Car's side pane talks about it (CarSmsPane); null when Tetra Car is not open. */
@@ -312,6 +346,31 @@ internal fun CarScreen(projected: Boolean = false) {
     // AI Assist's TV takes the side pane while it works (the user, 10 Nov: "bring the TV UI to the car, on the small side"); it goes when done
     var assist by remember { mutableStateOf(false) }
     androidx.compose.runtime.DisposableEffect(Unit) { Car.assist = { assist = true }; onDispose { Car.assist = null } }
+    // AI Assist's «πήγαινέ με…», «παίξε…», «άνοιξε τα μηνύματα» (the user, 10 Nov: "it recognised the command but nothing loaded in the
+    // car's map"): into the panes here, not a window of their own
+    var mapsGo by remember { mutableStateOf<Place?>(null) }
+    var mapsSearch by remember { mutableStateOf<String?>(null) }
+    var smsStart by remember { mutableStateOf<String?>(null) } // «γράψε μήνυμα…» › Edit: its conversation, the text filled in
+    var places by remember { mutableStateOf(false) } // the saved places as bubbles, over the map (Maps in the dock again)
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        Car.go = { w ->
+            fun show(app: CarApp) { set(state.beside(app)); if (app == CarApp.Browser) tiles = false; WriterLog.i("Car: AI Assist's ${w.substringBefore(':')} in $app") }
+            when {
+                w.startsWith("maps-go:") -> w.removePrefix("maps-go:").split(",", limit = 3).takeIf { it.size == 3 }
+                    ?.let { (lat, lng, name) -> mapsGo = Place("ask-${System.nanoTime()}", name, lat.toDouble(), lng.toDouble()); show(CarApp.Maps); true } ?: false
+                w.startsWith(MapsActivity.PLACE) -> Place.parse(w.removePrefix(MapsActivity.PLACE))?.let { mapsGo = it; show(CarApp.Maps); true } ?: false
+                w.startsWith("maps-search:") -> { mapsSearch = w.removePrefix("maps-search:"); show(CarApp.Maps); true }
+                w == Applet.Maps.name -> { show(CarApp.Maps); true }
+                w.startsWith("browser-play:") -> { play = w; show(CarApp.Browser); true }
+                w.startsWith("youtube:") -> { play = carPlay(JSONObject().put("site", "youtube").put("q", w.removePrefix("youtube:"))); show(CarApp.Browser); true }
+                w == Applet.Browser.name -> { show(CarApp.Browser); true }
+                w == Applet.Messages.name || w.startsWith("sms:") -> { if (w.startsWith("sms:")) smsStart = w; show(CarApp.Messages); true }
+                w == Applet.Phone.name -> { show(CarApp.Phone); true }
+                else -> false
+            }
+        }
+        onDispose { Car.go = null }
+    }
     // a call or a message takes the side pane for a while (the user, 9 Nov: "replace it … then bring back the app"); the map stays,
     // and with the map alone on the screen, the screen splits until it is over
     val remote by CarWire.call // the phone's call, through the car's link (on a head unit)
@@ -355,7 +414,10 @@ internal fun CarScreen(projected: Boolean = false) {
                 focus = { app -> state.panes.indexOf(app).takeIf { it >= 0 && it != state.focus }?.let { set(state.focused(it)) } }) { app ->
                 CompositionLocalProvider(LocalOnBackPressedDispatcherOwner provides backs.getValue(app)) {
                     when (app) {
-                        CarApp.Maps -> MapsScreen(MapsFiles.root(driveRoot()), null, back = {})
+                        CarApp.Maps -> Box(Modifier.fillMaxSize()) {
+                            MapsScreen(MapsFiles.root(driveRoot()), mapsGo, back = {}, search = mapsSearch)
+                            if (places) CarPlaces(go = { p -> mapsGo = p.copy(id = "ask-${System.nanoTime()}"); places = false; WriterLog.i("Car: to a saved place") }, close = { places = false })
+                        }
                         CarApp.Browser -> Box(Modifier.fillMaxSize()) {
                             BrowserScreen(back = {}, play = play, hide = {})
                             if (tiles) CarMediaTiles(Modifier.fillMaxSize()) { o -> play = carPlay(o); tiles = false }
@@ -368,12 +430,16 @@ internal fun CarScreen(projected: Boolean = false) {
                             val blocked = remember { mutableStateOf<String?>(null) }
                             PhoneApp(keypad, tab, number, missed, blocked, back = {})
                         }
-                        CarApp.Messages -> SmsScreen(back = {})
+                        CarApp.Messages -> key(smsStart) { SmsScreen(back = {}, start = smsStart) }
                     }
                 }
             }
             CarDock(state, side, layouts, setLayouts = { layouts = it }, layout = { set(state.laid(it)) },
-                open = { set(state.put(it)); if (it == CarApp.Browser) tiles = false }, media = ::media, apps = { apps = true }, projected = projected)
+                open = { app ->
+                    // Maps again while the map is up: the saved places (the user, 10 Nov: "the home faves in the car as a page with bubbles")
+                    if (app == CarApp.Maps && state.shown == CarApp.Maps) places = !places
+                    else { set(state.put(app)); if (app == CarApp.Browser) tiles = false }
+                }, media = ::media, apps = { apps = true }, projected = projected)
         }) { (panes, dock), c ->
             val d = dock.measure(if (side == DockSide.Bottom) c.copy(minHeight = 0) else c.copy(minWidth = 0))
             val w = if (side == DockSide.Bottom) c.maxWidth else c.maxWidth - d.width

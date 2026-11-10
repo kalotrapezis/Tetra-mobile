@@ -53,4 +53,5 @@
     <string name="auto_answer_on_phone">Wieġeb dan fuq it-telefon</string>
     <string name="auto_no_map">Għad m\'hemm l-ebda mappa fuq il-mowbajl. L-ewwel niżżel mappa fuq il-mowbajl.</string>
     <string name="auto_paired_done">Imqabbad ma\' %1$s: Tetra Car jinsab fuq l-iskrin tiegħu.</string>
+    <string name="car_favorites_none">Għad m\'hemmx postijiet issejvjati: issejvja wieħed fuq il-mappa b\'♥.</string>
 </resources>

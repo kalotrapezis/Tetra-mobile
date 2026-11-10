@@ -53,4 +53,5 @@
     <string name="auto_answer_on_phone">Answer this on the phone</string>
     <string name="auto_no_map">No map on the phone yet. Download a map on the phone first.</string>
     <string name="auto_paired_done">Paired with %1$s: Tetra Car is on its screen.</string>
+    <string name="car_favorites_none">No saved places yet: save one on the map with ♥.</string>
 </resources>

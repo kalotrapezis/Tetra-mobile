@@ -327,6 +327,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
     // [search]: an address from Contacts, looked for at once
     var tab by remember { mutableStateOf(if (search != null) MapsTab.Search else null) }
     var query by remember { mutableStateOf(search ?: "") }
+    LaunchedEffect(search) { if (search != null) { query = search; tab = MapsTab.Search } }
     var pill by remember { mutableStateOf<String?>(null) }
     var navQuery by remember { mutableStateOf("") }
     var navMode by remember { mutableStateOf("car") }
@@ -384,6 +385,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
     var navSheet by remember { mutableStateOf(false) } // the handle's sheet over the directions bar: tolls and the turns ahead
     var finding by remember { mutableStateOf<String?>(null) }
     var pending by remember { mutableStateOf(go) }
+    LaunchedEffect(go) { if (go != null) pending = go } // a new one while the map is open (Tetra Car, AI Assist's «πήγαινέ με»)
     var muted by remember { mutableStateOf(false) }
     var mapRef by remember { mutableStateOf<MapLibreMap?>(null) }
     OpenTiming("Maps", mapRef != null)

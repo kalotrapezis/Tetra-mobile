@@ -53,4 +53,5 @@
     <string name="auto_answer_on_phone">Odpovedz na to v telefóne</string>
     <string name="auto_no_map">V telefóne zatiaľ nie je žiadna mapa. Najprv si do telefónu stiahnite mapu.</string>
     <string name="auto_paired_done">Spárované s autom %1$s: Tetra Car je na jeho obrazovke.</string>
+    <string name="car_favorites_none">Zatiaľ žiadne uložené miesta: uložte si niektoré na mape pomocou ♥.</string>
 </resources>

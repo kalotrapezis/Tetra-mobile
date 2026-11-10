@@ -53,4 +53,5 @@
     <string name="auto_answer_on_phone">Vasta sellele telefonis</string>
     <string name="auto_no_map">Telefonis pole veel kaarti. Laadi esmalt telefoni kaart.</string>
     <string name="auto_paired_done">Seotud: %1$s. Tetra Car on selle ekraanil.</string>
+    <string name="car_favorites_none">Salvestatud kohti veel pole: salvesta üks kaardil ♥ abil.</string>
 </resources>

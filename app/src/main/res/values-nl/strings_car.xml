@@ -53,4 +53,5 @@
     <string name="auto_answer_on_phone">Beantwoord dit op de telefoon</string>
     <string name="auto_no_map">Er staat nog geen kaart op de telefoon. Download eerst een kaart op de telefoon.</string>
     <string name="auto_paired_done">Gekoppeld met %1$s: Tetra Car staat op het scherm.</string>
+    <string name="car_favorites_none">Nog geen bewaarde plaatsen: bewaar er een op de kaart met ♥.</string>
 </resources>

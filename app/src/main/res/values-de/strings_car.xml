@@ -53,4 +53,5 @@
     <string name="auto_answer_on_phone">Beantworte das am Telefon</string>
     <string name="auto_no_map">Auf dem Handy ist noch keine Karte. Lade zuerst eine Karte auf das Handy.</string>
     <string name="auto_paired_done">Gekoppelt mit %1$s: Tetra Car ist auf seinem Bildschirm.</string>
+    <string name="car_favorites_none">Noch keine gespeicherten Orte: speichere einen auf der Karte mit ♥.</string>
 </resources>

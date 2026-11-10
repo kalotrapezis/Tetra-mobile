@@ -23,6 +23,7 @@ import org.json.JSONObject
 internal object SmsRole {
     fun isDefault(c: Context) = runCatching { c.getSystemService(RoleManager::class.java).isRoleHeld(RoleManager.ROLE_SMS) }.getOrDefault(false)
     fun request(c: Context): Intent = c.getSystemService(RoleManager::class.java).createRequestRoleIntent(RoleManager.ROLE_SMS)
+    fun defaultApp(c: Context): String = runCatching { Telephony.Sms.getDefaultSmsPackage(c) }.getOrNull() ?: "no app"
 
     /** sms:, smsto:, mms: or mmsto: from another app, as Messages' "sms:<json>" (MainActivity), or null. */
     fun compose(i: Intent): String? {
@@ -61,6 +62,25 @@ class SmsDeliverReceiver : BroadcastReceiver() {
         if (PhoneSpam.matches(PhoneSpam.read(), from, PhoneCountry.of(c)) != null) return // the spam list's: kept, not announced
         SmsRole.notify(c, from, body)
         val wait = goAsync() // in the car: read aloud (CarSmsActivity), once Bluetooth has said whether it is
+        CarSmsActivity.arrived(c, from, body) { wait.finish() }
+    }
+}
+
+/**
+ * An SMS arriving while another app is the default (Google Messages on the user's phone, 10 Nov: "read messages on the car"): that
+ * app stores and announces it; in Tetra Car (on the car's screen too) it is read aloud there and answered by voice all the same.
+ * Outside the car nothing, so a message is never announced twice.
+ */
+class SmsReceivedReceiver : BroadcastReceiver() {
+    override fun onReceive(c: Context, intent: Intent) {
+        if (SmsRole.isDefault(c) || !Car.running) return // the default's own SMS_DELIVER does it; out of the car the default app does
+        val parts = Telephony.Sms.Intents.getMessagesFromIntent(intent)?.filterNotNull().orEmpty()
+        if (parts.isEmpty()) return
+        val from = parts.first().displayOriginatingAddress ?: parts.first().originatingAddress ?: ""
+        val body = parts.joinToString("") { it.displayMessageBody ?: "" }
+        WriterLog.i("Messages: an SMS arrived in the car (${body.length} characters; ${SmsRole.defaultApp(c)} keeps it)")
+        if (PhoneSpam.matches(PhoneSpam.read(), from, PhoneCountry.of(c)) != null) return
+        val wait = goAsync()
         CarSmsActivity.arrived(c, from, body) { wait.finish() }
     }
 }

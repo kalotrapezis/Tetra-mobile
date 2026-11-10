@@ -53,4 +53,5 @@
     <string name="auto_answer_on_phone">Atsakyk į tai telefone</string>
     <string name="auto_no_map">Telefone dar nėra žemėlapio. Pirmiausia atsisiųskite žemėlapį į telefoną.</string>
     <string name="auto_paired_done">Susieta su %1$s: Tetra Car rodomas jo ekrane.</string>
+    <string name="car_favorites_none">Išsaugotų vietų dar nėra: išsaugokite vieną žemėlapyje paspaudę ♥.</string>
 </resources>

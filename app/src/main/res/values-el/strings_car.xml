@@ -53,4 +53,5 @@
     <string name="auto_answer_on_phone">Απαντήστε σε αυτό στο κινητό</string>
     <string name="auto_no_map">Δεν υπάρχει ακόμα χάρτης στο κινητό. Κατεβάστε πρώτα έναν χάρτη στο κινητό.</string>
     <string name="auto_paired_done">Σε σύζευξη με %1$s: το Tetra Car είναι στην οθόνη του.</string>
+    <string name="car_favorites_none">Δεν υπάρχουν ακόμα αποθηκευμένα μέρη: αποθηκεύστε ένα στον χάρτη με το ♥.</string>
 </resources>

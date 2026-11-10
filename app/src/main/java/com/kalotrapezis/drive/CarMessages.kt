@@ -235,15 +235,20 @@ internal object CarQuiet {
     @Synchronized fun set(c: Context, on: Boolean) = runCatching {
         if (!allowed(c) || (on && !wanted(c))) return@runCatching
         val nm = c.getSystemService(NotificationManager::class.java)
-        val id = prefs(c).getString(RULE, null)?.takeIf { nm.getAutomaticZenRule(it) != null } ?: run {
+        // media through (the user, 10 Nov, the car's first drive: "no sound" — Do Not Disturb mutes media unless it is let through:
+        // the music, the route's voice and AI Assist went silent on the car's speakers); calls and alarms as before
+        val policy = android.service.notification.ZenPolicy.Builder().disallowAllSounds().hideAllVisualEffects().allowMedia(true)
+            .allowCalls(android.service.notification.ZenPolicy.PEOPLE_TYPE_ANYONE).allowRepeatCallers(true).allowAlarms(true).build()
+        val car = android.content.ComponentName(c, CarActivity::class.java)
+        val rule = if (android.os.Build.VERSION.SDK_INT >= 35) // Android's own driving rule, shown as such in its settings
+            android.app.AutomaticZenRule.Builder(c.getString(R.string.app_car), CONDITION).setType(android.app.AutomaticZenRule.TYPE_DRIVING)
+                .setConfigurationActivity(car).setZenPolicy(policy).setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY).setEnabled(true).build()
+        else android.app.AutomaticZenRule(c.getString(R.string.app_car), null, car, CONDITION, policy, NotificationManager.INTERRUPTION_FILTER_PRIORITY, true)
+        val kept = prefs(c).getString(RULE, null)?.takeIf { nm.getAutomaticZenRule(it) != null }
+        if (kept != null && on && nm.getAutomaticZenRule(kept).zenPolicy?.priorityCategoryMedia != android.service.notification.ZenPolicy.STATE_ALLOW)
+            runCatching { nm.updateAutomaticZenRule(kept, rule); WriterLog.i("Car: quiet lets media through now") }.onFailure { WriterLog.w("Car: quiet not updated", it) }
+        val id = kept ?: run {
             if (!on) return@runCatching
-            val policy = android.service.notification.ZenPolicy.Builder().disallowAllSounds().hideAllVisualEffects()
-                .allowCalls(android.service.notification.ZenPolicy.PEOPLE_TYPE_ANYONE).allowRepeatCallers(true).allowAlarms(true).build()
-            val car = android.content.ComponentName(c, CarActivity::class.java)
-            val rule = if (android.os.Build.VERSION.SDK_INT >= 35) // Android's own driving rule, shown as such in its settings
-                android.app.AutomaticZenRule.Builder(c.getString(R.string.app_car), CONDITION).setType(android.app.AutomaticZenRule.TYPE_DRIVING)
-                    .setConfigurationActivity(car).setZenPolicy(policy).setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY).setEnabled(true).build()
-            else android.app.AutomaticZenRule(c.getString(R.string.app_car), null, car, CONDITION, policy, NotificationManager.INTERRUPTION_FILTER_PRIORITY, true)
             nm.addAutomaticZenRule(rule).also { prefs(c).edit().putString(RULE, it).apply() }
         }
         nm.setAutomaticZenRuleState(id, android.service.notification.Condition(CONDITION, c.getString(R.string.app_car),

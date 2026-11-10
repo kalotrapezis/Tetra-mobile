@@ -53,4 +53,5 @@
     <string name="auto_answer_on_phone">Responde a isto no telemóvel</string>
     <string name="auto_no_map">Ainda não há nenhum mapa no telemóvel. Transfira primeiro um mapa no telemóvel.</string>
     <string name="auto_paired_done">Emparelhado com %1$s: o Tetra Car está no ecrã dele.</string>
+    <string name="car_favorites_none">Ainda não há locais guardados: guarde um no mapa com ♥.</string>
 </resources>

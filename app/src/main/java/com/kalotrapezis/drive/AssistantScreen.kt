@@ -229,6 +229,8 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () 
         context.startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(uri, mime).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK))
     }.onFailure { WriterLog.e("Assistant: could not open ${f.name}", it); say(context.getString(R.string.assistant_cannot_open), true) }
     fun go(v: String) = runCatching {
+        // in Tetra Car (on the car's screen above all, where no other window opens): the map, the music, a page in its panes
+        if (Car.go?.invoke(v) == true) return@runCatching
         if (v.startsWith("youtube:")) openYouTube(context, v.removePrefix("youtube:"))
         else if (v.startsWith("app:")) { if (!carOpenApp(context, v.removePrefix("app:"))) say(context.getString(R.string.assistant_cannot_open), true) }
         else context.startActivity(appletIntent(context, v))

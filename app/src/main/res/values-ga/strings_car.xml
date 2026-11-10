@@ -53,4 +53,5 @@
     <string name="auto_answer_on_phone">Freagair é seo ar an nguthán</string>
     <string name="auto_no_map">Níl aon léarscáil ar an bhfón fós. Íoslódáil léarscáil ar an bhfón ar dtús.</string>
     <string name="auto_paired_done">Péireáilte le %1$s: tá Tetra Car ar a scáileán.</string>
+    <string name="car_favorites_none">Níl aon áit sábháilte fós: sábháil ceann ar an léarscáil le ♥.</string>
 </resources>
