@@ -853,6 +853,7 @@ internal object MapsSearch {
      * with the query before one that has it inside, and towns before shops when only words are given.
      */
     fun search(all: List<Poi>, query: String, lat: Double, lng: Double, kind: String? = null, limit: Int = 60, nearby: Boolean = false): List<Poi> {
+        if (kind == null) spot(all, query, lat, lng)?.let { return listOf(it) }
         val q = fold(query.trim())
         // Nearby with no words or kind: what is around, not the towns (the user, 21 Oct: "βάλε και ένα κουμπί Nearby")
         if (q.isEmpty() && kind == null) return if (!nearby) emptyList() else all.asSequence().filter { !settlement(it.kind) && Math.abs(it.lat - lat) < 0.05 && Math.abs(it.lng - lng) < 0.065 }
@@ -872,6 +873,23 @@ internal object MapsSearch {
             .sortedWith(compareBy({ (p, _) -> if (q.isEmpty() || p.key.startsWith(q) || p.key.contains(" $q")) 0 else 1 },
                 { (p, _) -> if (kind == null && q.isNotEmpty() && !settlement(p.kind)) 1 else 0 }, { (_, d) -> d }))
             .take(limit).map { it.first }.toList()
+    }
+
+    /**
+     * The spot a Google plus code names ("8GH64VPV+HF", or short "4VPV+HF Ξάνθη": near that town, else near [lat],[lng]),
+     * or coordinates ("41.1364, 24.8937"); null for anything else (the user, 10 Nov: "this location codes Google has can I
+     * search with them In tetra maps?").
+     */
+    fun spot(all: List<Poi>, query: String, lat: Double, lng: Double): Poi? {
+        val t = query.trim()
+        Regex("""^(-?\d{1,2}\.\d+)\s*[,\s]\s*(-?\d{1,3}\.\d+)$""").find(t)?.let { m ->
+            val la = m.groupValues[1].toDouble(); val lo = m.groupValues[2].toDouble()
+            return if (la in -90.0..90.0 && lo in -180.0..180.0) Poi("", la, lo, t) else null
+        }
+        val m = Regex("""^([${PlusCode.ALPHABET}]{2,8}\+[${PlusCode.ALPHABET}]{0,3})(?:[\s,]+(.+))?$""", RegexOption.IGNORE_CASE).find(t) ?: return null
+        val town = m.groupValues[2].trim().takeIf { it.isNotEmpty() }?.let { w -> search(all, w, lat, lng, limit = 20).firstOrNull { settlement(it.kind) } ?: return null }
+        val at = PlusCode.decode(m.groupValues[1], town?.lat ?: lat, town?.lng ?: lng) ?: return null
+        return Poi("", at.first, at.second, t)
     }
 
     /** The list's own entry for something seen on the map: the same name, or the nearest, within [within] metres. */
@@ -1263,4 +1281,48 @@ internal object MapsCheck {
     }
 
     fun done(root: File, id: String) { root.mkdirs(); File(root, DONE).appendText("$id\n") }
+}
+
+/** Google's plus codes (Open Location Code): a spot as "8GH64VPV+HF", or "4VPV+HF" shortened against a place near it. */
+internal object PlusCode {
+    const val ALPHABET = "23456789CFGHJMPQRVWX"
+
+    /** The middle of [code]'s square; a short one is recovered nearest [refLat],[refLng], as Google does. */
+    fun decode(code: String, refLat: Double, refLng: Double): Pair<Double, Double>? {
+        val c = code.uppercase()
+        val before = c.substringBefore('+'); val after = c.substringAfter('+')
+        if (before.length % 2 != 0 || before.length > 8 || after.length == 1 || after.length > 3) return null
+        if (before.length == 8) return full(before + after)
+        val pad = 8 - before.length
+        val res = Math.pow(20.0, 2.0 - pad / 2)
+        val near = full(prefix(Math.floor(refLat / res) * res, Math.floor(refLng / res) * res, pad) + before + after) ?: return null
+        var (la, lo) = near
+        if (refLat + res / 2 < la && la - res >= -90) la -= res else if (refLat - res / 2 > la && la + res <= 90) la += res
+        if (refLng + res / 2 < lo) lo -= res else if (refLng - res / 2 > lo) lo += res
+        return la to lo
+    }
+
+    /** A whole code without its "+": ten characters (a ~14 m square), or eleven (~3 m). */
+    private fun full(c: String): Pair<Double, Double>? {
+        if (c.length < 10 || c.any { it !in ALPHABET }) return null
+        var la = -90.0; var lo = -180.0; var res = 20.0
+        for (i in 0 until 10 step 2) {
+            la += ALPHABET.indexOf(c[i]) * res; lo += ALPHABET.indexOf(c[i + 1]) * res
+            if (i < 8) res /= 20
+        }
+        var rLa = res; var rLo = res
+        if (c.length > 10) { rLa /= 5; rLo /= 4; val g = ALPHABET.indexOf(c[10]); la += (g / 4) * rLa; lo += (g % 4) * rLo }
+        return (la + rLa / 2) to (lo + rLo / 2)
+    }
+
+    /** The first [n] characters of the code of [lat],[lng]. */
+    private fun prefix(lat: Double, lng: Double, n: Int): String {
+        var la = lat + 90; var lo = lng + 180; var res = 20.0
+        return buildString {
+            repeat(n / 2) {
+                val a = Math.floor(la / res).toInt().coerceIn(0, 19); val b = Math.floor(lo / res).toInt().coerceIn(0, 19)
+                append(ALPHABET[a]).append(ALPHABET[b]); la -= a * res; lo -= b * res; res /= 20
+            }
+        }
+    }
 }

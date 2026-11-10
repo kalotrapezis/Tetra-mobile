@@ -1020,3 +1020,28 @@ class MapsOtherNamesTest {
         assertNull(MapsSearch.parse("town\t41.0\t23.0\tΣέρρες\tSerres")!!.named("el"))
     }
 }
+
+/** Google's plus codes and coordinates in Maps' search: the user's Xanthi schools, as Google gives them (10 Nov). */
+class PlusCodeTest {
+    private fun near(a: Pair<Double, Double>?, lat: Double, lng: Double) =
+        assertTrue("$a", a != null && Math.abs(a.first - lat) < 0.0002 && Math.abs(a.second - lng) < 0.0002)
+
+    @Test fun codes() {
+        near(PlusCode.decode("8GH64VPV+HF", 0.0, 0.0), 41.136437, 24.893687) // 14ο Δημοτικό, whole code: anywhere
+        near(PlusCode.decode("4VPV+HF", 41.13, 24.88), 41.136437, 24.893687)   // short, from Xanthi
+        near(PlusCode.decode("4wh5+g6", 41.0, 25.2), 41.128813, 24.908062)     // short, lower case, from a degree off
+        assertNull(PlusCode.decode("4VPV+H", 41.13, 24.88))
+        assertNull(PlusCode.decode("ABCD+EF", 41.13, 24.88))
+    }
+
+    @Test fun search() {
+        val xanthi = Poi("town", 41.1349, 24.8880, "Ξάνθη", "Xanthi")
+        val athens = Poi("city", 37.98, 23.73, "Αθήνα", "Athens")
+        // the town after a short code places it, wherever the map is
+        val s = MapsSearch.search(listOf(athens, xanthi), "4VVQ+P2 Ξάνθη", 37.98, 23.73).single()
+        near(s.lat to s.lng, 41.144312, 24.887563)
+        val c = MapsSearch.search(listOf(xanthi), "41.1364, 24.8937", 0.0, 0.0).single()
+        assertEquals(41.1364, c.lat, 1e-9); assertEquals(24.8937, c.lng, 1e-9)
+        assertEquals("Ξάνθη", MapsSearch.search(listOf(xanthi), "Ξάνθη", 0.0, 0.0).single().name) // words stay words
+    }
+}
