@@ -31,4 +31,24 @@
     <string name="car_open_bt">Atvērt, kad šis Bluetooth savienojas</string>
     <string name="car_bluetooth_phone">Tālruņa Bluetooth</string>
     <string name="car_bluetooth_phone_none">Izvēlies savu tālruni: kad tas savienojas, Tetra Car var atvērties pats.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (paša auto ekrāns)</string>
+    <string name="auto_settings_note">Instalē Tetra Auto auto ekrānā, savieno to ar šī tālruņa tīklāju un pēc tam savieno pārī: Tetra Car tiek zīmēts šeit un rādīts tur, un darbojas arī ar izslēgtu tālruņa ekrānu. Tālrunis sagatavojas auto, tiklīdz pievienojas auto Bluetooth.</string>
+    <string name="auto_paired">Savienots pārī: rāda Tetra Car, kad atrod šo tālruni</string>
+    <string name="auto_show_now">Rādīt auto tagad</string>
+    <string name="auto_show_now_summary">Gatavs auto nākamo pusstundu</string>
+    <string name="auto_pairing">Savienošana ar auto %1$s: atstāj šī tālruņa tīklāju ieslēgtu, auto pievienosies pats</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Gatavs auto</string>
+    <string name="auto_on_car">Auto %1$s ekrānā</string>
+    <string name="auto_note_text">Tetra Car šajā tālrunī tiek zīmēts auto ekrānam</string>
+    <string name="auto_stop">Apturēt</string>
+    <string name="auto_share">Kopīgot</string>
+    <string name="auto_send_to_car">Sūtīt uz auto</string>
+    <string name="auto_no_car">Pašlaik neviens auto nerāda Tetra Car</string>
+    <plurals name="auto_sending"><item quantity="zero">Uz auto tiek sūtīts %d failu</item><item quantity="one">Uz auto tiek sūtīts %d fails</item><item quantity="other">Uz auto tiek sūtīti %d faili</item></plurals>
+    <string name="auto_file_from_car">Fails %1$s saņemts no auto (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">Fails %1$s ir nonācis auto</string>
+    <string name="auto_file_not_on_car">Auto nesaglabāja failu %1$s</string>
+    <string name="auto_answer_on_phone">Atbildi uz to tālrunī</string>
 </resources>

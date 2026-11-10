@@ -464,6 +464,12 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
         if (!PhoneRelay.noCalls(context)) SettingRow(stringResource(R.string.car_pair_car), CarWire.link(context)?.let { stringResource(R.string.codes_paired, it.name) } ?: stringResource(R.string.car_pair_car_summary),
             onClick = { openApplet(context, Applet.Codes.name) })
     }
+    // Tetra Auto: the car's screen shows Tetra Car as this phone draws it (the user, 10 Nov: "the phone is the server and the car a dumb client")
+    if (!PhoneRelay.noCalls(context)) SettingsSection(stringResource(R.string.auto_title), stringResource(R.string.auto_settings_note)) {
+        var cars by remember { mutableStateOf(AutoCars.all(context)) }
+        cars.forEach { car -> SettingRow(car.name, stringResource(R.string.auto_paired)) { TextButton({ AutoCars.forget(context, car); cars = AutoCars.all(context) }) { Text(stringResource(R.string.settings_forget), maxLines = 1) } } }
+        if (cars.isNotEmpty()) SettingRow(stringResource(R.string.auto_show_now), stringResource(R.string.auto_show_now_summary), onClick = { AutoProjection.start(context) })
+    }
     // opening by itself: as the home screen (the surest), at start, or as the chosen Bluetooth joins
     SettingsSection(stringResource(R.string.car_open)) {
         SettingRow(stringResource(R.string.car_home), stringResource(R.string.car_home_summary), onClick = {

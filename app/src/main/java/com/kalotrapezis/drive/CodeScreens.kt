@@ -207,6 +207,11 @@ internal fun CodeScannerTab(back: () -> Unit, onCode: ((String) -> Boolean)? = n
                             if (!scanning || (value == ignoredValue && SystemClock.elapsedRealtime() < ignoredUntil)) return@addOnSuccessListener
                             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                             if (pairing != null) { pair(pairing.first, pairing.second); return@addOnSuccessListener }
+                            // Tetra Auto's QR on the car's screen: that car pairs as it next says hello (AutoCars)
+                            AutoCars.code(value)?.let { (code, name) ->
+                                result = CodeResult.Pairing(value, name); pairStatus = context.getString(R.string.auto_pairing, name)
+                                AutoCars.expect(context.applicationContext, code, name); return@addOnSuccessListener
+                            }
                             result = codeResult(value, code.url?.url?.takeIf { code.valueType == Barcode.TYPE_URL })
                         }
                         .addOnCompleteListener { frame.close() }

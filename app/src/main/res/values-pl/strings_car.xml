@@ -31,4 +31,24 @@
     <string name="car_open_bt">Otwieraj, gdy połączy się ten Bluetooth</string>
     <string name="car_bluetooth_phone">Bluetooth telefonu</string>
     <string name="car_bluetooth_phone_none">Wybierz swój telefon: gdy się połączy, Tetra Car może otworzyć się sam.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (własny ekran samochodu)</string>
+    <string name="auto_settings_note">Zainstaluj Tetra Auto na ekranie samochodu, połącz go z hotspotem tego telefonu, a potem sparuj: Tetra Car jest rysowany tutaj i pokazywany tam, i działa przy wyłączonym ekranie telefonu. Telefon przygotowuje się na samochód, gdy tylko połączy się Bluetooth samochodu.</string>
+    <string name="auto_paired">Sparowano: pokazuje Tetra Car, gdy znajdzie ten telefon</string>
+    <string name="auto_show_now">Pokaż w samochodzie teraz</string>
+    <string name="auto_show_now_summary">Gotowe na samochód przez następne pół godziny</string>
+    <string name="auto_pairing">Parowanie z samochodem %1$s: zostaw włączony hotspot tego telefonu, samochód połączy się sam</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Gotowe na samochód</string>
+    <string name="auto_on_car">Na ekranie samochodu %1$s</string>
+    <string name="auto_note_text">Tetra Car jest rysowany na tym telefonie dla ekranu samochodu</string>
+    <string name="auto_stop">Zatrzymaj</string>
+    <string name="auto_share">Udostępnij</string>
+    <string name="auto_send_to_car">Wyślij do samochodu</string>
+    <string name="auto_no_car">Żaden samochód nie pokazuje teraz Tetra Car</string>
+    <plurals name="auto_sending"><item quantity="one">Wysyłanie %d pliku do samochodu</item><item quantity="few">Wysyłanie %d plików do samochodu</item><item quantity="many">Wysyłanie %d plików do samochodu</item><item quantity="other">Wysyłanie %d pliku do samochodu</item></plurals>
+    <string name="auto_file_from_car">Plik %1$s przyszedł z samochodu (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">Plik %1$s jest w samochodzie</string>
+    <string name="auto_file_not_on_car">Samochód nie zachował pliku %1$s</string>
+    <string name="auto_answer_on_phone">Odpowiedz na to na telefonie</string>
 </resources>

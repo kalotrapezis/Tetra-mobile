@@ -31,4 +31,24 @@
     <string name="car_open_bt">Otvori kad se ovaj Bluetooth poveže</string>
     <string name="car_bluetooth_phone">Bluetooth telefona</string>
     <string name="car_bluetooth_phone_none">Odaberi svoj telefon: kad se poveže, Tetra Car se može otvoriti sam.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (vlastiti zaslon auta)</string>
+    <string name="auto_settings_note">Instaliraj Tetra Auto na zaslon auta, poveži ga sa žarišnom točkom ovog telefona, zatim upari: Tetra Car crta se ovdje, prikazuje ondje i radi i kad je zaslon telefona ugašen. Telefon se priprema za auto čim se poveže Bluetooth auta.</string>
+    <string name="auto_paired">Upareno: prikazuje Tetra Car kad pronađe ovaj telefon</string>
+    <string name="auto_show_now">Prikaži u autu sada</string>
+    <string name="auto_show_now_summary">Spremno za auto sljedećih pola sata</string>
+    <string name="auto_pairing">Uparivanje s autom %1$s: ostavi uključenu žarišnu točku ovog telefona, auto se povezuje sam</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Spremno za auto</string>
+    <string name="auto_on_car">Na zaslonu auta %1$s</string>
+    <string name="auto_note_text">Tetra Car crta se na ovom telefonu za zaslon auta</string>
+    <string name="auto_stop">Zaustavi</string>
+    <string name="auto_share">Dijeli</string>
+    <string name="auto_send_to_car">Pošalji u auto</string>
+    <string name="auto_no_car">Trenutačno nijedan auto ne prikazuje Tetra Car</string>
+    <plurals name="auto_sending"><item quantity="one">Šalje se %d datoteka u auto</item><item quantity="few">Šalju se %d datoteke u auto</item><item quantity="other">Šalje se %d datoteka u auto</item></plurals>
+    <string name="auto_file_from_car">Datoteka %1$s stigla je iz auta (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">Datoteka %1$s je u autu</string>
+    <string name="auto_file_not_on_car">Auto nije zadržao datoteku %1$s</string>
+    <string name="auto_answer_on_phone">Odgovori na ovo na telefonu</string>
 </resources>

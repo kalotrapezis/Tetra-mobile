@@ -121,6 +121,19 @@
         <!-- A message in the car: read aloud, a reply said and sent; over the lock screen, as a call's screen -->
         <activity android:name=".CarSmsActivity" android:exported="false" android:theme="@android:style/Theme.Translucent.NoTitleBar" android:taskAffinity="com.kalotrapezis.drive.carsms"
             android:excludeFromRecents="true" android:showWhenLocked="true" android:turnScreenOn="true" />
+        <!-- Tetra Auto: Tetra Car drawn for the car's own screen, the car a client of the phone (AutoProjection.kt) -->
+        <service android:name=".AutoProjectionService" android:exported="false" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Shows Tetra Car on the user's own paired car screen over the local Wi-Fi (like Android Auto's projection)" />
+        </service>
+        <activity android:name=".AutoShareActivity" android:exported="true" android:label="@string/auto_send_to_car" android:icon="@mipmap/applet_car"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
         <receiver android:name=".CarBootReceiver" android:exported="true">
             <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /><action android:name="android.intent.action.QUICKBOOT_POWERON" /></intent-filter>
         </receiver>

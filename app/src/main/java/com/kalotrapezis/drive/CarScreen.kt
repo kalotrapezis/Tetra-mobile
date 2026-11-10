@@ -276,8 +276,9 @@ private class PaneBack(override val lifecycle: Lifecycle) : OnBackPressedDispatc
     override val onBackPressedDispatcher = OnBackPressedDispatcher()
 }
 
+/** Tetra Car; [projected]: drawn for a car's own screen (Tetra Auto, AutoProjection), whose dock opens the car's Share. */
 @Composable
-private fun CarScreen() {
+internal fun CarScreen(projected: Boolean = false) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("car", Context.MODE_PRIVATE) }
     var state by remember { mutableStateOf(CarState.parse(prefs.getString("state", null))) }
@@ -356,7 +357,7 @@ private fun CarScreen() {
                 }
             }
             CarDock(state, side, layouts, setLayouts = { layouts = it }, layout = { set(state.laid(it)) },
-                open = { set(state.put(it)); if (it == CarApp.Browser) tiles = false }, media = ::media, apps = { apps = true })
+                open = { set(state.put(it)); if (it == CarApp.Browser) tiles = false }, media = ::media, apps = { apps = true }, projected = projected)
         }) { (panes, dock), c ->
             val d = dock.measure(if (side == DockSide.Bottom) c.copy(minHeight = 0) else c.copy(minWidth = 0))
             val w = if (side == DockSide.Bottom) c.maxWidth else c.maxWidth - d.width
@@ -408,7 +409,7 @@ private fun CarPanes(state: CarState, opened: List<CarApp>, coverAt: Int?, cover
 
 @Composable
 private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayouts: (Boolean) -> Unit, layout: (CarLayout) -> Unit,
-                    open: (CarApp) -> Unit, media: () -> Unit, apps: () -> Unit) {
+                    open: (CarApp) -> Unit, media: () -> Unit, apps: () -> Unit, projected: Boolean = false) {
     val context = LocalContext.current
     val down = side != DockSide.Bottom // down a side: icons without their names, so it fits a short screen
     val strip: @Composable () -> Unit = { // the layouts' strip, with its way back (the user's sliding strips)
@@ -425,7 +426,9 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
         // down a side only Maps, Media and Phone stay; Messages and the Browser while they are on the screen (the user, 9 Nov)
         if (!down || CarApp.Messages in state.panes) DockApp(R.drawable.sms_art, R.string.app_sms, CarApp.Messages in state.panes, down) { open(CarApp.Messages) }
         if (!down || CarApp.Browser in state.panes) DockApp(R.drawable.browser_art, R.string.app_browser, CarApp.Browser in state.panes, down) { open(CarApp.Browser) }
-        DockIcon(R.drawable.ic_view_grid, R.string.car_apps, MaterialTheme.colorScheme.secondary, down, apps)
+        // on the car's screen the phone's other apps would open on the phone: the car's own Share instead (the user, 10 Nov)
+        if (projected) DockIcon(R.drawable.ic_share, R.string.auto_share, MaterialTheme.colorScheme.secondary, down) { AutoProjection.session?.openShare() }
+        else DockIcon(R.drawable.ic_view_grid, R.string.car_apps, MaterialTheme.colorScheme.secondary, down, apps)
     }
     val layoutButton: @Composable () -> Unit = {
         Box(Modifier.size(72.dp, if (down) 44.dp else 56.dp).clip(RoundedCornerShape(12.dp)).clickable { setLayouts(true) }, contentAlignment = Alignment.Center) { LayoutGlyph(state.layout, true) }

@@ -31,4 +31,24 @@
     <string name="car_open_bt">Odpri, ko se poveže ta Bluetooth</string>
     <string name="car_bluetooth_phone">Bluetooth telefona</string>
     <string name="car_bluetooth_phone_none">Izberi svoj telefon: ko se poveže, se Tetra Car lahko odpre sam.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (lastni zaslon avta)</string>
+    <string name="auto_settings_note">Namesti Tetra Auto na zaslon avta, poveži ga z dostopno točko tega telefona in nato seznani: Tetra Car se riše tukaj in prikaže tam ter deluje tudi z ugasnjenim zaslonom telefona. Telefon se pripravi na avto, takoj ko se poveže Bluetooth avta.</string>
+    <string name="auto_paired">Seznanjeno: prikaže Tetra Car, ko najde ta telefon</string>
+    <string name="auto_show_now">Prikaži v avtu zdaj</string>
+    <string name="auto_show_now_summary">Pripravljeno za avto naslednje pol ure</string>
+    <string name="auto_pairing">Seznanjanje z avtom %1$s: pusti dostopno točko tega telefona vklopljeno, avto se poveže sam</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Pripravljeno za avto</string>
+    <string name="auto_on_car">Na zaslonu avta %1$s</string>
+    <string name="auto_note_text">Tetra Car se na tem telefonu riše za zaslon avta</string>
+    <string name="auto_stop">Ustavi</string>
+    <string name="auto_share">Deli</string>
+    <string name="auto_send_to_car">Pošlji v avto</string>
+    <string name="auto_no_car">Trenutno noben avto ne prikazuje Tetra Car</string>
+    <plurals name="auto_sending"><item quantity="one">V avto se pošilja %d datoteka</item><item quantity="two">V avto se pošiljata %d datoteki</item><item quantity="few">V avto se pošiljajo %d datoteke</item><item quantity="other">V avto se pošilja %d datotek</item></plurals>
+    <string name="auto_file_from_car">Datoteka %1$s je prišla iz avta (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">Datoteka %1$s je v avtu</string>
+    <string name="auto_file_not_on_car">Avto ni obdržal datoteke %1$s</string>
+    <string name="auto_answer_on_phone">Odgovori na to v telefonu</string>
 </resources>

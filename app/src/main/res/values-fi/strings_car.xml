@@ -31,4 +31,24 @@
     <string name="car_open_bt">Avaa, kun tämä Bluetooth yhdistyy</string>
     <string name="car_bluetooth_phone">Puhelimen Bluetooth</string>
     <string name="car_bluetooth_phone_none">Valitse puhelimesi: kun se yhdistyy, Tetra Car voi avautua itsestään.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (auton oma näyttö)</string>
+    <string name="auto_settings_note">Asenna Tetra Auto auton näytölle, yhdistä se tämän puhelimen hotspotiin ja muodosta sitten pari: Tetra Car piirretään tässä ja näytetään siellä, ja se toimii puhelimen näytön ollessa pimeänä. Puhelin valmistautuu autoa varten heti, kun auton Bluetooth yhdistyy.</string>
+    <string name="auto_paired">Pari muodostettu: näyttää Tetra Carin, kun se löytää tämän puhelimen</string>
+    <string name="auto_show_now">Näytä autossa nyt</string>
+    <string name="auto_show_now_summary">Valmiina autoa varten seuraavan puolen tunnin ajan</string>
+    <string name="auto_pairing">Muodostetaan pari autoon %1$s: pidä tämän puhelimen hotspot päällä, auto yhdistyy itse</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Valmiina autoa varten</string>
+    <string name="auto_on_car">Auton %1$s näytöllä</string>
+    <string name="auto_note_text">Tetra Car piirretään tällä puhelimella auton näyttöä varten</string>
+    <string name="auto_stop">Lopeta</string>
+    <string name="auto_share">Jaa</string>
+    <string name="auto_send_to_car">Lähetä autoon</string>
+    <string name="auto_no_car">Mikään auto ei näytä Tetra Caria juuri nyt</string>
+    <plurals name="auto_sending"><item quantity="one">Lähetetään %d tiedosto autoon</item><item quantity="other">Lähetetään %d tiedostoa autoon</item></plurals>
+    <string name="auto_file_from_car">%1$s tuli autosta (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">%1$s on autossa</string>
+    <string name="auto_file_not_on_car">Auto ei säilyttänyt tiedostoa %1$s</string>
+    <string name="auto_answer_on_phone">Vastaa tähän puhelimessa</string>
 </resources>

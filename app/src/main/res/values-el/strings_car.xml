@@ -31,4 +31,24 @@
     <string name="car_open_bt">Άνοιγμα όταν συνδέεται αυτό το Bluetooth</string>
     <string name="car_bluetooth_phone">Bluetooth του κινητού</string>
     <string name="car_bluetooth_phone_none">Διάλεξε το κινητό σου: όταν συνδεθεί, το Tetra Car μπορεί να ανοίξει από μόνο του.</string>
+    <!-- Tetra Auto -->
+    <string name="auto_title">Tetra Auto (η οθόνη του αυτοκινήτου)</string>
+    <string name="auto_settings_note">Εγκαταστήστε το Tetra Auto στην οθόνη του αυτοκινήτου, συνδέστε την στο σημείο πρόσβασης αυτού του κινητού και κάντε σύζευξη: το Tetra Car σχεδιάζεται εδώ και φαίνεται εκεί, και δουλεύει με την οθόνη του κινητού σβηστή. Το κινητό ετοιμάζεται για το αυτοκίνητο μόλις συνδεθεί το Bluetooth του.</string>
+    <string name="auto_paired">Σε σύζευξη: δείχνει το Tetra Car όταν βρίσκει αυτό το κινητό</string>
+    <string name="auto_show_now">Εμφάνιση στο αυτοκίνητο τώρα</string>
+    <string name="auto_show_now_summary">Έτοιμο για το αυτοκίνητο για την επόμενη μισή ώρα</string>
+    <string name="auto_pairing">Σύζευξη με %1$s: αφήστε ανοιχτό το σημείο πρόσβασης, το αυτοκίνητο συνδέεται μόνο του</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Έτοιμο για το αυτοκίνητο</string>
+    <string name="auto_on_car">Στην οθόνη του %1$s</string>
+    <string name="auto_note_text">Το Tetra Car σχεδιάζεται σε αυτό το κινητό για την οθόνη του αυτοκινήτου</string>
+    <string name="auto_stop">Διακοπή</string>
+    <string name="auto_share">Κοινοποίηση</string>
+    <string name="auto_send_to_car">Αποστολή στο αυτοκίνητο</string>
+    <string name="auto_no_car">Κανένα αυτοκίνητο δεν δείχνει τώρα το Tetra Car</string>
+    <plurals name="auto_sending"><item quantity="one">Αποστολή %d αρχείου στο αυτοκίνητο</item><item quantity="other">Αποστολή %d αρχείων στο αυτοκίνητο</item></plurals>
+    <string name="auto_file_from_car">Το %1$s ήρθε από το αυτοκίνητο (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">Το %1$s είναι στο αυτοκίνητο</string>
+    <string name="auto_file_not_on_car">Το αυτοκίνητο δεν κράτησε το %1$s</string>
+    <string name="auto_answer_on_phone">Απαντήστε σε αυτό στο κινητό</string>
 </resources>
