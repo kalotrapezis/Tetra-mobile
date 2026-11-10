@@ -4609,6 +4609,15 @@
     <string name="settings_remove_map">Entfernen</string>
     <string name="settings_remove_map_title">Karte von %1$s entfernen?</string>
     <string name="settings_remove_map_body">Ihre Dateien kommen in den Papierkorb, hier und auf deinen anderen Geräten. Deine gespeicherten Orte bleiben erhalten.</string>
+    <string name="settings_import_map">Karte importieren</string>
+    <string name="settings_import_map_summary">Eine .tetramap-Datei, die auf einem anderen Gerät exportiert wurde</string>
+    <string name="settings_export_map_title">Karte von %1$s exportieren</string>
+    <string name="settings_export_map_body">Eine .tetramap-Datei mit der Karte, ihren Straßen und ihrer Suche, für ein Gerät ohne Synchronisierung, etwa das Auto. Speichere sie als Datei oder teile sie mit einer anderen App.</string>
+    <string name="settings_exporting_map">%1$s wird exportiert…</string>
+    <string name="settings_importing_map">Karte wird importiert…</string>
+    <string name="settings_map_exported">%1$s exportiert</string>
+    <string name="settings_map_imported">Die Karte von %1$s ist installiert</string>
+    <string name="settings_map_not_imported">Karte konnte nicht importiert werden: %1$s</string>
     <string name="maps_lane_middle">über den mittleren Fahrstreifen</string>
     <string name="maps_bend_right">Achtung, scharfe Rechtskurve</string>
     <string name="maps_bend_left">Achtung, scharfe Linkskurve</string>

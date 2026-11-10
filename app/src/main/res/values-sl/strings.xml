@@ -4793,6 +4793,15 @@
     <string name="settings_remove_map">Odstrani</string>
     <string name="settings_remove_map_title">Odstranim zemljevid: %1$s?</string>
     <string name="settings_remove_map_body">Njegove datoteke gredo v Koš, tukaj in v vaših drugih napravah. Vaši shranjeni kraji ostanejo.</string>
+    <string name="settings_import_map">Uvozi zemljevid</string>
+    <string name="settings_import_map_summary">Datoteka .tetramap, izvožena iz druge naprave</string>
+    <string name="settings_export_map_title">Izvozi zemljevid: %1$s</string>
+    <string name="settings_export_map_body">Ena datoteka .tetramap z zemljevidom, njegovimi cestami in iskanjem za napravo brez sinhronizacije, kot je avto. Shranite jo kot datoteko ali jo delite z drugo aplikacijo.</string>
+    <string name="settings_exporting_map">Izvažanje: %1$s…</string>
+    <string name="settings_importing_map">Uvažanje zemljevida…</string>
+    <string name="settings_map_exported">Izvoženo: %1$s</string>
+    <string name="settings_map_imported">Zemljevid je nameščen: %1$s</string>
+    <string name="settings_map_not_imported">Zemljevida ni bilo mogoče uvoziti: %1$s</string>
     <string name="maps_lane_middle">po srednjem pasu</string>
     <string name="maps_bend_right">Oster ovinek v desno</string>
     <string name="maps_bend_left">Oster ovinek v levo</string>

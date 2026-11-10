@@ -4609,6 +4609,15 @@
     <string name="settings_remove_map">Poista</string>
     <string name="settings_remove_map_title">Poistetaanko kartta: %1$s?</string>
     <string name="settings_remove_map_body">Sen tiedostot siirretään roskakoriin, täällä ja muilla laitteillasi. Tallennetut paikkasi säilyvät.</string>
+    <string name="settings_import_map">Tuo kartta</string>
+    <string name="settings_import_map_summary">Toisesta laitteesta viety .tetramap-tiedosto</string>
+    <string name="settings_export_map_title">Vie kartta: %1$s</string>
+    <string name="settings_export_map_body">Yksi .tetramap-tiedosto, jossa on kartta, sen tiet ja haku, laitteelle, joka ei synkronoi, kuten autolle. Tallenna se tiedostoksi tai jaa se toiseen sovellukseen.</string>
+    <string name="settings_exporting_map">Viedään: %1$s…</string>
+    <string name="settings_importing_map">Tuodaan karttaa…</string>
+    <string name="settings_map_exported">Viety: %1$s</string>
+    <string name="settings_map_imported">Kartta on asennettu: %1$s</string>
+    <string name="settings_map_not_imported">Karttaa ei voitu tuoda: %1$s</string>
     <string name="maps_lane_middle">keskimmäiseltä kaistalta</string>
     <string name="maps_bend_right">Jyrkkä mutka oikealle edessä</string>
     <string name="maps_bend_left">Jyrkkä mutka vasemmalle edessä</string>

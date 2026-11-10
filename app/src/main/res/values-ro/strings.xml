@@ -4701,6 +4701,15 @@
     <string name="settings_remove_map">Elimină</string>
     <string name="settings_remove_map_title">Elimini harta: %1$s?</string>
     <string name="settings_remove_map_body">Fișierele ei merg în Coșul de gunoi, aici și pe celelalte dispozitive. Locurile salvate rămân.</string>
+    <string name="settings_import_map">Importă o hartă</string>
+    <string name="settings_import_map_summary">Un fișier .tetramap exportat de pe alt dispozitiv</string>
+    <string name="settings_export_map_title">Exportă harta: %1$s</string>
+    <string name="settings_export_map_body">Un singur fișier .tetramap cu harta, drumurile și căutarea ei, pentru un dispozitiv fără sincronizare, cum ar fi mașina. Salvează-l ca fișier sau partajează-l cu altă aplicație.</string>
+    <string name="settings_exporting_map">Se exportă %1$s…</string>
+    <string name="settings_importing_map">Se importă o hartă…</string>
+    <string name="settings_map_exported">%1$s a fost exportată</string>
+    <string name="settings_map_imported">Harta %1$s este instalată</string>
+    <string name="settings_map_not_imported">Harta nu a putut fi importată: %1$s</string>
     <string name="maps_lane_middle">pe banda din mijloc</string>
     <string name="maps_bend_right">Urmează o curbă strânsă la dreapta</string>
     <string name="maps_bend_left">Urmează o curbă strânsă la stânga</string>

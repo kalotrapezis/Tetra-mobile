@@ -4609,6 +4609,15 @@
     <string name="settings_remove_map">Премахване</string>
     <string name="settings_remove_map_title">Да се премахне ли картата на %1$s?</string>
     <string name="settings_remove_map_body">Файловете ѝ отиват в Кошчето, тук и на другите ви устройства. Запазените ви места остават.</string>
+    <string name="settings_import_map">Импортиране на карта</string>
+    <string name="settings_import_map_summary">Файл .tetramap, експортиран от друго устройство</string>
+    <string name="settings_export_map_title">Експортиране на картата: %1$s</string>
+    <string name="settings_export_map_body">Един файл .tetramap с картата, пътищата и търсенето ѝ, за устройство без синхронизация, като колата. Запазете го като файл или го споделете с друго приложение.</string>
+    <string name="settings_exporting_map">Експортиране: %1$s…</string>
+    <string name="settings_importing_map">Импортиране на карта…</string>
+    <string name="settings_map_exported">Експортирано: %1$s</string>
+    <string name="settings_map_imported">Картата е инсталирана: %1$s</string>
+    <string name="settings_map_not_imported">Картата не можа да се импортира: %1$s</string>
     <string name="maps_lane_middle">от средната лента</string>
     <string name="maps_bend_right">Предстои остър завой надясно</string>
     <string name="maps_bend_left">Предстои остър завой наляво</string>

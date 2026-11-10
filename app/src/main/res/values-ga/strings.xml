@@ -4885,6 +4885,15 @@
     <string name="settings_remove_map">Bain</string>
     <string name="settings_remove_map_title">An mbainfear léarscáil %1$s?</string>
     <string name="settings_remove_map_body">Téann a comhaid isteach sa Bhruscar, anseo agus ar do ghléasanna eile. Fanann do chuid áiteanna sábháilte.</string>
+    <string name="settings_import_map">Iompórtáil léarscáil</string>
+    <string name="settings_import_map_summary">Comhad .tetramap a easpórtáladh ó ghléas eile</string>
+    <string name="settings_export_map_title">Easpórtáil an léarscáil: %1$s</string>
+    <string name="settings_export_map_body">Comhad .tetramap amháin leis an léarscáil, a bóithre agus a cuardach, do ghléas nach ndéanann sioncrónú, mar an carr. Sábháil é mar chomhad nó comhroinn é le haip eile.</string>
+    <string name="settings_exporting_map">Á easpórtáil: %1$s…</string>
+    <string name="settings_importing_map">Léarscáil á hiompórtáil…</string>
+    <string name="settings_map_exported">Easpórtáilte: %1$s</string>
+    <string name="settings_map_imported">Tá an léarscáil suiteáilte: %1$s</string>
+    <string name="settings_map_not_imported">Níorbh fhéidir an léarscáil a iompórtáil: %1$s</string>
     <string name="maps_lane_middle">ón lána láir</string>
     <string name="maps_bend_right">Casadh géar ar dheis romhat</string>
     <string name="maps_bend_left">Casadh géar ar chlé romhat</string>

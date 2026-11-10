@@ -4609,6 +4609,15 @@
     <string name="settings_remove_map">Rimuovi</string>
     <string name="settings_remove_map_title">Rimuovere la mappa di %1$s?</string>
     <string name="settings_remove_map_body">I suoi file vanno nel Cestino, qui e sugli altri tuoi dispositivi. I tuoi luoghi salvati restano.</string>
+    <string name="settings_import_map">Importa una mappa</string>
+    <string name="settings_import_map_summary">Un file .tetramap esportato da un altro dispositivo</string>
+    <string name="settings_export_map_title">Esporta la mappa: %1$s</string>
+    <string name="settings_export_map_body">Un unico file .tetramap con la mappa, le sue strade e la sua ricerca, per un dispositivo senza sincronizzazione, come l\'auto. Salvalo come file o condividilo con un\'altra app.</string>
+    <string name="settings_exporting_map">Esportazione di %1$s…</string>
+    <string name="settings_importing_map">Importazione di una mappa…</string>
+    <string name="settings_map_exported">%1$s esportata</string>
+    <string name="settings_map_imported">La mappa %1$s è installata</string>
+    <string name="settings_map_not_imported">Impossibile importare la mappa: %1$s</string>
     <string name="maps_lane_middle">dalla corsia centrale</string>
     <string name="maps_bend_right">Curva stretta a destra</string>
     <string name="maps_bend_left">Curva stretta a sinistra</string>

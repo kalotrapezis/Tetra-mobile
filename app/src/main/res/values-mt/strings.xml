@@ -4793,6 +4793,15 @@
     <string name="settings_remove_map">Neħħi</string>
     <string name="settings_remove_map_title">Tneħħi l-mappa ta\' %1$s?</string>
     <string name="settings_remove_map_body">Il-fajls tagħha jmorru fl-Iskart, hawn u fuq l-apparati l-oħra tiegħek. Postijiet maħżuna tiegħek jibqgħu.</string>
+    <string name="settings_import_map">Importa mappa</string>
+    <string name="settings_import_map_summary">Fajl .tetramap esportat minn apparat ieħor</string>
+    <string name="settings_export_map_title">Esporta l-mappa: %1$s</string>
+    <string name="settings_export_map_body">Fajl .tetramap wieħed bil-mappa, it-toroq u t-tfittxija tagħha, għal apparat mingħajr sinkronizzazzjoni, bħall-karozza. Issejvjah bħala fajl jew aqsmu ma\' app oħra.</string>
+    <string name="settings_exporting_map">Qed tiġi esportata: %1$s…</string>
+    <string name="settings_importing_map">Qed tiġi importata mappa…</string>
+    <string name="settings_map_exported">Esportata: %1$s</string>
+    <string name="settings_map_imported">Il-mappa hija installata: %1$s</string>
+    <string name="settings_map_not_imported">Ma setgħetx tiġi importata l-mappa: %1$s</string>
     <string name="maps_lane_middle">mill-karreġġjata tan-nofs</string>
     <string name="maps_bend_right">Liwja qawwija lejn il-lemin quddiem</string>
     <string name="maps_bend_left">Liwja qawwija lejn ix-xellug quddiem</string>

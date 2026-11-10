@@ -4793,6 +4793,15 @@
     <string name="settings_remove_map">Odebrat</string>
     <string name="settings_remove_map_title">Odebrat mapu: %1$s?</string>
     <string name="settings_remove_map_body">Její soubory se přesunou do Koše, tady i na vašich dalších zařízeních. Vaše uložená místa zůstanou.</string>
+    <string name="settings_import_map">Importovat mapu</string>
+    <string name="settings_import_map_summary">Soubor .tetramap exportovaný z jiného zařízení</string>
+    <string name="settings_export_map_title">Exportovat mapu: %1$s</string>
+    <string name="settings_export_map_body">Jeden soubor .tetramap s mapou, jejími silnicemi a vyhledáváním pro zařízení bez synchronizace, jako je auto. Uložte ho jako soubor nebo ho sdílejte s jinou aplikací.</string>
+    <string name="settings_exporting_map">Exportování: %1$s…</string>
+    <string name="settings_importing_map">Importování mapy…</string>
+    <string name="settings_map_exported">Exportováno: %1$s</string>
+    <string name="settings_map_imported">Mapa je nainstalována: %1$s</string>
+    <string name="settings_map_not_imported">Mapu se nepodařilo importovat: %1$s</string>
     <string name="maps_lane_middle">prostředním pruhem</string>
     <string name="maps_bend_right">Pozor, ostrá zatáčka doprava</string>
     <string name="maps_bend_left">Pozor, ostrá zatáčka doleva</string>

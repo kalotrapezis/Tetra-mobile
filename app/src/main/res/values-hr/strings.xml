@@ -4701,6 +4701,15 @@
     <string name="settings_remove_map">Ukloni</string>
     <string name="settings_remove_map_title">Ukloniti kartu: %1$s?</string>
     <string name="settings_remove_map_body">Njezine datoteke idu u Otpad, ovdje i na vašim drugim uređajima. Vaša spremljena mjesta ostaju.</string>
+    <string name="settings_import_map">Uvezi kartu</string>
+    <string name="settings_import_map_summary">Datoteka .tetramap izvezena s drugog uređaja</string>
+    <string name="settings_export_map_title">Izvezi kartu: %1$s</string>
+    <string name="settings_export_map_body">Jedna datoteka .tetramap s kartom, njezinim cestama i pretraživanjem, za uređaj bez sinkronizacije, poput automobila. Spremite je kao datoteku ili je podijelite s drugom aplikacijom.</string>
+    <string name="settings_exporting_map">Izvoz: %1$s…</string>
+    <string name="settings_importing_map">Uvoz karte…</string>
+    <string name="settings_map_exported">Izvezeno: %1$s</string>
+    <string name="settings_map_imported">Karta je instalirana: %1$s</string>
+    <string name="settings_map_not_imported">Karta se nije mogla uvesti: %1$s</string>
     <string name="maps_lane_middle">srednjom trakom</string>
     <string name="maps_bend_right">Oštar zavoj udesno</string>
     <string name="maps_bend_left">Oštar zavoj ulijevo</string>

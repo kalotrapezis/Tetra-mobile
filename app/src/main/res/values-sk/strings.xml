@@ -4793,6 +4793,15 @@
     <string name="settings_remove_map">Odstrániť</string>
     <string name="settings_remove_map_title">Odstrániť mapu: %1$s?</string>
     <string name="settings_remove_map_body">Jej súbory sa presunú do Koša, tu aj vo vašich ďalších zariadeniach. Vaše uložené miesta zostanú.</string>
+    <string name="settings_import_map">Importovať mapu</string>
+    <string name="settings_import_map_summary">Súbor .tetramap exportovaný z iného zariadenia</string>
+    <string name="settings_export_map_title">Exportovať mapu: %1$s</string>
+    <string name="settings_export_map_body">Jeden súbor .tetramap s mapou, jej cestami a vyhľadávaním pre zariadenie bez synchronizácie, ako je auto. Uložte ho ako súbor alebo ho zdieľajte s inou aplikáciou.</string>
+    <string name="settings_exporting_map">Exportuje sa: %1$s…</string>
+    <string name="settings_importing_map">Importuje sa mapa…</string>
+    <string name="settings_map_exported">Exportované: %1$s</string>
+    <string name="settings_map_imported">Mapa je nainštalovaná: %1$s</string>
+    <string name="settings_map_not_imported">Mapu sa nepodarilo importovať: %1$s</string>
     <string name="maps_lane_middle">stredným pruhom</string>
     <string name="maps_bend_right">Pozor, ostrá zákruta doprava</string>
     <string name="maps_bend_left">Pozor, ostrá zákruta doľava</string>

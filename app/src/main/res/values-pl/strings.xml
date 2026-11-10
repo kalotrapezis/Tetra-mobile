@@ -4793,6 +4793,15 @@
     <string name="settings_remove_map">Usuń</string>
     <string name="settings_remove_map_title">Usunąć mapę: %1$s?</string>
     <string name="settings_remove_map_body">Jej pliki trafią do Kosza, tutaj i na Twoich innych urządzeniach. Zapisane miejsca zostaną.</string>
+    <string name="settings_import_map">Importuj mapę</string>
+    <string name="settings_import_map_summary">Plik .tetramap wyeksportowany z innego urządzenia</string>
+    <string name="settings_export_map_title">Eksportuj mapę: %1$s</string>
+    <string name="settings_export_map_body">Jeden plik .tetramap z mapą, jej drogami i wyszukiwaniem, dla urządzenia bez synchronizacji, takiego jak samochód. Zapisz go jako plik lub udostępnij innej aplikacji.</string>
+    <string name="settings_exporting_map">Eksportowanie: %1$s…</string>
+    <string name="settings_importing_map">Importowanie mapy…</string>
+    <string name="settings_map_exported">Wyeksportowano: %1$s</string>
+    <string name="settings_map_imported">Mapa jest zainstalowana: %1$s</string>
+    <string name="settings_map_not_imported">Nie udało się zaimportować mapy: %1$s</string>
     <string name="maps_lane_middle">środkowym pasem</string>
     <string name="maps_bend_right">Uwaga, ostry zakręt w prawo</string>
     <string name="maps_bend_left">Uwaga, ostry zakręt w lewo</string>

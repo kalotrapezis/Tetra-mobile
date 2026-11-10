@@ -4701,6 +4701,15 @@
     <string name="settings_remove_map">Quitar</string>
     <string name="settings_remove_map_title">¿Quitar el mapa de %1$s?</string>
     <string name="settings_remove_map_body">Sus archivos van a la Papelera, aquí y en tus otros dispositivos. Tus lugares guardados se quedan.</string>
+    <string name="settings_import_map">Importar un mapa</string>
+    <string name="settings_import_map_summary">Un archivo .tetramap exportado desde otro dispositivo</string>
+    <string name="settings_export_map_title">Exportar el mapa de %1$s</string>
+    <string name="settings_export_map_body">Un único archivo .tetramap con el mapa, sus carreteras y su búsqueda, para un dispositivo sin sincronización, como el coche. Guárdalo como archivo o compártelo con otra app.</string>
+    <string name="settings_exporting_map">Exportando %1$s…</string>
+    <string name="settings_importing_map">Importando un mapa…</string>
+    <string name="settings_map_exported">%1$s exportado</string>
+    <string name="settings_map_imported">El mapa de %1$s está instalado</string>
+    <string name="settings_map_not_imported">No se pudo importar el mapa: %1$s</string>
     <string name="maps_lane_middle">por el carril central</string>
     <string name="maps_bend_right">Curva cerrada a la derecha</string>
     <string name="maps_bend_left">Curva cerrada a la izquierda</string>
