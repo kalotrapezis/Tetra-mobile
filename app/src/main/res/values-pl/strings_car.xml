@@ -51,4 +51,5 @@
     <string name="auto_file_on_car">Plik %1$s jest w samochodzie</string>
     <string name="auto_file_not_on_car">Samochód nie zachował pliku %1$s</string>
     <string name="auto_answer_on_phone">Odpowiedz na to na telefonie</string>
+    <string name="auto_no_map">Na telefonie nie ma jeszcze mapy. Najpierw pobierz mapę na telefon.</string>
 </resources>

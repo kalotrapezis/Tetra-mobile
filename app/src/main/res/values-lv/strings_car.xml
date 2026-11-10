@@ -51,4 +51,5 @@
     <string name="auto_file_on_car">Fails %1$s ir nonācis auto</string>
     <string name="auto_file_not_on_car">Auto nesaglabāja failu %1$s</string>
     <string name="auto_answer_on_phone">Atbildi uz to tālrunī</string>
+    <string name="auto_no_map">Tālrunī vēl nav kartes. Vispirms lejupielādējiet karti tālrunī.</string>
 </resources>

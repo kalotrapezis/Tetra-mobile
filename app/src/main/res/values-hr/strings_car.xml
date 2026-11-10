@@ -51,4 +51,5 @@
     <string name="auto_file_on_car">Datoteka %1$s je u autu</string>
     <string name="auto_file_not_on_car">Auto nije zadržao datoteku %1$s</string>
     <string name="auto_answer_on_phone">Odgovori na ovo na telefonu</string>
+    <string name="auto_no_map">Na telefonu još nema karte. Najprije preuzmite kartu na telefon.</string>
 </resources>

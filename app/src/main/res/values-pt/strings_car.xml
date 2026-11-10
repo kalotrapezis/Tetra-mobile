@@ -51,4 +51,5 @@
     <string name="auto_file_on_car">%1$s está no carro</string>
     <string name="auto_file_not_on_car">O carro não guardou %1$s</string>
     <string name="auto_answer_on_phone">Responde a isto no telemóvel</string>
+    <string name="auto_no_map">Ainda não há nenhum mapa no telemóvel. Transfira primeiro um mapa no telemóvel.</string>
 </resources>

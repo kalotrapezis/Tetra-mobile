@@ -51,4 +51,5 @@
     <string name="auto_file_on_car">%1$s on autossa</string>
     <string name="auto_file_not_on_car">Auto ei säilyttänyt tiedostoa %1$s</string>
     <string name="auto_answer_on_phone">Vastaa tähän puhelimessa</string>
+    <string name="auto_no_map">Puhelimessa ei ole vielä karttaa. Lataa ensin kartta puhelimeen.</string>
 </resources>

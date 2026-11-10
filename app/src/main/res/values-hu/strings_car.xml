@@ -51,4 +51,5 @@
     <string name="auto_file_on_car">%1$s az autóban van</string>
     <string name="auto_file_not_on_car">Az autó nem tartotta meg ezt: %1$s</string>
     <string name="auto_answer_on_phone">Válaszolj erre a telefonon</string>
+    <string name="auto_no_map">A telefonon még nincs térkép. Először tölts le egy térképet a telefonra.</string>
 </resources>

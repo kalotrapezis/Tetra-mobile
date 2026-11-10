@@ -105,6 +105,9 @@ internal object AutoCars {
     }
 }
 
+/** True inside Tetra Car drawn for a car's screen: a page says less there (Maps without a map: download one on the phone). */
+internal val LocalOnCar = androidx.compose.runtime.staticCompositionLocalOf { false }
+
 /** Starting and stopping the projection, and the session there is now. */
 internal object AutoProjection {
     @Volatile var session: AutoSession? = null
@@ -348,7 +351,7 @@ internal class AutoSession(private val service: Service, private val socket: Soc
             override fun startActivity(intent: Intent, options: Bundle?) { runCatching { super.startActivity(Intent(intent).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), options) }.onFailure { WriterLog.w("Tetra Auto: not opened (${it.message})") } }
         }
         val view = ComposeView(safe).apply {
-            setContent { CompositionLocalProvider(LocalActivityResultRegistryOwner provides this@AutoSession) { TetraTheme { CarScreen(projected = true) } } }
+            setContent { CompositionLocalProvider(LocalActivityResultRegistryOwner provides this@AutoSession, LocalOnCar provides true) { TetraTheme { CarScreen(projected = true) } } }
         }
         p.setContentView(view)
         p.window!!.decorView.let { v ->
