@@ -91,7 +91,7 @@ internal object AutofillForm {
             val tag = n.htmlInfo?.tag?.lowercase()
             if (n.autofillId != null && n.autofillType == View.AUTOFILL_TYPE_TEXT && (tag == null || tag == "input")) {
                 val attrs = n.htmlInfo?.attributes.orEmpty().associate { it.first.lowercase() to it.second.orEmpty() }
-                out += Field(n.autofillId, n.autofillHints?.toList().orEmpty(), attrs["type"].orEmpty().lowercase(), attrs["autocomplete"].orEmpty().lowercase(),
+                out += Field(n.autofillId, n.autofillHints?.filterNotNull().orEmpty(), attrs["type"].orEmpty().lowercase(), attrs["autocomplete"].orEmpty().lowercase(),
                     n.inputType, listOfNotNull(n.idEntry, n.hint, attrs["name"], attrs["id"]).joinToString(" ").lowercase(),
                     n.autofillValue?.takeIf { it.isText }?.textValue?.toString().orEmpty())
             }
