@@ -87,6 +87,9 @@ class AssistantSheetActivity : AssistantActivity() { override val sheet = true }
 
 internal val ASSISTANT_COLOR = Color(0xFFFD6A04)
 
+/** AI Assist listening, thinking or speaking, wherever its screen is: for the mic buttons that pulse meanwhile. */
+internal object AssistBusy { val on = mutableStateOf(false) }
+
 internal fun openAssistant(c: Context) = c.startActivity(Intent(c, AssistantActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
 /**
@@ -158,7 +161,7 @@ internal enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Li
 
 @Composable
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
-private fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () -> Unit) {
+internal fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val decorated = remember { AiLook.decorated(context) }
@@ -199,6 +202,10 @@ private fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () -
     var liveLast by remember { mutableLongStateOf(0L) }
     var liveNow by remember { mutableLongStateOf(0L) }
     var voice by remember { mutableStateOf<AnswerVoice?>(null) } // the answer being read aloud
+    // listening, thinking or speaking: Tetra Car's mic pulses meanwhile (the user, 10 Nov: "make the mic pulse when active")
+    val busy = phase != Phase.Idle || reader.speaking
+    LaunchedEffect(busy) { AssistBusy.on.value = busy }
+    DisposableEffect(Unit) { onDispose { AssistBusy.on.value = false } }
     // the sheet's TV (8 Nov): what the robot shows while the answer is heard
     var talking by remember { mutableStateOf(false) }
     var tvCue by remember { mutableStateOf(TalkCue.None) }

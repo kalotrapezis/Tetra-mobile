@@ -1117,7 +1117,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     }
 
     offer?.let { o ->
-        AlertDialog(onDismissRequest = { offer = null }, title = { Text(stringResource(R.string.browser_save_title)) },
+        TetraAlertDialog(onDismissRequest = { offer = null }, title = { Text(stringResource(R.string.browser_save_title)) },
             text = { Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 o.logins.forEach { Text(stringResource(R.string.browser_save_login, it.host, it.user.ifEmpty { "—" })) }
                 o.addresses.forEach { Text(stringResource(R.string.browser_save_address, addressLabel(it))) }
@@ -1187,7 +1187,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     }
     naming?.let { g ->
         var name by remember(g) { mutableStateOf(groups[g].orEmpty()) }
-        AlertDialog(onDismissRequest = { naming = null }, title = { Text(stringResource(R.string.browser_group_name)) },
+        TetraAlertDialog(onDismissRequest = { naming = null }, title = { Text(stringResource(R.string.browser_group_name)) },
             text = { OutlinedTextField(name, { name = it }, singleLine = true) },
             confirmButton = { TextButton(onClick = { if (name.isNotBlank()) groups[g] = name.trim(); naming = null }) { Text(stringResource(R.string.common_ok)) } },
             dismissButton = { TextButton(onClick = { naming = null }) { Text(stringResource(R.string.common_cancel)) } })
@@ -1394,7 +1394,7 @@ private fun Modifier.sideTouches(): Modifier = composed {
 /** A bottom sheet; with the sidebar on, the floating card instead. [full]: the sheet opens all the way. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable internal fun BrowserSheet(onDismissRequest: () -> Unit, full: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
-    if (!BrowserSideSheets.on) { ModalBottomSheet(onDismissRequest = onDismissRequest, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = full), content = content); return }
+    if (!BrowserSideSheets.on) { TetraSheet(onDismissRequest = onDismissRequest, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = full), content = content); return }
     val from = remember { BrowserSideSheets.from }
     var open by remember { mutableStateOf(false) }
     var closing by remember { mutableStateOf(false) }
@@ -1403,7 +1403,7 @@ private fun Modifier.sideTouches(): Modifier = composed {
     val p by androidx.compose.animation.core.animateFloatAsState(if (open && !closing) 1f else 0f,
         androidx.compose.animation.core.tween(if (closing) 220 else 320, easing = androidx.compose.animation.core.CubicBezierEasing(0.2f, 0f, 0f, 1f)),
         label = "panel", finishedListener = { if (closing) dismiss() })
-    androidx.compose.ui.window.Dialog(onDismissRequest = { closing = true },
+    TetraDialog(onDismissRequest = { closing = true },
         properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
         // grown only once its window is on the screen: started before, the growing ran unseen and the card just appeared
         LaunchedEffect(Unit) { androidx.compose.runtime.withFrameNanos { }; androidx.compose.runtime.withFrameNanos { }; open = true }
@@ -1590,7 +1590,7 @@ internal fun addressLabel(a: Map<String, String>) = a["name"] ?: listOfNotNull(a
  */
 @Composable internal fun FolderDialog(title: String, current: String, tree: List<String>, close: () -> Unit, put: (String) -> Unit) {
     var name by remember { mutableStateOf("") }
-    AlertDialog(onDismissRequest = close, title = { Text(title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
+    TetraAlertDialog(onDismissRequest = close, title = { Text(title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
         text = {
             Column(Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())) {
                 (listOf("") + tree).forEach { f ->

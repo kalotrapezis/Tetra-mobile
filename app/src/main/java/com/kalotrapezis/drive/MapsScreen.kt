@@ -1178,11 +1178,11 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         }
     }
     // no voice on this phone for the directions' language: said once, with the way to add one
-    if (noVoice) AlertDialog(onDismissRequest = { noVoice = false },
+    if (noVoice) TetraAlertDialog(onDismissRequest = { noVoice = false },
         text = { Text(stringResource(R.string.maps_no_voice, Locale.forLanguageTag(words.lang).getDisplayLanguage(context.resources.configuration.locales[0]))) },
         confirmButton = { TextButton(onClick = { noVoice = false; MapsPrefs.voiceSettings(context) }) { Text(stringResource(R.string.settings_voice_settings)) } },
         dismissButton = { TextButton(onClick = { noVoice = false }) { Text(stringResource(R.string.common_ok)) } })
-    deleting?.let { p -> AlertDialog(onDismissRequest = { deleting = null }, title = { Text(stringResource(R.string.maps_delete_place, p.name)) },
+    deleting?.let { p -> TetraAlertDialog(onDismissRequest = { deleting = null }, title = { Text(stringResource(R.string.maps_delete_place, p.name)) },
         text = { Text(stringResource(if (p.slot > 0) R.string.maps_delete_leaves_home else R.string.maps_delete_everywhere)) },
         confirmButton = { TextButton(onClick = {
             deleting = null; selected = null
@@ -1371,7 +1371,7 @@ private fun roadAt(map: MapLibreMap?, loc: Location, lang: String): Pair<String,
     var note by remember { mutableStateOf("") }
     if (toMap && onMap != null) {
         var mapName by remember { mutableStateOf(p.name) }
-        AlertDialog(onDismissRequest = dismiss, title = { Text(stringResource(R.string.maps_add_to_map)) },
+        TetraAlertDialog(onDismissRequest = dismiss, title = { Text(stringResource(R.string.maps_add_to_map)) },
             text = { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     FilterChip(false, { toMap = false }, label = { Text(stringResource(R.string.maps_my_place), maxLines = 1, overflow = TextOverflow.Ellipsis) }); FilterChip(true, {}, label = { Text(stringResource(R.string.maps_on_the_map), maxLines = 1, overflow = TextOverflow.Ellipsis) })
@@ -1394,7 +1394,7 @@ private fun roadAt(map: MapLibreMap?, loc: Location, lang: String): Pair<String,
     var icon by remember { mutableStateOf(p.icon) }
     var slot by remember { mutableStateOf(p.slot) }
     var mode by remember { mutableStateOf(p.mode) }
-    AlertDialog(onDismissRequest = dismiss, title = { Text(stringResource(if (p.id.isEmpty()) R.string.maps_save_place else R.string.maps_place)) },
+    TetraAlertDialog(onDismissRequest = dismiss, title = { Text(stringResource(if (p.id.isEmpty()) R.string.maps_save_place else R.string.maps_place)) },
         text = { Column(Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) { // a phone shows half of it (the user, 23 Oct: "it needs scroll")
             if (p.id.isEmpty() && onMap != null) {
                 // one tap: an ΑμεΑ spot here, on the map

@@ -107,7 +107,7 @@ internal fun ExtAskDialog(a: ExtAsk) {
     val all = a.permissions.any { it == "<all_urls>" || it == "*://*/*" }
     val sites = a.permissions.filter { "://" in it || it == "<all_urls>" }
     val shown = a.permissions.filter { "://" !in it && it != "<all_urls>" } + if (all) listOf("<all_urls>") else sites.take(5) + listOfNotNull("…".takeIf { sites.size > 5 })
-    AlertDialog(onDismissRequest = { a.answer(false, false) },
+    TetraAlertDialog(onDismissRequest = { a.answer(false, false) },
         icon = { ExtIcon(a.ext.id, 40) },
         title = { Text(stringResource(if (a.update) R.string.browser_ext_update_title else R.string.browser_ext_add_title, name)) },
         text = { Column(Modifier.verticalScroll(rememberScrollState())) {

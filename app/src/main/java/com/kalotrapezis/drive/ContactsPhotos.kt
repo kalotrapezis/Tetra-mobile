@@ -146,7 +146,7 @@ internal object ContactsFaces {
     val context = LocalContext.current
     val people by produceState<List<PhotoPerson>?>(null) { value = withContext(Dispatchers.IO) { runCatching { ContactsFaces.people(context, contactName) }.getOrDefault(emptyList()) } }
     var person by remember { mutableStateOf<PhotoPerson?>(null) }
-    ModalBottomSheet(onDismissRequest = dismiss, containerColor = SheetColor, contentColor = islandContentColor()) {
+    TetraSheet(onDismissRequest = dismiss, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             val p = person
             if (p == null) {
@@ -182,7 +182,7 @@ internal object ContactsFaces {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable internal fun FacesForMany(pairs: List<Pair<ContactInfo, PhotoPerson>>, dismiss: () -> Unit, go: (List<Pair<ContactInfo, PhotoPerson>>) -> Unit) {
     var picked by remember(pairs) { mutableStateOf(pairs.toSet()) }
-    ModalBottomSheet(onDismissRequest = dismiss, containerColor = SheetColor, contentColor = islandContentColor()) {
+    TetraSheet(onDismissRequest = dismiss, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(pluralStringResource(R.plurals.contacts_photos_knows_n, pairs.size, pairs.size), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.contacts_use_faces), style = MaterialTheme.typography.bodySmall, color = islandContentColor().copy(alpha = 0.7f))

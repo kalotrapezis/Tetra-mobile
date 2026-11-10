@@ -52,4 +52,5 @@
     <string name="auto_file_not_on_car">Avto ni obdržal datoteke %1$s</string>
     <string name="auto_answer_on_phone">Odgovori na to v telefonu</string>
     <string name="auto_no_map">Na telefonu še ni zemljevida. Najprej prenesite zemljevid na telefon.</string>
+    <string name="auto_paired_done">Seznanjeno z avtom %1$s: Tetra Car je na njegovem zaslonu.</string>
 </resources>

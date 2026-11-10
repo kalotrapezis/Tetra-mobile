@@ -189,7 +189,7 @@ internal fun MemoryTab() {
     }
     editing?.let { f ->
         var text by remember(f.id) { mutableStateOf(f.text) }
-        AlertDialog(onDismissRequest = { editing = null }, title = { Text(stringResource(R.string.common_edit)) },
+        TetraAlertDialog(onDismissRequest = { editing = null }, title = { Text(stringResource(R.string.common_edit)) },
             text = { OutlinedTextField(text, { text = it }, Modifier.fillMaxWidth()) },
             confirmButton = { TextButton({ AssistantMemory.change(tetra, f.id, text, device); editing = null; reload() }) { Text(stringResource(R.string.common_save)) } },
             dismissButton = { TextButton({ editing = null }) { Text(stringResource(R.string.common_cancel)) } })
@@ -313,7 +313,7 @@ private fun ScheduleDialog(s: JSONObject, runnerNow: String?, close: () -> Unit,
     // which device makes them (the user, 6 Nov: "the phone is always open"): the computer (null: the first to look takes it) or this one
     var who by remember { mutableStateOf(runnerNow) }
     var whoMenu by remember { mutableStateOf(false) }
-    AlertDialog(onDismissRequest = close,
+    TetraAlertDialog(onDismissRequest = close,
         title = { Text(if (brief) stringResource(R.string.assistant_briefs_channel) else if (s.has("id")) stringResource(R.string.common_edit) else stringResource(R.string.assistant_sched_new)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -377,7 +377,7 @@ private fun PlaceDialog(now: JSONObject?, close: () -> Unit, set: (JSONObject?) 
             if (p == null) missing = true else set(p)
         }
     }
-    AlertDialog(onDismissRequest = close, title = { Text(stringResource(R.string.brief_place)) },
+    TetraAlertDialog(onDismissRequest = close, title = { Text(stringResource(R.string.brief_place)) },
         text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(now?.optString("name") ?: stringResource(R.string.brief_place_phone), style = MaterialTheme.typography.bodyMedium)
             OutlinedTextField(name, { name = it; missing = false }, Modifier.fillMaxWidth(), singleLine = true, placeholder = { Text(stringResource(R.string.brief_place_hint)) },

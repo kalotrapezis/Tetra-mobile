@@ -30,7 +30,7 @@ import androidx.compose.ui.window.DialogProperties
 @OptIn(ExperimentalFoundationApi::class)
 @Composable internal fun BookmarksManager(library: BookmarkLibrary, wide: Boolean, at: MutableState<String>, keep: (BookmarkLibrary) -> Unit, close: () -> Unit,
     others: List<DeviceTabs> = emptyList(), openNew: (String) -> Unit = {}, open: (String) -> Unit) =
-    Dialog(onDismissRequest = close, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    TetraDialog(onDismissRequest = close, properties = DialogProperties(usePlatformDefaultWidth = false)) {
     var folder by at
     var query by remember { mutableStateOf("") }
     var urls by remember { mutableStateOf(setOf<String>()) } // chosen pages
@@ -171,7 +171,7 @@ import androidx.compose.ui.window.DialogProperties
         }
         "delete" -> {
             val gone = library.marks.count { b -> b.url in urls || dirs.any { BookmarkLibrary.under(b.folder, it) } }
-            AlertDialog(onDismissRequest = { ask = null }, title = { Text(stringResource(R.string.browser_delete_chosen, gone, dirs.size)) },
+            TetraAlertDialog(onDismissRequest = { ask = null }, title = { Text(stringResource(R.string.browser_delete_chosen, gone, dirs.size)) },
                 confirmButton = { TextButton(onClick = { keep(library.delete(urls, dirs)); ask = null; clear() }) { Text(stringResource(R.string.common_delete)) } },
                 dismissButton = { TextButton(onClick = { ask = null }) { Text(stringResource(R.string.common_cancel)) } })
         }
@@ -213,7 +213,7 @@ private val RoundedCornerShapeNone = androidx.compose.foundation.shape.RoundedCo
 
 @Composable private fun NameDialog(title: String, start: String, close: () -> Unit, done: (String) -> Unit) {
     var name by remember { mutableStateOf(start) }
-    AlertDialog(onDismissRequest = close, title = { Text(title) },
+    TetraAlertDialog(onDismissRequest = close, title = { Text(title) },
         text = { OutlinedTextField(name, { name = it }, singleLine = true, label = { Text(stringResource(R.string.common_name)) }) },
         confirmButton = { TextButton(onClick = { done(name) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.common_ok)) } },
         dismissButton = { TextButton(onClick = close) { Text(stringResource(R.string.common_cancel)) } })
@@ -224,7 +224,7 @@ private val RoundedCornerShapeNone = androidx.compose.foundation.shape.RoundedCo
     var title by remember { mutableStateOf(b.title) }
     var url by remember { mutableStateOf(b.url) }
     val to = url.trim().let { if (it.isEmpty()) "" else BrowserRules.target(it) }
-    AlertDialog(onDismissRequest = close, title = { Text(stringResource(R.string.browser_edit_bookmark)) },
+    TetraAlertDialog(onDismissRequest = close, title = { Text(stringResource(R.string.browser_edit_bookmark)) },
         text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(title, { title = it }, singleLine = true, label = { Text(stringResource(R.string.common_name)) })
             OutlinedTextField(url, { url = it }, singleLine = true, label = { Text(stringResource(R.string.browser_bookmark_url)) }, isError = to.isNotEmpty() && taken(to))

@@ -99,14 +99,14 @@ internal fun BrowserPromptView(p: BrowserPrompter) {
     val cancel = stringResource(R.string.common_cancel)
     @Composable fun title(q: BasePrompt, fallback: String = "") = (q.title?.takeIf { it.isNotBlank() } ?: fallback).takeIf { it.isNotEmpty() }?.let { t -> @Composable { Text(t, maxLines = 2, overflow = TextOverflow.Ellipsis) } }
     when (val q = s.prompt) {
-        is AlertPrompt -> AlertDialog(onDismissRequest = { p.answer(q.dismiss()) }, title = title(q), text = { Text(q.message.orEmpty()) },
+        is AlertPrompt -> TetraAlertDialog(onDismissRequest = { p.answer(q.dismiss()) }, title = title(q), text = { Text(q.message.orEmpty()) },
             confirmButton = { TextButton(onClick = { p.answer(q.dismiss()) }) { Text(ok) } })
-        is ButtonPrompt -> AlertDialog(onDismissRequest = { p.answer(q.dismiss()) }, title = title(q), text = { Text(q.message.orEmpty()) },
+        is ButtonPrompt -> TetraAlertDialog(onDismissRequest = { p.answer(q.dismiss()) }, title = title(q), text = { Text(q.message.orEmpty()) },
             confirmButton = { TextButton(onClick = { p.answer(q.confirm(ButtonPrompt.Type.POSITIVE)) }) { Text(ok) } },
             dismissButton = { TextButton(onClick = { p.answer(q.confirm(ButtonPrompt.Type.NEGATIVE)) }) { Text(cancel) } })
         is TextPrompt -> {
             var text by remember(q) { mutableStateOf(q.defaultValue.orEmpty()) }
-            AlertDialog(onDismissRequest = { p.answer(q.dismiss()) }, title = title(q),
+            TetraAlertDialog(onDismissRequest = { p.answer(q.dismiss()) }, title = title(q),
                 text = { Column { Text(q.message.orEmpty()); OutlinedTextField(text, { text = it }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) } },
                 confirmButton = { TextButton(onClick = { p.answer(q.confirm(text)) }) { Text(ok) } },
                 dismissButton = { TextButton(onClick = { p.answer(q.dismiss()) }) { Text(cancel) } })
@@ -115,7 +115,7 @@ internal fun BrowserPromptView(p: BrowserPrompter) {
             val onlyPassword = q.authOptions.flags and AuthPrompt.AuthOptions.Flags.ONLY_PASSWORD != 0
             var user by remember(q) { mutableStateOf(q.authOptions.username.orEmpty()) }
             var pass by remember(q) { mutableStateOf(q.authOptions.password.orEmpty()) }
-            AlertDialog(onDismissRequest = { p.answer(q.dismiss()) }, title = title(q),
+            TetraAlertDialog(onDismissRequest = { p.answer(q.dismiss()) }, title = title(q),
                 text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(q.message.orEmpty())
                     if (!onlyPassword) OutlinedTextField(user, { user = it }, singleLine = true, label = { Text(stringResource(R.string.browser_auth_user)) }, modifier = Modifier.fillMaxWidth())
@@ -130,7 +130,7 @@ internal fun BrowserPromptView(p: BrowserPrompter) {
             val many = q.type == ChoicePrompt.Type.MULTIPLE
             val rows = remember(q) { q.choices.flatMap { c -> if (c.items != null) listOf(c) + c.items!!.toList() else listOf(c) }.filter { !it.separator } }
             var picked by remember(q) { mutableStateOf(rows.filter { it.selected && it.items == null }.map { it.id }.toSet()) }
-            ModalBottomSheet(onDismissRequest = { p.answer(q.dismiss()) }) {
+            TetraSheet(onDismissRequest = { p.answer(q.dismiss()) }) {
                 Column(Modifier.navigationBarsPadding().padding(bottom = 16.dp)) {
                     (q.title ?: q.message)?.takeIf { it.isNotBlank() }?.let { Text(it, Modifier.padding(horizontal = 20.dp, vertical = 8.dp), style = MaterialTheme.typography.titleMedium) }
                     LazyColumn(Modifier.weight(1f, fill = false)) {
@@ -155,7 +155,7 @@ internal fun BrowserPromptView(p: BrowserPrompter) {
             var hex by remember(q) { mutableStateOf(q.defaultValue ?: "#000000") }
             val colours = (q.predefinedValues?.toList().orEmpty() + TILE_COLORS.map { String.format("#%06X", it.toArgb() and 0xFFFFFF) } + listOf("#000000", "#FFFFFF")).distinct()
             fun parse(h: String) = runCatching { Color(android.graphics.Color.parseColor(h)) }.getOrNull()
-            AlertDialog(onDismissRequest = { p.answer(q.dismiss()) }, title = title(q, stringResource(R.string.browser_color)),
+            TetraAlertDialog(onDismissRequest = { p.answer(q.dismiss()) }, title = title(q, stringResource(R.string.browser_color)),
                 text = { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     @OptIn(ExperimentalLayoutApi::class)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -167,14 +167,14 @@ internal fun BrowserPromptView(p: BrowserPrompter) {
                 dismissButton = { TextButton(onClick = { p.answer(q.dismiss()) }) { Text(cancel) } })
         }
         is DateTimePrompt -> DateTimeAsk(q, p)
-        is PopupPrompt -> AlertDialog(onDismissRequest = { p.answer(q.confirm(AllowOrDeny.DENY)) }, title = { Text(stringResource(R.string.browser_popup_title)) },
+        is PopupPrompt -> TetraAlertDialog(onDismissRequest = { p.answer(q.confirm(AllowOrDeny.DENY)) }, title = { Text(stringResource(R.string.browser_popup_title)) },
             text = { Text(q.targetUri.orEmpty(), maxLines = 3, overflow = TextOverflow.Ellipsis) },
             confirmButton = { TextButton(onClick = { p.answer(q.confirm(AllowOrDeny.ALLOW)) }) { Text(stringResource(R.string.browser_popup_open)) } },
             dismissButton = { TextButton(onClick = { p.answer(q.confirm(AllowOrDeny.DENY)) }) { Text(cancel) } })
-        is BeforeUnloadPrompt -> AlertDialog(onDismissRequest = { p.answer(q.confirm(AllowOrDeny.DENY)) }, title = { Text(stringResource(R.string.browser_leave_title)) },
+        is BeforeUnloadPrompt -> TetraAlertDialog(onDismissRequest = { p.answer(q.confirm(AllowOrDeny.DENY)) }, title = { Text(stringResource(R.string.browser_leave_title)) },
             confirmButton = { TextButton(onClick = { p.answer(q.confirm(AllowOrDeny.ALLOW)) }) { Text(stringResource(R.string.browser_leave)) } },
             dismissButton = { TextButton(onClick = { p.answer(q.confirm(AllowOrDeny.DENY)) }) { Text(stringResource(R.string.browser_stay)) } })
-        is RepostConfirmPrompt -> AlertDialog(onDismissRequest = { p.answer(q.confirm(AllowOrDeny.DENY)) }, title = { Text(stringResource(R.string.browser_repost)) },
+        is RepostConfirmPrompt -> TetraAlertDialog(onDismissRequest = { p.answer(q.confirm(AllowOrDeny.DENY)) }, title = { Text(stringResource(R.string.browser_repost)) },
             confirmButton = { TextButton(onClick = { p.answer(q.confirm(AllowOrDeny.ALLOW)) }) { Text(stringResource(R.string.browser_resend)) } },
             dismissButton = { TextButton(onClick = { p.answer(q.confirm(AllowOrDeny.DENY)) }) { Text(cancel) } })
         else -> LaunchedEffect(q) { p.answer(q.dismiss()) }
@@ -193,7 +193,7 @@ private fun DateTimeAsk(q: DateTimePrompt, p: BrowserPrompter) {
     var date by remember(q) { mutableStateOf<LocalDate?>(null) }
     if (type != DateTimePrompt.Type.TIME && date == null) {
         val state = rememberDatePickerState(initialSelectedDateMillis = initial?.toEpochDay()?.times(86_400_000L))
-        DatePickerDialog(onDismissRequest = { p.answer(q.dismiss()) }, dismissButton = clear, confirmButton = {
+        TetraDatePickerDialog(onDismissRequest = { p.answer(q.dismiss()) }, dismissButton = clear, confirmButton = {
             TextButton(onClick = {
                 val d = state.selectedDateMillis?.let { LocalDate.ofEpochDay(it / 86_400_000L) } ?: return@TextButton
                 if (type == DateTimePrompt.Type.DATETIME_LOCAL) date = d else p.answer(q.confirm(BrowserDates.format(type, d, 0, 0)))
@@ -202,7 +202,7 @@ private fun DateTimeAsk(q: DateTimePrompt, p: BrowserPrompter) {
     } else {
         val (h, m) = remember(q) { BrowserDates.time(value) }
         val state = rememberTimePickerState(h, m, true)
-        AlertDialog(onDismissRequest = { p.answer(q.dismiss()) }, text = { TimePicker(state) }, dismissButton = clear,
+        TetraAlertDialog(onDismissRequest = { p.answer(q.dismiss()) }, text = { TimePicker(state) }, dismissButton = clear,
             confirmButton = { TextButton(onClick = { p.answer(q.confirm(BrowserDates.format(type, date, state.hour, state.minute))) }) { Text(ok) } })
     }
 }

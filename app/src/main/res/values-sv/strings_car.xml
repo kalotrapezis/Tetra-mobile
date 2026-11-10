@@ -52,4 +52,5 @@
     <string name="auto_file_not_on_car">Bilen behöll inte %1$s</string>
     <string name="auto_answer_on_phone">Svara på det här i telefonen</string>
     <string name="auto_no_map">Det finns ingen karta på telefonen än. Ladda först ner en karta på telefonen.</string>
+    <string name="auto_paired_done">Ihopparad med %1$s: Tetra Car visas på dess skärm.</string>
 </resources>

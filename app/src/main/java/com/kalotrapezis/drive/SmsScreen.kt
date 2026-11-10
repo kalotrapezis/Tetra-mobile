@@ -197,7 +197,7 @@ internal fun SmsScreen(back: () -> Unit, start: String? = null) {
     }
     }
 
-    if (asking) AlertDialog(onDismissRequest = { asking = false },
+    if (asking) TetraAlertDialog(onDismissRequest = { asking = false },
         title = { Text(stringResource(R.string.sms_delete_ask)) }, text = { Text(stringResource(R.string.sms_delete_note)) },
         confirmButton = { TextButton(onClick = {
             asking = false
@@ -212,7 +212,7 @@ internal fun SmsScreen(back: () -> Unit, start: String? = null) {
             }
         }) { Text(stringResource(R.string.common_delete), color = MaterialTheme.colorScheme.error) } },
         dismissButton = { TextButton(onClick = { asking = false }) { Text(stringResource(R.string.common_cancel)) } })
-    refused?.let { r -> AlertDialog(onDismissRequest = { refused = null }, text = { Text(stringResource(R.string.sms_default_only)) },
+    refused?.let { r -> TetraAlertDialog(onDismissRequest = { refused = null }, text = { Text(stringResource(R.string.sms_default_only)) },
         confirmButton = { if (r.size == 1) TextButton(onClick = { SmsBox.openInDefault(context, r[0]); refused = null }) { Text(stringResource(R.string.sms_open_default)) }
             else TextButton(onClick = { refused = null }) { Text(stringResource(R.string.common_ok)) } },
         dismissButton = { if (r.size == 1) TextButton(onClick = { refused = null }) { Text(stringResource(R.string.common_close)) } }) }

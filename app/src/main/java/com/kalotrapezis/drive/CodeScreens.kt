@@ -147,6 +147,15 @@ internal fun CodeScannerTab(back: () -> Unit, onCode: ((String) -> Boolean)? = n
     }
     LaunchedEffect(pickImage) { if (pickImage) imagePicker.launch("image/*") } // Home's «Κωδικός από εικόνα»
     var pairStatus by remember { mutableStateOf<String?>(null) }
+    // Tetra Auto: the car connects with the code just read; then said, and the scanner goes
+    var autoWaiting by remember { mutableStateOf(false) }
+    val autoPaired = AutoCars.justPaired.value
+    LaunchedEffect(autoPaired, autoWaiting) {
+        if (!autoWaiting || autoPaired == null) return@LaunchedEffect
+        pairStatus = context.getString(R.string.auto_paired_done, autoPaired)
+        kotlinx.coroutines.delay(1500)
+        back()
+    }
     var pairing by remember { mutableStateOf(false) }
     fun pair(raw: String, qr: PairingQr) {
         result = CodeResult.Pairing(raw, qr.name)
@@ -210,6 +219,7 @@ internal fun CodeScannerTab(back: () -> Unit, onCode: ((String) -> Boolean)? = n
                             // Tetra Auto's QR on the car's screen: that car pairs as it next says hello (AutoCars)
                             AutoCars.code(value)?.let { (code, name) ->
                                 result = CodeResult.Pairing(value, name); pairStatus = context.getString(R.string.auto_pairing, name)
+                                AutoCars.justPaired.value = null; autoWaiting = true
                                 AutoCars.expect(context.applicationContext, code, name); return@addOnSuccessListener
                             }
                             result = codeResult(value, code.url?.url?.takeIf { code.valueType == Barcode.TYPE_URL })

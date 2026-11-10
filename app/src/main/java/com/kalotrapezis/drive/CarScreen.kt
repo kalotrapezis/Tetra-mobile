@@ -62,6 +62,8 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -115,9 +117,17 @@ class CarActivity : ComponentActivity() {
     override fun onDestroy() { Car.running = false; CarQuiet.set(this, false); if (server != null) runCatching { SyncServer.release() }; super.onDestroy() }
     // the steering wheel's voice key, where the head unit passes it on: AI Assist listens
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_VOICE_ASSIST || keyCode == KeyEvent.KEYCODE_SEARCH) { carListen(this); return true }
+        if (keyCode == KeyEvent.KEYCODE_VOICE_ASSIST || keyCode == KeyEvent.KEYCODE_SEARCH) { Car.assist?.invoke() ?: carListen(this); return true }
         return super.onKeyDown(keyCode, event)
     }
+}
+
+/** The time, for the dock down a side (the user, 10 Nov: "the player buttons at the top I don't like, just the time there"). */
+@Composable
+private fun CarClock(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val now by produceState(System.currentTimeMillis()) { while (true) { value = System.currentTimeMillis(); delay(60_000 - value % 60_000) } }
+    Text(android.text.format.DateFormat.getTimeFormat(context).format(java.util.Date(now)), modifier, fontSize = 22.sp, maxLines = 1)
 }
 
 /**
@@ -128,6 +138,8 @@ internal object Car {
     @Volatile var running = false
     /** AI Assist's «άνοιξε τα μηνύματα»: that page beside the map; null when Tetra Car is not open. */
     @Volatile var show: ((CarApp) -> Unit)? = null
+    /** AI Assist in Tetra Car's side pane (its TV); null when Tetra Car is not open. */
+    @Volatile var assist: (() -> Unit)? = null
     /** A message arrived: Tetra Car's side pane talks about it (CarSmsPane); null when Tetra Car is not open. */
     @Volatile var message: ((CarMessage) -> Unit)? = null
     private fun prefs(c: Context) = c.getSharedPreferences("car", Context.MODE_PRIVATE)
@@ -297,11 +309,14 @@ internal fun CarScreen(projected: Boolean = false) {
         Car.message = { m -> message = m }
         onDispose { Car.show = null; Car.message = null }
     }
+    // AI Assist's TV takes the side pane while it works (the user, 10 Nov: "bring the TV UI to the car, on the small side"); it goes when done
+    var assist by remember { mutableStateOf(false) }
+    androidx.compose.runtime.DisposableEffect(Unit) { Car.assist = { assist = true }; onDispose { Car.assist = null } }
     // a call or a message takes the side pane for a while (the user, 9 Nov: "replace it … then bring back the app"); the map stays,
     // and with the map alone on the screen, the screen splits until it is over
     val remote by CarWire.call // the phone's call, through the car's link (on a head unit)
     val calling = PhoneCalls.calls.isNotEmpty() || remote != null
-    val covering = calling || message != null
+    val covering = calling || message != null || assist
     val shownState = if (covering && state.panes.all { it == CarApp.Maps }) state.laid(CarLayout.Wide) else state
     val coverAt = if (!covering) null else shownState.panes.indices.let { all -> all.firstOrNull { shownState.panes[it] != CarApp.Maps && it == shownState.focus } ?: all.firstOrNull { shownState.panes[it] != CarApp.Maps } ?: 0 }
     var pausedForCall by remember { mutableStateOf(false) }
@@ -335,6 +350,7 @@ internal fun CarScreen(projected: Boolean = false) {
         Layout(modifier = Modifier.fillMaxSize(), content = {
             CarPanes(shownState, opened, coverAt, cover = {
                 if (PhoneCalls.calls.isNotEmpty()) CarCallPane() else remote?.let { CarRemoteCallPane(it) } ?: message?.let { m -> CarSmsPane(m) { message = null } }
+                    ?: if (assist) AssistantApp(sheet = true) { assist = false } else Unit
             }, modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = if (side == DockSide.Bottom) 0.dp else 8.dp),
                 focus = { app -> state.panes.indexOf(app).takeIf { it >= 0 && it != state.focus }?.let { set(state.focused(it)) } }) { app ->
                 CompositionLocalProvider(LocalOnBackPressedDispatcherOwner provides backs.getValue(app)) {
@@ -420,7 +436,12 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
         DockApp(R.drawable.maps_art, R.string.app_maps, CarApp.Maps in state.panes, down) { open(CarApp.Maps) }
         DockIcon(R.drawable.ic_play, R.string.car_media, Color(0xFFE53935), down, media)
         DockApp(R.drawable.phone_art, R.string.app_phone, CarApp.Phone in state.panes, down) { open(CarApp.Phone) }
-        Box(Modifier.padding(if (down) 4.dp else 12.dp).size(if (down) 56.dp else 68.dp).clip(CircleShape).background(ASSISTANT_COLOR).clickable { carListen(context) }, contentAlignment = Alignment.Center) {
+        val busy = AssistBusy.on.value
+        val pulse by androidx.compose.animation.core.rememberInfiniteTransition(label = "mic").animateFloat(1f, 1.18f,
+            androidx.compose.animation.core.infiniteRepeatable<Float>(androidx.compose.animation.core.tween(550), androidx.compose.animation.core.RepeatMode.Reverse), label = "pulse")
+        Box(Modifier.padding(if (down) 4.dp else 12.dp).size(if (down) 56.dp else 68.dp)
+            .graphicsLayer { if (busy) { scaleX = pulse; scaleY = pulse } } // AI Assist at work: the mic breathes
+            .clip(CircleShape).background(ASSISTANT_COLOR).clickable { Car.assist?.invoke() ?: carListen(context) }, contentAlignment = Alignment.Center) {
             Icon(painterResource(R.drawable.ic_mic), stringResource(R.string.app_assistant), Modifier.size(34.dp), tint = Color.White)
         }
         // down a side only Maps, Media and Phone stay; Messages and the Browser while they are on the screen (the user, 9 Nov)
@@ -435,7 +456,7 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
     }
     if (down) Column(Modifier.fillMaxHeight().width(96.dp).verticalScroll(rememberScrollState()).padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) { // scrolls only on a very short screen
-        if (layouts) strip() else { NowPlaying(Modifier, media, small = true); buttons(); layoutButton() }
+        if (layouts) strip() else { CarClock(); buttons(); layoutButton() }
     }
     else Row(Modifier.fillMaxWidth().height(88.dp).padding(horizontal = 8.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         if (layouts) { Spacer(Modifier.weight(1f)); strip(); Spacer(Modifier.weight(1f)); return@Row }
@@ -631,7 +652,7 @@ private fun CarPairDialog(close: () -> Unit) {
     val before = remember { CarWire.link(context)?.theirToken }
     LaunchedEffect(Unit) { while (paired == null) { CarWire.link(context)?.takeIf { it.theirToken != before }?.let { paired = it.name }; delay(1000) } }
     val bitmap = remember(qr) { qr?.let { runCatching { qrBitmap(it).asImageBitmap() }.getOrNull() } }
-    androidx.compose.material3.AlertDialog(onDismissRequest = close, confirmButton = { androidx.compose.material3.TextButton(close) { Text(stringResource(R.string.common_close)) } },
+    TetraAlertDialog(onDismissRequest = close, confirmButton = { androidx.compose.material3.TextButton(close) { Text(stringResource(R.string.common_close)) } },
         title = { Text(stringResource(R.string.car_pair_phone)) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {

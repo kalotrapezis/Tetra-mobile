@@ -307,7 +307,7 @@ internal fun minutesText(c: android.content.Context, minutes: Long): String =
 @Composable internal fun ListDialog(l: PlaceList, dismiss: () -> Unit, delete: (() -> Unit)?, save: (PlaceList) -> Unit) {
     var name by remember { mutableStateOf(l.name) }
     var emoji by remember { mutableStateOf(l.emoji) }
-    AlertDialog(onDismissRequest = dismiss, title = { Text(stringResource(if (delete == null) R.string.maps_new_list else R.string.maps_list)) },
+    TetraAlertDialog(onDismissRequest = dismiss, title = { Text(stringResource(if (delete == null) R.string.maps_new_list else R.string.maps_list)) },
         text = { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.common_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(emoji, { emoji = it.take(8) }, label = { Text(stringResource(R.string.maps_emoji)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
@@ -325,7 +325,7 @@ internal fun minutesText(c: android.content.Context, minutes: Long): String =
 }
 
 /** Plan a trip: how many stops (the user, 22 Oct: "questions like how many stops you will do 5"). */
-@Composable internal fun TripCountDialog(dismiss: () -> Unit, pick: (Int) -> Unit) = AlertDialog(onDismissRequest = dismiss,
+@Composable internal fun TripCountDialog(dismiss: () -> Unit, pick: (Int) -> Unit) = TetraAlertDialog(onDismissRequest = dismiss,
     title = { Text(stringResource(R.string.maps_plan_trip)) },
     text = { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(stringResource(R.string.maps_plan_how_many))
@@ -338,7 +338,7 @@ internal fun minutesText(c: android.content.Context, minutes: Long): String =
 /** The trip's stops all pointed to: its name, then Save, or Save and go. */
 @Composable internal fun TripNameDialog(stops: List<Place>, dismiss: () -> Unit, save: (String, Boolean) -> Unit) {
     var name by remember { mutableStateOf(stops.joinToString(" → ") { it.name.substringBefore(",") }.take(60)) }
-    AlertDialog(onDismissRequest = dismiss, title = { Text(stringResource(R.string.maps_save_trip)) },
+    TetraAlertDialog(onDismissRequest = dismiss, title = { Text(stringResource(R.string.maps_save_trip)) },
         text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.common_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
             stops.forEachIndexed { i, p -> Text("${Trip.letter(i)}  ${p.name}", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) }

@@ -228,12 +228,12 @@ internal fun PhoneApp(keypad: MutableState<Boolean>, tabState: MutableState<Phon
     }
     }
     details?.let { g ->
-        ModalBottomSheet(onDismissRequest = { details = null }, containerColor = SheetColor, contentColor = islandContentColor()) {
+        TetraSheet(onDismissRequest = { details = null }, containerColor = SheetColor, contentColor = islandContentColor()) {
             CallDetails(g, calls.filter { PhoneLog.same(it.number, g.number) }, who(g.number), call = { call(it); details = null },
                 delete = { ids -> PhoneLog.delete(context, ids); details = null; version++ }, changed = { version++ })
         }
     }
-    if (drawer) ModalBottomSheet(onDismissRequest = { drawer = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
+    if (drawer) TetraSheet(onDismissRequest = { drawer = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(stringResource(R.string.app_phone), style = MaterialTheme.typography.titleLarge)
             PhoneSettings()
@@ -647,7 +647,7 @@ private fun SpeedDialPicker(key: Char, contacts: List<ContactInfo>, dismiss: () 
     val rows = remember(q, contacts) {
         contacts.filter { q.isBlank() || it.name.contains(q, true) }.flatMap { c -> c.phones.map { c.name to it } }.take(60)
     }
-    AlertDialog(onDismissRequest = dismiss, confirmButton = {}, dismissButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.common_cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
+    TetraAlertDialog(onDismissRequest = dismiss, confirmButton = {}, dismissButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.common_cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
         title = { Text(stringResource(R.string.phone_speed_dial_key, key.toString())) },
         text = {
             Column {

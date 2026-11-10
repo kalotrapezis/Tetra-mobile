@@ -540,7 +540,7 @@ internal fun ContactsScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> U
             }
         }
     }
-    if (drawer) ModalBottomSheet(onDismissRequest = { drawer = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
+    if (drawer) TetraSheet(onDismissRequest = { drawer = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(stringResource(R.string.common_import), style = MaterialTheme.typography.titleMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -600,7 +600,7 @@ internal fun ContactsScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> U
     }
     if (choosingCalendar) {
         val cals = remember { runCatching { CalendarFiles.calendars(calendarRoot()) }.getOrDefault(emptyList()) }
-        ModalBottomSheet(onDismissRequest = { choosingCalendar = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
+        TetraSheet(onDismissRequest = { choosingCalendar = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
             Column(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(stringResource(R.string.contacts_birthdays_go_into), style = MaterialTheme.typography.titleMedium)
                 val now = cals.firstOrNull { it.dir.name == ContactsPrefs.birthdays(context) } ?: ContactsBirthdays.existing(cals)
@@ -619,7 +619,7 @@ internal fun ContactsScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> U
     if (exportOpen) {
         val choices = listOf(Triple(stringResource(R.string.contacts_all_contacts), "All contacts", all), Triple(stringResource(R.string.contacts_favourites), "Favourites", all.filter { it.info.favourite })) +
             all.flatMap { it.info.labels }.distinctBy { it.lowercase() }.sortedBy { it.lowercase() }.map { l -> Triple(l, l, all.filter { c -> c.info.labels.any { it.equals(l, true) } }) }
-        ModalBottomSheet(onDismissRequest = { exportOpen = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
+        TetraSheet(onDismissRequest = { exportOpen = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
             Column(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp).verticalScroll(rememberScrollState())) {
                 Text(stringResource(R.string.contacts_export_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 4.dp))
                 Text(stringResource(R.string.contacts_export_hint), style = MaterialTheme.typography.bodySmall, color = islandContentColor().copy(alpha = 0.7f))
@@ -669,7 +669,7 @@ internal fun ContactsScreen(back: () -> Unit, hasAccess: Boolean, grant: () -> U
             }
         }
     }
-    if (deletingMany) androidx.compose.material3.AlertDialog(onDismissRequest = { deletingMany = false }, title = { Text(pluralStringResource(R.plurals.contacts_delete_n, selected.size, selected.size)) },
+    if (deletingMany) TetraAlertDialog(onDismissRequest = { deletingMany = false }, title = { Text(pluralStringResource(R.plurals.contacts_delete_n, selected.size, selected.size)) },
         text = { Text(stringResource(R.string.contacts_delete_many_hint)) },
         confirmButton = { TextButton(onClick = {
             deletingMany = false
@@ -830,7 +830,7 @@ private fun ContactPage(c: Contact, all: List<Contact>, wide: Boolean, close: ()
                     recordings.take(3).forEach { f -> RecordingRow(f) }
                 }
                 // See all: its own page, over the contact's
-                more?.let { what -> androidx.compose.ui.window.Dialog(onDismissRequest = { more = null }, properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+                more?.let { what -> TetraDialog(onDismissRequest = { more = null }, properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
                     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                         Box(Modifier.fillMaxSize()) {
                             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).statusBarsPadding().navigationBarsPadding()
@@ -893,7 +893,7 @@ private fun ContactPage(c: Contact, all: List<Contact>, wide: Boolean, close: ()
     // the card without its photo (a QR code holds ~3 KB), black on white, for a phone's camera or Tetra's Codes
     if (qr) {
         val bmp = remember(c) { runCatching { qrBitmap(ContactsMerge.export(listOf(c), noPhoto = true), 720, utf8 = true).asImageBitmap() }.getOrNull() }
-        androidx.compose.ui.window.Dialog(onDismissRequest = { qr = false }) {
+        TetraDialog(onDismissRequest = { qr = false }) {
             Surface(shape = MaterialTheme.shapes.extraLarge, color = Color.White, contentColor = Color.Black) {
                 Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (bmp != null) Image(bmp, contentDescription = stringResource(R.string.contacts_qr_of, i.name), modifier = Modifier.size(300.dp)) else Text(stringResource(R.string.contacts_qr_too_big))
@@ -908,7 +908,7 @@ private fun ContactPage(c: Contact, all: List<Contact>, wide: Boolean, close: ()
 /** Message, Call, Video or Mail with several ways: a strip from the bottom (no popup lists on a touch screen). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable private fun WaysStrip(title: String, options: List<Pair<String, () -> Unit>>, dismiss: () -> Unit) {
-    ModalBottomSheet(onDismissRequest = dismiss, containerColor = SheetColor, contentColor = islandContentColor()) {
+    TetraSheet(onDismissRequest = dismiss, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
             options.forEach { (label, act) ->
@@ -1002,7 +1002,7 @@ private fun ContactPage(c: Contact, all: List<Contact>, wide: Boolean, close: ()
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable private fun ContactsTrash(root: File, version: Int, dismiss: () -> Unit, restore: (Contact) -> Unit) {
     val trashed by produceState(emptyList<Contact>(), version) { value = withContext(Dispatchers.IO) { runCatching { ContactsFiles.trashed(root) }.getOrDefault(emptyList()) } }
-    ModalBottomSheet(onDismissRequest = dismiss, containerColor = SheetColor, contentColor = islandContentColor()) {
+    TetraSheet(onDismissRequest = dismiss, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.contacts_trash), style = MaterialTheme.typography.titleMedium)
             if (trashed.isEmpty()) Text(stringResource(R.string.contacts_trash_empty), color = islandContentColor().copy(alpha = 0.7f))
@@ -1024,7 +1024,7 @@ private fun ContactPage(c: Contact, all: List<Contact>, wide: Boolean, close: ()
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable private fun LinkReview(links: List<ContactsBirthdays.Link>, later: () -> Unit, go: (List<ContactsBirthdays.Link>) -> Unit) {
     var picked by remember(links) { mutableStateOf(links.toSet()) }
-    ModalBottomSheet(onDismissRequest = later, containerColor = SheetColor, contentColor = islandContentColor()) {
+    TetraSheet(onDismissRequest = later, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(stringResource(R.string.contacts_links_title), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.contacts_links_hint),
@@ -1088,7 +1088,7 @@ private fun ContactPage(c: Contact, all: List<Contact>, wide: Boolean, close: ()
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable private fun MergeSheet(pairs: List<Pair<Contact, Contact>>, dismiss: () -> Unit, merge: (List<Pair<Contact, Contact>>) -> Unit, notSame: (Contact, Contact) -> Unit) {
-    ModalBottomSheet(onDismissRequest = dismiss, containerColor = SheetColor, contentColor = islandContentColor()) {
+    TetraSheet(onDismissRequest = dismiss, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.contacts_merge_fix), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
@@ -1131,7 +1131,7 @@ private fun ContactPage(c: Contact, all: List<Contact>, wide: Boolean, close: ()
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable private fun LabelPick(labels: List<String>, many: List<Contact>, dismiss: () -> Unit, pick: (String) -> Unit) {
     var name by remember { mutableStateOf("") }
-    ModalBottomSheet(onDismissRequest = dismiss, containerColor = SheetColor, contentColor = islandContentColor()) {
+    TetraSheet(onDismissRequest = dismiss, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(pluralStringResource(R.plurals.contacts_label_n, many.size, many.size), style = MaterialTheme.typography.titleMedium)
             androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

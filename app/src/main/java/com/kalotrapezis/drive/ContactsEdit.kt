@@ -194,7 +194,7 @@ internal fun ContactEditor(start: ContactInfo, isNew: Boolean, allLabels: List<S
     }
     // a label's choices in a strip from the bottom (no popup lists on a touch screen), any other typed there
     choosing?.let { (labels, pick) ->
-        ModalBottomSheet(onDismissRequest = { choosing = null }, containerColor = SheetColor, contentColor = islandContentColor()) {
+        TetraSheet(onDismissRequest = { choosing = null }, containerColor = SheetColor, contentColor = islandContentColor()) {
             var custom by remember { mutableStateOf("") }
             Column(Modifier.navigationBarsPadding().padding(start = 20.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.contacts_label), style = MaterialTheme.typography.titleMedium)
@@ -208,8 +208,8 @@ internal fun ContactEditor(start: ContactInfo, isNew: Boolean, allLabels: List<S
             }
         }
     }
-    problem?.let { p -> AlertDialog(onDismissRequest = { problem = null }, text = { Text(p) }, confirmButton = { TextButton(onClick = { problem = null }) { Text(stringResource(R.string.common_ok), maxLines = 1, overflow = TextOverflow.Ellipsis) } }) }
-    if (asking && delete != null) AlertDialog(onDismissRequest = { asking = false }, title = { Text(stringResource(R.string.contacts_delete_q, start.name)) },
+    problem?.let { p -> TetraAlertDialog(onDismissRequest = { problem = null }, text = { Text(p) }, confirmButton = { TextButton(onClick = { problem = null }) { Text(stringResource(R.string.common_ok), maxLines = 1, overflow = TextOverflow.Ellipsis) } }) }
+    if (asking && delete != null) TetraAlertDialog(onDismissRequest = { asking = false }, title = { Text(stringResource(R.string.contacts_delete_q, start.name)) },
         text = { Text(stringResource(R.string.contacts_delete_hint)) },
         confirmButton = { TextButton(onClick = { asking = false; delete() }) { Text(stringResource(R.string.common_delete), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
         dismissButton = { TextButton(onClick = { asking = false }) { Text(stringResource(R.string.common_cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } })

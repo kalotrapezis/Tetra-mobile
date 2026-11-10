@@ -218,7 +218,7 @@ private fun InCallControls(call: Call, keys: Boolean, toggleKeys: () -> Unit, ad
             RoundButton(R.drawable.ic_note_add, stringResource(R.string.phone_note), null, 64.dp, modifier = cell) { noting = true }
         }
     }
-    if (picking) ModalBottomSheet(onDismissRequest = { picking = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
+    if (picking) TetraSheet(onDismissRequest = { picking = false }, containerColor = SheetColor, contentColor = islandContentColor()) {
         Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
             Text(stringResource(R.string.phone_sound), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 8.dp, bottom = 8.dp))
             @Composable fun option(icon: Int, name: String, on: Boolean, pick: () -> Unit) =
@@ -244,7 +244,7 @@ private fun InCallControls(call: Call, keys: Boolean, toggleKeys: () -> Unit, ad
 private fun QuickReply(call: Call, done: () -> Unit) {
     var own by remember { mutableStateOf("") }
     fun send(text: String) { call.reject(true, text); done() }
-    AlertDialog(onDismissRequest = done, title = { Text(stringResource(R.string.phone_decline_message)) }, confirmButton = { TextButton(onClick = { if (own.isNotBlank()) send(own.trim()) }) { Text(stringResource(R.string.common_send), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
+    TetraAlertDialog(onDismissRequest = done, title = { Text(stringResource(R.string.phone_decline_message)) }, confirmButton = { TextButton(onClick = { if (own.isNotBlank()) send(own.trim()) }) { Text(stringResource(R.string.common_send), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
         dismissButton = { TextButton(onClick = done) { Text(stringResource(R.string.common_cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -260,7 +260,7 @@ private fun CallNoteDialog(call: Call, done: () -> Unit) {
     val context = LocalContext.current
     val parts = PhoneCalls.parts(call)
     var text by remember { mutableStateOf(parts.firstNotNullOfOrNull { PhoneNotes.of(context, PhoneCalls.number(it).orEmpty(), it.details.creationTimeMillis) }.orEmpty()) }
-    AlertDialog(onDismissRequest = done, title = { Text(stringResource(R.string.phone_note_title)) },
+    TetraAlertDialog(onDismissRequest = done, title = { Text(stringResource(R.string.phone_note_title)) },
         text = { OutlinedTextField(text, { text = it }, minLines = 3, modifier = Modifier.fillMaxWidth()) },
         confirmButton = { TextButton(onClick = { parts.forEach { p -> PhoneNotes.save(context, PhoneCalls.number(p).orEmpty(), p.details.creationTimeMillis, text.trim()) }
             PhoneNotes.toNotes(context, PhoneCalls.title(context, call), call.details.creationTimeMillis, text.trim()); done() }) { Text(stringResource(R.string.common_save), maxLines = 1, overflow = TextOverflow.Ellipsis) } },

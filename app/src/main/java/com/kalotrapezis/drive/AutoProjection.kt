@@ -82,6 +82,8 @@ internal object AutoCars {
     fun forget(c: Context, car: Car) { save(c, all(c) - car); WriterLog.i("Tetra Auto: forgot ${car.name}") }
 
     @Volatile private var pending: Triple<String, String, Long>? = null
+    /** The car just paired: the scanner that read its code says so and closes. */
+    val justPaired = androidx.compose.runtime.mutableStateOf<String?>(null)
 
     /** The car's pairing QR ({tetraAuto, code, name}): its code and name; null for any other code. */
     fun code(raw: String): Pair<String, String>? = runCatching { JSONObject(raw).takeIf { it.optInt("tetraAuto") == AutoWire.VERSION }
@@ -101,7 +103,7 @@ internal object AutoCars {
         require(p != null && SystemClock.elapsedRealtime() < p.third && hello.optString("code") == p.first) { "Scan this car's code with Tetra on the phone first." }
         pending = null
         val token = ByteArray(32).also(SecureRandom()::nextBytes).joinToString("") { "%02x".format(it) }
-        Car(hello.optString("name").take(60).ifBlank { p.second }, token).also { save(c, all(c) + it); WriterLog.i("Tetra Auto: paired with ${it.name}") } to true
+        Car(hello.optString("name").take(60).ifBlank { p.second }, token).also { save(c, all(c) + it); justPaired.value = it.name; WriterLog.i("Tetra Auto: paired with ${it.name}") } to true
     }
 }
 
@@ -137,6 +139,9 @@ class AutoProjectionService : Service() {
         super.onCreate()
         WriterLog.init(this)
         TetraLook.load(this)
+        // Tetra stopping with a car on the line (a crash): the projection back in 3 s, so the car's screen comes back by itself
+        val before = Thread.getDefaultUncaughtExceptionHandler()
+        if (before !is RestartOnCrash) Thread.setDefaultUncaughtExceptionHandler(RestartOnCrash(applicationContext, before))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -210,6 +215,17 @@ class AutoProjectionService : Service() {
     companion object { private const val NOTE = 4170; private const val CHANNEL = "tetra_auto_nobadge"; private const val STOP = "stop" }
 }
 
+/** The process ending in a crash while a car shows Tetra Car: an exact alarm starts the projection again (the user, 10 Nov). */
+private class RestartOnCrash(private val app: Context, private val next: Thread.UncaughtExceptionHandler?) : Thread.UncaughtExceptionHandler {
+    override fun uncaughtException(t: Thread, e: Throwable) {
+        if (AutoProjection.session != null) runCatching {
+            val pi = PendingIntent.getForegroundService(app, 4171, Intent(app, AutoProjectionService::class.java), PendingIntent.FLAG_IMMUTABLE)
+            app.getSystemService(android.app.AlarmManager::class.java).setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 3000, pi)
+        }
+        next?.uncaughtException(t, e)
+    }
+}
+
 /**
  * One car on the line: its hello, then Tetra Car drawn for it and its touches played into it, and Share both ways. Everything
  * Tetra Car needs from an Activity is given here: a lifecycle, saved state, Back, and a stand-in for "ask Android" (a
@@ -268,7 +284,8 @@ internal class AutoSession(private val service: Service, private val socket: Soc
             main.post { runCatching { open(hello.optInt("dpi", 160).coerceIn(100, 480)) }.onFailure { WriterLog.e("Tetra Auto: Tetra Car not drawn", it); end() }; ready.countDown() }
             ready.await()
             Thread({ pings() }, "auto-ping").start()
-            socket.soTimeout = 0
+            // a car that says hello every 5 s (Tetra Auto 0.2) and goes silent is gone: its picture stops and the phone is free for it again
+            socket.soTimeout = if (hello.optBoolean("pings")) 20_000 else 0
             while (!ended) {
                 val (t, b) = AutoWire.read(input)
                 when (t) {
@@ -341,17 +358,29 @@ internal class AutoSession(private val service: Service, private val socket: Soc
         Thread({ drain(e) }, "auto-encoder").start()
         val d = service.getSystemService(DisplayManager::class.java).createVirtualDisplay("Tetra Auto", width, height, dpi, surface, DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY)
         display = d
+        panel(d)
+    }
+
+    /**
+     * Tetra Car on a panel (a Presentation) on that screen. Not an Activity: Android lets only system apps open one on a screen like this
+     * (ACTIVITY_EMBEDDING), so its dialogs are layers of the panel (CarDialogs.kt), and AI Assist is its side pane.
+     */
+    private fun panel(d: VirtualDisplay) {
         saved.performRestore(null)
         registry.currentState = Lifecycle.State.RESUMED
         val p = Presentation(service, d.display)
         // what Tetra Car opens (a call's screen, another app) opens on the phone: from here it needs a task of its own, and a refusal must not
         // end the picture on the car
-        val safe = object : android.content.ContextWrapper(p.context) {
+        // in Tetra's own language: the panel's own context follows the display's (the system's) and changed language when a menu opened
+        val chosen = if (Build.VERSION.SDK_INT >= 33) service.getSystemService(android.app.LocaleManager::class.java).applicationLocales.takeIf { !it.isEmpty } else null
+        val inLanguage = chosen?.let { p.context.createConfigurationContext(android.content.res.Configuration(p.context.resources.configuration).apply { setLocales(it) }) }
+            ?: AppLocale.wrap(p.context) // Android 13+: the app's language is Android's own per-app setting, which a panel's context does not get
+        val safe = object : android.content.ContextWrapper(inLanguage) {
             override fun startActivity(intent: Intent) = startActivity(intent, null)
             override fun startActivity(intent: Intent, options: Bundle?) { runCatching { super.startActivity(Intent(intent).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), options) }.onFailure { WriterLog.w("Tetra Auto: not opened (${it.message})") } }
         }
         val view = ComposeView(safe).apply {
-            setContent { CompositionLocalProvider(LocalActivityResultRegistryOwner provides this@AutoSession, LocalOnCar provides true) { TetraTheme { CarScreen(projected = true) } } }
+            setContent { CompositionLocalProvider(LocalActivityResultRegistryOwner provides this@AutoSession, LocalOnCar provides true) { TetraTheme { CarOverlayHost { CarScreen(projected = true) } } } }
         }
         p.setContentView(view)
         p.window!!.decorView.let { v ->
@@ -408,15 +437,43 @@ internal class AutoSession(private val service: Service, private val socket: Soc
         if (action == MotionEvent.ACTION_DOWN) downAt = now
         val full = if (action == MotionEvent.ACTION_POINTER_DOWN || action == MotionEvent.ACTION_POINTER_UP) action or (index shl MotionEvent.ACTION_POINTER_INDEX_SHIFT) else action
         val ev = MotionEvent.obtain(downAt, now, full, n, props, coords, 0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0)
-        runCatching { p.window?.decorView?.dispatchTouchEvent(ev) }
+        runCatching { deliver(p, ev, action) }.onFailure { WriterLog.w("Tetra Auto: a touch not delivered (${it.message})") }
         ev.recycle()
+    }
+
+    /** The window a touch began in (the panel, or a menu over it), its top-left corner on the car's screen: the rest of the touch goes there. */
+    private var touched: android.view.View? = null
+    private val touchedAt = IntArray(2)
+
+    /**
+     * A touch to the topmost of Tetra's windows under it on the car's screen: the panel, or a menu over it (a menu is a window of its
+     * own, as on the phone). Android's touch screen would do it; here the touches come from the car. A touch outside an open menu
+     * tells it so (ACTION_OUTSIDE), and it closes, as on the phone.
+     */
+    private fun deliver(p: Presentation, ev: MotionEvent, action: Int) {
+        val shown = p.display.displayId
+        if (action == MotionEvent.ACTION_DOWN || touched?.isAttachedToWindow != true) {
+            val windows = android.view.inspector.WindowInspector.getGlobalWindowViews()
+                .filter { it.isAttachedToWindow && it.isShown && it.display?.displayId == shown }
+            val at = IntArray(2)
+            val hit = windows.lastOrNull { v -> v.getLocationOnScreen(at); ev.x >= at[0] && ev.y >= at[1] && ev.x < at[0] + v.width && ev.y < at[1] + v.height }
+                ?: p.window?.decorView ?: return
+            if (action == MotionEvent.ACTION_DOWN) windows.dropWhile { it !== hit }.drop(1).forEach { above -> // menus over it, not touched: outside
+                MotionEvent.obtain(ev).apply { this.action = MotionEvent.ACTION_OUTSIDE }.let { o -> above.dispatchTouchEvent(o); o.recycle() }
+            }
+            touched = hit; hit.getLocationOnScreen(touchedAt)
+        }
+        val target = touched ?: return
+        ev.offsetLocation(-touchedAt[0].toFloat(), -touchedAt[1].toFloat())
+        target.dispatchTouchEvent(ev)
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) touched = null
     }
 
     /** The unit's keys: Back goes back in Tetra Car, the voice key opens AI Assist, play/pause the music. */
     private fun key(code: Int) {
         when (code) {
             KeyEvent.KEYCODE_BACK -> onBackPressedDispatcher.onBackPressed()
-            KeyEvent.KEYCODE_VOICE_ASSIST, KeyEvent.KEYCODE_SEARCH -> carListen(service)
+            KeyEvent.KEYCODE_VOICE_ASSIST, KeyEvent.KEYCODE_SEARCH -> Car.assist?.invoke() // AI Assist's TV in Tetra Car's side pane
             KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> BrowserMedia.act(if (BrowserMedia.playing) "pause" else "play")
         }
     }
