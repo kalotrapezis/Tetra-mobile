@@ -133,61 +133,114 @@ internal enum class MapsTab(@androidx.annotation.StringRes val label: Int, val i
     metres?.let { Text(metresText(it), style = MaterialTheme.typography.labelMedium) }
 }
 
-/** Saved: all places by emblem tab, or one list; lists with a name and an emoji, a long press to change one. */
+/**
+ * Saved: the lists first, each a roomy row with its emoji and how many places; a tap goes into it, Back comes out (the user,
+ * 10 Nov: "have the lists and click to go in to them. so they get separated … see how much brithing room there is").
+ * [shown]: null the lists; "all" every place; a list's id; "eopyy" / "amea-check" the app's own.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable internal fun FavoritesPanel(places: List<Place>, lists: List<PlaceList>, eopyy: List<Poi>, shown: String?, show: (String?) -> Unit, newList: () -> Unit,
     editList: (PlaceList) -> Unit, distance: (Place) -> Double?, open: (Place) -> Unit, checks: List<AmeaCheck> = emptyList(),
     openCheck: (AmeaCheck) -> Unit = {}, openPoi: (Poi) -> Unit) = MapsPanel {
-    Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-        FilterChip(shown == null, { show(null) }, label = { Text(stringResource(R.string.common_all), maxLines = 1, overflow = TextOverflow.Ellipsis) }, colors = chipColors())
-        lists.forEach { l ->
-            Box(Modifier.combinedClickable(onClick = { show(l.id) }, onLongClick = { editList(l) })) {
-                FilterChip(shown == l.id, { show(l.id) }, label = { Text("${l.emoji} ${l.name}".trim(), maxLines = 1, overflow = TextOverflow.Ellipsis) }, colors = chipColors())
-            }
+    val context = LocalContext.current
+    if (shown == null) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.maps_tab_saved), style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+            OutlinedButton(onClick = newList) { Text(stringResource(R.string.maps_new_list_button), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
         }
-        // a list of the app's own: EOPYY's pharmacies, nearest first
-        if (eopyy.isNotEmpty()) FilterChip(shown == "eopyy", { show("eopyy") }, label = { Text("⚕️ " + stringResource(R.string.maps_kind_eopyy_pharmacies), maxLines = 1, overflow = TextOverflow.Ellipsis) }, colors = chipColors())
-        // the municipalities' ΑμεΑ spots to place by hand, nearest first
-        if (checks.isNotEmpty()) FilterChip(shown == "amea-check", { show("amea-check") }, label = { Text(stringResource(R.string.maps_amea_to_place, checks.size), maxLines = 1, overflow = TextOverflow.Ellipsis) }, colors = chipColors())
-        TextButton(onClick = newList) { Text(stringResource(R.string.maps_new_list_button), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-    }
-    if (shown == "amea-check") {
-        LazyColumn { items(checks, key = { it.id }) { c ->
-            Row(Modifier.fillMaxWidth().clickable { openCheck(c) }.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                Text("♿")
-                Column(Modifier.weight(1f)) {
-                    // the street when known, else what the decision says, without its common opening
-                    Text(if (',' in c.address) c.address else c.subject.replace(Regex("^.*?(στάθμευσης|στάθμευση)\\s+(ΑμεΑ|ΑΜΕΑ|για ΑμεΑ|για ΑΜΕΑ)?[,»\"]*\\s*", RegexOption.IGNORE_CASE), "")
-                        .ifBlank { c.subject }, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text("${c.municipality} · ${c.date.take(4)}", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.7f))
-                }
-                distance(Place("", "", c.lat, c.lng))?.let { Text(metresText(it), style = MaterialTheme.typography.labelMedium) }
+        LazyColumn {
+            item { SavedRow("📍", stringResource(R.string.maps_all_places), pluralStringResource(R.plurals.maps_n_places, places.size, places.size), onClick = { show("all") }) }
+            items(lists, key = { it.id }) { l ->
+                val n = places.count { l.id in it.lists }
+                SavedRow(l.emoji.ifBlank { "📌" }, l.name, pluralStringResource(R.plurals.maps_n_places, n, n), onClick = { show(l.id) }, onLongClick = { editList(l) }, more = { editList(l) })
             }
+            // the app's own: EOPYY's pharmacies, and the municipalities' ΑμεΑ spots to place by hand, nearest first
+            if (eopyy.isNotEmpty()) item { SavedRow("⚕️", stringResource(R.string.maps_kind_eopyy_pharmacies), pluralStringResource(R.plurals.maps_n_places, eopyy.size, eopyy.size), onClick = { show("eopyy") }) }
+            if (checks.isNotEmpty()) item { SavedRow("♿", stringResource(R.string.maps_amea_to_place, checks.size), null, onClick = { show("amea-check") }) }
+        }
+        return@MapsPanel
+    }
+    androidx.activity.compose.BackHandler { show(null) }
+    val list = lists.firstOrNull { it.id == shown }
+    val inList = when (shown) { "all" -> places; else -> places.filter { shown in it.lists } }
+    // the open list's head: ‹ back, its emoji and name (a long press there changes it), how many
+    Row(Modifier.fillMaxWidth().padding(end = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = { show(null) }) { Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.common_back)) }
+        val (emoji, title, count) = when (shown) {
+            "all" -> Triple("📍", stringResource(R.string.maps_all_places), inList.size)
+            "eopyy" -> Triple("⚕️", stringResource(R.string.maps_kind_eopyy_pharmacies), eopyy.size)
+            "amea-check" -> Triple("♿", stringResource(R.string.maps_amea_to_place, checks.size), -1)
+            else -> Triple(list?.emoji.orEmpty(), list?.name.orEmpty(), inList.size)
+        }
+        Column(Modifier.weight(1f).combinedClickable(onClick = {}, onLongClick = { list?.let(editList) })) {
+            Text("$emoji $title".trim(), style = MaterialTheme.typography.titleLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            if (count >= 0) Text(pluralStringResource(R.plurals.maps_n_places, count, count), style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.7f))
+        }
+    }
+    when (shown) {
+        "amea-check" -> LazyColumn { items(checks, key = { it.id }) { c ->
+            // the street when known, else what the decision says, without its common opening
+            val what = if (',' in c.address) c.address else c.subject.replace(Regex("^.*?(στάθμευσης|στάθμευση)\\s+(ΑμεΑ|ΑΜΕΑ|για ΑμεΑ|για ΑΜΕΑ)?[,»\"]*\\s*", RegexOption.IGNORE_CASE), "")
+                .ifBlank { c.subject }
+            SavedRow("♿", what, "${c.municipality} · ${c.date.take(4)}", end = distance(Place("", "", c.lat, c.lng))?.let(::metresText), onClick = { openCheck(c) })
         } }
-        return@MapsPanel
-    }
-    if (shown == "eopyy") {
-        LazyColumn { items(eopyy) { p -> PoiRow(p, distance(p.place(LocalContext.current))) { openPoi(p) } } }
-        return@MapsPanel
-    }
-    val inList = if (shown == null) places else places.filter { shown in it.lists }
-    if (inList.isEmpty()) Text(stringResource(if (shown == null) R.string.maps_no_saved else R.string.maps_list_empty),
-        style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(16.dp))
-    else LazyColumn {
-        val groups = if (shown == null) inList.groupBy { Place.category(it.icon) }.toSortedMap(compareBy { Place.CATEGORIES.keys.indexOf(it) }) else mapOf("" to inList)
-        groups.forEach { (cat, ps) ->
-            if (cat.isNotEmpty() && groups.size > 1) item { Text(stringResource(Place.categoryLabel(cat)), style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.6f), modifier = Modifier.padding(start = 16.dp, top = 8.dp)) }
-            items(ps, key = { it.id }) { p ->
-                Row(Modifier.fillMaxWidth().clickable { open(p) }.padding(horizontal = 16.dp, vertical = 9.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(painterResource(placeIcon(p.icon)), contentDescription = null, modifier = Modifier.size(20.dp))
-                    Text(p.name, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    lists.filter { it.id in p.lists }.forEach { Text(it.emoji) }
-                    if (p.slot > 0) Text(stringResource(R.string.maps_home_slot, p.slot), style = MaterialTheme.typography.labelSmall)
-                    distance(p)?.let { Text(metresText(it), style = MaterialTheme.typography.labelMedium) }
+        "eopyy" -> LazyColumn { items(eopyy) { p ->
+            SavedRow("⚕️", p.title(context), p.named(context)?.takeIf { it.isNotEmpty() }, end = distance(p.place(context))?.let(::metresText), onClick = { openPoi(p) })
+        } }
+        else -> if (inList.isEmpty()) Text(stringResource(if (shown == "all") R.string.maps_no_saved else R.string.maps_list_empty),
+            style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(16.dp))
+        else {
+            // a long list gets a line to find in it (the user, 10 Nov: "I was tring to find the scool"); not in the car
+            var find by remember(shown) { mutableStateOf("") }
+            if (inList.size > 15 && !LocalOnCar.current) MapsSearchField(find, stringResource(R.string.maps_list_find), { find = it })
+            val found = if (find.isBlank()) inList else inList.filter { MapsSearch.fold("${it.name} ${it.label}").contains(MapsSearch.fold(find.trim())) }
+            // the words many names here start with ("Δημοτικό Σχολείο …") are dimmed, so the part that tells them apart stands out
+            val lead = found.map { it.short.split(' ').take(2).joinToString(" ") }.filter { ' ' in it }.groupingBy { it }.eachCount()
+                .filterValues { it >= 3 }.keys
+            LazyColumn {
+                items(found.sortedBy { distance(it) ?: Double.MAX_VALUE }, key = { it.id }) { p ->
+                    val more = listOfNotNull(
+                        p.name.takeIf { p.label.isNotBlank() && MapsSearch.fold(p.label).replace(" ", "") != MapsSearch.fold(p.name).replace(" ", "") },
+                        stringResource(R.string.maps_home_slot, p.slot).takeIf { p.slot > 0 },
+                        lists.filter { it.id in p.lists && it.id != shown }.joinToString("") { it.emoji }.ifEmpty { null },
+                    ).joinToString(" · ")
+                    SavedRow(null, p.short, more.ifEmpty { null }, icon = placeIcon(p.icon), dim = lead.firstOrNull { p.short.startsWith("$it ") }?.length ?: 0,
+                        end = distance(p)?.let(::metresText), onClick = { open(p) })
                 }
             }
         }
+    }
+}
+
+/**
+ * One row of Saved: a round badge (an emoji or an emblem), the name on up to two lines ([dim] of its first characters quieter),
+ * a quiet line under it, [end] (the distance) at the right; [more] a ⋮. In the car bigger, the name on one line, at a glance.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable private fun SavedRow(emoji: String?, title: String, sub: String?, icon: Int? = null, dim: Int = 0, end: String? = null, onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null, more: (() -> Unit)? = null) {
+    val car = LocalOnCar.current
+    Row(Modifier.fillMaxWidth().heightIn(min = if (car) 88.dp else 64.dp).combinedClickable(onClick = onClick, onLongClick = onLongClick)
+        .padding(start = 16.dp, end = if (more != null) 4.dp else 16.dp, top = 10.dp, bottom = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.12f), modifier = Modifier.size(if (car) 56.dp else 44.dp)) {
+            Box(contentAlignment = Alignment.Center) {
+                if (icon != null) Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(if (car) 28.dp else 22.dp))
+                else Text(emoji.orEmpty(), style = if (car) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge)
+            }
+        }
+        Column(Modifier.weight(1f)) {
+            val text = if (dim in 1 until title.length) androidx.compose.ui.text.buildAnnotatedString {
+                pushStyle(androidx.compose.ui.text.SpanStyle(color = Color.White.copy(alpha = 0.6f), fontWeight = FontWeight.Normal)); append(title.take(dim)); pop()
+                append(title.drop(dim))
+            } else androidx.compose.ui.text.AnnotatedString(title)
+            Text(text, style = if (car) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium,
+                maxLines = if (car) 1 else 2, overflow = TextOverflow.Ellipsis)
+            sub?.let { Text(it, style = if (car) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.7f),
+                maxLines = 1, overflow = TextOverflow.Ellipsis) }
+        }
+        end?.let { Text(it, style = if (car) MaterialTheme.typography.titleLarge else MaterialTheme.typography.labelLarge) }
+        more?.let { IconButton(onClick = it) { Icon(painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.common_edit)) } }
     }
 }
 

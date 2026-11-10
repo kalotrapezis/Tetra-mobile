@@ -54,4 +54,7 @@
     <string name="auto_no_map">A telefonon még nincs térkép. Először tölts le egy térképet a telefonra.</string>
     <string name="auto_paired_done">Párosítva: %1$s. A Tetra Car a képernyőjén van.</string>
     <string name="car_favorites_none">Még nincs mentett hely: ments el egyet a térképen a ♥ jellel.</string>
+    <string name="maps_all_places">Minden hely</string>
+    <plurals name="maps_n_places"><item quantity="one">%d hely</item><item quantity="other">%d hely</item></plurals>
+    <string name="maps_list_find">Keresés ebben a listában</string>
 </resources>

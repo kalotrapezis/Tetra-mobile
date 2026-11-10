@@ -54,4 +54,7 @@
     <string name="auto_no_map">V telefonu zatím není žádná mapa. Nejdřív si do telefonu stáhněte mapu.</string>
     <string name="auto_paired_done">Spárováno s autem %1$s: Tetra Car je na jeho obrazovce.</string>
     <string name="car_favorites_none">Zatím žádná uložená místa: uložte si nějaké na mapě pomocí ♥.</string>
+    <string name="maps_all_places">Všechna místa</string>
+    <plurals name="maps_n_places"><item quantity="one">%d místo</item><item quantity="few">%d místa</item><item quantity="many">%d místa</item><item quantity="other">%d míst</item></plurals>
+    <string name="maps_list_find">Hledat v tomto seznamu</string>
 </resources>

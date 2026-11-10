@@ -54,4 +54,7 @@
     <string name="auto_no_map">Na telefonu še ni zemljevida. Najprej prenesite zemljevid na telefon.</string>
     <string name="auto_paired_done">Seznanjeno z avtom %1$s: Tetra Car je na njegovem zaslonu.</string>
     <string name="car_favorites_none">Shranjenih mest še ni: shranite katero na zemljevidu z ♥.</string>
+    <string name="maps_all_places">Vsa mesta</string>
+    <plurals name="maps_n_places"><item quantity="one">%d mesto</item><item quantity="two">%d mesti</item><item quantity="few">%d mesta</item><item quantity="other">%d mest</item></plurals>
+    <string name="maps_list_find">Išči na tem seznamu</string>
 </resources>

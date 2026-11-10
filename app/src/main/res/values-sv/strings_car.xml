@@ -54,4 +54,7 @@
     <string name="auto_no_map">Det finns ingen karta på telefonen än. Ladda först ner en karta på telefonen.</string>
     <string name="auto_paired_done">Ihopparad med %1$s: Tetra Car visas på dess skärm.</string>
     <string name="car_favorites_none">Inga sparade platser än: spara en på kartan med ♥.</string>
+    <string name="maps_all_places">Alla platser</string>
+    <plurals name="maps_n_places"><item quantity="one">%d plats</item><item quantity="other">%d platser</item></plurals>
+    <string name="maps_list_find">Sök i den här listan</string>
 </resources>

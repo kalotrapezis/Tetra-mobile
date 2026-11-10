@@ -54,4 +54,7 @@
     <string name="auto_no_map">Għad m\'hemm l-ebda mappa fuq il-mowbajl. L-ewwel niżżel mappa fuq il-mowbajl.</string>
     <string name="auto_paired_done">Imqabbad ma\' %1$s: Tetra Car jinsab fuq l-iskrin tiegħu.</string>
     <string name="car_favorites_none">Għad m\'hemmx postijiet issejvjati: issejvja wieħed fuq il-mappa b\'♥.</string>
+    <string name="maps_all_places">Il-postijiet kollha</string>
+    <plurals name="maps_n_places"><item quantity="one">%d post</item><item quantity="two">%d postijiet</item><item quantity="few">%d postijiet</item><item quantity="many">%d post</item><item quantity="other">%d post</item></plurals>
+    <string name="maps_list_find">Fittex f\'din il-lista</string>
 </resources>

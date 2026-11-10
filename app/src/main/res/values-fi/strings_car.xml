@@ -54,4 +54,7 @@
     <string name="auto_no_map">Puhelimessa ei ole vielä karttaa. Lataa ensin kartta puhelimeen.</string>
     <string name="auto_paired_done">Yhdistetty: %1$s. Tetra Car on sen näytöllä.</string>
     <string name="car_favorites_none">Ei vielä tallennettuja paikkoja: tallenna paikka kartalla ♥-merkillä.</string>
+    <string name="maps_all_places">Kaikki paikat</string>
+    <plurals name="maps_n_places"><item quantity="one">%d paikka</item><item quantity="other">%d paikkaa</item></plurals>
+    <string name="maps_list_find">Etsi tästä luettelosta</string>
 </resources>

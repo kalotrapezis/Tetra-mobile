@@ -54,4 +54,7 @@
     <string name="auto_no_map">Non c\'è ancora una mappa sul telefono. Scarica prima una mappa sul telefono.</string>
     <string name="auto_paired_done">Associato a %1$s: Tetra Car è sul suo schermo.</string>
     <string name="car_favorites_none">Ancora nessun luogo salvato: salvane uno sulla mappa con ♥.</string>
+    <string name="maps_all_places">Tutti i luoghi</string>
+    <plurals name="maps_n_places"><item quantity="one">%d luogo</item><item quantity="many">%d luoghi</item><item quantity="other">%d luoghi</item></plurals>
+    <string name="maps_list_find">Cerca in questo elenco</string>
 </resources>

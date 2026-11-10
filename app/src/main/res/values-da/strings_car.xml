@@ -54,4 +54,7 @@
     <string name="auto_no_map">Der er endnu intet kort på telefonen. Hent først et kort på telefonen.</string>
     <string name="auto_paired_done">Parret med %1$s: Tetra Car er på dens skærm.</string>
     <string name="car_favorites_none">Ingen gemte steder endnu: gem et på kortet med ♥.</string>
+    <string name="maps_all_places">Alle steder</string>
+    <plurals name="maps_n_places"><item quantity="one">%d sted</item><item quantity="other">%d steder</item></plurals>
+    <string name="maps_list_find">Find i denne liste</string>
 </resources>

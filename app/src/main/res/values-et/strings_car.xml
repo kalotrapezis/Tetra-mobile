@@ -54,4 +54,7 @@
     <string name="auto_no_map">Telefonis pole veel kaarti. Laadi esmalt telefoni kaart.</string>
     <string name="auto_paired_done">Seotud: %1$s. Tetra Car on selle ekraanil.</string>
     <string name="car_favorites_none">Salvestatud kohti veel pole: salvesta üks kaardil ♥ abil.</string>
+    <string name="maps_all_places">Kõik kohad</string>
+    <plurals name="maps_n_places"><item quantity="one">%d koht</item><item quantity="other">%d kohta</item></plurals>
+    <string name="maps_list_find">Otsi sellest loendist</string>
 </resources>

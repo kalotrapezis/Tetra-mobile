@@ -54,4 +54,7 @@
     <string name="auto_no_map">Telefone dar nėra žemėlapio. Pirmiausia atsisiųskite žemėlapį į telefoną.</string>
     <string name="auto_paired_done">Susieta su %1$s: Tetra Car rodomas jo ekrane.</string>
     <string name="car_favorites_none">Išsaugotų vietų dar nėra: išsaugokite vieną žemėlapyje paspaudę ♥.</string>
+    <string name="maps_all_places">Visos vietos</string>
+    <plurals name="maps_n_places"><item quantity="one">%d vieta</item><item quantity="few">%d vietos</item><item quantity="many">%d vietos</item><item quantity="other">%d vietų</item></plurals>
+    <string name="maps_list_find">Ieškoti šiame sąraše</string>
 </resources>

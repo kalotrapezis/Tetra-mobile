@@ -54,4 +54,7 @@
     <string name="auto_no_map">Tālrunī vēl nav kartes. Vispirms lejupielādējiet karti tālrunī.</string>
     <string name="auto_paired_done">Savienots pārī ar %1$s: Tetra Car ir tā ekrānā.</string>
     <string name="car_favorites_none">Vēl nav saglabātu vietu: saglabājiet kādu kartē ar ♥.</string>
+    <string name="maps_all_places">Visas vietas</string>
+    <plurals name="maps_n_places"><item quantity="zero">%d vietu</item><item quantity="one">%d vieta</item><item quantity="other">%d vietas</item></plurals>
+    <string name="maps_list_find">Meklēt šajā sarakstā</string>
 </resources>

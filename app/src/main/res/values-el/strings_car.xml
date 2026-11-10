@@ -54,4 +54,7 @@
     <string name="auto_no_map">Δεν υπάρχει ακόμα χάρτης στο κινητό. Κατεβάστε πρώτα έναν χάρτη στο κινητό.</string>
     <string name="auto_paired_done">Σε σύζευξη με %1$s: το Tetra Car είναι στην οθόνη του.</string>
     <string name="car_favorites_none">Δεν υπάρχουν ακόμα αποθηκευμένα μέρη: αποθηκεύστε ένα στον χάρτη με το ♥.</string>
+    <string name="maps_all_places">Όλα τα μέρη</string>
+    <plurals name="maps_n_places"><item quantity="one">%d μέρος</item><item quantity="other">%d μέρη</item></plurals>
+    <string name="maps_list_find">Εύρεση σε αυτή τη λίστα</string>
 </resources>

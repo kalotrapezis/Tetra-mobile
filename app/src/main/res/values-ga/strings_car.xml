@@ -54,4 +54,7 @@
     <string name="auto_no_map">Níl aon léarscáil ar an bhfón fós. Íoslódáil léarscáil ar an bhfón ar dtús.</string>
     <string name="auto_paired_done">Péireáilte le %1$s: tá Tetra Car ar a scáileán.</string>
     <string name="car_favorites_none">Níl aon áit sábháilte fós: sábháil ceann ar an léarscáil le ♥.</string>
+    <string name="maps_all_places">Gach áit</string>
+    <plurals name="maps_n_places"><item quantity="one">%d áit</item><item quantity="two">%d áit</item><item quantity="few">%d áit</item><item quantity="many">%d n-áit</item><item quantity="other">%d áit</item></plurals>
+    <string name="maps_list_find">Aimsigh sa liosta seo</string>
 </resources>

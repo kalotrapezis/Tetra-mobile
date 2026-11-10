@@ -54,4 +54,7 @@
     <string name="auto_no_map">Auf dem Handy ist noch keine Karte. Lade zuerst eine Karte auf das Handy.</string>
     <string name="auto_paired_done">Gekoppelt mit %1$s: Tetra Car ist auf seinem Bildschirm.</string>
     <string name="car_favorites_none">Noch keine gespeicherten Orte: speichere einen auf der Karte mit ♥.</string>
+    <string name="maps_all_places">Alle Orte</string>
+    <plurals name="maps_n_places"><item quantity="one">%d Ort</item><item quantity="other">%d Orte</item></plurals>
+    <string name="maps_list_find">In dieser Liste suchen</string>
 </resources>
