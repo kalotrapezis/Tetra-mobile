@@ -31,4 +31,24 @@
     <string name="car_open_bt">Otevřít při připojení tohoto Bluetooth</string>
     <string name="car_bluetooth_phone">Bluetooth telefonu</string>
     <string name="car_bluetooth_phone_none">Vyber svůj telefon: když se připojí, Tetra Car se může otevřít sám.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (vlastní obrazovka auta)</string>
+    <string name="auto_settings_note">Nainstaluj Tetra Auto na obrazovku auta, připoj ji k hotspotu tohoto telefonu a pak spáruj: Tetra Car se kreslí tady, zobrazuje se tam a funguje i se zhasnutou obrazovkou telefonu. Telefon se na auto připraví, jakmile se připojí Bluetooth auta.</string>
+    <string name="auto_paired">Spárováno: zobrazí Tetra Car, když najde tento telefon</string>
+    <string name="auto_show_now">Zobrazit v autě hned</string>
+    <string name="auto_show_now_summary">Připraveno pro auto na příští půlhodinu</string>
+    <string name="auto_pairing">Párování s autem %1$s: nech hotspot tohoto telefonu zapnutý, auto se připojí samo</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Připraveno pro auto</string>
+    <string name="auto_on_car">Na obrazovce auta %1$s</string>
+    <string name="auto_note_text">Tetra Car se na tomto telefonu kreslí pro obrazovku auta</string>
+    <string name="auto_stop">Zastavit</string>
+    <string name="auto_share">Sdílet</string>
+    <string name="auto_send_to_car">Odeslat do auta</string>
+    <string name="auto_no_car">Teď Tetra Car nezobrazuje žádné auto</string>
+    <plurals name="auto_sending"><item quantity="one">Do auta se odesílá %d soubor</item><item quantity="few">Do auta se odesílají %d soubory</item><item quantity="many">Do auta se odesílá %d souboru</item><item quantity="other">Do auta se odesílá %d souborů</item></plurals>
+    <string name="auto_file_from_car">Soubor %1$s přišel z auta (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">Soubor %1$s je v autě</string>
+    <string name="auto_file_not_on_car">Auto si soubor %1$s neponechalo</string>
+    <string name="auto_answer_on_phone">Odpověz na to v telefonu</string>
 </resources>

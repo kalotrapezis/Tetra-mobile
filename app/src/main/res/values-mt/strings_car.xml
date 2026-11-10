@@ -31,4 +31,24 @@
     <string name="car_open_bt">Iftaħ meta dan il-Bluetooth jikkonnettja</string>
     <string name="car_bluetooth_phone">Il-Bluetooth tat-telefon</string>
     <string name="car_bluetooth_phone_none">Agħżel it-telefon tiegħek: meta jikkonnettja, Tetra Car jista’ jinfetaħ waħdu.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (l-iskrin tal-karozza nfisha)</string>
+    <string name="auto_settings_note">Installa Tetra Auto fuq l-iskrin tal-karozza, qabbdu mal-hotspot ta’ dan it-telefon, imbagħad qabbad: Tetra Car jinġibed hawn u jidher hemm, u jaħdem anki bl-iskrin tat-telefon mitfi. It-telefon jitlesta għall-karozza hekk kif il-Bluetooth tal-karozza jikkonnettja.</string>
+    <string name="auto_paired">Imqabbad: juri Tetra Car meta jsib dan it-telefon</string>
+    <string name="auto_show_now">Uri fil-karozza issa</string>
+    <string name="auto_show_now_summary">Lest għall-karozza għan-nofs siegħa li ġejja</string>
+    <string name="auto_pairing">Qed jitqabbad ma’ %1$s: żomm il-hotspot ta’ dan it-telefon mixgħul, il-karozza tikkonnettja waħedha</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Lest għall-karozza</string>
+    <string name="auto_on_car">Fuq l-iskrin ta’ %1$s</string>
+    <string name="auto_note_text">Tetra Car jinġibed fuq dan it-telefon għall-iskrin tal-karozza</string>
+    <string name="auto_stop">Ieqaf</string>
+    <string name="auto_share">Aqsam</string>
+    <string name="auto_send_to_car">Ibgħat lill-karozza</string>
+    <string name="auto_no_car">L-ebda karozza ma qed turi Tetra Car bħalissa</string>
+    <plurals name="auto_sending"><item quantity="one">Qed jintbagħat fajl wieħed lill-karozza</item><item quantity="few">Qed jintbagħtu %d fajls lill-karozza</item><item quantity="many">Qed jintbagħat %d fajl lill-karozza</item><item quantity="other">Qed jintbagħat %d fajl lill-karozza</item></plurals>
+    <string name="auto_file_from_car">%1$s wasal mill-karozza (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">%1$s jinsab fil-karozza</string>
+    <string name="auto_file_not_on_car">Il-karozza ma żammitx %1$s</string>
+    <string name="auto_answer_on_phone">Wieġeb dan fuq it-telefon</string>
 </resources>

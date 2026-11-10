@@ -31,4 +31,24 @@
     <string name="car_open_bt">Atidaryti prisijungus šiam Bluetooth</string>
     <string name="car_bluetooth_phone">Telefono Bluetooth</string>
     <string name="car_bluetooth_phone_none">Pasirink savo telefoną: kai jis prisijungs, Tetra Car gali atsidaryti savaime.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (paties automobilio ekranas)</string>
+    <string name="auto_settings_note">Įdiek Tetra Auto automobilio ekrane, prijunk jį prie šio telefono prieigos taško ir susiek: Tetra Car piešiamas čia, rodomas ten ir veikia net išjungus telefono ekraną. Telefonas pasiruošia automobiliui, kai tik prisijungia automobilio Bluetooth.</string>
+    <string name="auto_paired">Susieta: rodo Tetra Car, kai randa šį telefoną</string>
+    <string name="auto_show_now">Rodyti automobilyje dabar</string>
+    <string name="auto_show_now_summary">Paruošta automobiliui kitam pusvalandžiui</string>
+    <string name="auto_pairing">Susiejama su automobiliu %1$s: palik įjungtą šio telefono prieigos tašką, automobilis prisijungs pats</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Paruošta automobiliui</string>
+    <string name="auto_on_car">Automobilio %1$s ekrane</string>
+    <string name="auto_note_text">Tetra Car šiame telefone piešiamas automobilio ekranui</string>
+    <string name="auto_stop">Sustabdyti</string>
+    <string name="auto_share">Bendrinti</string>
+    <string name="auto_send_to_car">Siųsti į automobilį</string>
+    <string name="auto_no_car">Šiuo metu joks automobilis nerodo Tetra Car</string>
+    <plurals name="auto_sending"><item quantity="one">Į automobilį siunčiamas %d failas</item><item quantity="few">Į automobilį siunčiami %d failai</item><item quantity="many">Į automobilį siunčiama %d failo</item><item quantity="other">Į automobilį siunčiama %d failų</item></plurals>
+    <string name="auto_file_from_car">Failas %1$s gautas iš automobilio (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">Failas %1$s yra automobilyje</string>
+    <string name="auto_file_not_on_car">Automobilis neišsaugojo failo %1$s</string>
+    <string name="auto_answer_on_phone">Atsakyk į tai telefone</string>
 </resources>

@@ -263,6 +263,7 @@ class CarBluetoothReceiver : android.content.BroadcastReceiver() {
         val on = intent.action == android.bluetooth.BluetoothDevice.ACTION_ACL_CONNECTED
         WriterLog.i("Car: the ${if (PhoneRelay.noCalls(c)) "phone" else "car"}'s Bluetooth ${if (on) "joined" else "left"}")
         CarQuiet.set(c, on)
+        if (on) AutoProjection.startIfPaired(c) // a car with Tetra Auto: ready for it as its Bluetooth joins
         if (on && Car.opensOnBluetooth(c)) Car.open(c) // the user, 9 Nov: "open Tetra Car … on connection with phone"
     }
 }

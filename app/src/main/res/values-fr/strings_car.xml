@@ -31,4 +31,24 @@
     <string name="car_open_bt">Ouvrir quand ce Bluetooth se connecte</string>
     <string name="car_bluetooth_phone">Bluetooth du téléphone</string>
     <string name="car_bluetooth_phone_none">Choisis ton téléphone : quand il se connecte, Tetra Car peut s’ouvrir tout seul.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (l’écran de la voiture)</string>
+    <string name="auto_settings_note">Installe Tetra Auto sur l’écran de la voiture, connecte-le au point d’accès de ce téléphone, puis associe-les : Tetra Car est dessiné ici et affiché là-bas, et fonctionne même écran du téléphone éteint. Le téléphone se prépare pour la voiture dès que le Bluetooth de la voiture se connecte.</string>
+    <string name="auto_paired">Associé : affiche Tetra Car quand il trouve ce téléphone</string>
+    <string name="auto_show_now">Afficher dans la voiture maintenant</string>
+    <string name="auto_show_now_summary">Prêt pour la voiture pendant la prochaine demi-heure</string>
+    <string name="auto_pairing">Association avec %1$s : laisse le point d’accès de ce téléphone activé, la voiture se connecte toute seule</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Prêt pour la voiture</string>
+    <string name="auto_on_car">Sur l’écran de %1$s</string>
+    <string name="auto_note_text">Tetra Car est dessiné sur ce téléphone pour l’écran de la voiture</string>
+    <string name="auto_stop">Arrêter</string>
+    <string name="auto_share">Partager</string>
+    <string name="auto_send_to_car">Envoyer à la voiture</string>
+    <string name="auto_no_car">Aucune voiture n’affiche Tetra Car pour le moment</string>
+    <plurals name="auto_sending"><item quantity="one">Envoi de %d fichier à la voiture</item><item quantity="many">Envoi de %d fichiers à la voiture</item><item quantity="other">Envoi de %d fichiers à la voiture</item></plurals>
+    <string name="auto_file_from_car">%1$s vient de la voiture (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">%1$s est dans la voiture</string>
+    <string name="auto_file_not_on_car">La voiture n’a pas gardé %1$s</string>
+    <string name="auto_answer_on_phone">Réponds sur le téléphone</string>
 </resources>

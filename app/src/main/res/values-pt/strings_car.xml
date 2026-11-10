@@ -31,4 +31,24 @@
     <string name="car_open_bt">Abrir quando este Bluetooth ligar</string>
     <string name="car_bluetooth_phone">Bluetooth do telemóvel</string>
     <string name="car_bluetooth_phone_none">Escolhe o teu telemóvel: quando ligar, o Tetra Car pode abrir sozinho.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (o próprio ecrã do carro)</string>
+    <string name="auto_settings_note">Instala o Tetra Auto no ecrã do carro, liga-o ao hotspot deste telemóvel e depois emparelha: o Tetra Car é desenhado aqui e mostrado lá, e funciona com o ecrã do telemóvel desligado. O telemóvel prepara-se para o carro assim que o Bluetooth do carro se liga.</string>
+    <string name="auto_paired">Emparelhado: mostra o Tetra Car quando encontra este telemóvel</string>
+    <string name="auto_show_now">Mostrar no carro agora</string>
+    <string name="auto_show_now_summary">Pronto para o carro durante a próxima meia hora</string>
+    <string name="auto_pairing">A emparelhar com %1$s: mantém o hotspot deste telemóvel ligado, o carro liga-se sozinho</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Pronto para o carro</string>
+    <string name="auto_on_car">No ecrã de %1$s</string>
+    <string name="auto_note_text">O Tetra Car é desenhado neste telemóvel para o ecrã do carro</string>
+    <string name="auto_stop">Parar</string>
+    <string name="auto_share">Partilhar</string>
+    <string name="auto_send_to_car">Enviar para o carro</string>
+    <string name="auto_no_car">Nenhum carro está a mostrar o Tetra Car agora</string>
+    <plurals name="auto_sending"><item quantity="one">A enviar %d ficheiro para o carro</item><item quantity="many">A enviar %d ficheiros para o carro</item><item quantity="other">A enviar %d ficheiros para o carro</item></plurals>
+    <string name="auto_file_from_car">%1$s veio do carro (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">%1$s está no carro</string>
+    <string name="auto_file_not_on_car">O carro não guardou %1$s</string>
+    <string name="auto_answer_on_phone">Responde a isto no telemóvel</string>
 </resources>

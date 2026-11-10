@@ -31,4 +31,24 @@
     <string name="car_open_bt">Öppna när denna Bluetooth ansluter</string>
     <string name="car_bluetooth_phone">Telefonens Bluetooth</string>
     <string name="car_bluetooth_phone_none">Välj din telefon: när den ansluter kan Tetra Car öppnas av sig själv.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (bilens egen skärm)</string>
+    <string name="auto_settings_note">Installera Tetra Auto på bilens skärm, anslut den till den här telefonens surfzon och para sedan ihop: Tetra Car ritas här och visas där, och fungerar med telefonens skärm avstängd. Telefonen gör sig redo för bilen så fort bilens Bluetooth ansluter.</string>
+    <string name="auto_paired">Ihopparad: visar Tetra Car när den hittar den här telefonen</string>
+    <string name="auto_show_now">Visa i bilen nu</string>
+    <string name="auto_show_now_summary">Redo för bilen den närmaste halvtimmen</string>
+    <string name="auto_pairing">Parar ihop med %1$s: låt den här telefonens surfzon vara på, bilen ansluter av sig själv</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Redo för bilen</string>
+    <string name="auto_on_car">På skärmen i %1$s</string>
+    <string name="auto_note_text">Tetra Car ritas på den här telefonen för bilens skärm</string>
+    <string name="auto_stop">Stoppa</string>
+    <string name="auto_share">Dela</string>
+    <string name="auto_send_to_car">Skicka till bilen</string>
+    <string name="auto_no_car">Ingen bil visar Tetra Car just nu</string>
+    <plurals name="auto_sending"><item quantity="one">Skickar %d fil till bilen</item><item quantity="other">Skickar %d filer till bilen</item></plurals>
+    <string name="auto_file_from_car">%1$s kom från bilen (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">%1$s finns i bilen</string>
+    <string name="auto_file_not_on_car">Bilen behöll inte %1$s</string>
+    <string name="auto_answer_on_phone">Svara på det här i telefonen</string>
 </resources>

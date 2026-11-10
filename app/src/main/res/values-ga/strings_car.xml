@@ -31,4 +31,24 @@
     <string name="car_open_bt">Oscail nuair a nascann an Bluetooth seo</string>
     <string name="car_bluetooth_phone">Bluetooth an ghutháin</string>
     <string name="car_bluetooth_phone_none">Roghnaigh do ghuthán: nuair a nascann sé, is féidir le Tetra Car oscailt leis féin.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (scáileán an chairr féin)</string>
+    <string name="auto_settings_note">Suiteáil Tetra Auto ar scáileán an chairr, ceangail é le hotspot an ghutháin seo, ansin péireáil: tarraingítear Tetra Car anseo agus taispeántar ansin é, agus oibríonn sé agus scáileán an ghutháin múchta. Ullmhaíonn an guthán don charr a luaithe a nascann Bluetooth an chairr.</string>
+    <string name="auto_paired">Péireáilte: taispeánann sé Tetra Car nuair a aimsíonn sé an guthán seo</string>
+    <string name="auto_show_now">Taispeáin sa charr anois</string>
+    <string name="auto_show_now_summary">Réidh don charr don leathuair an chloig seo chugainn</string>
+    <string name="auto_pairing">Ag péireáil le %1$s: coinnigh hotspot an ghutháin seo ar siúl, nascann an carr leis féin</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Réidh don charr</string>
+    <string name="auto_on_car">Ar scáileán %1$s</string>
+    <string name="auto_note_text">Tarraingítear Tetra Car ar an nguthán seo do scáileán an chairr</string>
+    <string name="auto_stop">Stop</string>
+    <string name="auto_share">Roinn</string>
+    <string name="auto_send_to_car">Seol chuig an gcarr</string>
+    <string name="auto_no_car">Níl aon charr ag taispeáint Tetra Car faoi láthair</string>
+    <plurals name="auto_sending"><item quantity="one">%d comhad á sheoladh chuig an gcarr</item><item quantity="two">%d comhad á seoladh chuig an gcarr</item><item quantity="few">%d comhad á seoladh chuig an gcarr</item><item quantity="many">%d comhad á seoladh chuig an gcarr</item><item quantity="other">%d comhad á seoladh chuig an gcarr</item></plurals>
+    <string name="auto_file_from_car">Tháinig %1$s ón gcarr (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">Tá %1$s sa charr</string>
+    <string name="auto_file_not_on_car">Níor choinnigh an carr %1$s</string>
+    <string name="auto_answer_on_phone">Freagair é seo ar an nguthán</string>
 </resources>

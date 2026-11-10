@@ -31,4 +31,24 @@
     <string name="car_open_bt">Open when this Bluetooth connects</string>
     <string name="car_bluetooth_phone">The phone’s Bluetooth</string>
     <string name="car_bluetooth_phone_none">Choose your phone: when it connects, Tetra Car can open by itself.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (the car\'s own screen)</string>
+    <string name="auto_settings_note">Install Tetra Auto on the car\'s screen, connect it to this phone\'s hotspot, then pair: Tetra Car is drawn here and shown there, and works with the phone\'s screen off. The phone gets ready for the car as the car\'s Bluetooth joins.</string>
+    <string name="auto_paired">Paired: shows Tetra Car when it finds this phone</string>
+    <string name="auto_show_now">Show on the car now</string>
+    <string name="auto_show_now_summary">Ready for the car for the next half hour</string>
+    <string name="auto_pairing">Pairing with %1$s: keep this phone\'s hotspot on, the car connects by itself</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Ready for the car</string>
+    <string name="auto_on_car">On the screen of %1$s</string>
+    <string name="auto_note_text">Tetra Car is drawn on this phone for the car\'s screen</string>
+    <string name="auto_stop">Stop</string>
+    <string name="auto_share">Share</string>
+    <string name="auto_send_to_car">Send to car</string>
+    <string name="auto_no_car">No car is showing Tetra Car right now</string>
+    <plurals name="auto_sending"><item quantity="one">Sending %d file to the car</item><item quantity="other">Sending %d files to the car</item></plurals>
+    <string name="auto_file_from_car">%1$s came from the car (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">%1$s is on the car</string>
+    <string name="auto_file_not_on_car">The car did not keep %1$s</string>
+    <string name="auto_answer_on_phone">Answer this on the phone</string>
 </resources>

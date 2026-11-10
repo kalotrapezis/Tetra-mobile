@@ -31,4 +31,24 @@
     <string name="car_open_bt">Åbn når denne Bluetooth forbinder</string>
     <string name="car_bluetooth_phone">Telefonens Bluetooth</string>
     <string name="car_bluetooth_phone_none">Vælg din telefon: når den forbinder, kan Tetra Car åbne af sig selv.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (bilens egen skærm)</string>
+    <string name="auto_settings_note">Installer Tetra Auto på bilens skærm, forbind den til denne telefons hotspot, og par dem så: Tetra Car tegnes her og vises dér og virker med telefonens skærm slukket. Telefonen gør sig klar til bilen, så snart bilens Bluetooth forbinder.</string>
+    <string name="auto_paired">Parret: viser Tetra Car, når den finder denne telefon</string>
+    <string name="auto_show_now">Vis i bilen nu</string>
+    <string name="auto_show_now_summary">Klar til bilen den næste halve time</string>
+    <string name="auto_pairing">Parrer med %1$s: lad denne telefons hotspot være tændt, bilen forbinder af sig selv</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Klar til bilen</string>
+    <string name="auto_on_car">På skærmen i %1$s</string>
+    <string name="auto_note_text">Tetra Car tegnes på denne telefon til bilens skærm</string>
+    <string name="auto_stop">Stop</string>
+    <string name="auto_share">Del</string>
+    <string name="auto_send_to_car">Send til bilen</string>
+    <string name="auto_no_car">Ingen bil viser Tetra Car lige nu</string>
+    <plurals name="auto_sending"><item quantity="one">Sender %d fil til bilen</item><item quantity="other">Sender %d filer til bilen</item></plurals>
+    <string name="auto_file_from_car">%1$s kom fra bilen (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">%1$s er i bilen</string>
+    <string name="auto_file_not_on_car">Bilen gemte ikke %1$s</string>
+    <string name="auto_answer_on_phone">Svar på det på telefonen</string>
 </resources>

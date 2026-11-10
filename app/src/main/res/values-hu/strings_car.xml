@@ -31,4 +31,24 @@
     <string name="car_open_bt">Megnyitás, amikor ez a Bluetooth csatlakozik</string>
     <string name="car_bluetooth_phone">A telefon Bluetooth-a</string>
     <string name="car_bluetooth_phone_none">Válaszd ki a telefonod: amikor csatlakozik, a Tetra Car magától megnyílhat.</string>
+    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
+    <string name="auto_title">Tetra Auto (az autó saját kijelzője)</string>
+    <string name="auto_settings_note">Telepítsd a Tetra Autót az autó kijelzőjére, csatlakoztasd ennek a telefonnak a hotspotjához, majd párosítsd: a Tetra Car itt készül, ott jelenik meg, és kikapcsolt telefonkijelzővel is működik. A telefon felkészül az autóra, amint az autó Bluetooth-a csatlakozik.</string>
+    <string name="auto_paired">Párosítva: megjeleníti a Tetra Cart, amikor megtalálja ezt a telefont</string>
+    <string name="auto_show_now">Megjelenítés az autóban most</string>
+    <string name="auto_show_now_summary">Készen áll az autóra a következő fél órában</string>
+    <string name="auto_pairing">Párosítás: %1$s – hagyd bekapcsolva ennek a telefonnak a hotspotját, az autó magától csatlakozik</string>
+    <string name="auto_channel">Tetra Auto</string>
+    <string name="auto_ready">Készen áll az autóra</string>
+    <string name="auto_on_car">Az autó kijelzőjén: %1$s</string>
+    <string name="auto_note_text">A Tetra Car ezen a telefonon készül az autó kijelzőjére</string>
+    <string name="auto_stop">Leállítás</string>
+    <string name="auto_share">Megosztás</string>
+    <string name="auto_send_to_car">Küldés az autóba</string>
+    <string name="auto_no_car">Most egy autó sem jeleníti meg a Tetra Cart</string>
+    <plurals name="auto_sending"><item quantity="one">%d fájl küldése az autóba</item><item quantity="other">%d fájl küldése az autóba</item></plurals>
+    <string name="auto_file_from_car">%1$s megérkezett az autóból (Tetra › %2$s)</string>
+    <string name="auto_file_on_car">%1$s az autóban van</string>
+    <string name="auto_file_not_on_car">Az autó nem tartotta meg ezt: %1$s</string>
+    <string name="auto_answer_on_phone">Válaszolj erre a telefonon</string>
 </resources>
