@@ -631,9 +631,17 @@ internal fun MailScreen(start: String? = null, back: () -> Unit, hasAccess: Bool
     } else if (orange > 0) Box(Modifier.size(9.dp).clip(CircleShape).background(ORANGE))
 }
 
-@Composable private fun PcBadge() = Surface(color = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant, shape = CircleShape,
-    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))) {
-    Text("⇄ PC", Modifier.padding(horizontal = 6.dp), style = MaterialTheme.typography.labelSmall)
+/** When the PC last answered «look now» (MailEngine.askPc): ⇄ PC is green for 5 minutes after (the user, 10 Nov: "so I know what is happening"). */
+internal val mailPcSeen = androidx.compose.runtime.mutableLongStateOf(0L)
+
+@Composable private fun PcBadge() {
+    val now by produceState(System.currentTimeMillis()) { while (true) { delay(30_000); value = System.currentTimeMillis() } }
+    val active = maxOf(now, System.currentTimeMillis()) - mailPcSeen.longValue < 5 * 60_000 // reading now: grey again without another sync
+    val tint = if (active) GREEN else MaterialTheme.colorScheme.onSurfaceVariant
+    Surface(color = if (active) GREEN.copy(alpha = 0.15f) else Color.Transparent, contentColor = tint, shape = CircleShape,
+        border = androidx.compose.foundation.BorderStroke(1.dp, tint.copy(alpha = if (active) 0.9f else 0.5f))) {
+        Text("⇄ PC", Modifier.padding(horizontal = 6.dp), style = MaterialTheme.typography.labelSmall)
+    }
 }
 
 @Composable private fun Legend(color: Color, text: String, ring: Boolean = false) = Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {

@@ -522,6 +522,7 @@ internal object MailEngine {
         if (now - askedPc < 60_000) return
         askedPc = now
         runCatching { SyncClient(c, SyncStore(c)).mailCheckNow() }.onFailure { WriterLog.w("Mail: asking the PC to look: ${it.message}"); return } // away: the next sync
+        android.os.Handler(android.os.Looper.getMainLooper()).post { mailPcSeen.longValue = System.currentTimeMillis() } // the PC answered: Mail's ⇄ PC green
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             runCatching { androidx.core.content.ContextCompat.startForegroundService(c, Intent(c, SyncService::class.java).setAction(SyncService.ACTION_START)) }
                 .onFailure { WriterLog.w("Mail: the sync after asking the PC: ${it.message}") }
