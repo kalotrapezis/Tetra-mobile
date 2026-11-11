@@ -182,6 +182,16 @@ class MapsGreeklishTest {
         assertEquals("Δημοτικό Σχολείο Αγίου Λουκά", MapsSearch.search(all, "agiou louka", 38.0, 23.0).firstOrNull()?.name)
         assertEquals("Ξάνθη", MapsSearch.search(all, "xanthi", 38.0, 23.0).firstOrNull()?.name)
     }
+
+    @Test fun wordFormsAndAreaFind() { // what the assistant searched for in the car, 11 Nov
+        val school = Poi("primary_school", 38.277768, 23.585572, "Δημοτικό Σχολείο Αγίου Θωμά", "", "Άγιος Θωμάς, Βοιωτία")
+        val other = Poi("primary_school", 38.5, 23.6, "Δημοτικό Σχολείο Αγίου Λουκά", "", "Άγιος Λουκάς, Βοιωτία")
+        val all = listOf(other, school)
+        for (q in listOf("Δημοτικό Σχολείο Άγιος Θωμάς Βοιωτίας", "Δημοτικό Σχολείο Αγίου Θωμά", "σχολείο Άγιος Θωμάς", "dimotiko sxolio agios thomas"))
+            assertEquals(q, listOf("Δημοτικό Σχολείο Αγίου Θωμά"), MapsSearch.search(all, q, 38.4, 23.8).map { it.name })
+        assertEquals("αγι", MapsSearch.stem("αγιοσ")); assertEquals("αγι", MapsSearch.stem("αγιου")); assertEquals("θωμ", MapsSearch.stem("θωμα"))
+        assertEquals(emptyList<Poi>(), MapsSearch.search(all, "Σχολείο Άγιος Νικόλαος", 38.4, 23.8)) // a stem must still be there
+    }
 }
 
 class MapsImportZipTest {

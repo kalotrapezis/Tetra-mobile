@@ -873,6 +873,33 @@ internal object MapsSearch {
             .sortedWith(compareBy({ (p, _) -> if (q.isEmpty() || p.key.startsWith(q) || p.key.contains(" $q")) 0 else 1 },
                 { (p, _) -> if (kind == null && q.isNotEmpty() && !settlement(p.kind)) 1 else 0 }, { (_, d) -> d }))
             .take(limit).map { it.first }.toList()
+            .ifEmpty { if (words.isEmpty()) emptyList() else byStems(all, words, lat, lng, kind, limit) }
+    }
+
+    /** Greek and Greeklish endings, longest first, that a word changes with its case ("Άγιος" / "Αγίου", "Θωμάς" / "Θωμά"). */
+    private val ENDINGS = listOf("ουσ", "ων", "ου", "οσ", "ασ", "ησ", "εσ", "οι", "αι", "α", "η", "ο", "ι", "ε", "υ", "σ",
+        "ous", "on", "ou", "os", "as", "is", "es", "oi", "a", "i", "o", "e", "s")
+    /** [w] (folded) without its ending, kept at three letters or more: "αγιοσ" and "αγιου" are both "αγι". */
+    fun stem(w: String) = ENDINGS.firstOrNull { w.length - it.length >= 3 && w.endsWith(it) }?.let { w.dropLast(it.length) } ?: w
+
+    /**
+     * When no name has every word as said: each word's stem at a word's start in the name or in its area, so "Δημοτικό
+     * Σχολείο Άγιος Θωμάς Βοιωτίας" finds "Δημοτικό Σχολείο Αγίου Θωμά" in "Άγιος Θωμάς, Βοιωτία" (the user asked the
+     * assistant for it in the car, 11 Nov, and got no results). Nearest first.
+     */
+    private fun byStems(all: List<Poi>, words: List<String>, lat: Double, lng: Double, kind: String?, limit: Int): List<Poi> {
+        val stems = words.map(::stem)
+        val latinStems = words.map { stem(latin(it)) }
+        val apart = Regex("[^\\p{L}\\p{N}]+")
+        return all.asSequence()
+            .filter { kind == null || it.kind == kind }
+            .filter { p ->
+                val area = fold(p.more)
+                val text = " " + "${p.key} $area ${latin(area)}".replace(apart, " ")
+                stems.all { text.contains(" $it") } || latinStems.all { text.contains(" $it") }
+            }
+            .sortedBy { metresBetween(lat, lng, it.lat, it.lng) }
+            .take(limit).toList()
     }
 
     /**
