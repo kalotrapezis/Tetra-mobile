@@ -123,6 +123,7 @@
     <string name="browser_downloaded">I Overførsler: %1$s</string>
     <string name="browser_download_failed">Ikke hentet: %1$s</string>
     <string name="browser_load_error">%1$s kunne ikke åbnes</string>
+    <string name="browser_load_wait">Tjek internetforbindelsen. Siden åbner igen af sig selv, så snart den er tilbage.</string>
     <string name="browser_auth_user">Brugernavn</string>
     <string name="browser_auth_password">Adgangskode</string>
     <string name="browser_color">Farve</string>

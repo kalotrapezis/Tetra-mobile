@@ -123,6 +123,7 @@
     <string name="browser_downloaded">W Pobranych: %1$s</string>
     <string name="browser_download_failed">Nie pobrano: %1$s</string>
     <string name="browser_load_error">Nie można otworzyć %1$s</string>
+    <string name="browser_load_wait">Sprawdź połączenie z internetem. Strona otworzy się ponownie sama, gdy tylko połączenie wróci.</string>
     <string name="browser_auth_user">Nazwa użytkownika</string>
     <string name="browser_auth_password">Hasło</string>
     <string name="browser_color">Kolor</string>

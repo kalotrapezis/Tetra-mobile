@@ -123,6 +123,7 @@
     <string name="browser_downloaded">Latauksissa: %1$s</string>
     <string name="browser_download_failed">Ei ladattu: %1$s</string>
     <string name="browser_load_error">Sivustoa %1$s ei voitu avata</string>
+    <string name="browser_load_wait">Tarkista internetyhteys. Sivu avautuu itsestään uudelleen heti, kun yhteys palaa.</string>
     <string name="browser_auth_user">Käyttäjänimi</string>
     <string name="browser_auth_password">Salasana</string>
     <string name="browser_color">Väri</string>

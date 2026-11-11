@@ -123,6 +123,7 @@
     <string name="browser_downloaded">In Downloads: %1$s</string>
     <string name="browser_download_failed">Not downloaded: %1$s</string>
     <string name="browser_load_error">%1$s could not be opened</string>
+    <string name="browser_load_wait">Check the internet connection. The page opens again by itself as soon as it is back.</string>
     <string name="browser_auth_user">User name</string>
     <string name="browser_auth_password">Password</string>
     <string name="browser_color">Colour</string>

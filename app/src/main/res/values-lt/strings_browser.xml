@@ -123,6 +123,7 @@
     <string name="browser_downloaded">Atsisiuntimuose: %1$s</string>
     <string name="browser_download_failed">Neatsisiųsta: %1$s</string>
     <string name="browser_load_error">Nepavyko atidaryti %1$s</string>
+    <string name="browser_load_wait">Patikrinkite interneto ryšį. Puslapis vėl atsidarys pats, kai tik ryšys grįš.</string>
     <string name="browser_auth_user">Naudotojo vardas</string>
     <string name="browser_auth_password">Slaptažodis</string>
     <string name="browser_color">Spalva</string>

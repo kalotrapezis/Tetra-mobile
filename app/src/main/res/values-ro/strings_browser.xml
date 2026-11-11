@@ -123,6 +123,7 @@
     <string name="browser_downloaded">În Descărcări: %1$s</string>
     <string name="browser_download_failed">Nu s-a descărcat: %1$s</string>
     <string name="browser_load_error">%1$s nu a putut fi deschis</string>
+    <string name="browser_load_wait">Verificați conexiunea la internet. Pagina se va redeschide singură imediat ce revine.</string>
     <string name="browser_auth_user">Nume de utilizator</string>
     <string name="browser_auth_password">Parolă</string>
     <string name="browser_color">Culoare</string>

@@ -123,6 +123,7 @@
     <string name="browser_downloaded">Lejupielādēs: %1$s</string>
     <string name="browser_download_failed">Nav lejupielādēts: %1$s</string>
     <string name="browser_load_error">Neizdevās atvērt %1$s</string>
+    <string name="browser_load_wait">Pārbaudiet interneta savienojumu. Lapa atkal atvērsies pati, tiklīdz savienojums atjaunosies.</string>
     <string name="browser_auth_user">Lietotājvārds</string>
     <string name="browser_auth_password">Parole</string>
     <string name="browser_color">Krāsa</string>

@@ -123,6 +123,7 @@
     <string name="browser_downloaded">I Hämtade filer: %1$s</string>
     <string name="browser_download_failed">Inte hämtad: %1$s</string>
     <string name="browser_load_error">%1$s kunde inte öppnas</string>
+    <string name="browser_load_wait">Kontrollera internetanslutningen. Sidan öppnas igen av sig själv så snart den är tillbaka.</string>
     <string name="browser_auth_user">Användarnamn</string>
     <string name="browser_auth_password">Lösenord</string>
     <string name="browser_color">Färg</string>

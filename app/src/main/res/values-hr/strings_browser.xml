@@ -123,6 +123,7 @@
     <string name="browser_downloaded">U Preuzimanjima: %1$s</string>
     <string name="browser_download_failed">Nije preuzeto: %1$s</string>
     <string name="browser_load_error">%1$s nije moguće otvoriti</string>
+    <string name="browser_load_wait">Provjerite internetsku vezu. Stranica će se sama ponovno otvoriti čim se veza vrati.</string>
     <string name="browser_auth_user">Korisničko ime</string>
     <string name="browser_auth_password">Lozinka</string>
     <string name="browser_color">Boja</string>

@@ -123,6 +123,7 @@
     <string name="browser_downloaded">In Íoslódálacha: %1$s</string>
     <string name="browser_download_failed">Níor íoslódáladh: %1$s</string>
     <string name="browser_load_error">Níorbh fhéidir %1$s a oscailt</string>
+    <string name="browser_load_wait">Seiceáil an nasc idirlín. Osclóidh an leathanach arís leis féin a luaithe a bheidh sé ar ais.</string>
     <string name="browser_auth_user">Ainm úsáideora</string>
     <string name="browser_auth_password">Pasfhocal</string>
     <string name="browser_color">Dath</string>

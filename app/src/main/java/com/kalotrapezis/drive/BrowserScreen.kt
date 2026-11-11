@@ -94,6 +94,9 @@ import org.mozilla.geckoview.WebResponse
 internal const val BROWSER_SETTINGS = "settings-browser" // the sidebar's ⚙: Settings › Browser (MainActivity)
 internal val BROWSER_COLOR = Color(0xFF1A87FD) // the blue of the user's icon (Assets/BrowserApp.png)
 private val PRIVATE_COLOR = Color(0xFF2B2140)
+/** Gecko's errors that mean no network or too slow a one (not a site that is not there). */
+private val NET_DOWN = setOf(WebRequestError.ERROR_NET_INTERRUPT, WebRequestError.ERROR_NET_TIMEOUT, WebRequestError.ERROR_CONNECTION_REFUSED,
+    WebRequestError.ERROR_OFFLINE, WebRequestError.ERROR_NET_RESET, WebRequestError.ERROR_UNKNOWN_HOST, WebRequestError.ERROR_UNKNOWN_PROXY_HOST, WebRequestError.ERROR_PROXY_CONNECTION_REFUSED)
 
 private enum class BrowserPanel { Bookmarks, History, Import }
 
@@ -168,6 +171,7 @@ private class BrowserTab(val id: Int, val session: GeckoSession, val view: Gecko
     var pinned by mutableStateOf(false) // a circle at the row's start, its icon only
     var group by mutableStateOf<Int?>(null) // its tab group, if any
     var pending: String? = null // a kept tab's address, loaded when it is first opened
+    var failed: String? = null // an address not opened for want of a network: loaded again when one comes
     var port: WebExtension.Port? = null
     val waiting = mutableListOf<JSONObject>() // said before this page's script was there (a small page stops loading first): given when it comes
     /** The desktop site from its next page on (Spotify's web player); false when it was already. */
@@ -313,13 +317,22 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             message = context.getString(if (ok) R.string.browser_downloaded else R.string.browser_download_failed, name)
         }
     }
-    /** Gecko's own error, as a small page in Tetra's look (none of Firefox's about:neterror here). */
-    fun errorPage(uri: String?, e: WebRequestError): String {
+    /**
+     * Gecko's own error, as a page in Tetra's look (none of Firefox's about:neterror here), with Try again. No internet or too
+     * slow (the user, 11 Nov: "it tries to load and then it crashes"): the tab remembers it and loads it again when a network comes.
+     */
+    fun errorPage(t: BrowserTab, uri: String?, e: WebRequestError): String {
         fun esc(s: String) = android.text.Html.escapeHtml(s)
-        val html = "<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width'><body style='font:16px sans-serif;padding:24px;" +
-            "background:#%06X;color:#%06X'><h3>%s</h3><p style='word-break:break-all;opacity:.7'>%s</p><p style='opacity:.5'>%d / %d</p>".format(pageColor and 0xFFFFFF, pageText and 0xFFFFFF,
-            esc(context.getString(R.string.browser_load_error, BrowserRules.host(uri).ifEmpty { uri.orEmpty() })), esc(uri.orEmpty()), e.category, e.code)
-        WriterLog.w("Browser: ${BrowserRules.host(uri)} not opened (${e.category}/${e.code})")
+        val offline = e.code in NET_DOWN
+        if (offline && uri != null && uri.startsWith("http")) t.failed = uri
+        val again = uri?.takeIf { it.startsWith("http") }?.let { "<p><button onclick='${android.text.TextUtils.htmlEncode("location.replace(${JSONObject.quote(it)})")}' style='font:inherit;" +
+            "padding:12px 28px;border:0;border-radius:24px;background:#%06X;color:#fff'>%s</button></p>".format(BROWSER_COLOR.toArgb() and 0xFFFFFF, esc(context.getString(R.string.common_retry))) }.orEmpty()
+        val html = ("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width'><meta name=darkreader-lock>" + // already in Tetra's look: Dark Reader leaves it
+            "<style>html{height:100%%;background:#%06X}body{margin:0;min-height:100%%;font:16px sans-serif;padding:24px;box-sizing:border-box;color:#%06X}</style>" +
+            "<body><h3>%s</h3>%s%s<p style='word-break:break-all;opacity:.6'>%s</p><p style='opacity:.4;font-size:12px'>%d / %d</p>").format(
+            pageColor and 0xFFFFFF, pageText and 0xFFFFFF, esc(context.getString(R.string.browser_load_error, BrowserRules.host(uri).ifEmpty { uri.orEmpty() })),
+            if (offline) "<p>${esc(context.getString(R.string.browser_load_wait))}</p>" else "", again, esc(uri.orEmpty()), e.category, e.code)
+        WriterLog.w("Browser: ${BrowserRules.host(uri)} not opened (${e.category}/${e.code})${if (offline) ", again when online" else ""}")
         return "data:text/html;charset=utf-8," + Uri.encode(html)
     }
     var soundId by remember { mutableStateOf<Int?>(null) } // the tab last heard: the notification's and Maps' keys go to it, whichever is shown
@@ -357,7 +370,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         if (t.view.session !== t.session) { t.view.setSession(t.session); t.view.coverUntilFirstPaint(pageColor) }
     }
     fun reopen(t: BrowserTab) { runCatching { if (!t.session.isOpen) t.session.open(runtime); t.url.takeIf { it.isNotEmpty() }?.let(t.session::loadUri) }.onFailure { WriterLog.e("Browser: a tab not reopened", it) } }
-    fun load(t: BrowserTab, address: String) { attach(t); applyHtml(t, address); t.session.loadUri(address) }
+    fun load(t: BrowserTab, address: String) { attach(t); applyHtml(t, address); t.failed = null; t.session.loadUri(address) }
     lateinit var openTab: (String, Boolean) -> BrowserTab
     lateinit var closeTab: (BrowserTab) -> Unit
     /** A tab; [gecko]: one a page or an extension opens, its session left for Gecko to open. */
@@ -379,7 +392,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             override fun onCanGoForward(session: GeckoSession, canGoForward: Boolean) { tab.canForward = canGoForward }
             override fun onLoadRequest(session: GeckoSession, request: GeckoSession.NavigationDelegate.LoadRequest): GeckoResult<AllowOrDeny>? {
                 val u = Uri.parse(request.uri)
-                if (u.scheme?.lowercase() in WEB_SCHEMES) { applyHtml(tab, request.uri); return null }
+                if (u.scheme?.lowercase() in WEB_SCHEMES) { applyHtml(tab, request.uri); if (request.isDirectNavigation || request.uri != tab.failed) tab.failed = null; return null }
                 // mailto:, tel:, intent:, market: — the app that opens it; a page may start only what a browser may (BROWSABLE)
                 val intent = runCatching {
                     if (u.scheme == "intent") Intent.parseUri(u.toString(), Intent.URI_INTENT_SCHEME).apply { component = null; selector = null } else Intent(Intent.ACTION_VIEW, u)
@@ -392,7 +405,9 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             }
             // target=_blank, window.open: a tab of its own
             override fun onNewSession(session: GeckoSession, uri: String): GeckoResult<GeckoSession> = GeckoResult.fromValue(openTab(uri, true).session)
-            override fun onLoadError(session: GeckoSession, uri: String?, error: WebRequestError): GeckoResult<String> = GeckoResult.fromValue(errorPage(uri, error))
+            // never the whole of Tetra for a page that did not open: Gecko's own error page if Tetra's fails
+            override fun onLoadError(session: GeckoSession, uri: String?, error: WebRequestError): GeckoResult<String>? =
+                runCatching { GeckoResult.fromValue(errorPage(tab, uri, error)) }.onFailure { WriterLog.e("Browser: the error page not made", it) }.getOrNull()
         }
         session.progressDelegate = object : GeckoSession.ProgressDelegate {
             override fun onPageStart(session: GeckoSession, url: String) {
@@ -556,6 +571,25 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         onDispose { if (BrowserEngine.tabs === host) BrowserEngine.tabs = null }
     }
 
+    // a network that reaches the internet (back, or a better one): the tabs that could not open load again, once per 10 s at most
+    DisposableEffect(Unit) {
+        val cm = context.getSystemService(android.net.ConnectivityManager::class.java)
+        val main = android.os.Handler(android.os.Looper.getMainLooper())
+        var last = 0L
+        val cb = object : android.net.ConnectivityManager.NetworkCallback() {
+            override fun onCapabilitiesChanged(network: android.net.Network, caps: android.net.NetworkCapabilities) {
+                if (!caps.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED)) return
+                main.post {
+                    val now = android.os.SystemClock.elapsedRealtime()
+                    if (now - last < 10_000 || tabs.none { it.failed != null }) return@post
+                    last = now
+                    tabs.forEach { t -> t.failed?.let { u -> t.failed = null; WriterLog.i("Browser: online, ${BrowserRules.host(u)} again"); load(t, u) } }
+                }
+            }
+        }
+        runCatching { cm?.registerDefaultNetworkCallback(cb) }.onFailure { WriterLog.w("Browser: the network not watched (${it.message})") }
+        onDispose { runCatching { cm?.unregisterNetworkCallback(cb) }; main.removeCallbacksAndMessages(null) }
+    }
     val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current
     DisposableEffect(Unit) {
         val o = androidx.lifecycle.LifecycleEventObserver { _, e ->
@@ -929,7 +963,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                     if (h != null) BrowserHeld(h, close = { held = null }) { what ->
                         heldAct(h, what)
                     }
-                    else BrowserTabs(tabs, groups, openGroups, currentId, wide, !private, switch = ::switch, close = ::close, add = { open(); editing = true; typed = TextFieldValue("") },
+                    else BrowserTabs(tabs, groups, openGroups, currentId, wide, !private, splitPair?.takeIf { wide && !player }, switch = ::switch, close = ::close, add = { open(); editing = true; typed = TextFieldValue("") },
                         fold = { g -> openGroups = if (g in openGroups) openGroups - g else openGroups + g }, options = { tabOptions = it.id }, groupOptions = { groupOptions = it }, dropOn = ::dropOn)
                     }
                     if (top) { tabsRow(); addressRow() } else { addressRow(); tabsRow() }
@@ -986,7 +1020,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                         verticalAlignment = Alignment.CenterVertically) {
                         Icon(painterResource(R.drawable.ic_add), null, tint = BROWSER_COLOR); Text(stringResource(R.string.browser_tab_new), Modifier.padding(start = 10.dp), color = BROWSER_COLOR, style = MaterialTheme.typography.labelLarge)
                     }
-                    BrowserSideTabs(tabs, groups, openGroups, currentId, Modifier.weight(1f), !private, switch = ::switch, close = ::close,
+                    BrowserSideTabs(tabs, groups, openGroups, currentId, Modifier.weight(1f), !private, splitPair?.takeIf { wide && !player }, switch = ::switch, close = ::close,
                         fold = { g -> openGroups = if (g in openGroups) openGroups - g else openGroups + g }, options = { tabOptions = it.id }, groupOptions = { groupOptions = it })
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1041,10 +1075,14 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                 if (t.url.isEmpty()) BrowserStart(private, library, file = { filing = it }, search = if (side && !editing) ({ currentId = t.id; typed = TextFieldValue(""); editing = true; held = null }) else null) { u -> currentId = t.id; editing = false; load(t, BrowserRules.target(u)) }
             }
             val upright = androidx.compose.ui.platform.LocalConfiguration.current.let { it.screenHeightDp > it.screenWidthDp }
-            when {
-                panes == null -> pane(tab, Modifier.fillMaxSize())
-                upright -> Column(Modifier.fillMaxSize()) { panes.forEach { pane(it, Modifier.weight(1f).fillMaxWidth()) } }
-                else -> Row(Modifier.fillMaxSize()) { panes.forEach { pane(it, Modifier.weight(1f).fillMaxHeight()) } }
+            // one layout for one pane or two, its panes keyed by tab: a page's view stays where it is when split screen ends (the user, 11 Nov:
+            // "if you close split screen the page does not restore itself" — moved to a new parent, Gecko kept drawing at the half's size)
+            androidx.compose.ui.layout.Layout({ (panes ?: listOf(tab)).forEach { t -> key(t.id) { pane(t, Modifier) } } }, Modifier.fillMaxSize()) { parts, c ->
+                val n = parts.size.coerceAtLeast(1)
+                val w = if (upright) c.maxWidth else c.maxWidth / n
+                val h = if (upright) c.maxHeight / n else c.maxHeight
+                val placed = parts.map { it.measure(androidx.compose.ui.unit.Constraints.fixed(w, h)) }
+                layout(c.maxWidth, c.maxHeight) { placed.forEachIndexed { i, p -> if (upright) p.place(0, i * h) else p.place(i * w, 0) } }
             }
             if (editing) {
                 val q = typed.text.trim()
@@ -1425,9 +1463,18 @@ private fun Modifier.sideTouches(): Modifier = composed {
     }
 }
 
-@Composable private fun BrowserSideTabs(tabs: List<BrowserTab>, groups: Map<Int, String>, open: Set<Int>, current: Int, modifier: Modifier, fetch: Boolean, switch: (BrowserTab) -> Unit,
+/** The tab list with a split screen's second tab left out: the first stands for both (drawn as one, [BrowserTabs], [BrowserSideTabs]). */
+private fun splitItems(items: List<TabRowItem>, split: Pair<Int, Int>?): List<TabRowItem> {
+    split ?: return items
+    val i = items.indexOfFirst { it is TabRowItem.Tab && it.id == split.first }
+    val j = items.indexOfFirst { it is TabRowItem.Tab && it.id == split.second }
+    if (i < 0 || j < 0) return items
+    return items.filterIndexed { k, _ -> k != maxOf(i, j) }
+}
+
+@Composable private fun BrowserSideTabs(tabs: List<BrowserTab>, groups: Map<Int, String>, open: Set<Int>, current: Int, modifier: Modifier, fetch: Boolean, split: Pair<Int, Int>?, switch: (BrowserTab) -> Unit,
                                         close: (BrowserTab) -> Unit, fold: (Int) -> Unit, options: (BrowserTab) -> Unit, groupOptions: (Int) -> Unit) {
-    val items = BrowserTabRow.items(tabs.map { TabInfo(it.id, it.pinned, it.group) }, open)
+    val items = splitItems(BrowserTabRow.items(tabs.map { TabInfo(it.id, it.pinned, it.group) }, open), split)
     val scroll = androidx.compose.foundation.lazy.rememberLazyListState()
     LaunchedEffect(current, items.size) { items.indexOfFirst { it is TabRowItem.Tab && it.id == current }.takeIf { it >= 0 }?.let { scroll.animateScrollToItem(it) } }
     androidx.compose.foundation.lazy.LazyColumn(modifier.fillMaxWidth(), state = scroll, verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -1441,10 +1488,10 @@ private fun Modifier.sideTouches(): Modifier = composed {
                     Icon(painterResource(if (item.open) R.drawable.ic_chevron_left else R.drawable.ic_chevron_right), null, Modifier.size(18.dp))
                 }
                 is TabRowItem.Tab -> {
-                    val t = tabs.first { it.id == item.id }
+                    @Composable fun sideTab(t: BrowserTab, m: Modifier, paired: Boolean) {
                     val on = t.id == current
                     val fg = if (on) Color.White else LocalContentColor.current
-                    Row(Modifier.fillMaxWidth().padding(start = if (item.grouped) 16.dp else 0.dp).height(40.dp).clip(MaterialTheme.shapes.medium)
+                    Row(m.height(40.dp).clip(MaterialTheme.shapes.medium)
                         .background(if (on) BROWSER_COLOR else Color.Transparent).combinedClickable(onClick = { switch(t) }, onLongClick = { options(t) }).padding(start = 8.dp),
                         verticalAlignment = Alignment.CenterVertically) {
                         val pic = siteIcon(t.url, fetch) // said by its page as it loads, else the site's usual places (5 Nov: tabs showed letters)
@@ -1452,11 +1499,19 @@ private fun Modifier.sideTouches(): Modifier = composed {
                             if (pic != null) androidx.compose.foundation.Image(pic, null, Modifier.size(18.dp))
                             else Text(BrowserRules.site(BrowserRules.host(t.url)).take(1).uppercase().ifEmpty { "+" }, fontSize = 12.sp, color = fg, maxLines = 1)
                         }
-                        Text(t.title.ifBlank { BrowserRules.host(t.url).removePrefix("www.") }.ifBlank { stringResource(R.string.browser_tab_new) }, Modifier.padding(start = 10.dp).weight(1f),
+                        Text(t.title.ifBlank { BrowserRules.host(t.url).removePrefix("www.") }.ifBlank { stringResource(R.string.browser_tab_new) }, Modifier.padding(start = if (paired) 6.dp else 10.dp).weight(1f),
                             color = fg, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        if (t.media.playing) Icon(painterResource(R.drawable.ic_volume_up), null, Modifier.size(16.dp), tint = fg)
-                        if (!t.pinned) IconButton(onClick = { close(t) }, Modifier.size(36.dp)) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.browser_tab_close), Modifier.size(16.dp), tint = fg) }
+                        if (t.media.playing && !paired) Icon(painterResource(R.drawable.ic_volume_up), null, Modifier.size(16.dp), tint = fg)
+                        if (!t.pinned || paired) IconButton(onClick = { close(t) }, Modifier.size(if (paired) 32.dp else 36.dp)) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.browser_tab_close), Modifier.size(16.dp), tint = fg) }
                         else Spacer(Modifier.width(12.dp))
+                    }
+                    }
+                    val pair = split?.takeIf { item.id == it.first || item.id == it.second }?.let { (a, b) -> listOfNotNull(tabs.firstOrNull { it.id == a }, tabs.firstOrNull { it.id == b }) }?.takeIf { it.size == 2 }
+                    val m = Modifier.fillMaxWidth().padding(start = if (item.grouped) 16.dp else 0.dp)
+                    // split screen (the user, 11 Nov: "like Firefox, 2 tabs in one with 2 x"): its two tabs in one frame, left pane's first
+                    if (pair == null) sideTab(tabs.first { it.id == item.id }, m, false)
+                    else Row(m.border(1.5.dp, BROWSER_COLOR, MaterialTheme.shapes.medium).padding(2.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        pair.forEach { sideTab(it, Modifier.weight(1f), true) }
                     }
                 }
             }
@@ -1464,12 +1519,12 @@ private fun Modifier.sideTouches(): Modifier = composed {
     }
 }
 
-@Composable private fun BrowserTabs(tabs: List<BrowserTab>, groups: Map<Int, String>, open: Set<Int>, current: Int, wide: Boolean, fetch: Boolean, switch: (BrowserTab) -> Unit, close: (BrowserTab) -> Unit,
+@Composable private fun BrowserTabs(tabs: List<BrowserTab>, groups: Map<Int, String>, open: Set<Int>, current: Int, wide: Boolean, fetch: Boolean, split: Pair<Int, Int>?, switch: (BrowserTab) -> Unit, close: (BrowserTab) -> Unit,
                                     add: () -> Unit, fold: (Int) -> Unit, options: (BrowserTab) -> Unit, groupOptions: (Int) -> Unit, dropOn: (BrowserTab, String) -> Unit) =
     BoxWithConstraints(Modifier.fillMaxWidth().height(40.dp)) { // a fixed height: the bar measures its rows by their intrinsic height
     // a tablet: equal tabs, four across (more scroll); a phone: each as long as its name, up to 150 dp
     val width = if (wide) (maxWidth - 52.dp) / 4 - 6.dp else 0.dp
-    val items = BrowserTabRow.items(tabs.map { TabInfo(it.id, it.pinned, it.group) }, open)
+    val items = splitItems(BrowserTabRow.items(tabs.map { TabInfo(it.id, it.pinned, it.group) }, open), split)
     val bounds = remember { mutableMapOf<String, androidx.compose.ui.geometry.Rect>() } // each chip on the screen, for a drop
     var dragging by remember { mutableStateOf<Int?>(null) }
     var moved by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
@@ -1491,8 +1546,8 @@ private fun Modifier.sideTouches(): Modifier = composed {
                         }
                     }
                     is TabRowItem.Tab -> {
-                        val t = tabs.first { it.id == item.id }
-                        val on = t.id == current
+                        @Composable fun chip(t: BrowserTab, grouped: Boolean, paired: Boolean) {
+                                                val on = t.id == current
                         val key = "t${t.id}"
                         val initial = BrowserRules.site(BrowserRules.host(t.url)).take(1).uppercase().ifEmpty { "+" }
                         val gestures = Modifier.onGloballyPositioned { bounds[key] = it.boundsInRoot() }
@@ -1513,17 +1568,26 @@ private fun Modifier.sideTouches(): Modifier = composed {
                             val pic = siteIcon(t.url, fetch)
                             if (pic != null) Box(Modifier.size(28.dp).clip(CircleShape).background(Color.White), contentAlignment = Alignment.Center) { androidx.compose.foundation.Image(pic, null, Modifier.size(20.dp)) }
                             else Text(initial, color = if (on) Color.White else LocalContentColor.current, style = MaterialTheme.typography.labelLarge)
-                        } else Surface(shape = CircleShape, color = if (on) BROWSER_COLOR else if (item.grouped) BROWSER_COLOR.copy(alpha = 0.18f) else LocalContentColor.current.copy(alpha = 0.08f),
+                        } else Surface(shape = CircleShape, color = if (on) BROWSER_COLOR else if (grouped) BROWSER_COLOR.copy(alpha = 0.18f) else LocalContentColor.current.copy(alpha = 0.08f),
                             contentColor = if (on) Color.White else LocalContentColor.current,
-                            modifier = gestures.height(40.dp).then(if (wide) Modifier.width(width) else Modifier.widthIn(max = 150.dp))) {
-                            Row(Modifier.padding(start = 6.dp, end = if (on) 0.dp else 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            modifier = gestures.height(if (paired) 34.dp else 40.dp).then(if (wide) Modifier.width(if (paired) width - 3.dp else width) else Modifier.widthIn(max = 150.dp))) {
+                            Row(Modifier.padding(start = 6.dp, end = if (on || paired) 0.dp else 12.dp), verticalAlignment = Alignment.CenterVertically) {
                                 val pic = siteIcon(t.url, fetch)
                                 Box(Modifier.size(26.dp).clip(CircleShape).background(if (pic != null) Color.White else LocalContentColor.current.copy(alpha = 0.18f)), contentAlignment = Alignment.Center) {
                                     if (pic != null) androidx.compose.foundation.Image(pic, null, Modifier.size(18.dp)) else Text(initial, fontSize = 12.sp, maxLines = 1)
                                 }
                                 val name = t.title.ifBlank { BrowserRules.host(t.url).removePrefix("www.") }.ifBlank { stringResource(R.string.browser_tab_new) }
                                 Text(name, Modifier.padding(start = 6.dp).weight(1f, fill = wide), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                if (on) IconButton(onClick = { close(t) }, Modifier.size(36.dp)) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.browser_tab_close), Modifier.size(16.dp)) }
+                                if (on || paired) IconButton(onClick = { close(t) }, Modifier.size(if (paired) 32.dp else 36.dp)) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.browser_tab_close), Modifier.size(16.dp)) }
+                            }
+                        }
+                        }
+                        val pair = split?.takeIf { item.id == it.first || item.id == it.second }?.let { (a, b) -> listOfNotNull(tabs.firstOrNull { it.id == a }, tabs.firstOrNull { it.id == b }) }?.takeIf { it.size == 2 }
+                        // split screen (the user, 11 Nov: "like Firefox, 2 tabs in one with 2 x"): its two tabs in one pill, left pane's first, each closed by its own ×
+                        if (pair == null) chip(tabs.first { it.id == item.id }, item.grouped, false)
+                        else Surface(shape = CircleShape, color = Color.Transparent, border = androidx.compose.foundation.BorderStroke(1.5.dp, BROWSER_COLOR), modifier = Modifier.height(40.dp)) {
+                            Row(Modifier.padding(horizontal = 3.dp), horizontalArrangement = Arrangement.spacedBy(3.dp), verticalAlignment = Alignment.CenterVertically) {
+                                pair.forEach { chip(it, item.grouped, true) }
                             }
                         }
                     }

@@ -123,6 +123,7 @@
     <string name="browser_downloaded">V Stiahnutých: %1$s</string>
     <string name="browser_download_failed">Nestiahnuté: %1$s</string>
     <string name="browser_load_error">%1$s sa nedá otvoriť</string>
+    <string name="browser_load_wait">Skontrolujte pripojenie na internet. Stránka sa sama znova otvorí, hneď ako bude pripojenie späť.</string>
     <string name="browser_auth_user">Používateľské meno</string>
     <string name="browser_auth_password">Heslo</string>
     <string name="browser_color">Farba</string>

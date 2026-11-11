@@ -123,6 +123,7 @@
     <string name="browser_downloaded">Em Transferências: %1$s</string>
     <string name="browser_download_failed">Não transferido: %1$s</string>
     <string name="browser_load_error">Não foi possível abrir %1$s</string>
+    <string name="browser_load_wait">Verifique a ligação à internet. A página volta a abrir sozinha assim que ela regressar.</string>
     <string name="browser_auth_user">Nome de utilizador</string>
     <string name="browser_auth_password">Palavra-passe</string>
     <string name="browser_color">Cor</string>

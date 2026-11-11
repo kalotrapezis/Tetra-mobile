@@ -123,6 +123,7 @@
     <string name="browser_downloaded">A Letöltésekben: %1$s</string>
     <string name="browser_download_failed">Nem töltődött le: %1$s</string>
     <string name="browser_load_error">%1$s nem nyitható meg</string>
+    <string name="browser_load_wait">Ellenőrizze az internetkapcsolatot. Az oldal magától újra megnyílik, amint a kapcsolat visszatér.</string>
     <string name="browser_auth_user">Felhasználónév</string>
     <string name="browser_auth_password">Jelszó</string>
     <string name="browser_color">Szín</string>

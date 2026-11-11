@@ -123,6 +123,7 @@
     <string name="browser_downloaded">Στις Λήψεις: %1$s</string>
     <string name="browser_download_failed">Δεν έγινε λήψη: %1$s</string>
     <string name="browser_load_error">Δεν ήταν δυνατό να ανοίξει το %1$s</string>
+    <string name="browser_load_wait">Ελέγξτε τη σύνδεση στο διαδίκτυο. Η σελίδα θα ανοίξει ξανά μόνη της μόλις επανέλθει.</string>
     <string name="browser_auth_user">Όνομα χρήστη</string>
     <string name="browser_auth_password">Κωδικός</string>
     <string name="browser_color">Χρώμα</string>

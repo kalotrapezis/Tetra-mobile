@@ -123,6 +123,7 @@
     <string name="browser_downloaded">Allalaadimistes: %1$s</string>
     <string name="browser_download_failed">Ei laaditud alla: %1$s</string>
     <string name="browser_load_error">%1$s ei avanenud</string>
+    <string name="browser_load_wait">Kontrollige internetiühendust. Leht avaneb ise uuesti, kui ühendus taastub.</string>
     <string name="browser_auth_user">Kasutajanimi</string>
     <string name="browser_auth_password">Parool</string>
     <string name="browser_color">Värv</string>

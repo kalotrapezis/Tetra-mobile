@@ -123,6 +123,7 @@
     <string name="browser_downloaded">В „Изтегляния“: %1$s</string>
     <string name="browser_download_failed">Не е изтеглено: %1$s</string>
     <string name="browser_load_error">%1$s не може да се отвори</string>
+    <string name="browser_load_wait">Проверете връзката с интернет. Страницата ще се отвори отново сама, щом връзката се върне.</string>
     <string name="browser_auth_user">Потребителско име</string>
     <string name="browser_auth_password">Парола</string>
     <string name="browser_color">Цвят</string>
