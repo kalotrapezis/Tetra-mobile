@@ -40,6 +40,25 @@ class TvWidget : AppWidgetProvider() {
 
         private const val ENTER_MS = 4_000L
 
+        /** A tap on the screen: the talk on the TV itself (TvTalkService) with a key, the microphone and the decorations; else the sheet. */
+        private fun talkIntent(c: Context): PendingIntent =
+            if (AssistantKey.get(c) != null && hasMic(c) && AiLook.decorated(c))
+                PendingIntent.getForegroundService(c, 2, Intent(c, TvTalkService::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            else PendingIntent.getActivity(c, 1, Intent(c, AssistantSheetActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
+        /** The TV while AI Assist talks on it: rings, the thought cloud, its voice, or the snow; null, back to resting. */
+        internal fun showPhase(c: Context, phase: LivePhase?, snow: Boolean = false) {
+            val m = AppWidgetManager.getInstance(c); val ids = m.getAppWidgetIds(ComponentName(c, TvWidget::class.java))
+            if (ids.isEmpty()) return
+            if (phase == null || !isOn(c)) return show(c, m, ids)
+            val layout = when { snow -> R.layout.widget_tv_snow; phase == LivePhase.Listening -> R.layout.widget_tv_listen; phase == LivePhase.Speaking -> R.layout.widget_tv_speak; else -> R.layout.widget_tv_think }
+            val views = RemoteViews(c.packageName, layout).apply {
+                setOnClickPendingIntent(R.id.tv_talk, talkIntent(c))
+                setOnClickPendingIntent(R.id.tv_power, PendingIntent.getBroadcast(c, 0, Intent(c, TvWidget::class.java).setAction(POWER), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+            }
+            ids.forEach { m.updateAppWidget(it, views) }
+        }
+
         /** All the TVs on the home screen again (the AI decorations switch changed, say). */
         fun refresh(c: Context) { val m = AppWidgetManager.getInstance(c); show(c, m, m.getAppWidgetIds(ComponentName(c, TvWidget::class.java))) }
 
@@ -49,7 +68,7 @@ class TvWidget : AppWidgetProvider() {
             val layout = when { entering -> R.layout.widget_tv_enter; AiLook.decorated(c) -> R.layout.widget_tv_on; else -> R.layout.widget_tv_still }
             val views = if (isOn(c)) RemoteViews(c.packageName, layout).apply {
                 if (entering) setTextViewText(R.id.tv_hello, c.resources.getStringArray(R.array.tv_hello).random())
-                val talk = PendingIntent.getActivity(c, 1, Intent(c, AssistantSheetActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+                val talk = talkIntent(c)
                 setOnClickPendingIntent(R.id.tv_talk, talk)
                 setOnClickPendingIntent(R.id.tv_power, power)
             } else RemoteViews(c.packageName, R.layout.widget_tv_off).apply { setOnClickPendingIntent(R.id.tv_off, power) }

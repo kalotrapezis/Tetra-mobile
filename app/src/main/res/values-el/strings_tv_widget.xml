@@ -8,4 +8,5 @@
         <item>Καλώς ήρθες!</item>
         <item>Εδώ είμαι!</item>
     </string-array>
+    <string name="tv_talk_open">Άνοιξε την απάντηση στην Assistant</string>
 </resources>

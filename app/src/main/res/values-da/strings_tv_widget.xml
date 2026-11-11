@@ -8,4 +8,5 @@
         <item>Goddag!</item>
         <item>Her er jeg!</item>
     </string-array>
+    <string name="tv_talk_open">Åbn svaret i AI Assist</string>
 </resources>

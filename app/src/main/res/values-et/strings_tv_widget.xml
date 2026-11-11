@@ -8,4 +8,5 @@
         <item>Tervist!</item>
         <item>Siin ma olen!</item>
     </string-array>
+    <string name="tv_talk_open">Ava vastus AI Assistis</string>
 </resources>

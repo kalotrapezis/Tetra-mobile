@@ -8,4 +8,5 @@
         <item>Hallo daar!</item>
         <item>Hier ben ik!</item>
     </string-array>
+    <string name="tv_talk_open">Open het antwoord in AI Assist</string>
 </resources>

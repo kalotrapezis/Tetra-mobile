@@ -8,4 +8,5 @@
         <item>Здравей!</item>
         <item>Тук съм!</item>
     </string-array>
+    <string name="tv_talk_open">Отвори отговора в AI Assist</string>
 </resources>

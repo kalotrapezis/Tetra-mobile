@@ -49,6 +49,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Data: how much each app used (the user turns on Usage access in Android's settings; Plan.md § Data) -->
@@ -157,6 +158,8 @@
         <service android:name=".SyncService" android:exported="false" android:foregroundServiceType="dataSync" />
         <service android:name=".PhotoAnalysisService" android:exported="false" android:foregroundServiceType="dataSync" />
         <service android:name=".AudioService" android:exported="false" android:foregroundServiceType="dataSync" />
+        <!-- AI Assist talking on the home screen's TV (8 Nov) -->
+        <service android:name=".TvTalkService" android:exported="false" android:foregroundServiceType="microphone|mediaPlayback" />
         <!-- An alarm ringing: its time, Snooze and Dismiss, over the lock screen -->
         <activity android:name=".AlarmRingActivity" android:exported="false" android:launchMode="singleTask" android:taskAffinity="com.kalotrapezis.drive.alarm"
             android:excludeFromRecents="true" android:showWhenLocked="true" android:turnScreenOn="true" />
