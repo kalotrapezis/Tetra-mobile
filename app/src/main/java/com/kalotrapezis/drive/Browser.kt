@@ -152,7 +152,8 @@ internal object BrowserRules {
 
 /** [note]: what the user wrote of it (the Passwords applet, Google's export's "note"); a page's form never has one. [pinned]: ♥, at the top. */
 internal data class SavedLogin(val host: String, val user: String, val password: String, val note: String = "", val pinned: Boolean = false)
-internal data class SavedCard(val name: String, val number: String, val month: String, val year: String) {
+/** [cvc]: its security code, kept only when the user typed it on the computer (shown there after the password again); never from a page. */
+internal data class SavedCard(val name: String, val number: String, val month: String, val year: String, val cvc: String = "") {
     val last4 get() = number.takeLast(4)
 }
 
@@ -167,14 +168,14 @@ internal data class BrowserVault(val logins: List<SavedLogin> = emptyList(), val
         (logins + o.logins).associateBy { it.host to it.user }.values.map { n -> // a page's save keeps the note written
             logins.firstOrNull { it.host == n.host && it.user == n.user }?.let { o -> n.copy(note = n.note.ifEmpty { o.note }, pinned = n.pinned || o.pinned) } ?: n },
         (addresses + o.addresses).distinct(),
-        (cards + o.cards).associateBy { it.number }.values.toList())
+        (cards + o.cards).associateBy { it.number }.values.map { n -> n.copy(cvc = n.cvc.ifEmpty { cards.firstOrNull { it.number == n.number }?.cvc.orEmpty() }) }) // a page's card keeps the code kept
 
     val empty get() = logins.isEmpty() && addresses.isEmpty() && cards.isEmpty()
 
     fun json(): String = JSONObject()
         .put("logins", JSONArray(logins.map { JSONObject().put("host", it.host).put("user", it.user).put("password", it.password).apply { if (it.note.isNotEmpty()) put("note", it.note); if (it.pinned) put("pinned", true) } }))
         .put("addresses", JSONArray(addresses.map { JSONObject(it) }))
-        .put("cards", JSONArray(cards.map { JSONObject().put("name", it.name).put("number", it.number).put("month", it.month).put("year", it.year) }))
+        .put("cards", JSONArray(cards.map { JSONObject().put("name", it.name).put("number", it.number).put("month", it.month).put("year", it.year).apply { if (it.cvc.isNotEmpty()) put("cvc", it.cvc) } }))
         .toString()
 
     companion object {
@@ -187,7 +188,7 @@ internal data class BrowserVault(val logins: List<SavedLogin> = emptyList(), val
             BrowserVault(
                 list("logins").map { SavedLogin(it.getString("host"), it.optString("user"), it.getString("password"), it.optString("note"), it.optBoolean("pinned")) },
                 list("addresses").map { a -> a.keys().asSequence().associateWith { a.getString(it) } },
-                list("cards").map { SavedCard(it.optString("name"), it.getString("number"), it.optString("month"), it.optString("year")) })
+                list("cards").map { SavedCard(it.optString("name"), it.getString("number"), it.optString("month"), it.optString("year"), it.optString("cvc")) })
         }.getOrDefault(BrowserVault())
 
         /** A form the page sent (the injected script's {user, pass, fields}) as what could be kept for [host]. */

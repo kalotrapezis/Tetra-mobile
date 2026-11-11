@@ -131,4 +131,16 @@ class BrowserPasswordsTest {
         assertTrue(s.pruned(2 + 31 * 86_400_000L).items.isEmpty())
         assertEquals(s, SecretSet.parse(s.json()))
     }
+
+    @Test fun aCardsSecurityCodeFromTheComputerIsKept() {
+        // the computer writes a card's code fifth; the phone reads it, writes it back, and a page's card keeps it
+        val set = SecretSet(mapOf("c|5500000000000004" to SecretRec("""["MARIA","5500000000000004","12","31","123"]""", 1_000)))
+        val v = set.vault()
+        assertEquals("123", v.cards.single().cvc)
+        assertEquals("""["MARIA","5500000000000004","12","31","123"]""", SecretSet.keyed(v).getValue("c|5500000000000004"))
+        assertEquals("""["B","4111111111111111","01","30"]""", SecretSet.keyed(BrowserVault(cards = listOf(SavedCard("B", "4111111111111111", "01", "30")))).getValue("c|4111111111111111"))
+        val fromPage = v.with(BrowserVault(cards = listOf(SavedCard("MARIA K", "5500000000000004", "12", "31"))))
+        assertEquals(SavedCard("MARIA K", "5500000000000004", "12", "31", "123"), fromPage.cards.single())
+        assertEquals("123", BrowserVault.of(fromPage.json()).cards.single().cvc) // the browser's own file too
+    }
 }

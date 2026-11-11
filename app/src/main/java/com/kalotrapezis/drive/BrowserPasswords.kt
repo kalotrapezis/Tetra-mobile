@@ -57,7 +57,7 @@ internal data class SecretSet(val items: Map<String, SecretRec> = emptyMap()) {
         return BrowserVault(
             keys.filter { it.startsWith("l|") }.map { a(it).let { j -> SavedLogin(j.getString(0), j.getString(1), j.getString(2), j.optString(3), j.optString(4) == "1") } },
             keys.filter { it.startsWith("a|") }.map { a(it).let { j -> (0 until j.length() / 2).associate { i -> j.getString(2 * i) to j.getString(2 * i + 1) } } },
-            keys.filter { it.startsWith("c|") }.map { a(it).let { j -> SavedCard(j.getString(0), j.getString(1), j.getString(2), j.getString(3)) } })
+            keys.filter { it.startsWith("c|") }.map { a(it).let { j -> SavedCard(j.getString(0), j.getString(1), j.getString(2), j.getString(3), j.optString(4)) } })
     }
 
     /** The living ones' values by key, [prev]'s order kept, new ones after (oldest first). */
@@ -76,7 +76,7 @@ internal data class SecretSet(val items: Map<String, SecretRec> = emptyMap()) {
          */
         fun keyed(v: BrowserVault): Map<String, String> =
             v.logins.associate { "l|${it.host}|${it.user}" to JSONArray(listOfNotNull(it.host, it.user, it.password, it.note.ifEmpty { if (it.pinned) "" else null }, if (it.pinned) "1" else null)).toString() } + // no note, no ♥: as before them
-            v.cards.associate { "c|${it.number}" to JSONArray(listOf(it.name, it.number, it.month, it.year)).toString() } +
+            v.cards.associate { "c|${it.number}" to JSONArray(listOf(it.name, it.number, it.month, it.year) + listOfNotNull(it.cvc.ifEmpty { null })).toString() } +
             v.addresses.associate { m -> JSONArray(m.toSortedMap().flatMap { listOf(it.key, it.value) }).toString().let { "a|$it" to it } }
 
         fun parse(s: String): SecretSet? = runCatching {

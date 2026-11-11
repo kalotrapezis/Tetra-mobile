@@ -522,7 +522,7 @@ private val ADDRESS_FIELDS = listOf("name", "email", "tel", "organization", "str
     var month by remember { mutableStateOf(c.month) }; var year by remember { mutableStateOf(c.year) }
     val digits = number.filter(Char::isDigit)
     FormDialog(stringResource(if (c.number.isEmpty()) R.string.pw_add_card else R.string.common_edit), digits.length in 12..19, close,
-        { save(SavedCard(name.trim(), digits, month.filter(Char::isDigit).padStart(2, '0').takeLast(2).takeIf { month.isNotBlank() }.orEmpty(), year.filter(Char::isDigit))) }) {
+        { save(SavedCard(name.trim(), digits, month.filter(Char::isDigit).padStart(2, '0').takeLast(2).takeIf { month.isNotBlank() }.orEmpty(), year.filter(Char::isDigit), c.cvc)) }) { // the code kept on the computer stays
         Text(stringResource(R.string.pw_card_no_cvc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.pw_card_name)) }, singleLine = true)
         OutlinedTextField(number, { number = it }, label = { Text(stringResource(R.string.pw_card_number)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
