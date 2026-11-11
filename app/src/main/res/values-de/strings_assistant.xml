@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Live beenden</string>
     <string name="assistant_live_connecting">Verbindung wird hergestellt…</string>
     <string name="assistant_live_silence">Live wurde nach 20 Sekunden Stille beendet.</string>
+    <string name="assistant_live_bye">Tschüss</string>
     <string name="assistant_live_cap">Live wurde nach 5 Minuten beendet.</string>
     <string name="assistant_you">Du</string>
     <string name="assistant_voice">Stimme</string>

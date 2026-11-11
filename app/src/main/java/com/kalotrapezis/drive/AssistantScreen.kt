@@ -161,7 +161,7 @@ internal enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Li
 
 @Composable
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
-internal fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () -> Unit) {
+internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Boolean = false, closeNow: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val decorated = remember { AiLook.decorated(context) }
@@ -201,9 +201,10 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () 
     var liveStart by remember { mutableLongStateOf(0L) }
     var liveLast by remember { mutableLongStateOf(0L) }
     var liveNow by remember { mutableLongStateOf(0L) }
+    var liveTurns by remember { mutableIntStateOf(0) } // what was said in this live so far: «γεια σου» opens a talk, ends it later
     var voice by remember { mutableStateOf<AnswerVoice?>(null) } // the answer being read aloud
     // listening, thinking or speaking: Tetra Car's mic pulses meanwhile (the user, 10 Nov: "make the mic pulse when active")
-    val busy = phase != Phase.Idle || reader.speaking
+    val busy = phase != Phase.Idle || reader.speaking || live != null
     LaunchedEffect(busy) { AssistBusy.on.value = busy }
     DisposableEffect(Unit) { onDispose { AssistBusy.on.value = false } }
     // the sheet's TV (8 Nov): what the robot shows while the answer is heard
@@ -219,7 +220,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () 
         livePhase = LivePhase.Stopping
         scope.launch { delay(1_500); if (live == null) liveShown = false } // the record slows to a stop first
     }
-    DisposableEffect(Unit) { onDispose { live?.end(); AssistantAutoMemory.soon(context, chat.saved()) } }
+    DisposableEffect(Unit) { onDispose { endLive(); AssistantAutoMemory.soon(context, chat.saved()) } } // a closed pane or a car gone: its minutes still billed
     BackHandler { if (live != null) endLive() else close() }
 
     fun say(text: String, error: Boolean = false) { bubbles += Bubble(false, text, error = error) }
@@ -309,6 +310,12 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () 
         // and to the audio's estimate (a short yes only: "ναι, αλλά 10 λεπτά" goes to the model): nothing is spent before it
         confirming?.let { c -> AssistantChat.yesNo(text)?.let { yes -> decide(c, yes); return@launch } }
         pendingAudio?.let { a -> (if (text.trim().split(Regex("\\s+")).size <= 3) AssistantChat.yesNo(text) else null)?.let { yes -> if (yes) startAudio(a) else skipAudio(); listenAgain(); return@launch } }
+        // «οκ τέλος», "ok bye" (the user, 11 Nov): live ends here, at once and for nothing, without asking the model
+        if (inLive && AssistantChat.goodbye(text, started = liveTurns > 0)) {
+            val bye = context.getString(R.string.assistant_live_bye)
+            endLive(); say(bye); reader.add(bye); WriterLog.i("AI Assist: live ended by a spoken goodbye"); return@launch
+        }
+        if (inLive) liveTurns++
         phase = Phase.Thinking
         live?.muted = true; if (inLive) livePhase = LivePhase.Thinking
         // the answer comes a few words at a time and is read a sentence at a time: the first is heard while the rest is made
@@ -374,14 +381,17 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () 
             .onFailure { say(it.shownMessage(context) ?: "", true) }
     } }
     fun mic() = when (phase) { Phase.Idle -> hear(10_000); Phase.Listening -> stopNow.set(true); Phase.Thinking -> Unit }
-    LaunchedEffect(Unit) { if (sheet && hasKey) hear(8_000) }
+    LaunchedEffect(Unit) { if (sheet && hasKey && !liveFirst) hear(8_000) }
+    // opened live (Tetra Car's held mic): the pane goes once live has ended and its goodbye is said
+    var wasLive by remember { mutableStateOf(false) }
+    LaunchedEffect(liveShown) { if (liveShown) wasLive = true else if (liveFirst && wasLive) { while (reader.speaking) delay(200); close() } }
 
     /** [opening]: said for the user as soon as it listens (a talk about the attached file starts with the AI). */
     fun startLive(opening: String? = null) = scope.launch {
         if (!hasKey || live != null || phase != Phase.Idle) return@launch
         if (!hasMic(context)) { askMic.launch(Manifest.permission.RECORD_AUDIO); return@launch }
         hush()
-        liveYou = ""; liveAi = ""; liveLevel = 0f; livePhase = LivePhase.Connecting; liveShown = true
+        liveYou = ""; liveAi = ""; liveLevel = 0f; livePhase = LivePhase.Connecting; liveShown = true; liveTurns = 0
         liveStart = System.currentTimeMillis(); liveLast = liveStart; liveNow = liveStart
         val terms = withContext(Dispatchers.IO) { AssistantWords.terms(context) }
         live = AssistantLive(AssistantNet.key(context), terms,
@@ -394,6 +404,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, closeNow: () 
         WriterLog.i("AI Assist: live on")
         opening?.let { send(it) }
     }
+    LaunchedEffect(Unit) { if (sheet && hasKey && liveFirst) startLive() } // Tetra Car's held mic
     // the bill guard (live is paid by the minute): 20 s with nobody talking, or 5 minutes, and it ends by itself
     LaunchedEffect(liveShown) {
         while (liveShown) {

@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Ukončiť naživo</string>
     <string name="assistant_live_connecting">Pripája sa…</string>
     <string name="assistant_live_silence">Rozhovor naživo skončil po 20 sekundách ticha.</string>
+    <string name="assistant_live_bye">Ahoj</string>
     <string name="assistant_live_cap">Rozhovor naživo skončil po 5 minútach.</string>
     <string name="assistant_you">Ty</string>
     <string name="assistant_voice">Hlas</string>

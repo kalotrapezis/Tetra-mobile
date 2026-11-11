@@ -41,6 +41,7 @@
     <string name="assistant_live_end">End live</string>
     <string name="assistant_live_connecting">Connecting…</string>
     <string name="assistant_live_silence">Live ended after 20 seconds of silence.</string>
+    <string name="assistant_live_bye">Bye</string>
     <string name="assistant_live_cap">Live ended at 5 minutes.</string>
     <string name="assistant_you">You</string>
     <string name="assistant_ai" translatable="false">AI</string>

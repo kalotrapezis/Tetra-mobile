@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Baigti gyvai</string>
     <string name="assistant_live_connecting">Jungiamasi…</string>
     <string name="assistant_live_silence">Pokalbis gyvai baigėsi po 20 sekundžių tylos.</string>
+    <string name="assistant_live_bye">Iki</string>
     <string name="assistant_live_cap">Pokalbis gyvai baigėsi po 5 minučių.</string>
     <string name="assistant_you">Tu</string>
     <string name="assistant_voice">Balsas</string>

@@ -360,7 +360,10 @@ internal fun CarScreen(projected: Boolean = false) {
     }
     // AI Assist's TV takes the side pane while it works (the user, 10 Nov: "bring the TV UI to the car, on the small side"); it goes when done
     var assist by remember { mutableStateOf(false) }
-    androidx.compose.runtime.DisposableEffect(Unit) { Car.assist = { assist = true }; onDispose { Car.assist = null } }
+    var assistLive by remember { mutableStateOf(false) }
+    // the mic (the user, 11 Nov): a tap asks once, held starts a live talk; a tap while live talks ends it (the wheel's voice key is a tap)
+    fun mic(live: Boolean) { if (assist && assistLive && !live) assist = false else { assistLive = live; assist = true } }
+    androidx.compose.runtime.DisposableEffect(Unit) { Car.assist = { mic(false) }; onDispose { Car.assist = null } }
     // AI Assist's «πήγαινέ με…», «παίξε…», «άνοιξε τα μηνύματα» (the user, 10 Nov: "it recognised the command but nothing loaded in the
     // car's map"): into the panes here, not a window of their own
     var mapsGo by remember { mutableStateOf<Place?>(null) }
@@ -433,7 +436,7 @@ internal fun CarScreen(projected: Boolean = false) {
         Layout(modifier = Modifier.fillMaxSize(), content = {
             CarPanes(shownState, opened, coverAt, cover = {
                 if (PhoneCalls.calls.isNotEmpty()) CarCallPane() else remote?.let { CarRemoteCallPane(it) } ?: message?.let { m -> CarSmsPane(m) { message = null } }
-                    ?: if (assist) AssistantApp(sheet = true) { assist = false } else Unit
+                    ?: if (assist) key(assistLive) { AssistantApp(sheet = true, liveFirst = assistLive) { assist = false } } else Unit
             }, expose = expose?.let { ::pick }, modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = if (side == DockSide.Bottom) 0.dp else 8.dp),
                 focus = { app -> state.panes.indexOf(app).takeIf { it >= 0 && it != state.focus }?.let { set(state.focused(it)) } }) { app ->
                 CompositionLocalProvider(LocalOnBackPressedDispatcherOwner provides backs.getValue(app)) {
@@ -465,7 +468,7 @@ internal fun CarScreen(projected: Boolean = false) {
                     // Maps again while the map is in the big pane: the saved places (the user, 10 Nov: "the home faves in the car as a page with bubbles")
                     if (app == CarApp.Maps && state.panes[0] == CarApp.Maps) places = !places
                     else { set(state.put(app)); if (app == CarApp.Browser) tiles = false }
-                }, media = ::media, apps = { apps = true }, projected = projected)
+                }, media = ::media, apps = { apps = true }, mic = ::mic, projected = projected)
         }) { (panes, dock), c ->
             val d = dock.measure(if (side == DockSide.Bottom) c.copy(minHeight = 0) else c.copy(minWidth = 0))
             val w = if (side == DockSide.Bottom) c.maxWidth else c.maxWidth - d.width
@@ -518,7 +521,7 @@ private fun CarPanes(state: CarState, opened: List<CarApp>, coverAt: Int?, cover
 
 @Composable
 private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayouts: (Boolean) -> Unit, layout: (CarLayout) -> Unit, expose: () -> Unit,
-                    open: (CarApp) -> Unit, media: () -> Unit, apps: () -> Unit, projected: Boolean = false) {
+                    open: (CarApp) -> Unit, media: () -> Unit, apps: () -> Unit, mic: (live: Boolean) -> Unit, projected: Boolean = false) {
     val context = LocalContext.current
     val down = side != DockSide.Bottom // down a side: icons without their names, so it fits a short screen
     val strip: @Composable () -> Unit = { // the layouts' strip, with its way back (the user's sliding strips)
@@ -534,7 +537,7 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
             androidx.compose.animation.core.infiniteRepeatable<Float>(androidx.compose.animation.core.tween(550), androidx.compose.animation.core.RepeatMode.Reverse), label = "pulse")
         Box(Modifier.padding(if (down) 4.dp else 12.dp).size(if (down) 56.dp else 68.dp)
             .graphicsLayer { if (busy) { scaleX = pulse; scaleY = pulse } } // AI Assist at work: the mic breathes
-            .clip(CircleShape).background(ASSISTANT_COLOR).clickable { Car.assist?.invoke() ?: carListen(context) }, contentAlignment = Alignment.Center) {
+            .clip(CircleShape).background(ASSISTANT_COLOR).combinedClickable(onLongClick = { mic(true) }) { mic(false) }, contentAlignment = Alignment.Center) {
             Icon(painterResource(R.drawable.ic_mic), stringResource(R.string.app_assistant), Modifier.size(34.dp), tint = Color.White)
         }
         // down a side only Maps, Media and Phone stay; Messages and the Browser while they are on the screen (the user, 9 Nov)

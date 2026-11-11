@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Beigt tiešraidi</string>
     <string name="assistant_live_connecting">Savienojas…</string>
     <string name="assistant_live_silence">Tiešraide beidzās pēc 20 sekunžu klusuma.</string>
+    <string name="assistant_live_bye">Atā</string>
     <string name="assistant_live_cap">Tiešraide beidzās pēc 5 minūtēm.</string>
     <string name="assistant_you">Tu</string>
     <string name="assistant_voice">Balss</string>

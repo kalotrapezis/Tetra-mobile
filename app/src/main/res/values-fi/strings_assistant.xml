@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Lopeta suora</string>
     <string name="assistant_live_connecting">Yhdistetään…</string>
     <string name="assistant_live_silence">Suora keskustelu päättyi 20 sekunnin hiljaisuuden jälkeen.</string>
+    <string name="assistant_live_bye">Heippa</string>
     <string name="assistant_live_cap">Suora keskustelu päättyi 5 minuutin kohdalla.</string>
     <string name="assistant_you">Sinä</string>
     <string name="assistant_voice">Ääni</string>

@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Terminar en vivo</string>
     <string name="assistant_live_connecting">Conectando…</string>
     <string name="assistant_live_silence">La conversación en vivo terminó tras 20 segundos de silencio.</string>
+    <string name="assistant_live_bye">Adiós</string>
     <string name="assistant_live_cap">La conversación en vivo terminó a los 5 minutos.</string>
     <string name="assistant_you">Tú</string>
     <string name="assistant_voice">Voz</string>

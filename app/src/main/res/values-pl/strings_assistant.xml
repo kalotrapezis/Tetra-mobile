@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Zakończ rozmowę na żywo</string>
     <string name="assistant_live_connecting">Łączenie…</string>
     <string name="assistant_live_silence">Rozmowa na żywo zakończyła się po 20 sekundach ciszy.</string>
+    <string name="assistant_live_bye">Pa</string>
     <string name="assistant_live_cap">Rozmowa na żywo zakończyła się po 5 minutach.</string>
     <string name="assistant_you">Ty</string>
     <string name="assistant_voice">Głos</string>

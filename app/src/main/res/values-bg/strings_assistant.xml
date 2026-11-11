@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Край на живо</string>
     <string name="assistant_live_connecting">Свързване…</string>
     <string name="assistant_live_silence">Разговорът на живо приключи след 20 секунди мълчание.</string>
+    <string name="assistant_live_bye">Чао</string>
     <string name="assistant_live_cap">Разговорът на живо приключи след 5 минути.</string>
     <string name="assistant_you">Ти</string>
     <string name="assistant_voice">Глас</string>

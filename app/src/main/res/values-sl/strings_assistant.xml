@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Končaj v živo</string>
     <string name="assistant_live_connecting">Povezovanje…</string>
     <string name="assistant_live_silence">Pogovor v živo se je končal po 20 sekundah tišine.</string>
+    <string name="assistant_live_bye">Adijo</string>
     <string name="assistant_live_cap">Pogovor v živo se je končal po 5 minutah.</string>
     <string name="assistant_you">Ti</string>
     <string name="assistant_voice">Glas</string>

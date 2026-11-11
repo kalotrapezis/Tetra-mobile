@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Avsluta live</string>
     <string name="assistant_live_connecting">Ansluter…</string>
     <string name="assistant_live_silence">Live avslutades efter 20 sekunders tystnad.</string>
+    <string name="assistant_live_bye">Hej då</string>
     <string name="assistant_live_cap">Live avslutades efter 5 minuter.</string>
     <string name="assistant_you">Du</string>
     <string name="assistant_voice">Röst</string>

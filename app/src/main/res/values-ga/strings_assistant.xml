@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Cuir deireadh leis an mbeo</string>
     <string name="assistant_live_connecting">Ag nascadh…</string>
     <string name="assistant_live_silence">Tháinig deireadh leis an gcomhrá beo tar éis 20 soicind ciúnais.</string>
+    <string name="assistant_live_bye">Slán</string>
     <string name="assistant_live_cap">Tháinig deireadh leis an gcomhrá beo ag 5 nóiméad.</string>
     <string name="assistant_you">Tú</string>
     <string name="assistant_voice">Guth</string>

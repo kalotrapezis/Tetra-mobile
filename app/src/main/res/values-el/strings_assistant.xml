@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Τέλος ζωντανής συζήτησης</string>
     <string name="assistant_live_connecting">Σύνδεση…</string>
     <string name="assistant_live_silence">Η ζωντανή συζήτηση έκλεισε μετά από 20 δευτερόλεπτα σιωπής.</string>
+    <string name="assistant_live_bye">Τα λέμε</string>
     <string name="assistant_live_cap">Η ζωντανή συζήτηση έκλεισε στα 5 λεπτά.</string>
     <string name="assistant_you">Εσύ</string>
     <string name="assistant_voice">Φωνή</string>

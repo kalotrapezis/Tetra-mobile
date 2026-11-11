@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Live beëindigen</string>
     <string name="assistant_live_connecting">Verbinden…</string>
     <string name="assistant_live_silence">Live is beëindigd na 20 seconden stilte.</string>
+    <string name="assistant_live_bye">Doei</string>
     <string name="assistant_live_cap">Live is beëindigd na 5 minuten.</string>
     <string name="assistant_you">Jij</string>
     <string name="assistant_voice">Stem</string>

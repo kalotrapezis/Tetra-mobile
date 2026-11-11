@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Waqqaf il-live</string>
     <string name="assistant_live_connecting">Qed titqabbad…</string>
     <string name="assistant_live_silence">Il-live spiċċa wara 20 sekonda ta\' skiet.</string>
+    <string name="assistant_live_bye">Saħħa</string>
     <string name="assistant_live_cap">Il-live spiċċa wara 5 minuti.</string>
     <string name="assistant_you">Int</string>
     <string name="assistant_voice">Leħen</string>

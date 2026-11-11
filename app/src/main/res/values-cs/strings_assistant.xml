@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Ukončit živě</string>
     <string name="assistant_live_connecting">Připojování…</string>
     <string name="assistant_live_silence">Živý hovor skončil po 20 sekundách ticha.</string>
+    <string name="assistant_live_bye">Ahoj</string>
     <string name="assistant_live_cap">Živý hovor skončil po 5 minutách.</string>
     <string name="assistant_you">Ty</string>
     <string name="assistant_voice">Hlas</string>

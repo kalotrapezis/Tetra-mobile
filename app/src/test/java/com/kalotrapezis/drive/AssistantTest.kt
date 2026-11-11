@@ -159,6 +159,19 @@ class AssistantTest {
         assertNull(AssistantChat.yesNo(""))
     }
 
+    @Test fun aSpokenGoodbyeEndsLive() {
+        listOf("τέλος", "Τέλος συζήτησης", "οκ τέλος", "Αντίο!", "σταμάτα", "άκυρο", "Ευχαριστώ, τέλος", "ΤΕΛΟΣ", "τελος",
+            "ok bye", "Bye.", "goodbye", "end conversation", "stop", "That's all", "thanks, that's it", "ok thank you, goodbye")
+            .forEach { assertTrue(it, AssistantChat.goodbye(it, started = true)) }
+        listOf("stop at the next gas station", "σταμάτα στο επόμενο βενζινάδικο", "τέλος του δρόμου πού είναι", "πες μου το τέλος της ταινίας",
+            "bye bye bye bye bye bye", "ok", "ευχαριστώ", "", "what's the end of the film")
+            .forEach { assertFalse(it, AssistantChat.goodbye(it, started = true)) }
+        // «γεια σου» opens a talk: a goodbye only once something was said
+        assertFalse(AssistantChat.goodbye("Γεια σου", started = false))
+        assertTrue(AssistantChat.goodbye("γεια σου", started = true))
+        assertTrue(AssistantChat.goodbye("τέλος", started = false))
+    }
+
     @Test fun aStreamedAnswerComesInPiecesAndItsToolCallIsJoined() {
         fun data(o: JSONObject) = "data: $o"
         fun delta(d: JSONObject) = data(JSONObject().put("choices", JSONArray().put(JSONObject().put("delta", d))))

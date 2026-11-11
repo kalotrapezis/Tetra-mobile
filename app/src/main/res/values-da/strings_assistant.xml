@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Afslut live</string>
     <string name="assistant_live_connecting">Forbinder…</string>
     <string name="assistant_live_silence">Live sluttede efter 20 sekunders stilhed.</string>
+    <string name="assistant_live_bye">Farvel</string>
     <string name="assistant_live_cap">Live sluttede efter 5 minutter.</string>
     <string name="assistant_you">Du</string>
     <string name="assistant_voice">Stemme</string>

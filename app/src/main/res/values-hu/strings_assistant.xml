@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Élő leállítása</string>
     <string name="assistant_live_connecting">Csatlakozás…</string>
     <string name="assistant_live_silence">Az élő beszélgetés 20 másodpercnyi csend után véget ért.</string>
+    <string name="assistant_live_bye">Viszlát</string>
     <string name="assistant_live_cap">Az élő beszélgetés 5 perc után véget ért.</string>
     <string name="assistant_you">Te</string>
     <string name="assistant_voice">Hang</string>

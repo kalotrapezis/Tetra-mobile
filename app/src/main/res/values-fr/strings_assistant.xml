@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Arrêter le direct</string>
     <string name="assistant_live_connecting">Connexion…</string>
     <string name="assistant_live_silence">Le direct s\'est arrêté après 20 secondes de silence.</string>
+    <string name="assistant_live_bye">Au revoir</string>
     <string name="assistant_live_cap">Le direct s\'est arrêté au bout de 5 minutes.</string>
     <string name="assistant_you">Toi</string>
     <string name="assistant_voice">Voix</string>

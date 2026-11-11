@@ -1363,6 +1363,22 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
             val first = ContactsFiles.plain(said).split(Regex("[^\\p{L}]+")).firstOrNull { it.isNotEmpty() } ?: return null
             return when (first) { in YES -> true; in NO -> false; else -> null }
         }
+        /**
+         * A spoken end to a live talk («οκ τέλος», "ok bye"): nothing but a goodbye, give or take an «οκ» or a "thanks", so
+         * "stop at the next gas station" goes on. [started]: something was said already, so «γεια σου» is a goodbye, not a hello.
+         */
+        fun goodbye(said: String, started: Boolean): Boolean {
+            val w = words(said)
+            if (w.isEmpty() || w.size > 5) return false
+            val rest = w.filter { it !in FILLER }.joinToString(" ")
+            return rest in BYE || (started && rest in HELLO_BYE)
+        }
+        private fun words(s: String) = ContactsFiles.plain(s).split(Regex("[^\\p{L}]+")).filter { it.isNotEmpty() }
+        private fun phrases(vararg p: String) = p.map { words(it).joinToString(" ") }.toSet()
+        private val FILLER = phrases("οκ", "οκέι", "εντάξει", "ευχαριστώ", "ευχαριστούμε", "πολύ", "λοιπόν", "ok", "okay", "thanks", "thank", "you", "very", "much", "so", "well").flatMap { it.split(" ") }.toSet()
+        private val BYE = phrases("τέλος", "τέλος συζήτησης", "τέλος η συζήτηση", "αντίο", "σταμάτα", "άκυρο", "τα λέμε", "bye", "bye bye", "goodbye",
+            "end", "end conversation", "end the conversation", "stop", "that's all", "that's it")
+        private val HELLO_BYE = phrases("γεια", "γεια σου", "γεια σας", "γεια χαρά")
         private val YES = setOf("ναι", "οκ", "εντάξει", "ντάξει", "κάλεσε", "πάρε", "ok", "okay", "yes").map(ContactsFiles::plain).toSet()
         private val NO = setOf("όχι", "άκυρο", "ακύρωσε", "σταμάτα", "μη", "μην", "no", "cancel", "stop").map(ContactsFiles::plain).toSet()
     }

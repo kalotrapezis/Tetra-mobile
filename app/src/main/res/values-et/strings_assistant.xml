@@ -40,6 +40,7 @@
     <string name="assistant_live_end">Lõpeta otse</string>
     <string name="assistant_live_connecting">Ühendan…</string>
     <string name="assistant_live_silence">Otsevestlus lõppes 20 sekundi vaikuse järel.</string>
+    <string name="assistant_live_bye">Head aega</string>
     <string name="assistant_live_cap">Otsevestlus lõppes 5 minuti järel.</string>
     <string name="assistant_you">Sina</string>
     <string name="assistant_voice">Hääl</string>
