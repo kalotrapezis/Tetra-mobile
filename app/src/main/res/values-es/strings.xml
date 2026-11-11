@@ -1550,6 +1550,7 @@
     <string name="maps_kind_island">Isla</string>
     <string name="maps_kind_islet">Islote</string>
     <string name="maps_kind_locality">Paraje</string>
+    <string name="maps_kind_region">Región</string>
     <string name="maps_my_car">Mi coche</string>
     <string name="maps_parking_saved">Aparcamiento guardado</string>
     <string name="maps_on_car_screen">En la pantalla del coche: %1$s</string>

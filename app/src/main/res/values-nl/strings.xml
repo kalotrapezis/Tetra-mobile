@@ -1507,6 +1507,7 @@
     <string name="maps_kind_island">Eiland</string>
     <string name="maps_kind_islet">Eilandje</string>
     <string name="maps_kind_locality">Plek</string>
+    <string name="maps_kind_region">Regio</string>
     <string name="maps_my_car">Mijn auto</string>
     <string name="maps_parking_saved">Parkeerplek opgeslagen</string>
     <string name="maps_on_car_screen">Op het scherm van de auto: %1$s</string>

@@ -1593,6 +1593,7 @@
     <string name="maps_kind_island">Sala</string>
     <string name="maps_kind_islet">Salelė</string>
     <string name="maps_kind_locality">Vietovė</string>
+    <string name="maps_kind_region">Regionas</string>
     <string name="maps_my_car">Mano automobilis</string>
     <string name="maps_parking_saved">Stovėjimo vieta įrašyta</string>
     <string name="maps_on_car_screen">Automobilio ekrane: %1$s</string>

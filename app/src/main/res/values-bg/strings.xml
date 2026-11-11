@@ -1507,6 +1507,7 @@
     <string name="maps_kind_island">Остров</string>
     <string name="maps_kind_islet">Островче</string>
     <string name="maps_kind_locality">Местност</string>
+    <string name="maps_kind_region">Област</string>
     <string name="maps_my_car">Моята кола</string>
     <string name="maps_parking_saved">Паркирането е записано</string>
     <string name="maps_on_car_screen">На екрана на колата: %1$s</string>

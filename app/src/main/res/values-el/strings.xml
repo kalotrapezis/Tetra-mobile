@@ -1515,6 +1515,7 @@
     <string name="maps_kind_island">Νησί</string>
     <string name="maps_kind_islet">Νησίδα</string>
     <string name="maps_kind_locality">Τοποθεσία</string>
+    <string name="maps_kind_region">Περιοχή</string>
     <string name="maps_my_car">Το αυτοκίνητό μου</string>
     <string name="maps_parking_saved">Η θέση στάθμευσης αποθηκεύτηκε</string>
     <string name="maps_on_car_screen">Στην οθόνη του αυτοκινήτου: %1$s</string>

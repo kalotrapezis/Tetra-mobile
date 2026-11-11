@@ -1507,6 +1507,7 @@
     <string name="maps_kind_island">Ø</string>
     <string name="maps_kind_islet">Holm</string>
     <string name="maps_kind_locality">Sted</string>
+    <string name="maps_kind_region">Region</string>
     <string name="maps_my_car">Min bil</string>
     <string name="maps_parking_saved">Parkering gemt</string>
     <string name="maps_on_car_screen">På bilens skærm: %1$s</string>

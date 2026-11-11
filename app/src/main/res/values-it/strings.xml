@@ -1507,6 +1507,7 @@
     <string name="maps_kind_island">Isola</string>
     <string name="maps_kind_islet">Isolotto</string>
     <string name="maps_kind_locality">Località</string>
+    <string name="maps_kind_region">Regione</string>
     <string name="maps_my_car">La mia auto</string>
     <string name="maps_parking_saved">Parcheggio salvato</string>
     <string name="maps_on_car_screen">Sullo schermo dell\'auto: %1$s</string>

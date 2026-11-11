@@ -1593,6 +1593,7 @@
     <string name="maps_kind_island">Wyspa</string>
     <string name="maps_kind_islet">Wysepka</string>
     <string name="maps_kind_locality">Miejsce</string>
+    <string name="maps_kind_region">Region</string>
     <string name="maps_my_car">Mój samochód</string>
     <string name="maps_parking_saved">Zapisano miejsce parkowania</string>
     <string name="maps_on_car_screen">Na ekranie samochodu: %1$s</string>

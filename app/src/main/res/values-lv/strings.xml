@@ -1550,6 +1550,7 @@
     <string name="maps_kind_island">Sala</string>
     <string name="maps_kind_islet">Saliņa</string>
     <string name="maps_kind_locality">Vieta</string>
+    <string name="maps_kind_region">Reģions</string>
     <string name="maps_my_car">Mans auto</string>
     <string name="maps_parking_saved">Stāvvieta saglabāta</string>
     <string name="maps_on_car_screen">Auto ekrānā: %1$s</string>

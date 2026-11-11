@@ -1550,6 +1550,7 @@
     <string name="maps_kind_island">Insulă</string>
     <string name="maps_kind_islet">Insuliță</string>
     <string name="maps_kind_locality">Localitate</string>
+    <string name="maps_kind_region">Regiune</string>
     <string name="maps_my_car">Mașina mea</string>
     <string name="maps_parking_saved">Parcare salvată</string>
     <string name="maps_on_car_screen">Pe ecranul mașinii: %1$s</string>

@@ -1636,6 +1636,7 @@
     <string name="maps_kind_island">Oileán</string>
     <string name="maps_kind_islet">Inse</string>
     <string name="maps_kind_locality">Áit</string>
+    <string name="maps_kind_region">Réigiún</string>
     <string name="maps_my_car">Mo charr</string>
     <string name="maps_parking_saved">Páirceáil sábháilte</string>
     <string name="maps_on_car_screen">Ar scáileán an chairr: %1$s</string>

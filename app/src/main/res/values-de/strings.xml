@@ -1507,6 +1507,7 @@
     <string name="maps_kind_island">Insel</string>
     <string name="maps_kind_islet">Inselchen</string>
     <string name="maps_kind_locality">Ort</string>
+    <string name="maps_kind_region">Region</string>
     <string name="maps_my_car">Mein Auto</string>
     <string name="maps_parking_saved">Parkplatz gespeichert</string>
     <string name="maps_on_car_screen">Auf dem Autodisplay: %1$s</string>

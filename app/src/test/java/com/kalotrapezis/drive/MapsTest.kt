@@ -187,10 +187,47 @@ class MapsGreeklishTest {
         val school = Poi("primary_school", 38.277768, 23.585572, "Δημοτικό Σχολείο Αγίου Θωμά", "", "Άγιος Θωμάς, Βοιωτία")
         val other = Poi("primary_school", 38.5, 23.6, "Δημοτικό Σχολείο Αγίου Λουκά", "", "Άγιος Λουκάς, Βοιωτία")
         val all = listOf(other, school)
-        for (q in listOf("Δημοτικό Σχολείο Άγιος Θωμάς Βοιωτίας", "Δημοτικό Σχολείο Αγίου Θωμά", "σχολείο Άγιος Θωμάς", "dimotiko sxolio agios thomas"))
+        for (q in listOf("Δημοτικό Σχολείο Άγιος Θωμάς Βοιωτίας", "Δημοτικό Σχολείο Αγίου Θωμά", "σχολείο Άγιος Θωμάς", "dimotiko sxolio agios thomas",
+                "dimotiko sxoleio agios thomas", "σχολείο Αγίου Θομά", "Δημοτκό Σχολείο Αγιου Θωμα")) // misheard or mistyped
             assertEquals(q, listOf("Δημοτικό Σχολείο Αγίου Θωμά"), MapsSearch.search(all, q, 38.4, 23.8).map { it.name })
         assertEquals("αγι", MapsSearch.stem("αγιοσ")); assertEquals("αγι", MapsSearch.stem("αγιου")); assertEquals("θωμ", MapsSearch.stem("θωμα"))
         assertEquals(emptyList<Poi>(), MapsSearch.search(all, "Σχολείο Άγιος Νικόλαος", 38.4, 23.8)) // a stem must still be there
+    }
+
+    @Test fun regions() { // the user, 11 Nov: "when you search Βοιωτία shows the borders of that state"
+        // Google's own example, and a box round Βοιωτία as maps-regions.py encodes it
+        val g = MapsSearch.decode("_p~iF~ps|U_ulLnnqC_mqNvxq`@").single()
+        assertEquals(listOf(38.5, -120.2, 40.7, -120.95, 43.252, -126.453), g.toList())
+        val boeotia = MapsSearch.parseRegion("Περιφερειακή Ενότητα Βοιωτίας\tRegional Unit of Boeotia\tde=Regionalbezirk Böotien\t6\t38.3\t23.1\t22.5,38.0,23.7,38.6\t_{|fF_pihC_etB??_kiF~dtB?")!!
+        assertTrue(MapsSearch.inside(boeotia, 38.277768, 23.585572)); assertFalse(MapsSearch.inside(boeotia, 37.98, 23.73))
+        // an OSM school has no area: the region's border says where it is; the one of the same name in Αθήνα stays out
+        val there = Poi("primary_school", 38.277768, 23.585572, "Δημοτικό Σχολείο Αγίου Θωμά")
+        val athens = Poi("primary_school", 37.98, 23.73, "Δημοτικό Σχολείο Αγίου Θωμά")
+        val all = listOf(athens, there, boeotia, Poi("supermarket", 38.3, 23.4, "Μασούτης"), Poi("supermarket", 37.9, 23.7, "Σκλαβενίτης"))
+        for (q in listOf("σχολείο Άγιος Θωμάς Βοιωτίας", "Δημοτικό Σχολείο Αγίου Θωμά Βοιωτία", "sxoleio agios thomas boeotia"))
+            assertEquals(q, listOf(38.277768), MapsSearch.search(all, q, 37.98, 23.73).map { it.lat })
+        assertEquals("Περιφερειακή Ενότητα Βοιωτίας", MapsSearch.search(all, "Βοιωτία", 37.98, 23.73).first().name)
+        assertEquals(listOf("Μασούτης"), MapsSearch.search(all, "Βοιωτία", 37.98, 23.73, "supermarket").map { it.name }) // a kind in a region
+    }
+
+    /** The computer's own search list (the maps and the places put in by hand), when there: the car's search finds the school, and how long the fuzzy pass takes. */
+    @Test fun fuzzyOnTheRealList() {
+        val root = File(System.getProperty("user.home"), "Tetra/.System/Maps/Shared")
+        assumeTrue(File(root, "greece-places.tsv").isFile)
+        val all = MapsSearch.load(root)
+        for (q in listOf("Δημοτικό Σχολείο Άγιος Θωμάς Βοιωτίας", "σχολείο Αγίου Θομά", "Δημοτικό Σχολείο Άγιος Θωμάς Βοιωτίας")) { // the last: with the words made
+            val t = System.nanoTime()
+            val r = MapsSearch.search(all, q, 38.4, 23.8, limit = 1)
+            println("$q: ${r.firstOrNull()?.name} in ${(System.nanoTime() - t) / 1_000_000} ms of ${all.size}")
+            assertEquals(q, 38.277768, r.single().lat, 1e-6)
+        }
+        assumeTrue(File(root, "greece-regions.tsv").isFile)
+        for ((q, region) in listOf("Βοιωτία" to "Περιφερειακή Ενότητα Βοιωτίας", "Πελοπόννησος" to "Περιφέρεια Πελοποννήσου", "Στερεά Ελλάδα" to "Περιφέρεια Στερεάς Ελλάδας"))
+            assertEquals(q, region, MapsSearch.search(all, q, 38.4, 23.8).first { it.kind == "region" }.name)
+        val inBoeotia = MapsSearch.search(all, "Βοιωτία", 37.98, 23.73, "supermarket", limit = 2000)
+        println("supermarkets in Βοιωτία: ${inBoeotia.size}, e.g. ${inBoeotia.take(3).map { it.name }}")
+        val boeotia = all.first { it.kind == "region" && it.name == "Περιφερειακή Ενότητα Βοιωτίας" }
+        assertTrue(inBoeotia.isNotEmpty() && inBoeotia.all { MapsSearch.inside(boeotia, it.lat, it.lng) })
     }
 }
 

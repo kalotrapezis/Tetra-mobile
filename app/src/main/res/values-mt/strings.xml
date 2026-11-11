@@ -1593,6 +1593,7 @@
     <string name="maps_kind_island">Gżira</string>
     <string name="maps_kind_islet">Gżira żgħira</string>
     <string name="maps_kind_locality">Post</string>
+    <string name="maps_kind_region">Reġjun</string>
     <string name="maps_my_car">Il-karozza tiegħi</string>
     <string name="maps_parking_saved">Parkeġġ imħażen</string>
     <string name="maps_on_car_screen">Fuq l-iskrin tal-karozza: %1$s</string>

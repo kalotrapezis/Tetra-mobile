@@ -730,9 +730,17 @@ internal data class Poi(
     val hours: String = "", val phone: String = "", val web: String = "", val wheelchair: String = "", val note: String = "",
     /** Its names in Tetra's other languages, "el=Νευροκόπι|de=…" (maps-places.py). */
     val names: String = "",
+    /** A region's border (kind "region", <id>-regions.tsv): its outer rings, Google-polyline encoded, apart by a space. */
+    val outline: String = "",
 ) {
     /** Accent-blind, its own, English and other names together, and its own in Latin letters (Greeklish), for search. */
     val key = MapsSearch.fold("$name $nameEn ${names.replace('|', ' ')}").let { "$it ${MapsSearch.latin(MapsSearch.fold(name))}" }
+    /** The key with its area, for the fuzzy search: made the first time one runs, then kept (the whole list took 1.5 s each time). */
+    val wide by lazy { MapsSearch.wide(this) }
+    /** A region's rings, lat and lng after each other, and its box (south, west, north, east): read the first time they are needed. */
+    val rings by lazy { MapsSearch.decode(outline) }
+    val box by lazy { rings.flatMap { r -> r.indices.step(2).map { r[it] to r[it + 1] } }.let { p -> if (p.isEmpty()) DoubleArray(4) else
+        doubleArrayOf(p.minOf { it.first }, p.minOf { it.second }, p.maxOf { it.first }, p.maxOf { it.second }) } }
     /** Its name, or its kind's ("Pharmacy") when it has none. */
     fun title(c: android.content.Context) = name.ifEmpty { nameEn }.ifEmpty { MapsSearch.label(kind, c) }
     /**
@@ -781,7 +789,8 @@ internal object MapsSearch {
     )
     private val SETTLEMENTS = mapOf("city" to R.string.maps_kind_city, "town" to R.string.maps_kind_town, "village" to R.string.maps_kind_village,
         "suburb" to R.string.maps_kind_suburb, "neighbourhood" to R.string.maps_kind_neighbourhood, "hamlet" to R.string.maps_kind_hamlet,
-        "island" to R.string.maps_kind_island, "islet" to R.string.maps_kind_islet, "locality" to R.string.maps_kind_locality)
+        "island" to R.string.maps_kind_island, "islet" to R.string.maps_kind_islet, "locality" to R.string.maps_kind_locality,
+        "region" to R.string.maps_kind_region)
     fun settlement(kind: String) = kind in SETTLEMENTS
     /** A place of [kind] in words ("Pharmacy"); a kind Tetra has no name for as OSM writes it. */
     fun label(kind: String, c: android.content.Context) = (PILLS.firstOrNull { it.key == kind }?.one ?: SETTLEMENTS[kind])?.let(c::getString)
@@ -816,6 +825,39 @@ internal object MapsSearch {
             c.getOrElse(8) { "" }, c.getOrElse(9) { "" }, c.getOrElse(10) { "" }, c.getOrElse(11) { "" })
     }
 
+    /** A line of <id>-regions.tsv (maps-regions.py): name, name:en, other names, level, label lat, lng, box, outline. */
+    fun parseRegion(line: String): Poi? {
+        val c = line.split('\t')
+        if (c.size < 8) return null
+        return Poi("region", c[4].toDoubleOrNull() ?: return null, c[5].toDoubleOrNull() ?: return null, c[0], c[1], names = c[2], outline = c[7])
+    }
+
+    /** Google-polyline [outline]'s rings, each as lat, lng, lat, lng… */
+    fun decode(outline: String): List<DoubleArray> = outline.split(' ').filter { it.isNotEmpty() }.map { s ->
+        val out = ArrayList<Double>(); var i = 0; var lat = 0; var lng = 0
+        while (i < s.length) for (k in 0..1) {
+            var shift = 0; var v = 0
+            do { val b = s[i++].code - 63; v = v or ((b and 0x1f) shl shift); shift += 5 } while (b >= 0x20)
+            val d = if (v and 1 != 0) (v shr 1).inv() else v shr 1
+            if (k == 0) { lat += d; out += lat / 1e5 } else { lng += d; out += lng / 1e5 }
+        }
+        out.toDoubleArray()
+    }
+
+    /** Whether [lat],[lng] is inside region [r]'s border (its box, then each ring by ray casting). */
+    fun inside(r: Poi, lat: Double, lng: Double): Boolean {
+        val b = r.box
+        if (lat < b[0] || lat > b[2] || lng < b[1] || lng > b[3]) return false
+        return r.rings.any { a ->
+            var c = false; var j = a.size - 2; var i = 0
+            while (i < a.size) {
+                if ((a[i] > lat) != (a[j] > lat) && lng < (a[j + 1] - a[i + 1]) * (lat - a[i]) / (a[j] - a[i]) + a[i + 1]) c = !c
+                j = i; i += 2
+            }
+            c
+        }
+    }
+
     private var cache: Triple<String, Long, List<Poi>>? = null
 
     /** The places put in by hand (added-places.tsv), drawn on the map always, as the map's own. */
@@ -840,10 +882,12 @@ internal object MapsSearch {
     /** The search list in [root] with EOPYY's, read once (about 140 000 places) and kept while the files are the same. */
     @Synchronized fun load(root: File): List<Poi> {
         val files = MapsFiles.lists(root, "places") + listOf(File(root, EOPYY), File(root, AMEA), File(root, AMEA_DECISIONS), File(root, ADDED)).filter { it.isFile }
+        val regions = MapsFiles.lists(root, "regions")
         if (files.isEmpty()) return emptyList()
-        val stamp = files.sumOf { it.lastModified() } + files.size
+        val stamp = (files + regions).sumOf { it.lastModified() } + files.size + regions.size * 1000
         cache?.let { (path, at, all) -> if (path == root.path && at == stamp) return all }
-        val all = files.flatMap { f -> f.bufferedReader().useLines { lines -> lines.mapNotNull(::parse).toList() } }
+        val all = files.flatMap { f -> f.bufferedReader().useLines { lines -> lines.mapNotNull(::parse).toList() } } +
+            regions.flatMap { f -> f.bufferedReader().useLines { lines -> lines.mapNotNull(::parseRegion).toList() } }
         cache = Triple(root.path, stamp, all)
         return all
     }
@@ -863,8 +907,13 @@ internal object MapsSearch {
         // a kind with words that name a town: that kind in and around it, not with the town in its name (the user, 21 Oct:
         // "agios loukas" + Supermarkets went to Αθήνα, "ψάχνεις την λέξη … την κατηγορία που βρήσκετε")
         if (kind != null && words.isNotEmpty()) {
-            val town = all.asSequence().filter { settlement(it.kind) && (it.key.startsWith(q) || it.key.contains(" $q") || words.all { w -> it.key.contains(w) } || greeklish.all { w -> it.key.contains(w) }) }
-                .minByOrNull { metresBetween(lat, lng, it.lat, it.lng) }
+            val named = all.asSequence().filter { settlement(it.kind) && (it.key.startsWith(q) || it.key.contains(" $q") || words.all { w -> it.key.contains(w) } || greeklish.all { w -> it.key.contains(w) }) }
+            // a region the words name: that kind inside its border, unless a town is called just that (Θεσσαλονίκη the city, not
+            // its regional unit; Βοιωτία the regional unit, not the hamlet Κιβέρι Βοιωτίας)
+            val region = region(all, words)?.takeIf { it.second.size == words.size }?.first
+            val town = named.filter { it.kind != "region" && (region == null || fold(it.name) == q) }.minByOrNull { metresBetween(lat, lng, it.lat, it.lng) }
+                ?: region?.let { r -> return all.asSequence().filter { it.kind == kind && inside(r, it.lat, it.lng) }
+                    .sortedBy { metresBetween(lat, lng, it.lat, it.lng) }.take(limit).toList() }
             if (town != null) return search(all, "", town.lat, town.lng, kind, limit, nearby = true)
         }
         return all.asSequence()
@@ -873,7 +922,42 @@ internal object MapsSearch {
             .sortedWith(compareBy({ (p, _) -> if (q.isEmpty() || p.key.startsWith(q) || p.key.contains(" $q")) 0 else 1 },
                 { (p, _) -> if (kind == null && q.isNotEmpty() && !settlement(p.kind)) 1 else 0 }, { (_, d) -> d }))
             .take(limit).map { it.first }.toList()
-            .ifEmpty { if (words.isEmpty()) emptyList() else byStems(all, words, lat, lng, kind, limit) }
+            .let { found ->
+                // a query that is a region's name ("Πελοπόννησος"): the region first, before the hotels of its name
+                val region = if (kind == null && words.isNotEmpty()) region(all, words)?.takeIf { it.second.size == words.size }?.first else null
+                if (region != null) (listOf(region) + found.filter { it !== region }).take(limit)
+                else found.ifEmpty { if (words.isEmpty()) emptyList() else within(all, words, lat, lng, kind, limit) ?: fuzzy(all, words, lat, lng, kind, limit) }
+            }
+    }
+
+    /** The words of a region's name that say what it is, not which: a search names Βοιωτία, not its "Περιφερειακή Ενότητα". */
+    private val GENERIC = setOf("περιφερεια", "περιφερειακη", "ενοτητα", "αποκεντρωμενη", "διοικηση", "δημοσ", "και", "region", "regional",
+        "unit", "of", "the", "decentralized", "administration", "municipality", "and")
+
+    /**
+     * The region the words name ("σχολείο Άγιος Θωμάς Βοιωτίας": Βοιωτία, by its stem) with the places in [words] of its
+     * name; the one that takes the most words, then the smallest. Null when none is named.
+     */
+    private fun region(all: List<Poi>, words: List<String>): Pair<Poi, Set<Int>>? {
+        val stems = words.map(::stem)
+        return all.asSequence().filter { it.kind == "region" }.mapNotNull { r ->
+            listOf(r.name, r.nameEn).map { n -> fold(n).split(APART).filter { it.isNotEmpty() && it !in GENERIC } }.filter { it.isNotEmpty() }
+                .map { own -> own.map { o -> stems.indexOfFirst { s -> o.startsWith(s) } } }
+                .firstOrNull { -1 !in it }?.let { r to it.toSet() }
+        }.maxWithOrNull(compareBy({ it.second.size }, { -it.first.box.let { b -> (b[2] - b[0]) * (b[3] - b[1]) } }))
+    }
+
+    /**
+     * A region named among the words: the other words searched for inside its border, or the places of [kind] there when no
+     * word is left (the user, 11 Nov: "I just added the state as well … it is a search query that should normally be
+     * helpful"). Null when no region is named or nothing is found inside.
+     */
+    private fun within(all: List<Poi>, words: List<String>, lat: Double, lng: Double, kind: String?, limit: Int): List<Poi>? {
+        val (region, used) = region(all, words) ?: return null
+        val rest = words.filterIndexed { i, _ -> i !in used }
+        if (rest.isEmpty() && kind == null) return null
+        val inside = all.filter { it.kind != "region" && inside(region, it.lat, it.lng) }
+        return search(inside, rest.joinToString(" "), lat, lng, kind, limit).ifEmpty { null }
     }
 
     /** Greek and Greeklish endings, longest first, that a word changes with its case ("Άγιος" / "Αγίου", "Θωμάς" / "Θωμά"). */
@@ -883,23 +967,57 @@ internal object MapsSearch {
     fun stem(w: String) = ENDINGS.firstOrNull { w.length - it.length >= 3 && w.endsWith(it) }?.let { w.dropLast(it.length) } ?: w
 
     /**
-     * When no name has every word as said: each word's stem at a word's start in the name or in its area, so "Δημοτικό
-     * Σχολείο Άγιος Θωμάς Βοιωτίας" finds "Δημοτικό Σχολείο Αγίου Θωμά" in "Άγιος Θωμάς, Βοιωτία" (the user asked the
-     * assistant for it in the car, 11 Nov, and got no results). Nearest first.
+     * When no name has every word as said (the user, 11 Nov: "so we need fuzzy search for maps"): each word at a word's start
+     * in the name or its area by its stem, so "Δημοτικό Σχολείο Άγιος Θωμάς Βοιωτίας" (the assistant's search in the car)
+     * finds "Δημοτικό Σχολείο Αγίου Θωμά" in "Άγιος Θωμάς, Βοιωτία"; or a letter off, two in a long word ("Θομάς", heard or
+     * typed wrong), with the first letter right. Every word must be there, so "Άγιος Νικόλαος" never gives Αγίου Θωμά.
+     * Fewest letters off first, then nearest.
      */
-    private fun byStems(all: List<Poi>, words: List<String>, lat: Double, lng: Double, kind: String?, limit: Int): List<Poi> {
-        val stems = words.map(::stem)
-        val latinStems = words.map { stem(latin(it)) }
-        val apart = Regex("[^\\p{L}\\p{N}]+")
+    private fun fuzzy(all: List<Poi>, words: List<String>, lat: Double, lng: Double, kind: String?, limit: Int): List<Poi> {
+        // each word as its stem with the letters it may be off: none under four letters, one, two from seven
+        val forms = listOf(words, words.map(::latin)).map { ws -> ws.map { stem(it) to if (it.length >= 7) 2 else if (it.length >= 4) 1 else 0 } }
         return all.asSequence()
             .filter { kind == null || it.kind == kind }
-            .filter { p ->
-                val area = fold(p.more)
-                val text = " " + "${p.key} $area ${latin(area)}".replace(apart, " ")
-                stems.all { text.contains(" $it") } || latinStems.all { text.contains(" $it") }
+            .mapNotNull { p -> forms.mapNotNull { offBy(it, p.wide) }.minOrNull()?.let { p to it } }
+            .sortedWith(compareBy({ it.second }, { metresBetween(lat, lng, it.first.lat, it.first.lng) }))
+            .take(limit).map { it.first }.toList()
+    }
+
+    private val APART = Regex("[^\\p{L}\\p{N}]+")
+    /** [p]'s key and area (folded, and in Latin letters) as words between single spaces, a space at each end: Poi.wide. */
+    fun wide(p: Poi): String { val area = fold(p.more); return " " + "${p.key} $area ${latin(area)}".replace(APART, " ").trim() + " " }
+
+    /** The letters [words] (stem, letters it may be off) are off from the words of [text] (Poi.wide) in all, or null when one is not there. */
+    private fun offBy(words: List<Pair<String, Int>>, text: String): Int? {
+        var sum = 0
+        for ((s, k) in words) {
+            if (text.contains(" $s")) continue
+            if (k == 0) return null
+            val start = " ${s[0]}"
+            var best = k + 1
+            var i = text.indexOf(start)
+            while (i >= 0 && best > 0) {
+                val end = text.indexOf(' ', i + 1)
+                best = minOf(best, edits(s, stem(text.substring(i + 1, end)), k))
+                i = text.indexOf(start, end)
             }
-            .sortedBy { metresBetween(lat, lng, it.lat, it.lng) }
-            .take(limit).toList()
+            if (best > k) return null
+            sum += best
+        }
+        return sum
+    }
+
+    /** The edit distance from [a] to [b], or [k] + 1 as soon as it is more than [k]. */
+    fun edits(a: String, b: String, k: Int): Int {
+        if (Math.abs(a.length - b.length) > k) return k + 1
+        var prev = IntArray(b.length + 1) { it }
+        for (i in 1..a.length) {
+            val cur = IntArray(b.length + 1).also { it[0] = i }
+            for (j in 1..b.length) cur[j] = minOf(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + if (a[i - 1] == b[j - 1]) 0 else 1)
+            if (cur.min() > k) return k + 1
+            prev = cur
+        }
+        return prev[b.length]
     }
 
     /**

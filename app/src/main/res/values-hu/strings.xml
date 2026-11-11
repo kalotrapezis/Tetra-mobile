@@ -1507,6 +1507,7 @@
     <string name="maps_kind_island">Sziget</string>
     <string name="maps_kind_islet">Szigetecske</string>
     <string name="maps_kind_locality">Hely</string>
+    <string name="maps_kind_region">Régió</string>
     <string name="maps_my_car">Az autóm</string>
     <string name="maps_parking_saved">Parkolóhely mentve</string>
     <string name="maps_on_car_screen">Az autó képernyőjén: %1$s</string>

@@ -1507,6 +1507,7 @@
     <string name="maps_kind_island">Saari</string>
     <string name="maps_kind_islet">Luoto</string>
     <string name="maps_kind_locality">Paikka</string>
+    <string name="maps_kind_region">Alue</string>
     <string name="maps_my_car">Autoni</string>
     <string name="maps_parking_saved">Pysäköinti tallennettu</string>
     <string name="maps_on_car_screen">Auton näytöllä: %1$s</string>

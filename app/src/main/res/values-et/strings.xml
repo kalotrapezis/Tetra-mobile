@@ -1507,6 +1507,7 @@
     <string name="maps_kind_island">Saar</string>
     <string name="maps_kind_islet">Saareke</string>
     <string name="maps_kind_locality">Koht</string>
+    <string name="maps_kind_region">Piirkond</string>
     <string name="maps_my_car">Minu auto</string>
     <string name="maps_parking_saved">Parkimiskoht salvestatud</string>
     <string name="maps_on_car_screen">Auto ekraanil: %1$s</string>

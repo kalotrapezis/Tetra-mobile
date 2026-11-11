@@ -713,6 +713,10 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                     PropertyFactory.textFont(arrayOf("Noto Sans Medium")), PropertyFactory.textSize(13f), PropertyFactory.textOffset(arrayOf(0f, 1.3f)),
                     PropertyFactory.textAnchor(Property.TEXT_ANCHOR_TOP), PropertyFactory.textColor("#FFFFFF"), PropertyFactory.textHaloColor("#1A237E"),
                     PropertyFactory.textHaloWidth(1.5f), PropertyFactory.textAllowOverlap(true)))
+                // a region chosen from the search (Βοιωτία): its border (the user, 11 Nov: "Google … shows the borders of that state")
+                style.addSource(GeoJsonSource("region"))
+                style.addLayer(LineLayer("region-line", "region").withProperties(PropertyFactory.lineColor("#5E35B1"), PropertyFactory.lineWidth(3f),
+                    PropertyFactory.lineDasharray(arrayOf(2f, 1.5f)), PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND)))
                 style.addSource(GeoJsonSource("results"))
                 style.addLayer(SymbolLayer("results-dot", "results").withProperties(PropertyFactory.iconImage(Expression.get("icon")),
                     PropertyFactory.iconAllowOverlap(true), PropertyFactory.iconSize(0.9f)))
@@ -798,6 +802,12 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         (mapRef?.style?.getSource("places") as? GeoJsonSource)?.setGeoJson(FeatureCollection.fromFeatures(places.map { p ->
             Feature.fromGeometry(Point.fromLngLat(p.lng, p.lat)).apply { addStringProperty("id", p.id); addStringProperty("name", p.name); addStringProperty("icon", "e-${p.icon}") }
         }))
+    }
+    LaunchedEffect(mapRef, detail) {
+        (mapRef?.style?.getSource("region") as? GeoJsonSource)?.setGeoJson(FeatureCollection.fromFeatures(
+            detail?.takeIf { it.kind == "region" }?.rings.orEmpty().filter { it.size >= 4 }.map { a ->
+                Feature.fromGeometry(LineString.fromLngLats(a.indices.step(2).map { Point.fromLngLat(a[it + 1], a[it]) } + Point.fromLngLat(a[1], a[0])))
+            }))
     }
     LaunchedEffect(mapRef, results, tab, selected) {
         val shown = if (tab == MapsTab.Search) results else onMap?.second.orEmpty()
@@ -1117,7 +1127,8 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                             }
                         }) { p ->
                         detail = p; selected = p.place(context); tab = null
-                        mapRef?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(p.lat, p.lng), if (MapsSearch.settlement(p.kind)) 13.0 else 16.5))
+                        mapRef?.animateCamera(if (p.kind == "region") p.box.let { b -> CameraUpdateFactory.newLatLngBounds(LatLngBounds.from(b[2], b[3], b[0], b[1]), 80) }
+                            else CameraUpdateFactory.newLatLngZoom(LatLng(p.lat, p.lng), if (MapsSearch.settlement(p.kind)) 13.0 else 16.5))
                     }
                     MapsTab.Favorites -> FavoritesPanel(places, lists, remember(all, here) { all.filter { it.kind == "eopyy" }.sortedBy { p -> away(p.lat, p.lng) ?: 0.0 } },
                         shownList, { shownList = it }, { listEditing = PlaceList("", "", "❤️") }, { listEditing = it }, { away(it.lat, it.lng) },

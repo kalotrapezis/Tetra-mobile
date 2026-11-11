@@ -1593,6 +1593,7 @@
     <string name="maps_kind_island">Otok</string>
     <string name="maps_kind_islet">Otoček</string>
     <string name="maps_kind_locality">Kraj</string>
+    <string name="maps_kind_region">Regija</string>
     <string name="maps_my_car">Moj avto</string>
     <string name="maps_parking_saved">Parkirno mesto shranjeno</string>
     <string name="maps_on_car_screen">Na zaslonu avta: %1$s</string>

@@ -1517,6 +1517,7 @@
     <string name="maps_kind_island">Island</string>
     <string name="maps_kind_islet">Islet</string>
     <string name="maps_kind_locality">Place</string>
+    <string name="maps_kind_region">Region</string>
     <string name="maps_my_car">My car</string>
     <string name="maps_parking_saved">Parking saved</string>
     <string name="maps_on_car_screen">On the car\'s screen: %1$s</string>

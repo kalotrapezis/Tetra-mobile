@@ -1550,6 +1550,7 @@
     <string name="maps_kind_island">Otok</string>
     <string name="maps_kind_islet">Otočić</string>
     <string name="maps_kind_locality">Mjesto</string>
+    <string name="maps_kind_region">Regija</string>
     <string name="maps_my_car">Moj automobil</string>
     <string name="maps_parking_saved">Parkiranje spremljeno</string>
     <string name="maps_on_car_screen">Na zaslonu automobila: %1$s</string>

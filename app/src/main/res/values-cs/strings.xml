@@ -1593,6 +1593,7 @@
     <string name="maps_kind_island">Ostrov</string>
     <string name="maps_kind_islet">Ostrůvek</string>
     <string name="maps_kind_locality">Místo</string>
+    <string name="maps_kind_region">Region</string>
     <string name="maps_my_car">Moje auto</string>
     <string name="maps_parking_saved">Parkování uloženo</string>
     <string name="maps_on_car_screen">Na obrazovce auta: %1$s</string>

@@ -3,7 +3,7 @@
 # (greece.pmtiles — one file MapLibre opens on Android and, later, on the desktop) and Geofabrik's OSM extract of Greece
 # (greece-latest.osm.pbf), and from it the routing graph for car, foot, bike and wheelchair (greece-gh/, GraphHopper 10.2)
 # and the search list and addresses (greece-places.tsv, greece-addresses.tsv), the lanes (greece-lanes.tsv) and the area
-# codes' places for the Phone (greece-phone.tsv).
+# codes' places for the Phone (greece-phone.tsv), and the regions with their borders (greece-regions.tsv).
 # Long and heavy: ~0.5 GB + 0.35 GB of downloads, then several minutes and ~4 GB of memory for the graph.
 # Usage: tools/maps-greece.sh [out-dir]   (default ~/Tetra/.System/Maps/Data; MAXZOOM=15 by default)
 # The tools (pmtiles, GraphHopper, Python's osmium) are the desktop map builder's, in ~/Tetra/.System/Maps/Tools
@@ -73,6 +73,11 @@ fi
 # the lane arrows before turns, for lane guidance (tools/maps-lanes.py)
 if [ ! -f greece-lanes.tsv ] || [ greece-latest.osm.pbf -nt greece-lanes.tsv ]; then
   "$TOOLS/venv/bin/python" -I "$HERE/maps-lanes.py" greece-latest.osm.pbf greece-lanes.tsv
+fi
+
+# the regions (Βοιωτία, Στερεά Ελλάδα) with their borders, for search (tools/maps-regions.py, the desktop builder's copy)
+if [ ! -f greece-regions.tsv ] || [ greece-latest.osm.pbf -nt greece-regions.tsv ]; then
+  "$TOOLS/venv/bin/python" -I "$HERE/maps-regions.py" greece-latest.osm.pbf greece-regions.tsv
 fi
 
 # the Phone's places of Greece's area codes (tools/maps-phone.py, libphonenumber's data); a failed fetch keeps the last table
