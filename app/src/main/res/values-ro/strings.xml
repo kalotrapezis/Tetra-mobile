@@ -2124,6 +2124,8 @@
         <item quantity="other">Rețeaua ta este pe canalul %1$d, cu %2$d de rețele pe el sau alături. Canalul %3$d este cel mai puțin aglomerat: se schimbă în setările routerului.</item>
     </plurals>
     <string name="data_tip_reached">Limita a fost atinsă</string>
+    <string name="data_ask">Întreabă AI Assist</string>
+    <string name="data_ask_prompt">Uită-te la consumul meu de date și spune-mi ce iese în evidență și ce aș putea schimba.</string>
     <string name="data_tip_reached_text">%1$s din %2$s folosiți, cu %3$d zile înainte de reînnoire. Ce urmează poate fi mai lent sau poate costa în plus, conform condițiilor operatorului.</string>
     <string name="data_tip_runs_out">Limita vine %1$s</string>
     <string name="data_tip_runs_out_text">În ritmul obișnuit, cei %1$s se termină înainte de %2$s. Ca să-ți ajungă, rămâi în jur de %3$s pe zi.</string>

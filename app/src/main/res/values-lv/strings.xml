@@ -2124,6 +2124,8 @@
         <item quantity="other">Jūsu tīkls ir %1$d. kanālā, un tajā vai blakus ir %2$d tīkli. %3$d. kanāls ir vismazāk noslogots: to maina maršrutētāja iestatījumos.</item>
     </plurals>
     <string name="data_tip_reached">Limits ir sasniegts</string>
+    <string name="data_ask">Jautāt AI Assist</string>
+    <string name="data_ask_prompt">Paskaties uz manu datu lietojumu un pasaki, kas izceļas un ko es varētu mainīt.</string>
     <string name="data_tip_reached_text">Izmantoti %1$s no %2$s, %3$d dienas pirms atjaunošanas. Turpmākais var būt lēnāks vai maksāt papildus, kā noteikts operatora noteikumos.</string>
     <string name="data_tip_runs_out">Limits pienāks %1$s</string>
     <string name="data_tip_runs_out_text">Ar parasto tempu %1$s beigsies pirms %2$s. Lai pietiktu, turieties pie %3$s dienā.</string>

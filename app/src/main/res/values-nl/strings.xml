@@ -2061,6 +2061,8 @@
         <item quantity="other">Je netwerk staat op kanaal %1$d, met %2$d netwerken erop of ernaast. Kanaal %3$d is het minst druk: je wijzigt het in de instellingen van de router.</item>
     </plurals>
     <string name="data_tip_reached">De limiet is bereikt</string>
+    <string name="data_ask">Vraag AI Assist</string>
+    <string name="data_ask_prompt">Bekijk mijn datagebruik en vertel me wat opvalt en wat ik kan veranderen.</string>
     <string name="data_tip_reached_text">%1$s van %2$s gebruikt, %3$d dagen voor de vernieuwing. Wat nu komt, kan trager zijn of extra kosten, volgens de voorwaarden van de provider.</string>
     <string name="data_tip_runs_out">De limiet komt %1$s</string>
     <string name="data_tip_runs_out_text">In je gewone tempo zijn de %1$s op voor %2$s. Om het te redden: blijf rond %3$s per dag.</string>

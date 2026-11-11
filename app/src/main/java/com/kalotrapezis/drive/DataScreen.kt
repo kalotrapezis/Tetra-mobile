@@ -650,6 +650,11 @@ private fun byApps(bars: List<Bar>, appDays: List<Triple<LocalDate, String, Long
                 Text(t.title.text(context), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                 Text(t.text.text(context), style = MaterialTheme.typography.bodyMedium)
             } }
+            // the same advice, asked of AI Assist, which sees the numbers behind it (data tips, apps, days) and answers about them
+            if (AiGate.on) TextButton(onClick = { askAssistant(context, context.getString(R.string.data_ask_prompt)) }) {
+                Icon(painterResource(R.drawable.ic_sparkle), null, Modifier.size(18.dp), tint = dataColor()); Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.data_ask), color = dataColor())
+            }
         }
     }
 }

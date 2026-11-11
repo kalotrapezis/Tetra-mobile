@@ -115,6 +115,7 @@
         </activity>
         <activity android:name=".BriefActivity" android:exported="false" android:label="@string/assistant_briefs_channel" />
         <activity android:name=".UsageActivity" android:exported="false" android:label="@string/usage_title" />
+        <receiver android:name=".QuietOff" android:exported="false" /> <!-- AI Assist's Do Not Disturb "until": off again -->
         <activity android:name=".BrowserActivity" android:exported="false" android:label="@string/app_browser" android:icon="@mipmap/applet_browser" android:roundIcon="@mipmap/applet_browser" android:taskAffinity="com.kalotrapezis.drive.browser"
             android:launchMode="singleTask" android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode" />
         <!-- Tetra Car: Maps, Media, Phone, Messages and the Browser side by side on a head unit, a dock and AI Assist's mic -->

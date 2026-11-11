@@ -2250,6 +2250,8 @@
         <item quantity="other">Tá do líonra ar chainéal %1$d, agus %2$d líonra air nó in aice leis. Is é cainéal %3$d is lú daoine air: athraítear é i socruithe an ráiteora.</item>
     </plurals>
     <string name="data_tip_reached">Tá an teorainn bainte amach</string>
+    <string name="data_ask">Fiafraigh de AI Assist</string>
+    <string name="data_ask_prompt">Féach ar mo húsáid sonraí agus inis dom cad atá suntasach agus cad a d’fhéadfainn a athrú.</string>
     <string name="data_tip_reached_text">Úsáideadh %1$s as %2$s, %3$d lá roimh an athnuachan. Is féidir go mbeidh an rud atá ag teacht anois níos moille nó go gcosnaíonn sé níos mó, de réir théarmaí an soláthraí.</string>
     <string name="data_tip_runs_out">Tagann an teorainn %1$s</string>
     <string name="data_tip_runs_out_text">Ag do luas de ghnáth rithfidh na %1$s roimh %2$s. Chun maireachtáil, fan faoi %3$s sa lá.</string>

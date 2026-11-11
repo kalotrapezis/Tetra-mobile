@@ -2061,6 +2061,8 @@
         <item quantity="other">Dein Netzwerk ist auf Kanal %1$d, mit %2$d Netzwerken darauf oder daneben. Kanal %3$d ist am wenigsten belegt: er wird in den Einstellungen des Routers geändert.</item>
     </plurals>
     <string name="data_tip_reached">Das Limit ist erreicht</string>
+    <string name="data_ask">AI Assist fragen</string>
+    <string name="data_ask_prompt">Sieh dir meine Datennutzung an und sag mir, was auffällt und was ich ändern könnte.</string>
     <string name="data_tip_reached_text">%1$s von %2$s verbraucht, %3$d Tage vor der Erneuerung. Was jetzt kommt, kann langsamer sein oder extra kosten, je nach Bedingungen des Anbieters.</string>
     <string name="data_tip_runs_out">Das Limit kommt %1$s</string>
     <string name="data_tip_runs_out_text">Bei deinem üblichen Tempo sind die %1$s vor %2$s aufgebraucht. Damit es reicht, bleib bei etwa %3$s pro Tag.</string>

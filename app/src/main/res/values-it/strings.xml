@@ -2061,6 +2061,8 @@
         <item quantity="other">La tua rete è sul canale %1$d, con %2$d reti sullo stesso canale o accanto. Il canale %3$d è il meno affollato: si cambia nelle impostazioni del router.</item>
     </plurals>
     <string name="data_tip_reached">Limite raggiunto</string>
+    <string name="data_ask">Chiedi ad AI Assist</string>
+    <string name="data_ask_prompt">Guarda il mio uso dei dati e dimmi cosa spicca e cosa potrei cambiare.</string>
     <string name="data_tip_reached_text">Usati %1$s di %2$s, %3$d giorni prima del rinnovo. Ciò che viene ora può essere più lento o costare di più, secondo le condizioni dell\'operatore.</string>
     <string name="data_tip_runs_out">Il limite arriva %1$s</string>
     <string name="data_tip_runs_out_text">Al tuo ritmo abituale i %1$s finiscono prima del %2$s. Per arrivarci, resta intorno a %3$s al giorno.</string>

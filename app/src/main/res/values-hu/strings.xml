@@ -2061,6 +2061,8 @@
         <item quantity="other">A hálózatod a(z) %1$d. csatornán van, rajta vagy mellette %2$d hálózattal. A(z) %3$d. csatorna a legkevésbé zsúfolt: a router beállításaiban módosítható.</item>
     </plurals>
     <string name="data_tip_reached">Elérted a keretet</string>
+    <string name="data_ask">Kérdezd az AI Assistot</string>
+    <string name="data_ask_prompt">Nézd meg az adathasználatomat, és mondd el, mi tűnik ki, és min változtathatnék.</string>
     <string name="data_tip_reached_text">%2$s keretből %1$s felhasználva, %3$d nappal a megújulás előtt. Ami most jön, lassabb lehet vagy pluszba kerülhet, a szolgáltató feltételei szerint.</string>
     <string name="data_tip_runs_out">A keret elfogy: %1$s</string>
     <string name="data_tip_runs_out_text">A szokásos tempóddal a(z) %1$s elfogy %2$s előtt. Hogy kitartson, maradj napi %3$s körül.</string>

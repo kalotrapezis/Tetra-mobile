@@ -2071,6 +2071,8 @@
         <item quantity="other">Your network is on channel %1$d, with %2$d networks on it or next to it. Channel %3$d is the least crowded: it is changed in the router\'s settings.</item>
     </plurals>
     <string name="data_tip_reached">The limit is reached</string>
+    <string name="data_ask">Ask AI Assist</string>
+    <string name="data_ask_prompt">Look at my data use and tell me what stands out and what I could change.</string>
     <string name="data_tip_reached_text">%1$s of %2$s used, %3$d days before the renewal. What comes now may be slower or cost extra, as the carrier\'s terms say.</string>
     <string name="data_tip_runs_out">The limit comes %1$s</string>
     <string name="data_tip_runs_out_text">At your usual pace the %1$s run out before %2$s. To last, stay near %3$s a day.</string>

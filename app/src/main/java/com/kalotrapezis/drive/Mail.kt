@@ -370,10 +370,20 @@ internal object MailRequests {
 
     fun write(root: File, device: String, op: String, ids: Collection<String>, to: String? = null, now: Long = System.currentTimeMillis()): File {
         require(op in OPS && ids.isNotEmpty() && (op != "move" || to in MailFiles.ROLES))
+        return put(root, device, now) { JSONObject().put("op", op).put("ids", JSONArray(ids.toList())).apply { if (op == "move") put("to", to) } }
+    }
+
+    /** A PC account's own name, given here (the user, 11 Nov: the university's could not be named from the phone): the PC writes it in accounts.json. */
+    fun rename(root: File, device: String, account: String, name: String, now: Long = System.currentTimeMillis()): File {
+        require(account.isNotBlank() && name.isNotBlank())
+        return put(root, device, now) { JSONObject().put("op", "rename").put("account", account).put("name", name.trim().take(40)) }
+    }
+
+    private fun put(root: File, device: String, now: Long, body: () -> JSONObject): File {
         val dir = File(root, "requests").apply { mkdirs() }
         var at = now
         while (File(dir, "$device-$at.json").exists()) at++
-        val json = JSONObject().put("op", op).put("ids", JSONArray(ids.toList())).put("at", at).put("device", device).apply { if (op == "move") put("to", to) }
+        val json = body().put("at", at).put("device", device)
         val part = File(dir, ".$device-$at.json.part").apply { writeText(json.toString()) } // a dot file: sync never takes it half written
         return File(dir, "$device-$at.json").also { check(part.renameTo(it)) }
     }

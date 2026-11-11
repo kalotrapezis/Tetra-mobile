@@ -2061,6 +2061,8 @@
         <item quantity="other">Dit netværk er på kanal %1$d med %2$d netværk på den eller ved siden af. Kanal %3$d er den mindst travle: den ændres i routerens indstillinger.</item>
     </plurals>
     <string name="data_tip_reached">Grænsen er nået</string>
+    <string name="data_ask">Spørg AI Assist</string>
+    <string name="data_ask_prompt">Se på mit dataforbrug, og fortæl mig, hvad der skiller sig ud, og hvad jeg kunne ændre.</string>
     <string name="data_tip_reached_text">%1$s af %2$s brugt, %3$d dage før fornyelsen. Det, der kommer nu, kan være langsommere eller koste ekstra, som teleselskabets vilkår siger.</string>
     <string name="data_tip_runs_out">Grænsen nås %1$s</string>
     <string name="data_tip_runs_out_text">I dit sædvanlige tempo slipper de %1$s op før %2$s. For at nå det skal du holde dig omkring %3$s om dagen.</string>

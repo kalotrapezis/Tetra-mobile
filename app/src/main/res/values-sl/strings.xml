@@ -2187,6 +2187,8 @@
         <item quantity="other">Vaše omrežje je na kanalu %1$d, na njem ali poleg njega je %2$d omrežij. Kanal %3$d je najmanj zaseden: spremenite ga v nastavitvah usmerjevalnika.</item>
     </plurals>
     <string name="data_tip_reached">Omejitev je dosežena</string>
+    <string name="data_ask">Vprašaj AI Assist</string>
+    <string name="data_ask_prompt">Poglej mojo porabo podatkov in mi povej, kaj izstopa in kaj bi lahko spremenil.</string>
     <string name="data_tip_reached_text">Porabljeno %1$s od %2$s, %3$d dni pred obnovitvijo. Kar pride zdaj, je lahko počasnejše ali stane več, kot pravijo pogoji operaterja.</string>
     <string name="data_tip_runs_out">Omejitev bo dosežena %1$s</string>
     <string name="data_tip_runs_out_text">Z vašim običajnim tempom bo %1$s porabljenih pred %2$s. Da zdrži, ostanite pri približno %3$s na dan.</string>

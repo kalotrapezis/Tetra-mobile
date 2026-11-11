@@ -2187,6 +2187,8 @@
         <item quantity="other">Jūsų tinklas yra kanale %1$d, jame ar šalia jo – %2$d tinklų. Kanalas %3$d mažiausiai užimtas: jis keičiamas maršruto parinktuvo nustatymuose.</item>
     </plurals>
     <string name="data_tip_reached">Limitas pasiektas</string>
+    <string name="data_ask">Klausti AI Assist</string>
+    <string name="data_ask_prompt">Pažiūrėk į mano duomenų naudojimą ir pasakyk, kas išsiskiria ir ką galėčiau pakeisti.</string>
     <string name="data_tip_reached_text">Išnaudota %1$s iš %2$s, likus %3$d d. iki atnaujinimo. Tai, kas bus toliau, gali būti lėčiau arba kainuoti papildomai, kaip nurodo operatoriaus sąlygos.</string>
     <string name="data_tip_runs_out">Limitas bus pasiektas %1$s</string>
     <string name="data_tip_runs_out_text">Įprastu tempu %1$s baigsis anksčiau nei %2$s. Kad užtektų, laikykitės apie %3$s per dieną.</string>

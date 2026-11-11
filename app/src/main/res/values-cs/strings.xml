@@ -2187,6 +2187,8 @@
         <item quantity="other">Vaše síť je na kanálu %1$d a na něm nebo vedle je %2$d sítí. Nejméně obsazený je kanál %3$d: mění se v nastavení routeru.</item>
     </plurals>
     <string name="data_tip_reached">Limit je vyčerpán</string>
+    <string name="data_ask">Zeptat se AI Assist</string>
+    <string name="data_ask_prompt">Podívej se na moje využití dat a řekni mi, co vyčnívá a co bych mohl změnit.</string>
     <string name="data_tip_reached_text">Využito %1$s z %2$s, %3$d d před obnovením. Co přijde teď, může být pomalejší nebo stát víc, podle podmínek operátora.</string>
     <string name="data_tip_runs_out">Limit přijde %1$s</string>
     <string name="data_tip_runs_out_text">Vaším obvyklým tempem dojde %1$s dřív než %2$s. Aby vydržel, držte se kolem %3$s denně.</string>

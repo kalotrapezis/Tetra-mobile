@@ -170,6 +170,7 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
             "notes" -> NotesSync.soon(app)
             "places" -> LocationReminders.planSoon(app)
             "contacts" -> { ScopedSync.soon(app, "contacts", 0, orWhole = true); ContactsAccount.soon(app) }
+            "mail" -> ScopedSync.soon(app, "mail", 0, orWhole = true) // a rename or an action for the computer: it hears at once
             "schedules", "memory" -> ScopedSync.soon(app, "assistant", 0, orWhole = true) // the computer runs the schedules: it hears at once
         } },
         search = { q ->
@@ -185,12 +186,50 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
         photos = { place, at -> AssistantPhotos.at(app, place, at) },
         placesOn = { LocationReminders.ready(app) }, extract = Attach.reader(app),
         texts = { if (SmsBox.canRead(app)) SmsBox.read(app) else null },
+        here = { runCatching { app.getSystemService(android.location.LocationManager::class.java).let { lm ->
+            lm.allProviders.mapNotNull { runCatching { lm.getLastKnownLocation(it) }.getOrNull() }.maxByOrNull { it.time }?.let { it.latitude to it.longitude } } }.getOrNull() },
+        mediaKey = { key -> app.getSystemService(android.media.AudioManager::class.java).let { am ->
+            am.dispatchMediaKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, key)); am.dispatchMediaKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_UP, key)) } },
+        quiet = { on, until -> AssistantQuiet.set(app, on, until) },
+        photosBetween = { from, to -> android.os.Environment.getExternalStorageDirectory().let { shared ->
+            listDeviceMedia(app).filter { !it.isVideo && it.relativePath != null && it.takenMillis in from..to }.sortedByDescending { it.takenMillis }
+                .map { File(File(shared, it.relativePath!!), it.name) }.filter { it.isFile } } },
+        calls = { if (PhoneRelay.noCalls(app) || app.checkSelfPermission(android.Manifest.permission.READ_CALL_LOG) != android.content.pm.PackageManager.PERMISSION_GRANTED) null else PhoneLog.read(app, 400) },
         stations = { BrowserRules.bookmarks(app.getSharedPreferences("browser", Context.MODE_PRIVATE).getString("bookmarks", null)) },
         mapsStation = { BrowserMedia.station(app) },
         volume = { change, percent -> AssistantVolume.change(app, change, percent) },
         send = { c -> SyncClient(app, SyncStore(app)).assistDo(c) },
         hotspotDevice = if (PhoneRelay.noCalls(app)) DataFiles.device() else null, appContext = app)
     return AssistantChat(api, tools, forgetMs)
+}
+
+/**
+ * Do Not Disturb by voice («μην με ενοχλείς μέχρι τις 9»): Android's own, as the user set it up; off by itself at the time
+ * asked ([QuietOff], an alarm). Without the access, Android's page for it opens.
+ */
+internal object AssistantQuiet {
+    private fun off(c: Context) = android.app.PendingIntent.getBroadcast(c, 7341, Intent(c, QuietOff::class.java),
+        android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT)
+
+    fun set(c: Context, on: Boolean, until: Long?): String {
+        val nm = c.getSystemService(android.app.NotificationManager::class.java)
+        if (!nm.isNotificationPolicyAccessGranted) { CarQuiet.ask(c); return "Tetra may not change Do Not Disturb yet: Android's page for it is open, where the user allows Tetra; then ask again. Say so." }
+        nm.setInterruptionFilter(if (on) android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY else android.app.NotificationManager.INTERRUPTION_FILTER_ALL)
+        val am = c.getSystemService(android.app.AlarmManager::class.java)
+        am.cancel(off(c))
+        if (on && until != null) am.set(android.app.AlarmManager.RTC_WAKEUP, until, off(c))
+        WriterLog.i("AI Assist: Do Not Disturb ${if (on) "on" + (until?.let { " until ${java.time.Instant.ofEpochMilli(it)}" } ?: "") else "off"}")
+        return if (!on) "Do Not Disturb is off." else "Do Not Disturb is on" + (until?.let { " until " + java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalTime().withSecond(0) } ?: "") + "."
+    }
+}
+
+/** The time asked for has come: Do Not Disturb off again. */
+class QuietOff : android.content.BroadcastReceiver() {
+    override fun onReceive(c: Context, i: Intent) {
+        runCatching { c.getSystemService(android.app.NotificationManager::class.java).takeIf { it.isNotificationPolicyAccessGranted }
+            ?.setInterruptionFilter(android.app.NotificationManager.INTERRUPTION_FILTER_ALL) }
+        WriterLog.i("AI Assist: Do Not Disturb off, its time came")
+    }
 }
 
 /** "My words" (Settings › AI Assist): what Voxtral should spell right, sent with every recording as its context_bias. */

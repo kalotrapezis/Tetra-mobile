@@ -1241,9 +1241,17 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
         var problem by remember { mutableStateOf<String?>(null) }
         val scope = androidx.compose.runtime.rememberCoroutineScope()
         val microsoft = a.json?.optString("provider") == "microsoft" || a.json?.optString("auth").let { it != null && it != "" && it != "password" }
+        var name by remember { mutableStateOf(a.name) }
         AlertDialog(onDismissRequest = { if (!busy) using = null }, title = { Text(a.name) },
             text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(a.address)
+                // its name, as the PC's own accounts are named there (the user, 11 Nov: "I can't name the account like the others"): the PC writes it
+                OutlinedTextField(name, { name = it.take(40) }, singleLine = true, label = { Text(stringResource(R.string.common_name)) }, modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = { if (name.isNotBlank() && name.trim() != a.name) IconButton(onClick = {
+                        runCatching { MailRequests.rename(mailRoot(), MailEngine.device(), a.id, name.trim()); ScopedSync.soon(context.applicationContext, "mail", 0, orWhole = true) }
+                            .onFailure { WriterLog.e("Mail: renaming a PC account", it) }
+                        WriterLog.i("Mail: ${a.id} to be named on the PC"); using = null
+                    }) { Icon(painterResource(R.drawable.ic_check), stringResource(R.string.common_save)) } })
                 Text(stringResource(if (microsoft) R.string.mail_use_here_microsoft else R.string.mail_use_here_summary), style = MaterialTheme.typography.bodySmall)
                 TextButton(onClick = { using = null; storing = a.id }) { Icon(painterResource(R.drawable.ic_folder), contentDescription = null); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.mail_storage)) }
                 problem?.let { Text(it, color = MaterialTheme.colorScheme.error) }

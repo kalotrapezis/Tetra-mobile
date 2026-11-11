@@ -2187,6 +2187,8 @@
         <item quantity="other">In-network tiegħek hu fuq il-kanal %1$d, b’%2$d network fuqu jew qrib tiegħu. Il-kanal %3$d huwa l-inqas mimli: jinbidel fis-settings tar-router.</item>
     </plurals>
     <string name="data_tip_reached">Il-limitu wasal</string>
+    <string name="data_ask">Staqsi lil AI Assist</string>
+    <string name="data_ask_prompt">Ħares lejn l-użu tad-data tiegħi u għidli x’jispikka u x’nista’ nibdel.</string>
     <string name="data_tip_reached_text">Intużaw %1$s minn %2$s, %3$d ġranet qabel it-tiġdid. Dak li ġej issa jista’ jkun iktar bil-mod jew jiswa iktar, kif jgħidu t-termini tal-kumpanija.</string>
     <string name="data_tip_runs_out">Il-limitu jasal %1$s</string>
     <string name="data_tip_runs_out_text">Bil-pass tas-soltu, dak li fadal (%1$s) jispiċċa qabel %2$s. Biex idum, ibqa’ taħt %3$s kuljum.</string>

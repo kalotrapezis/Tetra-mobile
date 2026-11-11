@@ -2061,6 +2061,8 @@
         <item quantity="other">Verkkosi on kanavalla %1$d, ja sillä tai sen vieressä on %2$d verkkoa. Kanava %3$d on vähiten ruuhkainen: se vaihdetaan reitittimen asetuksista.</item>
     </plurals>
     <string name="data_tip_reached">Raja on saavutettu</string>
+    <string name="data_ask">Kysy AI Assistilta</string>
+    <string name="data_ask_prompt">Katso datankäyttöäni ja kerro, mikä erottuu ja mitä voisin muuttaa.</string>
     <string name="data_tip_reached_text">%1$s / %2$s käytetty, %3$d päivää ennen uusiutumista. Tästä eteenpäin yhteys voi olla hitaampi tai maksaa lisää operaattorin ehtojen mukaan.</string>
     <string name="data_tip_runs_out">Raja tulee vastaan %1$s</string>
     <string name="data_tip_runs_out_text">Tavallisella tahdillasi %1$s loppuu ennen päivää %2$s. Riittääksesi pysy noin %3$s:ssa päivässä.</string>

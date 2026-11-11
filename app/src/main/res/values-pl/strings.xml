@@ -2187,6 +2187,8 @@
         <item quantity="other">Twoja sieć jest na kanale %1$d, a na nim lub obok jest %2$d sieci. Kanał %3$d jest najmniej zatłoczony: zmienia się go w ustawieniach routera.</item>
     </plurals>
     <string name="data_tip_reached">Limit osiągnięty</string>
+    <string name="data_ask">Zapytaj AI Assist</string>
+    <string name="data_ask_prompt">Spójrz na moje zużycie danych i powiedz, co się wyróżnia i co mógłbym zmienić.</string>
     <string name="data_tip_reached_text">Zużyto %1$s z %2$s, %3$d dni przed odnowieniem. To, co teraz, może być wolniejsze lub kosztować więcej, zgodnie z warunkami operatora.</string>
     <string name="data_tip_runs_out">Limit skończy się %1$s</string>
     <string name="data_tip_runs_out_text">W zwykłym tempie %1$s skończy się przed %2$s. Aby wystarczyło, trzymaj się około %3$s dziennie.</string>

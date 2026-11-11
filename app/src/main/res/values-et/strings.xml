@@ -2061,6 +2061,8 @@
         <item quantity="other">Teie võrk on kanalil %1$d ja sellel või kõrval on %2$d võrku. Kanal %3$d on kõige vabam: seda muudetakse ruuteri seadetes.</item>
     </plurals>
     <string name="data_tip_reached">Limiit on täis</string>
+    <string name="data_ask">Küsi AI Assistilt</string>
+    <string name="data_ask_prompt">Vaata mu andmekasutust ja ütle, mis silma paistab ja mida võiksin muuta.</string>
     <string name="data_tip_reached_text">Kasutatud %1$s / %2$s, %3$d päeva enne uuenemist. Edasine võib olla aeglasem või maksta lisaks, nagu operaatori tingimused ütlevad.</string>
     <string name="data_tip_runs_out">Limiit saabub %1$s</string>
     <string name="data_tip_runs_out_text">Tavapärase tempo juures saavad %1$s otsa enne kuupäeva %2$s. Et jätkuks, püsige umbes %3$s piires päevas.</string>

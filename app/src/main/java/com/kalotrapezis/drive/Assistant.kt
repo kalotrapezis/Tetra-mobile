@@ -255,6 +255,18 @@ internal class AssistantTools(
     private val extract: (File) -> Attach.Doc = { Attach.extract(it) },
     /** The phone's SMS (SmsBox.read), newest first; null while Tetra may not read them. */
     private val texts: () -> List<SmsText>? = { null },
+    /** The phone's call log (PhoneLog.read), newest first; null while Tetra may not read it or on a tablet without a SIM. */
+    private val calls: () -> List<LoggedCall>? = { null },
+    /** The photos taken between two moments (ms), newest first (the phone's own folders). */
+    private val photosBetween: (Long, Long) -> List<File> = { _, _ -> emptyList() },
+    /** Where the phone was last (lat, lng); null without a fix or the permission. */
+    private val here: () -> Pair<Double, Double>? = { null },
+    /** A media key (KeyEvent.KEYCODE_MEDIA_…) to whatever plays. */
+    private val mediaKey: (Int) -> Unit = {},
+    /** Do Not Disturb on (until a time, ms) or off: what happened, for the model. */
+    private val quiet: (Boolean, Long?) -> String = { _, _ -> "Do Not Disturb cannot be set here." },
+    /** A web page's HTML (web read). */
+    private val fetchPage: (String) -> String = { PageText.fetch(it) },
     /** The Browser's bookmarks (a station is one) and Maps' ♪ station (address, name). */
     private val stations: () -> List<Bookmark> = { emptyList() },
     private val mapsStation: () -> Pair<String, String>? = { null },
@@ -283,6 +295,11 @@ internal class AssistantTools(
     private var factsShown = emptyList<AssistantMemory.Fact>()
     private var schedulesShown = emptyList<JSONObject>()
     private var smsShown = emptyList<SmsThread>()
+    private var callsShown = emptyList<LoggedCall>()
+    private var accountsShown = emptyList<MailAccount>()
+    private var audioShown = emptyList<AudioJobs.Job>()
+    private var eventsShown = emptyList<Occurrence>()
+    private var nearShown = emptyList<Poi>()
     /** The note note_new or shopping_list just made: note_pin and note_color without a choice mean it. */
     private var noteMade: String? = null
 
@@ -290,7 +307,8 @@ internal class AssistantTools(
     fun facts() = AssistantMemory.list(tetra)
 
     /** What a tool's choice points at in the last list, for a confirmation's card (AssistantGuard). */
-    fun picked(name: String, args: JSONObject): String? = args.optInt("choice", 0).takeIf { it > 0 }?.let { n -> when (name) {
+    fun picked(name: String, args: JSONObject): String? = if (name == "tetra") AssistantCommands.of(args)?.takeIf { it.first.key == "calls back" }?.second?.firstOrNull()
+        ?.toIntOrNull()?.let { callsShown.getOrNull(it - 1) }?.let { nameOf(it.number) } else args.optInt("choice", 0).takeIf { it > 0 }?.let { n -> when (name) {
         "contact_call" -> contacts.getOrNull(n - 1)?.name
         "alarm_delete" -> alarmsShown.getOrNull(n - 1)?.time?.toString()
         "memory_forget" -> factsShown.getOrNull(n - 1)?.text
@@ -401,6 +419,7 @@ internal class AssistantTools(
             "make_image" -> image(args.getString("prompt")).let { ToolResult("The picture is on the screen, saved as ${it.name}.", image = it) }
             "attachment_read" -> ToolResult(attached()?.let { Attach.read(it, args.optInt("part", 0).takeIf { n -> n > 0 }, args.optString("query")) } ?: "No file is attached in this chat.")
             "audio_make" -> audioMake(args)
+            "tetra" -> command(args)
             else -> ToolResult("No tool called $name.")
         }
     }.getOrElse { ToolResult("Failed: ${it.message}") }
@@ -823,13 +842,28 @@ internal class AssistantTools(
 
     // ---- Mail (the user, 31 Oct: new mail, what needs attention, a mail from someone, write one) ----
     private fun mails() = MailFiles.index(MailFiles.root(tetra), MailEngine.device())
+    private fun mailAccounts() = MailFiles.root(tetra).let { r -> MailFiles.accounts(r, MailEngine.ownAccounts(r).map { it.optString("id") }.toSet()) }
+    /**
+     * The accounts a request names by "account" (its name or its address, or a part: «Πανεπιστήμιο», "nup.ac.cy"), null for every
+     * one; none like it: the accounts there are, for the model to ask again (the user, 11 Nov: AI Assist could not see the university's).
+     */
+    private fun mailAccountIds(a: JSONObject): Result<Set<String>?> {
+        val words = ContactsFiles.plain(a.optString("account")).split(Regex("[\\s@.]+")).filter { it.isNotEmpty() }
+        if (words.isEmpty()) return Result.success(null)
+        val all = mailAccounts()
+        val hit = all.filter { acc -> ContactsFiles.plain("${acc.name} ${acc.address}").let { t -> words.all { it in t } } }
+        return if (hit.isNotEmpty()) Result.success(hit.map { it.id }.toSet())
+        else Result.failure(IllegalArgumentException("No mail account is called \"${a.optString("account")}\". The accounts: " +
+            all.joinToString("; ") { "${it.name} <${it.address}>" } + ". Ask again with one of them (its name or address), or without an account for all of them."))
+    }
     /** A numbered list for the model (sender, subject, when, unread/♥, the start of the text) and the screen (each opens the mail). */
     private fun mailList(found: List<MailEntry>, empty: String, stored: Boolean = false): ToolResult {
         mailsShown = found
         if (found.isEmpty()) return ToolResult(empty)
         val root = MailFiles.root(tetra)
+        val names = mailAccounts().associate { it.id to it.name }
         return ToolResult(found.mapIndexed { i, e ->
-            "${i + 1}. ${e.from.ifEmpty { e.fromAddress }} <${e.fromAddress}> — ${e.subject} (${Instant.ofEpochMilli(e.date).atZone(zone).format(SHOWN)}, ${e.folder})" +
+            "${i + 1}. ${e.from.ifEmpty { e.fromAddress }} <${e.fromAddress}> — ${e.subject} (${Instant.ofEpochMilli(e.date).atZone(zone).format(SHOWN)}, ${e.folder}, ${names[e.account] ?: e.account})" +
                 (if (!e.seen) " unread" else "") + (if (e.flagged) " ♥" else "") + (if (e.gone) " local only (no longer on the server)" else "") +
                 // the stored ones: their attachments by name, to export one
                 (if (stored) MailFiles.attachments(root, e).takeIf { it.isNotEmpty() }?.joinToString(", ", " 📎 ") { it.name }.orEmpty() else if (e.attachments > 0) " 📎" else "") +
@@ -847,8 +881,10 @@ internal class AssistantTools(
         val from = day("from_date")?.atStartOfDay(zone)?.toInstant()?.toEpochMilli()
         val to = day("to_date")?.plusDays(1)?.atStartOfDay(zone)?.toInstant()?.toEpochMilli()?.minus(1)
         val words = listOf(a.optString("from"), a.optString("query")).joinToString(" ").trim()
-        if (words.isEmpty() && from == null && to == null) return ToolResult("Say who it is from, some words, or the dates.")
-        return mailList(MailArchive.search(root, MailArchive.entries(root, device), words, from, to).take(15), "Nothing like that in the mail kept on this device.", stored = true)
+        val ids = mailAccountIds(a).getOrElse { return ToolResult(it.message!!) }
+        if (words.isEmpty() && from == null && to == null && ids == null) return ToolResult("Say who it is from, some words, the dates or the account.")
+        return mailList(MailArchive.search(root, MailArchive.entries(root, device).filter { ids == null || it.account in ids }, words, from, to).take(15),
+            "Nothing like that in the mail kept on this device.", stored = true)
     }
 
     /** One mail of the last list, or one of its attachments, copied into Tetra/Documents (never over a file there). */
@@ -865,14 +901,16 @@ internal class AssistantTools(
 
     private fun mailNew(a: JSONObject): ToolResult {
         val since = now().minusHours(a.optLong("hours", 24)).toInstant().toEpochMilli()
-        return mailList(mails().filter { it.folder == "Inbox" && (it.date >= since || (!it.seen && a.optBoolean("unread", true))) }.sortedByDescending { it.date }.take(15),
-            "No new mail.")
+        val ids = mailAccountIds(a).getOrElse { return ToolResult(it.message!!) }
+        return mailList(mails().filter { it.folder == "Inbox" && (ids == null || it.account in ids) && (it.date >= since || (!it.seen && a.optBoolean("unread", true))) }
+            .sortedByDescending { it.date }.take(15), "No new mail.")
     }
 
     /** The recent Inbox mail that is unread or ♥, with the start of each: the model says which need an answer or an action. */
     private fun mailAttention(a: JSONObject): ToolResult {
         val since = now().minusDays(a.optLong("days", 14)).toInstant().toEpochMilli()
-        return mailList(mails().filter { it.folder == "Inbox" && it.date >= since && (!it.seen || it.flagged) }.sortedByDescending { it.date }.take(25),
+        val ids = mailAccountIds(a).getOrElse { return ToolResult(it.message!!) }
+        return mailList(mails().filter { it.folder == "Inbox" && (ids == null || it.account in ids) && it.date >= since && (!it.seen || it.flagged) }.sortedByDescending { it.date }.take(25),
             "Nothing unread or marked ♥ in the last ${a.optLong("days", 14)} days.")
     }
 
@@ -881,8 +919,9 @@ internal class AssistantTools(
         val who = ContactsFiles.plain(a.optString("from")).trim()
         val addresses = if (who.isEmpty()) emptySet() else named(a.optString("from")).flatMap { c -> c.emails.map { it.value.lowercase() } }.toSet()
         val words = ContactsFiles.plain(a.optString("query")).split(' ').filter { it.length >= 2 }
-        if (who.isEmpty() && words.isEmpty()) return ToolResult("Say who it is from or some words.")
-        return mailList(mails().filter { e -> e.folder != "Spam" && e.folder != "Trash" &&
+        val ids = mailAccountIds(a).getOrElse { return ToolResult(it.message!!) }
+        if (who.isEmpty() && words.isEmpty() && ids == null) return ToolResult("Say who it is from, some words or the account.")
+        return mailList(mails().filter { e -> e.folder != "Spam" && e.folder != "Trash" && (ids == null || e.account in ids) &&
             (who.isEmpty() || e.fromAddress.lowercase() in addresses || who.split(' ').all { w -> ContactsFiles.plain("${e.from} ${e.fromAddress}").contains(w) }) &&
             words.all { w -> ContactsFiles.plain("${e.subject} ${e.snippet}").contains(w) } }.sortedByDescending { it.date }.take(15), "No mail found.")
     }
@@ -897,6 +936,431 @@ internal class AssistantTools(
             ?: return ToolResult("There is no mail account in Tetra's Mail. Say so.")
         return ToolResult("The mail to $to is on the screen, written, from ${acc.address}; it waits for the user to check it and press Send.",
             cards = listOf(ResultCard.Mail(acc.id, acc.address, to, a.optString("subject"), a.optString("body"))))
+    }
+
+    // ---- Tetra's command line (AssistantCommands): one tool, a command each ----
+    private fun command(a: JSONObject): ToolResult {
+        val (c, rest) = AssistantCommands.of(a) ?: return ToolResult("No command \"${a.optString("command")}\". " + AssistantCommands.description())
+        if (!AiGate.state.keeps(c.gate)) return ToolResult("The user does not let the assistant use their ${c.gate} (Settings › AI Assist). Say so; do not try another way.")
+        val n = rest.firstOrNull()?.toIntOrNull()
+        return when (c.key) {
+            "calls missed" -> callsMissed((n ?: 7).coerceIn(1, 60))
+            "calls recent" -> callsRecent((n ?: 15).coerceIn(1, 50))
+            "calls back" -> callBack(n)
+            "mail accounts" -> mailAccountsList()
+            "mail name" -> mailName(n, rest.drop(1).joinToString(" "))
+            "calendar find" -> calendarFind(rest.joinToString(" "))
+            "notes recent" -> notesRecent((n ?: 8).coerceIn(1, 30))
+            "notes add" -> notesAdd(n, rest.drop(1).joinToString(" "))
+            "notes trash" -> notesTrash(n)
+            "files recent" -> filesRecent(rest.firstOrNull()?.lowercase() ?: "all")
+            "audio list" -> audioList()
+            "audio play" -> audioPlay(rest.firstOrNull())
+            "photos recent" -> (n ?: 1).coerceIn(1, 365).let { d -> photosShown(now().minusDays(d.toLong()).toInstant().toEpochMilli(), now().toInstant().toEpochMilli(), "in the last $d days") }
+            "photos day" -> rest.firstOrNull()?.let { runCatching { LocalDate.parse(it) }.getOrNull() }?.let { d ->
+                photosShown(d.atStartOfDay(zone).toInstant().toEpochMilli(), d.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli() - 1, "on $d") }
+                ?: ToolResult("Say the day as YYYY-MM-DD.")
+            "maps places" -> mapsPlaces()
+            "contacts add" -> contactsAdd(rest)
+            "web read" -> webRead(rest.firstOrNull().orEmpty())
+            "media pause" -> media(android.view.KeyEvent.KEYCODE_MEDIA_PAUSE, "Paused.")
+            "media play" -> media(android.view.KeyEvent.KEYCODE_MEDIA_PLAY, "Playing again.")
+            "media next" -> media(android.view.KeyEvent.KEYCODE_MEDIA_NEXT, "The next one.")
+            "media previous" -> media(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS, "The one before.")
+            "quiet on" -> ToolResult(quiet(true, rest.lastOrNull()?.let { t -> clock(t)?.let { at(it).toInstant().toEpochMilli() } })) // "until 21:00" or "21:00"
+            "quiet off" -> ToolResult(quiet(false, null))
+            "mail read", "mail archive", "mail delete" -> mailAct(c.key.substringAfter(' '), rest)
+            "mail reply" -> mailReply(n, rest.drop(1).joinToString(" "))
+            "calendar move" -> calendarMove(n, rest.drop(1))
+            "calendar cancel" -> calendarCancel(n)
+            "reminder add" -> reminderAdd(rest)
+            "notes tick" -> notesTick(n, rest.drop(1).joinToString(" "))
+            "audio delete" -> audioDelete(n)
+            "audio rename" -> audioRename(n, rest.drop(1).joinToString(" "))
+            "maps nearest" -> mapsNearest(rest.joinToString(" "))
+            "maps go" -> n?.let { nearShown.getOrNull(it - 1) }?.let { p -> ToolResult("Directions to ${p.name} started in Tetra Maps.", go = "maps-go:${p.lat},${p.lng},${p.name}") }
+                ?: ToolResult(if (nearShown.isEmpty()) "Run maps nearest first." else "No number ${n ?: ""} in the last list; it has ${nearShown.size}.")
+            "contacts birthdays" -> birthdays((n ?: 30).coerceIn(1, 366))
+            "contacts phone", "contacts email" -> contactAddWay(c.key == "contacts phone", rest)
+            "data tips" -> dataTips()
+            "data apps" -> dataApps(n)
+            "data days" -> dataDays((n ?: 14).coerceIn(1, 62))
+            else -> ToolResult("Not here yet: ${c.key}.")
+        }
+    }
+
+    // ---- Mail accounts (the user, 11 Nov: "if an account does not have a name, show me the accounts and let me choose to name it") ----
+    private fun mailAccountsList(): ToolResult {
+        val all = mailAccounts()
+        accountsShown = all
+        if (all.isEmpty()) return ToolResult("There is no mail account in Tetra's Mail.")
+        val unread = mails().filter { it.folder == "Inbox" && !it.seen }.groupingBy { it.account }.eachCount()
+        return ToolResult(all.mapIndexed { i, a ->
+            "${i + 1}. ${a.name} <${a.address}>${if (a.name.equals(a.address, true)) " (no name of its own)" else ""} — " +
+                "${if (a.own) "fetched by this device" else "through the computer"}, ${unread[a.id] ?: 0} unread in the Inbox"
+        }.joinToString("\n"))
+    }
+
+    private fun mailName(n: Int?, said: String): ToolResult {
+        val acc = n?.let { accountsShown.getOrNull(it - 1) } ?: return ToolResult(if (accountsShown.isEmpty()) "No accounts list yet: run mail accounts first."
+            else "No number ${n ?: ""} in the accounts list; it has ${accountsShown.size}.")
+        val name = said.trim().take(40).ifEmpty { return ToolResult("Say the new name.") }
+        val root = MailFiles.root(tetra)
+        if (acc.own) MailEngine.rename(root, acc.id, name) else MailRequests.rename(root, MailEngine.device(), acc.id, name)
+        changed("mail")
+        return ToolResult(if (acc.own) "Named ${acc.address} «$name»." else "Asked the computer to name ${acc.address} «$name»; every device shows it once the computer has saved it.")
+    }
+
+    // ---- Calendar: events by their words ----
+    private fun calendarFind(said: String): ToolResult {
+        val words = ContactsFiles.plain(said).split(' ').filter { it.length >= 2 }.ifEmpty { return ToolResult("Say some words of the event.") }
+        val found = CalendarFiles.occurrences(calendars(), now().minusDays(30).toInstant(), now().plusDays(365).toInstant())
+            .filter { o -> ContactsFiles.plain("${o.event.title} ${o.event.place} ${o.event.notes}").let { t -> words.all { it in t } } }.take(15)
+        eventsShown = found
+        if (found.isEmpty()) return ToolResult("No event has those words, from 30 days ago to a year ahead.")
+        return ToolResult(found.mapIndexed { i, o -> "${i + 1}. " +
+            (if (o.allDay) o.start.toLocalDate().toString() + " all day" else o.start.withZoneSameInstant(zone).format(SHOWN) + "–" + o.end.withZoneSameInstant(zone).toLocalTime().format(HM)) +
+            ": " + o.event.title + o.event.place.takeIf { it.isNotBlank() }?.let { " @ $it" }.orEmpty()
+        }.joinToString("\n"))
+    }
+
+    // ---- Notes: the latest, a line added, one to the Trash ----
+    private fun notesRecent(count: Int): ToolResult {
+        val list = notes().list().filter { it.trashedAt == null && it.archivedAt == null && !it.empty }.sortedByDescending { it.updatedAt }.take(count)
+        notesFound = list
+        if (list.isEmpty()) return ToolResult("Notes is empty.")
+        return ToolResult(list.mapIndexed { i, n -> "${i + 1}. ${noteTitle(n)} (${Instant.ofEpochMilli(n.updatedAt).atZone(zone).format(SHOWN)})" }.joinToString("\n"),
+            choices = list.map { AssistantChoice(noteTitle(it), go = "note:${it.id}") })
+    }
+
+    private fun notesAdd(n: Int?, text: String): ToolResult {
+        val line = text.trim().ifEmpty { return ToolResult("Say what to add.") }
+        val shown = n?.let { notesFound.getOrNull(it - 1) } ?: return ToolResult("Which note? Run notes recent or notes_search first.")
+        val store = notes()
+        val note = store.get(shown.id) ?: return ToolResult("That note is gone.")
+        if (note.checklist) store.setText(note.id, note.title, note.content, note.items + CheckItem(java.util.UUID.randomUUID().toString(), line, false, (note.items.maxOfOrNull { it.order } ?: -1) + 1))
+        else store.setText(note.id, note.title, note.content.trimEnd().let { if (it.isEmpty()) line else "$it\n$line" }, null)
+        changed("notes")
+        return ToolResult("Added to «${noteTitle(note)}»: $line")
+    }
+
+    private fun notesTrash(n: Int?): ToolResult {
+        val shown = n?.let { notesFound.getOrNull(it - 1) } ?: return ToolResult("Which note? Run notes recent or notes_search first.")
+        notes().update(shown.id) { it.put("trashedAt", now().toInstant().toEpochMilli()) }
+        changed("notes")
+        return ToolResult("«${noteTitle(shown)}» is in the Trash of Notes for 30 days.")
+    }
+
+    // ---- Files of a kind, and the audio Library ----
+    private val KINDS = mapOf("documents" to setOf("docx", "doc", "odt", "rtf", "txt", "md", "xlsx", "xls", "ods", "csv", "pptx", "ppt", "odp"),
+        "pdf" to setOf("pdf"), "pictures" to setOf("jpg", "jpeg", "png", "webp", "heic", "gif"), "audio" to setOf("mp3", "m4a", "ogg", "opus", "wav", "flac", "aac"),
+        "video" to setOf("mp4", "mkv", "webm", "mov", "3gp"))
+
+    private fun filesRecent(kind: String): ToolResult {
+        val exts = KINDS[kind.removeSuffix("s").let { k -> KINDS.keys.firstOrNull { it.startsWith(k) } }]
+        val found = DriveRules.allItems(tetra).filter { !it.isDirectory && (exts == null || it.file.extension.lowercase() in exts) }.sortedByDescending { it.lastModified }.take(10)
+        files = found.map { it.file }
+        if (found.isEmpty()) return ToolResult("No ${if (exts == null) "" else "$kind "}files in Tetra.")
+        return ToolResult(found.mapIndexed { i, it -> "${i + 1}. ${it.relativePath} (${Instant.ofEpochMilli(it.lastModified).atZone(zone).format(SHOWN)})" }.joinToString("\n"),
+            cards = listOf(ResultCard.Files(found.map { it.file }, tetra)))
+    }
+
+    private fun audioList(): ToolResult {
+        val jobs = AudioJobs.dir(tetra).listFiles { f -> f.isDirectory }.orEmpty().mapNotNull { AudioJobs.read(tetra, it.name) }.sortedByDescending { it.changed }.take(15)
+        audioShown = jobs
+        if (jobs.isEmpty()) return ToolResult("The Library is empty: no audio made yet. audio_make makes one from a file.")
+        return ToolResult(jobs.mapIndexed { i, j ->
+            "${i + 1}. ${j.title.ifBlank { j.name }} — ${if (j.mode == "show") "show" else "narration"}" +
+                (if (j.audio != null) ", ${Math.round(j.seconds / 60).coerceAtLeast(1)} min, ready" else if (j.error.isNotBlank()) ", failed" else ", being made (${Math.round(AudioJobs.share(j) * 100)}%)") +
+                ", ${Instant.ofEpochMilli(j.changed).atZone(zone).format(SHOWN)}"
+        }.joinToString("\n"))
+    }
+
+    private fun audioPlay(which: String?): ToolResult {
+        if (audioShown.isEmpty()) audioList()
+        val n = which?.toIntOrNull()
+        val j = (if (n != null) audioShown.getOrNull(n - 1) else audioShown.firstOrNull { it.audio != null })
+            ?: return ToolResult(if (audioShown.isEmpty()) "The Library is empty: no audio made yet." else if (n != null) "No number $n in the Library list." else "Nothing in the Library is ready yet.")
+        val f = j.audio ?: return ToolResult("«${j.title.ifBlank { j.name }}» is not ready yet.")
+        return ToolResult("Playing «${j.title.ifBlank { j.name }}».", open = f)
+    }
+
+    // ---- Photos by day ----
+    private fun photosShown(from: Long, to: Long, said: String): ToolResult {
+        val found = photosBetween(from, to)
+        if (found.isEmpty()) return ToolResult("No photos $said.")
+        return ToolResult("${found.size} photos $said; the newest are on the screen.", photos = found.take(SHOWN_PHOTOS))
+    }
+
+    // ---- Maps: the user's own places ----
+    private fun mapsPlaces(): ToolResult {
+        val list = MapsFiles.places(MapsFiles.root(tetra))
+        if (list.isEmpty()) return ToolResult("No saved places in Tetra Maps.")
+        return ToolResult(list.mapIndexed { i, p -> "${i + 1}. ${p.name}${p.label.takeIf { it.isNotBlank() && it != p.name }?.let { " ($it)" }.orEmpty()}" }.joinToString("\n"))
+    }
+
+    // ---- Contacts: a new one ----
+    private fun contactsAdd(rest: List<String>): ToolResult {
+        // the number as said may come in pieces ("6944 123 456"): every trailing piece of digits is the number
+        val tail = rest.takeLastWhile { w -> w.isNotEmpty() && w.all { c -> c.isDigit() || c in "+-()" } }
+        val number = tail.joinToString("").takeIf { it.count(Char::isDigit) >= 5 } ?: return ToolResult("Say the name and then the phone number.")
+        val name = rest.dropLast(tail.size).joinToString(" ").trim().ifEmpty { return ToolResult("Say the contact's name.") }
+        if (allContacts().any { c -> c.info.phones.any { PhoneLog.same(it.value, number) } }) return ToolResult("$number is already in Contacts as ${nameOf(number)}.")
+        val words = name.split(' ')
+        ContactsFiles.save(ContactsFiles.root(tetra), null, ContactInfo(given = words.first(), family = words.drop(1).joinToString(" "), formatted = name, phones = listOf(VField("cell", number))))
+        changed("contacts")
+        return ToolResult("Saved $name, $number, in Contacts.")
+    }
+
+    // ---- Playing, and Do Not Disturb ----
+    private fun media(key: Int, said: String): ToolResult { mediaKey(key); return ToolResult("$said Say nothing more.") }
+    private fun clock(t: String) = runCatching { LocalTime.parse(t.padStart(5, '0')) }.getOrNull()
+    /** [t] today, or tomorrow when it has passed. */
+    private fun at(t: LocalTime) = now().with(t).withSecond(0).withNano(0).let { if (it.isAfter(now())) it else it.plusDays(1) }
+
+    // ---- Mail: mark read, archive, delete (the computer does them for its accounts, as Mail's own buttons), and a reply ----
+    private fun picks(rest: List<String>, from: Int): List<Int>? =
+        if (rest.firstOrNull()?.lowercase() == "all") (1..from).toList() else rest.mapNotNull { it.trim(',').toIntOrNull() }.filter { it in 1..from }.distinct().ifEmpty { null }
+
+    private fun mailAct(op: String, rest: List<String>): ToolResult {
+        if (mailsShown.isEmpty()) return ToolResult("No mail list yet: list or find the mails first.")
+        val chosen = picks(rest, mailsShown.size)?.map { mailsShown[it - 1] } ?: return ToolResult("Say which, by their numbers in the last list (1 2 3), or all.")
+        val root = MailFiles.root(tetra)
+        val own = mailAccounts().filter { it.own }.map { it.id }.toSet()
+        val (here, theirs) = chosen.partition { it.account in own }
+        if (here.isNotEmpty()) appContext?.let { MailEngine.act(it, root, op, here.map { m -> m.id }) } ?: error("This device cannot reach the mail server from here.")
+        if (theirs.isNotEmpty()) MailRequests.write(root, MailEngine.device(), op, theirs.map { it.id })
+        changed("mail")
+        val what = mapOf("read" to "Marked read", "archive" to "Archived", "delete" to "Moved to the Trash")[op]
+        return ToolResult("$what: ${chosen.size} mail${if (chosen.size > 1) "s" else ""}" + if (theirs.isNotEmpty()) " (the computer does it for its accounts at the next sync)." else ".")
+    }
+
+    private fun mailReply(n: Int?, body: String): ToolResult {
+        val m = n?.let { mailsShown.getOrNull(it - 1) } ?: return ToolResult(if (mailsShown.isEmpty()) "No mail list yet: find the mail first." else "No number ${n ?: ""} in the last mail list.")
+        val acc = mailAccounts().firstOrNull { it.id == m.account } ?: mailAccounts().firstOrNull() ?: return ToolResult("There is no mail account in Tetra's Mail. Say so.")
+        val subject = if (m.subject.trimStart().startsWith("re:", true)) m.subject else "Re: ${m.subject}"
+        return ToolResult("The reply to ${m.from.ifEmpty { m.fromAddress }} is on the screen, written, from ${acc.address}; it waits for the user to check it and press Send.",
+            cards = listOf(ResultCard.Mail(acc.id, acc.address, m.fromAddress, subject, body.trim())))
+    }
+
+    // ---- Calendar: move, cancel, a reminder ----
+    private fun shownEvent(n: Int?): Occurrence? = n?.let { eventsShown.getOrNull(it - 1) }
+    private fun repeats(o: Occurrence) = o.event.rrule != null || o.event.recurrenceId != null || o.file.overrides.isNotEmpty()
+
+    private fun calendarMove(n: Int?, rest: List<String>): ToolResult {
+        val o = shownEvent(n) ?: return ToolResult("Which event? Run calendar find first and give its number.")
+        if (repeats(o)) return ToolResult("«${o.event.title}» repeats: change it in Calendar, where Tetra asks whether this one or all. Say so.")
+        val day = rest.firstOrNull()?.let { runCatching { LocalDate.parse(it.take(10)) }.getOrNull() } ?: return ToolResult("Say the new day as YYYY-MM-DD.")
+        val time = (rest.getOrNull(1) ?: rest.first().substringAfter('T', "")).takeIf { it.isNotBlank() }?.let { clock(it) ?: return ToolResult("Say the time as HH:MM.") }
+        val e = o.event
+        val start = if (e.allDay) day.atStartOfDay(e.start.zone) else day.atTime(time ?: e.start.withZoneSameInstant(zone).toLocalTime()).atZone(zone)
+        CalendarFiles.save(o.file.file, e.copy(start = start, end = start.plus(Duration.between(e.start, e.end))))
+        changed("calendar")
+        return ToolResult("Moved «${e.title}» to ${if (e.allDay) day.toString() else start.format(SHOWN)}.")
+    }
+
+    private fun calendarCancel(n: Int?): ToolResult {
+        val o = shownEvent(n) ?: return ToolResult("Which event? Run calendar find first and give its number.")
+        if (repeats(o)) return ToolResult("«${o.event.title}» repeats: cancel it in Calendar, where Tetra asks whether this one or all. Say so.")
+        CalendarFiles.trash(CalendarFiles.root(tetra), o.file.file)
+        changed("calendar")
+        return ToolResult("«${o.event.title}» is deleted (in Tetra's Trash for 30 days).")
+    }
+
+    private fun reminderAdd(rest: List<String>): ToolResult {
+        val w = rest.firstOrNull() ?: return ToolResult("Say when (HH:MM or YYYY-MM-DDTHH:MM) and what.")
+        val start = (if ('T' in w) runCatching { LocalDateTime.parse(w).atZone(zone) }.getOrNull() else clock(w)?.let(::at)) ?: return ToolResult("Say when as HH:MM or YYYY-MM-DDTHH:MM.")
+        val what = rest.drop(1).joinToString(" ").trim().ifEmpty { return ToolResult("Say what to be reminded of.") }
+        val root = CalendarFiles.root(tetra)
+        val cal = calendars().firstOrNull() ?: CalendarFiles.newCalendar(root.apply { mkdirs() }, "Calendar", CalendarFiles.PALETTE[0])
+        val uid = CalendarFiles.newUid()
+        CalendarFiles.save(CalendarFiles.newFile(cal.dir, what, uid), CalEvent(uid, what, "", "", false, start, start.plusMinutes(15), alarms = listOf(CalAlarm(0, 0))))
+        changed("calendar")
+        return ToolResult("Reminder at ${start.format(SHOWN)}: $what.")
+    }
+
+    // ---- Notes: an item ticked ----
+    private fun notesTick(n: Int?, said: String): ToolResult {
+        val shown = n?.let { notesFound.getOrNull(it - 1) } ?: return ToolResult("Which note? Run notes recent or notes_search first.")
+        val store = notes()
+        val note = store.get(shown.id) ?: return ToolResult("That note is gone.")
+        if (!note.checklist) return ToolResult("«${noteTitle(note)}» is not a checklist.")
+        val words = ContactsFiles.plain(said).split(' ').filter { it.length >= 2 }.ifEmpty { return ToolResult("Say which item.") }
+        val hits = note.items.filter { i -> !i.checked && ContactsFiles.plain(i.text).let { t -> words.all { it.take(4) in t } } }
+        val item = hits.singleOrNull() ?: return ToolResult(if (hits.isEmpty()) "No open item like «$said» in «${noteTitle(note)}»; it has: ${note.items.filter { !it.checked }.joinToString(", ") { it.text }}."
+            else "More than one item is like that: ${hits.joinToString(", ") { it.text }}. Say which.")
+        store.setText(note.id, note.title, note.content, note.items.map { if (it.id == item.id) it.copy(checked = true) else it })
+        changed("notes")
+        return ToolResult("Ticked «${item.text}». Still open: ${note.items.count { !it.checked } - 1}.")
+    }
+
+    // ---- The Library: delete, rename ----
+    private fun audioShownAt(n: Int?) = n?.let { audioShown.getOrNull(it - 1) }
+    private fun audioDelete(n: Int?): ToolResult {
+        val j = audioShownAt(n) ?: return ToolResult("Which? Run audio list first and give its number.")
+        File(AudioJobs.dir(tetra), File(j.id).name).deleteRecursively()
+        audioShown = audioShown - j
+        return ToolResult("Deleted «${j.title.ifBlank { j.name }}» from the Library.")
+    }
+    private fun audioRename(n: Int?, title: String): ToolResult {
+        val j = audioShownAt(n) ?: return ToolResult("Which? Run audio list first and give its number.")
+        val name = title.trim().take(90).ifEmpty { return ToolResult("Say the new title.") }
+        val f = File(AudioJobs.dir(tetra), "${File(j.id).name}/job.json")
+        f.writeText(JSONObject(f.readText()).put("title", name).toString())
+        return ToolResult("Renamed it «$name».")
+    }
+
+    // ---- Maps: the nearest of a kind, from where the phone is ----
+    private fun mapsNearest(said: String): ToolResult {
+        val q = said.trim().ifEmpty { return ToolResult("Say what: a kind (fuel, pharmacy…) or words.") }
+        val (lat, lng) = here() ?: return ToolResult("Tetra does not know where the phone is (no location yet, or not allowed). Say so.")
+        val kind = MapsSearch.PILLS.firstOrNull { it.key == q.lowercase() }?.key
+        val found = MapsSearch.search(runCatching { MapsSearch.load(MapsFiles.root(tetra)) }.getOrDefault(emptyList()), if (kind != null) "" else q, lat, lng, kind, limit = 20)
+            .sortedBy { metresBetween(lat, lng, it.lat, it.lng) }.take(5)
+        nearShown = found
+        if (found.isEmpty()) return ToolResult("Nothing like «$q» on the map near here.")
+        return ToolResult(found.mapIndexed { i, p ->
+            val m = metresBetween(lat, lng, p.lat, p.lng)
+            "${i + 1}. ${p.name.ifBlank { "a ${p.kind.replace('_', ' ')} without a name" }}${p.more.takeIf { it.isNotBlank() }?.let { " (${it.take(60)})" }.orEmpty()} — ${if (m < 1000) "${(m / 10).toInt() * 10} m" else "%.1f km".format(java.util.Locale.ROOT, m / 1000)}" +
+                p.hours.takeIf { it.isNotBlank() }?.let { ", open $it" }.orEmpty()
+        }.joinToString("\n"))
+    }
+
+    // ---- Contacts: birthdays, a number or an address added ----
+    private fun birthdays(days: Int): ToolResult {
+        val today = now().toLocalDate()
+        val soon = allContacts().mapNotNull { c -> c.info.birthday?.let { b ->
+            val next = b.inYear(today.year).let { if (it.isBefore(today)) b.inYear(today.year + 1) else it }
+            Triple(c.info, next, b.year?.let { next.year - it })
+        } }.filter { !it.second.isAfter(today.plusDays(days.toLong())) }.sortedBy { it.second }
+        if (soon.isEmpty()) return ToolResult("No birthdays in the next $days days.")
+        return ToolResult(soon.joinToString("\n") { (i, d, age) -> "${d} ${d.dayOfWeek.toString().take(3).lowercase()}: ${i.name}${age?.let { " turns $it" }.orEmpty()}" +
+            if (d == today) " (today)" else "" })
+    }
+
+    private fun contactAddWay(phone: Boolean, rest: List<String>): ToolResult {
+        val value = rest.firstOrNull()?.trim() ?: return ToolResult("Say the ${if (phone) "number" else "address"} and then the name.")
+        if (phone && value.count(Char::isDigit) < 5 || !phone && '@' !in value) return ToolResult("Say the ${if (phone) "number" else "address"} first, then the contact's name.")
+        val name = rest.drop(1).joinToString(" ").trim().ifEmpty { return ToolResult("Say the contact's name.") }
+        val words = ContactsFiles.plain(name).split(' ').filter { it.isNotBlank() }
+        val hits = allContacts().filter { c -> words.all { w -> ContactsFiles.matches(c.info, w) } }
+        val c = hits.singleOrNull() ?: return ToolResult(if (hits.isEmpty()) "No contact called $name." else "More than one contact is like $name: ${hits.take(5).joinToString(", ") { it.info.name }}. Say which.")
+        val i = c.info
+        if (phone && i.phones.any { PhoneLog.same(it.value, value) } || !phone && i.emails.any { it.value.equals(value, true) }) return ToolResult("${i.name} has it already.")
+        ContactsFiles.save(ContactsFiles.root(tetra), c, if (phone) i.copy(phones = i.phones + VField("cell", value)) else i.copy(emails = i.emails + VField("home", value)))
+        changed("contacts")
+        return ToolResult("Added $value to ${i.name}.")
+    }
+
+    // ---- Data: the numbers behind the Data card (DataInsights), for AI Assist to explain ----
+    private class DataView(val plan: DataPlan?, val status: DataStatus?, val months: List<DataMonth>, val phone: Boolean)
+    private fun dataView(): DataView {
+        val root = File(tetra, TetraSystem.onDisk(DataFiles.FOLDER))
+        val all = DataFiles.all(root)
+        val today = now().toLocalDate()
+        val plan = DataFiles.plan(root)
+        hotspotDevice?.let { return DataView(plan, null, all[it].orEmpty(), false) } // a tablet: its own use, over the phone's hotspot
+        val months = all.values.maxByOrNull { m -> DataFiles.days(m).sumOf { it.mobile } }.orEmpty()
+        return DataView(plan, plan?.let { DataRules.status(it, DataFiles.days(months), today) }, months, true)
+    }
+    private fun words(w: DataWords) = appContext?.let { w.text(it) } ?: w.args.joinToString(", ", "${w.id}: ")
+
+    private fun dataTips(): ToolResult {
+        val v = dataView()
+        if (v.months.isEmpty()) return ToolResult("Tetra's Data has no counts yet on this device.")
+        val today = now().toLocalDate()
+        val m = DataInsights.metrics(v.plan, v.status, DataFiles.days(v.months), today, v.phone)
+        val tips = DataInsights.tips(v.plan, v.status, m, v.months.flatMap { it.apps }.filter { v.status == null || it.day in v.status.cycle }, v.phone)
+        fun b(n: Long) = DataRules.bytes(n)
+        val numbers = listOfNotNull("on average ${b(m.average)} a day this cycle", "a usual workday ${b(m.workdays)}, a weekend day ${b(m.weekends)} (the last three weeks)",
+            m.busiest?.let { "the busiest day ${it.first} with ${b(it.second)}" },
+            if (v.phone) "the hotspot shared ${m.hotspotShare}% of the mobile data" else "${m.hotspotShare}% of the Wi-Fi came over the phone's hotspot",
+            "Wi-Fi ${m.wifiShare}% of all", "forecast ${b(m.forecast)} by the cycle's end" + (v.status?.takeIf { v.plan?.limited == true }?.let { " of a ${b(it.size)} plan" } ?: ""),
+            m.runsOut?.let { "the plan runs out on $it" })
+        return ToolResult((if (tips.isEmpty()) "The card has no advice now." else "The card «For your plan» says:\n" + tips.joinToString("\n") { "- ${words(it.title)}: ${words(it.text)}" }) +
+            "\nThe numbers: " + numbers.joinToString("; ") + ".")
+    }
+
+    private fun dataApps(days: Int?): ToolResult {
+        val v = dataView()
+        val from = days?.let { now().toLocalDate().minusDays(it.toLong() - 1) } ?: v.status?.cycle?.start ?: now().toLocalDate().withDayOfMonth(1)
+        val apps = v.months.flatMap { it.apps }.filter { !it.day.isBefore(from) && it.app != "hotspot" }
+        if (apps.isEmpty()) return ToolResult("No app's data is counted since $from.")
+        fun b(n: Long) = DataRules.bytes(n)
+        val wifi = apps.filter { it.net == "wifi" }.groupBy { it.app }.mapValues { (_, l) -> l.sumOf { it.total } }
+        val rows = apps.filter { it.net == "mobile" }.groupBy { it.app }.map { (k, l) -> Triple(l.first().name, l.sumOf { it.fg }, l.sumOf { it.bg }) to k }
+            .sortedByDescending { it.first.second + it.first.third }.take(10)
+        val hotspot = v.months.flatMap { it.apps }.filter { !it.day.isBefore(from) && it.app == "hotspot" }.sumOf { it.total }
+        return ToolResult("Mobile data since $from, by app:\n" + rows.mapIndexed { i, (r, k) ->
+            "${i + 1}. ${r.first}: ${b(r.second + r.third)} (open ${b(r.second)}, in the background ${b(r.third)}); Wi-Fi ${b(wifi[k] ?: 0)}"
+        }.joinToString("\n") + (if (hotspot > 0) "\nThe hotspot shared ${b(hotspot)}." else ""))
+    }
+
+    private fun dataDays(count: Int): ToolResult {
+        val v = dataView()
+        val days = DataFiles.days(v.months).filter { !it.day.isAfter(now().toLocalDate()) }.takeLast(count)
+        if (days.isEmpty()) return ToolResult("Tetra's Data has no counts yet on this device.")
+        fun b(n: Long) = DataRules.bytes(n)
+        return ToolResult(days.reversed().joinToString("\n") { d ->
+            "${d.day} ${d.day.dayOfWeek.toString().take(3).lowercase()}: mobile ${b(d.mobile)}" + (v.plan?.let { p -> DataRules.counted(p, d).takeIf { it != d.mobile }?.let { " (the plan counts ${b(it)})" } } ?: "") +
+                ", Wi-Fi ${b(d.wifi)}" + (if (d.hotspot > 0) ", hotspot shared ${b(d.hotspot)}" else "") + (if (d.viaHotspot > 0) ", over the phone's hotspot ${b(d.viaHotspot)}" else "")
+        })
+    }
+
+    // ---- The web: a page as text ----
+    private fun webRead(url: String): ToolResult {
+        if (!url.startsWith("http")) return ToolResult("Give the page's address (https://…).")
+        val html = fetchPage(url)
+        val text = PageText.text(html)
+        if (text.length < 200) return ToolResult("The page gave almost no text (it may need a sign-in, or it builds itself with scripts). Offer to open it with open_url instead.")
+        return ToolResult(PageText.title(html).let { if (it.isEmpty()) "" else "$it\n\n" } + text.take(12_000) + if (text.length > 12_000) "\n[… the page goes on]" else "")
+    }
+
+    // ---- Calls (the user, 11 Nov: "check the phone for any missed calls and ask if I want to call them back") ----
+    private fun callLog() = calls() ?: error(if (hotspotDevice != null) "This tablet has no phone of its own: the calls are on the phone. Say so."
+        else "Tetra may not read the call log yet: the user opens Tetra's Phone once and allows it. Say so.")
+    private fun who(number: String) = if (number.isBlank()) "Hidden number" else nameOf(number).let { if (it == number) number else "$it ($number)" }
+    private fun kind(c: LoggedCall) = when (c.type) {
+        android.provider.CallLog.Calls.MISSED_TYPE -> "missed"; android.provider.CallLog.Calls.OUTGOING_TYPE -> "outgoing"
+        android.provider.CallLog.Calls.REJECTED_TYPE -> "declined"; android.provider.CallLog.Calls.BLOCKED_TYPE -> "blocked"
+        android.provider.CallLog.Calls.VOICEMAIL_TYPE -> "voicemail"; else -> "incoming" }
+    private fun talked(c: LoggedCall) = c.seconds > 0 && (c.type == android.provider.CallLog.Calls.OUTGOING_TYPE || c.type == android.provider.CallLog.Calls.INCOMING_TYPE)
+    /** A row's buttons: call back each one not called back yet (a tap is the user's own yes). */
+    private fun backButtons(rows: List<LoggedCall>) = rows.filter { it.number.isNotBlank() }.distinctBy { it.number }.take(4)
+        .map { c -> nameOf(c.number).let { AssistantChoice("☎ $it", call = PendingCall(it, c.number)) } }
+
+    /** The missed calls of the last [days], one row per number: how many, the last, and whether a talk with them came since. */
+    private fun callsMissed(days: Int): ToolResult {
+        val all = callLog()
+        val since = now().minusDays(days.toLong()).toInstant().toEpochMilli()
+        val rows = all.filter { it.type == android.provider.CallLog.Calls.MISSED_TYPE && it.at >= since }.groupBy { c -> ContactsWays.key(c.number).takeIf { it.length >= 5 } ?: c.number } // +30… and 69… one row, as PhoneLog.same
+            .map { (_, list) -> list.maxBy { it.at } to list.size }.sortedByDescending { it.first.at }
+        callsShown = rows.map { it.first }
+        if (rows.isEmpty()) return ToolResult("No missed calls in the last $days days.")
+        val open = mutableListOf<LoggedCall>()
+        return ToolResult(rows.mapIndexed { i, (c, times) ->
+            val since2 = all.filter { PhoneLog.same(it.number, c.number) && it.at > c.at && talked(it) }.minByOrNull { it.at }
+            if (since2 == null) open += c
+            "${i + 1}. ${who(c.number)} — ${if (times > 1) "$times missed calls, the last" else "missed"} ${Instant.ofEpochMilli(c.at).atZone(zone).format(SHOWN)}" +
+                (since2?.let { "; ${if (it.type == android.provider.CallLog.Calls.OUTGOING_TYPE) "called back" else "they called again"} ${Instant.ofEpochMilli(it.at).atZone(zone).format(SHOWN)}" } ?: "; not called back")
+        }.joinToString("\n"), choices = backButtons(open))
+    }
+
+    private fun callsRecent(count: Int): ToolResult {
+        val list = callLog().take(count)
+        callsShown = list
+        if (list.isEmpty()) return ToolResult("The call log is empty.")
+        return ToolResult(list.mapIndexed { i, c ->
+            "${i + 1}. ${who(c.number)} — ${kind(c)}${if (c.seconds > 0) ", ${(c.seconds + 59) / 60} min" else ""}, ${Instant.ofEpochMilli(c.at).atZone(zone).format(SHOWN)}"
+        }.joinToString("\n"))
+    }
+
+    private fun callBack(n: Int?): ToolResult {
+        val c = n?.let { callsShown.getOrNull(it - 1) } ?: return ToolResult(if (callsShown.isEmpty()) "No calls list yet: run calls missed or calls recent first."
+            else "No number ${n ?: ""} in the last calls list; it has ${callsShown.size}.")
+        if (c.number.isBlank()) return ToolResult("That call came from a hidden number: it cannot be called back. Say so.")
+        val name = nameOf(c.number)
+        return ToolResult("Tetra says \"$name\" and calls in 3 seconds unless the user stops it. Say nothing more.", call = PendingCall(name, c.number))
     }
 
     // ---- Messages (SMS): read for the model, never sent by it; the card's Send is the user's ----
@@ -1177,15 +1641,15 @@ internal class AssistantTools(
             fn("volume", "Change the phone's media volume.", listOf("change"),
                 "change" to p("string", "up, down, mute, unmute, or set (with percent)."), "percent" to p("integer", "With set: 0–100.")),
             fn("mail_new", "The new mail in the Inbox: what came in the last hours, and anything still unread; a numbered list with senders, subjects and the start of each.", emptyList(),
-                "hours" to p("integer", "How far back; 24 if not said."), "unread" to p("boolean", "Also older mail that is still unread; true if not said.")),
+                "hours" to p("integer", "How far back; 24 if not said."), "unread" to p("boolean", "Also older mail that is still unread; true if not said."), "account" to p("string", "Only this mail account, by its name or address as the user says it (Δουλειά, Gmail, the university's); left out: every account.")),
             fn("mail_attention", "The recent Inbox mail that is unread or marked ♥, with the start of each, to judge which needs an answer or an action.", emptyList(),
-                "days" to p("integer", "How far back; 14 if not said.")),
-            fn("mail_find", "Find mail from someone (a contact's name, a name or an address) and/or with some words; a numbered list, newest first.", emptyList(),
-                "from" to p("string", "Who it is from, as said."), "query" to p("string", "Words in the subject or the text.")),
+                "days" to p("integer", "How far back; 14 if not said."), "account" to p("string", "Only this mail account, by its name or address as the user says it (Δουλειά, Gmail, the university's); left out: every account.")),
+            fn("mail_find", "Find mail from someone (a contact's name, a name or an address), with some words and/or in one account; a numbered list, newest first, each with its account.", emptyList(),
+                "from" to p("string", "Who it is from, as said."), "query" to p("string", "Words in the subject or the text."), "account" to p("string", "Only this mail account, by its name or address as the user says it (Δουλειά, Gmail, the university's); left out: every account.")),
             fn("mail_open", "Open a mail from the last mail list in Tetra's Mail.", listOf("choice"), CHOICE),
             fn("mail_stored_find", "Search the mail kept on this device (Mail › Αποθήκη, Storage): every account, mail deleted from the server too, with their attachments' names; a numbered list.", emptyList(),
                 "from" to p("string", "Who it is from, as said."), "query" to p("string", "Words in the subject, the recipients or an attachment's name."),
-                "from_date" to p("string", "Earliest day, YYYY-MM-DD."), "to_date" to p("string", "Latest day, YYYY-MM-DD.")),
+                "from_date" to p("string", "Earliest day, YYYY-MM-DD."), "to_date" to p("string", "Latest day, YYYY-MM-DD."), "account" to p("string", "Only this mail account, by its name or address as the user says it (Δουλειά, Gmail, the university's); left out: every account.")),
             fn("mail_export", "Only when the user asks: copy a mail from the last mail list, or one of its attachments, into Tetra/Documents.", listOf("choice"),
                 "choice" to p("integer", "The number in the last list."), "attachment" to p("string", "The attachment's name, or part of it; empty for the whole mail (.eml).")),
             fn("mail_write", "Write an e-mail: Tetra's compose page opens with it filled in, and the user sends it. It is never sent by you.", listOf("to", "subject", "body"),
@@ -1215,6 +1679,7 @@ internal class AssistantTools(
             fn("make_image", "Draw a picture from a description.", listOf("prompt"), "prompt" to p("string", "What the picture shows, in detail.")),
             fn("attachment_read", "Read more of the file attached in this chat: one part by its number, or the passages about something.", emptyList(),
                 "part" to p("integer", "The part's number (1 = the start)."), "query" to p("string", "What to look for in it, in its language.")),
+            fn("tetra", AssistantCommands.description(), listOf("command"), "command" to p("string", "One command line, as listed (\"calls missed\", \"calls back 2\").")),
             fn("audio_make", "Make an audio file (.m4a) of the attached file (or of a file from the last files_find list): \"narration\" reads it whole with one voice; \"show\" is a radio show, a host and an expert talking it through with examples and recaps. It answers an estimate (minutes, cost, when ready): say it in one sentence and ask whether to start. It starts only on the user's yes, which Tetra hears; never say it has started or is done.", listOf("mode"),
                 "mode" to JSONObject().put("type", "string").put("enum", JSONArray(listOf("narration", "show"))).put("description", "\"narration\": read it to me; \"show\": a radio show."),
                 "minutes" to p("integer", "For a show: how long, if the user said."), "focus" to p("string", "For a show: what to dwell on, if said."),
@@ -1311,8 +1776,8 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
                 val name = f.getString("name")
                 onTool?.invoke(name)
                 // after outside text, a change waits for the user's yes (AssistantGuard); shortcut: one held call per turn, the last, until the model ever asks several at once
-                val r = if (outside && name in AssistantGuard.ACTS) { confirm = AssistantGuard.Confirm(name, args, AssistantGuard.what(name, args, tools.picked(name, args))); ToolResult(AssistantGuard.held(name)) }
-                    else tools.run(name, args).let { if (name in AssistantGuard.EXTERNAL) { outside = true; it.copy(forModel = AssistantGuard.wrap(name, it.forModel)) } else it }
+                val r = if (outside && AssistantGuard.acts(name, args)) { confirm = AssistantGuard.Confirm(name, args, AssistantGuard.what(name, args, tools.picked(name, args))); ToolResult(AssistantGuard.held(name)) }
+                    else tools.run(name, args).let { if (AssistantGuard.external(name, args)) { outside = true; it.copy(forModel = AssistantGuard.wrap(name, it.forModel)) } else it }
                 if (r.choices.isNotEmpty()) { choices.clear(); choices += r.choices }
                 r.call?.let { call = it }; r.image?.let { images += it }; images += r.photos; r.open?.let { open = it }; r.go?.let { go = it }; if (r.open != null || r.go != null) beside = r.beside
                 r.audio?.let { audio = it }

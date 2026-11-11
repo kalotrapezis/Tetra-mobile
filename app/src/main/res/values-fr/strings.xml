@@ -2124,6 +2124,8 @@
         <item quantity="other">Votre réseau est sur le canal %1$d, avec %2$d réseaux sur ce canal ou à côté. Le canal %3$d est le moins encombré : il se change dans les paramètres de la box.</item>
     </plurals>
     <string name="data_tip_reached">La limite est atteinte</string>
+    <string name="data_ask">Demander à AI Assist</string>
+    <string name="data_ask_prompt">Regarde mon utilisation des données et dis-moi ce qui ressort et ce que je pourrais changer.</string>
     <string name="data_tip_reached_text">%1$s sur %2$s utilisés, %3$d jours avant le renouvellement. La suite peut être plus lente ou payante, selon les conditions de l’opérateur.</string>
     <string name="data_tip_runs_out">La limite arrive le %1$s</string>
     <string name="data_tip_runs_out_text">À votre rythme habituel, les %1$s seront épuisés avant le %2$s. Pour tenir, restez vers %3$s par jour.</string>

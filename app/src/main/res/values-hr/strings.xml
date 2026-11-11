@@ -2124,6 +2124,8 @@
         <item quantity="other">Vaša mreža je na kanalu %1$d, a na njemu ili uz njega je %2$d mreža. Kanal %3$d je najmanje zagušen: mijenja se u postavkama usmjerivača.</item>
     </plurals>
     <string name="data_tip_reached">Ograničenje je dosegnuto</string>
+    <string name="data_ask">Pitaj AI Assist</string>
+    <string name="data_ask_prompt">Pogledaj moju potrošnju podataka i reci mi što se ističe i što bih mogao promijeniti.</string>
     <string name="data_tip_reached_text">Potrošeno %1$s od %2$s, %3$d dana prije obnove. Ono što sada slijedi može biti sporije ili dodatno naplaćeno, prema uvjetima operatera.</string>
     <string name="data_tip_runs_out">Ograničenje stiže %1$s</string>
     <string name="data_tip_runs_out_text">Uobičajenim tempom %1$s istječe prije %2$s. Da potraje, držite se oko %3$s dnevno.</string>

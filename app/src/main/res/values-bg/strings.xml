@@ -2061,6 +2061,8 @@
         <item quantity="other">Мрежата ви е на канал %1$d, с %2$d мрежи на него или до него. Канал %3$d е най-малко натоварен: сменя се в настройките на рутера.</item>
     </plurals>
     <string name="data_tip_reached">Лимитът е достигнат</string>
+    <string name="data_ask">Попитай AI Assist</string>
+    <string name="data_ask_prompt">Виж как използвам данните и ми кажи какво се откроява и какво мога да променя.</string>
     <string name="data_tip_reached_text">Използвани %1$s от %2$s, %3$d дни преди подновяването. Каквото следва, може да е по-бавно или да струва допълнително, според условията на оператора.</string>
     <string name="data_tip_runs_out">Лимитът идва %1$s</string>
     <string name="data_tip_runs_out_text">С обичайното ви темпо %1$s свършват преди %2$s. За да стигнат, стойте около %3$s на ден.</string>

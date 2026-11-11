@@ -264,7 +264,25 @@ class MailTest {
         val w = t.run("mail_write", org.json.JSONObject().put("to", "a@b.gr").put("subject", "Θέμα").put("body", "Καλημέρα"))
         assertEquals("a@b.gr", (w.cards.single() as ResultCard.Mail).to) // a card with its sender, waiting for Send
         assertTrue(t.run("mail_write", org.json.JSONObject().put("to", "Κανείς").put("subject", "x").put("body", "y")).forModel.contains("no e-mail address"))
+        // one account, by its name or a piece of its address (the user, 11 Nov: the university's mail could not be asked for)
+        val uni = t.run("mail_find", org.json.JSONObject().put("account", "nup.ac.cy"))
+        val uniMails = (uni.cards.single() as ResultCard.Mails).mails
+        assertTrue(uniMails.isNotEmpty() && uniMails.all { it.account == "t.kalotrapezis@nup.ac.cy" })
+        assertTrue(uni.forModel.lines().all { it.contains(", nup.ac.cy)") }) // each mail says its account
+        assertTrue(t.run("mail_new", org.json.JSONObject().put("account", "GMAIL").put("hours", 24 * 365)).let { r -> (r.cards.single() as ResultCard.Mails).mails.all { it.account == "kalotrapezis@gmail.com" } })
+        val unknown = t.run("mail_new", org.json.JSONObject().put("account", "Πανεπιστήμιο")).forModel
+        assertTrue(unknown.startsWith("No mail account is called")); assertTrue(unknown.contains("nup.ac.cy <t.kalotrapezis@nup.ac.cy>")) // the accounts, to ask again
         tetra.deleteRecursively()
+    }
+
+    @Test fun aPcAccountIsNamedOnThePhoneByARequest() {
+        val dir = java.nio.file.Files.createTempDirectory("mail").toFile()
+        val f = MailRequests.rename(dir, "Phone", "t.kalotrapezis@nup.ac.cy", "  Πανεπιστήμιο ", now = 7)
+        assertEquals("requests/Phone-7.json", f.relativeTo(dir).invariantSeparatorsPath)
+        val r = org.json.JSONObject(f.readText())
+        assertEquals(listOf("rename", "t.kalotrapezis@nup.ac.cy", "Πανεπιστήμιο", 7L, "Phone"), listOf(r.getString("op"), r.getString("account"), r.getString("name"), r.getLong("at"), r.getString("device")))
+        assertEquals(40, MailRequests.rename(dir, "Phone", "a@b", "x".repeat(60)).readText().let { org.json.JSONObject(it).getString("name").length })
+        dir.deleteRecursively()
     }
 
     @Test fun anAccountThisDeviceFetchesCanBeRenamed() {

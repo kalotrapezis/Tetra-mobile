@@ -77,8 +77,9 @@ open class AssistantActivity : ComponentActivity() {
         if (!sheet) androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = TetraLook.light
         // a tap on "your audio is ready" (AudioJobs): the chat opens on its card
         val job = intent.getStringExtra(AudioJobs.EXTRA)
+        val ask = intent.getStringExtra(ASK_EXTRA) // another app's «Ask AI Assist» (Data's card): asked at once, as if typed
         // the sheet: the app the user was in shows behind it, dimmed (the user: "the rest of the screen is black")
-        setContent { TetraTheme(backdrop = !sheet) { AssistantApp(sheet, job) { finish() } } }
+        setContent { TetraTheme(backdrop = !sheet) { AssistantApp(sheet, job, ask = ask) { finish() } } }
     }
 }
 
@@ -91,6 +92,9 @@ internal val ASSISTANT_COLOR = Color(0xFFFD6A04)
 internal object AssistBusy { val on = mutableStateOf(false) }
 
 internal fun openAssistant(c: Context) = c.startActivity(Intent(c, AssistantActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+internal const val ASK_EXTRA = "com.kalotrapezis.drive.ASK"
+/** AI Assist opened on a question, asked at once (the user, 11 Nov: the Data card's advice, made live). */
+internal fun askAssistant(c: Context, question: String) = c.startActivity(Intent(c, AssistantActivity::class.java).putExtra(ASK_EXTRA, question).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
 /**
  * AI Assist's one open conversation, the same from every way in (the sheet, a notification, the applet's icon), bubbles and
@@ -161,7 +165,7 @@ internal enum class LivePhase(val degreesPerSecond: Float) { Connecting(20f), Li
 
 @Composable
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
-internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Boolean = false, closeNow: () -> Unit) {
+internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Boolean = false, ask: String? = null, closeNow: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val decorated = remember { AiLook.decorated(context) }
@@ -405,6 +409,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
         opening?.let { send(it) }
     }
     LaunchedEffect(Unit) { if (sheet && hasKey && liveFirst) startLive() } // Tetra Car's held mic
+    LaunchedEffect(Unit) { if (!ask.isNullOrBlank() && hasKey) send(ask) }
     // the bill guard (live is paid by the minute): 20 s with nobody talking, or 5 minutes, and it ends by itself
     LaunchedEffect(liveShown) {
         while (liveShown) {

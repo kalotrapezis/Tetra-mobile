@@ -2187,6 +2187,8 @@
         <item quantity="other">Vaša sieť je na kanáli %1$d a na ňom alebo vedľa je %2$d sietí. Kanál %3$d je najmenej vyťažený: mení sa v nastaveniach smerovača.</item>
     </plurals>
     <string name="data_tip_reached">Limit je dosiahnutý</string>
+    <string name="data_ask">Opýtať sa AI Assist</string>
+    <string name="data_ask_prompt">Pozri sa na moje využitie dát a povedz mi, čo vyčnieva a čo by som mohol zmeniť.</string>
     <string name="data_tip_reached_text">Využité %1$s z %2$s, %3$d dní pred obnovením. Ďalšie dáta môžu byť pomalšie alebo stáť navyše podľa podmienok operátora.</string>
     <string name="data_tip_runs_out">Limit príde %1$s</string>
     <string name="data_tip_runs_out_text">Pri bežnom tempe sa %1$s minie pred %2$s. Aby vydržali, držte sa okolo %3$s denne.</string>

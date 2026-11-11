@@ -2124,6 +2124,8 @@
         <item quantity="other">Tu red está en el canal %1$d, con %2$d redes en él o al lado. El canal %3$d es el menos saturado: se cambia en los ajustes del router.</item>
     </plurals>
     <string name="data_tip_reached">Se ha alcanzado el límite</string>
+    <string name="data_ask">Preguntar a AI Assist</string>
+    <string name="data_ask_prompt">Mira mi uso de datos y dime qué destaca y qué podría cambiar.</string>
     <string name="data_tip_reached_text">%1$s de %2$s usados, %3$d días antes de la renovación. Lo que venga ahora puede ser más lento o costar más, según las condiciones del operador.</string>
     <string name="data_tip_runs_out">El límite llega %1$s</string>
     <string name="data_tip_runs_out_text">A tu ritmo habitual, los %1$s se acaban antes del %2$s. Para que duren, quédate cerca de %3$s al día.</string>
