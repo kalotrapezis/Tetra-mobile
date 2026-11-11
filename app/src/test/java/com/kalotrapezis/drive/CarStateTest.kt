@@ -19,10 +19,22 @@ class CarStateTest {
         assertEquals(CarState(CarLayout.Full, listOf(CarApp.Phone), 0), s.laid(CarLayout.Full))
     }
 
-    @Test fun theDockFillsTheFocusedPane() {
+    @Test fun theRailPutsAPageInTheBigPane() {
         val s = CarState(CarLayout.Wide, listOf(CarApp.Maps, CarApp.Browser), 1)
-        assertEquals(listOf(CarApp.Maps, CarApp.Phone), s.put(CarApp.Phone).panes)
-        assertEquals(s.copy(focus = 0), s.put(CarApp.Maps)) // shown already: focused where it is
+        assertEquals(CarState(CarLayout.Wide, listOf(CarApp.Phone, CarApp.Maps), 0), s.put(CarApp.Phone)) // the map slides to the small pane
+        // the map in the small pane: one tap brings it back to the big one
+        assertEquals(CarState(CarLayout.Wide, listOf(CarApp.Maps, CarApp.Phone), 0), s.put(CarApp.Phone).put(CarApp.Maps))
+        assertEquals(s.copy(focus = 0), s.put(CarApp.Maps)) // in the big pane already: stays
+        assertEquals(listOf(CarApp.Messages, CarApp.Maps, CarApp.Browser), CarState(CarLayout.Three, listOf(CarApp.Maps, CarApp.Browser, CarApp.Messages), 2).put(CarApp.Messages).panes)
+        assertEquals(listOf(CarApp.Phone), CarState(CarLayout.Full, listOf(CarApp.Maps), 0).put(CarApp.Phone).panes)
+    }
+
+    @Test fun exposeSwapsOrReplaces() {
+        val s = CarState(CarLayout.Wide, listOf(CarApp.Browser, CarApp.Maps), 0)
+        assertEquals(CarState(CarLayout.Wide, listOf(CarApp.Maps, CarApp.Browser), 0), s.placed(0, CarApp.Maps)) // shown in the other pane: swapped
+        assertEquals(CarState(CarLayout.Wide, listOf(CarApp.Browser, CarApp.Phone), 1), s.placed(1, CarApp.Phone)) // not shown: replaces
+        assertEquals(s.copy(focus = 1), s.placed(1, CarApp.Maps)) // already there: kept
+        assertEquals(s, s.placed(5, CarApp.Phone))
     }
 
     @Test fun spansFillTheWidth() {

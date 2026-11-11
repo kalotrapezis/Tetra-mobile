@@ -19,7 +19,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
@@ -280,8 +282,19 @@ internal data class CarState(val layout: CarLayout = CarLayout.Wide, val panes: 
         val apps = (panes.distinct() + CarApp.entries.filter { it !in panes }).take(l.weights.size)
         return CarState(l, apps, focus.coerceIn(apps.indices))
     }
-    /** The dock's button: a page already shown is focused where it is, else it takes the focused pane. */
-    fun put(app: CarApp): CarState = panes.indexOf(app).let { i -> if (i >= 0) copy(focus = i) else copy(panes = panes.toMutableList().also { it[focus] = app }) }
+    /**
+     * The rail's button (the user, 11 Nov: "when the map ends up in the small window it is very hard to get it back"): the rule is
+     * *the tapped page goes to the big pane* (the first, the widest in every layout). The others slide one pane along, keeping their
+     * order; a page that was not on the screen pushes the last one off (still running). So the map is always one tap from the big pane,
+     * and with two panes the big one's page takes the small one: Maps|Media, Phone › Phone|Maps, Maps › Maps|Phone.
+     */
+    fun put(app: CarApp): CarState = copy(panes = (listOf(app) + panes.filter { it != app }).take(panes.size), focus = 0)
+    /** Expose's choice: [app] in pane [i]; when it was in another pane, that pane takes what [i] had (a swap, nothing lost). */
+    fun placed(i: Int, app: CarApp): CarState {
+        if (i !in panes.indices) return this
+        val was = panes.indexOf(app)
+        return copy(panes = panes.toMutableList().also { if (was >= 0) it[was] = it[i]; it[i] = app }, focus = i)
+    }
     fun focused(i: Int) = copy(focus = i.coerceIn(panes.indices))
     /** [app] beside the map: two panes at least, the map in one, [app] in another, focused. */
     fun beside(app: CarApp): CarState {
@@ -334,6 +347,8 @@ internal fun CarScreen(projected: Boolean = false) {
     var play by remember { mutableStateOf<String?>(null) }
     var tiles by remember { mutableStateOf(false) }
     var layouts by remember { mutableStateOf(false) }
+    // expose (the user, 11 Nov): every pane shows the pages to choose from; the panes chosen so far, null when it is not up
+    var expose by remember { mutableStateOf<Set<Int>?>(null) }
     var apps by remember { mutableStateOf(false) }
     val side = Car.side(context) // Settings › Tetra Car › Dock: changed there, followed here at once
     // AI Assist's «άνοιξε …» reaches the panes while this screen is up
@@ -389,13 +404,14 @@ internal fun CarScreen(projected: Boolean = false) {
     BackHandler {
         when {
             apps -> apps = false
+            expose != null -> expose = null
             layouts -> layouts = false
             tiles && state.shown == CarApp.Browser -> tiles = false
             else -> backs.getValue(state.shown).onBackPressedDispatcher.let { if (it.hasEnabledCallbacks()) it.onBackPressed() }
         }
     }
     fun media() {
-        val wasShown = state.shown == CarApp.Browser
+        val wasShown = state.panes[0] == CarApp.Browser
         set(state.put(CarApp.Browser))
         when {
             wasShown && !tiles -> tiles = true // Media again: back to the three
@@ -404,13 +420,21 @@ internal fun CarScreen(projected: Boolean = false) {
         }
         WriterLog.i("Car: Media${if (tiles) " (tiles)" else ""}")
     }
+    // expose's choice in pane [i]; null: AI Assist, whose TV then takes that pane while it works. Done once every pane has chosen.
+    fun pick(i: Int, app: CarApp?) {
+        if (app == null) { set(state.focused(i)); expose = null; Car.assist?.invoke() ?: carListen(context); return }
+        if (app == CarApp.Browser && app !in opened) tiles = true // Media's first time: its three tiles, not an empty Browser
+        set(state.placed(i, app))
+        expose = (expose.orEmpty() + i).takeIf { it.size < shownState.panes.size }
+        WriterLog.i("Car: expose put $app in pane $i")
+    }
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding()) {
         // one layout for both children whichever side the dock is on: the pages are never put elsewhere in the tree (the route, the sound go on)
         Layout(modifier = Modifier.fillMaxSize(), content = {
             CarPanes(shownState, opened, coverAt, cover = {
                 if (PhoneCalls.calls.isNotEmpty()) CarCallPane() else remote?.let { CarRemoteCallPane(it) } ?: message?.let { m -> CarSmsPane(m) { message = null } }
                     ?: if (assist) AssistantApp(sheet = true) { assist = false } else Unit
-            }, modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = if (side == DockSide.Bottom) 0.dp else 8.dp),
+            }, expose = expose?.let { ::pick }, modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = if (side == DockSide.Bottom) 0.dp else 8.dp),
                 focus = { app -> state.panes.indexOf(app).takeIf { it >= 0 && it != state.focus }?.let { set(state.focused(it)) } }) { app ->
                 CompositionLocalProvider(LocalOnBackPressedDispatcherOwner provides backs.getValue(app)) {
                     when (app) {
@@ -434,10 +458,12 @@ internal fun CarScreen(projected: Boolean = false) {
                     }
                 }
             }
-            CarDock(state, side, layouts, setLayouts = { layouts = it }, layout = { set(state.laid(it)) },
+            CarDock(state, side, layouts, setLayouts = { layouts = it; expose = null }, layout = { set(state.laid(it)) },
+                expose = { expose = if (expose == null) emptySet() else null; layouts = false },
                 open = { app ->
-                    // Maps again while the map is up: the saved places (the user, 10 Nov: "the home faves in the car as a page with bubbles")
-                    if (app == CarApp.Maps && state.shown == CarApp.Maps) places = !places
+                    expose = null
+                    // Maps again while the map is in the big pane: the saved places (the user, 10 Nov: "the home faves in the car as a page with bubbles")
+                    if (app == CarApp.Maps && state.panes[0] == CarApp.Maps) places = !places
                     else { set(state.put(app)); if (app == CarApp.Browser) tiles = false }
                 }, media = ::media, apps = { apps = true }, projected = projected)
         }) { (panes, dock), c ->
@@ -459,7 +485,8 @@ internal fun CarScreen(projected: Boolean = false) {
 
 /** The panes: every page once opened stays composed; the ones not shown wait off the screen, still running. */
 @Composable
-private fun CarPanes(state: CarState, opened: List<CarApp>, coverAt: Int?, cover: @Composable () -> Unit, modifier: Modifier, focus: (CarApp) -> Unit, content: @Composable (CarApp) -> Unit) {
+private fun CarPanes(state: CarState, opened: List<CarApp>, coverAt: Int?, cover: @Composable () -> Unit, expose: ((Int, CarApp?) -> Unit)?,
+                     modifier: Modifier, focus: (CarApp) -> Unit, content: @Composable (CarApp) -> Unit) {
     val ring = MaterialTheme.colorScheme.primary
     val shape = RoundedCornerShape(16.dp)
     Layout(modifier = modifier, content = {
@@ -473,16 +500,16 @@ private fun CarPanes(state: CarState, opened: List<CarApp>, coverAt: Int?, cover
                 }
             }
         }
-        if (coverAt != null) Box(Modifier.clip(shape).background(MaterialTheme.colorScheme.background)) { PaneSized { cover() } } // last: over its pane, the page under it still running
+        if (coverAt != null) Box(Modifier.clip(shape).background(MaterialTheme.colorScheme.background)) { PaneSized { cover() } } // over its pane, the page under it still running
+        if (expose != null) state.panes.forEachIndexed { i, app -> Box(Modifier.clip(shape)) { CarExpose(app) { expose(i, it) } } } // last: over every pane
     }) { measurables, c ->
         val spans = carSpans(c.maxWidth, 8.dp.roundToPx(), state.layout.weights)
-        val placeables = measurables.mapIndexed { i, m ->
-            val at = if (i < opened.size) state.panes.indexOf(opened[i]) else coverAt ?: 0
-            m.measure(Constraints.fixed((spans.getOrNull(at) ?: spans[0]).second, c.maxHeight))
-        }
+        val covers = if (coverAt != null) 1 else 0
+        fun at(i: Int) = when { i < opened.size -> state.panes.indexOf(opened[i]); i < opened.size + covers -> coverAt ?: 0; else -> i - opened.size - covers }
+        val placeables = measurables.mapIndexed { i, m -> m.measure(Constraints.fixed((spans.getOrNull(at(i)) ?: spans[0]).second, c.maxHeight)) }
         layout(c.maxWidth, c.maxHeight) {
             placeables.forEachIndexed { i, p ->
-                val at = if (i < opened.size) state.panes.indexOf(opened[i]) else coverAt ?: 0
+                val at = at(i)
                 if (at >= 0) p.place(spans[at].first, 0) else p.place(-2 * c.maxWidth, 0)
             }
         }
@@ -490,7 +517,7 @@ private fun CarPanes(state: CarState, opened: List<CarApp>, coverAt: Int?, cover
 }
 
 @Composable
-private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayouts: (Boolean) -> Unit, layout: (CarLayout) -> Unit,
+private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayouts: (Boolean) -> Unit, layout: (CarLayout) -> Unit, expose: () -> Unit,
                     open: (CarApp) -> Unit, media: () -> Unit, apps: () -> Unit, projected: Boolean = false) {
     val context = LocalContext.current
     val down = side != DockSide.Bottom // down a side: icons without their names, so it fits a short screen
@@ -517,8 +544,9 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
         if (projected) DockIcon(R.drawable.ic_share, R.string.auto_share, MaterialTheme.colorScheme.secondary, down) { AutoProjection.session?.openShare() }
         else DockIcon(R.drawable.ic_view_grid, R.string.car_apps, MaterialTheme.colorScheme.secondary, down, apps)
     }
-    val layoutButton: @Composable () -> Unit = {
-        Box(Modifier.size(72.dp, if (down) 44.dp else 56.dp).clip(RoundedCornerShape(12.dp)).clickable { setLayouts(true) }, contentAlignment = Alignment.Center) { LayoutGlyph(state.layout, true) }
+    val layoutButton: @Composable () -> Unit = { // a tap: expose, a page to choose in every pane; held: the layouts' strip
+        Box(Modifier.size(72.dp, if (down) 44.dp else 56.dp).clip(RoundedCornerShape(12.dp)).combinedClickable(onLongClick = { setLayouts(true) }, onClick = expose),
+            contentAlignment = Alignment.Center) { LayoutGlyph(state.layout, true) }
     }
     if (down) Column(Modifier.fillMaxHeight().width(96.dp).verticalScroll(rememberScrollState()).padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) { // scrolls only on a very short screen
@@ -549,6 +577,35 @@ private fun DockButton(label: Int, shown: Boolean, down: Boolean, tap: () -> Uni
     }
 }
 
+
+/** Expose in one pane: the pages it can show, [now] ringed (a tap on it keeps it); null is AI Assist. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun CarExpose(now: CarApp, pick: (CarApp?) -> Unit) {
+    @Composable fun tile(app: CarApp?, label: Int, art: @Composable () -> Unit) {
+        Column(Modifier.width(112.dp).clip(RoundedCornerShape(16.dp))
+            .then(if (app == now) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp)) else Modifier)
+            .clickable { pick(app) }.padding(vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) { art() }
+            Text(stringResource(label), Modifier.padding(top = 4.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+    @Composable fun square(color: Color, icon: Int) = Box(Modifier.size(60.dp).clip(RoundedCornerShape(14.dp)).background(color), contentAlignment = Alignment.Center) {
+        Icon(painterResource(icon), null, Modifier.size(34.dp), tint = Color.White)
+    }
+    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
+        androidx.compose.foundation.layout.FlowRow(Modifier.verticalScroll(rememberScrollState()).padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            tile(CarApp.Browser, R.string.car_media) { square(Color(0xFFE53935), R.drawable.ic_play) }
+            tile(CarApp.Maps, R.string.app_maps) { Image(painterResource(R.drawable.maps_art), null, Modifier.size(60.dp)) }
+            tile(null, R.string.app_assistant) {
+                Box(Modifier.size(60.dp).clip(CircleShape).background(ASSISTANT_COLOR), contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.ic_mic), null, Modifier.size(34.dp), tint = Color.White) }
+            }
+            tile(CarApp.Messages, R.string.app_sms) { Image(painterResource(R.drawable.sms_art), null, Modifier.size(60.dp)) }
+            tile(CarApp.Phone, R.string.app_phone) { Image(painterResource(R.drawable.phone_art), null, Modifier.size(60.dp)) }
+        }
+    }
+}
 
 /** A layout drawn as its panes. */
 @Composable
