@@ -404,19 +404,24 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
     var touchedAt by remember { mutableStateOf(0L) } // a finger last moved the map
     var loose by remember { mutableStateOf(false) } // directions running, the camera off me (logged once)
     val tts = remember { mutableStateOf<TextToSpeech?>(null) }
+    val duck = remember { MapsDuck(context) }
     DisposableEffect(Unit) {
         var t: TextToSpeech? = null
         t = TextToSpeech(context.applicationContext) { ok ->
             if (ok != TextToSpeech.SUCCESS) return@TextToSpeech
             if ((t?.setLanguage(MapsPrefs.ttsLocale(words)) ?: -2) < 0 && MapsPrefs.firstNoVoice(context, words.lang)) noVoice = true
+            t?.setAudioAttributes(MapsDuck.speech); t?.setOnUtteranceProgressListener(duck)
             tts.value = t
         }
-        onDispose { t.stop(); t.shutdown() }
+        onDispose { t.stop(); t.shutdown(); duck.end() }
     }
-    /** [text] spoken; [why] in the log only: which warning, how far, how fast. */
+    /** [text] spoken, the music silent meanwhile; [why] in the log only: which warning, how far, how fast. */
     fun say(text: String, why: String = "") {
         WriterLog.i("Maps: say \"$text\"${if (muted) " (muted)" else ""}" + if (why.isNotEmpty()) " ($why)" else "")
-        if (!muted) tts.value?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "maps")
+        if (muted) return
+        val t = tts.value ?: return
+        val id = duck.start()
+        if (t.speak(text, TextToSpeech.QUEUE_FLUSH, null, id) != TextToSpeech.SUCCESS) duck.end(id)
     }
 
     /** The car is here: one place, "My car", saved over the last one. */
@@ -528,7 +533,12 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         // at car speed (40 km/h) for three fixes: driving, so the car is no longer where it was parked
         fast = if (loc.hasSpeed() && loc.speed > 11f) fast + 1 else 0
         if (fast == 3 && nav?.mode != "foot" && nav?.mode != "bike") unpark("driving")
-        mapRef?.locationComponent?.takeIf { it.isLocationComponentActivated }?.forceLocationUpdate(loc)
+        mapRef?.locationComponent?.takeIf { it.isLocationComponentActivated }?.let { lc ->
+            lc.forceLocationUpdate(loc)
+            // the arrow the way I go once moving (11 km/h), the dot with the compass when stopped; with directions always the arrow
+            val m = when { nav != null || (loc.hasSpeed() && loc.speed > 3f) -> RenderMode.GPS; !loc.hasSpeed() || loc.speed < 0.5f -> RenderMode.COMPASS; else -> lc.renderMode }
+            if (lc.renderMode != m) lc.renderMode = m
+        }
         road = roadAt(mapRef, loc, labelLang(context))
         speed = if (loc.hasSpeed()) Math.round(loc.speed * 3.6f) else null
         // the limit at most every two seconds, off the main thread (the graph is opened the first time)
@@ -777,11 +787,13 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         }
     }
     // the location dot, once the map and the permission are there
+    val onCar = LocalOnCar.current
     LaunchedEffect(mapRef, granted) {
         val map = mapRef ?: return@LaunchedEffect
         val style = map.style ?: return@LaunchedEffect
         if (!granted || map.locationComponent.isLocationComponentActivated) return@LaunchedEffect
-        activateArrow(context, map, style)
+        // in Tetra Car (160 dpi, seen from the seat, tilted, on the blue route) bigger: ~11 mm there (the user, 12 Nov: "just a white dot, very hard to see")
+        activateArrow(context, map, style, if (onCar) 1.0f else 0.6f)
         map.locationComponent.isLocationComponentEnabled = true
         map.locationComponent.renderMode = RenderMode.COMPASS
         here?.let { map.locationComponent.forceLocationUpdate(it) }
@@ -1257,9 +1269,34 @@ internal fun routeFeatures(r: Route?): FeatureCollection = if (r == null) Featur
     FeatureCollection.fromFeature(Feature.fromGeometry(LineString.fromLngLats(r.lats.indices.map { Point.fromLngLat(r.lngs[it], r.lats[it]) })))
 
 /** Where I am: a small arrow, so the road under it shows (the user, 21 Oct: "The arrow seams too big for the road"); fixes are ours. */
+/**
+ * The music silent while the voice speaks (the user, 12 Nov: "mute the music while it says turn right"): other apps pause for
+ * Android's transient focus and play on after it, Tetra's own Browser is muted by hand (Android silences no app for its own
+ * voice; muted, not paused, so a live station goes on without buffering again); back when the last thing said ends.
+ */
+internal class MapsDuck(c: Context) : android.speech.tts.UtteranceProgressListener() {
+    companion object {
+        val speech: android.media.AudioAttributes = android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH).build()
+    }
+    private val audio = c.getSystemService(android.media.AudioManager::class.java)
+    private val focus = android.media.AudioFocusRequest.Builder(android.media.AudioManager.AUDIOFOCUS_GAIN_TRANSIENT).setAudioAttributes(speech).build()
+    private var n = 0
+    @Volatile private var last: String? = null
+    /** Before speaking: the music silent; the id to speak with. */
+    fun start(): String = "maps${++n}".also { last = it; audio.requestAudioFocus(focus); BrowserMedia.act("duck") }
+    /** The music back, unless something newer is being said (QUEUE_FLUSH stops the one before it). */
+    fun end(id: String? = last) { if (id == null || id != last) return; last = null; audio.abandonAudioFocusRequest(focus); BrowserMedia.act("unduck") }
+    override fun onStart(id: String?) = Unit
+    override fun onDone(id: String?) = end(id)
+    override fun onStop(id: String?, interrupted: Boolean) = end(id)
+    @Deprecated("Deprecated in Java") override fun onError(id: String?) = end(id)
+}
+
 internal fun activateArrow(context: Context, map: MapLibreMap, style: Style, scale: Float = 0.6f) =
     map.locationComponent.activateLocationComponent(LocationComponentActivationOptions.builder(context, style).useDefaultLocationEngine(false)
-        .locationComponentOptions(org.maplibre.android.location.LocationComponentOptions.builder(context).maxZoomIconScale(scale).minZoomIconScale(scale * 0.75f).build()).build())
+        .locationComponentOptions(org.maplibre.android.location.LocationComponentOptions.builder(context).gpsDrawable(R.drawable.maps_my_arrow)
+            .maxZoomIconScale(scale).minZoomIconScale(scale * 0.75f).build()).build())
 
 /** The next turn's arrow, turned from straight ahead by a GraphHopper sign. */
 internal fun turnDegrees(sign: Int) = when (sign) { 1 -> 45f; 2 -> 90f; 3 -> 135f; 7 -> 20f; -1 -> -45f; -2 -> -90f; -3 -> -135f; -7 -> -20f; 8, -8, -98 -> 180f; else -> 0f }

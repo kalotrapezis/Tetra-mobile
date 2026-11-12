@@ -88,6 +88,9 @@ function mediaDo(a, b) { var m = cur(); b = b || {};
   if (a == 'toggle') a = (m && !m.paused) ? 'pause' : 'play';
   if (a == 'play') { if (m) m.play(); }
   else if (a == 'pause') { if (m) m.pause(); }
+  // Maps' voice: every player silent while it speaks, then as it was (muted, not paused: a live station goes on)
+  else if (a == 'duck') els().forEach(function (e) { if (e._tetraMuted == null) { e._tetraMuted = e.muted; e.muted = true; } });
+  else if (a == 'unduck') els().forEach(function (e) { if (e._tetraMuted != null) { e.muted = e._tetraMuted; e._tetraMuted = null; } });
   else if (a == 'next') click(b.next);
   else if (a == 'like') { if (!click(b.like)) post({ error: 'like: no button on ' + location.host }); }
   else if (a == 'prev') { var now = Date.now(), again = now - prevAt < 2000; prevAt = now;

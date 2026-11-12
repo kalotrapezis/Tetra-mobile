@@ -171,6 +171,9 @@ class AutoProjectionService : Service() {
             while (running) {
                 val socket = runCatching { s.accept() }.getOrNull() ?: continue
                 socket.tcpNoDelay = true
+                // a small send buffer: on a weak link the kernel would hold seconds of picture (the user, 12 Nov: "sits there, then
+                // answers every touch at once after 2-3 s"); with this the drain sees it at once and skips to a fresh picture
+                runCatching { socket.sendBufferSize = 128 * 1024 }
                 Thread({
                     val session = AutoSession(this, socket, main) { name -> update(name) }
                     session.run() // it takes AutoProjection.session once its car is admitted
@@ -277,7 +280,7 @@ internal class AutoSession(private val service: Service, private val socket: Soc
             AutoProjection.session = this
             send(AutoWire.WELCOME, JSONObject().put("name", "${Build.MANUFACTURER} ${Build.MODEL}").apply { if (admitted.second) put("token", admitted.first.token) }.toString().toByteArray())
             width = hello.optInt("width", 1024).coerceIn(320, 2560) and 1.inv(); height = hello.optInt("height", 600).coerceIn(240, 1600) and 1.inv()
-            WriterLog.i("Tetra Auto: ${admitted.first.name} connected, ${width}x$height at ${hello.optInt("dpi")} dpi")
+            WriterLog.i("Tetra Auto: ${admitted.first.name} connected, ${width}x$height at ${hello.optInt("dpi")} dpi, ${link()}")
             shown(admitted.first.name)
             hold(true)
             val ready = java.util.concurrent.CountDownLatch(1)
@@ -289,7 +292,7 @@ internal class AutoSession(private val service: Service, private val socket: Soc
             while (!ended) {
                 val (t, b) = AutoWire.read(input)
                 when (t) {
-                    AutoWire.TOUCH -> main.post { touch(b) }
+                    AutoWire.TOUCH -> { val at = SystemClock.uptimeMillis(); main.post { waited(at); touch(b) } }
                     AutoWire.KEY -> main.post { key(ByteBuffer.wrap(b).int) }
                     AutoWire.KEYFRAME -> runCatching { encoder?.setParameters(Bundle().apply { putInt(MediaCodec.PARAMETER_KEY_REQUEST_SYNC_FRAME, 0) }) }
                     AutoWire.FILE_BEGIN, AutoWire.FILE_DATA, AutoWire.FILE_END -> incoming(t, b)
@@ -345,7 +348,7 @@ internal class AutoSession(private val service: Service, private val socket: Soc
         if (ContactsPreload.all == null) ContactsPreload.warm(service)
         val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height).apply {
             setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
-            setInteger(MediaFormat.KEY_BIT_RATE, (width * height * 6).coerceIn(2_000_000, 8_000_000))
+            setInteger(MediaFormat.KEY_BIT_RATE, (width * height * 4).coerceIn(2_000_000, 6_000_000)) // a car's Wi-Fi is no better than this
             setInteger(MediaFormat.KEY_FRAME_RATE, 30)
             setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2)
             setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 100_000) // a still screen still sends: the car stays current
@@ -411,6 +414,8 @@ internal class AutoSession(private val service: Service, private val socket: Soc
                 b.position(info.offset); b.limit(info.offset + info.size)
                 if (info.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG != 0) {
                     send(AutoWire.VIDEO_CONFIG, ByteArray(info.size).also { b.get(it) })
+                } else if (stale(e, info)) {
+                    // behind: this picture is old; skipped until a fresh whole one, asked for once
                 } else {
                     if (buf.size < info.size + 9) buf = ByteArray(info.size + 9 + (1 shl 16))
                     buf[0] = if (info.flags and MediaCodec.BUFFER_FLAG_KEY_FRAME != 0) 1 else 0
@@ -424,6 +429,63 @@ internal class AutoSession(private val service: Service, private val socket: Soc
     }
 
     private var downAt = 0L
+
+    /**
+     * Which Wi-Fi the car came over (the user, 12 Nov: the hotspot is 2.4 GHz for the vacuum and the printer; the car's own
+     * CarLinkAP is 5 GHz, and Android Auto joins the phone to it): a network the phone joined, with its band, or the phone's hotspot.
+     */
+    private fun link(): String = runCatching {
+        val iface = java.net.NetworkInterface.getByInetAddress(socket.localAddress)?.name ?: "?"
+        val cm = service.getSystemService(android.net.ConnectivityManager::class.java)
+        val joined = cm.allNetworks.firstOrNull { cm.getLinkProperties(it)?.interfaceName == iface }
+        val mhz = joined?.let { (cm.getNetworkCapabilities(it)?.transportInfo as? android.net.wifi.WifiInfo)?.frequency } ?: 0
+        "over $iface " + when {
+            joined == null -> "(the phone's hotspot)"
+            mhz > 0 -> "(a Wi-Fi the phone joined, ${if (mhz >= 5000) "5" else "2.4"} GHz, $mhz MHz)"
+            else -> "(a Wi-Fi the phone joined)"
+        } + ", car ${socket.inetAddress.hostAddress}"
+    }.getOrElse { "link unknown (${it.message})" }
+
+    // —— keeping up (the user, 12 Nov: "very slow to respond to touches, sits there, then every touch at once after 2-3 s") ——
+
+    private var behindSince = 0L // the picture fell behind at (ms), 0 while current
+    private var skipped = 0
+    private var clockBase = Long.MAX_VALUE // now − a picture's time at its quickest: whatever clock the encoder's times are on
+    /**
+     * A picture made more than 250 ms ago (the link was slow and the encoder's output waited): skipped, and the encoder asked for a
+     * fresh whole picture, sent as soon as it comes; the car shows that, not the backlog.
+     */
+    private fun stale(e: MediaCodec, info: MediaCodec.BufferInfo): Boolean {
+        val raw = System.nanoTime() / 1000_000 - info.presentationTimeUs / 1000
+        clockBase = minOf(clockBase, raw)
+        val lagMs = raw - clockBase
+        val key = info.flags and MediaCodec.BUFFER_FLAG_KEY_FRAME != 0
+        if (behindSince == 0L) {
+            if (lagMs < 250) return false
+            behindSince = SystemClock.uptimeMillis(); skipped = 0
+            runCatching { e.setParameters(Bundle().apply { putInt(MediaCodec.PARAMETER_KEY_REQUEST_SYNC_FRAME, 0) }) }
+        }
+        if (key && lagMs < 250) {
+            WriterLog.i("Tetra Auto: the picture was ${SystemClock.uptimeMillis() - behindSince} ms behind (Wi-Fi to the car slow), $skipped old pictures skipped")
+            behindSince = 0; return false
+        }
+        skipped++
+        // a fresh whole picture asked for again every second while still behind
+        if (skipped % 30 == 0) runCatching { e.setParameters(Bundle().apply { putInt(MediaCodec.PARAMETER_KEY_REQUEST_SYNC_FRAME, 0) }) }
+        return true
+    }
+
+    private var waitLogged = 0L
+    /** A touch that waited for the phone's main thread, or whose redraw waited for a frame, logged (at most every 10 s). */
+    private fun waited(at: Long) {
+        val now = SystemClock.uptimeMillis()
+        val screen = if (service.getSystemService(PowerManager::class.java).isInteractive) "phone screen on" else "phone screen off"
+        if (now - at > 300 && now - waitLogged > 10_000) { waitLogged = now; WriterLog.i("Tetra Auto: a touch waited ${now - at} ms for the phone ($screen)") }
+        android.view.Choreographer.getInstance().postFrameCallback {
+            val f = SystemClock.uptimeMillis()
+            if (f - now > 300 && f - waitLogged > 10_000) { waitLogged = f; WriterLog.i("Tetra Auto: the redraw after a touch waited ${f - now} ms for a frame ($screen)") }
+        }
+    }
 
     /** A touch on the car, played into Tetra Car here: its pointers as fractions of the car's screen, made this screen's. */
     private fun touch(b: ByteArray) {

@@ -13,12 +13,8 @@ import android.hardware.display.VirtualDisplay
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
-import android.media.AudioManager
 import android.os.Environment
 import android.speech.tts.TextToSpeech
-import android.speech.tts.UtteranceProgressListener
 import androidx.car.app.CarAppService
 import androidx.car.app.CarContext
 import androidx.car.app.CarToast
@@ -971,11 +967,9 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
         drawRoute(); padCamera(); follow(); showSpeed(); invalidate()
     }
 
-    // —— the voice: over the music, which is lowered meanwhile ——
+    // —— the voice, the music silent meanwhile (MapsDuck) ——
 
-    private val speech = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build()
-    private val focus = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK).setAudioAttributes(speech).build()
-    private val audio = car.getSystemService(AudioManager::class.java)
+    private val duck = MapsDuck(car)
     private var tts: TextToSpeech? = null
     init {
         var t: TextToSpeech? = null
@@ -984,12 +978,8 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
             // no voice for the language: said once on the car's screen (its settings are on the phone)
             if ((t?.setLanguage(MapsPrefs.ttsLocale(words)) ?: -2) < 0 && MapsPrefs.firstNoVoice(carContext, words.lang))
                 CarToast.makeText(carContext, s(R.string.maps_no_voice, java.util.Locale.forLanguageTag(words.lang).getDisplayLanguage(carContext.resources.configuration.locales[0])), CarToast.LENGTH_LONG).show()
-            t?.setAudioAttributes(speech)
-            t?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                override fun onStart(id: String?) = Unit
-                override fun onDone(id: String?) { audio.abandonAudioFocusRequest(focus) }
-                @Deprecated("Deprecated in Java") override fun onError(id: String?) { audio.abandonAudioFocusRequest(focus) }
-            })
+            t?.setAudioAttributes(MapsDuck.speech)
+            t?.setOnUtteranceProgressListener(duck)
             tts = t
         }
     }
@@ -1000,8 +990,9 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
         val voice = MapsPrefs.voice(carContext)
         if (text.isEmpty() || voice == "off" || (voice == "important" && !important)) return
         WriterLog.i("Maps car: say \"$text\"" + if (why.isNotEmpty()) " ($why)" else "")
-        audio.requestAudioFocus(focus)
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "car")
+        val t = tts ?: return
+        val id = duck.start()
+        if (t.speak(text, TextToSpeech.QUEUE_FLUSH, null, id) != TextToSpeech.SUCCESS) duck.end(id)
     }
 
     // —— what the turn looks like ——
