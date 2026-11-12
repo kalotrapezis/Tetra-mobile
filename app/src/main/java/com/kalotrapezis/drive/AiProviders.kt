@@ -30,7 +30,7 @@ internal object AiProviders {
     val GROQ = AiProvider("groq", "Groq", "https://api.groq.com/openai/v1", "console.groq.com › API Keys",
         "openai/gpt-oss-120b", "whisper-large-v3-turbo", chatExtra = mapOf("reasoning_effort" to "low"))
     val ELEVENLABS = AiProvider("elevenlabs", "ElevenLabs", "https://api.elevenlabs.io/v1", "elevenlabs.io › Developers › API Keys",
-        voice = "eleven_flash_v2_5")
+        listen = "scribe_v2", voice = "eleven_flash_v2_5") // no chat of its own: its LLMs live only inside its voice Agents
     val ALL = listOf(MISTRAL, OPENAI, GROQ, ELEVENLABS)
 
     fun model(p: AiProvider, part: AiPart) = when (part) { AiPart.CHAT -> p.chat; AiPart.LISTEN -> p.listen; AiPart.VOICE -> p.voice }

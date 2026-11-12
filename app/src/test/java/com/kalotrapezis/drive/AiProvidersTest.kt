@@ -38,7 +38,7 @@ class AiProvidersTest {
 
     @Test fun eachPartOffersOnlyWhoCanDoIt() {
         assertEquals(listOf("mistral", "openai", "groq"), AiProviders.choices(AiPart.CHAT).map { it.id })
-        assertEquals(listOf("mistral", "openai", "groq"), AiProviders.choices(AiPart.LISTEN).map { it.id })
+        assertEquals(listOf("mistral", "openai", "groq", "elevenlabs"), AiProviders.choices(AiPart.LISTEN).map { it.id })
         assertEquals(listOf("mistral", "openai", "elevenlabs"), AiProviders.choices(AiPart.VOICE).map { it.id })
     }
 

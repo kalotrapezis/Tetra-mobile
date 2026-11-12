@@ -92,15 +92,20 @@ internal object AssistantNet {
     /** Speech to text by the service chosen to listen (Voxtral unless chosen), in Greek, spelling [terms] as given (My words). */
     fun transcribe(c: Context, pcm: ShortArray, terms: List<String>, bill: Bill? = null): String {
         val p = AiProviders.of(c, AiPart.LISTEN); val key = key(c, p)
+        val scribe = p == AiProviders.ELEVENLABS // its /speech-to-text names the fields its own way
         val b = "tetra" + System.nanoTime()
         val body = ByteArrayOutputStream().apply {
             fun field(name: String, value: String) = write("--$b\r\nContent-Disposition: form-data; name=\"$name\"\r\n\r\n$value\r\n".toByteArray())
-            field("model", p.listen!!); field("language", "el")
-            if (p.isMistral) terms.forEach { field("context_bias", it) } else if (terms.isNotEmpty()) field("prompt", terms.joinToString(", ")) // Whisper's way to the spellings
+            field(if (scribe) "model_id" else "model", p.listen!!); field(if (scribe) "language_code" else "language", "el")
+            when {
+                p.isMistral -> terms.forEach { field("context_bias", it) }
+                scribe -> terms.filter { it.length <= 50 && it.split(' ').size <= 5 && it.none { ch -> ch in "<>{}[]\\" } }.forEach { field("keyterms", it) } // its limits on a term
+                terms.isNotEmpty() -> field("prompt", terms.joinToString(", ")) // Whisper's way to the spellings
+            }
             write("--$b\r\nContent-Disposition: form-data; name=\"file\"; filename=\"speech.wav\"\r\nContent-Type: audio/wav\r\n\r\n".toByteArray())
             write(Vad.wav(pcm)); write("\r\n--$b--\r\n".toByteArray())
         }.toByteArray()
-        return JSONObject(send(key, "/audio/transcriptions", "multipart/form-data; boundary=$b", body, p).decodeToString()).optString("text").trim()
+        return JSONObject(send(key, if (scribe) "/speech-to-text" else "/audio/transcriptions", "multipart/form-data; boundary=$b", body, p).decodeToString()).optString("text").trim()
             .also { bill?.minutes(p.listen!!, pcm.size.toDouble() / Vad.RATE) }
     }
 
