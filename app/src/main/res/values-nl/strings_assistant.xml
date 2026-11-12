@@ -246,4 +246,15 @@
     <string name="brief_runs_on">Gemaakt op</string>
     <string name="brief_runs_computer">Computer</string>
     <string name="brief_runs_here">Dit apparaat</string>
+    <string name="ai_providers">Diensten</string>
+    <string name="ai_providers_note">Mistral doet alles. Een andere dienst kan in plaats daarvan denken, luisteren of spreken, met een eigen sleutel. Live gesprek, zoeken op het web en afbeeldingen blijven bij Mistral. Kosten van andere diensten worden hier niet geteld.</string>
+    <string name="ai_part_chat">Denken (chat en hulpmiddelen)</string>
+    <string name="ai_part_listen">Luisteren (spraak naar tekst)</string>
+    <string name="ai_part_voice">Spreken (stem)</string>
+    <string name="ai_provider_key_note">Maak er een aan op %1$s. Hij wordt versleuteld op deze telefoon bewaard. Wat je zegt en je vragen gaan naar %2$s; je bestanden blijven hier.</string>
+    <string name="ai_provider_key">%1$s-API-sleutel</string>
+    <string name="ai_no_key">Voeg eerst je %1$s-API-sleutel toe: Instellingen › AI Assist.</string>
+    <string name="ai_bad_key">De %1$s-sleutel klopt niet. Controleer hem in Instellingen › AI Assist.</string>
+    <string name="ai_busy">%1$s is druk bezig, of de sleutel heeft geen tegoed meer. Probeer het over een minuut opnieuw.</string>
+    <string name="ai_server">%1$s antwoordde met een fout (%2$d).</string>
 </resources>

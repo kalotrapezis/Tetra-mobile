@@ -151,18 +151,19 @@ internal class Meter(var total: Double = 0.0, var trip: Double = 0.0, var since:
  * line of a server-sent stream (tests give their own).
  */
 internal class Mistral(private val http: (path: String, body: String) -> String, val bill: Bill = Bill(),
-    private val stream: ((path: String, body: String, line: (String) -> Unit) -> Unit)? = null) {
+    private val stream: ((path: String, body: String, line: (String) -> Unit) -> Unit)? = null, val provider: AiProvider = AiProviders.MISTRAL) {
     /** One chat turn; with [onText] (and a [stream]) its words come as they are made, so the voice can start on the first sentence. */
     fun chat(messages: JSONArray, tools: JSONArray, onText: ((String) -> Unit)? = null, choice: String = "auto"): JSONObject {
-        val body = JSONObject().put("model", CHAT).put("messages", messages).put("tools", tools).put("tool_choice", choice).put("temperature", 0.2)
+        val body = adapt(JSONObject().put("model", CHAT).put("messages", messages).put("tools", tools).put("tool_choice", choice).put("temperature", 0.2))
+        val model = body.getString("model") // the chosen service's, for the bill
         if (onText == null || stream == null) return JSONObject(http("/chat/completions", body.toString()))
-            .also { bill.tokens(CHAT, it.optJSONObject("usage")) }
+            .also { bill.tokens(model, it.optJSONObject("usage")) }
             .getJSONArray("choices").getJSONObject(0).getJSONObject("message")
         val text = StringBuilder(); val calls = sortedMapOf<Int, JSONObject>()
         stream.invoke("/chat/completions", body.put("stream", true).toString()) { line ->
             val data = line.removePrefix("data:").trim().takeIf { line.startsWith("data:") && it.startsWith("{") } ?: return@invoke
             val chunk = JSONObject(data)
-            chunk.optJSONObject("usage")?.let { bill.tokens(CHAT, it) }
+            chunk.optJSONObject("usage")?.let { bill.tokens(model, it) }
             val delta = chunk.optJSONArray("choices")?.optJSONObject(0)?.optJSONObject("delta") ?: return@invoke
             AssistantChat.words(delta).takeIf { it.isNotEmpty() }?.let { text.append(it); onText(it) }
             // a call comes whole or in pieces by its index: the pieces' arguments are joined
@@ -179,14 +180,31 @@ internal class Mistral(private val http: (path: String, body: String) -> String,
     }
 
     /** A plain completion without tools ([json]: one JSON object back), by [model]; its text. */
-    fun complete(messages: JSONArray, json: Boolean = false, model: String = CHAT): String {
-        val body = JSONObject().put("model", model).put("messages", messages).put("temperature", 0.4).apply { if (json) put("response_format", JSONObject().put("type", "json_object")) }
-        return JSONObject(http("/chat/completions", body.toString())).also { bill.tokens(model, it.optJSONObject("usage")) }
+    fun complete(messages: JSONArray, json: Boolean = false, model: String = CHAT, temperature: Double = 0.4): String {
+        val body = adapt(JSONObject().put("model", model).put("messages", messages).put("temperature", temperature).apply { if (json) put("response_format", JSONObject().put("type", "json_object")) })
+        return JSONObject(http("/chat/completions", body.toString())).also { bill.tokens(body.getString("model"), it.optJSONObject("usage")) }
             .getJSONArray("choices").getJSONObject(0).getJSONObject("message").let(AssistantChat::words)
     }
 
+    /**
+     * [b] as the chosen service takes it: Mistral's unchanged; another's model and extras, "required" for Mistral's "any", no
+     * temperature for a reasoning model, no name on a tool's answer, and the word JSON said when JSON is asked (OpenAI's rule).
+     * shortcut: another service's prices are not in [Bill], so its costs count as nothing; add them when one is used much.
+     */
+    private fun adapt(b: JSONObject): JSONObject {
+        if (provider.isMistral) return b
+        b.put("model", provider.chat)
+        provider.chatExtra.forEach { (k, v) -> b.put(k, v) }
+        if (!provider.temperature) b.remove("temperature")
+        if (b.optString("tool_choice") == "any") b.put("tool_choice", "required")
+        val m = b.getJSONArray("messages")
+        b.put("messages", JSONArray((if (b.has("response_format")) listOf(JSONObject().put("role", "system").put("content", "Answer in JSON.")) else emptyList()) +
+            (0 until m.length()).map { i -> m.getJSONObject(i).let { o -> if (o.optString("role") == "tool") JSONObject(o.toString()).apply { remove("name") } else o } }))
+        return b
+    }
+
     /** The same API, its costs recorded as [feature] (the desktop's Mistral.as). */
-    fun tagged(feature: String, more: Map<String, Any> = emptyMap()) = Mistral(http, bill.part(feature, more), stream)
+    fun tagged(feature: String, more: Map<String, Any> = emptyMap()) = Mistral(http, bill.part(feature, more), stream, provider)
 
     /** One stateless turn of the Conversations API with one of Mistral's own tools (web_search, image_generation). */
     fun conversation(input: String, tool: String, instructions: String): JSONArray = JSONObject(http("/conversations", JSONObject()

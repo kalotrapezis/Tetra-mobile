@@ -246,4 +246,15 @@
     <string name="brief_runs_on">Прави се на</string>
     <string name="brief_runs_computer">Компютър</string>
     <string name="brief_runs_here">Това устройство</string>
+    <string name="ai_providers">Услуги</string>
+    <string name="ai_providers_note">Mistral прави всичко. Друга услуга може да мисли, слуша или говори вместо нея, със собствен ключ. Разговорът на живо, търсенето в мрежата и картинките остават при Mistral. Разходите за други услуги не се броят тук.</string>
+    <string name="ai_part_chat">Мислене (чат и инструменти)</string>
+    <string name="ai_part_listen">Слушане (реч в текст)</string>
+    <string name="ai_part_voice">Говорене (глас)</string>
+    <string name="ai_provider_key_note">Създай ключ в %1$s. Пази се криптиран на този телефон. Каквото казваш и въпросите ти отиват при %2$s; файловете ти остават тук.</string>
+    <string name="ai_provider_key">API ключ за %1$s</string>
+    <string name="ai_no_key">Първо добави API ключа за %1$s: Настройки › AI Assist.</string>
+    <string name="ai_bad_key">Ключът за %1$s е грешен. Провери го в Настройки › AI Assist.</string>
+    <string name="ai_busy">%1$s е заета или ключът няма повече кредит. Опитай пак след минута.</string>
+    <string name="ai_server">%1$s отговори с грешка (%2$d).</string>
 </resources>

@@ -246,4 +246,15 @@
     <string name="brief_runs_on">Görs på</string>
     <string name="brief_runs_computer">Datorn</string>
     <string name="brief_runs_here">Den här enheten</string>
+    <string name="ai_providers">Tjänster</string>
+    <string name="ai_providers_note">Mistral gör allt. En annan tjänst kan tänka, lyssna eller tala i stället, med sin egen nyckel. Livesamtal, webbsökning och bilder stannar hos Mistral. Andra tjänsters kostnader räknas inte här.</string>
+    <string name="ai_part_chat">Tänkande (chatt och verktyg)</string>
+    <string name="ai_part_listen">Lyssnande (tal till text)</string>
+    <string name="ai_part_voice">Tal (röst)</string>
+    <string name="ai_provider_key_note">Skapa en på %1$s. Den sparas krypterad på den här telefonen. Det du säger och dina frågor går till %2$s; dina filer stannar här.</string>
+    <string name="ai_provider_key">API-nyckel för %1$s</string>
+    <string name="ai_no_key">Lägg först till din API-nyckel för %1$s: Inställningar › AI Assist.</string>
+    <string name="ai_bad_key">%1$s-nyckeln är fel. Kontrollera den i Inställningar › AI Assist.</string>
+    <string name="ai_busy">%1$s är upptagen, eller så har nyckeln slut på kredit. Försök igen om en minut.</string>
+    <string name="ai_server">%1$s svarade med ett fel (%2$d).</string>
 </resources>

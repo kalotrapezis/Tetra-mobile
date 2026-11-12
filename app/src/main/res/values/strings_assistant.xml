@@ -249,4 +249,15 @@
     <string name="brief_runs_on">Made on</string>
     <string name="brief_runs_computer">Computer</string>
     <string name="brief_runs_here">This device</string>
+    <string name="ai_providers">Services</string>
+    <string name="ai_providers_note">Mistral does everything. Another service can think, listen or speak instead, with its own key. Live talk, web search and pictures stay with Mistral. Other services\' costs are not counted here.</string>
+    <string name="ai_part_chat">Thinking (chat and tools)</string>
+    <string name="ai_part_listen">Listening (speech to text)</string>
+    <string name="ai_part_voice">Speaking (voice)</string>
+    <string name="ai_provider_key_note">Make one at %1$s. It is kept encrypted on this phone. What you say and your questions go to %2$s; your files stay here.</string>
+    <string name="ai_provider_key">%1$s API key</string>
+    <string name="ai_no_key">Add your %1$s API key first: Settings › AI Assist.</string>
+    <string name="ai_bad_key">The %1$s key is wrong. Check it in Settings › AI Assist.</string>
+    <string name="ai_busy">%1$s is busy, or the key has no credit left. Try again in a minute.</string>
+    <string name="ai_server">%1$s answered with an error (%2$d).</string>
 </resources>

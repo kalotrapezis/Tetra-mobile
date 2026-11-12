@@ -42,7 +42,7 @@ class TvWidget : AppWidgetProvider() {
 
         /** A tap on the screen: the talk on the TV itself (TvTalkService) with a key, the microphone and the decorations; else the sheet. */
         private fun talkIntent(c: Context): PendingIntent =
-            if (AssistantKey.get(c) != null && hasMic(c) && AiLook.decorated(c))
+            if (AssistantKey.has(c) && hasMic(c) && AiLook.decorated(c))
                 PendingIntent.getForegroundService(c, 2, Intent(c, TvTalkService::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
             else PendingIntent.getActivity(c, 1, Intent(c, AssistantSheetActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 

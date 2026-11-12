@@ -2607,7 +2607,7 @@ internal fun WriterScreen(back: () -> Unit, open: String?) {
     // Review › ✦ Suggestions (WriterSuggest): AI Assist's edits for the selection or the document, each marked on the page
     // until accepted (one step of Undo) or rejected; asked only on Send, only while AI Assist may use Words.
     LaunchedEffect(Unit) { withContext(Dispatchers.IO) { AiGate.load(context) } }
-    val hasAiKey = remember { AssistantKey.get(context) != null }
+    val hasAiKey = remember { AssistantKey.has(context) }
     val suggestOn = AiGate.allows("writer") && hasAiKey
     var suggestAsking by remember { mutableStateOf(false) }
     var suggestBusy by remember { mutableStateOf<String?>(null) }

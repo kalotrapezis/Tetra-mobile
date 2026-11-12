@@ -328,13 +328,13 @@ class PillsVoiceService : Service() {
 
     private fun speak(words: String) {
         if (words.isBlank()) return
-        if (AiGate.load(this).enabled) AssistantKey.get(this)?.let { key -> if (runCatching { mistral(key, words) }.onFailure { WriterLog.w("Pills: AI Assist's voice: ${it.message}") }.getOrDefault(false)) return }
+        if (AiGate.load(this).enabled && AssistantKey.has(this, AiProviders.of(this, AiPart.VOICE)) && runCatching { aiVoice(words) }.onFailure { WriterLog.w("Pills: AI Assist's voice: ${it.message}") }.getOrDefault(false)) return
         phone(words)
     }
 
     /** AI Assist's own voice, as its answers are read; false when it chose the phone's. */
-    private fun mistral(key: String, words: String): Boolean {
-        val voice = AssistantVoices.chosen(this, key)
+    private fun aiVoice(words: String): Boolean {
+        val voice = AssistantVoices.chosen(this)
         if (voice == AssistantVoices.PHONE) return false
         val rate = 24_000
         val t = AudioTrack.Builder().setAudioAttributes(attributes)
@@ -347,7 +347,7 @@ class PillsVoiceService : Service() {
         try {
             t.play()
             Thread {
-                runCatching { AssistantNet.speech(key, voice, words, null) { a -> if (late.get()) throw java.io.InterruptedIOException("too late"); first.countDown(); t.write(a, 0, a.size, AudioTrack.WRITE_BLOCKING); written.addAndGet(a.size) } }
+                runCatching { AssistantNet.speech(this, voice, words, null) { a -> if (late.get()) throw java.io.InterruptedIOException("too late"); first.countDown(); t.write(a, 0, a.size, AudioTrack.WRITE_BLOCKING); written.addAndGet(a.size) } }
                     .onFailure { if (!late.get()) WriterLog.w("Pills: AI Assist's voice: ${it.message}") }
                 first.countDown(); done.countDown()
             }.start()

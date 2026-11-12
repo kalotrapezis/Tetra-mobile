@@ -250,4 +250,15 @@
     <string name="brief_runs_on">Isir fuq</string>
     <string name="brief_runs_computer">Kompjuter</string>
     <string name="brief_runs_here">Dan l-apparat</string>
+    <string name="ai_providers">Servizzi</string>
+    <string name="ai_providers_note">Mistral jagħmel kollox. Servizz ieħor jista\' jaħseb, jisma\' jew jitkellem minflokha, biċ-ċavetta tiegħu. Il-konversazzjoni diretta, it-tfittxija fuq il-web u l-istampi jibqgħu ma\' Mistral. L-ispejjeż ta\' servizzi oħra mhumiex magħduda hawn.</string>
+    <string name="ai_part_chat">Ħsieb (chat u għodod)</string>
+    <string name="ai_part_listen">Smigħ (diskors għal test)</string>
+    <string name="ai_part_voice">Taħdit (vuċi)</string>
+    <string name="ai_provider_key_note">Oħloq waħda fuq %1$s. Tinżamm ikkriptata fuq dan it-telefon. Dak li tgħid u l-mistoqsijiet tiegħek imorru għand %2$s; il-fajls tiegħek jibqgħu hawn.</string>
+    <string name="ai_provider_key">Ċavetta API ta\' %1$s</string>
+    <string name="ai_no_key">Żid l-ewwel iċ-ċavetta API ta\' %1$s tiegħek: Settings › AI Assist.</string>
+    <string name="ai_bad_key">Iċ-ċavetta ta\' %1$s hija ħażina. Iċċekkja f\'Settings › AI Assist.</string>
+    <string name="ai_busy">%1$s huwa okkupat, jew iċ-ċavetta m\'għandhiex kreditu. Erġa\' pprova f\'minuta.</string>
+    <string name="ai_server">%1$s wieġeb b\'żball (%2$d).</string>
 </resources>

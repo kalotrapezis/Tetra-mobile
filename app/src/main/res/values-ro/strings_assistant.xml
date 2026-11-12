@@ -248,4 +248,15 @@
     <string name="brief_runs_on">Se face pe</string>
     <string name="brief_runs_computer">Computer</string>
     <string name="brief_runs_here">Acest dispozitiv</string>
+    <string name="ai_providers">Servicii</string>
+    <string name="ai_providers_note">Mistral face totul. Alt serviciu poate gândi, asculta sau vorbi în locul ei, cu propria cheie. Conversația live, căutarea pe web și imaginile rămân la Mistral. Costurile altor servicii nu sunt numărate aici.</string>
+    <string name="ai_part_chat">Gândire (chat și instrumente)</string>
+    <string name="ai_part_listen">Ascultare (vorbire în text)</string>
+    <string name="ai_part_voice">Vorbire (voce)</string>
+    <string name="ai_provider_key_note">Creează una pe %1$s. Este păstrată criptată pe acest telefon. Ce spui și întrebările tale ajung la %2$s; fișierele tale rămân aici.</string>
+    <string name="ai_provider_key">Cheie API %1$s</string>
+    <string name="ai_no_key">Adaugă mai întâi cheia ta API %1$s: Setări › AI Assist.</string>
+    <string name="ai_bad_key">Cheia %1$s este greșită. Verific-o în Setări › AI Assist.</string>
+    <string name="ai_busy">%1$s este ocupat sau cheia nu mai are credit. Încearcă din nou peste un minut.</string>
+    <string name="ai_server">%1$s a răspuns cu o eroare (%2$d).</string>
 </resources>

@@ -246,4 +246,15 @@
     <string name="brief_runs_on">Missä tehdään</string>
     <string name="brief_runs_computer">Tietokone</string>
     <string name="brief_runs_here">Tämä laite</string>
+    <string name="ai_providers">Palvelut</string>
+    <string name="ai_providers_note">Mistral hoitaa kaiken. Toinen palvelu voi ajatella, kuunnella tai puhua sen sijaan omalla avaimellaan. Live-keskustelu, verkkohaku ja kuvat jäävät Mistralille. Muiden palvelujen kuluja ei lasketa tässä.</string>
+    <string name="ai_part_chat">Ajattelu (keskustelu ja työkalut)</string>
+    <string name="ai_part_listen">Kuuntelu (puhe tekstiksi)</string>
+    <string name="ai_part_voice">Puhe (ääni)</string>
+    <string name="ai_provider_key_note">Luo avain osoitteessa %1$s. Se säilytetään salattuna tässä puhelimessa. Puheesi ja kysymyksesi menevät palveluun %2$s; tiedostosi pysyvät täällä.</string>
+    <string name="ai_provider_key">%1$s API-avain</string>
+    <string name="ai_no_key">Lisää ensin %1$s-API-avaimesi: Asetukset › AI Assist.</string>
+    <string name="ai_bad_key">%1$s-avain on väärä. Tarkista se kohdassa Asetukset › AI Assist.</string>
+    <string name="ai_busy">%1$s on kiireinen tai avaimen krediitti on loppu. Yritä uudelleen minuutin kuluttua.</string>
+    <string name="ai_server">%1$s vastasi virheellä (%2$d).</string>
 </resources>

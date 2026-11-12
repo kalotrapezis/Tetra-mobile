@@ -72,7 +72,7 @@ internal class HomeTalk(private val c: Context, private val scope: CoroutineScop
 
     /** The widget's mic: start; while listening, that is all; while thinking or speaking, stop. [sheet]: no key or no mic yet. */
     fun tap(sheet: () -> Unit) = when (phase) {
-        null -> if (AssistantKey.get(c) == null || !hasMic(c)) sheet() else start()
+        null -> if (!AssistantKey.has(c) || !hasMic(c)) sheet() else start()
         LivePhase.Listening -> stop.set(true)
         else -> end()
     }
@@ -95,7 +95,7 @@ internal class HomeTalk(private val c: Context, private val scope: CoroutineScop
         if (pcm == null) return
         phase = LivePhase.Thinking
         val chat = withContext(Dispatchers.IO) { SharedChat.chat(c) }
-        val text = withContext(Dispatchers.IO) { AssistantNet.transcribe(AssistantNet.key(c), pcm, AssistantWords.terms(c), chat.bill.part("dictation")) }
+        val text = withContext(Dispatchers.IO) { AssistantNet.transcribe(c, pcm, AssistantWords.terms(c), chat.bill.part("dictation")) }
         if (text.isBlank()) return
         SharedChat.bubbles += Bubble(true, text)
         val speech = AnswerVoice(c, reader, chat.bill.part("voice"), scope).also { voice = it }

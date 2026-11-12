@@ -130,9 +130,7 @@ internal object MailAssist {
 
     fun draft(c: Context, thread: List<Pair<String, String>>, me: String, notes: String, style: MailAi.Style? = null): String {
         if (!AiGate.allows("mail")) throw DriveProblem("AI Assist may not use Mail.", R.string.ai_is_off)
-        val body = JSONObject().put("model", Mistral.CHAT).put("messages", messages(thread, me, notes, style)).put("temperature", 0.4)
-        return JSONObject(AssistantNet.post(AssistantNet.key(c), "/chat/completions", body.toString()))
-            .getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content").trim()
+        return AssistantNet.api(c, Bill()).complete(messages(thread, me, notes, style)).trim() // uncounted, as it always was
     }
 }
 

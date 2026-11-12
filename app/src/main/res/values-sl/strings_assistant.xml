@@ -250,4 +250,15 @@
     <string name="brief_runs_on">Pripravi se na</string>
     <string name="brief_runs_computer">Računalnik</string>
     <string name="brief_runs_here">Ta naprava</string>
+    <string name="ai_providers">Storitve</string>
+    <string name="ai_providers_note">Mistral naredi vse. Druga storitev lahko namesto nje razmišlja, posluša ali govori, z lastnim ključem. Pogovor v živo, iskanje po spletu in slike ostanejo pri Mistralu. Stroški drugih storitev se tukaj ne štejejo.</string>
+    <string name="ai_part_chat">Razmišljanje (klepet in orodja)</string>
+    <string name="ai_part_listen">Poslušanje (govor v besedilo)</string>
+    <string name="ai_part_voice">Govorjenje (glas)</string>
+    <string name="ai_provider_key_note">Ustvari ga na %1$s. Shranjen je šifriran v tem telefonu. Kar rečeš, in tvoja vprašanja gredo k %2$s; tvoje datoteke ostanejo tukaj.</string>
+    <string name="ai_provider_key">Ključ API za %1$s</string>
+    <string name="ai_no_key">Najprej dodaj svoj ključ API za %1$s: Nastavitve › AI Assist.</string>
+    <string name="ai_bad_key">Ključ %1$s je napačen. Preveri ga v Nastavitve › AI Assist.</string>
+    <string name="ai_busy">%1$s je zaseden ali pa ključ nima več kredita. Poskusi znova čez minuto.</string>
+    <string name="ai_server">%1$s je odgovoril z napako (%2$d).</string>
 </resources>

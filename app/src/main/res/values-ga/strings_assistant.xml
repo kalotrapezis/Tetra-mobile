@@ -252,4 +252,15 @@
     <string name="brief_runs_on">Déanta ar</string>
     <string name="brief_runs_computer">Ríomhaire</string>
     <string name="brief_runs_here">An gléas seo</string>
+    <string name="ai_providers">Seirbhísí</string>
+    <string name="ai_providers_note">Déanann Mistral gach rud. Is féidir le seirbhís eile smaoineamh, éisteacht nó labhairt ina háit, lena heochair féin. Fanann an comhrá beo, cuardach gréasáin agus pictiúir le Mistral. Ní áirítear costais seirbhísí eile anseo.</string>
+    <string name="ai_part_chat">Smaoineamh (comhrá agus uirlisí)</string>
+    <string name="ai_part_listen">Éisteacht (caint go téacs)</string>
+    <string name="ai_part_voice">Labhairt (guth)</string>
+    <string name="ai_provider_key_note">Cruthaigh ceann ag %1$s. Coinnítear criptithe é ar an bhfón seo. Téann a deir tú agus do cheisteanna chuig %2$s; fanann do chomhaid anseo.</string>
+    <string name="ai_provider_key">Eochair API %1$s</string>
+    <string name="ai_no_key">Cuir d\'eochair API %1$s leis ar dtús: Socruithe › AI Assist.</string>
+    <string name="ai_bad_key">Tá eochair %1$s mícheart. Seiceáil í faoi Socruithe › AI Assist.</string>
+    <string name="ai_busy">Tá %1$s gnóthach, nó níl aon chreidmheas fágtha ar an eochair. Bain triail eile as i gceann nóiméid.</string>
+    <string name="ai_server">D\'fhreagair %1$s le earráid (%2$d).</string>
 </resources>

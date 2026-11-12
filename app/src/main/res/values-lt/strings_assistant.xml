@@ -250,4 +250,15 @@
     <string name="brief_runs_on">Kur ruošiama</string>
     <string name="brief_runs_computer">Kompiuteris</string>
     <string name="brief_runs_here">Šis įrenginys</string>
+    <string name="ai_providers">Paslaugos</string>
+    <string name="ai_providers_note">Mistral daro viską. Kita paslauga gali vietoj jos galvoti, klausytis ar kalbėti, su savo raktu. Gyvas pokalbis, paieška internete ir paveikslėliai lieka Mistral. Kitų paslaugų išlaidos čia neskaičiuojamos.</string>
+    <string name="ai_part_chat">Mąstymas (pokalbis ir įrankiai)</string>
+    <string name="ai_part_listen">Klausymas (kalba į tekstą)</string>
+    <string name="ai_part_voice">Kalbėjimas (balsas)</string>
+    <string name="ai_provider_key_note">Susikurk jį %1$s. Jis saugomas užšifruotas šiame telefone. Tai, ką sakai, ir tavo klausimai siunčiami į %2$s; tavo failai lieka čia.</string>
+    <string name="ai_provider_key">%1$s API raktas</string>
+    <string name="ai_no_key">Pirmiausia pridėk savo %1$s API raktą: Nustatymai › AI Assist.</string>
+    <string name="ai_bad_key">%1$s raktas neteisingas. Patikrink jį skiltyje Nustatymai › AI Assist.</string>
+    <string name="ai_busy">%1$s užimtas arba rakte nebėra kredito. Pabandyk dar kartą po minutės.</string>
+    <string name="ai_server">%1$s atsakė klaida (%2$d).</string>
 </resources>

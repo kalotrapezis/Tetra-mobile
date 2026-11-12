@@ -69,10 +69,10 @@ internal object AssistantAutoMemory {
     /** From the screen: in the background, when switched on and the AI may run. */
     fun soon(c: Context, messages: JSONArray) {
         val app = c.applicationContext
-        if (!on(app) || !AiGate.on || AssistantKey.get(app) == null || messages.length() == 0) return
+        if (!on(app) || !AiGate.on || !AssistantKey.has(app) || messages.length() == 0) return
         Thread {
             runCatching {
-                val api = Mistral({ path, body -> AssistantNet.post(AssistantNet.key(app), path, body) }, AssistantMeter.bill(app)).tagged("memory")
+                val api = AssistantNet.api(app).tagged("memory")
                 if (after(api, driveRoot(), messages, TimerControl.device()).isNotEmpty()) ScopedSync.soon(app, "assistant", 0, orWhole = true)
             }.onFailure { WriterLog.w("AI Assist: auto memory (${it.message})") }
         }.start()

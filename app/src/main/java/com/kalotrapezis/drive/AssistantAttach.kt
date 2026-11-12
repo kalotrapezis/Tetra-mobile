@@ -254,16 +254,15 @@ internal object AudioJobs {
         runCatching {
             val usage = AssistantUsage.of(c)
             if (usage.capped()) error(c.getString(R.string.usage_capped))
-            val key = AssistantNet.key(c)
             val d = Attach.Doc(o.optString("name"), "", "text", File(f.parentFile, "source.txt").readText().split('\u000c'), emptyList(), false)
-            val api = Mistral({ path, body -> AssistantNet.post(key, path, body) }, AssistantMeter.bill(c)).tagged("audio", mapOf("file" to d.name, "job" to id))
+            val api = AssistantNet.api(c).tagged("audio", mapOf("file" to d.name, "job" to id))
             val tts = api.bill.part("tts")
-            // the host is the user's voice; the expert another of Mistral's presets
-            val all = AssistantNet.voices(key).map { it.first }
+            // the host is the user's voice; the expert another of the speaking service's
+            val all = AssistantNet.voices(c).map { it.first }
             val host = AssistantVoices.id(c)?.takeIf { it.isNotEmpty() } ?: all.firstOrNull() ?: error("No voice.")
             write { put("state", "running").put("stage", "script").put("done", 0).put("total", 1) }
             WriterLog.i("AI Assist: making the audio $id (${o.optString("mode")}, ${o.optInt("minutes")} min)")
-            val r = AudioMaker.make(api, { v, t, each -> AssistantNet.speech(key, v, t, tts, each) }, d, o.optString("mode"), o.optInt("minutes"), o.optString("focus"), o.optString("style"),
+            val r = AudioMaker.make(api, { v, t, each -> AssistantNet.speech(c, v, t, tts, each) }, d, o.optString("mode"), o.optInt("minutes"), o.optString("focus"), o.optString("style"),
                 listOf(host, all.firstOrNull { it != host } ?: host), f.parentFile!!, File(dir(tetra), "cache")) { stage, done, total ->
                 progress(stage, done, total); write { put("stage", stage).put("done", done).put("total", total) }
             }

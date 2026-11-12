@@ -248,4 +248,15 @@
     <string name="brief_runs_on">Preparato su</string>
     <string name="brief_runs_computer">Computer</string>
     <string name="brief_runs_here">Questo dispositivo</string>
+    <string name="ai_providers">Servizi</string>
+    <string name="ai_providers_note">Mistral fa tutto. Un altro servizio può pensare, ascoltare o parlare al suo posto, con la propria chiave. La conversazione dal vivo, la ricerca web e le immagini restano a Mistral. I costi degli altri servizi non sono conteggiati qui.</string>
+    <string name="ai_part_chat">Pensiero (chat e strumenti)</string>
+    <string name="ai_part_listen">Ascolto (voce in testo)</string>
+    <string name="ai_part_voice">Parlato (voce)</string>
+    <string name="ai_provider_key_note">Creane una su %1$s. Viene conservata cifrata su questo telefono. Ciò che dici e le tue domande vanno a %2$s; i tuoi file restano qui.</string>
+    <string name="ai_provider_key">Chiave API di %1$s</string>
+    <string name="ai_no_key">Aggiungi prima la tua chiave API di %1$s: Impostazioni › AI Assist.</string>
+    <string name="ai_bad_key">La chiave %1$s non è corretta. Controllala in Impostazioni › AI Assist.</string>
+    <string name="ai_busy">%1$s è occupato oppure la chiave non ha più credito. Riprova tra un minuto.</string>
+    <string name="ai_server">%1$s ha risposto con un errore (%2$d).</string>
 </resources>

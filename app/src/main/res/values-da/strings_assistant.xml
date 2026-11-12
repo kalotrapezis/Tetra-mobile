@@ -246,4 +246,15 @@
     <string name="brief_runs_on">Laves på</string>
     <string name="brief_runs_computer">Computer</string>
     <string name="brief_runs_here">Denne enhed</string>
+    <string name="ai_providers">Tjenester</string>
+    <string name="ai_providers_note">Mistral klarer det hele. En anden tjeneste kan tænke, lytte eller tale i stedet, med sin egen nøgle. Live-samtale, websøgning og billeder bliver hos Mistral. Andre tjenesters omkostninger tælles ikke med her.</string>
+    <string name="ai_part_chat">Tænkning (chat og værktøjer)</string>
+    <string name="ai_part_listen">Lytning (tale til tekst)</string>
+    <string name="ai_part_voice">Tale (stemme)</string>
+    <string name="ai_provider_key_note">Opret en på %1$s. Den gemmes krypteret på denne telefon. Det, du siger, og dine spørgsmål sendes til %2$s; dine filer bliver her.</string>
+    <string name="ai_provider_key">%1$s API-nøgle</string>
+    <string name="ai_no_key">Tilføj først din %1$s API-nøgle: Indstillinger › AI Assist.</string>
+    <string name="ai_bad_key">%1$s-nøglen er forkert. Tjek den i Indstillinger › AI Assist.</string>
+    <string name="ai_busy">%1$s har travlt, eller nøglen har ikke mere kredit. Prøv igen om et minut.</string>
+    <string name="ai_server">%1$s svarede med en fejl (%2$d).</string>
 </resources>

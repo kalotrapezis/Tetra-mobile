@@ -118,8 +118,8 @@ internal object WriterSuggest {
     /** Every piece of [text] asked about [ask], at most [MAX_CHUNKS]; the suggestions and whether the text went on past the cap. */
     fun ask(c: Context, text: String, base: Int, ask: String, progress: (Int, Int) -> Unit): Pair<List<Suggestion>, Boolean> {
         if (!AiGate.allows("writer")) throw DriveProblem("AI Assist may not use Words.", R.string.ai_is_off)
-        val key = AssistantNet.key(c)
-        val api = Mistral({ path, body -> AssistantNet.post(key, path, body) }, AssistantMeter.bill(c)).tagged("writer")
+        AssistantNet.key(c, AiProviders.of(c, AiPart.CHAT)) // no key: said at once
+        val api = AssistantNet.api(c).tagged("writer")
         val all = chunks(text); val sent = all.take(MAX_CHUNKS)
         val out = sent.flatMapIndexed { n, (start, piece) ->
             progress(n + 1, sent.size)

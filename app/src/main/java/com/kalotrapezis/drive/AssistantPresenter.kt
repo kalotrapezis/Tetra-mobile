@@ -71,9 +71,9 @@ internal object Presenter {
     /** The page's words as the presenter says them; without a key, past the month's budget or on an error, its first lines. */
     fun script(c: Context, title: String, text: String): String {
         val page = text.take(6000)
-        if (AssistantKey.get(c) == null || AssistantUsage.of(c).capped()) return opening(page)
+        if (!AssistantKey.has(c) || AssistantUsage.of(c).capped()) return opening(page)
         return runCatching {
-            val api = Mistral({ path, body -> AssistantNet.post(AssistantNet.key(c), path, body) }, AssistantMeter.bill(c)).tagged("presenter")
+            val api = AssistantNet.api(c).tagged("presenter")
             api.complete(JSONArray().put(JSONObject().put("role", "system").put("content", PROMPT)).put(JSONObject().put("role", "user").put("content", "Title: $title\n\n$page")))
         }.onFailure { WriterLog.w("AI Assist presenter: ${it.message}") }.getOrNull()?.trim()?.takeIf { it.isNotEmpty() } ?: opening(page)
     }

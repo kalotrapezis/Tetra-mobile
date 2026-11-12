@@ -250,4 +250,15 @@
     <string name="brief_runs_on">Vytvára sa na</string>
     <string name="brief_runs_computer">Počítač</string>
     <string name="brief_runs_here">Toto zariadenie</string>
+    <string name="ai_providers">Služby</string>
+    <string name="ai_providers_note">Mistral zvládne všetko. Iná služba môže namiesto nej myslieť, počúvať alebo hovoriť, s vlastným kľúčom. Živý rozhovor, vyhľadávanie na webe a obrázky zostávajú pri Mistral. Náklady iných služieb sa tu nepočítajú.</string>
+    <string name="ai_part_chat">Myslenie (chat a nástroje)</string>
+    <string name="ai_part_listen">Počúvanie (reč na text)</string>
+    <string name="ai_part_voice">Hovorenie (hlas)</string>
+    <string name="ai_provider_key_note">Vytvor si ho na %1$s. Uchováva sa zašifrovaný v tomto telefóne. Čo hovoríš a tvoje otázky idú do %2$s; tvoje súbory zostávajú tu.</string>
+    <string name="ai_provider_key">Kľúč API %1$s</string>
+    <string name="ai_no_key">Najprv pridaj svoj kľúč API %1$s: Nastavenia › AI Assist.</string>
+    <string name="ai_bad_key">Kľúč %1$s je nesprávny. Skontroluj ho v ponuke Nastavenia › AI Assist.</string>
+    <string name="ai_busy">%1$s je zaneprázdnený alebo kľúč už nemá kredit. Skús to znova o minútu.</string>
+    <string name="ai_server">%1$s odpovedal chybou (%2$d).</string>
 </resources>

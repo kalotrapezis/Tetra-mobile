@@ -246,4 +246,15 @@
     <string name="brief_runs_on">Πού φτιάχνεται</string>
     <string name="brief_runs_computer">Υπολογιστής</string>
     <string name="brief_runs_here">Αυτή η συσκευή</string>
+    <string name="ai_providers">Υπηρεσίες</string>
+    <string name="ai_providers_note">Η Mistral τα κάνει όλα. Μια άλλη υπηρεσία μπορεί να σκέφτεται, να ακούει ή να μιλά στη θέση της, με δικό της κλειδί. Η ζωντανή συζήτηση, η αναζήτηση στο web και οι εικόνες μένουν στη Mistral. Το κόστος άλλων υπηρεσιών δεν μετριέται εδώ.</string>
+    <string name="ai_part_chat">Σκέψη (συζήτηση και εργαλεία)</string>
+    <string name="ai_part_listen">Ακρόαση (ομιλία σε κείμενο)</string>
+    <string name="ai_part_voice">Ομιλία (φωνή)</string>
+    <string name="ai_provider_key_note">Φτιάξε ένα στο %1$s. Μένει κρυπτογραφημένο σε αυτό το κινητό. Ό,τι λες και οι ερωτήσεις σου πάνε στην %2$s· τα αρχεία σου μένουν εδώ.</string>
+    <string name="ai_provider_key">Κλειδί API της %1$s</string>
+    <string name="ai_no_key">Πρόσθεσε πρώτα το κλειδί API της %1$s: Ρυθμίσεις › AI Assist.</string>
+    <string name="ai_bad_key">Λάθος κλειδί %1$s. Έλεγξέ το στις Ρυθμίσεις › AI Assist.</string>
+    <string name="ai_busy">Η %1$s είναι απασχολημένη ή το κλειδί δεν έχει άλλη πίστωση. Δοκίμασε ξανά σε ένα λεπτό.</string>
+    <string name="ai_server">Η %1$s απάντησε με σφάλμα (%2$d).</string>
 </resources>

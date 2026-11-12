@@ -42,7 +42,7 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-/** The Mistral API key (Settings › Assistant), encrypted by a key that never leaves the phone's keystore. */
+/** Each service's API key (Settings › Assistant; Mistral's the first), encrypted by a key that never leaves the phone's keystore. */
 internal object AssistantKey {
     private const val ALIAS = "tetra_assistant_key"
     private fun prefs(c: Context) = c.getSharedPreferences("assistant", Context.MODE_PRIVATE)
@@ -55,58 +55,76 @@ internal object AssistantKey {
         }.generateKey()
     }
 
-    /** Whether a key is set, without reading it. */
-    fun has(c: Context) = prefs(c).contains("key")
-    fun get(c: Context): String? = prefs(c).getString("key", null)?.let { saved -> runCatching {
+    private fun name(p: AiProvider) = if (p.isMistral) "key" else "key_${p.id}" // Mistral's where it always was
+
+    /** Whether the chosen chat service has a key (AI Assist can answer), without reading it. */
+    fun has(c: Context) = has(c, AiProviders.of(c, AiPart.CHAT))
+    fun has(c: Context, p: AiProvider) = prefs(c).contains(name(p))
+    fun get(c: Context, p: AiProvider = AiProviders.MISTRAL): String? = prefs(c).getString(name(p), null)?.let { saved -> runCatching {
         val b = Base64.decode(saved, Base64.NO_WRAP)
         Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.DECRYPT_MODE, secret(), GCMParameterSpec(128, b, 0, 12)) }.doFinal(b, 12, b.size - 12).decodeToString()
     }.onFailure { WriterLog.e("Assistant: the key could not be read", it) }.getOrNull() }
 
-    fun set(c: Context, key: String) {
-        if (key.isBlank()) { prefs(c).edit().remove("key").apply(); return }
+    fun set(c: Context, key: String, p: AiProvider = AiProviders.MISTRAL) {
+        if (key.isBlank()) { prefs(c).edit().remove(name(p)).apply(); return }
         val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, secret()) }
-        prefs(c).edit().putString("key", Base64.encodeToString(cipher.iv + cipher.doFinal(key.trim().toByteArray()), Base64.NO_WRAP)).apply()
+        prefs(c).edit().putString(name(p), Base64.encodeToString(cipher.iv + cipher.doFinal(key.trim().toByteArray()), Base64.NO_WRAP)).apply()
     }
 }
 
-/** Mistral over HTTPS; every failure a [DriveProblem] the screen says in the user's language. */
+/** Mistral, or the service chosen for a part (AiProviders), over HTTPS; every failure a [DriveProblem] the screen says in the user's language. */
 internal object AssistantNet {
-    /** The key for a request, only while the AI is on (AiGate, read again here: the switch may have come by sync). */
-    fun key(c: Context): String { AiGate.load(c); AiGate.check(); return AssistantKey.get(c) ?: throw DriveProblem("No Mistral key.", R.string.assistant_no_key) }
+    /** [p]'s key for a request, only while the AI is on (AiGate, read again here: the switch may have come by sync). */
+    fun key(c: Context, p: AiProvider = AiProviders.MISTRAL): String { AiGate.load(c); AiGate.check(); return AssistantKey.get(c, p)
+        ?: throw if (p.isMistral) DriveProblem("No Mistral key.", R.string.assistant_no_key) else DriveProblem("No ${p.name} key.", R.string.ai_no_key, p.name) }
 
-    fun post(key: String, path: String, body: String): String =
-        send(key, path, "application/json", body.toByteArray()).decodeToString()
+    /** The chat of the service chosen to think, its key read at each request so a new one counts at once. */
+    fun api(c: Context, bill: Bill = AssistantMeter.bill(c)): Mistral {
+        val app = c.applicationContext; val p = AiProviders.of(app, AiPart.CHAT)
+        return Mistral({ path, body -> post(key(app, p), path, body, p) }, bill, { path, body, line -> stream(key(app, p), path, body, p, line) }, p)
+    }
+
+    fun post(key: String, path: String, body: String, p: AiProvider = AiProviders.MISTRAL): String =
+        send(key, path, "application/json", body.toByteArray(), p).decodeToString()
 
     fun download(key: String, fileId: String): ByteArray = send(key, "/files/$fileId/content", null, null)
 
-    /** Speech to text with Voxtral, in Greek, spelling [terms] as given (My words). */
-    fun transcribe(key: String, pcm: ShortArray, terms: List<String>, bill: Bill? = null): String {
+    /** Speech to text by the service chosen to listen (Voxtral unless chosen), in Greek, spelling [terms] as given (My words). */
+    fun transcribe(c: Context, pcm: ShortArray, terms: List<String>, bill: Bill? = null): String {
+        val p = AiProviders.of(c, AiPart.LISTEN); val key = key(c, p)
         val b = "tetra" + System.nanoTime()
         val body = ByteArrayOutputStream().apply {
             fun field(name: String, value: String) = write("--$b\r\nContent-Disposition: form-data; name=\"$name\"\r\n\r\n$value\r\n".toByteArray())
-            field("model", Mistral.TRANSCRIBE); field("language", "el")
-            terms.forEach { field("context_bias", it) }
+            field("model", p.listen!!); field("language", "el")
+            if (p.isMistral) terms.forEach { field("context_bias", it) } else if (terms.isNotEmpty()) field("prompt", terms.joinToString(", ")) // Whisper's way to the spellings
             write("--$b\r\nContent-Disposition: form-data; name=\"file\"; filename=\"speech.wav\"\r\nContent-Type: audio/wav\r\n\r\n".toByteArray())
             write(Vad.wav(pcm)); write("\r\n--$b--\r\n".toByteArray())
         }.toByteArray()
-        return JSONObject(send(key, "/audio/transcriptions", "multipart/form-data; boundary=$b", body).decodeToString()).optString("text").trim()
-            .also { bill?.minutes(Mistral.TRANSCRIBE, pcm.size.toDouble() / Vad.RATE) }
+        return JSONObject(send(key, "/audio/transcriptions", "multipart/form-data; boundary=$b", body, p).decodeToString()).optString("text").trim()
+            .also { bill?.minutes(p.listen!!, pcm.size.toDouble() / Vad.RATE) }
     }
 
     /** A failed live connection in the user's words, as [send] says a failed request. */
-    fun problem(code: Int?): DriveProblem = when (code) {
+    fun problem(code: Int?, p: AiProvider = AiProviders.MISTRAL): DriveProblem = when (code) {
         null -> DriveProblem("Offline", R.string.assistant_offline)
-        401 -> DriveProblem("Wrong key.", R.string.assistant_bad_key)
-        429 -> DriveProblem("Too many requests.", R.string.assistant_busy)
-        else -> DriveProblem("Mistral $code", R.string.assistant_server, code)
+        401 -> if (p.isMistral) DriveProblem("Wrong key.", R.string.assistant_bad_key) else DriveProblem("Wrong ${p.name} key.", R.string.ai_bad_key, p.name)
+        429 -> if (p.isMistral) DriveProblem("Too many requests.", R.string.assistant_busy) else DriveProblem("${p.name}: too many requests.", R.string.ai_busy, p.name)
+        else -> if (p.isMistral) DriveProblem("Mistral $code", R.string.assistant_server, code) else DriveProblem("${p.name} $code", R.string.ai_server, p.name, code)
     }
 
     /** A server-sent stream, a line at a time as it comes (the chat's answer, Mistral's voice). */
-    fun stream(key: String, path: String, body: String, line: (String) -> Unit) =
-        request(key, path, "application/json", body.toByteArray()) { it.bufferedReader().forEachLine(line) }
+    fun stream(key: String, path: String, body: String, p: AiProvider = AiProviders.MISTRAL, line: (String) -> Unit) =
+        request(key, path, "application/json", body.toByteArray(), p) { it.bufferedReader().forEachLine(line) }
 
-    /** Mistral's preset voices as id to "Name (languages)", every page (the TTS app's mistralVoices()). */
-    fun voices(key: String): List<Pair<String, String>> {
+    /** OpenAI's voices for /audio/speech, its best two first (its text-to-speech guide, Nov 2026); it has no list to ask. */
+    private val OPENAI_VOICES = listOf("marin", "cedar", "alloy", "ash", "ballad", "coral", "echo", "fable", "nova", "onyx", "sage", "shimmer", "verse")
+
+    /** The voices of the service chosen to speak as id to name: Mistral's presets "Name (languages)", every page (the TTS app's mistralVoices()). */
+    fun voices(c: Context): List<Pair<String, String>> {
+        val p = AiProviders.of(c, AiPart.VOICE); val key = key(c, p)
+        if (p == AiProviders.OPENAI) return OPENAI_VOICES.map { it to it.replaceFirstChar(Char::uppercase) }
+        if (p == AiProviders.ELEVENLABS) return JSONObject(request(key, "/voices", null, null, p) { it.readBytes().decodeToString() }).getJSONArray("voices").let { a ->
+            (0 until a.length()).map { a.getJSONObject(it).let { v -> v.getString("voice_id") to v.optString("name").ifBlank { v.getString("voice_id") } } } }
         val out = mutableListOf<Pair<String, String>>()
         var offset = 0
         while (true) {
@@ -121,10 +139,24 @@ internal object AssistantNet {
     }
 
     /**
-     * [text] read by Mistral's [voice], streamed: [audio] gets 24 kHz mono float samples as they are made, so playing starts
-     * before the sentence is whole. Mistral has no Greek voice, but its English ones read Greek well (the TTS app).
+     * [text] read by [voice] of the service chosen to speak, streamed: [audio] gets 24 kHz mono float samples as they are made,
+     * so playing starts before the sentence is whole. Mistral has no Greek voice, but its English ones read Greek well (the TTS
+     * app); OpenAI's and ElevenLabs' come as 16-bit samples at the same rate.
      */
-    fun speech(key: String, voice: String, text: String, bill: Bill?, audio: (FloatArray) -> Unit) {
+    fun speech(c: Context, voice: String, text: String, bill: Bill?, audio: (FloatArray) -> Unit) {
+        val p = AiProviders.of(c, AiPart.VOICE); val key = key(c, p)
+        if (!p.isMistral) {
+            val (path, body) = if (p == AiProviders.ELEVENLABS) "/text-to-speech/$voice/stream?output_format=pcm_24000" to JSONObject().put("text", text).put("model_id", p.voice)
+                else "/audio/speech" to JSONObject().put("model", p.voice).put("input", text).put("voice", voice).put("response_format", "pcm")
+            return request(key, path, "application/json", body.toString().toByteArray(), p) { input ->
+                val buf = ByteArray(9_600); var kept = 0
+                while (true) {
+                    val n = input.read(buf, kept, buf.size - kept).takeIf { it >= 0 }?.plus(kept) ?: break
+                    pcm16(buf, n).takeIf { it.isNotEmpty() }?.let(audio)
+                    kept = n % 2; if (kept == 1) buf[0] = buf[n - 1] // half a sample waits for its other byte
+                }
+            } // shortcut: another service's voice is not priced in Bill, so it counts as nothing
+        }
         val body = JSONObject().put("model", Mistral.TTS).put("input", text).put("voice_id", voice).put("response_format", "pcm").put("stream", true)
         stream(key, "/audio/speech", body.toString()) { line ->
             val data = line.removePrefix("data:").trim().takeIf { line.startsWith("data:") && it.startsWith("{") } ?: return@stream
@@ -135,20 +167,23 @@ internal object AssistantNet {
         bill?.chars(text)
     }
 
-    private fun send(key: String, path: String, type: String?, body: ByteArray?): ByteArray = request(key, path, type, body) { it.readBytes() }
+    /** The whole 16-bit little-endian samples among [bytes]' first [n] as floats (an odd last byte left out). */
+    fun pcm16(bytes: ByteArray, n: Int) = FloatArray(n / 2) { i -> ((bytes[2 * i].toInt() and 0xff) or (bytes[2 * i + 1].toInt() shl 8)).toShort() / 32768f }
 
-    private fun <T> request(key: String, path: String, type: String?, body: ByteArray?, read: (java.io.InputStream) -> T): T {
+    private fun send(key: String, path: String, type: String?, body: ByteArray?, p: AiProvider = AiProviders.MISTRAL): ByteArray = request(key, path, type, body, p) { it.readBytes() }
+
+    private fun <T> request(key: String, path: String, type: String?, body: ByteArray?, p: AiProvider = AiProviders.MISTRAL, read: (java.io.InputStream) -> T): T {
         AiGate.check() // nothing leaves for the AI while it is off, whoever asks
-        val c = URL(Mistral.API + path).openConnection() as HttpURLConnection
+        val c = URL(p.api + path).openConnection() as HttpURLConnection
         try {
             c.connectTimeout = 15_000; c.readTimeout = 120_000 // a picture takes a while
-            c.setRequestProperty("Authorization", "Bearer $key")
+            if (p == AiProviders.ELEVENLABS) c.setRequestProperty("xi-api-key", key) else c.setRequestProperty("Authorization", "Bearer $key")
             if (body != null) { c.requestMethod = "POST"; c.doOutput = true; c.setRequestProperty("Content-Type", type); c.outputStream.use { it.write(body) } }
             val code = try { c.responseCode } catch (e: IOException) { throw DriveProblem("Offline: ${e.message}", R.string.assistant_offline) }
             if (code in 200..299) return c.inputStream.use(read)
             val said = runCatching { c.errorStream?.use { it.readBytes().decodeToString() } }.getOrNull().orEmpty().take(300)
-            WriterLog.w("Assistant: Mistral $path answered $code $said")
-            throw problem(code)
+            WriterLog.w("Assistant: ${p.name} $path answered $code $said")
+            throw problem(code, p)
         } catch (e: IOException) {
             throw DriveProblem("Offline: ${e.message}", R.string.assistant_offline)
         } finally { c.disconnect() }
@@ -159,8 +194,9 @@ internal object AssistantNet {
 internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): AssistantChat {
     val app = c.applicationContext
     val tetra = driveRoot()
-    val api = Mistral({ path, body -> AssistantNet.post(AssistantNet.key(app), path, body) }, AssistantMeter.bill(app),
-        stream = { path, body, line -> AssistantNet.stream(AssistantNet.key(app), path, body, line) })
+    val api = AssistantNet.api(app)
+    // web search and pictures are Mistral's own tools, whichever service thinks
+    val mistral = Mistral({ path, body -> AssistantNet.post(AssistantNet.key(app), path, body) }, api.bill)
     val prefs = app.getSharedPreferences("assistant", Context.MODE_PRIVATE)
     val tools = AssistantTools(tetra, TimerControl.device(),
         changed = { what -> when (what) {
@@ -174,11 +210,11 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
             "schedules", "memory" -> ScopedSync.soon(app, "assistant", 0, orWhole = true) // the computer runs the schedules: it hears at once
         } },
         search = { q ->
-            val (text, sources, _) = Mistral.output(api.tagged("web").conversation(q, "web_search", "Search the web and answer briefly with the facts found."))
+            val (text, sources, _) = Mistral.output(mistral.tagged("web").conversation(q, "web_search", "Search the web and answer briefly with the facts found."))
             text to sources.map { it.split(" — ").let { p -> ResultCard.Source(p.first(), p.last()) } }.filter { it.url.startsWith("http") }
         },
         image = { prompt ->
-            val id = Mistral.output(api.tagged("image").conversation(prompt, "image_generation", "Draw the picture asked for.")).third.firstOrNull() ?: error("No picture came back.")
+            val id = Mistral.output(mistral.tagged("image").conversation(prompt, "image_generation", "Draw the picture asked for.")).third.firstOrNull() ?: error("No picture came back.")
             File(File(tetra, FOLDER).apply { mkdirs() }, "image-${System.currentTimeMillis()}.png").apply { writeBytes(AssistantNet.download(AssistantNet.key(app), id)) }
         },
         // shortcut: which card is the user's is kept on this phone only (Contacts has no "me" mark yet); move it into the card when the computer needs it
@@ -462,7 +498,7 @@ class AssistantRecognition : RecognitionService() {
     @Volatile private var stop = false
 
     override fun onStartListening(intent: Intent?, cb: Callback) {
-        val key = AssistantKey.get(this) ?: return cb.error(SpeechRecognizer.ERROR_CLIENT)
+        if (!AssistantKey.has(this, AiProviders.of(this, AiPart.LISTEN))) return cb.error(SpeechRecognizer.ERROR_CLIENT)
         if (!hasMic(this)) return cb.error(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS)
         stop = false
         Thread {
@@ -470,7 +506,7 @@ class AssistantRecognition : RecognitionService() {
                 cb.readyForSpeech(Bundle())
                 val pcm = listen(8_000, { stop }, pauseMs = AssistantPause.ms(this), mic = AssistantAudio.mic(this)) ?: return@Thread cb.error(SpeechRecognizer.ERROR_SPEECH_TIMEOUT)
                 cb.endOfSpeech()
-                cb.results(Bundle().apply { putStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION, arrayListOf(AssistantNet.transcribe(key, pcm, AssistantWords.terms(this@AssistantRecognition), AssistantMeter.bill(this@AssistantRecognition).part("dictation")))) })
+                cb.results(Bundle().apply { putStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION, arrayListOf(AssistantNet.transcribe(this@AssistantRecognition, pcm, AssistantWords.terms(this@AssistantRecognition), AssistantMeter.bill(this@AssistantRecognition).part("dictation")))) })
             }.onFailure { WriterLog.w("Assistant: recognition for another app failed", it); runCatching { cb.error(SpeechRecognizer.ERROR_NETWORK) } }
         }.start()
     }
@@ -490,16 +526,17 @@ internal object AssistantMeter {
     fun bill(c: Context): Bill { val app = c.applicationContext; return Bill({ add(app, it) }, { AssistantUsage.record(app, it) }) }
 }
 
-/** The voice that reads answers (Settings › AI Assist › Voice): one of Mistral's, or the phone's own ("", free). */
+/** The voice that reads answers (Settings › AI Assist › Voice): one of the speaking service's, or the phone's own ("", free); one kept for each service. */
 internal object AssistantVoices {
     const val PHONE = ""
     private fun prefs(c: Context) = c.getSharedPreferences("assistant", Context.MODE_PRIVATE)
-    fun id(c: Context): String? = prefs(c).getString("voice", null)
-    fun name(c: Context): String? = prefs(c).getString("voiceName", null)
-    fun set(c: Context, id: String, name: String) = prefs(c).edit().putString("voice", id).putString("voiceName", name).apply()
+    private fun of(c: Context) = AiProviders.of(c, AiPart.VOICE).let { if (it.isMistral) "" else "_${it.id}" } // Mistral's where it always was
+    fun id(c: Context): String? = prefs(c).getString("voice" + of(c), null)
+    fun name(c: Context): String? = prefs(c).getString("voiceName" + of(c), null)
+    fun set(c: Context, id: String, name: String) = prefs(c).edit().putString("voice" + of(c), id).putString("voiceName" + of(c), name).apply()
 
-    /** The chosen voice; never chosen, Mistral's first (the user wanted Mistral's voice), kept from then on. */
-    fun chosen(c: Context, key: String): String = id(c) ?: (AssistantNet.voices(key).firstOrNull()?.also { set(c, it.first, it.second) }?.first ?: PHONE)
+    /** The chosen voice; never chosen, the service's first (the user wanted Mistral's voice), kept from then on. */
+    fun chosen(c: Context): String = id(c) ?: (AssistantNet.voices(c).firstOrNull()?.also { set(c, it.first, it.second) }?.first ?: PHONE)
 }
 
 /**
@@ -513,12 +550,11 @@ internal class AnswerVoice(private val c: Context, private val reader: ReadAloud
     @Volatile private var track: AudioTrack? = null
 
     private val making = scope.launch(Dispatchers.IO) {
-        val key = AssistantKey.get(c)
-        var voice = key?.let { k -> runCatching { AssistantVoices.chosen(c, k) }.getOrDefault(AssistantVoices.PHONE) } ?: AssistantVoices.PHONE
+        var voice = if (!AssistantKey.has(c, AiProviders.of(c, AiPart.VOICE))) AssistantVoices.PHONE else runCatching { AssistantVoices.chosen(c) }.getOrDefault(AssistantVoices.PHONE)
         for (s in sentences) {
-            if (voice == AssistantVoices.PHONE || key == null) { audio.trySend(s); continue }
+            if (voice == AssistantVoices.PHONE) { audio.trySend(s); continue }
             try {
-                AssistantNet.speech(key, voice, s, bill) { a -> if (audio.trySend(a).isFailure) throw CancellationException("stopped") }
+                AssistantNet.speech(c, voice, s, bill) { a -> if (audio.trySend(a).isFailure) throw CancellationException("stopped") }
             } catch (e: CancellationException) { throw e
             } catch (e: Exception) { WriterLog.w("AI Assist voice: ${e.message}"); voice = AssistantVoices.PHONE; audio.trySend(s) }
         }

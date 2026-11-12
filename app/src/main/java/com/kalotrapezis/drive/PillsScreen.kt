@@ -638,7 +638,7 @@ private data class Draft(val m: Medicine, val dose: String, val perBox: String, 
     val shoot = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { b -> keepPhoto(b) }
     val askCamera = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok -> if (ok) shoot.launch(null) }
     // «Πες το»: one sentence heard, written down by Mistral, turned into the guide's fields
-    val ai = AiGate.allows("pills") && AssistantKey.get(context) != null
+    val ai = AiGate.allows("pills") && AssistantKey.has(context)
     fun sayIt() = scope.launch {
         listening = true; heard = null
         val r = withContext(Dispatchers.IO) { runCatching { PillsVoiceFill.hear(context) } }
@@ -840,21 +840,18 @@ internal object PillsVoiceFill {
     private val COLOR_NAMES = listOf("white", "yellow", "orange", "pink", "red", "purple", "blue", "green", "brown")
 
     fun hear(c: android.content.Context): Pair<String, JSONObject> {
-        val key = AssistantNet.key(c)
+        AssistantNet.key(c, AiProviders.of(c, AiPart.CHAT)) // no key: said before listening
         val bill = AssistantMeter.bill(c)
         val pcm = listen(10_000, { false }) ?: throw DriveProblem("Nothing heard.", R.string.pills_say_nothing)
-        val text = AssistantNet.transcribe(key, pcm, emptyList(), bill).trim()
+        val text = AssistantNet.transcribe(c, pcm, emptyList(), bill).trim()
         if (text.isEmpty()) throw DriveProblem("Nothing heard.", R.string.pills_say_nothing)
-        return text to read(key, text, bill)
+        return text to read(AssistantNet.api(c, bill), text)
     }
 
-    fun read(key: String, text: String, bill: Bill?): JSONObject {
-        val body = JSONObject().put("model", Mistral.CHAT).put("temperature", 0).put("response_format", JSONObject().put("type", "json_object"))
-            .put("messages", JSONArray().put(JSONObject().put("role", "system").put("content", PROMPT)).put(JSONObject().put("role", "user").put("content", text)))
-        val r = JSONObject(AssistantNet.post(key, "/chat/completions", body.toString()))
-        bill?.tokens(Mistral.CHAT, r.optJSONObject("usage"))
+    fun read(api: Mistral, text: String): JSONObject {
+        val r = api.complete(JSONArray().put(JSONObject().put("role", "system").put("content", PROMPT)).put(JSONObject().put("role", "user").put("content", text)), json = true, temperature = 0.0)
         WriterLog.i("Pills: Say it read ${text.length} characters")
-        return JSONObject(r.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content"))
+        return JSONObject(r)
     }
 
     /** The fields said, over [m]; the numbers the guide keeps as text come back aside. */

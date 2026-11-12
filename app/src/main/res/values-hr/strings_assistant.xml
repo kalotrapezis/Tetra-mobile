@@ -248,4 +248,15 @@
     <string name="brief_runs_on">Izrađuje se na</string>
     <string name="brief_runs_computer">Računalo</string>
     <string name="brief_runs_here">Ovaj uređaj</string>
+    <string name="ai_providers">Usluge</string>
+    <string name="ai_providers_note">Mistral radi sve. Druga usluga može umjesto nje razmišljati, slušati ili govoriti, s vlastitim ključem. Razgovor uživo, pretraživanje weba i slike ostaju kod Mistrala. Troškovi drugih usluga ovdje se ne broje.</string>
+    <string name="ai_part_chat">Razmišljanje (chat i alati)</string>
+    <string name="ai_part_listen">Slušanje (govor u tekst)</string>
+    <string name="ai_part_voice">Govor (glas)</string>
+    <string name="ai_provider_key_note">Napravi ga na %1$s. Čuva se šifriran na ovom telefonu. Ono što kažeš i tvoja pitanja idu u %2$s; tvoje datoteke ostaju ovdje.</string>
+    <string name="ai_provider_key">%1$s API ključ</string>
+    <string name="ai_no_key">Prvo dodaj svoj %1$s API ključ: Postavke › AI Assist.</string>
+    <string name="ai_bad_key">%1$s ključ nije ispravan. Provjeri ga pod Postavke › AI Assist.</string>
+    <string name="ai_busy">%1$s je zauzet ili ključ nema više kredita. Pokušaj ponovno za minutu.</string>
+    <string name="ai_server">%1$s je odgovorio pogreškom (%2$d).</string>
 </resources>

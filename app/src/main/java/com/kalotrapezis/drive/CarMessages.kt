@@ -128,22 +128,22 @@ internal suspend fun carTalk(c: Context, from: String, name: String, body: Strin
     val paused = music && BrowserMedia.control != null && BrowserMedia.playing // the user, 9 Nov: "stop the music on call or message"
     if (paused) BrowserMedia.act("pause")
     audio.requestAudioFocus(focus)
-    suspend fun heard(key: String, waitMs: Long): String? = withContext(Dispatchers.IO) {
+    suspend fun heard(waitMs: Long): String? = withContext(Dispatchers.IO) {
         val pcm = runCatching { listen(waitMs, { false }, {}, AssistantPause.ms(c), AssistantAudio.mic(c)) }.getOrNull() ?: return@withContext null
-        runCatching { AssistantNet.transcribe(key, pcm, AssistantWords.terms(c)) }.onFailure { WriterLog.w("Car: a reply not heard", it) }.getOrNull()
+        runCatching { AssistantNet.transcribe(c, pcm, AssistantWords.terms(c)) }.onFailure { WriterLog.w("Car: a reply not heard", it) }.getOrNull()
     }
     try {
         CarSpeech.say(c, c.getString(R.string.car_sms_said, name, body))
-        val key = runCatching { AssistantNet.key(c) }.getOrNull()
+        val key = runCatching { AssistantNet.key(c, AiProviders.of(c, AiPart.LISTEN)) }.getOrNull()
         if (key == null || !hasMic(c) || !(remote || SmsBox.canSend(c))) { WriterLog.i("Car: a message read, no reply asked (key, microphone or SMS)"); return }
         step.intValue = 1
-        if (AssistantChat.yesNo(heard(key, 6_000) ?: return) != true) return
+        if (AssistantChat.yesNo(heard(6_000) ?: return) != true) return
         step.intValue = 2
         CarSpeech.say(c, c.getString(R.string.car_sms_say_it))
-        val text = heard(key, 20_000)?.trim()?.takeIf { it.isNotEmpty() } ?: return
+        val text = heard(20_000)?.trim()?.takeIf { it.isNotEmpty() } ?: return
         reply.value = text; step.intValue = 3
         CarSpeech.say(c, c.getString(R.string.car_sms_send_it, text))
-        if (AssistantChat.yesNo(heard(key, 6_000) ?: return) == true) {
+        if (AssistantChat.yesNo(heard(6_000) ?: return) == true) {
             val sent = if (!remote) { SmsBox.send(c, from, text); true }
                 else withContext(Dispatchers.IO) { !CarWire.ask(c, JSONObject().put("sms", JSONObject().put("to", from).put("text", text))).has("error") }
             if (sent) CarSpeech.say(c, c.getString(R.string.car_sms_sent)) else WriterLog.w("Car: the reply did not reach the phone")

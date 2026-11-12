@@ -171,8 +171,8 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
     val decorated = remember { AiLook.decorated(context) }
     // the sheet's TV switches off before it goes: the line, the dot, its «fsst»
     var tvOff by remember { mutableStateOf(false) }
-    val close: () -> Unit = { if (!sheet || !decorated || AssistantKey.get(context) == null) closeNow() else if (!tvOff) { tvOff = true; Zap.play(); scope.launch { delay(520); closeNow() } } }
-    LaunchedEffect(Unit) { if (sheet && decorated && AssistantKey.get(context) != null) Zap.play() } // and on, as it opens
+    val close: () -> Unit = { if (!sheet || !decorated || !AssistantKey.has(context)) closeNow() else if (!tvOff) { tvOff = true; Zap.play(); scope.launch { delay(520); closeNow() } } }
+    LaunchedEffect(Unit) { if (sheet && decorated && AssistantKey.has(context)) Zap.play() } // and on, as it opens
     // every way in goes on with the open conversation (the user, 8 Nov), the sheet's or the full screen's
     val chat = remember { SharedChat.chat(context) }
     val bubbles = remember { SharedChat.bubbles.apply { openJob?.let { add(Bubble(false, "", job = it)) } } }
@@ -188,7 +188,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
     var confirming by remember { mutableStateOf<AssistantGuard.Confirm?>(null) } // a change asked after outside text (AssistantGuard)
     var attached by remember { mutableStateOf<Attach.Doc?>(null) } // goes with the next message
     var attaching by remember { mutableStateOf(false) }
-    var hasKey by remember { mutableStateOf(AssistantKey.get(context) != null) }
+    var hasKey by remember { mutableStateOf(AssistantKey.has(context)) }
     val prefs = remember { context.getSharedPreferences("assistant", Context.MODE_PRIVATE) }
     var aloud by remember { mutableStateOf(sheet || prefs.getBoolean("aloud", false)) }
     val reader = rememberReadAloud()
@@ -379,7 +379,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
         hearing = false
         if (pcm == null) { phase = Phase.Idle; if (sheet && pending == null && confirming == null && dialing == null && bubbles.lastOrNull()?.images.isNullOrEmpty() && bubbles.lastOrNull()?.cards.isNullOrEmpty()) close(); return@launch }
         phase = Phase.Thinking
-        val text = withContext(Dispatchers.IO) { runCatching { AssistantNet.transcribe(AssistantNet.key(context), pcm, AssistantWords.terms(context), chat.bill.part("dictation")) } }
+        val text = withContext(Dispatchers.IO) { runCatching { AssistantNet.transcribe(context, pcm, AssistantWords.terms(context), chat.bill.part("dictation")) } }
         phase = Phase.Idle; spent = chat.bill.usd
         text.onSuccess { if (it.isBlank()) say(context.getString(R.string.assistant_heard_nothing)) else send(it) }
             .onFailure { say(it.shownMessage(context) ?: "", true) }
@@ -394,6 +394,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
     fun startLive(opening: String? = null) = scope.launch {
         if (!hasKey || live != null || phase != Phase.Idle) return@launch
         if (!hasMic(context)) { askMic.launch(Manifest.permission.RECORD_AUDIO); return@launch }
+        if (!AssistantKey.has(context, AiProviders.MISTRAL)) { hear(8_000); return@launch } // live talk is Mistral's own: without its key, a phrase at a time
         hush()
         liveYou = ""; liveAi = ""; liveLevel = 0f; livePhase = LivePhase.Connecting; liveShown = true; liveTurns = 0
         liveStart = System.currentTimeMillis(); liveLast = liveStart; liveNow = liveStart
@@ -1057,23 +1058,23 @@ internal fun DefaultAssistantCard() {
     }
 }
 
-/** The Mistral key: here when it is missing, and in Settings › Assistant. */
+/** A service's key (the one chosen to think unless [p] is given): here when it is missing, and in Settings › Assistant. */
 @Composable
-internal fun AssistantKeyField(saved: () -> Unit = {}) {
+internal fun AssistantKeyField(p: AiProvider = AiProviders.of(LocalContext.current, AiPart.CHAT), saved: () -> Unit = {}) {
     val context = LocalContext.current
     var key by remember { mutableStateOf("") }
-    var has by remember { mutableStateOf(AssistantKey.get(context) != null) }
+    var has by remember(p) { mutableStateOf(AssistantKey.has(context, p)) }
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(R.string.assistant_key), style = MaterialTheme.typography.titleMedium)
+        Text(if (p.isMistral) stringResource(R.string.assistant_key) else stringResource(R.string.ai_provider_key, p.name), style = MaterialTheme.typography.titleMedium)
         Text(stringResource(if (has) R.string.assistant_key_saved else R.string.assistant_key_missing), style = MaterialTheme.typography.bodySmall,
             color = if (has) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(key, { key = it }, Modifier.weight(1f), singleLine = true, visualTransformation = PasswordVisualTransformation(),
                 placeholder = { Text(stringResource(R.string.assistant_key_hint), maxLines = 1, overflow = TextOverflow.Ellipsis) })
-            Button(onClick = { runCatching { AssistantKey.set(context, key) }.onFailure { WriterLog.e("Assistant: the key was not saved", it) }
-                key = ""; has = AssistantKey.get(context) != null; if (has) saved() }, enabled = key.isNotBlank()) { Text(stringResource(R.string.common_save), maxLines = 1) }
+            Button(onClick = { runCatching { AssistantKey.set(context, key, p) }.onFailure { WriterLog.e("Assistant: the key was not saved", it) }
+                key = ""; has = AssistantKey.get(context, p) != null; if (has) saved() }, enabled = key.isNotBlank()) { Text(stringResource(R.string.common_save), maxLines = 1) }
         }
-        Text(stringResource(R.string.assistant_key_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+        Text(if (p.isMistral) stringResource(R.string.assistant_key_note) else stringResource(R.string.ai_provider_key_note, p.site, p.name), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
     }
 }

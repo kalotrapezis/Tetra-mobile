@@ -751,7 +751,23 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
         }
     }
     if (AiGate.on) AssistantMemorySection(version.intValue)
-    SettingsSection { AssistantKeyField() }
+    // the service for each part (the user, 12 Nov: drop-in replacements like OpenAI and ElevenLabs); Mistral unless chosen
+    var providers by remember { mutableStateOf(AiPart.entries.map { AiProviders.of(context, it) }) }
+    var pickingPart by remember { mutableStateOf<AiPart?>(null) }
+    SettingsSection(stringResource(R.string.ai_providers), stringResource(R.string.ai_providers_note)) {
+        AiPart.entries.forEach { part ->
+            SettingRow(stringResource(PART_NAMES.getValue(part)), providers[part.ordinal].name, onClick = { pickingPart = part }) { Chevron() }
+        }
+    }
+    pickingPart?.let { part ->
+        AlertDialog(onDismissRequest = { pickingPart = null }, confirmButton = { TextButton(onClick = { pickingPart = null }) { Text(stringResource(R.string.common_done)) } },
+            title = { Text(stringResource(PART_NAMES.getValue(part))) },
+            text = { Column { AiProviders.choices(part).forEach { p ->
+                SettingRow(p.name, chosen = p == providers[part.ordinal], onClick = { AiProviders.set(context, part, p); providers = AiPart.entries.map { AiProviders.of(context, it) }; pickingPart = null })
+            } } })
+    }
+    // a key for each service in use, Mistral's always (live talk, web search and pictures are its own)
+    (listOf(AiProviders.MISTRAL) + providers).distinct().forEach { p -> key(p.id) { SettingsSection { AssistantKeyField(p = p) } } }
     // AI decorations (8 Nov): the record, the cassette, the TV with the robot, the snow and the CRT; off, the plain conversation
     var decorations by remember { mutableStateOf(AiLook.decorated(context)) }
     SettingsSection(stringResource(R.string.ai_decorations), null) {
@@ -776,7 +792,7 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
         }
     }
     // the voice that reads answers: Mistral's (the user: the phone's was bad and slow), the phone's kept as the free one
-    var voiceName by remember { mutableStateOf(AssistantVoices.id(context)?.let { if (it == AssistantVoices.PHONE) context.getString(R.string.assistant_voice_phone) else AssistantVoices.name(context) }) }
+    var voiceName by remember(providers) { mutableStateOf(AssistantVoices.id(context)?.let { if (it == AssistantVoices.PHONE) context.getString(R.string.assistant_voice_phone) else AssistantVoices.name(context) }) }
     var picking by remember { mutableStateOf(false) }
     SettingsSection(stringResource(R.string.assistant_voice), stringResource(R.string.assistant_voice_note)) {
         SettingRow(stringResource(R.string.assistant_voice), voiceName ?: stringResource(R.string.assistant_voice_first), onClick = { picking = true }) { Chevron() }
@@ -809,7 +825,9 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
 }
 
 
-/** Mistral's voices (all pages), the phone's first: a tap chooses one and reads a sentence in it. */
+/** The speaking service's voices (Mistral's: all pages), the phone's first: a tap chooses one and reads a sentence in it. */
+private val PART_NAMES = mapOf(AiPart.CHAT to R.string.ai_part_chat, AiPart.LISTEN to R.string.ai_part_listen, AiPart.VOICE to R.string.ai_part_voice)
+
 @Composable private fun VoicePicker(close: () -> Unit, chosen: (String, String) -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -820,7 +838,7 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
     var current by remember { mutableStateOf(AssistantVoices.id(context)) }
     var sample by remember { mutableStateOf<AnswerVoice?>(null) }
     LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) { runCatching { AssistantNet.voices(AssistantNet.key(context)) } }
+        withContext(Dispatchers.IO) { runCatching { AssistantNet.voices(context) } }
             .onSuccess { voices = it }.onFailure { problem = it.shownMessage(context) ?: it.message; voices = emptyList() }
     }
     DisposableEffect(Unit) { onDispose { sample?.stop() } }

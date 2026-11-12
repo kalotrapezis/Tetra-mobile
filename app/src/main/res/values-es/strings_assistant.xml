@@ -248,4 +248,15 @@
     <string name="brief_runs_on">Se hace en</string>
     <string name="brief_runs_computer">Ordenador</string>
     <string name="brief_runs_here">Este dispositivo</string>
+    <string name="ai_providers">Servicios</string>
+    <string name="ai_providers_note">Mistral lo hace todo. Otro servicio puede pensar, escuchar o hablar en su lugar, con su propia clave. La conversación en directo, la búsqueda web y las imágenes siguen con Mistral. Los costes de otros servicios no se cuentan aquí.</string>
+    <string name="ai_part_chat">Pensar (chat y herramientas)</string>
+    <string name="ai_part_listen">Escuchar (voz a texto)</string>
+    <string name="ai_part_voice">Hablar (voz)</string>
+    <string name="ai_provider_key_note">Crea una en %1$s. Se guarda cifrada en este teléfono. Lo que dices y tus preguntas van a %2$s; tus archivos se quedan aquí.</string>
+    <string name="ai_provider_key">Clave de API de %1$s</string>
+    <string name="ai_no_key">Primero añade tu clave de API de %1$s: Ajustes › AI Assist.</string>
+    <string name="ai_bad_key">La clave de %1$s no es correcta. Compruébala en Ajustes › AI Assist.</string>
+    <string name="ai_busy">%1$s está ocupado o la clave se ha quedado sin crédito. Inténtalo de nuevo en un minuto.</string>
+    <string name="ai_server">%1$s respondió con un error (%2$d).</string>
 </resources>

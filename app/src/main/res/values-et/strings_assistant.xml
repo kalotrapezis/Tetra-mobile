@@ -246,4 +246,15 @@
     <string name="brief_runs_on">Kus tehakse</string>
     <string name="brief_runs_computer">Arvuti</string>
     <string name="brief_runs_here">See seade</string>
+    <string name="ai_providers">Teenused</string>
+    <string name="ai_providers_note">Mistral teeb kõike. Mõni muu teenus võib selle asemel mõelda, kuulata või rääkida, oma võtmega. Otsevestlus, veebiotsing ja pildid jäävad Mistralile. Teiste teenuste kulusid siin ei arvestata.</string>
+    <string name="ai_part_chat">Mõtlemine (vestlus ja tööriistad)</string>
+    <string name="ai_part_listen">Kuulamine (kõne tekstiks)</string>
+    <string name="ai_part_voice">Rääkimine (hääl)</string>
+    <string name="ai_provider_key_note">Loo see aadressil %1$s. Seda hoitakse selles telefonis krüpteerituna. See, mida ütled, ja sinu küsimused lähevad teenusele %2$s; sinu failid jäävad siia.</string>
+    <string name="ai_provider_key">%1$s API võti</string>
+    <string name="ai_no_key">Lisa kõigepealt oma %1$s API võti: Seaded › AI Assist.</string>
+    <string name="ai_bad_key">%1$s võti on vale. Kontrolli seda jaotises Seaded › AI Assist.</string>
+    <string name="ai_busy">%1$s on hõivatud või võtmel pole enam krediiti. Proovi minuti pärast uuesti.</string>
+    <string name="ai_server">%1$s vastas veaga (%2$d).</string>
 </resources>

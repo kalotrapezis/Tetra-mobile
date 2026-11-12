@@ -248,4 +248,15 @@
     <string name="brief_runs_on">Kur tiek veidots</string>
     <string name="brief_runs_computer">Dators</string>
     <string name="brief_runs_here">Šī ierīce</string>
+    <string name="ai_providers">Pakalpojumi</string>
+    <string name="ai_providers_note">Mistral dara visu. Cits pakalpojums var tā vietā domāt, klausīties vai runāt ar savu atslēgu. Tiešraides saruna, meklēšana tīmeklī un attēli paliek pie Mistral. Citu pakalpojumu izmaksas šeit netiek skaitītas.</string>
+    <string name="ai_part_chat">Domāšana (tērzēšana un rīki)</string>
+    <string name="ai_part_listen">Klausīšanās (runa tekstā)</string>
+    <string name="ai_part_voice">Runāšana (balss)</string>
+    <string name="ai_provider_key_note">Izveido to vietnē %1$s. Tā tiek glabāta šifrēta šajā tālrunī. Tas, ko saki, un tavi jautājumi nonāk pie %2$s; tavi faili paliek šeit.</string>
+    <string name="ai_provider_key">%1$s API atslēga</string>
+    <string name="ai_no_key">Vispirms pievieno savu %1$s API atslēgu: Iestatījumi › AI Assist.</string>
+    <string name="ai_bad_key">%1$s atslēga ir nepareiza. Pārbaudi to sadaļā Iestatījumi › AI Assist.</string>
+    <string name="ai_busy">%1$s ir aizņemts, vai atslēgai vairs nav kredīta. Mēģini vēlreiz pēc minūtes.</string>
+    <string name="ai_server">%1$s atbildēja ar kļūdu (%2$d).</string>
 </resources>
