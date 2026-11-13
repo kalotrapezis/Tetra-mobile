@@ -119,7 +119,7 @@ dependencies {
     }
 }
 
-/** GraphHopper's ByteBuffer.get/put(index, bytes, offset, length) calls (Android 14+) turned into Nio29's (Android 10). */
+/** GraphHopper's ByteBuffer.get/put(index, bytes, offset, length) and Stream.toList() calls (Android 14+) turned into Nio29's (Android 10). */
 abstract class Nio29Calls : com.android.build.api.instrumentation.AsmClassVisitorFactory<com.android.build.api.instrumentation.InstrumentationParameters.None> {
     override fun createClassVisitor(classContext: com.android.build.api.instrumentation.ClassContext, nextClassVisitor: org.objectweb.asm.ClassVisitor) =
         object : org.objectweb.asm.ClassVisitor(org.objectweb.asm.Opcodes.ASM9, nextClassVisitor) {
@@ -128,11 +128,13 @@ abstract class Nio29Calls : com.android.build.api.instrumentation.AsmClassVisito
                     override fun visitMethodInsn(opcode: Int, owner: String, name: String, descriptor: String, isInterface: Boolean) {
                         if (opcode == org.objectweb.asm.Opcodes.INVOKEVIRTUAL && owner == "java/nio/ByteBuffer" && (name == "get" || name == "put") && descriptor == "(I[BII)Ljava/nio/ByteBuffer;")
                             super.visitMethodInsn(org.objectweb.asm.Opcodes.INVOKESTATIC, "com/kalotrapezis/drive/Nio29", name, "(Ljava/nio/ByteBuffer;I[BII)Ljava/nio/ByteBuffer;", false)
+                        else if (opcode == org.objectweb.asm.Opcodes.INVOKEINTERFACE && owner == "java/util/stream/Stream" && name == "toList" && descriptor == "()Ljava/util/List;")
+                            super.visitMethodInsn(org.objectweb.asm.Opcodes.INVOKESTATIC, "com/kalotrapezis/drive/Nio29", name, "(Ljava/util/stream/Stream;)Ljava/util/List;", false)
                         else super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
                     }
                 }
         }
-    override fun isInstrumentable(classData: com.android.build.api.instrumentation.ClassData) = classData.className == "com.graphhopper.storage.MMapDataAccess"
+    override fun isInstrumentable(classData: com.android.build.api.instrumentation.ClassData) = classData.className.startsWith("com.graphhopper.")
 }
 androidComponents {
     onVariants { v -> v.instrumentation.transformClassesWith(Nio29Calls::class.java, com.android.build.api.instrumentation.InstrumentationScope.ALL) {} }

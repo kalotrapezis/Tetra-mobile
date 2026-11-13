@@ -11,7 +11,6 @@ import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Environment
 import android.speech.tts.TextToSpeech
@@ -731,10 +730,10 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
 
     // —— where I am ——
 
-    private val listener = LocationListener { loc ->
+    private val listener = locationListener { loc ->
         // a network fix only until GPS has one, and never over a fresher GPS one
         val h = here
-        if (loc.provider == LocationManager.NETWORK_PROVIDER && h != null && h.provider == LocationManager.GPS_PROVIDER && loc.time - h.time < 10_000) return@LocationListener
+        if (loc.provider == LocationManager.NETWORK_PROVIDER && h != null && h.provider == LocationManager.GPS_PROVIDER && loc.time - h.time < 10_000) return@locationListener
         onFix(loc)
     }
 

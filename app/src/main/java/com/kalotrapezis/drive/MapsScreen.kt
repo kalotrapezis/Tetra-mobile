@@ -620,14 +620,14 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
     fix = ::onFix
     DisposableEffect(granted) {
         val lm = context.getSystemService(LocationManager::class.java)
-        val listener = LocationListener { loc ->
+        val listener = locationListener { loc ->
             // a network fix only until GPS has one, and never over a fresher GPS one
             val h = here
-            if (loc.provider == LocationManager.NETWORK_PROVIDER && h != null && h.provider == LocationManager.GPS_PROVIDER && loc.time - h.time < 10_000) return@LocationListener
+            if (loc.provider == LocationManager.NETWORK_PROVIDER && h != null && h.provider == LocationManager.GPS_PROVIDER && loc.time - h.time < 10_000) return@locationListener
             // in directions, a cell tower's rough fix does not stand for the GPS for two minutes after its last: in a tunnel
             // the arrow goes on along the route instead of jumping to it
             if (loc.provider == LocationManager.NETWORK_PROVIDER && nav != null && lastReal?.provider == LocationManager.GPS_PROVIDER &&
-                android.os.SystemClock.elapsedRealtimeNanos() - lastRealAt < 120_000_000_000L) return@LocationListener
+                android.os.SystemClock.elapsedRealtimeNanos() - lastRealAt < 120_000_000_000L) return@locationListener
             onFix(loc)
         }
         if (granted && lm != null) {
@@ -1511,4 +1511,15 @@ private fun roadAt(map: MapLibreMap?, loc: Location, lang: String): Pair<String,
             save(p.copy(id = p.id.ifEmpty { MapsFiles.newId() }, name = name.trim(), icon = icon, slot = slot, mode = mode, lists = lists.map { it.id }.filter { it in inLists }, label = label.trim()))
         }) { Text(stringResource(R.string.common_save)) } },
         dismissButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.common_cancel)) } })
+}
+
+/**
+ * A LocationListener that only takes fixes. Its other methods have defaults from Android 11 only; on Android 10 (the car's head
+ * unit) a lambda left them abstract, and a provider turned off crashed Tetra with AbstractMethodError (13 Nov).
+ */
+internal inline fun locationListener(crossinline fix: (android.location.Location) -> Unit) = object : LocationListener {
+    override fun onLocationChanged(location: android.location.Location) = fix(location)
+    override fun onProviderEnabled(provider: String) {}
+    override fun onProviderDisabled(provider: String) {}
+    @Deprecated("Android 10 still calls it") override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) {}
 }

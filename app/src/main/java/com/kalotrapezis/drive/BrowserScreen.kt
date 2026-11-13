@@ -40,6 +40,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -257,6 +259,9 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     var currentId by remember { mutableIntStateOf(0) }
     val barKey = if (wide) "bar_tablet" else "bar_phone"
     var onBarTools by remember { mutableStateOf(BrowserTools.parse(prefs.getString(barKey, null), wide)) }
+    // a narrow bar (a pane of Tetra Car at a big size: 13 Nov, "at 200% the browser is broken"): the address and the tabs only, every tool in the sheet
+    var narrow by remember { mutableStateOf(false) }
+    fun offBar() = if (narrow) BrowserTools.ALL + onBarTools.filter { it !in BrowserTools.ALL } else BrowserTools.ALL - onBarTools.toSet()
     // split screen (the user, 2 Nov): a tablet's two tabs side by side, or one above the other when upright; a tap chooses which the bar drives
     var splitPair by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     // tab groups (the user, 2 Nov): a tab dragged onto another makes one, named; one chip that unfolds.
@@ -312,7 +317,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         WriterLog.i("Browser: downloading $name ($type) from ${BrowserRules.host(r.uri)}")
         scope.launch {
             val got = withContext(Dispatchers.IO) { runCatching<File?> {
-                if (android.os.Environment.isExternalStorageManager()) {
+                if (storageAllowed(context)) {
                     val dir = File(driveRoot(), "Downloads").apply { mkdirs() }
                     val f = DriveRules.newFile(driveRoot(), "Downloads/$name") // "x (2).pdf" when taken
                     val part = File(dir, ".${f.name}.tetra-saving")
@@ -835,7 +840,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         "bookmarks" -> BrowserTool(R.drawable.ic_bookmark, stringResource(R.string.browser_bookmarks)) { panel = BrowserPanel.Bookmarks }
         "history" -> if (private) null else BrowserTool(R.drawable.ic_history, stringResource(R.string.browser_history)) { panel = BrowserPanel.History }
         // the Passwords applet (the user, 4 Nov: "Instead of making a better password page, create a password manager in tetra"), this page's site looked up
-        "saved" -> if (private) null else BrowserTool(R.drawable.ic_lock, stringResource(R.string.app_passwords)) { openApplet(context, PasswordsActivity.WORD + host) }
+        "saved" -> if (private || CarMaps.edition) null else BrowserTool(R.drawable.ic_lock, stringResource(R.string.app_passwords)) { openApplet(context, PasswordsActivity.WORD + host) }
         "copy" -> BrowserTool(R.drawable.ic_copy, stringResource(R.string.browser_copy_url), enabled = url.isNotEmpty()) {
             context.getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(android.content.ClipData.newPlainText(host, url))
             message = context.getString(R.string.browser_copied)
@@ -931,7 +936,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     @Composable fun topMenu() = Box {
         IconButton(onClick = { menu = true; editing = false }, Modifier.size(44.dp)) { Icon(painterResource(R.drawable.ic_menu), stringResource(R.string.browser_menu)) }
         DropdownMenu(expanded = menu && !editTools, onDismissRequest = { menu = false }) {
-            (BrowserTools.ALL - onBarTools.toSet()).forEach { id ->
+            offBar().forEach { id ->
                 val t = toolOf(id) ?: return@forEach
                 DropdownMenuItem(text = { Text(t.label) }, onClick = { menu = false; t.act() }, enabled = t.enabled,
                     leadingIcon = { Icon(painterResource(t.icon), null, tint = if (t.on) BROWSER_COLOR else LocalContentColor.current) })
@@ -957,7 +962,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             }.heightIn(min = 24.dp), contentAlignment = Alignment.Center) { // a finger's worth of height, though the pill is thin
                 Box(Modifier.size(width = 36.dp, height = 4.dp).clip(CircleShape).background(onBar.copy(alpha = 0.4f)))
             }
-            Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(start = 10.dp, end = 10.dp, bottom = 8.dp, top = if (top) 8.dp else 2.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            val room = with(LocalDensity.current) { 280.dp.roundToPx() }
+            Row(Modifier.fillMaxWidth().onSizeChanged { narrow = !wide && it.width < room }.height(IntrinsicSize.Min).padding(start = 10.dp, end = 10.dp, bottom = 8.dp, top = if (top) 8.dp else 2.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     @Composable fun addressRow() {
                     // row 1: Back (a tablet: and Forward), the address, and a tablet's tools in one framed line with ☰ at its end (the user's sketch, 2 Nov)
@@ -996,7 +1002,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                     if (top) { tabsRow(); addressRow() } else { addressRow(); tabsRow() }
                 }
                 // a phone: two columns of three small ones (the user's choice, by a long press)
-                if (!wide) shown.chunked(3).forEach { column ->
+                if (!wide && !narrow) shown.chunked(3).forEach { column ->
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) { column.forEach { tool(it, Modifier.size(width = 48.dp, height = 32.dp)) } }
                 }
             }
@@ -1218,7 +1224,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             }
             FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 // in edit mode each extension's button too, to put on the bar (the user, 3 Nov: "pin them in the toolbar")
-                (if (editTools) BrowserTools.ALL + BrowserEngine.extensions.map { "ext:${it.id}" } else BrowserTools.ALL - onBarTools.toSet()).forEach { id ->
+                (if (editTools) BrowserTools.ALL + BrowserEngine.extensions.map { "ext:${it.id}" } else offBar()).forEach { id ->
                     val t = toolOf(id) ?: return@forEach
                     BrowserTile(t.icon, t.image, t.label, t.enabled || editTools, on = !editTools && t.on, pinned = editTools && id in onBarTools, long = { editTools = true }) {
                         if (!editTools) { menu = false; t.act(); return@BrowserTile }

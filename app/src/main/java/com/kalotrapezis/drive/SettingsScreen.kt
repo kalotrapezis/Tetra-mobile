@@ -49,6 +49,12 @@ import kotlinx.coroutines.withContext
  * longer explanations under their section. One accent (the theme's own); an applet's colour only tints its icon in
  * the list. [items] are the rows' titles, for the search.
  */
+/**
+ * The car's build (Tetra Auto SE): only what a head unit uses (the user, 13 Nov: "the old settings that don't make sense, hide
+ * them"): Tetra Car, Maps, the Browser, AI Assist and the look. No computer sync, Office, mail, photos or the phone's own calls.
+ */
+internal val CAR_PAGES = listOf(SettingsPage.Car, SettingsPage.Maps, SettingsPage.Browser, SettingsPage.Assistant, SettingsPage.Appearance)
+
 internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, val icon: Int, val tint: Color?, @androidx.annotation.StringRes val summary: Int, val items: List<Int>) {
     Sync(R.string.app_sync, R.drawable.ic_sync, null, R.string.settings_sync_summary, listOf(R.string.settings_computer, R.string.settings_open_sync, R.string.settings_sync_auto, R.string.settings_listen)),
     Appearance(R.string.settings_appearance, R.drawable.ic_palette, null, R.string.settings_appearance_summary, listOf(R.string.settings_theme, R.string.settings_language, R.string.settings_photo_on_home, R.string.settings_hidden_from_home, R.string.settings_app_icons)),
@@ -105,7 +111,7 @@ internal fun SettingsTab(
     var open by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
     LaunchedEffect(start) { start?.let { open = it; started() } } // a notification's page (MapsAge: Maps)
     var query by remember { mutableStateOf("") }
-    val shown = open ?: if (wide) SettingsPage.Sync else null
+    val shown = open ?: if (!wide) null else if (CarMaps.edition) SettingsPage.Car else SettingsPage.Sync
     BackHandler { when { !wide && open != null -> open = null; query.isNotEmpty() -> query = ""; else -> back() } }
 
     val list: @Composable (Modifier) -> Unit = { m ->
@@ -131,7 +137,9 @@ internal fun SettingsTab(
                 @Composable fun PageRow(p: SettingsPage, summary: String) = SettingRow(stringResource(p.title), summary, onClick = { open = p; query = "" },
                     chosen = wide && p == shown, leading = { Icon(painterResource(p.icon), contentDescription = null, tint = p.tint ?: quiet(), modifier = Modifier.size(24.dp)) },
                 ) { if (!wide) Chevron() }
-                if (query.isBlank()) {
+                if (query.isBlank() && CarMaps.edition) {
+                    SettingsSection(stringResource(R.string.settings_apps)) { CAR_PAGES.forEach { PageRow(it, stringResource(it.summary)) } }
+                } else if (query.isBlank()) {
                     SettingsSection(stringResource(R.string.app_name)) {
                         SettingRow(stringResource(R.string.guide_title), stringResource(R.string.guide_summary), onClick = openGuide,
                             leading = { Icon(painterResource(R.drawable.ic_school), contentDescription = null, tint = quiet(), modifier = Modifier.size(24.dp)) }) { if (!wide) Chevron() }
@@ -142,7 +150,7 @@ internal fun SettingsTab(
                     // the words as shown, in the language shown
                     val res = LocalContext.current.resources
                     val q = query.trim().lowercase()
-                    val hits = SettingsPage.entries.flatMap { p -> p.items.map(res::getString).filter { q in it.lowercase() || q in res.getString(p.title).lowercase() }.map { p to it } }
+                    val hits = (if (CarMaps.edition) CAR_PAGES else SettingsPage.entries).flatMap { p -> p.items.map(res::getString).filter { q in it.lowercase() || q in res.getString(p.title).lowercase() }.map { p to it } }
                     SettingsSection(pluralStringResource(R.plurals.settings_found, hits.size, hits.size)) { hits.forEach { (p, item) ->
                         SettingRow(item, stringResource(p.title), onClick = { open = p; query = "" },
                             leading = { Icon(painterResource(p.icon), contentDescription = null, tint = p.tint ?: quiet(), modifier = Modifier.size(24.dp)) }) { Chevron() }
@@ -402,7 +410,8 @@ internal fun SettingsTab(
     val wide = LocalConfiguration.current.screenWidthDp >= 700
     var layout by remember(wide) { mutableStateOf(HomeLayout.load(context, wide)) }
     val hidden = layout.filter { it.hidden }
-    SettingsSection(stringResource(R.string.app_home), if (hidden.isEmpty()) null else stringResource(R.string.settings_hidden_note)) {
+    // the car's build has no phone home screen and no app icons to switch (their components are not in its manifest)
+    if (!CarMaps.edition) SettingsSection(stringResource(R.string.app_home), if (hidden.isEmpty()) null else stringResource(R.string.settings_hidden_note)) {
         SwitchRow(stringResource(R.string.settings_photo_on_home), stringResource(R.string.settings_photo_on_home_summary), photoBackdrop, setPhotoBackdrop)
         if (hidden.isEmpty()) SettingRow(stringResource(R.string.settings_hidden_from_home), stringResource(R.string.settings_nothing_hidden))
         hidden.forEach { item ->
@@ -414,7 +423,7 @@ internal fun SettingsTab(
         }
     }
     // a launcher icon for each part (asked 17 Oct): on the home screen and in the app list, opening straight into it
-    SettingsSection(stringResource(R.string.settings_app_icons), stringResource(R.string.settings_app_icons_note)) {
+    if (!CarMaps.edition) SettingsSection(stringResource(R.string.settings_app_icons), stringResource(R.string.settings_app_icons_note)) {
         Applet.entries.forEach { a ->
             var on by remember { mutableStateOf(a.shown(context)) }
             SettingRow(stringResource(a.label), onClick = { on = !on; a.show(context, on) }, leading = { Image(painterResource(a.art), contentDescription = null, modifier = Modifier.size(32.dp)) }) {
@@ -429,10 +438,11 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
 /** Settings › Tetra Car: its icon, what it does in the car, the car's Bluetooth and the link to the car's screen. */
 @Composable private fun CarSettingsPage() {
     val context = LocalContext.current
+    val onUnit = CarMaps.edition || PhoneRelay.noCalls(context) // the car's screen: its own Tetra Car, paired with the phone, not the phone's settings for a car
     SettingsSection(stringResource(R.string.app_car)) {
         // Tetra Car: an icon, and a choice of home screen on a head unit
         var car by remember { mutableStateOf(CarIcon.shown(context)) }
-        SettingRow(stringResource(R.string.app_car), onClick = { car = !car; CarIcon.show(context, car) }, leading = {
+        if (!CarMaps.edition) SettingRow(stringResource(R.string.app_car), onClick = { car = !car; CarIcon.show(context, car) }, leading = {
             Icon(painterResource(R.drawable.ic_directions_car), contentDescription = null, tint = Color.White,
                 modifier = Modifier.size(32.dp).background(CAR_APP_COLOR, RoundedCornerShape(8.dp)).padding(5.dp))
         }) { Switch(checked = car, onCheckedChange = { car = it; CarIcon.show(context, it) }) }
@@ -442,7 +452,7 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
             quiet = on; CarQuiet.want(context, on); if (on && !CarQuiet.allowed(context)) CarQuiet.ask(context)
         }
         // which paired Bluetooth device is the car (on the phone: in the car, quiet, calls answered), or the phone (on the car's screen: Tetra Car opens)
-        val unit = PhoneRelay.noCalls(context)
+        val unit = onUnit
         run {
             var choosing by remember { mutableStateOf(false) }
             var chosen by remember { mutableStateOf(Car.cars(context)) }
@@ -461,11 +471,11 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
                 } } })
         }
         // the car's own link (CarWire): the phone scans the code Tetra Car shows on the car's screen
-        if (!PhoneRelay.noCalls(context)) SettingRow(stringResource(R.string.car_pair_car), CarWire.link(context)?.let { stringResource(R.string.codes_paired, it.name) } ?: stringResource(R.string.car_pair_car_summary),
+        if (!onUnit) SettingRow(stringResource(R.string.car_pair_car), CarWire.link(context)?.let { stringResource(R.string.codes_paired, it.name) } ?: stringResource(R.string.car_pair_car_summary),
             onClick = { openApplet(context, Applet.Codes.name) })
     }
     // Tetra Auto: the car's screen shows Tetra Car as this phone draws it (the user, 10 Nov: "the phone is the server and the car a dumb client")
-    if (!PhoneRelay.noCalls(context)) SettingsSection(stringResource(R.string.auto_title), stringResource(R.string.auto_settings_note)) {
+    if (!onUnit) SettingsSection(stringResource(R.string.auto_title), stringResource(R.string.auto_settings_note)) {
         var cars by remember { mutableStateOf(AutoCars.all(context)) }
         cars.forEach { car -> SettingRow(car.name, stringResource(R.string.auto_paired)) { TextButton({ AutoCars.forget(context, car); cars = AutoCars.all(context) }) { Text(stringResource(R.string.settings_forget), maxLines = 1) } } }
         if (cars.isNotEmpty()) SettingRow(stringResource(R.string.auto_show_now), stringResource(R.string.auto_show_now_summary), onClick = { AutoProjection.start(context) })
@@ -473,13 +483,13 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
     // opening by itself: as the home screen (the surest), at start, or as the chosen Bluetooth joins
     SettingsSection(stringResource(R.string.car_open)) {
         SettingRow(stringResource(R.string.car_home), stringResource(R.string.car_home_summary), onClick = {
-            if (!CarIcon.shown(context)) CarIcon.show(context, true) // the home screen is the icon's alias
+            if (!CarMaps.edition && !CarIcon.shown(context)) CarIcon.show(context, true) // the home screen is the icon's alias (the car's build: Tetra Car itself)
             runCatching { context.startActivity(Intent(android.provider.Settings.ACTION_HOME_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
         })
         var boot by remember { mutableStateOf(Car.opensOnBoot(context)) }
         SwitchRow(stringResource(R.string.car_open_boot), null, boot) { on -> boot = on; Car.setOpens(context, boot = on); if (on && !Car.mayOpen(context)) Car.askOpen(context) }
         var bt by remember { mutableStateOf(Car.opensOnBluetooth(context)) }
-        SwitchRow(stringResource(R.string.car_open_bt), stringResource(if (PhoneRelay.noCalls(context)) R.string.car_bluetooth_phone else R.string.car_bluetooth), bt) { on ->
+        SwitchRow(stringResource(R.string.car_open_bt), stringResource(if (onUnit) R.string.car_bluetooth_phone else R.string.car_bluetooth), bt) { on ->
             bt = on; Car.setOpens(context, bluetooth = on); if (on && !Car.mayOpen(context)) Car.askOpen(context)
         }
     }

@@ -13,12 +13,16 @@ import android.os.StatFs
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -58,22 +62,43 @@ internal object CarMaps {
     val edition: Boolean get() = BuildConfig.APPLICATION_ID.endsWith(".se")
 
     private fun root() = MapsFiles.root(driveRoot())
+    /** The Browser's bookmarks (each device's file, BrowserSync) go too, under this prefix; the rest of its folder (passwords, tabs) never. */
+    private const val BOOKMARKS = "@browser/Bookmarks/"
+    private fun bookmarks() = File(BrowserSync.root(), "Bookmarks")
+
+    /** Where [path] is on this device: in the Maps folder or the bookmarks' (no way out of either). */
+    private fun local(path: String): File? {
+        val (dir, rel) = if (path.startsWith(BOOKMARKS)) bookmarks() to path.removePrefix(BOOKMARKS) else root() to path
+        val r = dir.canonicalFile
+        return File(r, rel).canonicalFile.takeIf { it.path.startsWith(r.path + File.separator) }
+    }
+
+    /**
+     * What both sides keep changing on their own, small: saved places, lists, trips and the bookmarks. Taken from the phone when
+     * its copy is newer, without asking (a "new maps (0 MB)" offer at every opening, 13 Nov); the car's own parking stays its own.
+     */
+    internal fun personal(path: String) = path.startsWith(BOOKMARKS) || path == MapsSearch.ADDED ||
+        path.substringBefore('/') in setOf(MapsFiles.PLACES, MapsFiles.LISTS, MapsFiles.TRIPS)
+    private fun parking(path: String) = path == "${MapsFiles.PLACES}/${MapsFiles.PARKING}.json"
+
+    /** What of the phone's [theirs] (path → {size, modified}) this unit takes: a map it lacks or has different; a place or bookmark only newer. */
+    internal fun wanted(theirs: JSONObject, local: (String) -> File?) = theirs.keys().asSequence().map { it to theirs.getJSONObject(it) }.filter { (path, o) ->
+        val mine = local(path) ?: return@filter false
+        val older = mine.lastModified() < o.optLong("modified") - 2000
+        if (personal(path)) !parking(path) && (!mine.isFile || older) else !mine.isFile || mine.length() != o.optLong("size") || older
+    }.sortedBy { it.first }.toList()
 
     // ---- the phone ----
 
-    /** Every file under the phone's Maps folder: path → {size, modified}. */
+    /** Every file under the phone's Maps folder and its bookmarks: path → {size, modified}. */
     fun list(): JSONObject = JSONObject().apply {
-        val root = root()
-        root.walkTopDown().filter { it.isFile && !it.name.startsWith(".") && !it.name.endsWith(".part") }
-            .forEach { put(it.relativeTo(root).invariantSeparatorsPath, JSONObject().put("size", it.length()).put("modified", it.lastModified())) }
+        for ((dir, prefix) in listOf(root() to "", bookmarks() to BOOKMARKS))
+            dir.walkTopDown().filter { it.isFile && !it.name.startsWith(".") && !it.name.endsWith(".part") }
+                .forEach { put(prefix + it.relativeTo(dir).invariantSeparatorsPath, JSONObject().put("size", it.length()).put("modified", it.lastModified())) }
     }
 
-    /** A path the unit asked for, if it is a file inside the Maps folder (no way out of it). */
-    fun file(path: String): File? {
-        val root = root().canonicalFile
-        val f = File(root, path).canonicalFile
-        return f.takeIf { it.isFile && it.path.startsWith(root.path + File.separator) }
-    }
+    /** A path the unit asked for, if it is a file in the Maps folder or the bookmarks'. */
+    fun file(path: String): File? = local(path)?.takeIf { it.isFile }
 
     // ---- the unit ----
 
@@ -88,7 +113,7 @@ internal object CarMaps {
     val state = mutableStateOf<State>(State.Idle)
     /** Bumped when maps came: Maps draws them again. */
     val version = mutableIntStateOf(0)
-    private val main = Handler(Looper.getMainLooper())
+    private val main by lazy { Handler(Looper.getMainLooper()) } // lazy: the JVM tests have no Looper
     /** "Not now" for this offer: asked again when the phone has something else. */
     private var declined: Set<String> = emptySet()
 
@@ -103,20 +128,39 @@ internal object CarMaps {
         Thread {
             val next: State = runCatching {
                 val theirs = CarWire.maps(c.applicationContext)
-                val root = root()
-                val want = theirs.keys().asSequence().map { it to theirs.getJSONObject(it) }.filter { (path, o) ->
-                    val mine = File(root, path)
-                    !mine.isFile || mine.length() != o.optLong("size") || mine.lastModified() < o.optLong("modified") - 2000
-                }.sortedBy { it.first }.toList()
+                val all = wanted(theirs, ::local)
+                val want = all.filterNot { personal(it.first) }
+                if (want.isEmpty() && all.isNotEmpty()) { // only places or bookmarks: just taken
+                    runCatching { fetch(c, all) { } }.onSuccess { WriterLog.i("Car maps: ${all.size} places or bookmarks from the phone") }
+                        .onFailure { WriterLog.w("Car maps: places or bookmarks not taken (${it.message})") }
+                    main.post { version.intValue++ }
+                }
                 if (want.isEmpty() || want.map { it.first }.toSet() == declined) State.Idle
-                else State.Offer(want, want.map { it.first }.filter { it.endsWith(".pmtiles") }.map { it.removeSuffix(".pmtiles").replaceFirstChar(Char::uppercase) },
-                    want.sumOf { it.second.optLong("size") }, !haveMap())
+                else State.Offer(all, want.map { it.first }.filter { it.endsWith(".pmtiles") }.map { it.removeSuffix(".pmtiles").replaceFirstChar(Char::uppercase) },
+                    all.sumOf { it.second.optLong("size") }, !haveMap())
             }.getOrElse { State.Failed(it.message ?: "") }
             main.post { state.value = next }
         }.start()
     }
 
-    fun decline(o: State.Offer) { declined = o.files.map { it.first }.toSet(); state.value = State.Idle }
+    /** [files] from the phone, one after another, each kept only once it has all arrived; [moved]: the bytes so far, now and then. */
+    private fun fetch(c: Context, files: List<Pair<String, JSONObject>>, moved: (Long) -> Unit) {
+        var before = 0L
+        for ((path, info) in files) {
+            val f = checkNotNull(local(path)) { "$path is not a map." }.also { it.parentFile?.mkdirs() }
+            val part = File(f.parentFile, ".${f.name}.part")
+            var last = 0L
+            part.outputStream().buffered(1 shl 16).use { out ->
+                CarWire.download(c.applicationContext, path, out) { got -> if (got - last > (4L shl 20)) { last = got; moved(before + got) } }
+            }
+            check(part.length() == info.optLong("size")) { "$path came incomplete." }
+            f.delete(); check(part.renameTo(f)) { "$path not kept." }
+            f.setLastModified(info.optLong("modified"))
+            before += info.optLong("size")
+        }
+    }
+
+    fun decline(o: State.Offer) { declined = o.files.map { it.first }.filterNot(::personal).toSet(); state.value = State.Idle }
 
     /** The offered files from the phone, one after another, each kept only once it has all arrived. */
     fun download(c: Context, o: State.Offer) {
@@ -126,23 +170,7 @@ internal object CarMaps {
         state.value = State.Moving(0, o.bytes, "")
         WriterLog.i("Car maps: ${o.files.size} files from the phone, ${o.bytes shr 20} MB")
         Thread {
-            var before = 0L
-            val failed = runCatching {
-                for ((path, info) in o.files) {
-                    val f = File(root, path).also { it.parentFile?.mkdirs() }
-                    val part = File(f.parentFile, ".${f.name}.part")
-                    var last = 0L
-                    part.outputStream().buffered(1 shl 16).use { out ->
-                        CarWire.download(c.applicationContext, path, out) { got ->
-                            if (got - last > (4L shl 20)) { last = got; val at = before + got; main.post { state.value = State.Moving(at, o.bytes, path) } }
-                        }
-                    }
-                    check(part.length() == info.optLong("size")) { "$path came incomplete." }
-                    f.delete(); check(part.renameTo(f)) { "$path not kept." }
-                    f.setLastModified(info.optLong("modified"))
-                    before += info.optLong("size")
-                }
-            }.exceptionOrNull()
+            val failed = runCatching { fetch(c, o.files) { at -> main.post { state.value = State.Moving(at, o.bytes, "") } } }.exceptionOrNull()
             WriterLog.i("Car maps: ${if (failed == null) "all came" else "stopped (${failed.message})"}")
             main.post {
                 version.intValue++
@@ -169,15 +197,15 @@ internal fun CarMapsGuide(modifier: Modifier = Modifier, pair: () -> Unit) {
     val first = !CarMaps.haveMap()
     val s = state
     if (!first && (s is CarMaps.State.Idle || s is CarMaps.State.Checking)) return // nothing to say over a map that is there
-    Box(modifier.fillMaxSize().padding(16.dp), contentAlignment = if (first) Alignment.Center else Alignment.TopCenter) {
+    Box(modifier.fillMaxSize().then(if (first) Modifier.background(MaterialTheme.colorScheme.background) else Modifier).padding(16.dp), contentAlignment = if (first) Alignment.Center else Alignment.TopCenter) {
         Surface(Modifier.widthIn(max = 620.dp), shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh, shadowElevation = 8.dp) {
-            Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Column(Modifier.verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) { // scrolls when a big size leaves too little height
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Icon(painterResource(R.drawable.ic_map), null, Modifier.size(32.dp), tint = MAPS_COLOR)
-                    Text(stringResource(if (first) R.string.car_maps_title else R.string.car_maps_update_title), style = MaterialTheme.typography.headlineSmall)
+                    Icon(painterResource(R.drawable.ic_map), null, Modifier.size(24.dp), tint = MAPS_COLOR)
+                    Text(stringResource(if (first) R.string.car_maps_title else R.string.car_maps_update_title), style = MaterialTheme.typography.titleLarge)
                 }
                 if (first) {
-                    Text(stringResource(R.string.car_maps_intro), style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.car_maps_intro), style = MaterialTheme.typography.bodyMedium)
                     Step(1, stringResource(R.string.car_maps_step_storage), storage) {
                         if (Build.VERSION.SDK_INT >= 30) context.startActivity(Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
                         else ask.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -189,8 +217,8 @@ internal fun CarMapsGuide(modifier: Modifier = Modifier, pair: () -> Unit) {
                         Text(stringResource(R.string.car_maps_offer, s.countries.ifEmpty { listOf(stringResource(R.string.car_maps_updates)) }.joinToString(", "), s.bytes shr 20),
                             style = MaterialTheme.typography.titleMedium)
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Button({ CarMaps.download(context, s) }) { Text(stringResource(if (s.first) R.string.car_maps_download else R.string.car_maps_update)) }
-                            if (!s.first) TextButton({ CarMaps.decline(s) }) { Text(stringResource(R.string.photos_not_now)) }
+                            Button({ CarMaps.download(context, s) }, Modifier.height(36.dp), contentPadding = SMALL) { Text(stringResource(if (s.first) R.string.car_maps_download else R.string.car_maps_update)) }
+                            if (!s.first) TextButton({ CarMaps.decline(s) }, Modifier.height(36.dp), contentPadding = SMALL) { Text(stringResource(R.string.photos_not_now)) }
                         }
                     }
                     is CarMaps.State.Moving -> {
@@ -199,7 +227,7 @@ internal fun CarMapsGuide(modifier: Modifier = Modifier, pair: () -> Unit) {
                     }
                     is CarMaps.State.Failed -> {
                         Text(stringResource(R.string.car_maps_failed, s.why), color = MaterialTheme.colorScheme.error)
-                        TextButton({ CarMaps.check(context) }) { Text(stringResource(R.string.common_retry)) }
+                        TextButton({ CarMaps.check(context) }, Modifier.height(36.dp), contentPadding = SMALL) { Text(stringResource(R.string.common_retry)) }
                     }
                     CarMaps.State.Checking -> Text(stringResource(R.string.car_maps_checking))
                     CarMaps.State.Idle -> if (first && storage && paired && reached) Text(stringResource(R.string.car_maps_phone_none))
@@ -212,15 +240,18 @@ internal fun CarMapsGuide(modifier: Modifier = Modifier, pair: () -> Unit) {
 /** One step of the guide: its number (a tick when done) and what to do, a tap to do it. */
 @Composable
 private fun Step(n: Int, text: String, done: Boolean, act: () -> Unit) {
-    Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerHighest, RoundedCornerShape(16.dp)).padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-        Box(Modifier.size(36.dp).background(if (done) MAPS_COLOR else MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
-            Text(if (done) "✓" else "$n", style = MaterialTheme.typography.titleMedium, color = androidx.compose.ui.graphics.Color.White)
+    Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerHighest, RoundedCornerShape(14.dp)).padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Box(Modifier.size(28.dp).background(if (done) MAPS_COLOR else MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
+            Text(if (done) "✓" else "$n", style = MaterialTheme.typography.titleSmall, color = androidx.compose.ui.graphics.Color.White)
         }
-        Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-        if (!done) Button(act) { Text(stringResource(R.string.car_maps_do)) }
+        Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+        if (!done) Button(act, Modifier.height(36.dp), contentPadding = SMALL) { Text(stringResource(R.string.car_maps_do)) }
     }
 }
+
+/** The guide's buttons: small (at the car's 150 % Material's own were too big, 13 Nov). */
+private val SMALL = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
 
 /** Whether Tetra may use its folder: all files access (Android 11 and later), the storage permission on Android 10 (Tetra Auto SE's head units). */
 internal fun storageAllowed(c: Context) = if (Build.VERSION.SDK_INT >= 30) Environment.isExternalStorageManager()

@@ -251,7 +251,9 @@ private fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, close: () -> 
                 row(R.string.car_map_zoom, CarView.ZOOM, v.zoom, { if (it == 0f) "0" else "%+.1f".format(it) }) { Car.setView(context, v.copy(zoom = it)) }
                 row(R.string.car_map_tilt, CarView.TILT, v.tilt, { if (it < 0) stringResource(R.string.car_map_tilt_auto) else "$it°" }) { Car.setView(context, v.copy(tilt = it)) }
                 row(R.string.car_map_arrow, listOf(false, true), v.low, { stringResource(if (it) R.string.car_map_arrow_low else R.string.car_map_arrow_middle) }) { Car.setView(context, v.copy(low = it)) }
-                row(R.string.car_ui_size, CarView.UI, v.ui, { pct(it) }) { Car.setView(context, v.copy(ui = it)) }
+                // the car's build: one size for all of Tetra (CarSize, also in Settings › Tetra Car), not a second one over Tetra Car's alone
+                if (CarMaps.edition) row(R.string.car_ui_size, CarSize.STEPS, CarSize.of(context), { pct(it) }) { CarSize.set(context, it); (context as? android.app.Activity)?.recreate() }
+                else row(R.string.car_ui_size, CarView.UI, v.ui, { pct(it) }) { Car.setView(context, v.copy(ui = it)) }
                 val asked = AutoProjection.session?.asked
                 if (!CarMaps.edition) row(R.string.car_resolution, CarView.RES, v.res, { r -> asked?.let { (w, h) -> "${(w * r).toInt() and 1.inv()}×${(h * r).toInt() and 1.inv()}" } ?: pct(r) }) { Car.setView(context, v.copy(res = it)) }
         }
@@ -263,7 +265,7 @@ private fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, close: () -> 
 private fun CarClock(modifier: Modifier = Modifier, tap: () -> Unit = {}) {
     val context = LocalContext.current
     val now by produceState(System.currentTimeMillis()) { while (true) { value = System.currentTimeMillis(); delay(60_000 - value % 60_000) } }
-    Text(android.text.format.DateFormat.getTimeFormat(context).format(java.util.Date(now)), modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = tap).padding(6.dp), fontSize = 22.sp, maxLines = 1)
+    Text(android.text.format.DateFormat.getTimeFormat(context).format(java.util.Date(now)), modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = tap).padding(horizontal = 2.dp, vertical = 6.dp), fontSize = 20.sp, maxLines = 1) // "18:30" within the side dock's 64 dp
 }
 
 /**
@@ -342,7 +344,7 @@ internal object Car {
     private val viewState = mutableStateOf<CarView?>(null)
     /** Tetra Car's sizes and Maps' camera (the car's menu): one state, so the screen and the map follow a change at once. */
     fun view(c: Context): CarView = viewState.value ?: prefs(c).let { p ->
-        CarView(p.getFloat("ui_scale", 1f), p.getFloat("map_scale", if (CarMaps.edition) 1.25f else 2f) /* the car's build is 150 % already (CarSize) */, p.getFloat("map_zoom", 0f), p.getInt("map_tilt", -1), p.getBoolean("map_low", true), p.getFloat("resolution", 1f))
+        CarView(if (CarMaps.edition) 1f else p.getFloat("ui_scale", 1f) /* the car's build: CarSize instead */, p.getFloat("map_scale", if (CarMaps.edition) 1.25f else 2f) /* the car's build is 150 % already (CarSize) */, p.getFloat("map_zoom", 0f), p.getInt("map_tilt", -1), p.getBoolean("map_low", true), p.getFloat("resolution", 1f))
     }.also { viewState.value = it }
     fun setView(c: Context, v: CarView) {
         val old = viewState.value
@@ -736,7 +738,7 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
     val down = side != DockSide.Bottom // down a side: icons without their names, so it fits a short screen
     val strip: @Composable () -> Unit = { // the layouts' strip, with its way back (the user's sliding strips)
         IconButton({ setLayouts(false) }) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
-        CarLayout.entries.forEach { l -> Box(Modifier.size(80.dp, if (down) 46.dp else 56.dp).clip(RoundedCornerShape(12.dp)).clickable { layout(l); setLayouts(false) }, contentAlignment = Alignment.Center) { LayoutGlyph(l, l == state.layout) } }
+        CarLayout.entries.forEach { l -> Box(Modifier.size(if (down) DOCK_SIDE else 80.dp, if (down) 46.dp else 56.dp).clip(RoundedCornerShape(12.dp)).clickable { layout(l); setLayouts(false) }, contentAlignment = Alignment.Center) { LayoutGlyph(l, l == state.layout) } }
     }
     val recent: @Composable () -> Unit = { // the dock's apps, the newest last (CarDockApps)
         CarDockApps.all(context).forEach { id ->
@@ -758,20 +760,27 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
         // the car's menu (the user, 13 Nov: "make the share icon a menu icon and put all the rest there"): Share, and the map's sizes and camera
         if (projected) DockIcon(R.drawable.ic_menu, R.string.common_more, MaterialTheme.colorScheme.secondary, down, menu)
         else DockIcon(R.drawable.ic_view_grid, R.string.car_apps, MaterialTheme.colorScheme.secondary, down, apps)
-        Box(Modifier.padding(if (down) 4.dp else 8.dp).size(if (down) 56.dp else 64.dp)
-            .graphicsLayer { if (busy) { scaleX = pulse; scaleY = pulse } } // AI Assist at work: the mic breathes
-            .clip(CircleShape).background(ASSISTANT_COLOR).combinedClickable(onLongClick = { mic(true) }) { mic(false) }, contentAlignment = Alignment.Center) {
-            Icon(painterResource(R.drawable.ic_mic), stringResource(R.string.app_assistant), Modifier.size(34.dp), tint = Color.White)
+        // the size of the other icons (the user, 13 Nov: "so we can control the panel's width from the icon size")
+        DockButton(R.string.app_assistant, false, down, { mic(false) }, long = { mic(true) }) {
+            Box(Modifier.size(if (down) 40.dp else 44.dp).graphicsLayer { if (busy) { scaleX = pulse; scaleY = pulse } } // AI Assist at work: the mic breathes
+                .clip(CircleShape).background(ASSISTANT_COLOR), contentAlignment = Alignment.Center) {
+                Icon(painterResource(R.drawable.ic_mic), stringResource(R.string.app_assistant).takeIf { down }, Modifier.size(26.dp), tint = Color.White)
+            }
         }
     }
     val layoutButton: @Composable () -> Unit = { // a tap: expose, a page to choose in every pane; held: the layouts' strip
-        Box(Modifier.size(72.dp, if (down) 44.dp else 56.dp).clip(RoundedCornerShape(12.dp)).combinedClickable(onLongClick = { setLayouts(true) }, onClick = expose),
+        Box(Modifier.size(if (down) DOCK_SIDE else 72.dp, if (down) 44.dp else 56.dp).clip(RoundedCornerShape(12.dp)).combinedClickable(onLongClick = { setLayouts(true) }, onClick = expose),
             contentAlignment = Alignment.Center) { LayoutGlyph(state.layout, true) }
     }
-    if (down) Column(Modifier.fillMaxHeight().width(96.dp).verticalScroll(rememberScrollState()).padding(vertical = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) { // scrolls only on a very short screen
-        // the time on top, the apps, then the apps' menu, the mic and the layouts' switch at the bottom (the user, 13 Nov)
-        if (layouts) strip() else { CarStatus(true, clock); recent(); Column(horizontalAlignment = Alignment.CenterHorizontally) { group() }; layoutButton() }
+    if (down && layouts) Column(Modifier.fillMaxHeight().width(DOCK_SIDE).verticalScroll(rememberScrollState()).padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) { strip() } // scrolls only on a very short screen
+    else if (down) Column(Modifier.fillMaxHeight().width(DOCK_SIDE).padding(vertical = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        // the time on top, the apps, then the apps' menu, the mic and the layouts' switch at the bottom (the user, 13 Nov); the apps
+        // in what room is left, the oldest left out when a bigger size takes it (the user, 13 Nov: bigger made the dock's icons smaller)
+        CarStatus(true, clock)
+        DockFit(Modifier.weight(1f).fillMaxWidth()) { recent() }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) { group() }
+        layoutButton()
     }
     else Row(Modifier.fillMaxWidth().height(88.dp).padding(horizontal = 8.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         if (layouts) { Spacer(Modifier.weight(1f)); strip(); Spacer(Modifier.weight(1f)); return@Row }
@@ -782,6 +791,20 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
         layoutButton()
         Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) { CarStatus(false, clock) }
     }
+}
+
+/** The dock down a side: as wide as its icons and the clock (the user, 13 Nov: "the dock's width is still there, the icons are small"). */
+private val DOCK_SIDE = 64.dp
+
+/** The dock's apps down a side: as many as fit its height, the newest kept (they come last), spaced evenly. */
+@Composable
+private fun DockFit(modifier: Modifier, content: @Composable () -> Unit) = Layout(content, modifier) { ms, c ->
+    val all = ms.map { it.measure(c.copy(minWidth = 0, minHeight = 0)) }
+    val shown = ArrayList<androidx.compose.ui.layout.Placeable>()
+    var used = 0
+    for (p in all.asReversed()) { if (used + p.height > c.maxHeight) break; used += p.height; shown.add(0, p) }
+    val gap = (c.maxHeight - used) / (shown.size + 1)
+    layout(c.maxWidth, c.maxHeight) { var y = gap; shown.forEach { it.place((c.maxWidth - it.width) / 2, y); y += it.height + gap } }
 }
 
 @Composable
@@ -811,8 +834,8 @@ private fun DockOther(component: ComponentName, down: Boolean) {
 }
 
 @Composable
-private fun DockButton(label: Int, shown: Boolean, down: Boolean, tap: () -> Unit, art: @Composable () -> Unit) {
-    Column(Modifier.width(76.dp).clip(RoundedCornerShape(12.dp)).clickable(onClick = tap).padding(vertical = if (down) 2.dp else 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+private fun DockButton(label: Int, shown: Boolean, down: Boolean, tap: () -> Unit, long: (() -> Unit)? = null, art: @Composable () -> Unit) {
+    Column(Modifier.width(if (down) DOCK_SIDE else 76.dp).clip(RoundedCornerShape(12.dp)).combinedClickable(onLongClick = long, onClick = tap).padding(vertical = if (down) 2.dp else 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         art()
         if (!down) Text(stringResource(label), fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Box(Modifier.padding(top = 2.dp).size(5.dp).clip(CircleShape).background(if (shown) MaterialTheme.colorScheme.primary else Color.Transparent)) // on the screen now

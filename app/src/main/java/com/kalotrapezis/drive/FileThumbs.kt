@@ -72,7 +72,7 @@ internal object FileThumbs {
             val bmp = (if (cached.exists()) BitmapFactory.decodeFile(cached.path) else null) ?: runCatching { make(file, kind) }
                 .onFailure { WriterLog.e("Files: thumbnail of ${file.name}", it) }.getOrNull()?.also { b ->
                     val part = File(dir, "$key.part") // written aside and renamed: a half-written one never passes for done
-                    runCatching { part.outputStream().use { b.compress(Bitmap.CompressFormat.WEBP_LOSSY, 80, it) }; part.renameTo(cached) }
+                    runCatching { part.outputStream().use { b.compress(if (android.os.Build.VERSION.SDK_INT >= 30) Bitmap.CompressFormat.WEBP_LOSSY else @Suppress("DEPRECATION") Bitmap.CompressFormat.WEBP, 80, it) }; part.renameTo(cached) }
                 }
             if (bmp == null) none.createNewFile() else memory.put(key, bmp)
             bmp

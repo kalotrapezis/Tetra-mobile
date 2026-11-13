@@ -452,7 +452,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
     val lifecycleOwner = LocalLifecycleOwner.current
     val preferences = remember(context) { context.getSharedPreferences("onboarding", Context.MODE_PRIVATE) }
     // the first start opens the guide (Guide.kt), which can be skipped; Settings › Guide opens it again
-    var screen by remember { mutableStateOf(if (AppLocale.reopenSettings) Screen.Settings.also { AppLocale.reopenSettings = false } else if (preferences.getBoolean(PHOTO_SETUP_COMPLETED, false)) Screen.Home else Screen.Guide) }
+    var screen by remember { mutableStateOf(if (AppLocale.reopenSettings || CarMaps.edition /* the car: only Settings, never the phone's home (its window brought back after Android closed it) */) Screen.Settings.also { AppLocale.reopenSettings = false } else if (preferences.getBoolean(PHOTO_SETUP_COMPLETED, false)) Screen.Home else Screen.Guide) }
     var settingsStart by remember { mutableStateOf<SettingsPage?>(null) }
     var guideAt by remember { mutableStateOf(if (screen == Screen.Guide) 0 else null) } // the guide's step; docked under the screen when screen isn't Guide
     var writerOpen by remember { mutableStateOf<String?>(null) } // the document Writer edits; null a new one

@@ -97,7 +97,7 @@ internal object PhoneLocation {
             val done = CountDownLatch(1).also { waits[provider] = it }
             // getCurrentLocation is Android 11+; a head unit on Android 10 asks for one update instead
             runCatching { if (android.os.Build.VERSION.SDK_INT >= 30) lm.getCurrentLocation(provider, cancel, pool) { synchronized(found) { found[provider] = it }; done.countDown() }
-                else @Suppress("DEPRECATION") lm.requestSingleUpdate(provider, { l -> synchronized(found) { found[provider] = l }; done.countDown() }, android.os.Looper.getMainLooper()) }
+                else @Suppress("DEPRECATION") lm.requestSingleUpdate(provider, locationListener { l -> synchronized(found) { found[provider] = l }; done.countDown() }, android.os.Looper.getMainLooper()) }
                 .onFailure { done.countDown() }
         }
         try {

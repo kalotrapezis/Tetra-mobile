@@ -190,7 +190,7 @@ internal object MailArchive {
 
     /** A mail no index line names: what its own headers say (the first 64 KB), its date from its name when they say none. */
     fun fromFile(f: File, rel: String, account: String, role: String): MailEntry {
-        val head = f.inputStream().use { it.readNBytes(65_536) }
+        val head = f.inputStream().use { s -> ByteArray(minOf(f.length(), 65_536L).toInt()).also { java.io.DataInputStream(s).readFully(it) } } // readNBytes is Android 13+ (the car's build: 10)
         val h = Mime.headers(head)
         val from = Mime.words(h["from"].orEmpty())
         val address = Regex("<([^>]+)>").find(from)?.groupValues?.get(1) ?: from.trim()
