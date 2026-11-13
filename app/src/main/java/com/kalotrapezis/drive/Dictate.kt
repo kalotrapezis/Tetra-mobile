@@ -49,7 +49,10 @@ internal fun DictateButton(insert: (String) -> Unit, modifier: Modifier = Modifi
         r.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.takeIf { it.isNotBlank() }?.let(insert)
     }
     fun byAndroid() = runCatching {
-        android.launch(Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM))
+        // ends on the same pause as Voxtral's (Settings › AI Assist); a recognizer may ignore these, as Android allows
+        android.launch(Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            .putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, AssistantPause.ms(context).toLong())
+            .putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, AssistantPause.ms(context).toLong()))
     }.onFailure { tell(context.getString(R.string.dictate_unavailable)) }
 
     fun byVoxtral() = scope.launch {
