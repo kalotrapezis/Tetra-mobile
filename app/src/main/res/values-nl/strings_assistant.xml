@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Dat bestand kon niet worden geopend.</string>
     <string name="assistant_mic_needed">Tetra heeft de microfoon nodig om je te horen.</string>
     <string name="assistant_heard_nothing">Dat heb ik niet verstaan. Probeer het opnieuw.</string>
+    <string name="dictate">Spreek om te typen</string>
+    <string name="dictate_unavailable">Er is geen spraakherkenning op dit apparaat. Voeg een Mistral-sleutel toe onder Instellingen › AI Assist.</string>
     <string name="assistant_key">Mistral-API-sleutel</string>
     <string name="assistant_key_hint">Plak de sleutel</string>
     <string name="assistant_key_saved">Opgeslagen op deze telefoon</string>

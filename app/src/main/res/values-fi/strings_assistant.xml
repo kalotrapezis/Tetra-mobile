@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Tiedostoa ei voitu avata.</string>
     <string name="assistant_mic_needed">Tetra tarvitsee mikrofonin kuullakseen sinut.</string>
     <string name="assistant_heard_nothing">En saanut selvää. Yritä uudelleen.</string>
+    <string name="dictate">Puhu kirjoittaaksesi</string>
+    <string name="dictate_unavailable">Tässä laitteessa ei ole puheentunnistusta. Lisää Mistral-avain kohtaan Asetukset › AI Assist.</string>
     <string name="assistant_key">Mistralin API-avain</string>
     <string name="assistant_key_hint">Liitä avain</string>
     <string name="assistant_key_saved">Tallennettu tähän puhelimeen</string>

@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Файлът не можа да се отвори.</string>
     <string name="assistant_mic_needed">Tetra се нуждае от микрофона, за да те чува.</string>
     <string name="assistant_heard_nothing">Не те чух добре. Опитай отново.</string>
+    <string name="dictate">Говори за писане</string>
+    <string name="dictate_unavailable">На това устройство няма разпознаване на реч. Добави ключ за Mistral в Настройки › AI Assist.</string>
     <string name="assistant_key">API ключ за Mistral</string>
     <string name="assistant_key_hint">Постави ключа</string>
     <string name="assistant_key_saved">Запазен на този телефон</string>

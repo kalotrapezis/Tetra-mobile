@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Soubor se nepodařilo otevřít.</string>
     <string name="assistant_mic_needed">Tetra potřebuje mikrofon, aby tě slyšela.</string>
     <string name="assistant_heard_nothing">Nepodařilo se mi to zachytit. Zkus to znovu.</string>
+    <string name="dictate">Diktovat text</string>
+    <string name="dictate_unavailable">Na tomto zařízení není rozpoznávání řeči. Přidej klíč Mistral v Nastavení › AI Assist.</string>
     <string name="assistant_key">Klíč API Mistral</string>
     <string name="assistant_key_hint">Vlož klíč</string>
     <string name="assistant_key_saved">Uložen v tomto telefonu</string>

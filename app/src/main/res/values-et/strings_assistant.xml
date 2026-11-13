@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Seda faili ei saanud avada.</string>
     <string name="assistant_mic_needed">Tetra vajab mikrofoni, et sind kuulda.</string>
     <string name="assistant_heard_nothing">Ma ei saanud aru. Proovi uuesti.</string>
+    <string name="dictate">Räägi, et kirjutada</string>
+    <string name="dictate_unavailable">Selles seadmes pole kõnetuvastust. Lisa Mistrali võti jaotises Seaded › AI Assist.</string>
     <string name="assistant_key">Mistrali API võti</string>
     <string name="assistant_key_hint">Kleebi võti</string>
     <string name="assistant_key_saved">Salvestatud sellesse telefoni</string>

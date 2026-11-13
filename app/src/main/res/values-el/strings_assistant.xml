@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Το αρχείο δεν άνοιξε.</string>
     <string name="assistant_mic_needed">Το Tetra χρειάζεται το μικρόφωνο για να σε ακούσει.</string>
     <string name="assistant_heard_nothing">Δεν άκουσα καλά. Πες το ξανά.</string>
+    <string name="dictate">Υπαγόρευση</string>
+    <string name="dictate_unavailable">Δεν υπάρχει αναγνώριση ομιλίας σε αυτή τη συσκευή. Πρόσθεσε κλειδί Mistral στο μενού Ρυθμίσεις › Βοηθός AI.</string>
     <string name="assistant_key">Κλειδί API της Mistral</string>
     <string name="assistant_key_hint">Επικόλλησε το κλειδί</string>
     <string name="assistant_key_saved">Αποθηκεύτηκε σε αυτό το κινητό</string>

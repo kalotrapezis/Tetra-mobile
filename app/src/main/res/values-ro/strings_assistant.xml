@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Fișierul nu a putut fi deschis.</string>
     <string name="assistant_mic_needed">Tetra are nevoie de microfon ca să te audă.</string>
     <string name="assistant_heard_nothing">Nu am înțeles. Încearcă din nou.</string>
+    <string name="dictate">Vorbește pentru a scrie</string>
+    <string name="dictate_unavailable">Pe acest dispozitiv nu există recunoaștere vocală. Adaugă o cheie Mistral în Setări › AI Assist.</string>
     <string name="assistant_key">Cheie API Mistral</string>
     <string name="assistant_key_hint">Lipește cheia</string>
     <string name="assistant_key_saved">Salvată pe acest telefon</string>

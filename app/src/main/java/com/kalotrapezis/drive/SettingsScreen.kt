@@ -130,6 +130,7 @@ internal fun SettingsTab(
                                 cursorBrush = SolidColor(islandContentColor()), modifier = Modifier.fillMaxWidth())
                         }
                         if (query.isNotEmpty()) IconButton(onClick = { query = "" }) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_clear)) }
+                        else DictateButton({ query = it.trim() })
                     }
                 }
             }

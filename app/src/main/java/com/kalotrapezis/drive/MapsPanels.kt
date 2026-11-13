@@ -88,7 +88,7 @@ internal enum class MapsTab(@androidx.annotation.StringRes val label: Int, val i
     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Search),
     keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSearch = { done?.invoke() }),
     placeholder = { Text(hint) }, leadingIcon = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
-    trailingIcon = { if (query.isNotEmpty()) IconButton(onClick = { change("") }) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_clear)) } },
+    trailingIcon = { if (query.isNotEmpty()) IconButton(onClick = { change("") }) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_clear)) } else DictateButton({ change(it.trim()) }) },
     colors = TextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent, focusedPlaceholderColor = Color.White.copy(alpha = 0.6f), unfocusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
         focusedLeadingIconColor = Color.White, unfocusedLeadingIconColor = Color.White, focusedTrailingIconColor = Color.White, unfocusedTrailingIconColor = Color.White),

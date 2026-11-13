@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Il-fajl ma setax jinfetaħ.</string>
     <string name="assistant_mic_needed">Tetra teħtieġ il-mikrofonu biex tisimgħek.</string>
     <string name="assistant_heard_nothing">Ma smajtx sew. Erġa\' pprova.</string>
+    <string name="dictate">Kellem biex tikteb</string>
+    <string name="dictate_unavailable">Dan l-apparat ma għandux rikonoxximent tad-diskors. Żid ċavetta ta\' Mistral f\'Settings › AI Assist.</string>
     <string name="assistant_key">Ċavetta API ta\' Mistral</string>
     <string name="assistant_key_hint">Waħħal iċ-ċavetta</string>
     <string name="assistant_key_saved">Salvata fuq dan it-telefon</string>
