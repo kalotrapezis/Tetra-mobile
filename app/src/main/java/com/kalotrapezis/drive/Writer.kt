@@ -38,6 +38,8 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.material3.RadioButton
 import androidx.compose.foundation.clickable
@@ -3361,18 +3363,25 @@ internal fun WriterScreen(back: () -> Unit, open: String?) {
             }
             val downScroll = rememberScrollState(); val sideScroll = rememberScrollState()
             var handleAt by remember { mutableStateOf<Offset?>(null) } // a handle being dragged: where, on the (unscaled) page
+            var edgeLogs by remember { mutableIntStateOf(0) }
+            var pageView by remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) } // the page's view, in the window: a held handle's edges
             val densityHere = LocalDensity.current
+            val ribbonOver = if (OfficeUi.top) 0 else islandPx // the ribbon over the page's bottom, in pixels
             /** The cursor on the page (unscaled), from the last styled layout, with room around it. */
-            fun cursorOnPage(): androidx.compose.ui.geometry.Rect? = editorLayout?.let { l ->
+            fun cursorOnPage(): androidx.compose.ui.geometry.Rect? = handleAt?.let { p -> androidx.compose.ui.geometry.Rect(p, androidx.compose.ui.geometry.Size(1f, 1f)) } ?: editorLayout?.let { l ->
                 val at = state.selection.max.coerceIn(0, l.layoutInput.text.length)
                 with(densityHere) { l.getCursorRect(at).translate(margins.calculateLeftPadding(LayoutDirection.Ltr).toPx(), margins.calculateTopPadding().toPx())
-                    .let { c -> androidx.compose.ui.geometry.Rect(c.left - 32.dp.toPx(), c.top - 16.dp.toPx(), c.right + 32.dp.toPx(), c.bottom + 16.dp.toPx()) } }
+                    // below it, room for the handles and for the ribbon, which lies over the page's bottom (when it is down there)
+                    .let { c -> androidx.compose.ui.geometry.Rect(c.left - 32.dp.toPx(), c.top - 16.dp.toPx(), c.right + 32.dp.toPx(), c.bottom + (ribbonOver + 48.dp.toPx()) / pageScale) } }
             }
             // The zoomed page keeps the cursor in sight at every styled layout, at once (the editor's own request came once a
             // keystroke, from the unstyled layout, so the page fell behind the typing).
             // Keyed on the layout alone: a handle being dragged moves the selection, and the page then jumped to its other end.
-            LaunchedEffect(editorLayout, pageScale) {
-                if (!printPhone) return@LaunchedEffect
+            // and when the view changes height: the keyboard coming up hid a cursor near the bottom
+            LaunchedEffect(editorLayout, pageScale, downScroll.viewportSize) {
+                // a handle held: the page stays under the finger (the user, 13 Nov: "selecting text… the view is moving around
+                // a lot" — it followed the selection's end at every layout and ran from the finger); the edges scroll it instead
+                if (!printPhone || handleAt != null) return@LaunchedEffect
                 val c = cursorOnPage() ?: return@LaunchedEffect
                 val padX = with(densityHere) { 10.dp.toPx() }; val padY = with(densityHere) { 8.dp.toPx() }
                 fun follow(sc: androidx.compose.foundation.ScrollState, from: Float, to: Float): Float {
@@ -3394,7 +3403,7 @@ internal fun WriterScreen(back: () -> Unit, open: String?) {
                 val top = l.getLineTop(l.getLineForOffset(at.coerceIn(0, l.layoutInput.text.length))) + with(densityNow) { (margins.calculateTopPadding() + 8.dp - 24.dp).toPx() }
                 downScroll.animateScrollTo((top * (if (printPhone) pageScale else 1f)).toInt().coerceAtLeast(0))
             }
-            Box(Modifier.weight(1f).fillMaxWidth()
+            Box(Modifier.weight(1f).fillMaxWidth().onGloballyPositioned { pageView = it.boundsInWindow() }
                 .then(if (printPhone) Modifier.pinchZoom({ pageZoom }, 1f, 5f, sideScroll, downScroll) { pageZoom = it } else Modifier)
                 // A loupe over a handle being dragged, a little above the finger (asked 14 Oct): the page's letters at a size to aim by.
                 .then(if (printPhone) Modifier.magnifier(
@@ -3438,7 +3447,7 @@ internal fun WriterScreen(back: () -> Unit, open: String?) {
                     }
                 }
                 Surface(color = paper, shape = RoundedCornerShape(if (onPage) 0.dp else 6.dp),
-                    modifier = (if (printPhone) Modifier.scaledBy(pageScale).followCursor { cursorOnPage() }.width(sheet.width * perPt).heightIn(min = sheet.height * perPt)
+                    modifier = (if (printPhone) Modifier.scaledBy(pageScale).followCursor { cursorOnPage()?.let { r -> androidx.compose.ui.geometry.Rect(r.left * pageScale, r.top * pageScale, r.right * pageScale, r.bottom * pageScale) } }.width(sheet.width * perPt).heightIn(min = sheet.height * perPt)
                         else if (onPage) Modifier.align(Alignment.TopCenter).offset(x = -shift).width(sheet.width * perPt).heightIn(min = sheet.height * perPt)
                         else if (reading) Modifier.align(Alignment.TopCenter).width(readingWidth) else Modifier.fillMaxWidth()).heightIn(min = 520.dp)) {
                     when {
@@ -3497,7 +3506,15 @@ internal fun WriterScreen(back: () -> Unit, open: String?) {
                             }
                             if (printPhone && selectedPicture == null) layout?.let { l ->
                                 val d = LocalDensity.current
-                                PageHandles(state, l, Offset(with(d) { margins.calculateLeftPadding(LayoutDirection.Ltr).toPx() }, with(d) { margins.calculateTopPadding().toPx() }), pageScale) { handleAt = it }
+                                PageHandles(state, l, Offset(with(d) { margins.calculateLeftPadding(LayoutDirection.Ltr).toPx() }, with(d) { margins.calculateTopPadding().toPx() }), pageScale,
+                                    where = { p -> "page view ${pageView.top.roundToInt()}–${pageView.bottom.roundToInt()}, scroll ${downScroll.value} of ${downScroll.maxValue} (view ${downScroll.viewportSize}), the handle reckoned at ${with(d) { (pageView.top + 8.dp.toPx() + p.y * pageScale - downScroll.value).roundToInt() }}" },
+                                    edge = { y -> with(d) {
+                                        // the finger (in the window) within 28 dp of the page's top, or of the ribbon over its bottom:
+                                        // up to 8 dp a frame that way, faster nearer
+                                        val zone = 28.dp.toPx(); val top = pageView.top; val bottom = pageView.bottom - ribbonOver
+                                        val step = when { y < top + zone -> -(top + zone - y); y > bottom - zone -> y - (bottom - zone); else -> 0f }.coerceIn(-zone, zone) / zone * 8.dp.toPx()
+                                        if (step == 0f) 0f else downScroll.dispatchRawDelta(step).also { got -> if (++edgeLogs % 30 == 1) WriterLog.i("handle at the edge: finger at ${y.roundToInt()} in ${pageView.top.roundToInt()}–${pageView.bottom.roundToInt()}, step ${step.roundToInt()}, scrolled ${got.roundToInt()} to ${downScroll.value}") } / pageScale
+                                    } }) { handleAt = it }
                             }
                             // The pictures, drawn where their character sits: its left, standing on its line's bottom.
                             layout?.let { l ->
@@ -5186,7 +5203,9 @@ internal val PAGE_COLORS = listOf(0xFFF2CC, 0xE2EFDA, 0xDDEBF7, 0xFCE4D6, 0xEDED
 /** A sideways-scrolling row with more beyond an edge: that edge shaded, so it shows there is more (the user, 2026-10-14). */
 /**
  * The zoomed page scrolls to [cursor] (the styled layout's) whenever the editor asks to be brought into view — not to
- * the rectangle the editor gives, which a one-frame unstyled layout puts elsewhere.
+ * the rectangle the editor gives, which a one-frame unstyled layout puts elsewhere. [cursor] is at the page's scale: the
+ * scroll takes it as it is, and the page's own (unscaled) place sent it 1/0.44 too far down on a phone, then the cursor's
+ * follow brought it back (13 Nov: "selecting text… the view is moving around a lot").
  */
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 private fun Modifier.followCursor(cursor: () -> androidx.compose.ui.geometry.Rect?) = this.bringIntoViewResponder(object : androidx.compose.foundation.relocation.BringIntoViewResponder {
@@ -5202,7 +5221,7 @@ private fun Modifier.followCursor(cursor: () -> androidx.compose.ui.geometry.Rec
  * scaled page, and the user wanted a pointier nose). [at]: where the text starts in this box; [scale]: the page's.
  */
 @Composable
-private fun PageHandles(state: RichTextState, layout: TextLayoutResult, at: Offset, scale: Float, dragging: (Offset?) -> Unit) {
+private fun PageHandles(state: RichTextState, layout: TextLayoutResult, at: Offset, scale: Float, where: (Offset) -> String, edge: (Float) -> Float, dragging: (Offset?) -> Unit) {
     val sel = state.selection
     val len = layout.layoutInput.text.length
     if (len == 0 || sel.max > len) return
@@ -5216,18 +5235,30 @@ private fun PageHandles(state: RichTextState, layout: TextLayoutResult, at: Offs
         val sideNow by rememberUpdatedState(side); val selNow by rememberUpdatedState(sel)
         val layoutNow by rememberUpdatedState(layout); val startNow by rememberUpdatedState(nose - at - Offset(0f, c.height / 2))
         var drag by remember { mutableStateOf(Offset.Zero) }
-        Box(Modifier.offset { IntOffset(left.roundToInt(), nose.y.roundToInt()) }.size(with(LocalDensity.current) { size.toDp() })
+        var held by remember { mutableStateOf(false) }
+        var place by remember { mutableStateOf<androidx.compose.ui.layout.LayoutCoordinates?>(null) }
+        var fingerY by remember { mutableFloatStateOf(0f) } // where the finger is, in the window
+        fun moveTo() {
+            dragging(at + drag)
+            val to = layoutNow.getOffsetForPosition(drag)
+            val s = selNow
+            state.selection = when (sideNow) {
+                -1 -> TextRange(minOf(to, s.max - 1).coerceAtLeast(0), s.max)
+                1 -> TextRange(s.min, maxOf(to, s.min + 1))
+                else -> TextRange(to)
+            }
+        }
+        // held by an edge of the view: the page scrolls on, and this end goes with it, though the finger is still
+        LaunchedEffect(held) { var logged = false
+            while (held) { val dy = edge(fingerY); if (dy != 0f) { if (!logged) { logged = true; WriterLog.i("selection handle at the view's edge: the page scrolls") }; drag += Offset(0f, dy); moveTo() }; kotlinx.coroutines.delay(16) } }
+        Box(Modifier.offset { IntOffset(left.roundToInt(), nose.y.roundToInt()) }.size(with(LocalDensity.current) { size.toDp() }).onGloballyPositioned { place = it }
             // Keyed on the side alone: keyed on the place too, the drag ended at the first letter it moved.
             .pointerInput(side) {
-                detectDragGestures(onDragStart = { drag = startNow; dragging(at + drag) }, onDragEnd = { dragging(null) }, onDragCancel = { dragging(null) }) { change, by ->
-                    change.consume(); drag += by; dragging(at + drag)
-                    val to = layoutNow.getOffsetForPosition(drag)
-                    val s = selNow
-                    state.selection = when (sideNow) {
-                        -1 -> TextRange(minOf(to, s.max - 1).coerceAtLeast(0), s.max)
-                        1 -> TextRange(s.min, maxOf(to, s.min + 1))
-                        else -> TextRange(to)
-                    }
+                detectDragGestures(onDragStart = { o -> drag = startNow; held = true; fingerY = place?.takeIf { it.isAttached }?.localToWindow(o)?.y ?: 0f; dragging(at + drag)
+                        WriterLog.i("selection handle $sideNow held at (${drag.x.roundToInt()}, ${drag.y.roundToInt()}), finger at ${fingerY.roundToInt()} in the window, ${selNow.min}–${selNow.max}; ${where(at + drag)}") },
+                    onDragEnd = { held = false; dragging(null); WriterLog.i("selection handle $sideNow let go at (${drag.x.roundToInt()}, ${drag.y.roundToInt()}), ${state.selection.min}–${state.selection.max}") },
+                    onDragCancel = { held = false; dragging(null) }) { change, by ->
+                    change.consume(); drag += by; place?.takeIf { it.isAttached }?.let { fingerY = it.localToWindow(change.position).y }; moveTo()
                 }
             }
             .drawBehind {
