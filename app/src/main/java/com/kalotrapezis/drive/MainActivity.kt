@@ -317,13 +317,13 @@ class MainActivity : ComponentActivity() {
         // slowed that frame on the phone (25 Oct)
         android.view.Choreographer.getInstance().postFrameCallback { window.decorView.post {
             CalendarPreload.warm(this)
-            if (Environment.isExternalStorageManager()) MailFiles.warm(MailEngine.device()) // Mail's index (tens of MB)
-            Thread { android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND); if (Environment.isExternalStorageManager()) runCatching { notesStore().list() } }.start()
+            if (storageAllowed(this)) MailFiles.warm(MailEngine.device()) // Mail's index (tens of MB)
+            Thread { android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND); if (storageAllowed(this)) runCatching { notesStore().list() } }.start()
         } }
         Thread { runCatching { TimerService.check(this) } }.start() // a timer running (here or started elsewhere): its notification
         // transfers cut off earlier leave hidden .part files; none is running at start but a sync's own
-        Thread { runCatching { if (Environment.isExternalStorageManager() && !SyncService.isRunning) SyncRules.sweepParts(TetraFolder.root(Environment.getExternalStorageDirectory())) } }.start()
-        Thread { runCatching { if (Environment.isExternalStorageManager()) MapsAge.check(this) } }.start() // a map turned old: said once
+        Thread { runCatching { if (storageAllowed(this) && !SyncService.isRunning) SyncRules.sweepParts(TetraFolder.root(Environment.getExternalStorageDirectory())) } }.start()
+        Thread { runCatching { if (storageAllowed(this)) MapsAge.check(this) } }.start() // a map turned old: said once
         // Compose's new text menu bypasses LocalTextToolbar; the old path lets Writer show its Selection tab instead (14 Oct).
         @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class) androidx.compose.foundation.ComposeFoundationFlags.isNewContextMenuEnabled = false
         // a document, spreadsheet or presentation another app opens here (Open with › Tetra Office); else a photo or video
@@ -508,7 +508,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
     fun lockScannerPortrait() { (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT }
     fun unlockScannerOrientation() { (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
 
-    fun hasAllFilesAccess() = Environment.isExternalStorageManager()
+    fun hasAllFilesAccess() = storageAllowed(context)
     fun quarantineScanFiles(page: CapturedPage) {
         val trash = File(context.cacheDir, "scans-trash").also { it.mkdirs() }
         if (page.file.exists()) runCatching { Files.move(page.file.toPath(), File(trash, "${UUID.randomUUID()}-${page.file.name}").toPath()) }
@@ -1039,7 +1039,7 @@ private fun LocalDriveApp(external: ExternalMedia? = null, office: ExternalMedia
                     save = ::saveScan,
                 )
                 Screen.Settings -> SettingsTab(
-                    back = { screen = Screen.Home },
+                    back = { if (CarMaps.edition) (context as? Activity)?.finish() else screen = Screen.Home },
                     start = settingsStart, started = { settingsStart = null },
                     metadataStore = photoMetadata,
                     photoPermission = photoPermission(),

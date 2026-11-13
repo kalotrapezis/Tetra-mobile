@@ -1247,7 +1247,7 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         return target
     }
 
-    private suspend fun sha256(f: File): String = SyncRules.hex(MessageDigest.getInstance("SHA-256").also { d -> f.inputStream().use { pump(it, java.io.OutputStream.nullOutputStream(), d) } }.digest())
+    private suspend fun sha256(f: File): String = SyncRules.hex(MessageDigest.getInstance("SHA-256").also { d -> f.inputStream().use { pump(it, object : java.io.OutputStream() { override fun write(b: Int) = Unit; override fun write(b: ByteArray, off: Int, len: Int) = Unit } /* nullOutputStream is Android 13+ */, d) } }.digest())
 
     /**
      * Follows a move the computer made. It never overwrites: if something else is already there, both are kept; the

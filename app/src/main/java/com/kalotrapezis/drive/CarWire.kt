@@ -90,14 +90,18 @@ internal object CarWire {
 
     /** On the unit: the phone answered the last hello. */
     val reached = mutableStateOf(false)
+    /** On the unit: the phone's battery (per cent, charging), from its answer to the hello; null without a phone. */
+    val battery = mutableStateOf<Pair<Int, Boolean>?>(null)
     /** On the unit: the phone's call now, for the side pane; null with none. */
     val call = mutableStateOf<JSONObject?>(null)
 
     /** The unit to the phone: "here I am, at these addresses" (every 30 s while Tetra Car is open). */
     fun hello(c: Context) {
         val l = link(c) ?: return
-        val ok = runCatching { anyHost(l) { h -> post(h, l.port, l.fingerprint, l.token, "/car/hello", JSONObject().put("hosts", JSONArray(SyncServer.lanAddresses()))) } }.isSuccess
-        if (ok != reached.value) Handler(Looper.getMainLooper()).post { reached.value = ok }
+        val answer = runCatching { anyHost(l) { h -> post(h, l.port, l.fingerprint, l.token, "/car/hello", JSONObject().put("hosts", JSONArray(SyncServer.lanAddresses()))) } }.getOrNull()
+        val ok = answer != null
+        val power = answer?.optInt("battery", -1)?.takeIf { it >= 0 }?.let { it to answer.optBoolean("charging") }
+        Handler(Looper.getMainLooper()).post { if (ok != reached.value) reached.value = ok; battery.value = power }
     }
 
     /** The unit asks the phone: {call: "answer"}, {place: number, name}, {sms: {to, text}}. */
@@ -132,7 +136,9 @@ internal object CarWire {
                 val main = Handler(Looper.getMainLooper())
                 main.removeCallbacksAndMessages(TOKEN)
                 main.postAtTime({ if (!alive()) { WriterLog.i("Car link: the car is gone"); CarQuiet.set(c, false) } }, TOKEN, android.os.SystemClock.uptimeMillis() + 95_000)
-                200 to JSONObject().put("ok", true)
+                // the phone's battery for the dock on the car's screen (CarStatus)
+                val power = c.getSystemService(android.os.BatteryManager::class.java)
+                200 to JSONObject().put("ok", true).put("battery", power.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY)).put("charging", power.isCharging)
             }
             "/car/event" -> { // on the unit: from the phone
                 val main = Handler(Looper.getMainLooper())
@@ -145,6 +151,7 @@ internal object CarWire {
                 }
                 200 to JSONObject().put("ok", true)
             }
+            "/car/maps" -> 200 to CarMaps.list() // on the phone: its maps, for the unit to add or update its own
             "/car/do" -> { // on the phone: the unit's buttons and AI Assist
                 body.optString("call").takeIf { it.isNotEmpty() }?.let { what ->
                     val ok = PhoneCalls.act(what.take(9)) ?: false
@@ -182,7 +189,32 @@ internal object CarWire {
             ?.let { hex -> (0..3).map { i -> hex.substring(6 - i * 2, 8 - i * 2).toInt(16) }.joinToString(".") }
     }.getOrNull()
 
-    private fun post(host: String, port: Int, fingerprint: String, token: String?, path: String, body: JSONObject): JSONObject {
+    /** On the unit: the phone's maps, path → {size, modified} (CarMaps). */
+    fun maps(c: Context): JSONObject = link(c)?.let { l -> anyHost(l) { h -> post(h, l.port, l.fingerprint, l.token, "/car/maps", JSONObject()) } }
+        ?: throw SyncException("No phone is paired with Tetra Car.")
+
+    /** On the unit: one of the phone's map files, streamed to [into] ([got]: the bytes so far); the link's own pinned TLS. */
+    fun download(c: Context, path: String, into: java.io.OutputStream, got: (Long) -> Unit) {
+        val l = link(c) ?: throw SyncException("No phone is paired with Tetra Car.")
+        anyHost(l) { host ->
+            val h = open(host, l.port, l.fingerprint, l.token, "/car/map?path=" + java.net.URLEncoder.encode(path, "UTF-8")).apply { requestMethod = "GET"; readTimeout = 30_000 }
+            if (h.responseCode !in 200..299) throw SyncException("The phone did not give $path (${h.responseCode}).")
+            h.inputStream.use { input ->
+                val buf = ByteArray(1 shl 16); var n: Int; var total = 0L
+                while (input.read(buf).also { n = it } >= 0) { into.write(buf, 0, n); total += n; got(total) }
+            }
+            h.disconnect()
+        }
+    }
+
+    /** On the phone (SyncServer's GET /car/map): the map file a paired unit asks for, or null when it may not have it. */
+    fun mapFile(c: Context, bearer: String?, path: String?): java.io.File? {
+        val l = link(c) ?: return null
+        if (bearer == null || bearer != l.theirToken || path == null) return null
+        return CarMaps.file(path)
+    }
+
+    private fun open(host: String, port: Int, fingerprint: String, token: String?, path: String): HttpsURLConnection {
         val pinned = object : X509TrustManager {
             override fun checkServerTrusted(chain: Array<out X509Certificate>, authType: String) {
                 if (SyncRules.hex(MessageDigest.getInstance("SHA-256").digest(chain.first().encoded)) != fingerprint) throw CertificateException("Not the paired device.")
@@ -191,12 +223,18 @@ internal object CarWire {
             override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
         }
         val tls = SSLContext.getInstance("TLS").apply { init(null, arrayOf(pinned), null) }
-        val h = (URL("https://$host:$port$path").openConnection() as HttpsURLConnection).apply {
+        return (URL("https://$host:$port$path").openConnection() as HttpsURLConnection).apply {
             sslSocketFactory = tls.socketFactory
             hostnameVerifier = HostnameVerifier { _, _ -> true } // identity is the pinned certificate
-            requestMethod = "POST"; connectTimeout = 3_000; readTimeout = 10_000; doOutput = true
-            setRequestProperty("Content-Type", "application/json")
+            connectTimeout = 3_000; readTimeout = 10_000
             token?.let { setRequestProperty("Authorization", "Bearer $it") }
+        }
+    }
+
+    private fun post(host: String, port: Int, fingerprint: String, token: String?, path: String, body: JSONObject): JSONObject {
+        val h = open(host, port, fingerprint, token, path).apply {
+            requestMethod = "POST"; doOutput = true
+            setRequestProperty("Content-Type", "application/json")
         }
         h.outputStream.use { it.write(body.toString().toByteArray()) }
         val ok = h.responseCode in 200..299

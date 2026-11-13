@@ -39,10 +39,19 @@ internal object AppLocale {
 
     /** Before Android 13, each activity's context in the chosen language (its attachBaseContext). */
     // shortcut: before Android 13 notifications and the car's screens stay in the system's language; fine while the devices are 13+.
+    /** Also Tetra Auto SE's size on the car's screen (CarSize): every screen of Tetra drawn that much bigger. */
     fun wrap(base: Context): Context {
-        if (Build.VERSION.SDK_INT >= 33) return base
-        val tag = prefs(base).getString("tag", "").orEmpty().ifEmpty { return base }
-        return base.createConfigurationContext(Configuration(base.resources.configuration).apply { setLocale(Locale.forLanguageTag(tag)) })
+        val tag = if (Build.VERSION.SDK_INT >= 33) "" else prefs(base).getString("tag", "").orEmpty()
+        val scale = CarSize.of(base)
+        if (tag.isEmpty() && scale == 1f) return base
+        return base.createConfigurationContext(Configuration(base.resources.configuration).apply {
+            if (tag.isNotEmpty()) setLocale(Locale.forLanguageTag(tag))
+            if (scale != 1f) {
+                densityDpi = (densityDpi * scale).toInt()
+                screenWidthDp = (screenWidthDp / scale).toInt(); screenHeightDp = (screenHeightDp / scale).toInt()
+                smallestScreenWidthDp = (smallestScreenWidthDp / scale).toInt()
+            }
+        })
     }
 
     private fun prefs(c: Context) = c.getSharedPreferences("language", Context.MODE_PRIVATE)

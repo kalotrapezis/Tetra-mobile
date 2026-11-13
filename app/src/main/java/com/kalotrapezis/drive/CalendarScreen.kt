@@ -164,7 +164,7 @@ internal object CalendarPreload {
     }
     fun warm(c: Context) { val app = c.applicationContext; Thread {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND) // Home's first frames come first
-        if (Environment.isExternalStorageManager()) runCatching { load(calendarRoot(), LocalDate.now().year, CalendarPrefs.hidden(app)) }
+        if (storageAllowed(app)) runCatching { load(calendarRoot(), LocalDate.now().year, CalendarPrefs.hidden(app)) }
     }.start() }
 }
 

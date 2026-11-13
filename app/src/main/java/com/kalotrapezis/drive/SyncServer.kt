@@ -272,6 +272,15 @@ internal class SyncServer(private val context: Context, private val store: SyncS
                 reply(output, if ("transit" in e.message.orEmpty()) 422 else 400, JSONObject().put("error", e.message))
             }
         }
+        // Tetra Auto SE: a map file of this phone's, to the paired car's unit (CarMaps), streamed
+        if (method == "GET" && path.startsWith("/car/map?")) {
+            val f = CarWire.mapFile(context, bearer, android.net.Uri.parse("https://x$path").getQueryParameter("path"))
+                ?: return reply(output, 404, JSONObject().put("error", "No such map."))
+            output.write(("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: ${f.length()}\r\nConnection: close\r\n\r\n").toByteArray())
+            f.inputStream().use { it.copyTo(output, 1 shl 16) }
+            output.flush()
+            return
+        }
         // Tetra Car's own link (CarWire): live calls and messages between the car's screen and the phone; never sync, never peers
         if (method == "POST" && path.startsWith("/car/") && length in 0..65536) {
             val raw = ByteArray(length.toInt()).also { var read = 0; while (read < length.toInt()) { val n = stream.read(it, read, length.toInt() - read); if (n < 0) break; read += n } }

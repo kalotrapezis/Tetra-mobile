@@ -34,7 +34,7 @@ internal enum class Applet(@androidx.annotation.StringRes val label: Int, val ar
     Pills(R.string.app_pills, R.drawable.pills_art),
     Passwords(R.string.app_passwords, R.drawable.passwords_art);
 
-    private fun component(context: Context) = ComponentName(context.packageName, "${Applet::class.java.packageName}.App$name")
+    private fun component(context: Context) = ComponentName(context.packageName, "${Applet::class.java.name.substringBeforeLast('.')}.App$name")
 
     fun shown(context: Context) = context.packageManager.getComponentEnabledSetting(component(context)) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
 
