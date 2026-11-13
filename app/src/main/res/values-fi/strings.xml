@@ -4726,4 +4726,24 @@
     <string name="car_map_arrow_low">Alempana</string>
     <string name="car_ui_size">Käyttöliittymä</string>
     <string name="car_resolution">Tarkkuus</string>
+    <string name="car_maps_title">Kartat puhelimesta</string>
+    <string name="car_maps_update_title">Uusia karttoja puhelimessa</string>
+    <string name="car_maps_intro">Tetra Carin kartat toimivat ilman yhteyttä. Tetra hakee ne kerran puhelimesta sen hotspotin kautta; sen jälkeen vain uudet.</string>
+    <string name="car_maps_step_storage">Salli Tetran tallentaa kartat tähän laitteeseen</string>
+    <string name="car_maps_step_pair">Yhdistä puhelimeen: liitä tämä laite puhelimen hotspotiin ja skannaa sitten koodi Tetralla puhelimessa</string>
+    <string name="car_maps_offer">Puhelimessa: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">uudempia karttoja</string>
+    <string name="car_maps_download">Lataa</string>
+    <string name="car_maps_update">Päivitä</string>
+    <string name="car_maps_moving">%1$d / %2$d MB…</string>
+    <string name="car_maps_failed">Karttoja ei saatu: %1$s</string>
+    <string name="car_maps_checking">Kysytään puhelimelta, mitä karttoja sillä on…</string>
+    <string name="car_maps_phone_none">Puhelimessa ei ole vielä karttoja. Tee ne tietokoneella (Tetra › Kartat); ne siirtyvät puhelimeen ja sitten tähän laitteeseen.</string>
+    <string name="car_maps_do">Tee</string>
+    <string name="car_maps_no_space">Laitteessa ei ole tarpeeksi tilaa: kartat tarvitsevat %1$d MB, vapaana on %2$d MB.</string>
+    <string name="car_dock_auto">Automaattinen: laidalle kuljettajan puolelle leveällä näytöllä, muuten alareunaan</string>
+    <string name="car_driver">Kuljettajan paikka</string>
+    <string name="car_driver_summary">Vasemmanpuoleinen ohjaus (suurin osa Euroopasta) tai oikeanpuoleinen (Iso-Britannia, Irlanti, Kypros, Malta)</string>
+    <string name="car_screen_size">Koko tällä näytöllä</string>
+    <string name="car_screen_size_summary">Kaikki isompana: kartan nimet ja nuoli, kortit, telakka</string>
 </resources>

@@ -4928,4 +4928,24 @@
     <string name="car_map_arrow_low">Níže</string>
     <string name="car_ui_size">Rozhraní</string>
     <string name="car_resolution">Rozlišení</string>
+    <string name="car_maps_title">Mapy z telefonu</string>
+    <string name="car_maps_update_title">Nové mapy v telefonu</string>
+    <string name="car_maps_intro">Mapy Tetra Car fungují offline. Jednou je do telefonu pošle Tetra přes jeho hotspot; potom už jen to, co je nové.</string>
+    <string name="car_maps_step_storage">Povolit Tetře ukládat mapy do této jednotky</string>
+    <string name="car_maps_step_pair">Spárujte s telefonem: připojte tuto jednotku k jeho hotspotu a pak naskenujte kód v Tetře v telefonu</string>
+    <string name="car_maps_offer">V telefonu: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">novější mapy</string>
+    <string name="car_maps_download">Stáhnout</string>
+    <string name="car_maps_update">Aktualizovat</string>
+    <string name="car_maps_moving">%1$d z %2$d MB…</string>
+    <string name="car_maps_failed">Mapy nedorazily: %1$s</string>
+    <string name="car_maps_checking">Ptám se telefonu, jaké mapy má…</string>
+    <string name="car_maps_phone_none">Telefon zatím nemá žádné mapy. Vytvořte je na počítači (Tetra › Mapy); dostanou se do telefonu a pak do této jednotky.</string>
+    <string name="car_maps_do">Provést</string>
+    <string name="car_maps_no_space">Na této jednotce není dost místa: mapy potřebují %1$d MB, volných je %2$d MB.</string>
+    <string name="car_dock_auto">Automaticky: na straně řidiče u širokého displeje, jinak podél spodního okraje</string>
+    <string name="car_driver">Místo řidiče</string>
+    <string name="car_driver_summary">Levostranné řízení (většina Evropy) nebo pravostranné (Velká Británie, Irsko, Kypr, Malta)</string>
+    <string name="car_screen_size">Velikost na této obrazovce</string>
+    <string name="car_screen_size_summary">Vše větší: názvy a šipka na mapě, karty, lišta</string>
 </resources>

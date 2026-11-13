@@ -190,7 +190,7 @@ internal fun CarMapsGuide(modifier: Modifier = Modifier, pair: () -> Unit) {
                             style = MaterialTheme.typography.titleMedium)
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Button({ CarMaps.download(context, s) }) { Text(stringResource(if (s.first) R.string.car_maps_download else R.string.car_maps_update)) }
-                            if (!s.first) TextButton({ CarMaps.decline(s) }) { Text(stringResource(R.string.car_maps_not_now)) }
+                            if (!s.first) TextButton({ CarMaps.decline(s) }) { Text(stringResource(R.string.photos_not_now)) }
                         }
                     }
                     is CarMaps.State.Moving -> {
@@ -199,7 +199,7 @@ internal fun CarMapsGuide(modifier: Modifier = Modifier, pair: () -> Unit) {
                     }
                     is CarMaps.State.Failed -> {
                         Text(stringResource(R.string.car_maps_failed, s.why), color = MaterialTheme.colorScheme.error)
-                        TextButton({ CarMaps.check(context) }) { Text(stringResource(R.string.car_maps_again)) }
+                        TextButton({ CarMaps.check(context) }) { Text(stringResource(R.string.common_retry)) }
                     }
                     CarMaps.State.Checking -> Text(stringResource(R.string.car_maps_checking))
                     CarMaps.State.Idle -> if (first && storage && paired && reached) Text(stringResource(R.string.car_maps_phone_none))

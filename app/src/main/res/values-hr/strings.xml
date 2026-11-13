@@ -4827,4 +4827,24 @@
     <string name="car_map_arrow_low">Niže</string>
     <string name="car_ui_size">Sučelje</string>
     <string name="car_resolution">Razlučivost</string>
+    <string name="car_maps_title">Karte s telefona</string>
+    <string name="car_maps_update_title">Nove karte na telefonu</string>
+    <string name="car_maps_intro">Karte Tetra Cara rade izvan mreže. Jednom ih Tetra preuzme s telefona preko njegova hotspota; poslije samo ono što je novo.</string>
+    <string name="car_maps_step_storage">Dopustite Tetri da čuva karte na ovom uređaju</string>
+    <string name="car_maps_step_pair">Upari s telefonom: povežite ovaj uređaj s hotspotom telefona, zatim skenirajte kôd u Tetri na telefonu</string>
+    <string name="car_maps_offer">Na telefonu: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">novije karte</string>
+    <string name="car_maps_download">Preuzmi</string>
+    <string name="car_maps_update">Ažuriraj</string>
+    <string name="car_maps_moving">%1$d od %2$d MB…</string>
+    <string name="car_maps_failed">Karte nisu stigle: %1$s</string>
+    <string name="car_maps_checking">Pitam telefon koje karte ima…</string>
+    <string name="car_maps_phone_none">Telefon još nema karte. Napravite ih na računalu (Tetra › Karte); stignu na telefon, pa na ovaj uređaj.</string>
+    <string name="car_maps_do">Pokreni</string>
+    <string name="car_maps_no_space">Nema dovoljno mjesta na uređaju: karte trebaju %1$d MB, slobodno je %2$d MB.</string>
+    <string name="car_dock_auto">Automatski: uz vozačevu stranu na širokom zaslonu, inače uz donji rub</string>
+    <string name="car_driver">Vozačevo sjedalo</string>
+    <string name="car_driver_summary">Upravljač s lijeve strane (većina Europe) ili s desne (Velika Britanija, Irska, Cipar, Malta)</string>
+    <string name="car_screen_size">Veličina na ovom zaslonu</string>
+    <string name="car_screen_size_summary">Sve veće: nazivi i strelica na karti, kartice, dock</string>
 </resources>

@@ -4928,4 +4928,24 @@
     <string name="car_map_arrow_low">Nižje</string>
     <string name="car_ui_size">Vmesnik</string>
     <string name="car_resolution">Ločljivost</string>
+    <string name="car_maps_title">Zemljevidi iz telefona</string>
+    <string name="car_maps_update_title">Novi zemljevidi v telefonu</string>
+    <string name="car_maps_intro">Zemljevidi Tetra Car delujejo brez povezave. Enkrat jih Tetra prenese iz telefona prek njegove dostopne točke; potem le novosti.</string>
+    <string name="car_maps_step_storage">Dovoli Tetri hraniti zemljevide v tej napravi</string>
+    <string name="car_maps_step_pair">Poveži s telefonom: poveži to napravo z njegovo dostopno točko, nato skeniraj kodo s Tetro v telefonu</string>
+    <string name="car_maps_offer">V telefonu: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">novejši zemljevidi</string>
+    <string name="car_maps_download">Prenesi</string>
+    <string name="car_maps_update">Posodobi</string>
+    <string name="car_maps_moving">%1$d od %2$d MB…</string>
+    <string name="car_maps_failed">Zemljevidi niso prišli: %1$s</string>
+    <string name="car_maps_checking">Vprašam telefon, kateri zemljevidi so na njem…</string>
+    <string name="car_maps_phone_none">Telefon še nima zemljevidov. Ustvarite jih v računalniku (Tetra › Zemljevidi); pridejo v telefon in nato v to napravo.</string>
+    <string name="car_maps_do">Izvedi</string>
+    <string name="car_maps_no_space">V napravi ni dovolj prostora: zemljevidi potrebujejo %1$d MB, prostih je %2$d MB.</string>
+    <string name="car_dock_auto">Samodejno: ob voznikovi strani na širokem zaslonu, sicer ob spodnjem robu</string>
+    <string name="car_driver">Voznikov sedež</string>
+    <string name="car_driver_summary">Volan na levi (večina Evrope) ali na desni (Velika Britanija, Irska, Ciper, Malta)</string>
+    <string name="car_screen_size">Velikost na tem zaslonu</string>
+    <string name="car_screen_size_summary">Vse večje: imena in puščica na zemljevidu, kartice, dock</string>
 </resources>

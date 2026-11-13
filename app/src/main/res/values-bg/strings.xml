@@ -4726,4 +4726,24 @@
     <string name="car_map_arrow_low">Ниско</string>
     <string name="car_ui_size">Интерфейс</string>
     <string name="car_resolution">Резолюция</string>
+    <string name="car_maps_title">Карти от телефона</string>
+    <string name="car_maps_update_title">Нови карти в телефона</string>
+    <string name="car_maps_intro">Картите на Tetra Car работят без връзка. Идват веднъж от Tetra в телефона през неговата точка за достъп; после – само новото.</string>
+    <string name="car_maps_step_storage">Разрешете на Tetra да пази картите на това устройство</string>
+    <string name="car_maps_step_pair">Сдвояване с телефона: свържете устройството с неговата точка за достъп, после сканирайте кода с Tetra на телефона</string>
+    <string name="car_maps_offer">На телефона: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">по-нови карти</string>
+    <string name="car_maps_download">Изтегляне</string>
+    <string name="car_maps_update">Обновяване</string>
+    <string name="car_maps_moving">%1$d от %2$d MB…</string>
+    <string name="car_maps_failed">Картите не дойдоха: %1$s</string>
+    <string name="car_maps_checking">Питане на телефона какви карти има…</string>
+    <string name="car_maps_phone_none">На телефона още няма карти. Направете една на компютъра (Tetra › Карти); тя стига до телефона, после до това устройство.</string>
+    <string name="car_maps_do">Изпълни</string>
+    <string name="car_maps_no_space">Няма достатъчно място на устройството: картите са нужни %1$d MB, свободни са %2$d MB.</string>
+    <string name="car_dock_auto">Автоматично: от страната на шофьора при широк екран, иначе по долния край</string>
+    <string name="car_driver">Място на шофьора</string>
+    <string name="car_driver_summary">Волан отляво (по-голямата част от Европа) или отдясно (Великобритания, Ирландия, Кипър, Малта)</string>
+    <string name="car_screen_size">Размер на този екран</string>
+    <string name="car_screen_size_summary">Всичко по-голямо: имената и стрелката на картата, картите, панелът</string>
 </resources>

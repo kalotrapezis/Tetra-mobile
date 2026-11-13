@@ -4928,4 +4928,24 @@
     <string name="car_map_arrow_low">Niżej</string>
     <string name="car_ui_size">Interfejs</string>
     <string name="car_resolution">Rozdzielczość</string>
+    <string name="car_maps_title">Mapy z telefonu</string>
+    <string name="car_maps_update_title">Nowe mapy w telefonie</string>
+    <string name="car_maps_intro">Mapy Tetra Car działają offline. Raz przychodzą z telefonu do Tetra przez jego hotspot; potem już tylko to, co nowe.</string>
+    <string name="car_maps_step_storage">Zezwól Tetrze na przechowywanie map w tym urządzeniu</string>
+    <string name="car_maps_step_pair">Połącz z telefonem: podłącz to urządzenie do hotspotu telefonu, potem zeskanuj kod w Tetrze w telefonie</string>
+    <string name="car_maps_offer">W telefonie: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">nowsze mapy</string>
+    <string name="car_maps_download">Pobierz</string>
+    <string name="car_maps_update">Aktualizuj</string>
+    <string name="car_maps_moving">%1$d z %2$d MB…</string>
+    <string name="car_maps_failed">Mapy nie przyszły: %1$s</string>
+    <string name="car_maps_checking">Pytam telefon, jakie mapy ma…</string>
+    <string name="car_maps_phone_none">W telefonie nie ma jeszcze map. Utwórz je na komputerze (Tetra › Mapy); trafią do telefonu, a potem do tego urządzenia.</string>
+    <string name="car_maps_do">Wykonaj</string>
+    <string name="car_maps_no_space">Za mało miejsca w urządzeniu: mapy potrzebują %1$d MB, wolne jest %2$d MB.</string>
+    <string name="car_dock_auto">Automatycznie: z boku kierowcy przy szerokim ekranie, w przeciwnym razie wzdłuż dołu</string>
+    <string name="car_driver">Miejsce kierowcy</string>
+    <string name="car_driver_summary">Kierownica po lewej (większość Europy) lub po prawej (Wielka Brytania, Irlandia, Cypr, Malta)</string>
+    <string name="car_screen_size">Rozmiar na tym ekranie</string>
+    <string name="car_screen_size_summary">Wszystko większe: nazwy i strzałka na mapie, karty, dok</string>
 </resources>

@@ -4928,4 +4928,24 @@
     <string name="car_map_arrow_low">Aktar \'l isfel</string>
     <string name="car_ui_size">Interfaċċja</string>
     <string name="car_resolution">Riżoluzzjoni</string>
+    <string name="car_maps_title">Mapep mit-telefon</string>
+    <string name="car_maps_update_title">Mapep ġodda fuq it-telefon</string>
+    <string name="car_maps_intro">Il-mapep ta\' Tetra Car jaħdmu offline. Jiġu darba minn Tetra fuq it-telefon permezz tal-hotspot tiegħu; wara dan, biss dak il-ġdid.</string>
+    <string name="car_maps_step_storage">Agħti permess lil Tetra biex iżomm il-mapep fuq din l-unità</string>
+    <string name="car_maps_step_pair">Ikkoppja mat-telefon: qabbad din l-unità mal-hotspot tiegħu, imbagħad iskennja l-kodiċi b\'Tetra fuq it-telefon</string>
+    <string name="car_maps_offer">Fuq it-telefon: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">mapep aktar ġodda</string>
+    <string name="car_maps_download">Niżżel</string>
+    <string name="car_maps_update">Aġġorna</string>
+    <string name="car_maps_moving">%1$d minn %2$d MB…</string>
+    <string name="car_maps_failed">Il-mapep ma waslux: %1$s</string>
+    <string name="car_maps_checking">Qed nistaqsi lit-telefon liema mapep għandu…</string>
+    <string name="car_maps_phone_none">It-telefon għadu m\'għandux mapep. Oħloq waħda fuq il-kompjuter (Tetra › Mapep); tasal fit-telefon, imbagħad f\'din l-unità.</string>
+    <string name="car_maps_do">Agħmel</string>
+    <string name="car_maps_no_space">M\'hemmx biżżejjed spazju f\'din l-unità: il-mapep jeħtieġu %1$d MB, %2$d MB huma ħielsa.</string>
+    <string name="car_dock_auto">Awtomatiku: fuq naħa tas-sewwieq f\'skrin wiesa\', inkella tul it-tarf t\'isfel</string>
+    <string name="car_driver">Sit tas-sewwieq</string>
+    <string name="car_driver_summary">Sewwieq fuq ix-xellug (ħafna mill-Ewropa) jew fuq il-lemin (ir-Renju Unit, l-Irlanda, Ċipru, Malta)</string>
+    <string name="car_screen_size">Daqs fuq dan l-iskrin</string>
+    <string name="car_screen_size_summary">Kollox akbar: ismijiet u vleġġa tal-mappa, il-kards, id-dock</string>
 </resources>

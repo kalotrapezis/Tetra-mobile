@@ -4726,4 +4726,24 @@
     <string name="car_map_arrow_low">Più in basso</string>
     <string name="car_ui_size">Interfaccia</string>
     <string name="car_resolution">Risoluzione</string>
+    <string name="car_maps_title">Mappe dal telefono</string>
+    <string name="car_maps_update_title">Nuove mappe sul telefono</string>
+    <string name="car_maps_intro">Le mappe di Tetra Car funzionano offline. Arrivano una volta da Tetra sul telefono, attraverso il suo hotspot; in seguito, solo le novità.</string>
+    <string name="car_maps_step_storage">Consentire a Tetra di conservare le mappe su questa unità</string>
+    <string name="car_maps_step_pair">Abbina al telefono: collegare questa unità al suo hotspot, poi scansionare il codice con Tetra sul telefono</string>
+    <string name="car_maps_offer">Sul telefono: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">mappe più recenti</string>
+    <string name="car_maps_download">Scarica</string>
+    <string name="car_maps_update">Aggiorna</string>
+    <string name="car_maps_moving">%1$d di %2$d MB…</string>
+    <string name="car_maps_failed">Le mappe non sono arrivate: %1$s</string>
+    <string name="car_maps_checking">Chiedo al telefono quali mappe ha…</string>
+    <string name="car_maps_phone_none">Il telefono non ha ancora mappe. Crearne una sul computer (Tetra › Mappe): arriverà al telefono e poi a questa unità.</string>
+    <string name="car_maps_do">Esegui</string>
+    <string name="car_maps_no_space">Spazio insufficiente su questa unità: le mappe richiedono %1$d MB, ne sono liberi %2$d MB.</string>
+    <string name="car_dock_auto">Automatico: sul lato del guidatore con schermo largo, altrimenti lungo il bordo inferiore</string>
+    <string name="car_driver">Posto di guida</string>
+    <string name="car_driver_summary">Guida a sinistra (gran parte d\'Europa) o a destra (Regno Unito, Irlanda, Cipro, Malta)</string>
+    <string name="car_screen_size">Dimensione su questo schermo</string>
+    <string name="car_screen_size_summary">Tutto più grande: nomi e freccia della mappa, schede, dock</string>
 </resources>

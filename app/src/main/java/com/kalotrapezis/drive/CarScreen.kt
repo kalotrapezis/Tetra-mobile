@@ -770,14 +770,17 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
     }
     if (down) Column(Modifier.fillMaxHeight().width(96.dp).verticalScroll(rememberScrollState()).padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) { // scrolls only on a very short screen
-        if (layouts) strip() else { CarStatus(true, clock); recent(); layoutButton(); Column(horizontalAlignment = Alignment.CenterHorizontally) { group() } }
+        // the time on top, the apps, then the apps' menu, the mic and the layouts' switch at the bottom (the user, 13 Nov)
+        if (layouts) strip() else { CarStatus(true, clock); recent(); Column(horizontalAlignment = Alignment.CenterHorizontally) { group() }; layoutButton() }
     }
     else Row(Modifier.fillMaxWidth().height(88.dp).padding(horizontal = 8.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         if (layouts) { Spacer(Modifier.weight(1f)); strip(); Spacer(Modifier.weight(1f)); return@Row }
-        group()
+        // as down a side, left to right: the apps, the apps' menu, the mic, the layouts' switch; the time at the end
         NowPlaying(Modifier.weight(1f), media)
         recent()
-        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) { layoutButton(); CarStatus(false, clock) }
+        group()
+        layoutButton()
+        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) { CarStatus(false, clock) }
     }
 }
 

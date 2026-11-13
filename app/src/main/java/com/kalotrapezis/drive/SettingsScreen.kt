@@ -499,7 +499,7 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
         }
         // the driver's seat (left-hand or right-hand drive): where Auto puts the dock on a wide screen
         var right by remember { mutableStateOf(Car.driverRight(context)) }
-        ChoiceRow(stringResource(R.string.car_driver), stringResource(R.string.car_driver_summary), listOf(false to stringResource(R.string.car_driver_left), true to stringResource(R.string.car_driver_right)), right) {
+        ChoiceRow(stringResource(R.string.car_driver), stringResource(R.string.car_driver_summary), listOf(false to stringResource(R.string.words_left), true to stringResource(R.string.words_right)), right) {
             right = it; Car.setDriverRight(context, it)
         }
     }

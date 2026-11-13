@@ -4726,4 +4726,24 @@
     <string name="car_map_arrow_low">Lager</string>
     <string name="car_ui_size">Interface</string>
     <string name="car_resolution">Resolutie</string>
+    <string name="car_maps_title">Kaarten van de telefoon</string>
+    <string name="car_maps_update_title">Nieuwe kaarten op de telefoon</string>
+    <string name="car_maps_intro">De kaarten van Tetra Car werken offline. Ze komen één keer van Tetra op de telefoon, via de hotspot; daarna alleen wat nieuw is.</string>
+    <string name="car_maps_step_storage">Tetra toestaan de kaarten op dit toestel op te slaan</string>
+    <string name="car_maps_step_pair">Koppelen met de telefoon: verbind dit toestel met de hotspot van de telefoon en scan daarna de code met Tetra op de telefoon</string>
+    <string name="car_maps_offer">Op de telefoon: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">nieuwere kaarten</string>
+    <string name="car_maps_download">Downloaden</string>
+    <string name="car_maps_update">Bijwerken</string>
+    <string name="car_maps_moving">%1$d van %2$d MB…</string>
+    <string name="car_maps_failed">De kaarten zijn niet gekomen: %1$s</string>
+    <string name="car_maps_checking">De telefoon wordt gevraagd welke kaarten hij heeft…</string>
+    <string name="car_maps_phone_none">De telefoon heeft nog geen kaarten. Maak er een op de computer (Tetra › Kaarten); die komt op de telefoon en daarna op dit toestel.</string>
+    <string name="car_maps_do">Doen</string>
+    <string name="car_maps_no_space">Te weinig ruimte op dit toestel: de kaarten hebben %1$d MB nodig, %2$d MB is vrij.</string>
+    <string name="car_dock_auto">Automatisch: aan de kant van de bestuurder bij een breed scherm, anders langs de onderkant</string>
+    <string name="car_driver">Bestuurdersstoel</string>
+    <string name="car_driver_summary">Linkse besturing (het grootste deel van Europa) of rechtse besturing (Verenigd Koninkrijk, Ierland, Cyprus, Malta)</string>
+    <string name="car_screen_size">Grootte op dit scherm</string>
+    <string name="car_screen_size_summary">Alles groter: de namen en de pijl op de kaart, de kaarten, het dock</string>
 </resources>
