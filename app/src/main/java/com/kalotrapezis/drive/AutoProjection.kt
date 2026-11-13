@@ -256,6 +256,8 @@ internal class AutoSession(private val service: Service, private val socket: Soc
     @Volatile private var ended = false
     private var car: AutoCars.Car? = null
     private var width = 0; private var height = 0
+    /** The screen size the car asked for (its hello); the picture may be drawn smaller (Tetra Car's menu › Resolution). */
+    @Volatile var asked = 1024 to 600
     private var encoder: MediaCodec? = null
     private var display: VirtualDisplay? = null
     private var presentation: Presentation? = null
@@ -279,7 +281,9 @@ internal class AutoSession(private val service: Service, private val socket: Soc
             AutoProjection.session?.takeIf { it !== this }?.end()
             AutoProjection.session = this
             send(AutoWire.WELCOME, JSONObject().put("name", "${Build.MANUFACTURER} ${Build.MODEL}").apply { if (admitted.second) put("token", admitted.first.token) }.toString().toByteArray())
-            width = hello.optInt("width", 1024).coerceIn(320, 2560) and 1.inv(); height = hello.optInt("height", 600).coerceIn(240, 1600) and 1.inv()
+            asked = hello.optInt("width", 1024).coerceIn(320, 2560) to hello.optInt("height", 600).coerceIn(240, 1600)
+            val r = Car.view(service).res // Tetra Car's menu › Resolution: smaller, so all is bigger and sharper on the car
+            width = (asked.first * r).toInt().coerceAtLeast(320) and 1.inv(); height = (asked.second * r).toInt().coerceAtLeast(240) and 1.inv()
             WriterLog.i("Tetra Auto: ${admitted.first.name} connected, ${width}x$height at ${hello.optInt("dpi")} dpi, ${link()}")
             shown(admitted.first.name)
             hold(true)

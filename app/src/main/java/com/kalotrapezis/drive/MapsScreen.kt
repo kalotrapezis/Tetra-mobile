@@ -403,6 +403,8 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
     var fast by remember { mutableStateOf(0) } // fixes in a row at car speed
     var touchedAt by remember { mutableStateOf(0L) } // a finger last moved the map
     var loose by remember { mutableStateOf(false) } // directions running, the camera off me (logged once)
+    val onCar = LocalOnCar.current
+    val carView = if (onCar) Car.view(context) else null // Tetra Car's menu: the driving camera's zoom, tilt and where the arrow sits
     val tts = remember { mutableStateOf<TextToSpeech?>(null) }
     val duck = remember { MapsDuck(context) }
     DisposableEffect(Unit) {
@@ -451,8 +453,16 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         mapRef?.moveCamera(org.maplibre.android.camera.CameraUpdateFactory.paddingTo(0.0, 0.0, 0.0, 0.0)) // me in the middle again
     }
 
-    /** The camera's padding for [tilt]: tilted further at speed, the car lower on the screen (up to 70 % down), the road ahead above it. */
-    fun ahead(tilt: Double) = doubleArrayOf(0.0, context.resources.displayMetrics.heightPixels * 0.4 * ((tilt - 45) / 15).coerceIn(0.0, 1.0), 0.0, 0.0)
+    /**
+     * The camera's padding for [tilt]: tilted further at speed, the car lower on the screen (up to 70 % down), the road ahead above
+     * it. In Tetra Car with the arrow low (its menu) always low, 65 % down, 75 % at the most tilt, as Google Maps keeps it.
+     */
+    fun ahead(tilt: Double, car: Boolean = false): DoubleArray {
+        val f = ((tilt - 45) / 15).coerceIn(0.0, 1.0)
+        return doubleArrayOf(0.0, context.resources.displayMetrics.heightPixels * (if (car && carView?.low == true) 0.3 + 0.2 * f else 0.4 * f), 0.0, 0.0)
+    }
+    /** The driving camera's zoom and tilt for [v], as Tetra Car's menu sets them (elsewhere [v] itself). */
+    fun cam(v: Pair<Double, Double>) = carView?.camera(v) ?: v
 
     /** The camera on me, turned the way I go; zoom and tilt through the tracking itself (a camera move of ours would end it). */
     fun follow(mode: String) {
@@ -460,8 +470,8 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         lc.renderMode = RenderMode.GPS
         lc.setCameraMode(CameraMode.TRACKING_GPS, object : org.maplibre.android.location.OnLocationCameraTransitionListener {
             override fun onLocationCameraTransitionFinished(cameraMode: Int) {
-                val (z, t) = if (mode == "car") view else 17.5 to 0.0
-                lc.zoomWhileTracking(z); lc.tiltWhileTracking(t); lc.paddingWhileTracking(if (mode == "car") ahead(t) else ahead(0.0))
+                val (z, t) = if (mode == "car") cam(view) else 17.5 to 0.0
+                lc.zoomWhileTracking(z); lc.tiltWhileTracking(t); lc.paddingWhileTracking(if (mode == "car") ahead(t, true) else ahead(0.0))
             }
             override fun onLocationCameraTransitionCanceled(cameraMode: Int) = Unit
         })
@@ -552,6 +562,10 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                 nextStop = null; MapsPrefs.setPendingTrip(context, null); startNav(ns, "car", loc)
             }
         }
+        // in Tetra Car, driving without directions: the camera on me and turned the way I go, as Google Maps does (the user, 13 Nov),
+        // unless the map was touched in the last 15 s or something is open on it
+        if (onCar && nav == null && loc.hasSpeed() && loc.speed > 3f && tab == null && selected == null && preview == null && System.currentTimeMillis() - touchedAt > 15_000)
+            mapRef?.locationComponent?.takeIf { it.isLocationComponentActivated && it.cameraMode != CameraMode.TRACKING_GPS }?.let { WriterLog.i("Maps: driving, the camera on me (Tetra Car)"); follow("car") }
         val n = nav ?: return
         val car = n.mode == "car"
         val speedMs = if (loc.hasSpeed()) loc.speed.toDouble() else 0.0
@@ -595,7 +609,8 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         if (car && g.view != view) {
             view = g.view
             WriterLog.i("Maps: camera zoom ${view.first} tilt ${view.second.toInt()} (step ${p.next} ${p.toNext.toInt()} m ahead, ${Math.round(speedMs * 3.6)} km/h)")
-            lc?.takeIf { it.cameraMode == CameraMode.TRACKING_GPS }?.let { it.zoomWhileTracking(view.first, 1500); it.tiltWhileTracking(view.second, 1500); it.paddingWhileTracking(ahead(view.second), 1500) }
+            val (z, t) = cam(view)
+            lc?.takeIf { it.cameraMode == CameraMode.TRACKING_GPS }?.let { it.zoomWhileTracking(z, 1500); it.tiltWhileTracking(t, 1500); it.paddingWhileTracking(ahead(t, true), 1500) }
         }
         g.words(words, car)?.let { say(it, why = g.why()) }
         g.bend?.let { b -> say(MapsPrefs.bendWords(words, n.bends[b].right), why = "bend ${(n.bends[b].along - p.along).toInt()} m ahead, ${Math.round(speedMs * 3.6)} km/h") }
@@ -663,9 +678,11 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         navResults = withContext(Dispatchers.Default) { MapsSearch.search(all, navQuery, center.latitude, center.longitude) }
     }
 
-    val mapView = remember {
+    // the map's own pixel ratio: the screen's, or Tetra Car's map size (its menu); a new map when that changes, drawn again by the effects on mapRef
+    val ratio = androidx.compose.ui.platform.LocalDensity.current.density
+    val mapView = remember(ratio) {
         MapLibre.getInstance(context)
-        MapView(context).apply { onCreate(Bundle()) }
+        MapView(context, org.maplibre.android.maps.MapLibreMapOptions.createFromAttributes(context).pixelRatio(ratio)).apply { onCreate(Bundle()) }
     }
     DisposableEffect(mapView, lifecycle) {
         if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) mapView.onStart()
@@ -678,7 +695,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
             else -> Unit
         } }
         lifecycle.addObserver(observer)
-        onDispose { lifecycle.removeObserver(observer); mapView.onStop(); mapView.onDestroy() }
+        onDispose { lifecycle.removeObserver(observer); mapRef = null; mapView.onStop(); mapView.onDestroy() }
     }
     LaunchedEffect(mapView) {
         if (!mapFile.isFile) return@LaunchedEffect
@@ -787,7 +804,6 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         }
     }
     // the location dot, once the map and the permission are there
-    val onCar = LocalOnCar.current
     LaunchedEffect(mapRef, granted) {
         val map = mapRef ?: return@LaunchedEffect
         val style = map.style ?: return@LaunchedEffect
@@ -797,6 +813,13 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         map.locationComponent.isLocationComponentEnabled = true
         map.locationComponent.renderMode = RenderMode.COMPASS
         here?.let { map.locationComponent.forceLocationUpdate(it) }
+        nav?.let { follow(it.mode) } // a new map (Tetra Car's map size changed) mid-route: on me again
+    }
+    // Tetra Car's menu changed the camera: at once, while it follows me
+    LaunchedEffect(carView) {
+        if (nav.let { it != null && it.mode != "car" }) return@LaunchedEffect
+        val lc = mapRef?.locationComponent?.takeIf { it.isLocationComponentActivated && it.cameraMode == CameraMode.TRACKING_GPS } ?: return@LaunchedEffect
+        val (z, t) = cam(view); lc.zoomWhileTracking(z, 800); lc.tiltWhileTracking(t, 800); lc.paddingWhileTracking(ahead(t, true), 800)
     }
     // the added ones, but not where one of my places stands on it (the five work schools are both); again when one is added
     LaunchedEffect(mapRef, places, added) {
@@ -907,7 +930,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
     }
 
     Box(Modifier.fillMaxSize()) {
-        if (mapFile.isFile) AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize())
+        if (mapFile.isFile) androidx.compose.runtime.key(mapView) { AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize()) } // a new map, a new view
         else Column(Modifier.align(Alignment.Center).padding(32.dp).widthIn(max = 480.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Icon(painterResource(R.drawable.ic_map), contentDescription = null, tint = MAPS_COLOR, modifier = Modifier.size(48.dp))
             // on the car's screen one line (the user, 10 Nov: "it should just say no maps on the phone, please download a map first")

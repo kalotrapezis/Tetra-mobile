@@ -4716,4 +4716,14 @@
     <string name="brief_place_phone">където е телефонът</string>
     <string name="brief_place_not_found">Няма такова място.</string>
     <string name="brief_place_use_phone">Където е телефонът</string>
+    <string name="car_map_view">Изглед на картата</string>
+    <string name="car_map_size">Размер</string>
+    <string name="car_map_zoom">Мащаб</string>
+    <string name="car_map_tilt">Наклон</string>
+    <string name="car_map_tilt_auto">По скорост</string>
+    <string name="car_map_arrow">Стрелка</string>
+    <string name="car_map_arrow_middle">В средата</string>
+    <string name="car_map_arrow_low">Ниско</string>
+    <string name="car_ui_size">Интерфейс</string>
+    <string name="car_resolution">Резолюция</string>
 </resources>

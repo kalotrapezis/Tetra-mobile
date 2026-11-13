@@ -4918,4 +4918,14 @@
     <string name="brief_place_phone">fejn hu t-telefon</string>
     <string name="brief_place_not_found">Ma nstabx post bħal dan.</string>
     <string name="brief_place_use_phone">Fejn hu t-telefon</string>
+    <string name="car_map_view">Veduta tal-mappa</string>
+    <string name="car_map_size">Daqs</string>
+    <string name="car_map_zoom">Żum</string>
+    <string name="car_map_tilt">Inklinazzjoni</string>
+    <string name="car_map_tilt_auto">Skont il-veloċità</string>
+    <string name="car_map_arrow">Vleġġa</string>
+    <string name="car_map_arrow_middle">Fin-nofs</string>
+    <string name="car_map_arrow_low">Aktar \'l isfel</string>
+    <string name="car_ui_size">Interfaċċja</string>
+    <string name="car_resolution">Riżoluzzjoni</string>
 </resources>

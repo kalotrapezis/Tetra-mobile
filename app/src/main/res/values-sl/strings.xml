@@ -4918,4 +4918,14 @@
     <string name="brief_place_phone">kjer je telefon</string>
     <string name="brief_place_not_found">Takega kraja ni.</string>
     <string name="brief_place_use_phone">Kjer je telefon</string>
+    <string name="car_map_view">Pogled zemljevida</string>
+    <string name="car_map_size">Velikost</string>
+    <string name="car_map_zoom">Povečava</string>
+    <string name="car_map_tilt">Nagib</string>
+    <string name="car_map_tilt_auto">Glede na hitrost</string>
+    <string name="car_map_arrow">Puščica</string>
+    <string name="car_map_arrow_middle">Na sredini</string>
+    <string name="car_map_arrow_low">Nižje</string>
+    <string name="car_ui_size">Vmesnik</string>
+    <string name="car_resolution">Ločljivost</string>
 </resources>

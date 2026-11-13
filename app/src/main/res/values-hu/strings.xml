@@ -4716,4 +4716,14 @@
     <string name="brief_place_phone">ahol a telefon van</string>
     <string name="brief_place_not_found">Nincs ilyen hely.</string>
     <string name="brief_place_use_phone">Ahol a telefon van</string>
+    <string name="car_map_view">Térképnézet</string>
+    <string name="car_map_size">Méret</string>
+    <string name="car_map_zoom">Nagyítás</string>
+    <string name="car_map_tilt">Dőlés</string>
+    <string name="car_map_tilt_auto">Sebesség szerint</string>
+    <string name="car_map_arrow">Nyíl</string>
+    <string name="car_map_arrow_middle">Középen</string>
+    <string name="car_map_arrow_low">Lejjebb</string>
+    <string name="car_ui_size">Felület</string>
+    <string name="car_resolution">Felbontás</string>
 </resources>

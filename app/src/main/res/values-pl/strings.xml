@@ -4918,4 +4918,14 @@
     <string name="brief_place_phone">tam, gdzie jest telefon</string>
     <string name="brief_place_not_found">Nie znaleziono takiego miejsca.</string>
     <string name="brief_place_use_phone">Tam, gdzie jest telefon</string>
+    <string name="car_map_view">Widok mapy</string>
+    <string name="car_map_size">Rozmiar</string>
+    <string name="car_map_zoom">Powiększenie</string>
+    <string name="car_map_tilt">Nachylenie</string>
+    <string name="car_map_tilt_auto">Według prędkości</string>
+    <string name="car_map_arrow">Strzałka</string>
+    <string name="car_map_arrow_middle">Na środku</string>
+    <string name="car_map_arrow_low">Niżej</string>
+    <string name="car_ui_size">Interfejs</string>
+    <string name="car_resolution">Rozdzielczość</string>
 </resources>

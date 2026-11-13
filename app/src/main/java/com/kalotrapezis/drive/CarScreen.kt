@@ -16,6 +16,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.background
@@ -74,10 +78,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
@@ -156,12 +162,98 @@ private fun CarPlaces(go: (Place) -> Unit, close: () -> Unit) {
     }
 }
 
-/** The time, for the dock down a side (the user, 10 Nov: "the player buttons at the top I don't like, just the time there"). */
+/**
+ * Tetra Car's sizes and Maps' camera there (the user, 13 Nov: "everything when it comes to maps is small … the view more like
+ * Google Maps … tilt or zoom level can be part of a settings page … UI scaling as well 100% 150% 200%"). The car asks for
+ * 1280×720 at 160 dpi and its panel shows that on 1024×600, seen from the seat: [map] ×2 looks as big as the phone in the hand.
+ * [ui] Tetra Car's own screens; [map] Maps' map and buttons, instead of [ui]; [zoom] added to the camera's zoom while driving;
+ * [tilt] fixed degrees, -1 the camera's own (45° rising to 60° with speed); [low] the arrow low on the screen, the road ahead above it;
+ * [res] the picture drawn at that part of the size the car asks for, its shape kept (0.8: 1024×576 for its 1280×720, the panel's 1024 wide), so all is bigger and sharper.
+ */
+internal data class CarView(val ui: Float, val map: Float, val zoom: Float, val tilt: Int, val low: Boolean, val res: Float = 1f) {
+    /** A driving camera's zoom and tilt, as chosen here. */
+    fun camera(v: Pair<Double, Double>) = (v.first + zoom).coerceIn(5.0, 19.0) to (if (tilt >= 0) tilt.toDouble() else v.second)
+    companion object {
+        val PHONE = CarView(1f, 1f, 0f, -1, false)
+        val UI = listOf(1f, 1.25f, 1.5f, 1.75f, 2f) // 25% steps (the user, 13 Nov)
+        val MAP = listOf(1f, 1.25f, 1.5f, 1.75f, 2f, 2.25f, 2.5f, 2.75f, 3f)
+        val ZOOM = listOf(-1f, -0.5f, 0f, 0.5f, 1f)
+        val TILT = listOf(-1, 0, 30, 45, 60)
+        val RES = listOf(1f, 0.8f, 2f / 3)
+    }
+}
+
+/**
+ * The car's menu (the dock's ☰; the user, 13 Nov: "a settings app, the phone, the messages and whatever else is not on the dock"):
+ * a tile for each, [open] puts a page in the panes; Settings slides to Tetra Car's sizes and how Maps looks at the road, each a
+ * row of choices changed at once, with its way back.
+ */
 @Composable
-private fun CarClock(modifier: Modifier = Modifier) {
+private fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, close: () -> Unit) {
+    val context = LocalContext.current
+    val v = Car.view(context)
+    var settings by remember { mutableStateOf(false) }
+    fun pct(f: Float) = "${(f * 100).toInt()} %"
+    @Composable fun <T> row(label: Int, options: List<T>, chosen: T, name: @Composable (T) -> String, pick: (T) -> Unit) {
+        Text(stringResource(label), Modifier.padding(top = 12.dp, bottom = 4.dp), style = MaterialTheme.typography.titleMedium)
+        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            options.forEach { o -> FilterChip(o == chosen, { pick(o) }, { Text(name(o), style = MaterialTheme.typography.titleMedium) }) }
+        }
+    }
+    // an icon and its name, four to a row, as Android Auto's launcher, in Tetra's rounded squares (the user, 13 Nov)
+    @Composable fun tile(label: Int, tap: () -> Unit, modifier: Modifier, art: @Composable () -> Unit) {
+        Column(modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = tap).padding(vertical = 14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(Modifier.size(72.dp).clip(RoundedCornerShape(18.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest), contentAlignment = Alignment.Center) { art() } // Tetra's rounded squares
+            Text(stringResource(label), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+    @Composable fun icon(icon: Int, color: Color) = Box(Modifier.size(72.dp).background(color), contentAlignment = Alignment.Center) {
+        Icon(painterResource(icon), null, Modifier.size(36.dp), tint = Color.White)
+    }
+    BackHandler { if (settings) settings = false else close() }
+    if (!settings) Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).clickable(remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, null) {}
+        .verticalScroll(rememberScrollState()).padding(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.weight(1f))
+            IconButton(close) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_close)) }
+        }
+        androidx.compose.foundation.layout.FlowRow(maxItemsInEachRow = 4) {
+            val w = Modifier.weight(1f)
+            listOf(CarApp.Maps to (R.drawable.maps_art to R.string.app_maps), CarApp.Phone to (R.drawable.phone_art to R.string.app_phone),
+                CarApp.Messages to (R.drawable.sms_art to R.string.app_sms), CarApp.Browser to (R.drawable.browser_art to R.string.app_browser)).forEach { (app, look) ->
+                tile(look.second, { close(); open(app) }, w) { Image(painterResource(look.first), null, Modifier.size(72.dp)) }
+            }
+            tile(R.string.car_media, { close(); media() }, w) { icon(R.drawable.ic_play, Color(0xFFE53935)) }
+            tile(R.string.auto_share, { close(); AutoProjection.session?.openShare() }, w) { icon(R.drawable.ic_share, MaterialTheme.colorScheme.secondary) }
+            tile(R.string.common_settings, { settings = true }, w) { icon(R.drawable.ic_settings, Color(0xFF1A73E8)) }
+            Spacer(w) // the last row's empty place, so its tiles keep their width
+        }
+    }
+    else Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)).clickable { settings = false }, contentAlignment = Alignment.Center) {
+        Column(Modifier.padding(16.dp).widthIn(max = 600.dp).clip(RoundedCornerShape(24.dp)).background(MaterialTheme.colorScheme.surface)
+            .clickable(remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, null) {}.verticalScroll(rememberScrollState()).padding(20.dp)) { // a tap on the card stays on it
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton({ settings = false }) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
+                Text(stringResource(R.string.car_map_view), Modifier.weight(1f), style = MaterialTheme.typography.headlineSmall)
+                IconButton(close) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_close)) }
+            }
+                row(R.string.car_map_size, CarView.MAP, v.map, { pct(it) }) { Car.setView(context, v.copy(map = it)) }
+                row(R.string.car_map_zoom, CarView.ZOOM, v.zoom, { if (it == 0f) "0" else "%+.1f".format(it) }) { Car.setView(context, v.copy(zoom = it)) }
+                row(R.string.car_map_tilt, CarView.TILT, v.tilt, { if (it < 0) stringResource(R.string.car_map_tilt_auto) else "$it°" }) { Car.setView(context, v.copy(tilt = it)) }
+                row(R.string.car_map_arrow, listOf(false, true), v.low, { stringResource(if (it) R.string.car_map_arrow_low else R.string.car_map_arrow_middle) }) { Car.setView(context, v.copy(low = it)) }
+                row(R.string.car_ui_size, CarView.UI, v.ui, { pct(it) }) { Car.setView(context, v.copy(ui = it)) }
+                val asked = AutoProjection.session?.asked
+                row(R.string.car_resolution, CarView.RES, v.res, { r -> asked?.let { (w, h) -> "${(w * r).toInt() and 1.inv()}×${(h * r).toInt() and 1.inv()}" } ?: pct(r) }) { Car.setView(context, v.copy(res = it)) }
+        }
+    }
+}
+
+/** The time, for the dock down a side (the user, 10 Nov: "the player buttons at the top I don't like, just the time there"); a tap shows the recent messages (13 Nov). */
+@Composable
+private fun CarClock(modifier: Modifier = Modifier, tap: () -> Unit = {}) {
     val context = LocalContext.current
     val now by produceState(System.currentTimeMillis()) { while (true) { value = System.currentTimeMillis(); delay(60_000 - value % 60_000) } }
-    Text(android.text.format.DateFormat.getTimeFormat(context).format(java.util.Date(now)), modifier, fontSize = 22.sp, maxLines = 1)
+    Text(android.text.format.DateFormat.getTimeFormat(context).format(java.util.Date(now)), modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = tap).padding(6.dp), fontSize = 22.sp, maxLines = 1)
 }
 
 /**
@@ -192,6 +284,19 @@ internal object Car {
     /** Where Tetra Car's dock sits (Settings › Tetra Car, radio buttons): one state, so an open Tetra Car follows a change at once. */
     fun side(c: Context): DockSide = dock.value ?: runCatching { DockSide.valueOf(prefs(c).getString("dock", null)!!) }.getOrDefault(DockSide.Bottom).also { dock.value = it }
     fun setSide(c: Context, d: DockSide) { dock.value = d; prefs(c).edit().putString("dock", d.name).apply() }
+    private val viewState = mutableStateOf<CarView?>(null)
+    /** Tetra Car's sizes and Maps' camera (the car's menu): one state, so the screen and the map follow a change at once. */
+    fun view(c: Context): CarView = viewState.value ?: prefs(c).let { p ->
+        CarView(p.getFloat("ui_scale", 1f), p.getFloat("map_scale", 2f), p.getFloat("map_zoom", 0f), p.getInt("map_tilt", -1), p.getBoolean("map_low", true), p.getFloat("resolution", 1f))
+    }.also { viewState.value = it }
+    fun setView(c: Context, v: CarView) {
+        val old = viewState.value
+        viewState.value = v
+        prefs(c).edit().putFloat("ui_scale", v.ui).putFloat("map_scale", v.map).putFloat("map_zoom", v.zoom).putInt("map_tilt", v.tilt).putBoolean("map_low", v.low).putFloat("resolution", v.res).apply()
+        WriterLog.i("Car: view $v")
+        // another resolution: the car's picture again at that size (the car joins again by itself)
+        if (old != null && old.res != v.res) AutoProjection.session?.end()
+    }
     fun answers(c: Context) = prefs(c).getBoolean("answer_calls", true)
     fun set(c: Context, read: Boolean?, answer: Boolean?) = prefs(c).edit().apply { read?.let { putBoolean("read_sms", it) }; answer?.let { putBoolean("answer_calls", it) } }.apply()
 
@@ -423,6 +528,12 @@ internal fun CarScreen(projected: Boolean = false) {
         }
         WriterLog.i("Car: Media${if (tiles) " (tiles)" else ""}")
     }
+    fun openApp(app: CarApp) {
+        expose = null
+        // Maps again while the map is in the big pane: the saved places (the user, 10 Nov: "the home faves in the car as a page with bubbles")
+        if (app == CarApp.Maps && state.panes[0] == CarApp.Maps) places = !places
+        else { set(state.put(app)); if (app == CarApp.Browser) tiles = false }
+    }
     // expose's choice in pane [i]; null: AI Assist, whose TV then takes that pane while it works. Done once every pane has chosen.
     fun pick(i: Int, app: CarApp?) {
         if (app == null) { set(state.focused(i)); expose = null; Car.assist?.invoke() ?: carListen(context); return }
@@ -431,6 +542,10 @@ internal fun CarScreen(projected: Boolean = false) {
         expose = (expose.orEmpty() + i).takeIf { it.size < shownState.panes.size }
         WriterLog.i("Car: expose put $app in pane $i")
     }
+    val base = LocalDensity.current
+    val view = if (projected) Car.view(context) else CarView.PHONE // the sizes are the car's screen's; Tetra Car on the phone stays as drawn
+    var viewPage by remember { mutableStateOf(false) } // the car's menu
+    CompositionLocalProvider(LocalDensity provides Density(base.density * view.ui, base.fontScale)) { // Tetra Car's interface size
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding()) {
         // one layout for both children whichever side the dock is on: the pages are never put elsewhere in the tree (the route, the sound go on)
         Layout(modifier = Modifier.fillMaxSize(), content = {
@@ -442,7 +557,9 @@ internal fun CarScreen(projected: Boolean = false) {
                 CompositionLocalProvider(LocalOnBackPressedDispatcherOwner provides backs.getValue(app)) {
                     when (app) {
                         CarApp.Maps -> Box(Modifier.fillMaxSize()) {
-                            MapsScreen(MapsFiles.root(driveRoot()), mapsGo, back = {}, search = mapsSearch)
+                            CompositionLocalProvider(LocalDensity provides Density(base.density * view.map, base.fontScale)) { // Maps' own size, instead of the interface's
+                                PaneSized { MapsScreen(MapsFiles.root(driveRoot()), mapsGo, back = {}, search = mapsSearch) } // its pane's size in its own dp
+                            }
                             if (places) CarPlaces(go = { p -> mapsGo = p.copy(id = "ask-${System.nanoTime()}"); places = false; WriterLog.i("Car: to a saved place") }, close = { places = false })
                         }
                         CarApp.Browser -> Box(Modifier.fillMaxSize()) {
@@ -463,12 +580,8 @@ internal fun CarScreen(projected: Boolean = false) {
             }
             CarDock(state, side, layouts, setLayouts = { layouts = it; expose = null }, layout = { set(state.laid(it)) },
                 expose = { expose = if (expose == null) emptySet() else null; layouts = false },
-                open = { app ->
-                    expose = null
-                    // Maps again while the map is in the big pane: the saved places (the user, 10 Nov: "the home faves in the car as a page with bubbles")
-                    if (app == CarApp.Maps && state.panes[0] == CarApp.Maps) places = !places
-                    else { set(state.put(app)); if (app == CarApp.Browser) tiles = false }
-                }, media = ::media, apps = { apps = true }, mic = ::mic, projected = projected)
+                open = ::openApp, media = ::media, apps = { apps = true }, mic = ::mic,
+                clock = { set(state.beside(CarApp.Messages)); WriterLog.i("Car: the clock › messages") }, menu = { viewPage = true }, projected = projected)
         }) { (panes, dock), c ->
             val d = dock.measure(if (side == DockSide.Bottom) c.copy(minHeight = 0) else c.copy(minWidth = 0))
             val w = if (side == DockSide.Bottom) c.maxWidth else c.maxWidth - d.width
@@ -483,6 +596,8 @@ internal fun CarScreen(projected: Boolean = false) {
             }
         }
         if (apps) CarApps { apps = false }
+        if (viewPage) CarViewPage(::openApp, ::media) { viewPage = false }
+    }
     }
 }
 
@@ -521,7 +636,7 @@ private fun CarPanes(state: CarState, opened: List<CarApp>, coverAt: Int?, cover
 
 @Composable
 private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayouts: (Boolean) -> Unit, layout: (CarLayout) -> Unit, expose: () -> Unit,
-                    open: (CarApp) -> Unit, media: () -> Unit, apps: () -> Unit, mic: (live: Boolean) -> Unit, projected: Boolean = false) {
+                    open: (CarApp) -> Unit, media: () -> Unit, apps: () -> Unit, mic: (live: Boolean) -> Unit, clock: () -> Unit = {}, menu: () -> Unit = {}, projected: Boolean = false) {
     val context = LocalContext.current
     val down = side != DockSide.Bottom // down a side: icons without their names, so it fits a short screen
     val strip: @Composable () -> Unit = { // the layouts' strip, with its way back (the user's sliding strips)
@@ -544,7 +659,8 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
         if (!down || CarApp.Messages in state.panes) DockApp(R.drawable.sms_art, R.string.app_sms, CarApp.Messages in state.panes, down) { open(CarApp.Messages) }
         if (!down || CarApp.Browser in state.panes) DockApp(R.drawable.browser_art, R.string.app_browser, CarApp.Browser in state.panes, down) { open(CarApp.Browser) }
         // on the car's screen the phone's other apps would open on the phone: the car's own Share instead (the user, 10 Nov)
-        if (projected) DockIcon(R.drawable.ic_share, R.string.auto_share, MaterialTheme.colorScheme.secondary, down) { AutoProjection.session?.openShare() }
+        // the car's menu (the user, 13 Nov: "make the share icon a menu icon and put all the rest there"): Share, and the map's sizes and camera
+        if (projected) DockIcon(R.drawable.ic_menu, R.string.common_more, MaterialTheme.colorScheme.secondary, down, menu)
         else DockIcon(R.drawable.ic_view_grid, R.string.car_apps, MaterialTheme.colorScheme.secondary, down, apps)
     }
     val layoutButton: @Composable () -> Unit = { // a tap: expose, a page to choose in every pane; held: the layouts' strip
@@ -553,7 +669,7 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
     }
     if (down) Column(Modifier.fillMaxHeight().width(96.dp).verticalScroll(rememberScrollState()).padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) { // scrolls only on a very short screen
-        if (layouts) strip() else { CarClock(); buttons(); layoutButton() }
+        if (layouts) strip() else { CarClock(tap = clock); buttons(); layoutButton() }
     }
     else Row(Modifier.fillMaxWidth().height(88.dp).padding(horizontal = 8.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         if (layouts) { Spacer(Modifier.weight(1f)); strip(); Spacer(Modifier.weight(1f)); return@Row }

@@ -4817,4 +4817,14 @@
     <string name="brief_place_phone">gdje je telefon</string>
     <string name="brief_place_not_found">Takvo mjesto nije pronađeno.</string>
     <string name="brief_place_use_phone">Gdje je telefon</string>
+    <string name="car_map_view">Prikaz karte</string>
+    <string name="car_map_size">Veličina</string>
+    <string name="car_map_zoom">Zum</string>
+    <string name="car_map_tilt">Nagib</string>
+    <string name="car_map_tilt_auto">Prema brzini</string>
+    <string name="car_map_arrow">Strelica</string>
+    <string name="car_map_arrow_middle">U sredini</string>
+    <string name="car_map_arrow_low">Niže</string>
+    <string name="car_ui_size">Sučelje</string>
+    <string name="car_resolution">Razlučivost</string>
 </resources>

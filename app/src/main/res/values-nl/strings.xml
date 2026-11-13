@@ -4716,4 +4716,14 @@
     <string name="brief_place_phone">waar de telefoon is</string>
     <string name="brief_place_not_found">Zo\'n plaats niet gevonden.</string>
     <string name="brief_place_use_phone">Waar de telefoon is</string>
+    <string name="car_map_view">Kaartweergave</string>
+    <string name="car_map_size">Grootte</string>
+    <string name="car_map_zoom">Zoom</string>
+    <string name="car_map_tilt">Kanteling</string>
+    <string name="car_map_tilt_auto">Naar snelheid</string>
+    <string name="car_map_arrow">Pijl</string>
+    <string name="car_map_arrow_middle">In het midden</string>
+    <string name="car_map_arrow_low">Lager</string>
+    <string name="car_ui_size">Interface</string>
+    <string name="car_resolution">Resolutie</string>
 </resources>

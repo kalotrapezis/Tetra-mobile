@@ -4717,4 +4717,14 @@
     <string name="brief_place_phone">where the phone is</string>
     <string name="brief_place_not_found">No such place found.</string>
     <string name="brief_place_use_phone">Use where the phone is</string>
+    <string name="car_map_view">Map view</string>
+    <string name="car_map_size">Size</string>
+    <string name="car_map_zoom">Zoom</string>
+    <string name="car_map_tilt">Tilt</string>
+    <string name="car_map_tilt_auto">By speed</string>
+    <string name="car_map_arrow">Arrow</string>
+    <string name="car_map_arrow_middle">Middle</string>
+    <string name="car_map_arrow_low">Lower</string>
+    <string name="car_ui_size">Interface</string>
+    <string name="car_resolution">Resolution</string>
 </resources>

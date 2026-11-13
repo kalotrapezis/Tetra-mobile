@@ -4716,4 +4716,14 @@
     <string name="brief_place_phone">missä puhelin on</string>
     <string name="brief_place_not_found">Paikkaa ei löytynyt.</string>
     <string name="brief_place_use_phone">Missä puhelin on</string>
+    <string name="car_map_view">Karttanäkymä</string>
+    <string name="car_map_size">Koko</string>
+    <string name="car_map_zoom">Zoomaus</string>
+    <string name="car_map_tilt">Kallistus</string>
+    <string name="car_map_tilt_auto">Nopeuden mukaan</string>
+    <string name="car_map_arrow">Nuoli</string>
+    <string name="car_map_arrow_middle">Keskellä</string>
+    <string name="car_map_arrow_low">Alempana</string>
+    <string name="car_ui_size">Käyttöliittymä</string>
+    <string name="car_resolution">Tarkkuus</string>
 </resources>

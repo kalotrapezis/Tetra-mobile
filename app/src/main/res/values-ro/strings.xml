@@ -4817,4 +4817,14 @@
     <string name="brief_place_phone">unde este telefonul</string>
     <string name="brief_place_not_found">Niciun loc găsit.</string>
     <string name="brief_place_use_phone">Unde este telefonul</string>
+    <string name="car_map_view">Vizualizare hartă</string>
+    <string name="car_map_size">Mărime</string>
+    <string name="car_map_zoom">Zoom</string>
+    <string name="car_map_tilt">Înclinare</string>
+    <string name="car_map_tilt_auto">După viteză</string>
+    <string name="car_map_arrow">Săgeată</string>
+    <string name="car_map_arrow_middle">La mijloc</string>
+    <string name="car_map_arrow_low">Mai jos</string>
+    <string name="car_ui_size">Interfață</string>
+    <string name="car_resolution">Rezoluție</string>
 </resources>

@@ -4817,4 +4817,14 @@
     <string name="brief_place_phone">là où est le téléphone</string>
     <string name="brief_place_not_found">Aucun lieu de ce nom.</string>
     <string name="brief_place_use_phone">Là où est le téléphone</string>
+    <string name="car_map_view">Vue de la carte</string>
+    <string name="car_map_size">Taille</string>
+    <string name="car_map_zoom">Zoom</string>
+    <string name="car_map_tilt">Inclinaison</string>
+    <string name="car_map_tilt_auto">Selon la vitesse</string>
+    <string name="car_map_arrow">Flèche</string>
+    <string name="car_map_arrow_middle">Au milieu</string>
+    <string name="car_map_arrow_low">Plus bas</string>
+    <string name="car_ui_size">Interface</string>
+    <string name="car_resolution">Résolution</string>
 </resources>

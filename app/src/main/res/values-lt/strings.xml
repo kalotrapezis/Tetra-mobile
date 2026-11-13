@@ -4918,4 +4918,14 @@
     <string name="brief_place_phone">ten, kur yra telefonas</string>
     <string name="brief_place_not_found">Tokia vieta nerasta.</string>
     <string name="brief_place_use_phone">Ten, kur yra telefonas</string>
+    <string name="car_map_view">Žemėlapio vaizdas</string>
+    <string name="car_map_size">Dydis</string>
+    <string name="car_map_zoom">Mastelis</string>
+    <string name="car_map_tilt">Pokrypis</string>
+    <string name="car_map_tilt_auto">Pagal greitį</string>
+    <string name="car_map_arrow">Rodyklė</string>
+    <string name="car_map_arrow_middle">Viduryje</string>
+    <string name="car_map_arrow_low">Žemiau</string>
+    <string name="car_ui_size">Sąsaja</string>
+    <string name="car_resolution">Skyra</string>
 </resources>

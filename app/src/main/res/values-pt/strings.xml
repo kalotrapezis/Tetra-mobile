@@ -4817,4 +4817,14 @@
     <string name="brief_place_phone">onde está o telemóvel</string>
     <string name="brief_place_not_found">Não foi encontrado esse local.</string>
     <string name="brief_place_use_phone">Onde está o telemóvel</string>
+    <string name="car_map_view">Vista do mapa</string>
+    <string name="car_map_size">Tamanho</string>
+    <string name="car_map_zoom">Zoom</string>
+    <string name="car_map_tilt">Inclinação</string>
+    <string name="car_map_tilt_auto">Pela velocidade</string>
+    <string name="car_map_arrow">Seta</string>
+    <string name="car_map_arrow_middle">Ao meio</string>
+    <string name="car_map_arrow_low">Mais abaixo</string>
+    <string name="car_ui_size">Interface</string>
+    <string name="car_resolution">Resolução</string>
 </resources>

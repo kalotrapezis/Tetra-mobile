@@ -5019,4 +5019,14 @@
     <string name="brief_place_phone">an áit a bhfuil an fón</string>
     <string name="brief_place_not_found">Níor aimsíodh a leithéid d\'áit.</string>
     <string name="brief_place_use_phone">An áit a bhfuil an fón</string>
+    <string name="car_map_view">Amharc léarscáile</string>
+    <string name="car_map_size">Méid</string>
+    <string name="car_map_zoom">Súmáil</string>
+    <string name="car_map_tilt">Claonadh</string>
+    <string name="car_map_tilt_auto">De réir luais</string>
+    <string name="car_map_arrow">Saighead</string>
+    <string name="car_map_arrow_middle">Sa lár</string>
+    <string name="car_map_arrow_low">Níos ísle</string>
+    <string name="car_ui_size">Comhéadan</string>
+    <string name="car_resolution">Taifeach</string>
 </resources>

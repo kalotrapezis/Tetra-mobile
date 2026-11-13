@@ -4715,4 +4715,14 @@
     <string name="brief_place_phone">εκεί που είναι το κινητό</string>
     <string name="brief_place_not_found">Δεν βρέθηκε τέτοιο μέρος.</string>
     <string name="brief_place_use_phone">Εκεί που είναι το κινητό</string>
+    <string name="car_map_view">Προβολή χάρτη</string>
+    <string name="car_map_size">Μέγεθος</string>
+    <string name="car_map_zoom">Ζουμ</string>
+    <string name="car_map_tilt">Κλίση</string>
+    <string name="car_map_tilt_auto">Με την ταχύτητα</string>
+    <string name="car_map_arrow">Βέλος</string>
+    <string name="car_map_arrow_middle">Στη μέση</string>
+    <string name="car_map_arrow_low">Χαμηλά</string>
+    <string name="car_ui_size">Διεπαφή</string>
+    <string name="car_resolution">Ανάλυση</string>
 </resources>

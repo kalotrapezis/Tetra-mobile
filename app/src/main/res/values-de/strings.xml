@@ -4716,4 +4716,14 @@
     <string name="brief_place_phone">wo das Telefon ist</string>
     <string name="brief_place_not_found">Kein solcher Ort gefunden.</string>
     <string name="brief_place_use_phone">Ort des Telefons nehmen</string>
+    <string name="car_map_view">Kartenansicht</string>
+    <string name="car_map_size">Größe</string>
+    <string name="car_map_zoom">Zoom</string>
+    <string name="car_map_tilt">Neigung</string>
+    <string name="car_map_tilt_auto">Nach Tempo</string>
+    <string name="car_map_arrow">Pfeil</string>
+    <string name="car_map_arrow_middle">Mitte</string>
+    <string name="car_map_arrow_low">Unten</string>
+    <string name="car_ui_size">Oberfläche</string>
+    <string name="car_resolution">Auflösung</string>
 </resources>

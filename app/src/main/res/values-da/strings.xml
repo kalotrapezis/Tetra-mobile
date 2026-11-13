@@ -4716,4 +4716,14 @@
     <string name="brief_place_phone">hvor telefonen er</string>
     <string name="brief_place_not_found">Intet sådant sted fundet.</string>
     <string name="brief_place_use_phone">Hvor telefonen er</string>
+    <string name="car_map_view">Kortvisning</string>
+    <string name="car_map_size">Størrelse</string>
+    <string name="car_map_zoom">Zoom</string>
+    <string name="car_map_tilt">Hældning</string>
+    <string name="car_map_tilt_auto">Efter fart</string>
+    <string name="car_map_arrow">Pil</string>
+    <string name="car_map_arrow_middle">I midten</string>
+    <string name="car_map_arrow_low">Lavere</string>
+    <string name="car_ui_size">Brugerflade</string>
+    <string name="car_resolution">Opløsning</string>
 </resources>

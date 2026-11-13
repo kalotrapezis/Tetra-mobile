@@ -4716,4 +4716,14 @@
     <string name="brief_place_phone">seal, kus on telefon</string>
     <string name="brief_place_not_found">Sellist kohta ei leitud.</string>
     <string name="brief_place_use_phone">Seal, kus on telefon</string>
+    <string name="car_map_view">Kaardivaade</string>
+    <string name="car_map_size">Suurus</string>
+    <string name="car_map_zoom">Suum</string>
+    <string name="car_map_tilt">Kalle</string>
+    <string name="car_map_tilt_auto">Kiiruse järgi</string>
+    <string name="car_map_arrow">Nool</string>
+    <string name="car_map_arrow_middle">Keskel</string>
+    <string name="car_map_arrow_low">Allpool</string>
+    <string name="car_ui_size">Liides</string>
+    <string name="car_resolution">Eraldusvõime</string>
 </resources>

@@ -4817,4 +4817,14 @@
     <string name="brief_place_phone">tur, kur ir tālrunis</string>
     <string name="brief_place_not_found">Šāda vieta nav atrasta.</string>
     <string name="brief_place_use_phone">Tur, kur ir tālrunis</string>
+    <string name="car_map_view">Kartes skats</string>
+    <string name="car_map_size">Izmērs</string>
+    <string name="car_map_zoom">Tālummaiņa</string>
+    <string name="car_map_tilt">Slīpums</string>
+    <string name="car_map_tilt_auto">Pēc ātruma</string>
+    <string name="car_map_arrow">Bulta</string>
+    <string name="car_map_arrow_middle">Vidū</string>
+    <string name="car_map_arrow_low">Zemāk</string>
+    <string name="car_ui_size">Saskarne</string>
+    <string name="car_resolution">Izšķirtspēja</string>
 </resources>

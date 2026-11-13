@@ -4716,4 +4716,14 @@
     <string name="brief_place_phone">där telefonen är</string>
     <string name="brief_place_not_found">Ingen sådan plats hittades.</string>
     <string name="brief_place_use_phone">Där telefonen är</string>
+    <string name="car_map_view">Kartvy</string>
+    <string name="car_map_size">Storlek</string>
+    <string name="car_map_zoom">Zoom</string>
+    <string name="car_map_tilt">Lutning</string>
+    <string name="car_map_tilt_auto">Efter fart</string>
+    <string name="car_map_arrow">Pil</string>
+    <string name="car_map_arrow_middle">I mitten</string>
+    <string name="car_map_arrow_low">Längre ner</string>
+    <string name="car_ui_size">Gränssnitt</string>
+    <string name="car_resolution">Upplösning</string>
 </resources>

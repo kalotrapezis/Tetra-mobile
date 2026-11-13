@@ -4918,4 +4918,14 @@
     <string name="brief_place_phone">kde je telefon</string>
     <string name="brief_place_not_found">Takové místo nenalezeno.</string>
     <string name="brief_place_use_phone">Kde je telefon</string>
+    <string name="car_map_view">Zobrazení mapy</string>
+    <string name="car_map_size">Velikost</string>
+    <string name="car_map_zoom">Přiblížení</string>
+    <string name="car_map_tilt">Náklon</string>
+    <string name="car_map_tilt_auto">Podle rychlosti</string>
+    <string name="car_map_arrow">Šipka</string>
+    <string name="car_map_arrow_middle">Uprostřed</string>
+    <string name="car_map_arrow_low">Níže</string>
+    <string name="car_ui_size">Rozhraní</string>
+    <string name="car_resolution">Rozlišení</string>
 </resources>
