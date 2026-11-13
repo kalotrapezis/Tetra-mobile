@@ -114,15 +114,29 @@ function first(sel, wait, text, random) { if (firstOff) firstOff(); var lastN = 
   firstOff = function () { seen.disconnect(); clearInterval(t); clearTimeout(end); document.removeEventListener('visibilitychange', look); firstOff = null; };
   seen.observe(document.documentElement, { childList: true, subtree: true }); document.addEventListener('visibilitychange', look); look(); }
 
-// a full-screen video filling the screen, its black bars cropped (the Browser's pinch out, kept per site; BrowserScreen.kt):
-// any site's <video>, under the element that went full screen or itself full screen
-var coverStyle = null;
+// a full-screen video filling the screen, its black bars cropped (the Browser's ↔ and pinch, kept per site; BrowserScreen.kt):
+// set on the <video> itself, important, and set again whenever its player rewrites its size (YouTube's does); as it was after
+var COVER = [['position', 'fixed'], ['left', '0'], ['top', '0'], ['width', '100vw'], ['height', '100vh'], ['max-width', 'none'], ['max-height', 'none'], ['object-fit', 'cover']];
+var coverOn = false, coverSeen = null;
+function fsVideos() { var f = document.fullscreenElement; if (!f) return []; return f.tagName == 'VIDEO' ? [f] : Array.prototype.slice.call(f.querySelectorAll('video')); }
+function coverApply() { fsVideos().forEach(function (v) {
+  if (!v._tetraCover) { v._tetraCover = 1; v._tetraWas = v.getAttribute('style'); }
+  COVER.forEach(function (p) { if (v.style.getPropertyValue(p[0]) !== p[1] || v.style.getPropertyPriority(p[0]) !== 'important') v.style.setProperty(p[0], p[1], 'important'); }); }); }
+function coverClear() { Array.prototype.forEach.call(document.querySelectorAll('video'), function (v) {
+  if (!v._tetraCover) return; v._tetraCover = 0;
+  if (v._tetraWas == null) v.removeAttribute('style'); else v.setAttribute('style', v._tetraWas); });
+  window.dispatchEvent(new Event('resize')); } // the player lays its video out again
 function cover(on) { try {
-  if (!coverStyle) { coverStyle = document.createElement('style');
-    coverStyle.textContent = 'html.tetra-cover :fullscreen video,html.tetra-cover video:fullscreen{position:fixed!important;left:0!important;top:0!important;' +
-      'width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;object-fit:cover!important}'; }
-  if (!coverStyle.isConnected) (document.head || document.documentElement).appendChild(coverStyle);
-  document.documentElement.classList.toggle('tetra-cover', !!on); } catch (e) { post({ error: 'cover: ' + e }); } }
+  coverOn = !!on;
+  if (coverSeen) { coverSeen.disconnect(); coverSeen = null; }
+  if (!coverOn) { coverClear(); return; }
+  coverApply();
+  var f = document.fullscreenElement;
+  if (f) { coverSeen = new MutationObserver(function () { if (coverOn) coverApply(); });
+    coverSeen.observe(f, { subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'src'] }); }
+  } catch (e) { post({ error: 'cover: ' + e }); } }
+// the Browser may say "fill" before the page's own full screen has come: it is filled as it comes
+document.addEventListener('fullscreenchange', function () { if (document.fullscreenElement) { if (coverOn) cover(true); } else { coverOn = false; if (coverSeen) { coverSeen.disconnect(); coverSeen = null; } coverClear(); } }, true);
 
 function heard(m) {
   if ('bg' in m) bg = !!m.bg;
