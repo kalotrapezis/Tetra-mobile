@@ -4727,4 +4727,24 @@
     <string name="car_map_arrow_low">Lower</string>
     <string name="car_ui_size">Interface</string>
     <string name="car_resolution">Resolution</string>
+    <string name="car_maps_title">Maps from your phone</string>
+    <string name="car_maps_update_title">New maps on your phone</string>
+    <string name="car_maps_intro">Tetra Car\'s maps work offline. They come once from Tetra on your phone over its hotspot; after that, only what is new.</string>
+    <string name="car_maps_step_storage">Allow Tetra to keep the maps on this unit</string>
+    <string name="car_maps_step_pair">Pair with your phone: connect this unit to its hotspot, then scan the code with Tetra on the phone</string>
+    <string name="car_maps_offer">On the phone: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">newer maps</string>
+    <string name="car_maps_download">Download</string>
+    <string name="car_maps_update">Update</string>
+    <string name="car_maps_moving">%1$d of %2$d MB…</string>
+    <string name="car_maps_failed">The maps did not come: %1$s</string>
+    <string name="car_maps_checking">Asking the phone what maps it has…</string>
+    <string name="car_maps_phone_none">The phone has no maps yet. Make one on the computer (Tetra › Maps); it reaches the phone, then this unit.</string>
+    <string name="car_maps_do">Do it</string>
+    <string name="car_maps_no_space">Not enough room on this unit: the maps need %1$d MB, %2$d MB are free.</string>
+    <string name="car_dock_auto">Automatic: down the driver\'s side on a wide screen, along the bottom otherwise</string>
+    <string name="car_driver">Driver\'s seat</string>
+    <string name="car_driver_summary">Left-hand drive (most of Europe) or right-hand drive (UK, Ireland, Cyprus, Malta)</string>
+    <string name="car_screen_size">Size on this screen</string>
+    <string name="car_screen_size_summary">Everything bigger: the map\'s names and arrow, the cards, the dock</string>
 </resources>

@@ -247,7 +247,7 @@ internal object PhoneCodes {
         }
         if (typed == "*#06#") {
             @Suppress("MissingPermission")
-            val ids = runCatching { val tm = c.getSystemService(android.telephony.TelephonyManager::class.java); (0 until tm.activeModemCount).mapNotNull { tm.getImei(it) } }.getOrNull()
+            val ids = runCatching { val tm = c.getSystemService(android.telephony.TelephonyManager::class.java); (0 until if (android.os.Build.VERSION.SDK_INT >= 30) tm.activeModemCount else @Suppress("DEPRECATION") tm.phoneCount).mapNotNull { tm.getImei(it) } }.getOrNull()
             if (ids.isNullOrEmpty()) runCatching { c.startActivity(android.content.Intent(android.provider.Settings.ACTION_DEVICE_INFO_SETTINGS).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
             else android.app.AlertDialog.Builder(c).setTitle("IMEI").setMessage(ids.joinToString("\n")).setPositiveButton(c.getString(R.string.common_ok), null).show()
             return true

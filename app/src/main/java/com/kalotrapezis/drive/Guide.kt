@@ -306,7 +306,7 @@ private fun has(c: Context, p: String) = c.checkSelfPermission(p) == PackageMana
 
 /** Allowed, not yet, or null: not on this device (calls on a tablet without a SIM). */
 private fun granted(c: Context, ask: GuideAsk): Boolean? = when (ask) {
-    GuideAsk.AllFiles -> Environment.isExternalStorageManager()
+    GuideAsk.AllFiles -> storageAllowed(c)
     GuideAsk.Photos -> hasVisualAccess(c)
     GuideAsk.Notifications -> androidx.core.app.NotificationManagerCompat.from(c).areNotificationsEnabled()
     GuideAsk.Alarms -> Build.VERSION.SDK_INT < 31 || c.getSystemService(android.app.AlarmManager::class.java).canScheduleExactAlarms()

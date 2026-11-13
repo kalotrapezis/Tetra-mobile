@@ -4827,4 +4827,24 @@
     <string name="car_map_arrow_low">Zemāk</string>
     <string name="car_ui_size">Saskarne</string>
     <string name="car_resolution">Izšķirtspēja</string>
+    <string name="car_maps_title">Kartes no tālruņa</string>
+    <string name="car_maps_update_title">Jaunas kartes tālrunī</string>
+    <string name="car_maps_intro">Tetra Car kartes darbojas bezsaistē. Tās vienreiz tiek atsūtītas no tālruņa uz Tetra caur tā hotspot; pēc tam – tikai jaunais.</string>
+    <string name="car_maps_step_storage">Atļaujiet Tetra glabāt kartes šajā ierīcē</string>
+    <string name="car_maps_step_pair">Savienojiet ar tālruni: pievienojiet šo ierīci tā hotspot, pēc tam noskenējiet kodu Tetra tālrunī</string>
+    <string name="car_maps_offer">Tālrunī: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">jaunākas kartes</string>
+    <string name="car_maps_download">Lejupielādēt</string>
+    <string name="car_maps_update">Atjaunināt</string>
+    <string name="car_maps_moving">%1$d no %2$d MB…</string>
+    <string name="car_maps_failed">Kartes neatnāca: %1$s</string>
+    <string name="car_maps_checking">Jautājam tālrunim, kādas kartes tam ir…</string>
+    <string name="car_maps_phone_none">Tālrunī vēl nav karšu. Izveidojiet tās datorā (Tetra › Kartes); tās nonāks tālrunī un pēc tam šajā ierīcē.</string>
+    <string name="car_maps_do">Veikt</string>
+    <string name="car_maps_no_space">Šajā ierīcē nepietiek vietas: kartēm vajag %1$d MB, brīvi ir %2$d MB.</string>
+    <string name="car_dock_auto">Automātiski: pa vadītāja pusi platā ekrānā, citādi pa apakšmalu</string>
+    <string name="car_driver">Vadītāja vieta</string>
+    <string name="car_driver_summary">Kreisā stūre (lielākā daļa Eiropas) vai labā stūre (Lielbritānija, Īrija, Kipra, Malta)</string>
+    <string name="car_screen_size">Izmērs šajā ekrānā</string>
+    <string name="car_screen_size_summary">Viss lielāks: kartes nosaukumi un bulta, kartītes, panelis</string>
 </resources>

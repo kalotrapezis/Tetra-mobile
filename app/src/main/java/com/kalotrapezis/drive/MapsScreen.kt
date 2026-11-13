@@ -104,7 +104,7 @@ import org.maplibre.geojson.Point
 import java.io.File
 import java.util.Locale
 
-private val MAPS_COLOR = androidx.compose.ui.graphics.Color(0xFF5C6BC0)
+internal val MAPS_COLOR = androidx.compose.ui.graphics.Color(0xFF5C6BC0)
 /** The maps there are and a degree of sea round them (Greece's when none says): the camera stays within. */
 private fun cameraBounds(root: File): LatLngBounds {
     val all = MapsFiles.maps(root).mapNotNull { it.bounds }

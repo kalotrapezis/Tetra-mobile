@@ -4726,4 +4726,24 @@
     <string name="car_map_arrow_low">Lavere</string>
     <string name="car_ui_size">Brugerflade</string>
     <string name="car_resolution">Opløsning</string>
+    <string name="car_maps_title">Kort fra telefonen</string>
+    <string name="car_maps_update_title">Nye kort på telefonen</string>
+    <string name="car_maps_intro">Kortene i Tetra Car virker offline. De hentes én gang fra Tetra på telefonen via dens hotspot; derefter kun det nye.</string>
+    <string name="car_maps_step_storage">Tillad Tetra at gemme kortene på denne enhed</string>
+    <string name="car_maps_step_pair">Par med telefonen: forbind enheden til telefonens hotspot, og scan derefter koden med Tetra på telefonen</string>
+    <string name="car_maps_offer">På telefonen: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">nyere kort</string>
+    <string name="car_maps_download">Hent</string>
+    <string name="car_maps_update">Opdater</string>
+    <string name="car_maps_moving">%1$d af %2$d MB…</string>
+    <string name="car_maps_failed">Kortene kom ikke: %1$s</string>
+    <string name="car_maps_checking">Spørger telefonen, hvilke kort den har…</string>
+    <string name="car_maps_phone_none">Telefonen har endnu ingen kort. Lav et på computeren (Tetra › Kort); det kommer til telefonen og derefter til enheden.</string>
+    <string name="car_maps_do">Udfør</string>
+    <string name="car_maps_no_space">Ikke nok plads på enheden: kortene kræver %1$d MB, %2$d MB er ledige.</string>
+    <string name="car_dock_auto">Automatisk: ned ad førersiden på en bred skærm, ellers langs bunden</string>
+    <string name="car_driver">Førersæde</string>
+    <string name="car_driver_summary">Venstrestyret (det meste af Europa) eller højrestyret (Storbritannien, Irland, Cypern, Malta)</string>
+    <string name="car_screen_size">Størrelse på denne skærm</string>
+    <string name="car_screen_size_summary">Alt større: kortets navne og pil, kortene, panelet</string>
 </resources>

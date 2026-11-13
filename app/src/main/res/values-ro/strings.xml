@@ -4827,4 +4827,24 @@
     <string name="car_map_arrow_low">Mai jos</string>
     <string name="car_ui_size">Interfață</string>
     <string name="car_resolution">Rezoluție</string>
+    <string name="car_maps_title">Hărți de pe telefon</string>
+    <string name="car_maps_update_title">Hărți noi pe telefon</string>
+    <string name="car_maps_intro">Hărțile Tetra Car funcționează offline. Ajung o singură dată de la telefon la Tetra, prin hotspotul acestuia; apoi doar ce e nou.</string>
+    <string name="car_maps_step_storage">Permite Tetra să păstreze hărțile pe această unitate</string>
+    <string name="car_maps_step_pair">Asociază cu telefonul: conectează această unitate la hotspotul lui, apoi scanează codul cu Tetra de pe telefon</string>
+    <string name="car_maps_offer">Pe telefon: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">hărți mai noi</string>
+    <string name="car_maps_download">Descarcă</string>
+    <string name="car_maps_update">Actualizează</string>
+    <string name="car_maps_moving">%1$d din %2$d MB…</string>
+    <string name="car_maps_failed">Hărțile nu au ajuns: %1$s</string>
+    <string name="car_maps_checking">Întrebăm telefonul ce hărți are…</string>
+    <string name="car_maps_phone_none">Telefonul nu are încă hărți. Fă una pe calculator (Tetra › Hărți); ajunge pe telefon și apoi pe această unitate.</string>
+    <string name="car_maps_do">Fă</string>
+    <string name="car_maps_no_space">Nu e destul loc pe această unitate: hărțile cer %1$d MB, sunt %2$d MB liberi.</string>
+    <string name="car_dock_auto">Automat: pe partea șoferului la ecran lat, altfel pe marginea de jos</string>
+    <string name="car_driver">Locul șoferului</string>
+    <string name="car_driver_summary">Volan pe stânga (cea mai mare parte a Europei) sau pe dreapta (Regatul Unit, Irlanda, Cipru, Malta)</string>
+    <string name="car_screen_size">Dimensiune pe acest ecran</string>
+    <string name="car_screen_size_summary">Totul mai mare: numele și săgeata de pe hartă, cardurile, dock-ul</string>
 </resources>

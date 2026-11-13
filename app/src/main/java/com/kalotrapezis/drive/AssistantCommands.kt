@@ -103,7 +103,7 @@ internal object PageText {
         }
         try {
             if (c.responseCode !in 200..299) error("The page answered ${c.responseCode}.")
-            val bytes = c.inputStream.use { it.readNBytes(MAX_BYTES) }
+            val bytes = c.inputStream.use { input -> ByteArray(MAX_BYTES).let { b -> var n = 0; while (n < b.size) { val r = input.read(b, n, b.size - n); if (r < 0) break; n += r }; b.copyOf(n) } } // readNBytes is Android 13+
             val charset = c.contentType?.substringAfter("charset=", "")?.trim()?.takeIf { it.isNotEmpty() } ?: "UTF-8"
             return String(bytes, runCatching { charset(charset) }.getOrDefault(Charsets.UTF_8))
         } finally { c.disconnect() }

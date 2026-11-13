@@ -486,10 +486,21 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
     // where the dock sits (the user, 9 Nov: "a radio buttons group on the settings, not in the layouts")
     SettingsSection(stringResource(R.string.car_dock)) {
         var side by remember { mutableStateOf(Car.side(context)) }
-        listOf(DockSide.Bottom to R.string.car_dock_bottom, DockSide.Left to R.string.car_dock_left, DockSide.Right to R.string.car_dock_right).forEach { (d, label) ->
+        listOf(DockSide.Auto to R.string.car_dock_auto, DockSide.Bottom to R.string.car_dock_bottom, DockSide.Left to R.string.car_dock_left, DockSide.Right to R.string.car_dock_right).forEach { (d, label) ->
             Row(Modifier.fillMaxWidth().clickable { side = d; Car.setSide(context, d) }.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(side == d, { side = d; Car.setSide(context, d) }); Text(stringResource(label))
             }
+        }
+        if (CarMaps.edition) {
+            var size by remember { mutableStateOf(CarSize.of(context)) }
+            ChoiceRow(stringResource(R.string.car_screen_size), stringResource(R.string.car_screen_size_summary), CarSize.STEPS.map { it to "${(it * 100).toInt()} %" }, size) {
+                size = it; CarSize.set(context, it); (context as? android.app.Activity)?.recreate()
+            }
+        }
+        // the driver's seat (left-hand or right-hand drive): where Auto puts the dock on a wide screen
+        var right by remember { mutableStateOf(Car.driverRight(context)) }
+        ChoiceRow(stringResource(R.string.car_driver), stringResource(R.string.car_driver_summary), listOf(false to stringResource(R.string.words_left), true to stringResource(R.string.words_right)), right) {
+            right = it; Car.setDriverRight(context, it)
         }
     }
     // what happens in the car (Tetra Car open, the car's Bluetooth, or the car's screen paired): also AI Assist's car_assist

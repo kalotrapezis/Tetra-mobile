@@ -4827,4 +4827,24 @@
     <string name="car_map_arrow_low">Más abajo</string>
     <string name="car_ui_size">Interfaz</string>
     <string name="car_resolution">Resolución</string>
+    <string name="car_maps_title">Mapas del teléfono</string>
+    <string name="car_maps_update_title">Mapas nuevos en el teléfono</string>
+    <string name="car_maps_intro">Los mapas de Tetra Car funcionan sin conexión. Se descargan una vez desde Tetra en el teléfono, a través de su punto de acceso; después, solo lo nuevo.</string>
+    <string name="car_maps_step_storage">Permitir que Tetra guarde los mapas en esta unidad</string>
+    <string name="car_maps_step_pair">Emparejar con el teléfono: conecte esta unidad a su punto de acceso y escanee el código con Tetra en el teléfono</string>
+    <string name="car_maps_offer">En el teléfono: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">mapas más recientes</string>
+    <string name="car_maps_download">Descargar</string>
+    <string name="car_maps_update">Actualizar</string>
+    <string name="car_maps_moving">%1$d de %2$d MB…</string>
+    <string name="car_maps_failed">No llegaron los mapas: %1$s</string>
+    <string name="car_maps_checking">Preguntando al teléfono qué mapas tiene…</string>
+    <string name="car_maps_phone_none">El teléfono aún no tiene mapas. Cree uno en el ordenador (Tetra › Mapas); llegará al teléfono y luego a esta unidad.</string>
+    <string name="car_maps_do">Hacerlo</string>
+    <string name="car_maps_no_space">No hay suficiente espacio en esta unidad: los mapas necesitan %1$d MB y hay %2$d MB libres.</string>
+    <string name="car_dock_auto">Automático: por el lado del conductor en pantalla ancha, si no por la parte inferior</string>
+    <string name="car_driver">Asiento del conductor</string>
+    <string name="car_driver_summary">Volante a la izquierda (la mayor parte de Europa) o a la derecha (Reino Unido, Irlanda, Chipre, Malta)</string>
+    <string name="car_screen_size">Tamaño en esta pantalla</string>
+    <string name="car_screen_size_summary">Todo más grande: los nombres y la flecha del mapa, las tarjetas, el panel</string>
 </resources>

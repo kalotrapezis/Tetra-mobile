@@ -4726,4 +4726,24 @@
     <string name="car_map_arrow_low">Lejjebb</string>
     <string name="car_ui_size">Felület</string>
     <string name="car_resolution">Felbontás</string>
+    <string name="car_maps_title">Térképek a telefonról</string>
+    <string name="car_maps_update_title">Új térképek a telefonon</string>
+    <string name="car_maps_intro">A Tetra Car térképei internet nélkül is működnek. Egyszer érkeznek a Tetrához a telefonról, annak hotspotján keresztül; utána már csak az új rész.</string>
+    <string name="car_maps_step_storage">Engedélyezze, hogy a Tetra tárolja a térképeket ezen az egységen</string>
+    <string name="car_maps_step_pair">Párosítás a telefonnal: csatlakoztassa az egységet a telefon hotspotjához, majd olvassa be a kódot a telefonon lévő Tetrával</string>
+    <string name="car_maps_offer">A telefonon: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">újabb térképek</string>
+    <string name="car_maps_download">Letöltés</string>
+    <string name="car_maps_update">Frissítés</string>
+    <string name="car_maps_moving">%1$d / %2$d MB…</string>
+    <string name="car_maps_failed">A térképek nem érkeztek meg: %1$s</string>
+    <string name="car_maps_checking">Lekérdezzük a telefontól, milyen térképei vannak…</string>
+    <string name="car_maps_phone_none">A telefonon még nincsenek térképek. Készítse el a számítógépen (Tetra › Térképek); az eljut a telefonra, onnan pedig erre az egységre.</string>
+    <string name="car_maps_do">Indítás</string>
+    <string name="car_maps_no_space">Nincs elég hely az egységen: a térképekhez %1$d MB kell, %2$d MB szabad.</string>
+    <string name="car_dock_auto">Automatikus: széles kijelzőnél a vezetőoldalon lefelé, egyébként az alsó szél mentén</string>
+    <string name="car_driver">Vezetőülés</string>
+    <string name="car_driver_summary">Bal oldali kormány (Európa nagy része) vagy jobb oldali (Egyesült Királyság, Írország, Ciprus, Málta)</string>
+    <string name="car_screen_size">Méret ezen a kijelzőn</string>
+    <string name="car_screen_size_summary">Minden nagyobb: a térkép nevei és nyila, a kártyák, a dokk</string>
 </resources>

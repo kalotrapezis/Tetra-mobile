@@ -53,7 +53,7 @@ abstract class AppletActivity : ComponentActivity() {
 
 class NotesActivity : AppletActivity() {
     override val applet = Applet.Notes
-    @Composable override fun Content(word: String?, back: () -> Unit) = NotesTab(back = back, hasAccess = Environment.isExternalStorageManager(), grant = ::grant,
+    @Composable override fun Content(word: String?, back: () -> Unit) = NotesTab(back = back, hasAccess = storageAllowed(this), grant = ::grant,
         start = when (word) { NEW_NOTE -> false; NEW_CHECKLIST -> true; else -> null }, openId = word?.takeIf { it.startsWith("note:") }?.removePrefix("note:"))
     companion object { const val NEW_NOTE = "note-new"; const val NEW_CHECKLIST = "checklist-new" }
 }
@@ -67,7 +67,7 @@ class CodesActivity : AppletActivity() {
 
 class CalendarActivity : AppletActivity() {
     override val applet = Applet.Calendar
-    @Composable override fun Content(word: String?, back: () -> Unit) = CalendarScreen(back = back, hasAccess = Environment.isExternalStorageManager(), grant = ::grant,
+    @Composable override fun Content(word: String?, back: () -> Unit) = CalendarScreen(back = back, hasAccess = storageAllowed(this), grant = ::grant,
         startKind = word?.takeIf { it.startsWith(NEW) }?.let { k -> NewKind.entries.firstOrNull { it.name == k.removePrefix(NEW) } },
         openContact = { uid -> startActivity(appletIntent(this, "contact:$uid")) })
     companion object { const val NEW = "calendar-new:" } // Home's tiles: a new one of that kind
@@ -75,12 +75,12 @@ class CalendarActivity : AppletActivity() {
 
 class TimerActivity : AppletActivity() {
     override val applet = Applet.Timer
-    @Composable override fun Content(word: String?, back: () -> Unit) = TimerScreen(back = back, hasAccess = Environment.isExternalStorageManager(), grant = ::grant)
+    @Composable override fun Content(word: String?, back: () -> Unit) = TimerScreen(back = back, hasAccess = storageAllowed(this), grant = ::grant)
 }
 
 class PillsActivity : AppletActivity() {
     override val applet = Applet.Pills
-    @Composable override fun Content(word: String?, back: () -> Unit) = PillsScreen(back = back, hasAccess = Environment.isExternalStorageManager(), grant = ::grant)
+    @Composable override fun Content(word: String?, back: () -> Unit) = PillsScreen(back = back, hasAccess = storageAllowed(this), grant = ::grant)
 }
 
 class MapsActivity : AppletActivity() {
@@ -99,7 +99,7 @@ class MapsActivity : AppletActivity() {
 
 class ContactsActivity : AppletActivity() {
     override val applet = Applet.Contacts
-    @Composable override fun Content(word: String?, back: () -> Unit) = ContactsScreen(back = back, hasAccess = Environment.isExternalStorageManager(), grant = ::grant,
+    @Composable override fun Content(word: String?, back: () -> Unit) = ContactsScreen(back = back, hasAccess = storageAllowed(this), grant = ::grant,
         start = word?.takeIf { it.startsWith("contact:") }?.removePrefix("contact:"), newNumber = word?.takeIf { it.startsWith("contact-new:") }?.removePrefix("contact-new:"),
         openMaps = { q -> startActivity(appletIntent(this, "maps-search:$q")) })
 }
@@ -110,7 +110,7 @@ class MailActivity : AppletActivity() {
     private fun tetra(word: String) = startActivity(Intent(this, MainActivity::class.java).putExtra(Applet.EXTRA, word)
         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP))
     @Composable override fun Content(word: String?, back: () -> Unit) = MailScreen(start = word?.takeIf { it.startsWith("mail") }, back = back,
-        hasAccess = Environment.isExternalStorageManager(), grant = ::grant,
+        hasAccess = storageAllowed(this), grant = ::grant,
         openFile = { f -> runCatching { tetra("file:" + DriveRules.relative(driveRoot(), f)) }.onFailure { Toast.makeText(this, it.message, Toast.LENGTH_LONG).show() } },
         openSettings = { tetra(SETTINGS) }, openFolder = { rel -> tetra("folder:$rel") })
     companion object { const val SETTINGS = "settings-mail" }

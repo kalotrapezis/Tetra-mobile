@@ -4827,4 +4827,24 @@
     <string name="car_map_arrow_low">Mais abaixo</string>
     <string name="car_ui_size">Interface</string>
     <string name="car_resolution">Resolução</string>
+    <string name="car_maps_title">Mapas do telemóvel</string>
+    <string name="car_maps_update_title">Novos mapas no telemóvel</string>
+    <string name="car_maps_intro">Os mapas do Tetra Car funcionam offline. Chegam uma vez da Tetra ao telemóvel, através do ponto de acesso deste; depois, só o que for novo.</string>
+    <string name="car_maps_step_storage">Permitir que a Tetra guarde os mapas nesta unidade</string>
+    <string name="car_maps_step_pair">Emparelhar com o telemóvel: ligue esta unidade ao ponto de acesso dele e leia o código com a Tetra no telemóvel</string>
+    <string name="car_maps_offer">No telemóvel: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">mapas mais recentes</string>
+    <string name="car_maps_download">Transferir</string>
+    <string name="car_maps_update">Atualizar</string>
+    <string name="car_maps_moving">%1$d de %2$d MB…</string>
+    <string name="car_maps_failed">Os mapas não chegaram: %1$s</string>
+    <string name="car_maps_checking">A perguntar ao telemóvel que mapas tem…</string>
+    <string name="car_maps_phone_none">O telemóvel ainda não tem mapas. Crie um no computador (Tetra › Mapas); chega ao telemóvel e depois a esta unidade.</string>
+    <string name="car_maps_do">Fazer</string>
+    <string name="car_maps_no_space">Não há espaço suficiente nesta unidade: os mapas precisam de %1$d MB e há %2$d MB livres.</string>
+    <string name="car_dock_auto">Automático: pelo lado do condutor num ecrã largo, senão ao longo da parte inferior</string>
+    <string name="car_driver">Lugar do condutor</string>
+    <string name="car_driver_summary">Volante à esquerda (a maior parte da Europa) ou à direita (Reino Unido, Irlanda, Chipre, Malta)</string>
+    <string name="car_screen_size">Tamanho neste ecrã</string>
+    <string name="car_screen_size_summary">Tudo maior: os nomes e a seta do mapa, os cartões, o dock</string>
 </resources>

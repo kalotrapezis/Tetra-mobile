@@ -4726,4 +4726,24 @@
     <string name="car_map_arrow_low">Allpool</string>
     <string name="car_ui_size">Liides</string>
     <string name="car_resolution">Eraldusvõime</string>
+    <string name="car_maps_title">Kaardid telefonist</string>
+    <string name="car_maps_update_title">Telefonis on uued kaardid</string>
+    <string name="car_maps_intro">Tetra Caris olevad kaardid töötavad ilma internetita. Need tulevad telefonist Tetrale üks kord selle hotspoti kaudu; pärast seda ainult uus.</string>
+    <string name="car_maps_step_storage">Luba Tetral hoida kaarte selles seadmes</string>
+    <string name="car_maps_step_pair">Ühenda telefoniga: ühenda see seade telefoni hotspotiga ja skanni seejärel kood telefonis Tetraga</string>
+    <string name="car_maps_offer">Telefonis: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">uuemad kaardid</string>
+    <string name="car_maps_download">Lae alla</string>
+    <string name="car_maps_update">Uuenda</string>
+    <string name="car_maps_moving">%1$d / %2$d MB…</string>
+    <string name="car_maps_failed">Kaardid ei tulnud: %1$s</string>
+    <string name="car_maps_checking">Küsin telefonilt, millised kaardid tal on…</string>
+    <string name="car_maps_phone_none">Telefonis pole veel kaarte. Tee need arvutis (Tetra › Kaardid); need jõuavad telefoni ja seejärel sellesse seadmesse.</string>
+    <string name="car_maps_do">Tee ära</string>
+    <string name="car_maps_no_space">Selles seadmes pole piisavalt ruumi: kaardid vajavad %1$d MB, vaba on %2$d MB.</string>
+    <string name="car_dock_auto">Automaatne: suure ekraani korral juhi poolel alla, muidu allserva ääres</string>
+    <string name="car_driver">Juhiiste</string>
+    <string name="car_driver_summary">Vasakpoolne roolilaud (suurem osa Euroopast) või parempoolne (Suurbritannia, Iirimaa, Küpros, Malta)</string>
+    <string name="car_screen_size">Suurus sellel ekraanil</string>
+    <string name="car_screen_size_summary">Kõik suuremad: kaardi nimed ja nool, kaardid, paneel</string>
 </resources>

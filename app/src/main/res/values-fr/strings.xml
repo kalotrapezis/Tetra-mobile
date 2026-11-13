@@ -4827,4 +4827,24 @@
     <string name="car_map_arrow_low">Plus bas</string>
     <string name="car_ui_size">Interface</string>
     <string name="car_resolution">Résolution</string>
+    <string name="car_maps_title">Cartes depuis votre téléphone</string>
+    <string name="car_maps_update_title">Nouvelles cartes sur votre téléphone</string>
+    <string name="car_maps_intro">Les cartes de Tetra Car fonctionnent hors connexion. Elles sont téléchargées une fois depuis Tetra sur votre téléphone, via son point d\'accès ; ensuite, seulement les nouveautés.</string>
+    <string name="car_maps_step_storage">Autoriser Tetra à garder les cartes sur cet appareil</string>
+    <string name="car_maps_step_pair">Associer au téléphone : connectez cet appareil à son point d\'accès, puis scannez le code avec Tetra sur le téléphone</string>
+    <string name="car_maps_offer">Sur le téléphone : %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">cartes plus récentes</string>
+    <string name="car_maps_download">Télécharger</string>
+    <string name="car_maps_update">Mettre à jour</string>
+    <string name="car_maps_moving">%1$d sur %2$d MB…</string>
+    <string name="car_maps_failed">Les cartes ne sont pas arrivées : %1$s</string>
+    <string name="car_maps_checking">Demande au téléphone quelles cartes il a…</string>
+    <string name="car_maps_phone_none">Le téléphone n\'a pas encore de cartes. Créez-en une sur l\'ordinateur (Tetra › Cartes) ; elle arrive sur le téléphone, puis sur cet appareil.</string>
+    <string name="car_maps_do">Lancer</string>
+    <string name="car_maps_no_space">Pas assez de place sur cet appareil : les cartes demandent %1$d MB, %2$d MB sont libres.</string>
+    <string name="car_dock_auto">Automatique : côté conducteur sur grand écran, sinon le long du bas</string>
+    <string name="car_driver">Côté conducteur</string>
+    <string name="car_driver_summary">Conduite à gauche (la plupart de l\'Europe) ou à droite (Royaume-Uni, Irlande, Chypre, Malte)</string>
+    <string name="car_screen_size">Taille sur cet écran</string>
+    <string name="car_screen_size_summary">Tout en plus grand : noms et flèche de la carte, cartes, dock</string>
 </resources>

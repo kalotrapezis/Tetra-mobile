@@ -4726,4 +4726,24 @@
     <string name="car_map_arrow_low">Längre ner</string>
     <string name="car_ui_size">Gränssnitt</string>
     <string name="car_resolution">Upplösning</string>
+    <string name="car_maps_title">Kartor från telefonen</string>
+    <string name="car_maps_update_title">Nya kartor i telefonen</string>
+    <string name="car_maps_intro">Tetra Cars kartor fungerar offline. De hämtas en gång från telefonen till Tetra via dess hotspot; därefter bara det nya.</string>
+    <string name="car_maps_step_storage">Tillåt Tetra att spara kartorna på den här enheten</string>
+    <string name="car_maps_step_pair">Parkoppla med telefonen: anslut den här enheten till telefonens hotspot och skanna sedan koden med Tetra i telefonen</string>
+    <string name="car_maps_offer">I telefonen: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">nyare kartor</string>
+    <string name="car_maps_download">Hämta</string>
+    <string name="car_maps_update">Uppdatera</string>
+    <string name="car_maps_moving">%1$d av %2$d MB…</string>
+    <string name="car_maps_failed">Kartorna kom inte: %1$s</string>
+    <string name="car_maps_checking">Frågar telefonen vilka kartor den har…</string>
+    <string name="car_maps_phone_none">Telefonen har inga kartor än. Skapa en på datorn (Tetra › Kartor); den når telefonen och sedan den här enheten.</string>
+    <string name="car_maps_do">Kör</string>
+    <string name="car_maps_no_space">För lite plats på enheten: kartorna behöver %1$d MB, %2$d MB är ledigt.</string>
+    <string name="car_dock_auto">Automatiskt: på förarsidan vid bred skärm, annars längs underkanten</string>
+    <string name="car_driver">Förarplats</string>
+    <string name="car_driver_summary">Vänsterstyrt (största delen av Europa) eller högerstyrt (Storbritannien, Irland, Cypern, Malta)</string>
+    <string name="car_screen_size">Storlek på den här skärmen</string>
+    <string name="car_screen_size_summary">Allt större: kartans namn och pil, korten, docken</string>
 </resources>

@@ -105,7 +105,11 @@ import kotlin.math.roundToInt
  */
 class CarActivity : ComponentActivity() {
     override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLocale.wrap(base))
+    private var size = 1f
+    // a new size on the car's screen (Settings › Tetra Car): this screen drawn again at it
+    override fun onResume() { super.onResume(); if (CarSize.of(this) != size) recreate() }
     override fun onCreate(savedInstanceState: Bundle?) {
+        size = CarSize.of(this)
         super.onCreate(savedInstanceState)
         WriterLog.init(this)
         TetraLook.load(this)
@@ -113,6 +117,7 @@ class CarActivity : ComponentActivity() {
         if (PhoneLog.recent == null) PhoneLog.warm(this)
         if (ContactsPreload.all == null) ContactsPreload.warm(this)
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = TetraLook.light
+        fullScreen()
         WriterLog.i("Tetra Car opened")
         Car.running = true
         CarQuiet.set(this, true)
@@ -122,6 +127,11 @@ class CarActivity : ComponentActivity() {
         setContent { TetraTheme { CarScreen() } }
     }
     private var server: SyncServer? = null
+    /** The whole screen, the system's bars hidden (the user, 13 Nov: "hide the system bar, make it full screen"); a swipe shows them for a while. */
+    private fun fullScreen() = WindowCompat.getInsetsController(window, window.decorView).run {
+        systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE; hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+    }
+    override fun onWindowFocusChanged(hasFocus: Boolean) { super.onWindowFocusChanged(hasFocus); if (hasFocus) fullScreen() }
     override fun onDestroy() { Car.running = false; CarQuiet.set(this, false); if (server != null) runCatching { SyncServer.release() }; super.onDestroy() }
     // the steering wheel's voice key, where the head unit passes it on: AI Assist listens
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -224,7 +234,7 @@ private fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, close: () -> 
                 tile(look.second, { close(); open(app) }, w) { Image(painterResource(look.first), null, Modifier.size(72.dp)) }
             }
             tile(R.string.car_media, { close(); media() }, w) { icon(R.drawable.ic_play, Color(0xFFE53935)) }
-            tile(R.string.auto_share, { close(); AutoProjection.session?.openShare() }, w) { icon(R.drawable.ic_share, MaterialTheme.colorScheme.secondary) }
+            if (!CarMaps.edition) tile(R.string.auto_share, { close(); AutoProjection.session?.openShare() }, w) { icon(R.drawable.ic_share, MaterialTheme.colorScheme.secondary) } // Tetra Auto's Share
             tile(R.string.common_settings, { settings = true }, w) { icon(R.drawable.ic_settings, Color(0xFF1A73E8)) }
             Spacer(w) // the last row's empty place, so its tiles keep their width
         }
@@ -243,7 +253,7 @@ private fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, close: () -> 
                 row(R.string.car_map_arrow, listOf(false, true), v.low, { stringResource(if (it) R.string.car_map_arrow_low else R.string.car_map_arrow_middle) }) { Car.setView(context, v.copy(low = it)) }
                 row(R.string.car_ui_size, CarView.UI, v.ui, { pct(it) }) { Car.setView(context, v.copy(ui = it)) }
                 val asked = AutoProjection.session?.asked
-                row(R.string.car_resolution, CarView.RES, v.res, { r -> asked?.let { (w, h) -> "${(w * r).toInt() and 1.inv()}×${(h * r).toInt() and 1.inv()}" } ?: pct(r) }) { Car.setView(context, v.copy(res = it)) }
+                if (!CarMaps.edition) row(R.string.car_resolution, CarView.RES, v.res, { r -> asked?.let { (w, h) -> "${(w * r).toInt() and 1.inv()}×${(h * r).toInt() and 1.inv()}" } ?: pct(r) }) { Car.setView(context, v.copy(res = it)) }
         }
     }
 }
@@ -254,6 +264,47 @@ private fun CarClock(modifier: Modifier = Modifier, tap: () -> Unit = {}) {
     val context = LocalContext.current
     val now by produceState(System.currentTimeMillis()) { while (true) { value = System.currentTimeMillis(); delay(60_000 - value % 60_000) } }
     Text(android.text.format.DateFormat.getTimeFormat(context).format(java.util.Date(now)), modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = tap).padding(6.dp), fontSize = 22.sp, maxLines = 1)
+}
+
+/**
+ * The time and the battery at the dock's end (the user, 13 Nov: "a clock and battery to the horizontal as well as to the side"):
+ * on a head unit the phone's battery, as Android Auto shows it (CarWire's hello brings it); on the phone its own.
+ */
+@Composable
+private fun CarStatus(down: Boolean, clock: () -> Unit) {
+    val context = LocalContext.current
+    val remote by CarWire.battery
+    val own by produceState<Pair<Int, Boolean>?>(null) {
+        while (true) {
+            value = context.registerReceiver(null, android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED))?.takeIf { it.getBooleanExtra(android.os.BatteryManager.EXTRA_PRESENT, false) }?.let { i ->
+                val level = i.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1) * 100 / i.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, 100).coerceAtLeast(1)
+                val status = i.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, 0)
+                level to (status == android.os.BatteryManager.BATTERY_STATUS_CHARGING || status == android.os.BatteryManager.BATTERY_STATUS_FULL)
+            }
+            delay(60_000)
+        }
+    }
+    val battery = remote ?: own
+    val parts: @Composable () -> Unit = { battery?.let { (level, charging) -> CarBattery(level, charging) }; CarClock(tap = clock) }
+    if (down) Column(horizontalAlignment = Alignment.CenterHorizontally) { parts() }
+    else Column(Modifier.padding(start = 12.dp, end = 8.dp), horizontalAlignment = Alignment.End) { parts() }
+}
+
+/** A battery drawn as a battery: its outline, filled to the level (red under 20 %), a bolt while it charges, and the per cent. */
+@Composable
+private fun CarBattery(level: Int, charging: Boolean) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Canvas(Modifier.size(24.dp, 12.dp)) {
+            val tip = size.width * 0.1f
+            drawRoundRect(ink, size = Size(size.width - tip, size.height), cornerRadius = CornerRadius(3.dp.toPx()), style = Stroke(1.5.dp.toPx()))
+            drawRect(ink, Offset(size.width - tip, size.height * 0.3f), Size(tip, size.height * 0.4f))
+            val inset = 2.5.dp.toPx()
+            drawRect(if (level < 20 && !charging) Color(0xFFE53935) else if (charging) Color(0xFF43A047) else ink, Offset(inset, inset),
+                Size((size.width - tip - inset * 2) * level.coerceIn(0, 100) / 100f, size.height - inset * 2))
+        }
+        Text((if (charging) "⚡" else "") + "$level%", fontSize = 13.sp, maxLines = 1)
+    }
 }
 
 /**
@@ -282,12 +333,16 @@ internal object Car {
     fun open(c: Context) = runCatching { c.startActivity(Intent(c, CarActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }.onFailure { WriterLog.w("Car: not opened by itself", it) }
     private val dock = mutableStateOf<DockSide?>(null)
     /** Where Tetra Car's dock sits (Settings › Tetra Car, radio buttons): one state, so an open Tetra Car follows a change at once. */
-    fun side(c: Context): DockSide = dock.value ?: runCatching { DockSide.valueOf(prefs(c).getString("dock", null)!!) }.getOrDefault(DockSide.Bottom).also { dock.value = it }
+    fun side(c: Context): DockSide = dock.value ?: runCatching { DockSide.valueOf(prefs(c).getString("dock", null)!!) }.getOrDefault(DockSide.Auto).also { dock.value = it }
+    private val driver = mutableStateOf<Boolean?>(null)
+    /** The driver sits on the right (right-hand drive: UK, Ireland, Cyprus, Malta…): Auto's dock goes down the right. */
+    fun driverRight(c: Context): Boolean = driver.value ?: prefs(c).getBoolean("driver_right", false).also { driver.value = it }
+    fun setDriverRight(c: Context, right: Boolean) { driver.value = right; prefs(c).edit().putBoolean("driver_right", right).apply() }
     fun setSide(c: Context, d: DockSide) { dock.value = d; prefs(c).edit().putString("dock", d.name).apply() }
     private val viewState = mutableStateOf<CarView?>(null)
     /** Tetra Car's sizes and Maps' camera (the car's menu): one state, so the screen and the map follow a change at once. */
     fun view(c: Context): CarView = viewState.value ?: prefs(c).let { p ->
-        CarView(p.getFloat("ui_scale", 1f), p.getFloat("map_scale", 2f), p.getFloat("map_zoom", 0f), p.getInt("map_tilt", -1), p.getBoolean("map_low", true), p.getFloat("resolution", 1f))
+        CarView(p.getFloat("ui_scale", 1f), p.getFloat("map_scale", if (CarMaps.edition) 1.25f else 2f) /* the car's build is 150 % already (CarSize) */, p.getFloat("map_zoom", 0f), p.getInt("map_tilt", -1), p.getBoolean("map_low", true), p.getFloat("resolution", 1f))
     }.also { viewState.value = it }
     fun setView(c: Context, v: CarView) {
         val old = viewState.value
@@ -349,7 +404,7 @@ internal fun carOpenApp(c: Context, name: String): Boolean {
     val said = fold(name)
     val pm = c.packageManager
     val all = pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
-        .filter { it.activityInfo.name != "${CarActivity::class.java.packageName}.AppCar" }.map { it to fold(it.loadLabel(pm).toString()) }
+        .filter { it.activityInfo.name != "${CarActivity::class.java.name.substringBeforeLast('.')}.AppCar" }.map { it to fold(it.loadLabel(pm).toString()) }
     val hit = all.firstOrNull { it.second == said } ?: all.firstOrNull { it.second.contains(said) || said.contains(it.second) } ?: return false
     val a = hit.first.activityInfo
     c.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(ComponentName(a.packageName, a.name))
@@ -363,7 +418,7 @@ internal fun carListen(c: Context) = c.startActivity(Intent(c, AssistantSheetAct
 
 /** Settings › App icons › Tetra Car: its launcher icon, also offered as the home screen (off until asked for, as the applets'). */
 internal object CarIcon {
-    private fun component(c: Context) = ComponentName(c.packageName, "${CarActivity::class.java.packageName}.AppCar")
+    private fun component(c: Context) = ComponentName(c.packageName, "${CarActivity::class.java.name.substringBeforeLast('.')}.AppCar")
     fun shown(c: Context) = c.packageManager.getComponentEnabledSetting(component(c)) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
     fun show(c: Context, on: Boolean) {
         c.packageManager.setComponentEnabledSetting(component(c),
@@ -376,7 +431,40 @@ internal object CarIcon {
 internal enum class CarApp { Maps, Browser, Phone, Messages }
 
 /** Where the dock sits (the user, 9 Nov: "κανονικά έχει τη μπάρα στο πλάι"): along the bottom, or down a side. */
-internal enum class DockSide { Bottom, Left, Right }
+internal enum class DockSide { Auto, Bottom, Left, Right }
+
+/**
+ * The dock's apps (the user, 13 Nov: "if I open an app that is not on the dock it goes to the dock and the oldest app that was on the
+ * dock goes away from it"): Tetra's pages ("maps", "media", "phone", "messages", "browser") and the unit's own apps ("app:" and its
+ * component), [SLOTS] of them, in the order they came; one already there stays where it is.
+ */
+internal object CarDockApps {
+    const val SLOTS = 4
+    val START = listOf("maps", "media", "phone", "messages")
+    private val state = mutableStateOf<List<String>?>(null)
+    private fun prefs(c: Context) = c.getSharedPreferences("car", Context.MODE_PRIVATE)
+    fun all(c: Context): List<String> = state.value ?: runCatching { org.json.JSONArray(prefs(c).getString("dock_apps", null)!!).let { a -> (0 until a.length()).map(a::getString) } }
+        .getOrDefault(START).also { state.value = it }
+    fun used(c: Context, id: String) {
+        val next = docked(all(c), id)
+        if (next == state.value) return
+        state.value = next; prefs(c).edit().putString("dock_apps", org.json.JSONArray(next).toString()).apply()
+    }
+}
+
+/** The dock after [id] was opened: unchanged when it is there; else it joins at the end, the oldest leaving to keep [slots]. */
+internal fun docked(now: List<String>, id: String, slots: Int = CarDockApps.SLOTS) = if (id in now) now else (now + id).takeLast(slots)
+
+/**
+ * Auto, as Android Auto does it (the user, 13 Nov: "in my car the bar is to the side, it depends on the aspect ratio … right hand
+ * drive and left hand drive changes at what side the controls are"): a wide screen has the dock down the driver's side, a narrower
+ * one along the bottom.
+ */
+internal fun dockFor(chosen: DockSide, widthDp: Int, heightDp: Int, driverRight: Boolean) = when {
+    chosen != DockSide.Auto -> chosen
+    heightDp > 0 && widthDp.toFloat() / heightDp >= 1.5f -> if (driverRight) DockSide.Right else DockSide.Left
+    else -> DockSide.Bottom
+}
 
 internal enum class CarLayout(val weights: List<Float>) { Full(listOf(1f)), Wide(listOf(0.6f, 0.4f)), Half(listOf(0.5f, 0.5f)), Three(listOf(0.5f, 0.25f, 0.25f)) }
 
@@ -455,7 +543,8 @@ internal fun CarScreen(projected: Boolean = false) {
     // expose (the user, 11 Nov): every pane shows the pages to choose from; the panes chosen so far, null when it is not up
     var expose by remember { mutableStateOf<Set<Int>?>(null) }
     var apps by remember { mutableStateOf(false) }
-    val side = Car.side(context) // Settings › Tetra Car › Dock: changed there, followed here at once
+    val config = LocalConfiguration.current
+    val side = dockFor(Car.side(context), config.screenWidthDp, config.screenHeightDp, Car.driverRight(context)) // Settings › Tetra Car › Dock: changed there, followed here at once
     // AI Assist's «άνοιξε …» reaches the panes while this screen is up
     var message by remember { mutableStateOf<CarMessage?>(null) }
     androidx.compose.runtime.DisposableEffect(Unit) {
@@ -519,6 +608,7 @@ internal fun CarScreen(projected: Boolean = false) {
         }
     }
     fun media() {
+        CarDockApps.used(context, "media")
         val wasShown = state.panes[0] == CarApp.Browser
         set(state.put(CarApp.Browser))
         when {
@@ -530,6 +620,7 @@ internal fun CarScreen(projected: Boolean = false) {
     }
     fun openApp(app: CarApp) {
         expose = null
+        CarDockApps.used(context, app.name.lowercase())
         // Maps again while the map is in the big pane: the saved places (the user, 10 Nov: "the home faves in the car as a page with bubbles")
         if (app == CarApp.Maps && state.panes[0] == CarApp.Maps) places = !places
         else { set(state.put(app)); if (app == CarApp.Browser) tiles = false }
@@ -543,7 +634,7 @@ internal fun CarScreen(projected: Boolean = false) {
         WriterLog.i("Car: expose put $app in pane $i")
     }
     val base = LocalDensity.current
-    val view = if (projected) Car.view(context) else CarView.PHONE // the sizes are the car's screen's; Tetra Car on the phone stays as drawn
+    val view = if (projected || CarMaps.edition) Car.view(context) else CarView.PHONE // the sizes are the car's screen's; Tetra Car on the phone stays as drawn
     var viewPage by remember { mutableStateOf(false) } // the car's menu
     CompositionLocalProvider(LocalDensity provides Density(base.density * view.ui, base.fontScale)) { // Tetra Car's interface size
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding()) {
@@ -558,9 +649,13 @@ internal fun CarScreen(projected: Boolean = false) {
                     when (app) {
                         CarApp.Maps -> Box(Modifier.fillMaxSize()) {
                             CompositionLocalProvider(LocalDensity provides Density(base.density * view.map, base.fontScale)) { // Maps' own size, instead of the interface's
-                                PaneSized { MapsScreen(MapsFiles.root(driveRoot()), mapsGo, back = {}, search = mapsSearch) } // its pane's size in its own dp
+                                key(CarMaps.version.intValue) { PaneSized { MapsScreen(MapsFiles.root(driveRoot()), mapsGo, back = {}, search = mapsSearch) } } // its pane's size in its own dp; again when maps came
                             }
                             if (places) CarPlaces(go = { p -> mapsGo = p.copy(id = "ask-${System.nanoTime()}"); places = false; WriterLog.i("Car: to a saved place") }, close = { places = false })
+                            // Tetra Auto SE: the maps from the phone, the first time and whenever it has more or newer
+                            var pairPhone by remember { mutableStateOf(false) }
+                            CarMapsGuide(pair = { pairPhone = true })
+                            if (pairPhone) CarPairDialog { pairPhone = false }
                         }
                         CarApp.Browser -> Box(Modifier.fillMaxSize()) {
                             BrowserScreen(back = {}, play = play, hide = {})
@@ -589,13 +684,13 @@ internal fun CarScreen(projected: Boolean = false) {
             val p = panes.measure(Constraints.fixed(w, h))
             layout(c.maxWidth, c.maxHeight) {
                 when (side) {
-                    DockSide.Bottom -> { p.place(0, 0); d.place(0, h) }
+                    DockSide.Bottom, DockSide.Auto -> { p.place(0, 0); d.place(0, h) } // Auto is resolved to one of the others above
                     DockSide.Left -> { d.place(0, 0); p.place(d.width, 0) }
                     DockSide.Right -> { p.place(0, 0); d.place(w, 0) }
                 }
             }
         }
-        if (apps) CarApps { apps = false }
+        if (apps) CarApps(close = { apps = false }) { id -> if (id == "media") media() else CarApp.entries.firstOrNull { it.name.lowercase() == id }?.let(::openApp) } // a page of Tetra's from the grid: as from the dock
         if (viewPage) CarViewPage(::openApp, ::media) { viewPage = false }
     }
     }
@@ -643,25 +738,31 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
         IconButton({ setLayouts(false) }) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
         CarLayout.entries.forEach { l -> Box(Modifier.size(80.dp, if (down) 46.dp else 56.dp).clip(RoundedCornerShape(12.dp)).clickable { layout(l); setLayouts(false) }, contentAlignment = Alignment.Center) { LayoutGlyph(l, l == state.layout) } }
     }
-    val buttons: @Composable () -> Unit = {
-        DockApp(R.drawable.maps_art, R.string.app_maps, CarApp.Maps in state.panes, down) { open(CarApp.Maps) }
-        DockIcon(R.drawable.ic_play, R.string.car_media, Color(0xFFE53935), down, media)
-        DockApp(R.drawable.phone_art, R.string.app_phone, CarApp.Phone in state.panes, down) { open(CarApp.Phone) }
-        val busy = AssistBusy.on.value
-        val pulse by androidx.compose.animation.core.rememberInfiniteTransition(label = "mic").animateFloat(1f, 1.18f,
-            androidx.compose.animation.core.infiniteRepeatable<Float>(androidx.compose.animation.core.tween(550), androidx.compose.animation.core.RepeatMode.Reverse), label = "pulse")
-        Box(Modifier.padding(if (down) 4.dp else 12.dp).size(if (down) 56.dp else 68.dp)
+    val recent: @Composable () -> Unit = { // the dock's apps, the newest last (CarDockApps)
+        CarDockApps.all(context).forEach { id ->
+            when (id) {
+                "maps" -> DockApp(R.drawable.maps_art, R.string.app_maps, CarApp.Maps in state.panes, down) { open(CarApp.Maps) }
+                "media" -> DockIcon(R.drawable.ic_play, R.string.car_media, Color(0xFFE53935), down, media)
+                "phone" -> DockApp(R.drawable.phone_art, R.string.app_phone, CarApp.Phone in state.panes, down) { open(CarApp.Phone) }
+                "messages" -> DockApp(R.drawable.sms_art, R.string.app_sms, CarApp.Messages in state.panes, down) { open(CarApp.Messages) }
+                "browser" -> DockApp(R.drawable.browser_art, R.string.app_browser, CarApp.Browser in state.panes, down) { open(CarApp.Browser) }
+                else -> ComponentName.unflattenFromString(id.removePrefix("app:"))?.let { DockOther(it, down) }
+            }
+        }
+    }
+    val busy = AssistBusy.on.value
+    val pulse by androidx.compose.animation.core.rememberInfiniteTransition(label = "mic").animateFloat(1f, 1.18f,
+        androidx.compose.animation.core.infiniteRepeatable<Float>(androidx.compose.animation.core.tween(550), androidx.compose.animation.core.RepeatMode.Reverse), label = "pulse")
+    // the apps' grid and AI Assist's mic side by side (the user, 13 Nov: "the assistant mic next to the app menu"), as Android Auto has them
+    val group: @Composable () -> Unit = {
+        // the car's menu (the user, 13 Nov: "make the share icon a menu icon and put all the rest there"): Share, and the map's sizes and camera
+        if (projected) DockIcon(R.drawable.ic_menu, R.string.common_more, MaterialTheme.colorScheme.secondary, down, menu)
+        else DockIcon(R.drawable.ic_view_grid, R.string.car_apps, MaterialTheme.colorScheme.secondary, down, apps)
+        Box(Modifier.padding(if (down) 4.dp else 8.dp).size(if (down) 56.dp else 64.dp)
             .graphicsLayer { if (busy) { scaleX = pulse; scaleY = pulse } } // AI Assist at work: the mic breathes
             .clip(CircleShape).background(ASSISTANT_COLOR).combinedClickable(onLongClick = { mic(true) }) { mic(false) }, contentAlignment = Alignment.Center) {
             Icon(painterResource(R.drawable.ic_mic), stringResource(R.string.app_assistant), Modifier.size(34.dp), tint = Color.White)
         }
-        // down a side only Maps, Media and Phone stay; Messages and the Browser while they are on the screen (the user, 9 Nov)
-        if (!down || CarApp.Messages in state.panes) DockApp(R.drawable.sms_art, R.string.app_sms, CarApp.Messages in state.panes, down) { open(CarApp.Messages) }
-        if (!down || CarApp.Browser in state.panes) DockApp(R.drawable.browser_art, R.string.app_browser, CarApp.Browser in state.panes, down) { open(CarApp.Browser) }
-        // on the car's screen the phone's other apps would open on the phone: the car's own Share instead (the user, 10 Nov)
-        // the car's menu (the user, 13 Nov: "make the share icon a menu icon and put all the rest there"): Share, and the map's sizes and camera
-        if (projected) DockIcon(R.drawable.ic_menu, R.string.common_more, MaterialTheme.colorScheme.secondary, down, menu)
-        else DockIcon(R.drawable.ic_view_grid, R.string.car_apps, MaterialTheme.colorScheme.secondary, down, apps)
     }
     val layoutButton: @Composable () -> Unit = { // a tap: expose, a page to choose in every pane; held: the layouts' strip
         Box(Modifier.size(72.dp, if (down) 44.dp else 56.dp).clip(RoundedCornerShape(12.dp)).combinedClickable(onLongClick = { setLayouts(true) }, onClick = expose),
@@ -669,13 +770,17 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
     }
     if (down) Column(Modifier.fillMaxHeight().width(96.dp).verticalScroll(rememberScrollState()).padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) { // scrolls only on a very short screen
-        if (layouts) strip() else { CarClock(tap = clock); buttons(); layoutButton() }
+        // the time on top, the apps, then the apps' menu, the mic and the layouts' switch at the bottom (the user, 13 Nov)
+        if (layouts) strip() else { CarStatus(true, clock); recent(); Column(horizontalAlignment = Alignment.CenterHorizontally) { group() }; layoutButton() }
     }
     else Row(Modifier.fillMaxWidth().height(88.dp).padding(horizontal = 8.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         if (layouts) { Spacer(Modifier.weight(1f)); strip(); Spacer(Modifier.weight(1f)); return@Row }
+        // as down a side, left to right: the apps, the apps' menu, the mic, the layouts' switch; the time at the end
         NowPlaying(Modifier.weight(1f), media)
-        buttons()
-        Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) { layoutButton() }
+        recent()
+        group()
+        layoutButton()
+        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) { CarStatus(false, clock) }
     }
 }
 
@@ -685,6 +790,24 @@ private fun DockApp(art: Int, label: Int, shown: Boolean, down: Boolean, tap: ()
 @Composable
 private fun DockIcon(icon: Int, label: Int, color: Color, down: Boolean, tap: () -> Unit) = DockButton(label, false, down, tap) {
     Box(Modifier.size(if (down) 40.dp else 44.dp).clip(RoundedCornerShape(12.dp)).background(color), contentAlignment = Alignment.Center) { Icon(painterResource(icon), stringResource(label).takeIf { down }, Modifier.size(26.dp), tint = Color.White) }
+}
+
+/** One of the unit's own apps on the dock: its icon and name, a tap opens it beside Tetra Car where the unit allows. */
+@Composable
+private fun DockOther(component: ComponentName, down: Boolean) {
+    val context = LocalContext.current
+    val look by produceState<Pair<String, ImageBitmap>?>(null, component) {
+        value = withContext(Dispatchers.IO) { runCatching { context.packageManager.getActivityInfo(component, 0).let { i -> i.loadLabel(context.packageManager).toString() to i.loadIcon(context.packageManager).toBitmap(96, 96).asImageBitmap() } }.getOrNull() }
+    }
+    val (label, icon) = look ?: return
+    Column(Modifier.width(76.dp).clip(RoundedCornerShape(12.dp)).clickable {
+        runCatching { context.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(component).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)) }
+            .onFailure { WriterLog.w("Car: ${component.flattenToShortString()} not opened", it) }
+    }.padding(vertical = if (down) 2.dp else 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Image(icon, label.takeIf { down }, Modifier.size(if (down) 40.dp else 44.dp).clip(RoundedCornerShape(12.dp)))
+        if (!down) Text(label, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Spacer(Modifier.height(7.dp))
+    }
 }
 
 @Composable
@@ -790,13 +913,13 @@ private fun CarMediaTiles(modifier: Modifier, pick: (JSONObject) -> Unit) {
 
 /** The dock's Apps: every app on the head unit; Android puts it beside Tetra Car where the unit allows, else in front. */
 @Composable
-private fun CarApps(close: () -> Unit) {
+private fun CarApps(close: () -> Unit, page: (String) -> Unit) {
     val context = LocalContext.current
     val all by produceState(emptyList<Triple<ComponentName, String, ImageBitmap>>()) {
         value = withContext(Dispatchers.IO) {
             val pm = context.packageManager
             pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
-                .filter { it.activityInfo.name != "${CarActivity::class.java.packageName}.AppCar" }
+                .filter { it.activityInfo.name != "${CarActivity::class.java.name.substringBeforeLast('.')}.AppCar" }
                 .map { r -> Triple(ComponentName(r.activityInfo.packageName, r.activityInfo.name), r.loadLabel(pm).toString(), r.loadIcon(pm).toBitmap(96, 96).asImageBitmap()) }
                 .sortedBy { it.second.lowercase() }
         }
@@ -813,8 +936,30 @@ private fun CarApps(close: () -> Unit) {
         }
         if (pairing) CarPairDialog { pairing = false }
         LazyVerticalGrid(GridCells.Adaptive(112.dp), Modifier.fillMaxSize().padding(8.dp)) {
+            if (CarMaps.edition) item {
+                Column(Modifier.clip(RoundedCornerShape(12.dp)).clickable {
+                    AppLocale.reopenSettings = true
+                    runCatching { context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                    close()
+                }.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(painterResource(R.drawable.settings_art), null, Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)))
+                    Text(stringResource(R.string.common_settings), fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
+            }
+            // Tetra's own pages with the rest, all apps in one place (the user, 13 Nov: "group all the apps together")
+            listOf(Triple("maps", R.drawable.maps_art, R.string.app_maps), Triple("media", 0, R.string.car_media), Triple("phone", R.drawable.phone_art, R.string.app_phone),
+                Triple("messages", R.drawable.sms_art, R.string.app_sms), Triple("browser", R.drawable.browser_art, R.string.app_browser)).forEach { (id, art, label) ->
+                item(key = id) {
+                    Column(Modifier.clip(RoundedCornerShape(12.dp)).clickable { page(id); close() }.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        if (art != 0) Image(painterResource(art), null, Modifier.size(56.dp))
+                        else Box(Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)).background(Color(0xFFE53935)), contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.ic_play), null, Modifier.size(32.dp), tint = Color.White) }
+                        Text(stringResource(label), fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+            }
             items(all, key = { it.first.flattenToString() }) { (component, label, icon) ->
                 Column(Modifier.clip(RoundedCornerShape(12.dp)).clickable {
+                    CarDockApps.used(context, "app:" + component.flattenToString())
                     runCatching { context.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(component)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)) }
                         .onFailure { WriterLog.w("Car: ${component.flattenToShortString()} not opened", it) }

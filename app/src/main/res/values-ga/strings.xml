@@ -5029,4 +5029,24 @@
     <string name="car_map_arrow_low">Níos ísle</string>
     <string name="car_ui_size">Comhéadan</string>
     <string name="car_resolution">Taifeach</string>
+    <string name="car_maps_title">Léarscáileanna ón bhfón</string>
+    <string name="car_maps_update_title">Léarscáileanna nua ar an bhfón</string>
+    <string name="car_maps_intro">Oibríonn léarscáileanna Tetra Car gan líonra. Tagann siad uair amháin ó Tetra ar an bhfón tríd an hotspot; ina dhiaidh sin, an rud nua amháin.</string>
+    <string name="car_maps_step_storage">Ceadaigh do Tetra na léarscáileanna a choinneáil ar an aonad seo</string>
+    <string name="car_maps_step_pair">Péireáil leis an bhfón: ceangail an t-aonad seo lena hotspot, ansin scan an cód le Tetra ar an bhfón</string>
+    <string name="car_maps_offer">Ar an bhfón: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">léarscáileanna níos nuaí</string>
+    <string name="car_maps_download">Íoslódáil</string>
+    <string name="car_maps_update">Nuashonraigh</string>
+    <string name="car_maps_moving">%1$d as %2$d MB…</string>
+    <string name="car_maps_failed">Níor tháinig na léarscáileanna: %1$s</string>
+    <string name="car_maps_checking">Ag fiafraí den bhfón cad iad na léarscáileanna atá aige…</string>
+    <string name="car_maps_phone_none">Níl léarscáileanna ag an bhfón fós. Déan ceann ar an ríomhaire (Tetra › Léarscáileanna); tagann sé chuig an bhfón, agus ansin chuig an aonad seo.</string>
+    <string name="car_maps_do">Déan é</string>
+    <string name="car_maps_no_space">Níl go leor spáis ar an aonad seo: teastaíonn %1$d MB ó na léarscáileanna, tá %2$d MB saor.</string>
+    <string name="car_dock_auto">Uathoibríoch: síos ar thaobh an tiománaí ar scáileán leathan, nó feadh an bhoinn murab ea</string>
+    <string name="car_driver">Suíochán an tiománaí</string>
+    <string name="car_driver_summary">Tiomáint ar an taobh clé (formhór na hEorpa) nó ar an taobh deas (an Ríocht Aontaithe, Éire, an Chipir, Málta)</string>
+    <string name="car_screen_size">Méid ar an scáileán seo</string>
+    <string name="car_screen_size_summary">Gach rud níos mó: ainmneacha agus saighead an léarscáil, na cártaí, an dock</string>
 </resources>

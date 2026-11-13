@@ -4928,4 +4928,24 @@
     <string name="car_map_arrow_low">Žemiau</string>
     <string name="car_ui_size">Sąsaja</string>
     <string name="car_resolution">Skyra</string>
+    <string name="car_maps_title">Žemėlapiai iš telefono</string>
+    <string name="car_maps_update_title">Nauji žemėlapiai telefone</string>
+    <string name="car_maps_intro">Tetra Car žemėlapiai veikia be interneto. Jie atsiunčiami iš telefono į Tetra vieną kartą per jo viešosios prieigos tašką; vėliau – tik naujausi.</string>
+    <string name="car_maps_step_storage">Leiskite Tetra saugoti žemėlapius šiame įrenginyje</string>
+    <string name="car_maps_step_pair">Susieti su telefonu: prijunkite šį įrenginį prie telefono viešosios prieigos taško, tada nuskaitykite kodą Tetra telefone</string>
+    <string name="car_maps_offer">Telefone: %1$s (%2$d MB)</string>
+    <string name="car_maps_updates">naujesni žemėlapiai</string>
+    <string name="car_maps_download">Atsisiųsti</string>
+    <string name="car_maps_update">Atnaujinti</string>
+    <string name="car_maps_moving">%1$d iš %2$d MB…</string>
+    <string name="car_maps_failed">Žemėlapiai neatsiųsti: %1$s</string>
+    <string name="car_maps_checking">Klausiama telefono, kokius žemėlapius jis turi…</string>
+    <string name="car_maps_phone_none">Telefone dar nėra žemėlapių. Sukurkite juos kompiuteryje (Tetra › Žemėlapiai); jie pasieks telefoną, o vėliau – šį įrenginį.</string>
+    <string name="car_maps_do">Atlikti</string>
+    <string name="car_maps_no_space">Įrenginyje nepakanka vietos: žemėlapiams reikia %1$d MB, laisva %2$d MB.</string>
+    <string name="car_dock_auto">Automatiškai: vairuotojo pusėje plačiame ekrane, kitaip – apačioje</string>
+    <string name="car_driver">Vairuotojo vieta</string>
+    <string name="car_driver_summary">Vairas kairėje (dauguma Europos) arba dešinėje (Jungtinė Karalystė, Airija, Kipras, Malta)</string>
+    <string name="car_screen_size">Dydis šiame ekrane</string>
+    <string name="car_screen_size_summary">Viskas didesnis: žemėlapio pavadinimai ir rodyklė, kortelės, dokas</string>
 </resources>
