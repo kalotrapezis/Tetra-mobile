@@ -291,6 +291,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     var tabsRun by remember { mutableStateOf(prefs.getBoolean("tabs_run", true)) } // tabs not shown go on, sound and all (☰'s switch)
     // a video's full screen (YouTube's ⛶): the page alone, turned to landscape, until its ⛶ or ‹
     var fullTab by remember { mutableStateOf<Int?>(null) }
+    var fullPoke by remember { mutableIntStateOf(0) } // a touch on a full-screen video: its ↔ for a moment
     // a link or a picture held (the user, 4 Nov: "when I long click replace the tab bar with the right click menu")
     var held by remember { mutableStateOf<GeckoSession.ContentDelegate.ContextElement?>(null) }
     fun hostActivity() = generateSequence(context) { (it as? android.content.ContextWrapper)?.baseContext }.filterIsInstance<android.app.Activity>().firstOrNull()
@@ -1234,7 +1235,9 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         Row(Modifier.weight(if (player) 0.6f else 1f).fillMaxWidth()) {
         // the sidebar beside the page; with Auto-hide it comes back over the page instead, so the page does not jump
         if (side && !autohide && showBar) sideBar(Modifier)
-        Box(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.background).twoFingerTabs(rightHalf = side || wide,
+        Box(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.background)
+            .pointerInput(Unit) { awaitPointerEventScope { while (true) { if (awaitPointerEvent(PointerEventPass.Initial).changes.any { it.pressed && !it.previousPressed }) fullPoke++ } } }
+            .twoFingerTabs(rightHalf = side || wide,
             // two fingers up: the next tab, down: the one before (the user, 7 Nov: one finger scrolls, so two are free)
             step = { if (BrowserGesture.Swipe in gestures) { stepTab(it); true } else false }, begin = { tabs.firstOrNull { it.id == currentId }?.let(::capture) },
             hold = { if (fullTab != null || switcher != null || BrowserGesture.Hold !in gestures) false else { showTabs(); true } }, slide = ::slideTabs, letGo = ::letGoTabs,
@@ -1363,6 +1366,22 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                 }
             }
             if (BrowserGesture.Knob in gestures && !full && !editing) tabKnob()
+            // a full-screen video's ↔ (the user, 13 Nov: "we need a <-> knob that auto hides"; a site's player may keep the pinch for
+            // itself): at the right edge, lit while filled; gone 3 s after the last touch, back at the next
+            if (full) tabs.firstOrNull { it.id == fullTab }?.let { t ->
+                var seen by remember { mutableStateOf(true) }
+                LaunchedEffect(fullPoke) { seen = true; delay(3000); seen = false }
+                val filled = BrowserRules.host(t.url) in coverSites
+                androidx.compose.animation.AnimatedVisibility(seen, Modifier.align(Alignment.CenterEnd),
+                    enter = androidx.compose.animation.fadeIn(), exit = androidx.compose.animation.fadeOut()) {
+                    Surface(onClick = { setCover(t, !filled); fullPoke++ }, shape = androidx.compose.foundation.shape.RoundedCornerShape(topStartPercent = 50, bottomStartPercent = 50),
+                        color = if (filled) BROWSER_COLOR else Color.Black.copy(alpha = 0.6f), contentColor = Color.White, modifier = Modifier.size(44.dp, 64.dp)) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(painterResource(R.drawable.ic_fill_width), stringResource(if (filled) R.string.browser_video_fit else R.string.browser_video_fill), Modifier.size(24.dp))
+                        }
+                    }
+                }
+            }
             if (side && autohide && !lowered) {
                 androidx.compose.animation.AnimatedVisibility(showBar, Modifier.align(Alignment.CenterStart),
                     enter = androidx.compose.animation.slideInHorizontally { -it }, exit = androidx.compose.animation.slideOutHorizontally { -it }) { sideBar(Modifier.shadow(8.dp)) }
