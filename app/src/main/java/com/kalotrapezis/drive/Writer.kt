@@ -1839,14 +1839,14 @@ internal fun WriterScreen(back: () -> Unit, open: String?) {
     }
     LaunchedEffect(autoSaveDue) { if (autoSaveDue > 0 && dirty) save(auto = true) }
     /** A new document's first Save, or Save as (File): beside the document it was, under [typed], and goes on as that one. */
-    fun saveNew(typed: String) {
+    fun saveNew(typed: String, into: File? = null) {
         if (saving) return
         val clean = typed.trim().removeSuffix(".${kind.extension}")
         if (clean.isEmpty() || '/' in clean) { message = context.getString(R.string.words_not_a_file_name); return }
         saving = true
         scope.launch {
             try {
-            val dir = currentFile()?.parentFile ?: TextEditorStore(context).saveDirectory()
+            val dir = into ?: currentFile()?.parentFile ?: TextEditorStore(context).saveDirectory()
             val target = File(dir, "$clean.${kind.extension}")
             val doc = current()
             val savedStyleEdits = styleEdits
@@ -4583,20 +4583,20 @@ internal fun WriterScreen(back: () -> Unit, open: String?) {
     equationOpen?.let { (key, math) -> EquationDialog(math, { equationOpen = null }) { m -> equationOpen = null; putEquation(key, m) } }
     if (naming) {
         var typed by remember { mutableStateOf(file?.nameWithoutExtension?.let { "$it (2)" } ?: "") }
+        var into by remember { mutableStateOf(file?.parentFile ?: TextEditorStore(context).saveDirectory()) }
         AlertDialog(
             onDismissRequest = { naming = false },
             title = { Text(stringResource(R.string.words_save_as)) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SaveAsWhere(into, { into = it }) {
                     OutlinedTextField(typed, { typed = it }, singleLine = true, label = { Text(stringResource(R.string.words_file_name)) }, suffix = { Text(".${kind.extension}") })
                     // A new document chooses its kind; a file stays what it is (its own package is what is written).
                     if (file == null) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OfficeKind.entries.forEach { k -> RibbonButton(if (k == OfficeKind.Docx) "Word (.docx)" else "OpenDocument (.odt)", MaterialTheme.colorScheme.onSurface, on = kind == k) { kind = k } }
                     }
-                    Text(file?.parentFile?.let { stringResource(R.string.words_save_as_beside, file.name, it.name) } ?: stringResource(R.string.words_save_as_in, TextEditorStore(context).saveFolder), style = MaterialTheme.typography.bodySmall)
                 }
             },
-            confirmButton = { TextButton(onClick = { saveNew(typed) }) { Text(stringResource(R.string.common_save)) } },
+            confirmButton = { TextButton(onClick = { WriterLog.i("Words: save as into ${into.name}"); saveNew(typed, into) }) { Text(stringResource(R.string.common_save)) } },
             dismissButton = { TextButton(onClick = { naming = false }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }

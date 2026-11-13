@@ -2032,13 +2032,12 @@ internal fun PdfScreen(back: () -> Unit, open: String, openWords: (String) -> Un
     // File › Save as and Rename (Words' and Slides'): beside it, a PDF; Save as goes on with the new one
     naming?.let { how -> file?.let { f ->
         var typedName by remember { mutableStateOf(if (how == "as") "${f.nameWithoutExtension} (2)" else f.nameWithoutExtension) }
+        var into by remember { mutableStateOf(f.parentFile) } // Save as: the folder chosen (Rename stays beside)
         androidx.compose.material3.AlertDialog(onDismissRequest = { naming = null }, title = { Text(stringResource(if (how == "as") R.string.words_save_as else R.string.common_rename)) },
-            text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                androidx.compose.material3.OutlinedTextField(typedName, { typedName = it }, singleLine = true, label = { Text(stringResource(R.string.words_file_name)) }, suffix = { Text(".pdf") })
-                if (how == "as") Text(stringResource(R.string.pdf_save_as_beside, f.name), style = MaterialTheme.typography.bodySmall)
-            } },
+            text = { val field = @Composable { androidx.compose.material3.OutlinedTextField(typedName, { typedName = it }, singleLine = true, label = { Text(stringResource(R.string.words_file_name)) }, suffix = { Text(".pdf") }) }
+                if (how == "as") SaveAsWhere(into, { into = it }) { field() } else field() },
             confirmButton = { androidx.compose.material3.TextButton(onClick = {
-                val t = typedName.trim().removeSuffix(".pdf").takeIf { it.isNotEmpty() && '/' !in it }?.let { File(f.parentFile, "$it.pdf") }
+                val t = typedName.trim().removeSuffix(".pdf").takeIf { it.isNotEmpty() && '/' !in it }?.let { File(if (how == "as") into else f.parentFile, "$it.pdf") }
                     ?: run { Toast.makeText(context, R.string.words_not_a_file_name, Toast.LENGTH_SHORT).show(); return@TextButton }
                 if (t == f) { naming = null; return@TextButton }
                 if (t.exists()) { Toast.makeText(context, context.getString(R.string.words_name_taken, t.name), Toast.LENGTH_LONG).show(); return@TextButton }

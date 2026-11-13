@@ -457,16 +457,15 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
         }
     }
     // Save as: a new file in the save folder. Never over another file.
-    fun saveAs(id: String, typed: String) {
+    fun saveAs(id: String, typed: String, dir: File) {
         val t = tabs.firstOrNull { it.id == id } ?: return
         val name = TextFileRules.fileName(typed) ?: run { message = context.getString(R.string.text_bad_name); return }
         scope.launch {
-            val dir = store.saveDirectory()
             val file = File(dir, name)
             val result = withContext(Dispatchers.IO) {
                 when {
-                    !dir.isDirectory && !dir.mkdirs() -> context.getString(R.string.text_folder_failed, store.saveFolder)
-                    file.exists() -> context.getString(R.string.text_name_taken, name, store.saveFolder)
+                    !dir.isDirectory && !dir.mkdirs() -> context.getString(R.string.text_folder_failed, dir.name)
+                    file.exists() -> context.getString(R.string.text_name_taken, name, dir.name)
                     !write(t, Uri.fromFile(file)) -> context.getString(R.string.text_save_failed, name)
                     else -> null
                 }
@@ -475,7 +474,7 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
             val renamed = t.copy(uri = Uri.fromFile(file).toString(), name = name)
             tabs[tabs.indexOfFirst { it.id == id }] = renamed
             saved[id] = text[id]?.text ?: ""; withContext(Dispatchers.IO) { store.setDraft(id, null) }
-            naming = null; persist(); store.mark(renamed.uri, true); message = context.getString(R.string.text_saved_in, store.saveFolder)
+            naming = null; persist(); store.mark(renamed.uri, true); message = context.getString(R.string.text_saved_in, dir.name); WriterLog.i("Text editor: saved as into ${dir.name}")
         }
     }
     fun close(id: String, force: Boolean = false) {
@@ -602,16 +601,18 @@ internal fun TextEditorScreen(back: () -> Unit, open: Uri? = null, start: String
 
     naming?.let { id ->
         var typed by remember(id) { mutableStateOf(tabs.firstOrNull { it.id == id }?.name?.takeUnless { it.startsWith("Untitled") } ?: "") }
+        // the folder of the file it is when that is in Tetra, else the save folder
+        var into by remember(id) { mutableStateOf(tabs.firstOrNull { it.id == id }?.uri?.let { TextFileRules.tetraPath(it, "${context.packageName}.files", driveRoot().path) }
+            ?.let { File(driveRoot(), it).parentFile } ?: store.saveDirectory()) }
         AlertDialog(
             onDismissRequest = { naming = null },
             title = { Text(stringResource(R.string.text_save_as)) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SaveAsWhere(into, { into = it }) {
                     OutlinedTextField(typed, { typed = it }, singleLine = true, label = { Text(stringResource(R.string.scanner_file_name)) })
-                    Text(stringResource(R.string.text_save_where, store.saveFolder), style = MaterialTheme.typography.bodySmall)
                 }
             },
-            confirmButton = { TextButton(onClick = { saveAs(id, typed) }) { Text(stringResource(R.string.common_save), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
+            confirmButton = { TextButton(onClick = { saveAs(id, typed, into) }) { Text(stringResource(R.string.common_save), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
             dismissButton = { TextButton(onClick = { naming = null }) { Text(stringResource(R.string.common_cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
         )
     }

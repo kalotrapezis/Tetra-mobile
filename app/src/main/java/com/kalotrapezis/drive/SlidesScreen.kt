@@ -2481,15 +2481,17 @@ internal fun SlidesScreen(back: () -> Unit, open: String) {
     if (savingAs || renaming) file?.let { f ->
         var typed by remember { mutableStateOf(if (savingAs) "${f.nameWithoutExtension} (2)" else f.nameWithoutExtension) }
         var kind by remember { mutableStateOf(f.extension.lowercase()) } // Save as: .pptx or .odp (the other format: the deck rebuilt in it)
-        fun target() = typed.trim().removeSuffix(".$kind").takeIf { it.isNotEmpty() && '/' !in it }?.let { File(f.parentFile, "$it.$kind") }
+        var into by remember { mutableStateOf(f.parentFile) } // Save as: the folder chosen (Rename stays beside)
+        fun target() = typed.trim().removeSuffix(".$kind").takeIf { it.isNotEmpty() && '/' !in it }?.let { File(if (savingAs) into else f.parentFile, "$it.$kind") }
         androidx.compose.material3.AlertDialog(onDismissRequest = { savingAs = false; renaming = false }, title = { Text(if (savingAs) stringResource(R.string.slides_save_as) else stringResource(R.string.common_rename)) },
-            text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            text = { val fields = @Composable {
                 androidx.compose.material3.OutlinedTextField(typed, { typed = it }, singleLine = true, label = { Text(stringResource(R.string.slides_file_name)) }, suffix = { Text(".${if (savingAs) kind else f.extension}") })
                 if (savingAs) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     for (k in listOf("pptx", "odp")) androidx.compose.material3.FilterChip(kind == k, { kind = k }, { Text(if (k == "pptx") "PowerPoint" else "LibreOffice") })
                 }
-                if (savingAs) Text(stringResource(R.string.slides_save_as_beside, f.name) + if (kind != f.extension.lowercase()) " " + stringResource(R.string.slides_save_as_rebuilt) else "", style = MaterialTheme.typography.bodySmall)
-            } },
+                if (savingAs && kind != f.extension.lowercase()) Text(stringResource(R.string.slides_save_as_rebuilt), style = MaterialTheme.typography.bodySmall)
+            }
+                if (savingAs) SaveAsWhere(into, { into = it }) { fields() } else Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { fields() } },
             confirmButton = { androidx.compose.material3.TextButton(onClick = {
                 val t = target() ?: run { message = context.getString(R.string.slides_not_file_name); return@TextButton }
                 if (t == f) { savingAs = false; renaming = false; return@TextButton }

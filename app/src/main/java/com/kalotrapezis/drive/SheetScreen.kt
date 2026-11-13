@@ -1853,9 +1853,11 @@ internal fun SheetScreen(back: () -> Unit, open: String) {
     // File › Save as and Rename: the new name, beside the file
     fileNaming?.let { how -> file?.let { f ->
         var typed by remember(how) { mutableStateOf(if (how == "as") "${f.nameWithoutExtension} (2)" else f.nameWithoutExtension) }
+        var into by remember(how) { mutableStateOf(f.parentFile) } // Save as: the folder chosen (Rename stays beside)
         AlertDialog(onDismissRequest = { fileNaming = null }, title = { Text(stringResource(if (how == "as") R.string.tables_save_as else R.string.common_rename)) },
-            text = { OutlinedTextField(typed, { typed = it }, singleLine = true, label = { Text(stringResource(R.string.tables_file_name)) }, suffix = { Text(".${f.extension}") }) },
-            confirmButton = { TextButton(onClick = { val name = typed.trim().removeSuffix(".${f.extension}"); val target = File(f.parentFile, "$name.${f.extension}")
+            text = { val field = @Composable { OutlinedTextField(typed, { typed = it }, singleLine = true, label = { Text(stringResource(R.string.tables_file_name)) }, suffix = { Text(".${f.extension}") }) }
+                if (how == "as") SaveAsWhere(into, { into = it }) { field() } else field() },
+            confirmButton = { TextButton(onClick = { val name = typed.trim().removeSuffix(".${f.extension}"); val target = File(if (how == "as") into else f.parentFile, "$name.${f.extension}")
                 when {
                     name.isEmpty() || '/' in name -> message = context.getString(R.string.tables_not_a_file_name)
                     target == f -> fileNaming = null
@@ -1866,12 +1868,11 @@ internal fun SheetScreen(back: () -> Unit, open: String) {
             dismissButton = { TextButton(onClick = { fileNaming = null }) { Text(stringResource(R.string.common_cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } }) } }
     if (naming) {
         var typed by remember { mutableStateOf("New spreadsheet") }
-        val dir = remember { TextEditorStore(context).saveDirectory() }
+        var dir by remember { mutableStateOf(TextEditorStore(context).saveDirectory()) }
         AlertDialog(onDismissRequest = { naming = false }, title = { Text(stringResource(R.string.tables_save_as)) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SaveAsWhere(dir, { dir = it }) {
                     OutlinedTextField(typed, { typed = it }, singleLine = true, label = { Text(stringResource(R.string.tables_file_name)) }, suffix = { Text(".xlsx") })
-                    Text(stringResource(R.string.tables_save_folder, TextEditorStore(context).saveFolder), style = MaterialTheme.typography.bodySmall)
                 }
             },
             confirmButton = { TextButton(onClick = {
