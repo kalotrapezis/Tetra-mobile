@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Tryck här för att få tillbaka sidofältet</string>
     <string name="browser_tab_behind">Nya flikar i bakgrunden</string>
     <string name="browser_tab_behind_note">Öppna i ny flik (hållen eller högerklickad länk) öppnar den bakom och du stannar på sidan.</string>
+    <string name="browser_tab_knob">Flikgrepp</string>
+    <string name="browser_tab_knob_note">Ett litet grepp vid högerkanten: dra på det för att byta flik, håll det för att se alla flikar.</string>
+    <string name="browser_tabs_all">Alla flikar</string>
+    <string name="browser_video_fill">Videon fyller skärmen</string>
+    <string name="browser_video_fit">Hela videon</string>
 </resources>

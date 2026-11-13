@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Touchez ici pour faire revenir la barre latérale</string>
     <string name="browser_tab_behind">Nouveaux onglets en arrière-plan</string>
     <string name="browser_tab_behind_note">Ouvrir dans un nouvel onglet (lien maintenu ou clic droit) l’ouvre derrière et vous restez sur cette page.</string>
+    <string name="browser_tab_knob">Poignée des onglets</string>
+    <string name="browser_tab_knob_note">Une petite poignée au bord droit : glissez dessus pour changer d\'onglet, maintenez-la pour voir tous les onglets.</string>
+    <string name="browser_tabs_all">Tous les onglets</string>
+    <string name="browser_video_fill">La vidéo remplit l\'écran</string>
+    <string name="browser_video_fit">Vidéo entière</string>
 </resources>

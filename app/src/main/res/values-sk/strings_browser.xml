@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Ťuknutím sem vrátite bočný panel</string>
     <string name="browser_tab_behind">Nové karty na pozadí</string>
     <string name="browser_tab_behind_note">Otvoriť na novej karte (podržaný odkaz alebo pravé tlačidlo) ju otvorí na pozadí a zostanete na tejto stránke.</string>
+    <string name="browser_tab_knob">Úchyt kariet</string>
+    <string name="browser_tab_knob_note">Malý úchyt pri pravom okraji: posunutím prepnete kartu, podržaním uvidíte všetky karty.</string>
+    <string name="browser_tabs_all">Všetky karty</string>
+    <string name="browser_video_fill">Video vyplní obrazovku</string>
+    <string name="browser_video_fit">Celé video</string>
 </resources>

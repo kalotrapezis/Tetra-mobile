@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Pieskarieties šeit, lai atgrieztu sānjoslu</string>
     <string name="browser_tab_behind">Jaunas cilnes fonā</string>
     <string name="browser_tab_behind_note">Atvērt jaunā cilnē (turētai saitei vai ar labo klikšķi) to atver fonā, un jūs paliekat šajā lapā.</string>
+    <string name="browser_tab_knob">Ciļņu rokturis</string>
+    <string name="browser_tab_knob_note">Neliels rokturis labajā malā: velciet pa to, lai mainītu cilni, turiet to, lai redzētu visas cilnes.</string>
+    <string name="browser_tabs_all">Visas cilnes</string>
+    <string name="browser_video_fill">Video aizpilda ekrānu</string>
+    <string name="browser_video_fit">Viss video</string>
 </resources>

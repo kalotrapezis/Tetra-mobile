@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Puuduta siin, et külgriba tagasi tuua</string>
     <string name="browser_tab_behind">Uued vahekaardid taustal</string>
     <string name="browser_tab_behind_note">Ava uuel vahekaardil (hoitud või paremklõpsatud lingilt) avab selle taha ja jääd sellele lehele.</string>
+    <string name="browser_tab_knob">Vahekaartide sang</string>
+    <string name="browser_tab_knob_note">Väike sang paremas servas: libista sellel vahekaardi vahetamiseks, hoia seda kõigi vahekaartide nägemiseks.</string>
+    <string name="browser_tabs_all">Kõik vahekaardid</string>
+    <string name="browser_video_fill">Video täidab ekraani</string>
+    <string name="browser_video_fit">Kogu video</string>
 </resources>

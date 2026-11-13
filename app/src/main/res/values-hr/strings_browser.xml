@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Dodirnite ovdje za povratak bočne trake</string>
     <string name="browser_tab_behind">Nove kartice u pozadini</string>
     <string name="browser_tab_behind_note">Otvori u novoj kartici (zadržana veza ili desni klik) otvara je iza, a ti ostaješ na ovoj stranici.</string>
+    <string name="browser_tab_knob">Ručka kartica</string>
+    <string name="browser_tab_knob_note">Mala ručka na desnom rubu: povuci po njoj za promjenu kartice, zadrži je za prikaz svih kartica.</string>
+    <string name="browser_tabs_all">Sve kartice</string>
+    <string name="browser_video_fill">Videozapis ispunjava zaslon</string>
+    <string name="browser_video_fit">Cijeli videozapis</string>
 </resources>

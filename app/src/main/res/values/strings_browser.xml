@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Tap here to bring the side bar back</string>
     <string name="browser_tab_behind">New tabs in the background</string>
     <string name="browser_tab_behind_note">Open in new tab, from a held or right-clicked link, opens it behind and keeps you on this page.</string>
+    <string name="browser_tab_knob">Tab knob</string>
+    <string name="browser_tab_knob_note">A small knob at the right edge: slide on it to change tab, hold it to see every tab.</string>
+    <string name="browser_tabs_all">All tabs</string>
+    <string name="browser_video_fill">Video fills the screen</string>
+    <string name="browser_video_fit">Whole video</string>
 </resources>

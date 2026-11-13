@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Toque aqui para trazer de volta a barra lateral</string>
     <string name="browser_tab_behind">Novos separadores em segundo plano</string>
     <string name="browser_tab_behind_note">Abrir em novo separador, a partir de uma ligação mantida premida ou com clique direito, abre-o atrás e fica nesta página.</string>
+    <string name="browser_tab_knob">Pega dos separadores</string>
+    <string name="browser_tab_knob_note">Uma pequena pega na margem direita: deslize nela para mudar de separador, mantenha-a premida para ver todos os separadores.</string>
+    <string name="browser_tabs_all">Todos os separadores</string>
+    <string name="browser_video_fill">O vídeo preenche o ecrã</string>
+    <string name="browser_video_fit">Vídeo inteiro</string>
 </resources>

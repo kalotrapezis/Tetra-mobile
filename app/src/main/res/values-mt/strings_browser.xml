@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Agħfas hawn biex terġa\' ġġib il-bar tal-ġenb</string>
     <string name="browser_tab_behind">Tabs ġodda fl-isfond</string>
     <string name="browser_tab_behind_note">Iftaħ f’tab ġdida, minn link miżmuma jew bil-klikk tal-lemin, tiftaħha wara u tibqa’ f’din il-paġna.</string>
+    <string name="browser_tab_knob">Manku tat-tabs</string>
+    <string name="browser_tab_knob_note">Manku żgħir fit-tarf tal-lemin: żerżaq fuqu biex tibdel it-tab, żommu biex tara t-tabs kollha.</string>
+    <string name="browser_tabs_all">It-tabs kollha</string>
+    <string name="browser_video_fill">Il-vidjo jimla l-iskrin</string>
+    <string name="browser_video_fit">Il-vidjo kollu</string>
 </resources>

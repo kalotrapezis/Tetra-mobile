@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Tik hier om de zijbalk terug te halen</string>
     <string name="browser_tab_behind">Nieuwe tabbladen op de achtergrond</string>
     <string name="browser_tab_behind_note">Openen in nieuw tabblad (link vasthouden of rechtsklikken) opent het erachter en je blijft op deze pagina.</string>
+    <string name="browser_tab_knob">Tabgreep</string>
+    <string name="browser_tab_knob_note">Een kleine greep aan de rechterrand: schuif erover om van tabblad te wisselen, houd hem vast om alle tabbladen te zien.</string>
+    <string name="browser_tabs_all">Alle tabbladen</string>
+    <string name="browser_video_fill">Video vult het scherm</string>
+    <string name="browser_video_fit">Hele video</string>
 </resources>

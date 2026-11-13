@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Πάτα εδώ για να επαναφέρεις την πλαϊνή στήλη</string>
     <string name="browser_tab_behind">Νέες καρτέλες στο παρασκήνιο</string>
     <string name="browser_tab_behind_note">Το «Άνοιγμα σε νέα καρτέλα», από σύνδεσμο με παρατεταμένο πάτημα ή δεξί κλικ, την ανοίγει από πίσω και μένεις στη σελίδα σου.</string>
+    <string name="browser_tab_knob">Λαβή καρτελών</string>
+    <string name="browser_tab_knob_note">Μια μικρή λαβή στη δεξιά άκρη: σύρε πάνω της για να αλλάξεις καρτέλα, κράτησέ την για να δεις όλες τις καρτέλες.</string>
+    <string name="browser_tabs_all">Όλες οι καρτέλες</string>
+    <string name="browser_video_fill">Το βίντεο γεμίζει την οθόνη</string>
+    <string name="browser_video_fit">Ολόκληρο το βίντεο</string>
 </resources>

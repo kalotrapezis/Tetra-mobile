@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Bakstelėkite čia, kad grąžintumėte šoninę juostą</string>
     <string name="browser_tab_behind">Nauji skirtukai fone</string>
     <string name="browser_tab_behind_note">Atidaryti naujame skirtuke (palaikius nuorodą ar dešiniuoju pelės klavišu) atidaro jį fone, o jūs liekate šiame puslapyje.</string>
+    <string name="browser_tab_knob">Skirtukų rankenėlė</string>
+    <string name="browser_tab_knob_note">Maža rankenėlė dešiniajame krašte: braukite ja, kad pakeistumėte skirtuką, palaikykite, kad matytumėte visus skirtukus.</string>
+    <string name="browser_tabs_all">Visi skirtukai</string>
+    <string name="browser_video_fill">Vaizdo įrašas užpildo ekraną</string>
+    <string name="browser_video_fit">Visas vaizdo įrašas</string>
 </resources>

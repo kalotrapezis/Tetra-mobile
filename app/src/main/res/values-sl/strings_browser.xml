@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Tapnite tukaj, da vrnete stransko vrstico</string>
     <string name="browser_tab_behind">Novi zavihki v ozadju</string>
     <string name="browser_tab_behind_note">Odpri v novem zavihku (pridržana povezava ali desni klik) ga odpre zadaj, vi pa ostanete na tej strani.</string>
+    <string name="browser_tab_knob">Ročaj zavihkov</string>
+    <string name="browser_tab_knob_note">Majhen ročaj ob desnem robu: podrsajte po njem za menjavo zavihka, pridržite ga za prikaz vseh zavihkov.</string>
+    <string name="browser_tabs_all">Vsi zavihki</string>
+    <string name="browser_video_fill">Video zapolni zaslon</string>
+    <string name="browser_video_fit">Cel video</string>
 </resources>

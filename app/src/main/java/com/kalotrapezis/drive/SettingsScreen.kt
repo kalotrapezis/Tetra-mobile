@@ -593,6 +593,7 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
     var top by remember { mutableStateOf(prefs.getBoolean("top_bar", false)) }
     var side by remember { mutableStateOf(prefs.getBoolean("side_bar", true)) }
     var behind by remember { mutableStateOf(prefs.getBoolean("tab_behind", false)) }
+    var knob by remember { mutableStateOf(prefs.getBoolean("tab_knob", true)) }
     SettingsSection(stringResource(R.string.browser_history)) {
         ChoiceRow(stringResource(R.string.browser_history_keep), null, listOf(BrowserRules.ON_EXIT to stringResource(R.string.browser_keep_exit),
             BrowserRules.DAY to stringResource(R.string.browser_keep_day), BrowserRules.NEVER to stringResource(R.string.browser_keep_never)), keep) {
@@ -610,6 +611,7 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
     }
     SettingsSection {
         SwitchRow(stringResource(R.string.browser_tab_behind), stringResource(R.string.browser_tab_behind_note), behind) { behind = it; prefs.edit().putBoolean("tab_behind", it).apply() }
+        SwitchRow(stringResource(R.string.browser_tab_knob), stringResource(R.string.browser_tab_knob_note), knob) { knob = it; prefs.edit().putBoolean("tab_knob", it).apply() }
     }
     // what this device shares with the others through Tetra's sync (the user, 3 Nov: "options in the settings what to sync in the
     // browser"); each switch is this device's own, and off keeps what is here (BrowserSync.kt)

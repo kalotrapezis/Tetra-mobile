@@ -114,6 +114,16 @@ function first(sel, wait, text, random) { if (firstOff) firstOff(); var lastN = 
   firstOff = function () { seen.disconnect(); clearInterval(t); clearTimeout(end); document.removeEventListener('visibilitychange', look); firstOff = null; };
   seen.observe(document.documentElement, { childList: true, subtree: true }); document.addEventListener('visibilitychange', look); look(); }
 
+// a full-screen video filling the screen, its black bars cropped (the Browser's pinch out, kept per site; BrowserScreen.kt):
+// any site's <video>, under the element that went full screen or itself full screen
+var coverStyle = null;
+function cover(on) { try {
+  if (!coverStyle) { coverStyle = document.createElement('style');
+    coverStyle.textContent = 'html.tetra-cover :fullscreen video,html.tetra-cover video:fullscreen{position:fixed!important;left:0!important;top:0!important;' +
+      'width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;object-fit:cover!important}'; }
+  if (!coverStyle.isConnected) (document.head || document.documentElement).appendChild(coverStyle);
+  document.documentElement.classList.toggle('tetra-cover', !!on); } catch (e) { post({ error: 'cover: ' + e }); } }
+
 function heard(m) {
   if ('bg' in m) bg = !!m.bg;
   if (m.fill) fill(m.fill);
@@ -121,6 +131,7 @@ function heard(m) {
   if (m.autoplay) autoplay();
   if (m.first) first(m.first, m.wait, m.text, m.random);
   if (m.report) { last = null; report(); }
+  if ('cover' in m) cover(m.cover);
 }
 connect();
 })();

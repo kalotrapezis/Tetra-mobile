@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Tapáil anseo chun an barra taoibh a thabhairt ar ais</string>
     <string name="browser_tab_behind">Cluaisíní nua sa chúlra</string>
     <string name="browser_tab_behind_note">Osclaíonn Oscail i gcluaisín nua, ó nasc coinnithe nó le cliceáil dheis, taobh thiar é agus fanann tú ar an leathanach seo.</string>
+    <string name="browser_tab_knob">Hanla na gcluaisíní</string>
+    <string name="browser_tab_knob_note">Hanla beag ar an imeall ar dheis: sleamhnaigh air chun cluaisín a athrú, coinnigh air chun gach cluaisín a fheiceáil.</string>
+    <string name="browser_tabs_all">Gach cluaisín</string>
+    <string name="browser_video_fill">Líonann an físeán an scáileán</string>
+    <string name="browser_video_fit">An físeán ar fad</string>
 </resources>

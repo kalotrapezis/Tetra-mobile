@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Hier tippen, um die Seitenleiste zurückzuholen</string>
     <string name="browser_tab_behind">Neue Tabs im Hintergrund</string>
     <string name="browser_tab_behind_note">„In neuem Tab öffnen“ (Link gedrückt halten oder Rechtsklick) öffnet ihn dahinter, du bleibst auf dieser Seite.</string>
+    <string name="browser_tab_knob">Tab-Griff</string>
+    <string name="browser_tab_knob_note">Ein kleiner Griff am rechten Rand: darauf wischen wechselt den Tab, gedrückt halten zeigt alle Tabs.</string>
+    <string name="browser_tabs_all">Alle Tabs</string>
+    <string name="browser_video_fill">Video füllt den Bildschirm</string>
+    <string name="browser_video_fit">Ganzes Video</string>
 </resources>

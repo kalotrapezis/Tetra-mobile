@@ -32,6 +32,13 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.systemGestureExclusion
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -95,6 +102,9 @@ import org.mozilla.geckoview.WebResponse
 
 internal const val BROWSER_SETTINGS = "settings-browser" // the sidebar's ⚙: Settings › Browser (MainActivity)
 internal val BROWSER_COLOR = Color(0xFF1A87FD) // the blue of the user's icon (Assets/BrowserApp.png)
+private const val TAB_HOLD_MS = 400L // the tab knob or two fingers held this long: the tabs' list
+private const val TAB_STEP_DP = 56 // a slide this long: one tab (the knob) or the highlight one on (the list)
+private const val TAB_SHOT_PX = 360 // a tab's picture's width in the list
 private val PRIVATE_COLOR = Color(0xFF2B2140)
 /** Gecko's errors that mean no network or too slow a one (not a site that is not there). */
 private val NET_DOWN = setOf(WebRequestError.ERROR_NET_INTERRUPT, WebRequestError.ERROR_NET_TIMEOUT, WebRequestError.ERROR_CONNECTION_REFUSED,
@@ -173,6 +183,7 @@ private class BrowserTab(val id: Int, val session: GeckoSession, val view: Gecko
     var pinned by mutableStateOf(false) // a circle at the row's start, its icon only
     var group by mutableStateOf<Int?>(null) // its tab group, if any
     var pending: String? = null // a kept tab's address, loaded when it is first opened
+    var shot by mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) // its page as last seen, small: the tabs' list
     var failed: String? = null // an address not opened for want of a network: loaded again when one comes
     var port: WebExtension.Port? = null
     val waiting = mutableListOf<JSONObject>() // said before this page's script was there (a small page stops loading first): given when it comes
@@ -286,6 +297,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     val drift = remember { IntArray(1) } // the scroll since its last turn, in px: a small threshold, so the bar does not flicker
     // HTML only, per site (Private: for this time only, kept nowhere)
     var htmlSites by remember { mutableStateOf(if (private) emptySet() else prefs.getStringSet("html_sites", null).orEmpty().toSet()) }
+    // a full-screen video filling the screen, per site (the user, 13 Nov: "like YouTube's app"); Private: for this time only
+    var coverSites by remember { mutableStateOf(if (private) emptySet() else prefs.getStringSet("cover_sites", null).orEmpty().toSet()) }
     /** The tab set as its next page's site wants: Gecko reads it as that page loads. */
     fun applyHtml(t: BrowserTab, address: String?) {
         val on = BrowserRules.htmlOnly(htmlSites, address)
@@ -401,6 +414,19 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         if (!t.session.isOpen) t.session.open(runtime)
         if (t.view.session !== t.session) { t.view.setSession(t.session); t.view.coverUntilFirstPaint(pageColor) }
     }
+    /** The tab's page as it is now, small, for the tabs' list (the user's sketch, 13 Nov); nothing when its view is not shown. */
+    fun capture(t: BrowserTab) {
+        if (!t.view.isAttachedToWindow || t.view.width == 0 || t.view.session == null) return
+        runCatching { t.view.capturePixels().accept({ big -> big ?: return@accept
+            val w = TAB_SHOT_PX.coerceAtMost(big.width)
+            val small = android.graphics.Bitmap.createScaledBitmap(big, w, (big.height.toLong() * w / big.width).toInt().coerceAtLeast(1), true)
+            if (small !== big) big.recycle()
+            t.shot = small.asImageBitmap()
+        }, { e -> WriterLog.w("Browser: no picture of ${BrowserRules.host(t.url)}: ${e?.message}") }) }.onFailure { WriterLog.w("Browser: no picture of a tab", it) }
+    }
+    // a moment after the page stops scrolling: its picture as the user left it (taken at the switch itself, the view is already gone)
+    val shotJob = remember { arrayOfNulls<kotlinx.coroutines.Job>(1) }
+    fun captureSoon(t: BrowserTab) { shotJob[0]?.cancel(); shotJob[0] = scope.launch { delay(1000); if (t.id == currentId) capture(t) } }
     fun reopen(t: BrowserTab) { runCatching { if (!t.session.isOpen) t.session.open(runtime); t.url.takeIf { it.isNotEmpty() }?.let(t.session::loadUri) }.onFailure { WriterLog.e("Browser: a tab not reopened", it) } }
     fun load(t: BrowserTab, address: String) { attach(t); applyHtml(t, address); t.failed = null; t.session.loadUri(address) }
     lateinit var openTab: (String, Boolean) -> BrowserTab
@@ -452,6 +478,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             override fun onPageStop(session: GeckoSession, success: Boolean) {
                 tab.progress = 100
                 if (tab.url.isEmpty()) return // a new session's about:blank, before its first page
+                if (tab.id == currentId) captureSoon(tab) // drawn by then: the tabs' list's picture
                 if (tab.autoplay) { tab.autoplay = false; WriterLog.i("Browser: autoplay on ${BrowserRules.host(tab.url)}"); tab.send(JSONObject().put("autoplay", true)) }
                 tab.first?.takeIf { tab.mix && BrowserRules.host(tab.url) in it.hosts }?.let { site -> tab.mix = false; WriterLog.i("Browser: a mix looked for on ${site.id}")
                     tab.send(JSONObject().put("first", "a[href*=\"/playlist/\"]").put("text", "Daily Mix").put("random", true).put("wait", 30000)) }
@@ -466,6 +493,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             override fun onTitleChange(session: GeckoSession, title: String?) { tab.title = title.orEmpty() }
             override fun onFullScreen(session: GeckoSession, fullScreen: Boolean) {
                 fullTab = if (fullScreen) tab.id else null
+                if (fullScreen) tab.send(JSONObject().put("cover", BrowserRules.host(tab.url) in coverSites)) // filled, if the site's videos were
                 hostActivity()?.requestedOrientation = if (fullScreen) android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE else android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             }
             override fun onExternalResponse(session: GeckoSession, response: WebResponse) = download(response)
@@ -481,7 +509,10 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             override fun onKill(session: GeckoSession) { WriterLog.w("Browser: a tab's page was killed, ${BrowserRules.host(tab.url)}"); reopen(tab) }
         }
         session.scrollDelegate = object : GeckoSession.ScrollDelegate {
-            override fun onScrollChanged(session: GeckoSession, scrollX: Int, scrollY: Int) { tab.scrollY = scrollY; if (scrollY <= 0 && tab.id == currentId) barShown = true } // back at the top: the bar
+            override fun onScrollChanged(session: GeckoSession, scrollX: Int, scrollY: Int) {
+                tab.scrollY = scrollY
+                if (tab.id == currentId) { captureSoon(tab); if (scrollY <= 0) barShown = true } // back at the top: the bar
+            }
         }
         session.permissionDelegate = object : GeckoSession.PermissionDelegate {
             override fun onContentPermissionRequest(session: GeckoSession, perm: GeckoSession.PermissionDelegate.ContentPermission): GeckoResult<Int> = GeckoResult.fromValue(when (perm.permission) {
@@ -590,6 +621,43 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         tabs.remove(t); BrowserEngine.forget(t.session); t.view.releaseSession(); t.session.close()
     }
     openTab = { u, gecko -> open(u, gecko) }
+    /** The next tab (+1) or the one before (-1), its name said a moment: two fingers' swipe, the tab knob's slide. */
+    fun stepTab(step: Int) {
+        val i = tabs.indexOfFirst { it.id == currentId }
+        tabs.getOrNull(i + step)?.let { t -> switch(t); message = t.title.ifBlank { BrowserRules.host(t.url) }.ifBlank { context.getString(R.string.browser_tab_new) } }
+    }
+    // the tabs' list (the user's sketch, 13 Nov): the tab knob or two fingers held open it; the finger, still down, moves the
+    // highlight and letting go opens that tab (as Alt-Tab); let go without sliding, it stays for a tap. 0 is New tab, i + 1 tabs[i]
+    var switcher by remember { mutableStateOf<Int?>(null) }
+    val switchFrom = remember { IntArray(1) }
+    var slid by remember { mutableStateOf(false) }
+    var knobOn by remember { mutableStateOf(prefs.getBoolean("tab_knob", true)) } // Settings › Browser › Tab knob, read again on coming back
+    fun showTabs() {
+        tabs.firstOrNull { it.id == currentId }?.let(::capture)
+        switchFrom[0] = tabs.indexOfFirst { it.id == currentId } + 1; switcher = switchFrom[0]; slid = false; editing = false; held = null
+        WriterLog.i("Browser: the tabs' list, ${tabs.size} tabs")
+    }
+    fun pickTab(i: Int) {
+        switcher = null
+        if (i == 0) { open(); editing = true; typed = TextFieldValue("") } else tabs.getOrNull(i - 1)?.let(::switch)
+        WriterLog.i("Browser: from the tabs' list, ${if (i == 0) "a new tab" else "tab ${i}"}")
+    }
+    fun slideTabs(dy: Float) {
+        val n = (dy / (TAB_STEP_DP * density)).toInt()
+        if (n != 0) slid = true
+        if (switcher != null) switcher = (switchFrom[0] + n).coerceIn(0, tabs.size)
+    }
+    fun letGoTabs() { if (slid) switcher?.let(::pickTab) }
+    /** A full-screen video filled (black bars cropped) or whole, kept for its site: a pinch out or in. */
+    fun setCover(t: BrowserTab, on: Boolean) {
+        val h = BrowserRules.host(t.url)
+        t.send(JSONObject().put("cover", on))
+        message = context.getString(if (on) R.string.browser_video_fill else R.string.browser_video_fit)
+        if ((h in coverSites) == on) return
+        coverSites = if (on) coverSites + h else coverSites - h
+        if (!private) prefs.edit().putStringSet("cover_sites", coverSites).apply()
+        WriterLog.i("Browser: video fill ${if (on) "on" else "off"} for $h")
+    }
     closeTab = ::close
     DisposableEffect(Unit) {
         val host = object : ExtTabs {
@@ -778,6 +846,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         // (an observer added now is told ON_RESUME at once)
         val back = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
             if (!private) vault = BrowserSecrets.vault(context) // the Passwords applet may have changed it meanwhile
+            knobOn = prefs.getBoolean("tab_knob", true)
             syncMarks(BookmarkLibrary(bookmarks, bookFolders), false); readOthers(); syncVault(vault, false); shareTabs() } }
         lifecycle.lifecycle.addObserver(back)
         onDispose { lifecycle.lifecycle.removeObserver(back); watch.stopWatching(); main.removeCallbacks(marksSoon); main.removeCallbacks(tabsSoon); main.removeCallbacks(vaultSoon) }
@@ -795,7 +864,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         }
     }
 
-    BackHandler { when { held != null -> held = null; fullTab != null -> tab.session.exitFullScreen(); player -> player = false; editing -> editing = false; panel != null -> panel = null; menu -> menu = false; tab.canBack -> tab.session.goBack(); else -> back() } }
+    BackHandler { when { switcher != null -> switcher = null; held != null -> held = null; fullTab != null -> tab.session.exitFullScreen(); player -> player = false; editing -> editing = false; panel != null -> panel = null; menu -> menu = false; tab.canBack -> tab.session.goBack(); else -> back() } }
 
     val url = tab.url
     val host = BrowserRules.host(url)
@@ -1087,16 +1156,49 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         }
     }
 
+    /** The tab knob (the user's sketch, 13 Nov), at the right edge: a slide on it the next tab or the one before, one a step;
+     *  held, the tabs' list, chosen in by the same finger; a tap, the list to tap in. Out of the system's back swipe (under its 200 dp). */
+    @Composable fun BoxScope.tabKnob() {
+        val label = stringResource(R.string.browser_tabs_all)
+        Box(Modifier.align(Alignment.BottomEnd).padding(bottom = if (wide) 160.dp else 72.dp).size(32.dp, 100.dp).systemGestureExclusion()
+            .semantics { contentDescription = label; onClick(label) { showTabs(); true } }
+            .pointerInput(Unit) { awaitEachGesture {
+                val down = awaitFirstDown(); down.consume()
+                tabs.firstOrNull { it.id == currentId }?.let(::capture) // before it is left: its picture
+                val began = System.currentTimeMillis()
+                val step = TAB_STEP_DP.dp.toPx()
+                var mode = 0 // 0: not yet known, 1: a slide (tab by tab), 2: held (the list)
+                var done = 0
+                while (true) {
+                    val e = if (mode == 0) withTimeoutOrNull((TAB_HOLD_MS - (System.currentTimeMillis() - began)).coerceAtLeast(1)) { awaitPointerEvent() } else awaitPointerEvent()
+                    if (e == null) { mode = 2; showTabs(); continue }
+                    val c = e.changes.firstOrNull { it.id == down.id } ?: break
+                    if (!c.pressed) { if (mode == 0) showTabs() else if (mode == 2) letGoTabs(); break }
+                    c.consume()
+                    val dy = c.position.y - down.position.y
+                    if (mode == 0 && kotlin.math.abs(dy) > viewConfiguration.touchSlop) { mode = 1; WriterLog.i("Browser: the tab knob slid") }
+                    if (mode == 1) { val n = (-dy / step).toInt(); while (done < n) { done++; stepTab(1) }; while (done > n) { done--; stepTab(-1) } } // up: the next, as two fingers'
+                    if (mode == 2) slideTabs(dy)
+                }
+            } }, contentAlignment = Alignment.CenterEnd) {
+            Box(Modifier.size(18.dp, 76.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(topStartPercent = 50, bottomStartPercent = 50))
+                .background(Color.Black.copy(alpha = 0.75f)), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(4.dp, 30.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.6f)))
+            }
+        }
+    }
+
     Column(Modifier.fillMaxSize().background(bar).then(if (full) Modifier else Modifier.statusBarsPadding().windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top)).navigationBarsPadding()).imePadding()) {
         if (top && !player && !full && !side) barArea()
         Row(Modifier.weight(if (player) 0.6f else 1f).fillMaxWidth()) {
         // the sidebar beside the page; with Auto-hide it comes back over the page instead, so the page does not jump
         if (side && !autohide && showBar) sideBar(Modifier)
-        Box(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.background).twoFingerTabs(rightHalf = side || wide) { step ->
+        Box(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.background).twoFingerTabs(rightHalf = side || wide,
             // two fingers up: the next tab, down: the one before (the user, 7 Nov: one finger scrolls, so two are free)
-            val i = tabs.indexOfFirst { it.id == currentId }
-            tabs.getOrNull(i + step)?.let { t -> switch(t); message = t.title.ifBlank { BrowserRules.host(t.url) }.ifBlank { context.getString(R.string.browser_tab_new) } }
-        }) {
+            step = ::stepTab, begin = { tabs.firstOrNull { it.id == currentId }?.let(::capture) },
+            hold = { if (fullTab != null || switcher != null) false else { showTabs(); true } }, slide = ::slideTabs, letGo = ::letGoTabs,
+            // in a video's full screen: out fills the screen, in shows it whole
+            pinch = { out -> tabs.firstOrNull { it.id == fullTab }?.let { setCover(it, out); true } ?: false })) {
             val panes = splitPair?.takeIf { wide && !player }?.let { p -> listOfNotNull(tabs.firstOrNull { it.id == p.first }, tabs.firstOrNull { it.id == p.second }) }?.takeIf { it.size == 2 }
             @Composable fun pane(t: BrowserTab, m: Modifier) = Box(m.then(if (panes != null && t.id == currentId) Modifier.border(2.dp, BROWSER_COLOR) else Modifier)
                 .pointerInput(t.id, panes != null) { if (panes != null) awaitEachGesture { awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial); if (t.id != currentId) currentId = t.id } }) {
@@ -1185,6 +1287,27 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                     Text(it, Modifier.padding(horizontal = 18.dp, vertical = 10.dp))
                 }
             }
+            switcher?.let { hi ->
+                Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.55f)).pointerInput(Unit) { detectTapGestures { switcher = null } })
+                val listState = rememberLazyListState()
+                LaunchedEffect(hi) { listState.animateScrollToItem((hi - 1).coerceAtLeast(0)) }
+                // a tablet: a column at the left; a phone: in the middle (the user's sketch)
+                LazyColumn(Modifier.align(if (wide) Alignment.CenterStart else Alignment.Center).then(if (wide) Modifier.width(280.dp) else Modifier.fillMaxWidth(0.68f)).fillMaxHeight(),
+                    state = listState, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    item(key = "new") {
+                        // New tab first: the Browser with every bar hidden still opens one
+                        Surface(onClick = { pickTab(0) }, shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            border = if (hi == 0) androidx.compose.foundation.BorderStroke(3.dp, BROWSER_COLOR) else null, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                            Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(painterResource(R.drawable.ic_add), null, tint = BROWSER_COLOR)
+                                Text(stringResource(R.string.browser_tab_new), Modifier.padding(start = 12.dp), color = BROWSER_COLOR, style = MaterialTheme.typography.labelLarge)
+                            }
+                        }
+                    }
+                    itemsIndexed(tabs, key = { _, t -> t.id }) { i, t -> BrowserTabShot(t, hi == i + 1, !private) { pickTab(i + 1) } }
+                }
+            }
+            if (knobOn && !full && !editing) tabKnob()
             if (side && autohide && !lowered) {
                 androidx.compose.animation.AnimatedVisibility(showBar, Modifier.align(Alignment.CenterStart),
                     enter = androidx.compose.animation.slideInHorizontally { -it }, exit = androidx.compose.animation.slideOutHorizontally { -it }) { sideBar(Modifier.shadow(8.dp)) }
@@ -1411,28 +1534,66 @@ private fun Modifier.swipeLeft(hide: () -> Unit): Modifier = pointerInput(Unit) 
 
 /**
  * Two fingers moved up or down together (over 96 dp, mostly upright): [step] +1 for up, -1 for down, once a gesture. On a
- * tablet only from the page's right half ([rightHalf]), where the thumb rests; a pinch (fingers apart) is left to the page.
+ * tablet only from the page's right half ([rightHalf]), where the thumb rests; [begin] as two fingers come down. Two fingers held still ([TAB_HOLD_MS]): [hold]
+ * (true when the tabs' list opened), then their slide ([slide], in px from where they were held) and their lifting ([letGo]).
+ * A pinch goes to [pinch] (out: true), left to the page when it says false.
  */
-private fun Modifier.twoFingerTabs(rightHalf: Boolean, step: (Int) -> Unit): Modifier = pointerInput(rightHalf) {
+private fun Modifier.twoFingerTabs(rightHalf: Boolean, step: (Int) -> Unit, begin: () -> Unit, hold: () -> Boolean, slide: (Float) -> Unit, letGo: () -> Unit, pinch: (Boolean) -> Boolean): Modifier = pointerInput(rightHalf) {
     awaitEachGesture {
         awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
         val need = 96.dp.toPx()
-        var start: Offset? = null; var gap = 0f
+        val still = 16.dp.toPx()
+        var start: Offset? = null; var gap = 0f; var since = 0L
+        var swipe = true; var moved = false; var holding = false
         while (true) {
-            val e = awaitPointerEvent(PointerEventPass.Initial)
+            val e = if (start != null && !moved && !holding) withTimeoutOrNull((TAB_HOLD_MS - (System.currentTimeMillis() - since)).coerceAtLeast(1)) { awaitPointerEvent(PointerEventPass.Initial) }
+                else awaitPointerEvent(PointerEventPass.Initial)
+            if (e == null) { if (hold()) holding = true else moved = true; continue }
             val down = e.changes.filter { it.pressed }
+            val from = start
+            if (holding && from != null) {
+                if (down.size < 2) { letGo(); break }
+                e.changes.forEach { it.consume() }
+                slide((down[0].position.y + down[1].position.y) / 2f - from.y); continue
+            }
             if (down.isEmpty()) break
-            if (down.size != 2) { if (start != null) break else continue }
+            if (down.size != 2) { if (from != null) break else continue }
             val mid = (down[0].position + down[1].position) / 2f
             val apart = (down[0].position - down[1].position).getDistance()
-            if (start == null) {
-                if (rightHalf && down.any { it.position.x < size.width / 2f }) break
-                start = mid; gap = apart; continue
+            if (from == null) {
+                swipe = !(rightHalf && down.any { it.position.x < size.width / 2f })
+                start = mid; gap = apart; since = System.currentTimeMillis(); begin(); continue
             }
-            val d = mid - start
-            if (kotlin.math.abs(apart - gap) > need / 2) break // a pinch
-            if (kotlin.math.abs(d.y) > need && kotlin.math.abs(d.y) > 2 * kotlin.math.abs(d.x)) {
+            val d = mid - from
+            if (d.getDistance() > still || kotlin.math.abs(apart - gap) > still) moved = true
+            if (kotlin.math.abs(apart - gap) > need / 2) { if (pinch(apart > gap)) down.forEach { it.consume() }; break } // a pinch
+            if (swipe && kotlin.math.abs(d.y) > need && kotlin.math.abs(d.y) > 2 * kotlin.math.abs(d.x)) {
                 down.forEach { it.consume() }; step(if (d.y < 0) 1 else -1); break
+            }
+        }
+    }
+}
+
+/** A tab in the tabs' list: its page as last seen (else its site's circle), its icon and name under it; framed when highlighted. */
+@Composable private fun BrowserTabShot(t: BrowserTab, on: Boolean, fetch: Boolean, click: () -> Unit) {
+    val name = t.title.ifBlank { BrowserRules.host(t.url) }.ifBlank { stringResource(R.string.browser_tab_new) }
+    val site = BrowserRules.site(BrowserRules.host(t.url))
+    val pic = siteIcon(t.url, fetch)
+    @Composable fun circle(size: Int) = Box(Modifier.size(size.dp).clip(CircleShape).background(if (pic != null) Color.White else TILE_COLORS[(site.hashCode() and 0x7fffffff) % TILE_COLORS.size]),
+        contentAlignment = Alignment.Center) {
+        if (pic != null) androidx.compose.foundation.Image(pic, null, Modifier.size((size * 2 / 3).dp)) else Text(site.take(1).uppercase(), color = Color.White, fontSize = (size / 2).sp)
+    }
+    Surface(onClick = click, shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        border = if (on) androidx.compose.foundation.BorderStroke(3.dp, BROWSER_COLOR) else null, modifier = Modifier.fillMaxWidth()) {
+        Column {
+            Box(Modifier.fillMaxWidth().aspectRatio(1.6f).background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
+                val shot = t.shot
+                if (shot != null) androidx.compose.foundation.Image(shot, null, Modifier.fillMaxSize(), alignment = Alignment.TopCenter, contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+                else circle(48)
+            }
+            Row(Modifier.padding(horizontal = 10.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                circle(20)
+                Text(name, Modifier.padding(start = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelLarge)
             }
         }
     }

@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Tocca qui per far tornare la barra laterale</string>
     <string name="browser_tab_behind">Nuove schede in background</string>
     <string name="browser_tab_behind_note">Apri in nuova scheda (link tenuto premuto o clic destro) la apre dietro e resti su questa pagina.</string>
+    <string name="browser_tab_knob">Maniglia delle schede</string>
+    <string name="browser_tab_knob_note">Una piccola maniglia sul bordo destro: scorri su di essa per cambiare scheda, tienila premuta per vedere tutte le schede.</string>
+    <string name="browser_tabs_all">Tutte le schede</string>
+    <string name="browser_video_fill">Il video riempie lo schermo</string>
+    <string name="browser_video_fit">Video intero</string>
 </resources>

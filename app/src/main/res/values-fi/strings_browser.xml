@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Napauta tästä palauttaaksesi sivupalkin</string>
     <string name="browser_tab_behind">Uudet välilehdet taustalle</string>
     <string name="browser_tab_behind_note">Avaa uudessa välilehdessä (pidetty tai hiiren oikealla painettu linkki) avaa sen taakse, ja pysyt tällä sivulla.</string>
+    <string name="browser_tab_knob">Välilehtikahva</string>
+    <string name="browser_tab_knob_note">Pieni kahva oikeassa reunassa: liu\'uta sitä vaihtaaksesi välilehteä, pidä sitä painettuna nähdäksesi kaikki välilehdet.</string>
+    <string name="browser_tabs_all">Kaikki välilehdet</string>
+    <string name="browser_video_fill">Video täyttää näytön</string>
+    <string name="browser_video_fit">Koko video</string>
 </resources>

@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Atinge aici pentru a readuce bara laterală</string>
     <string name="browser_tab_behind">File noi în fundal</string>
     <string name="browser_tab_behind_note">Deschide în filă nouă (link ținut apăsat sau clic dreapta) o deschide în spate și rămâi pe această pagină.</string>
+    <string name="browser_tab_knob">Mâner pentru file</string>
+    <string name="browser_tab_knob_note">Un mic mâner la marginea din dreapta: glisează pe el pentru a schimba fila, ține-l apăsat pentru a vedea toate filele.</string>
+    <string name="browser_tabs_all">Toate filele</string>
+    <string name="browser_video_fill">Videoclipul umple ecranul</string>
+    <string name="browser_video_fit">Videoclipul întreg</string>
 </resources>

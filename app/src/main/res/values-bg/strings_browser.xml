@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Докоснете тук, за да върнете страничната лента</string>
     <string name="browser_tab_behind">Нови раздели на заден план</string>
     <string name="browser_tab_behind_note">„Отваряне в нов раздел“ от задържана връзка или с десен бутон я отваря отзад и остава на тази страница.</string>
+    <string name="browser_tab_knob">Дръжка за раздели</string>
+    <string name="browser_tab_knob_note">Малка дръжка в десния край: плъзнете по нея, за да смените раздела, задръжте я, за да видите всички раздели.</string>
+    <string name="browser_tabs_all">Всички раздели</string>
+    <string name="browser_video_fill">Видеото запълва екрана</string>
+    <string name="browser_video_fit">Цялото видео</string>
 </resources>

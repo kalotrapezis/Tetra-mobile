@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Koppints ide az oldalsáv visszahozásához</string>
     <string name="browser_tab_behind">Új lapok a háttérben</string>
     <string name="browser_tab_behind_note">A Megnyitás új lapon (nyomva tartott vagy jobb gombbal kattintott linkről) mögé nyitja, és ezen az oldalon maradsz.</string>
+    <string name="browser_tab_knob">Lapfogantyú</string>
+    <string name="browser_tab_knob_note">Kis fogantyú a jobb szélen: húzd rajta a lapváltáshoz, tartsd lenyomva az összes lap megtekintéséhez.</string>
+    <string name="browser_tabs_all">Összes lap</string>
+    <string name="browser_video_fill">A videó kitölti a képernyőt</string>
+    <string name="browser_video_fit">Teljes videó</string>
 </resources>

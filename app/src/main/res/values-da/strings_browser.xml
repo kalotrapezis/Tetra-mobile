@@ -147,4 +147,9 @@
     <string name="browser_hide_hint">Tryk her for at få sidebjælken tilbage</string>
     <string name="browser_tab_behind">Nye faner i baggrunden</string>
     <string name="browser_tab_behind_note">Åbn i ny fane fra et holdt eller højreklikket link åbner den bagved, så du bliver på siden.</string>
+    <string name="browser_tab_knob">Fanegreb</string>
+    <string name="browser_tab_knob_note">Et lille greb i højre kant: stryg på det for at skifte fane, hold det for at se alle faner.</string>
+    <string name="browser_tabs_all">Alle faner</string>
+    <string name="browser_video_fill">Videoen fylder skærmen</string>
+    <string name="browser_video_fit">Hele videoen</string>
 </resources>
