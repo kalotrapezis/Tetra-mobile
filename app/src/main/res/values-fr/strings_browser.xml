@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Touchez ici pour faire revenir la barre latérale</string>
     <string name="browser_tab_behind">Nouveaux onglets en arrière-plan</string>
     <string name="browser_tab_behind_note">Ouvrir dans un nouvel onglet (lien maintenu ou clic droit) l’ouvre derrière et vous restez sur cette page.</string>
+    <string name="browser_tab_knob">Poignée des onglets</string>
+    <string name="browser_gestures">Gestes</string>
+    <string name="browser_gestures_guide">Afficher le guide des gestes</string>
+    <string name="browser_g_knob_text">Glissez sur la poignée au bord droit pour changer d\'onglet. Maintenez-la, glissez jusqu\'à un onglet et relâchez pour l\'ouvrir.</string>
+    <string name="browser_g_swipe">Balayage à deux doigts</string>
+    <string name="browser_g_swipe_text">Deux doigts vers le haut pour l\'onglet suivant, vers le bas pour le précédent.</string>
+    <string name="browser_g_hold">Appui à deux doigts</string>
+    <string name="browser_g_hold_text">Maintenez deux doigts immobiles pour voir tous les onglets, glissez jusqu\'à l\'un et relâchez.</string>
+    <string name="browser_g_list">Balayages dans la liste des onglets</string>
+    <string name="browser_g_list_text">Dans la liste des onglets, balayez un onglet vers la droite pour le fermer, vers la gauche pour l\'épingler.</string>
+    <string name="browser_g_pinch">Pincer une vidéo en plein écran</string>
+    <string name="browser_g_pinch_text">Dans une vidéo en plein écran, écartez les doigts pour remplir l\'écran, pincez pour la voir en entier.</string>
+    <string name="browser_tab_closed">Onglet fermé</string>
+    <string name="browser_tabs_all">Tous les onglets</string>
+    <string name="browser_video_fill">La vidéo remplit l\'écran</string>
+    <string name="browser_video_fit">Vidéo entière</string>
 </resources>

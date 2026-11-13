@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Koppints ide az oldalsáv visszahozásához</string>
     <string name="browser_tab_behind">Új lapok a háttérben</string>
     <string name="browser_tab_behind_note">A Megnyitás új lapon (nyomva tartott vagy jobb gombbal kattintott linkről) mögé nyitja, és ezen az oldalon maradsz.</string>
+    <string name="browser_tab_knob">Lapfogantyú</string>
+    <string name="browser_gestures">Kézmozdulatok</string>
+    <string name="browser_gestures_guide">Kézmozdulat-útmutató megjelenítése</string>
+    <string name="browser_g_knob_text">Húzd az ujjad a jobb szélen lévő fogantyún a lapváltáshoz. Tartsd lenyomva, húzd egy lapra, majd engedd el a megnyitáshoz.</string>
+    <string name="browser_g_swipe">Kétujjas húzás</string>
+    <string name="browser_g_swipe_text">Két ujj felfelé a következő laphoz, lefelé az előzőhöz.</string>
+    <string name="browser_g_hold">Kétujjas tartás</string>
+    <string name="browser_g_hold_text">Tarts két ujjat mozdulatlanul az összes lap megtekintéséhez, húzd egyre, és engedd el.</string>
+    <string name="browser_g_list">Húzások a laplistában</string>
+    <string name="browser_g_list_text">A laplistában húzz egy lapot jobbra a bezáráshoz, balra a kitűzéshez.</string>
+    <string name="browser_g_pinch">Teljes képernyős videó csippentése</string>
+    <string name="browser_g_pinch_text">Teljes képernyős videóban széthúzott ujjakkal kitöltöd a képernyőt, összecsippentve teljes egészében látod.</string>
+    <string name="browser_tab_closed">Lap bezárva</string>
+    <string name="browser_tabs_all">Összes lap</string>
+    <string name="browser_video_fill">A videó kitölti a képernyőt</string>
+    <string name="browser_video_fit">Teljes videó</string>
 </resources>

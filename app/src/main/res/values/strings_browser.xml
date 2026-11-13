@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Tap here to bring the side bar back</string>
     <string name="browser_tab_behind">New tabs in the background</string>
     <string name="browser_tab_behind_note">Open in new tab, from a held or right-clicked link, opens it behind and keeps you on this page.</string>
+    <string name="browser_tab_knob">Tab knob</string>
+    <string name="browser_gestures">Gestures</string>
+    <string name="browser_gestures_guide">Show the gestures guide</string>
+    <string name="browser_g_knob_text">Slide on the knob at the right edge to change tab. Hold it, slide to a tab and let go to open it.</string>
+    <string name="browser_g_swipe">Two-finger swipe</string>
+    <string name="browser_g_swipe_text">Two fingers up for the next tab, down for the one before.</string>
+    <string name="browser_g_hold">Two-finger hold</string>
+    <string name="browser_g_hold_text">Hold two fingers still to see every tab, slide to one and let go.</string>
+    <string name="browser_g_list">Swipes in the tab list</string>
+    <string name="browser_g_list_text">In the tab list, swipe a tab right to close it, left to pin it.</string>
+    <string name="browser_g_pinch">Pinch a full-screen video</string>
+    <string name="browser_g_pinch_text">In a full-screen video, pinch out to fill the screen, pinch in to see it whole.</string>
+    <string name="browser_tab_closed">Tab closed</string>
+    <string name="browser_tabs_all">All tabs</string>
+    <string name="browser_video_fill">Video fills the screen</string>
+    <string name="browser_video_fit">Whole video</string>
 </resources>

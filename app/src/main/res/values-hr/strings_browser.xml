@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Dodirnite ovdje za povratak bočne trake</string>
     <string name="browser_tab_behind">Nove kartice u pozadini</string>
     <string name="browser_tab_behind_note">Otvori u novoj kartici (zadržana veza ili desni klik) otvara je iza, a ti ostaješ na ovoj stranici.</string>
+    <string name="browser_tab_knob">Ručka kartica</string>
+    <string name="browser_gestures">Pokreti</string>
+    <string name="browser_gestures_guide">Prikaži vodič za pokrete</string>
+    <string name="browser_g_knob_text">Povuci po ručki na desnom rubu za promjenu kartice. Zadrži je, povuci do kartice i pusti da je otvoriš.</string>
+    <string name="browser_g_swipe">Povlačenje s dva prsta</string>
+    <string name="browser_g_swipe_text">Dva prsta gore za sljedeću karticu, dolje za prethodnu.</string>
+    <string name="browser_g_hold">Držanje s dva prsta</string>
+    <string name="browser_g_hold_text">Drži dva prsta mirno za prikaz svih kartica, povuci do jedne i pusti.</string>
+    <string name="browser_g_list">Povlačenje u popisu kartica</string>
+    <string name="browser_g_list_text">U popisu kartica povuci karticu udesno da je zatvoriš, ulijevo da je prikvačiš.</string>
+    <string name="browser_g_pinch">Štipanje videa preko cijelog zaslona</string>
+    <string name="browser_g_pinch_text">U videu preko cijelog zaslona raširi prste da ispuni zaslon, skupi ih da ga vidiš cijelog.</string>
+    <string name="browser_tab_closed">Kartica zatvorena</string>
+    <string name="browser_tabs_all">Sve kartice</string>
+    <string name="browser_video_fill">Videozapis ispunjava zaslon</string>
+    <string name="browser_video_fit">Cijeli videozapis</string>
 </resources>

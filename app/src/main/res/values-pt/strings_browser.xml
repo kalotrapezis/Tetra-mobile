@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Toque aqui para trazer de volta a barra lateral</string>
     <string name="browser_tab_behind">Novos separadores em segundo plano</string>
     <string name="browser_tab_behind_note">Abrir em novo separador, a partir de uma ligação mantida premida ou com clique direito, abre-o atrás e fica nesta página.</string>
+    <string name="browser_tab_knob">Pega dos separadores</string>
+    <string name="browser_gestures">Gestos</string>
+    <string name="browser_gestures_guide">Mostrar o guia de gestos</string>
+    <string name="browser_g_knob_text">Deslize na pega da margem direita para mudar de separador. Mantenha-a, deslize até um separador e solte para o abrir.</string>
+    <string name="browser_g_swipe">Deslizar com dois dedos</string>
+    <string name="browser_g_swipe_text">Dois dedos para cima para o separador seguinte, para baixo para o anterior.</string>
+    <string name="browser_g_hold">Manter com dois dedos</string>
+    <string name="browser_g_hold_text">Mantenha dois dedos parados para ver todos os separadores, deslize até um e solte.</string>
+    <string name="browser_g_list">Deslizar na lista de separadores</string>
+    <string name="browser_g_list_text">Na lista de separadores, deslize um separador para a direita para o fechar, para a esquerda para o fixar.</string>
+    <string name="browser_g_pinch">Beliscar um vídeo em ecrã inteiro</string>
+    <string name="browser_g_pinch_text">Num vídeo em ecrã inteiro, afaste os dedos para encher o ecrã, aproxime-os para o ver inteiro.</string>
+    <string name="browser_tab_closed">Separador fechado</string>
+    <string name="browser_tabs_all">Todos os separadores</string>
+    <string name="browser_video_fill">O vídeo preenche o ecrã</string>
+    <string name="browser_video_fit">Vídeo inteiro</string>
 </resources>

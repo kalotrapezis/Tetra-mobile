@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Klepnutím sem vrátíte postranní panel</string>
     <string name="browser_tab_behind">Nové karty na pozadí</string>
     <string name="browser_tab_behind_note">Otevřít na nové kartě (podržený odkaz nebo pravé tlačítko) ji otevře na pozadí a zůstanete na této stránce.</string>
+    <string name="browser_tab_knob">Úchyt panelů</string>
+    <string name="browser_gestures">Gesta</string>
+    <string name="browser_gestures_guide">Zobrazit průvodce gesty</string>
+    <string name="browser_g_knob_text">Posunutím po úchytu u pravého okraje přepnete panel. Podržte ho, posuňte se na panel a pusťte, tím ho otevřete.</string>
+    <string name="browser_g_swipe">Přejetí dvěma prsty</string>
+    <string name="browser_g_swipe_text">Dva prsty nahoru pro další panel, dolů pro předchozí.</string>
+    <string name="browser_g_hold">Podržení dvěma prsty</string>
+    <string name="browser_g_hold_text">Podržte dva prsty v klidu a uvidíte všechny panely, posuňte se na jeden a pusťte.</string>
+    <string name="browser_g_list">Přejetí v seznamu panelů</string>
+    <string name="browser_g_list_text">V seznamu panelů přejeďte panelem doprava pro zavření, doleva pro připnutí.</string>
+    <string name="browser_g_pinch">Roztažení videa na celé obrazovce</string>
+    <string name="browser_g_pinch_text">Ve videu na celé obrazovce roztáhněte prsty pro vyplnění obrazovky, stáhněte je pro celé video.</string>
+    <string name="browser_tab_closed">Panel zavřen</string>
+    <string name="browser_tabs_all">Všechny panely</string>
+    <string name="browser_video_fill">Video vyplní obrazovku</string>
+    <string name="browser_video_fit">Celé video</string>
 </resources>

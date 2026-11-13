@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Dotknij tutaj, aby przywrócić pasek boczny</string>
     <string name="browser_tab_behind">Nowe karty w tle</string>
     <string name="browser_tab_behind_note">Otwórz w nowej karcie (przytrzymany link lub prawy przycisk) otwiera ją w tle, a ty zostajesz na tej stronie.</string>
+    <string name="browser_tab_knob">Uchwyt kart</string>
+    <string name="browser_gestures">Gesty</string>
+    <string name="browser_gestures_guide">Pokaż przewodnik po gestach</string>
+    <string name="browser_g_knob_text">Przesuń po uchwycie przy prawej krawędzi, aby zmienić kartę. Przytrzymaj go, przesuń na kartę i puść, aby ją otworzyć.</string>
+    <string name="browser_g_swipe">Przesunięcie dwoma palcami</string>
+    <string name="browser_g_swipe_text">Dwa palce w górę – następna karta, w dół – poprzednia.</string>
+    <string name="browser_g_hold">Przytrzymanie dwoma palcami</string>
+    <string name="browser_g_hold_text">Przytrzymaj nieruchomo dwa palce, aby zobaczyć wszystkie karty, przesuń na jedną i puść.</string>
+    <string name="browser_g_list">Przesunięcia na liście kart</string>
+    <string name="browser_g_list_text">Na liście kart przesuń kartę w prawo, aby ją zamknąć, w lewo, aby ją przypiąć.</string>
+    <string name="browser_g_pinch">Uszczypnięcie filmu na pełnym ekranie</string>
+    <string name="browser_g_pinch_text">W filmie na pełnym ekranie rozsuń palce, aby wypełnić ekran, zsuń je, aby zobaczyć cały film.</string>
+    <string name="browser_tab_closed">Karta zamknięta</string>
+    <string name="browser_tabs_all">Wszystkie karty</string>
+    <string name="browser_video_fill">Film wypełnia ekran</string>
+    <string name="browser_video_fit">Cały film</string>
 </resources>

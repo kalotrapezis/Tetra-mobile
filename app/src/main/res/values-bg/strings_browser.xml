@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Докоснете тук, за да върнете страничната лента</string>
     <string name="browser_tab_behind">Нови раздели на заден план</string>
     <string name="browser_tab_behind_note">„Отваряне в нов раздел“ от задържана връзка или с десен бутон я отваря отзад и остава на тази страница.</string>
+    <string name="browser_tab_knob">Дръжка за раздели</string>
+    <string name="browser_gestures">Жестове</string>
+    <string name="browser_gestures_guide">Покажи ръководството за жестове</string>
+    <string name="browser_g_knob_text">Плъзнете по дръжката в десния край, за да смените раздела. Задръжте я, плъзнете до раздел и пуснете, за да го отворите.</string>
+    <string name="browser_g_swipe">Плъзгане с два пръста</string>
+    <string name="browser_g_swipe_text">Два пръста нагоре за следващия раздел, надолу за предишния.</string>
+    <string name="browser_g_hold">Задържане с два пръста</string>
+    <string name="browser_g_hold_text">Задръжте два пръста неподвижно, за да видите всички раздели, плъзнете до един и пуснете.</string>
+    <string name="browser_g_list">Плъзгане в списъка с раздели</string>
+    <string name="browser_g_list_text">В списъка с раздели плъзнете раздел надясно, за да го затворите, наляво, за да го закачите.</string>
+    <string name="browser_g_pinch">Щипване на видео на цял екран</string>
+    <string name="browser_g_pinch_text">Във видео на цял екран разтворете пръсти, за да запълни екрана, съберете ги, за да го видите цялото.</string>
+    <string name="browser_tab_closed">Разделът е затворен</string>
+    <string name="browser_tabs_all">Всички раздели</string>
+    <string name="browser_video_fill">Видеото запълва екрана</string>
+    <string name="browser_video_fit">Цялото видео</string>
 </resources>

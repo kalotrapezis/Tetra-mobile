@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Agħfas hawn biex terġa\' ġġib il-bar tal-ġenb</string>
     <string name="browser_tab_behind">Tabs ġodda fl-isfond</string>
     <string name="browser_tab_behind_note">Iftaħ f’tab ġdida, minn link miżmuma jew bil-klikk tal-lemin, tiftaħha wara u tibqa’ f’din il-paġna.</string>
+    <string name="browser_tab_knob">Manku tat-tabs</string>
+    <string name="browser_gestures">Ġesti</string>
+    <string name="browser_gestures_guide">Uri l-gwida tal-ġesti</string>
+    <string name="browser_g_knob_text">Żerżaq fuq il-manku fit-tarf tal-lemin biex tibdel it-tab. Żommu, żerżaq għal tab u erħi biex tiftħu.</string>
+    <string name="browser_g_swipe">Swipe b\'żewġ swaba\'</string>
+    <string name="browser_g_swipe_text">Żewġ swaba\' \'l fuq għat-tab li jmiss, \'l isfel għal ta\' qabel.</string>
+    <string name="browser_g_hold">Żamma b\'żewġ swaba\'</string>
+    <string name="browser_g_hold_text">Żomm żewġ swaba\' wieqfa biex tara t-tabs kollha, żerżaq għal waħda u erħi.</string>
+    <string name="browser_g_list">Swipes fil-lista tat-tabs</string>
+    <string name="browser_g_list_text">Fil-lista tat-tabs, agħmel swipe lil tab lejn il-lemin biex tagħlqu, lejn ix-xellug biex tqabbdu.</string>
+    <string name="browser_g_pinch">Oqros vidjo fuq skrin sħiħ</string>
+    <string name="browser_g_pinch_text">F\'vidjo fuq skrin sħiħ, iftaħ subgħajk biex jimla l-iskrin, oqros biex tarah kollu.</string>
+    <string name="browser_tab_closed">It-tab ingħalaq</string>
+    <string name="browser_tabs_all">It-tabs kollha</string>
+    <string name="browser_video_fill">Il-vidjo jimla l-iskrin</string>
+    <string name="browser_video_fit">Il-vidjo kollu</string>
 </resources>

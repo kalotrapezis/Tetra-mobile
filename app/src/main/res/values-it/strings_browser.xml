@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Tocca qui per far tornare la barra laterale</string>
     <string name="browser_tab_behind">Nuove schede in background</string>
     <string name="browser_tab_behind_note">Apri in nuova scheda (link tenuto premuto o clic destro) la apre dietro e resti su questa pagina.</string>
+    <string name="browser_tab_knob">Maniglia delle schede</string>
+    <string name="browser_gestures">Gesti</string>
+    <string name="browser_gestures_guide">Mostra la guida ai gesti</string>
+    <string name="browser_g_knob_text">Scorri sulla maniglia al bordo destro per cambiare scheda. Tienila premuta, scorri fino a una scheda e rilascia per aprirla.</string>
+    <string name="browser_g_swipe">Scorrimento con due dita</string>
+    <string name="browser_g_swipe_text">Due dita in su per la scheda successiva, in giù per la precedente.</string>
+    <string name="browser_g_hold">Pressione con due dita</string>
+    <string name="browser_g_hold_text">Tieni ferme due dita per vedere tutte le schede, scorri fino a una e rilascia.</string>
+    <string name="browser_g_list">Scorrimenti nell\'elenco schede</string>
+    <string name="browser_g_list_text">Nell\'elenco schede, scorri una scheda a destra per chiuderla, a sinistra per fissarla.</string>
+    <string name="browser_g_pinch">Pizzica un video a schermo intero</string>
+    <string name="browser_g_pinch_text">In un video a schermo intero, allarga le dita per riempire lo schermo, avvicinale per vederlo intero.</string>
+    <string name="browser_tab_closed">Scheda chiusa</string>
+    <string name="browser_tabs_all">Tutte le schede</string>
+    <string name="browser_video_fill">Il video riempie lo schermo</string>
+    <string name="browser_video_fit">Video intero</string>
 </resources>

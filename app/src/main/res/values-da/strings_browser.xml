@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Tryk her for at få sidebjælken tilbage</string>
     <string name="browser_tab_behind">Nye faner i baggrunden</string>
     <string name="browser_tab_behind_note">Åbn i ny fane fra et holdt eller højreklikket link åbner den bagved, så du bliver på siden.</string>
+    <string name="browser_tab_knob">Fanegreb</string>
+    <string name="browser_gestures">Bevægelser</string>
+    <string name="browser_gestures_guide">Vis guiden til bevægelser</string>
+    <string name="browser_g_knob_text">Stryg på grebet i højre kant for at skifte fane. Hold det, stryg til en fane og slip for at åbne den.</string>
+    <string name="browser_g_swipe">Strygning med to fingre</string>
+    <string name="browser_g_swipe_text">To fingre op for næste fane, ned for den forrige.</string>
+    <string name="browser_g_hold">Hold med to fingre</string>
+    <string name="browser_g_hold_text">Hold to fingre stille for at se alle faner, stryg til en og slip.</string>
+    <string name="browser_g_list">Strygninger i fanelisten</string>
+    <string name="browser_g_list_text">Stryg en fane til højre i fanelisten for at lukke den, til venstre for at fastgøre den.</string>
+    <string name="browser_g_pinch">Knib i en video i fuld skærm</string>
+    <string name="browser_g_pinch_text">I en video i fuld skærm: spred fingrene for at fylde skærmen, knib for at se hele videoen.</string>
+    <string name="browser_tab_closed">Fanen er lukket</string>
+    <string name="browser_tabs_all">Alle faner</string>
+    <string name="browser_video_fill">Videoen fylder skærmen</string>
+    <string name="browser_video_fit">Hele videoen</string>
 </resources>

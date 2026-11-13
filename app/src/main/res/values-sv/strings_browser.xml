@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Tryck här för att få tillbaka sidofältet</string>
     <string name="browser_tab_behind">Nya flikar i bakgrunden</string>
     <string name="browser_tab_behind_note">Öppna i ny flik (hållen eller högerklickad länk) öppnar den bakom och du stannar på sidan.</string>
+    <string name="browser_tab_knob">Flikgrepp</string>
+    <string name="browser_gestures">Gester</string>
+    <string name="browser_gestures_guide">Visa guiden för gester</string>
+    <string name="browser_g_knob_text">Dra på greppet vid högerkanten för att byta flik. Håll det, dra till en flik och släpp för att öppna den.</string>
+    <string name="browser_g_swipe">Svep med två fingrar</string>
+    <string name="browser_g_swipe_text">Två fingrar uppåt för nästa flik, nedåt för den förra.</string>
+    <string name="browser_g_hold">Håll med två fingrar</string>
+    <string name="browser_g_hold_text">Håll två fingrar stilla för att se alla flikar, dra till en och släpp.</string>
+    <string name="browser_g_list">Svep i fliklistan</string>
+    <string name="browser_g_list_text">I fliklistan sveper du en flik åt höger för att stänga den, åt vänster för att fästa den.</string>
+    <string name="browser_g_pinch">Nyp i en video i helskärm</string>
+    <string name="browser_g_pinch_text">I en video i helskärm: sära på fingrarna för att fylla skärmen, nyp för att se hela videon.</string>
+    <string name="browser_tab_closed">Fliken stängd</string>
+    <string name="browser_tabs_all">Alla flikar</string>
+    <string name="browser_video_fill">Videon fyller skärmen</string>
+    <string name="browser_video_fit">Hela videon</string>
 </resources>

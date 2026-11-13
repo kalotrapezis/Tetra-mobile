@@ -147,4 +147,20 @@
     <string name="browser_hide_hint">Atinge aici pentru a readuce bara laterală</string>
     <string name="browser_tab_behind">File noi în fundal</string>
     <string name="browser_tab_behind_note">Deschide în filă nouă (link ținut apăsat sau clic dreapta) o deschide în spate și rămâi pe această pagină.</string>
+    <string name="browser_tab_knob">Mâner pentru file</string>
+    <string name="browser_gestures">Gesturi</string>
+    <string name="browser_gestures_guide">Arată ghidul gesturilor</string>
+    <string name="browser_g_knob_text">Glisează pe mânerul de la marginea dreaptă pentru a schimba fila. Ține-l apăsat, glisează la o filă și eliberează pentru a o deschide.</string>
+    <string name="browser_g_swipe">Glisare cu două degete</string>
+    <string name="browser_g_swipe_text">Două degete în sus pentru fila următoare, în jos pentru cea anterioară.</string>
+    <string name="browser_g_hold">Apăsare cu două degete</string>
+    <string name="browser_g_hold_text">Ține două degete nemișcate pentru a vedea toate filele, glisează la una și eliberează.</string>
+    <string name="browser_g_list">Glisări în lista de file</string>
+    <string name="browser_g_list_text">În lista de file, glisează o filă spre dreapta pentru a o închide, spre stânga pentru a o fixa.</string>
+    <string name="browser_g_pinch">Ciupire pe un videoclip pe tot ecranul</string>
+    <string name="browser_g_pinch_text">Într-un videoclip pe tot ecranul, depărtează degetele ca să umple ecranul, apropie-le ca să-l vezi întreg.</string>
+    <string name="browser_tab_closed">Filă închisă</string>
+    <string name="browser_tabs_all">Toate filele</string>
+    <string name="browser_video_fill">Videoclipul umple ecranul</string>
+    <string name="browser_video_fit">Videoclipul întreg</string>
 </resources>
