@@ -236,6 +236,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     var dismissed by remember { mutableStateOf(setOf<String>()) } // playlists whose Player strip was closed
     var background by remember { mutableStateOf(BrowserMedia.background(context)) }
     var message by remember { mutableStateOf(said) }
+    var downloaded by remember { mutableStateOf<File?>(null) } // the last download: Open and Open with in a strip, until closed
     LaunchedEffect(message) { if (message != null) { delay(3000); message = null } }
     LaunchedEffect(BrowserEngine.note) { BrowserEngine.note?.let { message = it; BrowserEngine.note = null } }
     LaunchedEffect(Unit) { BrowserEngine.firstStart(context) } // uBlock Origin and Dark Reader, once; in the background
@@ -297,7 +298,11 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         drift[0] = if ((d > 0) == (drift[0] > 0)) drift[0] + d else d
         if (drift[0] < -12 * density) barShown = true else if (drift[0] > 48 * density) barShown = false
     }
-    /** Downloads (a link the page does not show itself: a file, a blob, an attachment): into Downloads, said when there. */
+    /**
+     * Downloads (a link the page does not show itself: a file, a blob, an attachment, pdf.js's Download): into Tetra's
+     * Downloads, where Files shows them, with Open (a PDF in Tetra's viewer) and Open with until closed (the user, 13 Nov:
+     * "It has no download function or open with a PDF viewer"). Without all-files access: the phone's Downloads, as before.
+     */
     fun download(r: WebResponse) {
         val type = r.headers["Content-Type"]?.substringBefore(';')?.trim()?.lowercase()
         if (type == "application/x-xpinstall") { BrowserEngine.install(r.uri); return } // an extension offered outside addons.mozilla.org
@@ -306,17 +311,39 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         message = context.getString(R.string.browser_downloading, name)
         WriterLog.i("Browser: downloading $name ($type) from ${BrowserRules.host(r.uri)}")
         scope.launch {
-            val ok = withContext(Dispatchers.IO) { runCatching {
-                val resolver = context.contentResolver
-                val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, ContentValues().apply {
-                    put(MediaStore.Downloads.DISPLAY_NAME, name); type?.let { put(MediaStore.Downloads.MIME_TYPE, it) }; put(MediaStore.Downloads.IS_PENDING, 1)
-                })!!
-                try { resolver.openOutputStream(uri)!!.use { out -> body.use { it.copyTo(out) } } } catch (e: Exception) { resolver.delete(uri, null, null); throw e }
-                resolver.update(uri, ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }, null, null)
-            }.onFailure { WriterLog.e("Browser: $name not downloaded", it) }.isSuccess }
-            message = context.getString(if (ok) R.string.browser_downloaded else R.string.browser_download_failed, name)
+            val got = withContext(Dispatchers.IO) { runCatching<File?> {
+                if (android.os.Environment.isExternalStorageManager()) {
+                    val dir = File(driveRoot(), "Downloads").apply { mkdirs() }
+                    val f = DriveRules.newFile(driveRoot(), "Downloads/$name") // "x (2).pdf" when taken
+                    val part = File(dir, ".${f.name}.tetra-saving")
+                    try { part.outputStream().use { out -> body.use { it.copyTo(out) } }; check(part.renameTo(f)) { "could not name ${f.name}" } } catch (e: Exception) { part.delete(); throw e }
+                    f
+                } else {
+                    val resolver = context.contentResolver
+                    val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, ContentValues().apply {
+                        put(MediaStore.Downloads.DISPLAY_NAME, name); type?.let { put(MediaStore.Downloads.MIME_TYPE, it) }; put(MediaStore.Downloads.IS_PENDING, 1)
+                    })!!
+                    try { resolver.openOutputStream(uri)!!.use { out -> body.use { it.copyTo(out) } } } catch (e: Exception) { resolver.delete(uri, null, null); throw e }
+                    resolver.update(uri, ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }, null, null)
+                    null
+                }
+            }.onFailure { WriterLog.e("Browser: $name not downloaded", it) } }
+            got.getOrNull()?.let { f -> WriterLog.i("Browser: downloaded into Tetra/Downloads/${f.name} (${f.length() / 1024} KB)"); downloaded = f }
+            message = context.getString(if (got.isSuccess) R.string.browser_downloaded else R.string.browser_download_failed, got.getOrNull()?.name ?: name)
         }
     }
+    /** A download in Tetra: Open asks Tetra's own window (a PDF, a document: its Office app), Open with any app. */
+    fun openDownload(f: File, with: Boolean) = runCatching {
+        if (!with) context.startActivity(Intent(context, MainActivity::class.java).putExtra(Applet.EXTRA, "file:" + DriveRules.relative(driveRoot(), f))
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+        else {
+            val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.files", f)
+            val mime = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(f.extension.lowercase()) ?: "application/octet-stream"
+            context.startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW).setDataAndType(uri, mime).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), context.getString(R.string.home_open_with))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
+        WriterLog.i("Browser: download opened${if (with) " with" else ""}, .${f.extension}")
+    }.onFailure { WriterLog.e("Browser: download not opened", it); message = it.message }
     /**
      * Gecko's own error, as a page in Tetra's look (none of Firefox's about:neterror here), with Try again. No internet or too
      * slow (the user, 11 Nov: "it tries to load and then it crashes"): the tab remembers it and loads it again when a network comes.
@@ -1125,6 +1152,19 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                         Text(stringResource(R.string.browser_playlist_found), Modifier.weight(1f))
                         IconButton(onClick = { player = true }) { Icon(painterResource(R.drawable.ic_play), stringResource(R.string.browser_player)) }
                         IconButton(onClick = { list?.let { dismissed = dismissed + it } }) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_close)) }
+                    }
+                }
+            }
+            // a download done: Open, Open with, close (as the playlist's strip)
+            androidx.compose.animation.AnimatedVisibility(downloaded != null && panel == null && !editing, Modifier.align(Alignment.BottomCenter),
+                enter = androidx.compose.animation.slideInVertically { it }, exit = androidx.compose.animation.slideOutVertically { it }) {
+                val f = downloaded
+                Surface(color = islandColor(), contentColor = islandContentColor(), shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.padding(12.dp).fillMaxWidth()) {
+                    Row(Modifier.padding(start = 18.dp, end = 4.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(f?.name.orEmpty(), Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        TextButton(onClick = { f?.let { openDownload(it, false) }; downloaded = null }) { Text(stringResource(R.string.common_open), maxLines = 1) }
+                        TextButton(onClick = { f?.let { openDownload(it, true) } }) { Text(stringResource(R.string.home_open_with), maxLines = 1) }
+                        IconButton(onClick = { downloaded = null }) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_close)) }
                     }
                 }
             }
