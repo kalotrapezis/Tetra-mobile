@@ -889,6 +889,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
                             keyboardActions = KeyboardActions(onGo = { if (typed.text.isNotBlank()) go(typed.text) }), modifier = Modifier.fillMaxWidth().focusRequester(focus))
                     }
+                    DictateButton({ typed = typed.dictated(it) }, Modifier.size(36.dp), tint = onBar)
                 } else Row(Modifier.weight(1f).fillMaxHeight().clickable { typed = TextFieldValue(url, TextRange(0, url.length)); editing = true; panel = null; menu = false },
                     verticalAlignment = Alignment.CenterVertically) {
                     if (url.startsWith("https://")) Icon(painterResource(R.drawable.ic_lock), null, Modifier.size(16.dp).padding(end = 4.dp))
@@ -1140,6 +1141,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                                         cursorBrush = SolidColor(BROWSER_COLOR), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
                                         keyboardActions = KeyboardActions(onGo = { if (typed.text.isNotBlank()) go(typed.text) }), modifier = Modifier.fillMaxWidth().focusRequester(focus))
                                 }
+                                DictateButton({ typed = typed.dictated(it) }, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             if (found.isNotEmpty()) { HorizontalDivider(); found.forEach { (u, t) -> BrowserRow(t, u, click = { go(u) }) } }
                         }

@@ -424,7 +424,7 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
                 OutlinedTextField(cc, { cc = it }, label = { Text(stringResource(R.string.mail_cc_field)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(bcc, { bcc = it }, label = { Text(stringResource(R.string.mail_bcc_field)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth())
             }
-            OutlinedTextField(subject, { subject = it }, singleLine = true, label = { Text(stringResource(R.string.mail_subject)) }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(subject, { subject = it }, singleLine = true, label = { Text(stringResource(R.string.mail_subject)) }, trailingIcon = { DictateButton({ subject = subject.dictated(it) }) }, modifier = Modifier.fillMaxWidth())
             if (attachments.isNotEmpty()) Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 attachments.forEach { a ->
                     Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.medium) {
@@ -439,7 +439,7 @@ internal fun MailCompose(draft: MailDraft, accounts: List<MailAccount>, root: Fi
             if (of != null && draft.kind != "forward" && AiGate.allows("mail")) Surface(color = MAIL_ACCENT.copy(alpha = 0.35f), shape = CircleShape, modifier = Modifier.clickable(enabled = !drafting) { assist() }) {
                 Text(stringResource(if (drafting) R.string.mail_assist_working else R.string.mail_assist), Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.labelLarge)
             }
-            OutlinedTextField(body, { body = it }, label = { Text(stringResource(R.string.mail_body)) }, modifier = Modifier.fillMaxWidth().heightIn(min = 240.dp))
+            OutlinedTextField(body, { body = it }, label = { Text(stringResource(R.string.mail_body)) }, trailingIcon = { DictateButton({ body = body.dictated(it) }) }, modifier = Modifier.fillMaxWidth().heightIn(min = 240.dp))
             if (signed && signature.isNotBlank()) Text(dash + signature, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
             problem?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             Box(Modifier.heightIn(min = 120.dp))

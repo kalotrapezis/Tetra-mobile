@@ -169,6 +169,7 @@ internal fun SmsScreen(back: () -> Unit, start: String? = null) {
                         BasicTextField(query, { query = it }, singleLine = true, textStyle = TextStyle(color = islandContentColor(), fontSize = 16.sp),
                             cursorBrush = SolidColor(islandContentColor()), modifier = Modifier.fillMaxWidth().focusRequester(focus))
                     }
+                    DictateButton({ query = query.dictated(it) })
                 }
             } else Surface(color = islandColor(), contentColor = islandContentColor(), shape = MaterialTheme.shapes.extraLarge) {
                 Row(Modifier.padding(horizontal = 10.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -260,10 +261,13 @@ private fun SmsConversation(address: String, thread: SmsThread?, all: List<SmsTe
         }
         Row(Modifier.widthIn(max = 640.dp).fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
             Surface(color = islandColor(), contentColor = islandContentColor(), shape = RoundedCornerShape(24.dp), modifier = Modifier.weight(1f)) {
-                Box(Modifier.padding(horizontal = 18.dp, vertical = 14.dp)) {
-                    if (draft.isEmpty()) Text(stringResource(R.string.sms_write), color = islandContentColor().copy(alpha = 0.7f), maxLines = 1)
-                    BasicTextField(draft, setDraft, maxLines = 6, textStyle = TextStyle(color = islandContentColor(), fontSize = 16.sp),
-                        cursorBrush = SolidColor(islandContentColor()), modifier = Modifier.fillMaxWidth())
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Box(Modifier.weight(1f).padding(start = 18.dp, top = 14.dp, bottom = 14.dp)) {
+                        if (draft.isEmpty()) Text(stringResource(R.string.sms_write), color = islandContentColor().copy(alpha = 0.7f), maxLines = 1)
+                        BasicTextField(draft, setDraft, maxLines = 6, textStyle = TextStyle(color = islandContentColor(), fontSize = 16.sp),
+                            cursorBrush = SolidColor(islandContentColor()), modifier = Modifier.fillMaxWidth())
+                    }
+                    DictateButton({ setDraft(draft.dictated(it)) }, Modifier.padding(4.dp))
                 }
             }
             Surface(color = SMS_COLOR, contentColor = Color.White, shape = CircleShape, modifier = Modifier.alpha(if (draft.isBlank() || sending) 0.5f else 1f)) {

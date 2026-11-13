@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Filen kunde inte öppnas.</string>
     <string name="assistant_mic_needed">Tetra behöver mikrofonen för att höra dig.</string>
     <string name="assistant_heard_nothing">Jag uppfattade inte det. Försök igen.</string>
+    <string name="dictate">Tala för att skriva</string>
+    <string name="dictate_unavailable">Den här enheten har ingen röstigenkänning. Lägg till en Mistral-nyckel under Inställningar › AI Assist.</string>
     <string name="assistant_key">API-nyckel för Mistral</string>
     <string name="assistant_key_hint">Klistra in nyckeln</string>
     <string name="assistant_key_saved">Sparad på den här telefonen</string>

@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Nepavyko atidaryti failo.</string>
     <string name="assistant_mic_needed">Tetra reikia mikrofono, kad tave girdėtų.</string>
     <string name="assistant_heard_nothing">Neišgirdau. Pabandyk dar kartą.</string>
+    <string name="dictate">Kalbėk, kad rašytum</string>
+    <string name="dictate_unavailable">Šiame įrenginyje nėra kalbos atpažinimo. Pridėk Mistral raktą skiltyje Nustatymai › AI Assist.</string>
     <string name="assistant_key">Mistral API raktas</string>
     <string name="assistant_key_hint">Įklijuok raktą</string>
     <string name="assistant_key_saved">Išsaugota šiame telefone</string>

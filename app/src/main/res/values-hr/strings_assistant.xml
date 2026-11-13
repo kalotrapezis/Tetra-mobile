@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Datoteku nije bilo moguće otvoriti.</string>
     <string name="assistant_mic_needed">Tetra treba mikrofon da te čuje.</string>
     <string name="assistant_heard_nothing">Nije mi uspjelo razumjeti. Pokušaj ponovno.</string>
+    <string name="dictate">Govori za tipkanje</string>
+    <string name="dictate_unavailable">Na ovom uređaju nema prepoznavanja govora. Dodaj Mistral ključ u izborniku Postavke › AI Assist.</string>
     <string name="assistant_key">Mistral API ključ</string>
     <string name="assistant_key_hint">Zalijepi ključ</string>
     <string name="assistant_key_saved">Spremljeno na ovom telefonu</string>

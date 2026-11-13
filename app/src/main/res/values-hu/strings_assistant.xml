@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">A fájlt nem sikerült megnyitni.</string>
     <string name="assistant_mic_needed">A Tetrának szüksége van a mikrofonra, hogy halljon.</string>
     <string name="assistant_heard_nothing">Nem értettem. Próbáld újra.</string>
+    <string name="dictate">Beszélj a gépeléshez</string>
+    <string name="dictate_unavailable">Ezen az eszközön nincs beszédfelismerés. Adj hozzá Mistral-kulcsot a következőben: Beállítások › AI Assist.</string>
     <string name="assistant_key">Mistral API-kulcs</string>
     <string name="assistant_key_hint">Illeszd be a kulcsot</string>
     <string name="assistant_key_saved">Elmentve ezen a telefonon</string>

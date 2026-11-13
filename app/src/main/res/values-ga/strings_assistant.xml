@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Níorbh fhéidir an comhad sin a oscailt.</string>
     <string name="assistant_mic_needed">Tá an micreafón de dhíth ar Tetra chun tú a chloisteáil.</string>
     <string name="assistant_heard_nothing">Níor chuala mé sin. Bain triail eile as.</string>
+    <string name="dictate">Labhair chun scríobh</string>
+    <string name="dictate_unavailable">Níl aitheantas cainte ar an bhfeiste seo. Cuir eochair Mistral leis faoi Socruithe › AI Assist.</string>
     <string name="assistant_key">Eochair API Mistral</string>
     <string name="assistant_key_hint">Greamaigh an eochair</string>
     <string name="assistant_key_saved">Sábháilte ar an bhfón seo</string>

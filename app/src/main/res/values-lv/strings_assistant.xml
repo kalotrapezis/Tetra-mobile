@@ -16,6 +16,8 @@
     <string name="assistant_cannot_open">Failu neizdevās atvērt.</string>
     <string name="assistant_mic_needed">Tetra vajag mikrofonu, lai tevi dzirdētu.</string>
     <string name="assistant_heard_nothing">Es to nedzirdēju. Mēģini vēlreiz.</string>
+    <string name="dictate">Runā, lai rakstītu</string>
+    <string name="dictate_unavailable">Šajā ierīcē nav runas atpazīšanas. Pievieno Mistral atslēgu sadaļā Iestatījumi › AI Assist.</string>
     <string name="assistant_key">Mistral API atslēga</string>
     <string name="assistant_key_hint">Ielīmē atslēgu</string>
     <string name="assistant_key_saved">Saglabāta šajā tālrunī</string>
