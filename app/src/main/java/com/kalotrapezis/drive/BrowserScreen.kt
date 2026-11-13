@@ -624,8 +624,14 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     }
     openTab = { u, gecko -> open(u, gecko) }
     // a tick a tab (the user, 13 Nov: "so it feels like it has stops … check, sits, check, sits, vibration and a snap on the screen")
-    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
-    fun tick() = haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.SegmentTick)
+    // the vibrator itself, as a physical detent (USAGE_PHYSICAL_EMULATION): View haptics are off on a phone whose touch vibration is
+    // switched off (the user's: "it does not vibrate"), and a TICK is too faint; a CLICK a tab, a HEAVY_CLICK as the list opens
+    val vibrator = remember { context.getSystemService(android.os.Vibrator::class.java) }
+    fun buzz(effect: Int) = runCatching {
+        val e = android.os.VibrationEffect.createPredefined(effect)
+        if (android.os.Build.VERSION.SDK_INT >= 33) vibrator?.vibrate(e, android.os.VibrationAttributes.createForUsage(android.os.VibrationAttributes.USAGE_PHYSICAL_EMULATION)) else vibrator?.vibrate(e)
+    }
+    fun tick() = buzz(android.os.VibrationEffect.EFFECT_CLICK)
     var knobSteps by remember { mutableIntStateOf(0) } // the knob's snap, a step at a time
     /** The next tab (+1) or the one before (-1), its name said a moment: two fingers' swipe, the tab knob's slide. */
     fun stepTab(step: Int) {
@@ -645,7 +651,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         tabs.firstOrNull { it.id == currentId }?.let(::capture)
         // on the first tab, whichever is shown (the user, 13 Nov: "every tab switch is downwards and every new tab is up"): one up is New tab
         switchFrom[0] = 1; switcher = 1; slid = false; editing = false; held = null
-        haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress) // held: the list
+        buzz(android.os.VibrationEffect.EFFECT_HEAVY_CLICK) // held: the list
         WriterLog.i("Browser: the tabs' list, ${tabs.size} tabs")
     }
     // one UI, not two (the user, 13 Nov: "highlight the actual tabs they are right there … dont have 2 uis"): with the sidebar in
