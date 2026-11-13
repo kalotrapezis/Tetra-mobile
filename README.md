@@ -4,7 +4,7 @@
 Free software, no account, no cloud: nothing leaves your devices.</p>
 
 <p align="center">
-  <a href="https://github.com/kalotrapezis/Tetra-mobile/releases/download/v0.8.0-beta.18/Tetra-0.8.0-beta.18-arm64.apk"><img src="Assets/buttons/download-android.png" alt="Download Tetra for Android (APK)" width="440"></a>
+  <a href="https://github.com/kalotrapezis/Tetra-mobile/releases/download/v0.8.0-beta.19/Tetra-0.8.0-beta.19-arm64.apk"><img src="Assets/buttons/download-android.png" alt="Download Tetra for Android (APK)" width="440"></a>
   <a href="https://github.com/kalotrapezis/Tetra"><img src="Assets/buttons/get-desktop.png" alt="Tetra for the desktop" width="440"></a>
 </p>
 
@@ -14,7 +14,7 @@ Photos, Files, Notes, Office, Calendar, Timer, Pills, Maps, Contacts, Phone, Dat
 **applets** of one app that share one folder, `/sdcard/Tetra`. [Tetra for the desktop](https://github.com/kalotrapezis/Tetra)
 has the same applets on Linux, and the two sync over your own Wi-Fi.
 
-**0.8.0 Beta 18** ([what's new](https://github.com/kalotrapezis/Tetra-mobile/releases/tag/v0.8.0-beta.18)). A beta: keep
+**0.8.0 Beta 19** ([what's new](https://github.com/kalotrapezis/Tetra-mobile/releases/tag/v0.8.0-beta.19)). A beta: keep
 your own backups. Screenshots use invented sample data.
 
 ## What Tetra does for you
