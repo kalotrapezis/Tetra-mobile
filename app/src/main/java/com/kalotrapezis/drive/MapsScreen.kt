@@ -38,6 +38,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -950,9 +952,16 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         val badge = (nav ?: carNav)?.mode == "car" || (shownSpeed != null && limit != null) // without directions: beside a sign, as before
         if (live && (limit != null || badge)) {
             // clear of the island and the bars below it (the user, 21 Oct: "ακουμπάει πάνω στο νησί … δώσε λίγο αέρα")
-            Row(Modifier.align(Alignment.BottomStart).navigationBarsPadding().padding(start = 12.dp, bottom = if (nav != null) 150.dp else 100.dp),
+            val over = limit?.let { l -> (shownSpeed ?: 0) > l + 3 } == true
+            // Tetra Car: the limit over my speed, at the very left, where the driver looks (the user, 13 Nov), the map free beside it
+            if (Car.running) Column(Modifier.align(Alignment.BottomStart).navigationBarsPadding().padding(start = 6.dp, bottom = if (nav != null) 110.dp else 80.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                limit?.let { LimitSign(it) }
+                if (badge) SpeedBadge(shownSpeed, over)
+            }
+            else Row(Modifier.align(Alignment.BottomStart).navigationBarsPadding().padding(start = 12.dp, bottom = if (nav != null) 150.dp else 100.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                if (badge) SpeedBadge(shownSpeed, limit?.let { l -> (shownSpeed ?: 0) > l + 3 } == true)
+                if (badge) SpeedBadge(shownSpeed, over)
                 limit?.let { LimitSign(it) }
             }
         }
@@ -973,7 +982,9 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         if (n != null && narrow) {
             // a narrow screen: one pill, the road above and the next turn below (the user, 21 Oct)
             // one card: the road I am on at its top (the user, 22 Oct: the pill and the card "seam from a diferent planet")
-            NavBanner(n, root, Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(12.dp).fillMaxWidth(), roadName, roadCode)
+            // Tetra Car: as small as what it says, at the top left, the map seen around it (the user, 13 Nov, Android Auto's photo: "don't leave empty space")
+            if (Car.running) NavBanner(n, root, Modifier.align(Alignment.TopStart).statusBarsPadding().padding(6.dp), roadName, roadCode, compact = true)
+            else NavBanner(n, root, Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(12.dp).fillMaxWidth(), roadName, roadCode)
         } else {
             Row(Modifier.align(Alignment.TopStart).statusBarsPadding().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (n == null) Island(R.drawable.ic_chevron_left, stringResource(R.string.common_back), back)
@@ -1055,7 +1066,9 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
             if (pending != null && nav == null && finding == null) Pill(stringResource(if (granted) R.string.maps_waiting_location else R.string.maps_location_off_directions))
             val s = selected
             fun away(lat: Double, lng: Double) = here?.let { metresBetween(it.latitude, it.longitude, lat, lng) }
-            if (n != null) Surface(color = islandColor(), contentColor = islandContentColor(), shape = MaterialTheme.shapes.extraLarge) {
+            // Tetra Car: the bar as wide as what it holds, on the left (the user, 13 Nov: "cut them off when empty, so more of the map is visible")
+            if (n != null) Box(Modifier.fillMaxWidth()) { Surface(color = islandColor(), contentColor = islandContentColor(), shape = MaterialTheme.shapes.extraLarge,
+                modifier = Modifier.align(Alignment.CenterStart).then(if (Car.running) Modifier.width(IntrinsicSize.Max) else Modifier.fillMaxWidth())) {
               Column {
                 // the handle, as Tetra's others: drag up (or tap) for the tolls and the turns ahead
                 var drag by remember { mutableStateOf(0f) }
@@ -1066,7 +1079,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                 }
                 if (navSheet) NavSheet(n, navTolls)
                 Row(Modifier.padding(start = 20.dp, end = 8.dp, top = 2.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
+                    Column(Modifier.weight(1f).padding(end = 12.dp)) {
                         val left = n.p?.left ?: n.route.metres
                         val minutes = Math.round(n.route.millis / 60_000.0 * (left / n.route.metres.coerceAtLeast(1.0)))
                         Text("${metresText(left)} · ${minutesText(context, minutes)}", style = MaterialTheme.typography.titleMedium)
@@ -1087,7 +1100,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                     }
                 }
               }
-            } else if (placing != null) {
+            } } else if (placing != null) {
                 val c = placing!!
                 Surface(color = islandColor(), contentColor = islandContentColor(), shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -1402,24 +1415,32 @@ private fun roadAt(map: MapLibreMap?, loc: Location, lang: String): Pair<String,
  * The next turn, in the car's card style (MapsCar's turn card): the arrow and the distance big, the street, the instruction
  * smaller; [road] and [code], the road I am on, as a small line at its top.
  */
-@Composable private fun NavBanner(n: Nav, root: File, modifier: Modifier, road: String? = null, code: String? = null) {
+@Composable private fun NavBanner(n: Nav, root: File, modifier: Modifier, road: String? = null, code: String? = null, compact: Boolean = false) {
     val step = n.route.steps.getOrNull(n.p?.next ?: 0) ?: return
     val white = androidx.compose.ui.graphics.Color.White
     Surface(color = androidx.compose.ui.graphics.Color(0xF0303134), contentColor = white, shape = MaterialTheme.shapes.extraLarge, modifier = modifier.widthIn(max = 560.dp)) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             if (road != null || code != null) Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 code?.let { RoadCode(it) }
-                road?.let { Text(it, style = MaterialTheme.typography.titleLarge, color = white.copy(alpha = 0.9f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(painterResource(if (step.sign == 4) R.drawable.ic_place else R.drawable.ic_navigation), contentDescription = null,
-                    modifier = Modifier.size(44.dp).rotate(if (step.sign == 4) 0f else turnDegrees(step.sign)))
-                Text(n.p?.let { metresText(it.toNext) } ?: "", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                road?.let { Text(it, style = if (compact) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.titleLarge, color = white.copy(alpha = if (compact) 0.7f else 0.9f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
             val instruction = step.text.substringBefore(" στην ").substringBefore(" onto ").substringBefore(" στο ")
-            if (step.street.isNotEmpty()) Text(step.street, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text(if (step.street.isEmpty()) step.text else instruction, style = MaterialTheme.typography.bodyMedium, color = white.copy(alpha = 0.75f),
-                maxLines = 2, overflow = TextOverflow.Ellipsis)
+            val turn: @Composable () -> Unit = { Icon(painterResource(if (step.sign == 4) R.drawable.ic_place else R.drawable.ic_navigation), contentDescription = null,
+                modifier = Modifier.size(44.dp).rotate(if (step.sign == 4) 0f else turnDegrees(step.sign))) }
+            val distance: @Composable () -> Unit = { Text(n.p?.let { metresText(it.toNext) } ?: "", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold) }
+            val words: @Composable () -> Unit = {
+                if (step.street.isNotEmpty()) Text(step.street, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                // the car: big what matters (how far, which street), what to do there left to the arrow and the voice (the user, 13 Nov)
+                if (!compact || step.street.isEmpty()) Text(if (step.street.isEmpty()) step.text else instruction, style = MaterialTheme.typography.bodyMedium, color = white.copy(alpha = 0.75f),
+                    maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
+            // the car: the turn on the left, the distance, the street and what to do stacked beside it, as Android Auto's
+            if (compact) Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                turn(); Column(Modifier.widthIn(max = 320.dp)) { distance(); words() }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) { turn(); distance() }
+                words()
+            }
             // the lanes before the turn, the ones to take white
             val lanes = step.lanes?.takeIf { showLanes(it, n.p?.toNext ?: Double.MAX_VALUE) }
             if (lanes != null) {

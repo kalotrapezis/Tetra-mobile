@@ -152,6 +152,7 @@ internal object CarWire {
                 200 to JSONObject().put("ok", true)
             }
             "/car/maps" -> 200 to CarMaps.list() // on the phone: its maps, for the unit to add or update its own
+            "/car/assistant" -> 200 to CarAssistant.give(c) // on the phone: AI Assist's settings and keys, for the paired unit only
             "/car/do" -> { // on the phone: the unit's buttons and AI Assist
                 body.optString("call").takeIf { it.isNotEmpty() }?.let { what ->
                     val ok = PhoneCalls.act(what.take(9)) ?: false
@@ -188,6 +189,10 @@ internal object CarWire {
         java.io.File("/proc/net/route").readLines().drop(1).map { it.split(Regex("\\s+")) }.firstOrNull { it.getOrNull(1) == "00000000" }?.getOrNull(2)
             ?.let { hex -> (0..3).map { i -> hex.substring(6 - i * 2, 8 - i * 2).toInt(16) }.joinToString(".") }
     }.getOrNull()
+
+    /** On the unit: the phone's AI Assist settings and keys (CarAssistant). */
+    fun assistant(c: Context): JSONObject = link(c)?.let { l -> anyHost(l) { h -> post(h, l.port, l.fingerprint, l.token, "/car/assistant", JSONObject()) } }
+        ?: throw SyncException("No phone is paired with Tetra Car.")
 
     /** On the unit: the phone's maps, path → {size, modified} (CarMaps). */
     fun maps(c: Context): JSONObject = link(c)?.let { l -> anyHost(l) { h -> post(h, l.port, l.fingerprint, l.token, "/car/maps", JSONObject()) } }

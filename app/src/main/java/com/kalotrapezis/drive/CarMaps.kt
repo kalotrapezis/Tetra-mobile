@@ -62,13 +62,16 @@ internal object CarMaps {
     val edition: Boolean get() = BuildConfig.APPLICATION_ID.endsWith(".se")
 
     private fun root() = MapsFiles.root(driveRoot())
-    /** The Browser's bookmarks (each device's file, BrowserSync) go too, under this prefix; the rest of its folder (passwords, tabs) never. */
-    private const val BOOKMARKS = "@browser/Bookmarks/"
-    private fun bookmarks() = File(BrowserSync.root(), "Bookmarks")
+    /**
+     * Besides the maps, under these prefixes: the Browser's bookmarks (each device's file, BrowserSync; never its passwords or tabs)
+     * and AI Assist's shared folder (its switches, its memory, the user's words).
+     */
+    private val MORE = mapOf("@browser/Bookmarks/" to { File(BrowserSync.root(), "Bookmarks") }, "@assistant/" to { AiGate.file(driveRoot()).parentFile!! })
 
-    /** Where [path] is on this device: in the Maps folder or the bookmarks' (no way out of either). */
+    /** Where [path] is on this device: in the Maps folder or one of [MORE] (no way out of any). */
     private fun local(path: String): File? {
-        val (dir, rel) = if (path.startsWith(BOOKMARKS)) bookmarks() to path.removePrefix(BOOKMARKS) else root() to path
+        val more = MORE.entries.firstOrNull { path.startsWith(it.key) }
+        val (dir, rel) = if (more != null) more.value() to path.removePrefix(more.key) else root() to path
         val r = dir.canonicalFile
         return File(r, rel).canonicalFile.takeIf { it.path.startsWith(r.path + File.separator) }
     }
@@ -77,7 +80,7 @@ internal object CarMaps {
      * What both sides keep changing on their own, small: saved places, lists, trips and the bookmarks. Taken from the phone when
      * its copy is newer, without asking (a "new maps (0 MB)" offer at every opening, 13 Nov); the car's own parking stays its own.
      */
-    internal fun personal(path: String) = path.startsWith(BOOKMARKS) || path == MapsSearch.ADDED ||
+    internal fun personal(path: String) = path.startsWith("@") || path == MapsSearch.ADDED ||
         path.substringBefore('/') in setOf(MapsFiles.PLACES, MapsFiles.LISTS, MapsFiles.TRIPS)
     private fun parking(path: String) = path == "${MapsFiles.PLACES}/${MapsFiles.PARKING}.json"
 
@@ -92,7 +95,7 @@ internal object CarMaps {
 
     /** Every file under the phone's Maps folder and its bookmarks: path → {size, modified}. */
     fun list(): JSONObject = JSONObject().apply {
-        for ((dir, prefix) in listOf(root() to "", bookmarks() to BOOKMARKS))
+        for ((dir, prefix) in listOf(root() to "") + MORE.map { (prefix, dir) -> dir() to prefix })
             dir.walkTopDown().filter { it.isFile && !it.name.startsWith(".") && !it.name.endsWith(".part") }
                 .forEach { put(prefix + it.relativeTo(dir).invariantSeparatorsPath, JSONObject().put("size", it.length()).put("modified", it.lastModified())) }
     }
@@ -126,6 +129,8 @@ internal object CarMaps {
         if (state.value is State.Moving || state.value is State.Checking) return
         state.value = State.Checking
         Thread {
+            // AI Assist as on the phone: its settings and keys (the user, 13 Nov: "the Mistral key is a pain to write on a touchscreen")
+            runCatching { CarAssistant.take(c.applicationContext, CarWire.assistant(c.applicationContext)) }.onFailure { WriterLog.w("Car: AI Assist's settings not taken (${it.message})") }
             val next: State = runCatching {
                 val theirs = CarWire.maps(c.applicationContext)
                 val all = wanted(theirs, ::local)
@@ -177,6 +182,49 @@ internal object CarMaps {
                 state.value = if (failed == null) State.Idle else State.Failed(failed.message ?: "")
             }
         }.start()
+    }
+}
+
+/**
+ * AI Assist's settings and each service's key, from the phone to the paired unit over Tetra Car's pinned link (the user, 13 Nov:
+ * "the settings about the assistant, everything, to sync over with the first transfer"). Each key is read out of the phone's
+ * keystore and kept in the unit's own (AssistantKey); never written to a file. The phone's choices win each time the car starts.
+ */
+internal object CarAssistant {
+    private fun prefs(c: Context) = c.getSharedPreferences("assistant", Context.MODE_PRIVATE)
+    private fun isKey(name: String) = name == "key" || name.startsWith("key_") // AssistantKey's, encrypted for this device only
+
+    /** On the phone: every setting, its type with it, and the keys in the clear (for the link only). */
+    fun give(c: Context): JSONObject {
+        val settings = JSONObject()
+        prefs(c).all.forEach { (k, v) ->
+            if (isKey(k) || v == null) return@forEach
+            val (t, value) = when (v) { is Boolean -> "b" to v; is Int -> "i" to v; is Long -> "l" to v; is Float -> "f" to v.toDouble()
+                is Set<*> -> "set" to org.json.JSONArray(v.map { it.toString() }); else -> "s" to v.toString() }
+            settings.put(k, JSONObject().put("t", t).put("v", value))
+        }
+        val keys = JSONObject().apply { AiProviders.ALL.forEach { p -> AssistantKey.get(c, p)?.let { put(p.id, it) } } }
+        return JSONObject().put("settings", settings).put("keys", keys)
+    }
+
+    /** On the unit: the phone's [o] over this unit's; what the phone has not stays. */
+    fun take(c: Context, o: JSONObject) {
+        val settings = o.optJSONObject("settings") ?: return
+        val e = prefs(c).edit()
+        settings.keys().forEach { k ->
+            if (isKey(k)) return@forEach
+            val s = settings.getJSONObject(k)
+            when (s.optString("t")) {
+                "b" -> e.putBoolean(k, s.getBoolean("v")); "i" -> e.putInt(k, s.getInt("v")); "l" -> e.putLong(k, s.getLong("v"))
+                "f" -> e.putFloat(k, s.getDouble("v").toFloat())
+                "set" -> e.putStringSet(k, s.getJSONArray("v").let { a -> (0 until a.length()).map(a::getString).toSet() })
+                else -> e.putString(k, s.optString("v"))
+            }
+        }
+        e.apply()
+        val keys = o.optJSONObject("keys")
+        AiProviders.ALL.forEach { p -> keys?.optString(p.id)?.takeIf { it.isNotBlank() && it != AssistantKey.get(c, p) }?.let { AssistantKey.set(c, it, p) } }
+        WriterLog.i("Car: AI Assist's settings from the phone, ${settings.length()} settings, ${keys?.length() ?: 0} keys")
     }
 }
 
@@ -264,7 +312,8 @@ internal fun storageAllowed(c: Context) = if (Build.VERSION.SDK_INT >= 30) Envir
  * itself does on a denser screen. 150 % until chosen; 1 on the phone, which is never scaled.
  */
 internal object CarSize {
-    val STEPS = listOf(1f, 1.25f, 1.5f, 1.75f, 2f, 2.25f, 2.5f)
-    fun of(c: Context): Float = if (!CarMaps.edition) 1f else c.getSharedPreferences("car", Context.MODE_PRIVATE).getFloat("screen_scale", 1.5f)
+    // 10 % steps (the user, 13 Nov: "I don't want to go from too small to too big"), 120 % at first: 125 % looked right in the car
+    val STEPS = (10..20).map { it / 10f }
+    fun of(c: Context): Float = if (!CarMaps.edition) 1f else c.getSharedPreferences("car", Context.MODE_PRIVATE).getFloat("screen_scale", 1.2f).let { v -> STEPS.minBy { kotlin.math.abs(it - v) } }
     fun set(c: Context, v: Float) = c.getSharedPreferences("car", Context.MODE_PRIVATE).edit().putFloat("screen_scale", v).commit()
 }

@@ -119,7 +119,7 @@ class CarActivity : ComponentActivity() {
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = TetraLook.light
         fullScreen()
         WriterLog.i("Tetra Car opened")
-        Car.running = true
+        open++; Car.running = true
         CarQuiet.set(this, true)
         // the car's link to the phone (CarWire): this unit's server for the phone's calls and messages, and a hello every 30 s
         server = runCatching { SyncServer.acquire(applicationContext, SyncStore(applicationContext)) }.onFailure { WriterLog.w("Car: no server for the phone", it) }.getOrNull()
@@ -132,7 +132,9 @@ class CarActivity : ComponentActivity() {
         systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE; hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
     }
     override fun onWindowFocusChanged(hasFocus: Boolean) { super.onWindowFocusChanged(hasFocus); if (hasFocus) fullScreen() }
-    override fun onDestroy() { Car.running = false; CarQuiet.set(this, false); if (server != null) runCatching { SyncServer.release() }; super.onDestroy() }
+    // a new size recreates this screen: the old one goes after the new one came, so only the last one out says Tetra Car closed
+    override fun onDestroy() { if (--open == 0) { Car.running = false; CarQuiet.set(this, false) }; if (server != null) runCatching { SyncServer.release() }; super.onDestroy() }
+    private companion object { var open = 0 }
     // the steering wheel's voice key, where the head unit passes it on: AI Assist listens
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_VOICE_ASSIST || keyCode == KeyEvent.KEYCODE_SEARCH) { Car.assist?.invoke() ?: carListen(this); return true }
@@ -199,10 +201,11 @@ internal data class CarView(val ui: Float, val map: Float, val zoom: Float, val 
  * row of choices changed at once, with its way back.
  */
 @Composable
-private fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, close: () -> Unit) {
+private fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, startSettings: Boolean = false, close: () -> Unit) {
     val context = LocalContext.current
     val v = Car.view(context)
-    var settings by remember { mutableStateOf(false) }
+    var settings by remember { mutableStateOf(startSettings) }
+    fun back() { if (settings && !startSettings) settings = false else close() } // opened at its settings (the car's build): back closes it
     fun pct(f: Float) = "${(f * 100).toInt()} %"
     @Composable fun <T> row(label: Int, options: List<T>, chosen: T, name: @Composable (T) -> String, pick: (T) -> Unit) {
         Text(stringResource(label), Modifier.padding(top = 12.dp, bottom = 4.dp), style = MaterialTheme.typography.titleMedium)
@@ -220,7 +223,7 @@ private fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, close: () -> 
     @Composable fun icon(icon: Int, color: Color) = Box(Modifier.size(72.dp).background(color), contentAlignment = Alignment.Center) {
         Icon(painterResource(icon), null, Modifier.size(36.dp), tint = Color.White)
     }
-    BackHandler { if (settings) settings = false else close() }
+    BackHandler { back() }
     if (!settings) Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).clickable(remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, null) {}
         .verticalScroll(rememberScrollState()).padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -239,11 +242,11 @@ private fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, close: () -> 
             Spacer(w) // the last row's empty place, so its tiles keep their width
         }
     }
-    else Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)).clickable { settings = false }, contentAlignment = Alignment.Center) {
+    else Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)).clickable { back() }, contentAlignment = Alignment.Center) {
         Column(Modifier.padding(16.dp).widthIn(max = 600.dp).clip(RoundedCornerShape(24.dp)).background(MaterialTheme.colorScheme.surface)
             .clickable(remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, null) {}.verticalScroll(rememberScrollState()).padding(20.dp)) { // a tap on the card stays on it
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton({ settings = false }) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
+                IconButton(::back) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
                 Text(stringResource(R.string.car_map_view), Modifier.weight(1f), style = MaterialTheme.typography.headlineSmall)
                 IconButton(close) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_close)) }
             }
@@ -252,9 +255,15 @@ private fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, close: () -> 
                 row(R.string.car_map_tilt, CarView.TILT, v.tilt, { if (it < 0) stringResource(R.string.car_map_tilt_auto) else "$it°" }) { Car.setView(context, v.copy(tilt = it)) }
                 row(R.string.car_map_arrow, listOf(false, true), v.low, { stringResource(if (it) R.string.car_map_arrow_low else R.string.car_map_arrow_middle) }) { Car.setView(context, v.copy(low = it)) }
                 // the car's build: one size for all of Tetra (CarSize, also in Settings › Tetra Car), not a second one over Tetra Car's alone
-                if (CarMaps.edition) row(R.string.car_ui_size, CarSize.STEPS, CarSize.of(context), { pct(it) }) { CarSize.set(context, it); (context as? android.app.Activity)?.recreate() }
+                if (CarMaps.edition) row(R.string.car_screen_size, CarSize.STEPS, CarSize.of(context), { pct(it) }) { CarSize.set(context, it); (context as? android.app.Activity)?.recreate() }
                 else row(R.string.car_ui_size, CarView.UI, v.ui, { pct(it) }) { Car.setView(context, v.copy(ui = it)) }
                 val asked = AutoProjection.session?.asked
+                // the car's build: the rest of Tetra's settings for the car (Tetra Car, Maps, Browser, AI Assist, the look)
+                if (CarMaps.edition) androidx.compose.material3.TextButton({
+                    AppLocale.reopenSettings = true
+                    runCatching { context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                    close()
+                }, Modifier.padding(top = 12.dp)) { Text(stringResource(R.string.common_settings) + "  ›", style = MaterialTheme.typography.titleMedium) }
                 if (!CarMaps.edition) row(R.string.car_resolution, CarView.RES, v.res, { r -> asked?.let { (w, h) -> "${(w * r).toInt() and 1.inv()}×${(h * r).toInt() and 1.inv()}" } ?: pct(r) }) { Car.setView(context, v.copy(res = it)) }
         }
     }
@@ -545,6 +554,7 @@ internal fun CarScreen(projected: Boolean = false) {
     // expose (the user, 11 Nov): every pane shows the pages to choose from; the panes chosen so far, null when it is not up
     var expose by remember { mutableStateOf<Set<Int>?>(null) }
     var apps by remember { mutableStateOf(false) }
+    var carSettings by remember { mutableStateOf(false) } // the car's build: the apps' Settings tile
     val config = LocalConfiguration.current
     val side = dockFor(Car.side(context), config.screenWidthDp, config.screenHeightDp, Car.driverRight(context)) // Settings › Tetra Car › Dock: changed there, followed here at once
     // AI Assist's «άνοιξε …» reaches the panes while this screen is up
@@ -692,8 +702,9 @@ internal fun CarScreen(projected: Boolean = false) {
                 }
             }
         }
-        if (apps) CarApps(close = { apps = false }) { id -> if (id == "media") media() else CarApp.entries.firstOrNull { it.name.lowercase() == id }?.let(::openApp) } // a page of Tetra's from the grid: as from the dock
+        if (apps) CarApps(close = { apps = false }, settings = { carSettings = true }) { id -> if (id == "media") media() else CarApp.entries.firstOrNull { it.name.lowercase() == id }?.let(::openApp) } // a page of Tetra's from the grid: as from the dock
         if (viewPage) CarViewPage(::openApp, ::media) { viewPage = false }
+        if (carSettings) CarViewPage(::openApp, ::media, startSettings = true) { carSettings = false }
     }
     }
 }
@@ -778,9 +789,8 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
         // the time on top, the apps, then the apps' menu, the mic and the layouts' switch at the bottom (the user, 13 Nov); the apps
         // in what room is left, the oldest left out when a bigger size takes it (the user, 13 Nov: bigger made the dock's icons smaller)
         CarStatus(true, clock)
-        DockFit(Modifier.weight(1f).fillMaxWidth()) { recent() }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) { group() }
-        layoutButton()
+        // every icon the same distance apart, the apps' menu, the mic and the layouts' switch too (the user, 13 Nov: "it hits the eye")
+        DockFit(Modifier.weight(1f).fillMaxWidth(), keep = 3) { recent(); group(); layoutButton() }
     }
     else Row(Modifier.fillMaxWidth().height(88.dp).padding(horizontal = 8.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         if (layouts) { Spacer(Modifier.weight(1f)); strip(); Spacer(Modifier.weight(1f)); return@Row }
@@ -796,13 +806,13 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
 /** The dock down a side: as wide as its icons and the clock (the user, 13 Nov: "the dock's width is still there, the icons are small"). */
 private val DOCK_SIDE = 64.dp
 
-/** The dock's apps down a side: as many as fit its height, the newest kept (they come last), spaced evenly. */
+/** The dock down a side: the last [keep] always, then as many apps as fit its height, the newest kept (they come last); all spaced evenly. */
 @Composable
-private fun DockFit(modifier: Modifier, content: @Composable () -> Unit) = Layout(content, modifier) { ms, c ->
+private fun DockFit(modifier: Modifier, keep: Int, content: @Composable () -> Unit) = Layout(content, modifier) { ms, c ->
     val all = ms.map { it.measure(c.copy(minWidth = 0, minHeight = 0)) }
-    val shown = ArrayList<androidx.compose.ui.layout.Placeable>()
-    var used = 0
-    for (p in all.asReversed()) { if (used + p.height > c.maxHeight) break; used += p.height; shown.add(0, p) }
+    val shown = ArrayList(all.takeLast(keep))
+    var used = shown.sumOf { it.height }
+    for (p in all.dropLast(keep).asReversed()) { if (used + p.height > c.maxHeight) break; used += p.height; shown.add(0, p) }
     val gap = (c.maxHeight - used) / (shown.size + 1)
     layout(c.maxWidth, c.maxHeight) { var y = gap; shown.forEach { it.place((c.maxWidth - it.width) / 2, y); y += it.height + gap } }
 }
@@ -936,7 +946,7 @@ private fun CarMediaTiles(modifier: Modifier, pick: (JSONObject) -> Unit) {
 
 /** The dock's Apps: every app on the head unit; Android puts it beside Tetra Car where the unit allows, else in front. */
 @Composable
-private fun CarApps(close: () -> Unit, page: (String) -> Unit) {
+private fun CarApps(close: () -> Unit, settings: () -> Unit, page: (String) -> Unit) {
     val context = LocalContext.current
     val all by produceState(emptyList<Triple<ComponentName, String, ImageBitmap>>()) {
         value = withContext(Dispatchers.IO) {
@@ -953,18 +963,15 @@ private fun CarApps(close: () -> Unit, page: (String) -> Unit) {
             IconButton(close) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
             Text(stringResource(R.string.car_apps), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
             // the car's own link to the phone (CarWire): its QR, scanned once by the phone
-            if (PhoneRelay.noCalls(context)) androidx.compose.material3.TextButton({ pairing = true }) {
+            if (CarMaps.edition || PhoneRelay.noCalls(context)) androidx.compose.material3.TextButton({ pairing = true }) {
                 Icon(painterResource(R.drawable.ic_phone), null, Modifier.size(20.dp)); Text("  " + stringResource(R.string.car_pair_phone))
             }
         }
         if (pairing) CarPairDialog { pairing = false }
         LazyVerticalGrid(GridCells.Adaptive(112.dp), Modifier.fillMaxSize().padding(8.dp)) {
+            // the car's build: Tetra Car's own settings first (the map's size, zoom, tilt and arrow, the size of everything), the rest under them
             if (CarMaps.edition) item {
-                Column(Modifier.clip(RoundedCornerShape(12.dp)).clickable {
-                    AppLocale.reopenSettings = true
-                    runCatching { context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
-                    close()
-                }.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(Modifier.clip(RoundedCornerShape(12.dp)).clickable { close(); settings() }.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Image(painterResource(R.drawable.settings_art), null, Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)))
                     Text(stringResource(R.string.common_settings), fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
