@@ -155,12 +155,15 @@
     <string name="assistant_attach_pill_show">🎙 Направи го радиопредаване</string>
     <string name="assistant_attach_pill_live">💬 Жива беседа за документа</string>
     <string name="assistant_attach_pill_read">🔊 Прочети ми го</string>
-    <string name="assistant_attach_show_prompt">Направи «%1$s» радиопредаване като аудиофайл: водещ и експерт, около 15 минути, с пример и резюме за всяка секция.</string>
+    <string name="assistant_attach_show_prompt">Направи «%1$s» радиопредаване като аудиофайл: водещ и експерт, с пример и резюме за всяка секция.</string>
     <string name="assistant_attach_read_prompt">Прочети ми «%1$s» цял като аудиофайл, с един глас.</string>
     <string name="assistant_attach_live_prompt">Да поговорим за документа «%1$s». Кажи ми в две изречения какво казва и ме попитай откъде искам да започнем.</string>
     <string name="assistant_attach_show">Радиопредаване</string>
     <string name="assistant_attach_read">Четене</string>
     <string name="assistant_attach_estimate">≈ %1$d минути аудио, ≈ €%2$s, готово за ~%3$d минути.</string>
+    <string name="assistant_attach_length_short">Кратко</string>
+    <string name="assistant_attach_length_medium">Средно</string>
+    <string name="assistant_attach_length_long">Дълго</string>
     <string name="assistant_attach_start">Старт</string>
     <string name="assistant_attach_started">Правя го на заден план. Ще ти кажа, когато е готово.</string>
     <string name="assistant_attach_skipped">Добре, няма да го правя.</string>

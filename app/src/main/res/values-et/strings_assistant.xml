@@ -155,12 +155,15 @@
     <string name="assistant_attach_pill_show">🎙 Tee sellest raadiosaade</string>
     <string name="assistant_attach_pill_live">💬 Elav vestlus dokumendist</string>
     <string name="assistant_attach_pill_read">🔊 Loe mulle ette</string>
-    <string name="assistant_attach_show_prompt">Tee «%1$s» raadiosaateks helifailina: saatejuht ja ekspert, umbes 15 minutit, igas osas näide ja kokkuvõte.</string>
+    <string name="assistant_attach_show_prompt">Tee «%1$s» raadiosaateks helifailina: saatejuht ja ekspert, igas osas näide ja kokkuvõte.</string>
     <string name="assistant_attach_read_prompt">Loe mulle «%1$s» tervikuna ette helifailina, ühe häälega.</string>
     <string name="assistant_attach_live_prompt">Räägime dokumendist «%1$s». Ütle mulle kahe lausega, mis selles on, ja küsi, kust ma tahan alustada.</string>
     <string name="assistant_attach_show">Raadiosaade</string>
     <string name="assistant_attach_read">Lugemine</string>
     <string name="assistant_attach_estimate">≈ %1$d minutit heli, ≈ €%2$s, valmis ~%3$d minutiga.</string>
+    <string name="assistant_attach_length_short">Lühike</string>
+    <string name="assistant_attach_length_medium">Keskmine</string>
+    <string name="assistant_attach_length_long">Pikk</string>
     <string name="assistant_attach_start">Alusta</string>
     <string name="assistant_attach_started">Teen seda taustal. Annan teada, kui see on valmis.</string>
     <string name="assistant_attach_skipped">Selge, ma ei tee seda.</string>

@@ -155,12 +155,15 @@
     <string name="assistant_attach_pill_show">🎙 Trasformalo in una trasmissione radio</string>
     <string name="assistant_attach_pill_live">💬 Conversazione dal vivo sul documento</string>
     <string name="assistant_attach_pill_read">🔊 Leggimelo</string>
-    <string name="assistant_attach_show_prompt">Trasforma «%1$s» in una trasmissione radio in audio: un conduttore e un esperto, circa 15 minuti, con un esempio e un riepilogo per ogni sezione.</string>
+    <string name="assistant_attach_show_prompt">Trasforma «%1$s» in una trasmissione radio in audio: un conduttore e un esperto, con un esempio e un riepilogo per ogni sezione.</string>
     <string name="assistant_attach_read_prompt">Leggimi «%1$s» per intero in audio, con una sola voce.</string>
     <string name="assistant_attach_live_prompt">Parliamo del documento «%1$s». Dimmi in due frasi che cosa dice e chiedimi da dove voglio cominciare.</string>
     <string name="assistant_attach_show">Trasmissione radio</string>
     <string name="assistant_attach_read">Lettura</string>
     <string name="assistant_attach_estimate">≈ %1$d minuti di audio, ≈ €%2$s, pronto in ~%3$d minuti.</string>
+    <string name="assistant_attach_length_short">Breve</string>
+    <string name="assistant_attach_length_medium">Media</string>
+    <string name="assistant_attach_length_long">Lunga</string>
     <string name="assistant_attach_start">Avvia</string>
     <string name="assistant_attach_started">Lo sto preparando in background. Ti avviserò quando sarà pronto.</string>
     <string name="assistant_attach_skipped">Va bene, non lo preparo.</string>

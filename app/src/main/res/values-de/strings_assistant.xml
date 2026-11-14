@@ -155,12 +155,15 @@
     <string name="assistant_attach_pill_show">🎙 Als Radiosendung hören</string>
     <string name="assistant_attach_pill_live">💬 Live-Gespräch über das Dokument</string>
     <string name="assistant_attach_pill_read">🔊 Lies es mir vor</string>
-    <string name="assistant_attach_show_prompt">Mach aus «%1$s» eine Radiosendung als Audiodatei: ein Moderator und ein Experte, etwa 15 Minuten, mit einem Beispiel und einer Zusammenfassung zu jedem Abschnitt.</string>
+    <string name="assistant_attach_show_prompt">Mach aus «%1$s» eine Radiosendung als Audiodatei: ein Moderator und ein Experte, mit einem Beispiel und einer Zusammenfassung zu jedem Abschnitt.</string>
     <string name="assistant_attach_read_prompt">Lies mir «%1$s» ganz vor, als Audiodatei, mit einer Stimme.</string>
     <string name="assistant_attach_live_prompt">Lass uns über das Dokument «%1$s» sprechen. Sag mir in zwei Sätzen, was es sagt, und frag mich, wo ich anfangen möchte.</string>
     <string name="assistant_attach_show">Radiosendung</string>
     <string name="assistant_attach_read">Vorlesen</string>
     <string name="assistant_attach_estimate">≈ %1$d Minuten Audio, ≈ €%2$s, fertig in ~%3$d Minuten.</string>
+    <string name="assistant_attach_length_short">Kurz</string>
+    <string name="assistant_attach_length_medium">Mittel</string>
+    <string name="assistant_attach_length_long">Lang</string>
     <string name="assistant_attach_start">Starten</string>
     <string name="assistant_attach_started">Ich mache es im Hintergrund. Ich sage Bescheid, wenn es fertig ist.</string>
     <string name="assistant_attach_skipped">In Ordnung, ich mache es nicht.</string>

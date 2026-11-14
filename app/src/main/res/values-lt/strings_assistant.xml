@@ -155,12 +155,15 @@
     <string name="assistant_attach_pill_show">🎙 Padaryk radijo laidą</string>
     <string name="assistant_attach_pill_live">💬 Tiesioginis pokalbis apie dokumentą</string>
     <string name="assistant_attach_pill_read">🔊 Perskaityk man</string>
-    <string name="assistant_attach_show_prompt">Padaryk iš «%1$s» radijo laidą garso failu: vedėjas ir ekspertas, apie 15 minučių, su pavyzdžiu ir santrauka kiekvienai daliai.</string>
+    <string name="assistant_attach_show_prompt">Padaryk iš «%1$s» radijo laidą garso failu: vedėjas ir ekspertas, su pavyzdžiu ir santrauka kiekvienai daliai.</string>
     <string name="assistant_attach_read_prompt">Perskaityk man «%1$s» visą garso failu, vienu balsu.</string>
     <string name="assistant_attach_live_prompt">Pakalbėkime apie dokumentą «%1$s». Pasakyk dviem sakiniais, ką jis sako, ir paklausk, nuo ko norėčiau pradėti.</string>
     <string name="assistant_attach_show">Radijo laida</string>
     <string name="assistant_attach_read">Skaitymas</string>
     <string name="assistant_attach_estimate">≈ %1$d minučių garso, ≈ €%2$s, bus parengta per ~%3$d minučių.</string>
+    <string name="assistant_attach_length_short">Trumpa</string>
+    <string name="assistant_attach_length_medium">Vidutinė</string>
+    <string name="assistant_attach_length_long">Ilga</string>
     <string name="assistant_attach_start">Pradėti</string>
     <string name="assistant_attach_started">Darau fone. Pranešiu, kai bus paruošta.</string>
     <string name="assistant_attach_skipped">Gerai, nedarysiu.</string>

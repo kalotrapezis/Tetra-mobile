@@ -451,7 +451,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
                 { f -> scope.launch { attaching = true; withContext(Dispatchers.IO) { runCatching { Attach.reader(context)(f) } }.onSuccess { attached = it }.onFailure { say(it.shownMessage(context) ?: "", true) }; attaching = false } },
                 ::say, dialing, dialLeft, ::cancelDial)
             itemsIndexed(bubbles) { i, b -> BubbleView(b, pending.takeIf { i == bubbles.size - 1 }, ::choose, ::call, { pending = null; say(context.getString(R.string.assistant_call_cancelled)) }, ::open,
-                pendingAudio.takeIf { i == bubbles.size - 1 }, { startAudio(it) }, ::skipAudio, actions, confirming.takeIf { i == bubbles.size - 1 }, ::decide) }
+                pendingAudio.takeIf { i == bubbles.size - 1 }, { pendingAudio = pendingAudio?.sized(it) }, { startAudio(it) }, ::skipAudio, actions, confirming.takeIf { i == bubbles.size - 1 }, ::decide) }
         }
     }
 
@@ -912,7 +912,7 @@ private fun MicButton(phase: Phase, hearing: Boolean, tap: () -> Unit) {
 
 @Composable
 private fun BubbleView(b: Bubble, pending: PendingCall?, choose: (AssistantChoice) -> Unit, call: (PendingCall) -> Unit, cancel: () -> Unit, open: (File) -> Unit,
-    audio: AudioAsk?, startAudio: (AudioAsk) -> Unit, skipAudio: () -> Unit, actions: CardActions,
+    audio: AudioAsk?, setLength: (String) -> Unit, startAudio: (AudioAsk) -> Unit, skipAudio: () -> Unit, actions: CardActions,
     confirming: AssistantGuard.Confirm? = null, decide: (AssistantGuard.Confirm, Boolean) -> Unit = { _, _ -> }) {
     Column(Modifier.fillMaxWidth(), horizontalAlignment = if (b.mine) Alignment.End else Alignment.Start) {
         // the file that went with it: its name and pages, never its text
@@ -946,10 +946,15 @@ private fun BubbleView(b: Bubble, pending: PendingCall?, choose: (AssistantChoic
             }.getOrNull() }
             bmp?.let { Image(it, contentDescription = f.name, Modifier.padding(top = 6.dp).widthIn(max = 360.dp).clip(RoundedCornerShape(16.dp)).clickable { open(f) }, contentScale = ContentScale.FillWidth) }
         }
-        // audio_make's estimate: the user's «Ξεκίνα» (or a spoken yes) starts it
-        if (audio != null && b.audio == audio) Surface(Modifier.padding(top = 6.dp).widthIn(max = 560.dp), shape = RoundedCornerShape(16.dp), color = AppColor.assistant.copy(alpha = 0.16f).compositeOver(MaterialTheme.colorScheme.surface)) {
+        // audio_make's estimate: the user's «Ξεκίνα» (or a spoken yes) starts it; a length chosen is a copy of the ask, the same file's card
+        if (audio != null && b.audio?.doc === audio.doc) Surface(Modifier.padding(top = 6.dp).widthIn(max = 560.dp), shape = RoundedCornerShape(16.dp), color = AppColor.assistant.copy(alpha = 0.16f).compositeOver(MaterialTheme.colorScheme.surface)) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(stringResource(if (audio.mode == "show") R.string.assistant_attach_show else R.string.assistant_attach_read) + " · " + audio.doc.name, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (audio.mode == "show" && audio.estimates.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf("short" to R.string.assistant_attach_length_short, "medium" to R.string.assistant_attach_length_medium, "long" to R.string.assistant_attach_length_long).forEach { (l, label) ->
+                        FilterChip(selected = audio.length == l, onClick = { setLength(l) }, label = { Text(stringResource(label), maxLines = 1) })
+                    }
+                }
                 Text(stringResource(R.string.assistant_attach_estimate, audio.estimate.minutes, "%.2f".format(Locale.ROOT, audio.estimate.usd), audio.estimate.ready), style = MaterialTheme.typography.bodyLarge)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { startAudio(audio) }) { Icon(painterResource(R.drawable.ic_play), contentDescription = null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.assistant_attach_start), maxLines = 1) }

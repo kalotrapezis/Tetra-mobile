@@ -155,12 +155,15 @@
     <string name="assistant_attach_pill_show">🎙 Agħmilha programm tar-radju</string>
     <string name="assistant_attach_pill_live">💬 Taħdita diretta dwar id-dokument</string>
     <string name="assistant_attach_pill_read">🔊 Aqrali għalija</string>
-    <string name="assistant_attach_show_prompt">Agħmel «%1$s» programm tar-radju f\'fajl awdjo: presentatur u espert, madwar 15-il minuta, b\'eżempju u sommarju għal kull sezzjoni.</string>
+    <string name="assistant_attach_show_prompt">Agħmel «%1$s» programm tar-radju f\'fajl awdjo: presentatur u espert, b\'eżempju u sommarju għal kull sezzjoni.</string>
     <string name="assistant_attach_read_prompt">Aqrali «%1$s» kollu f\'fajl awdjo, b\'vuċi waħda.</string>
     <string name="assistant_attach_live_prompt">Ejja nitkellmu dwar id-dokument «%1$s». Għidli f\'żewġ sentenzi x\'jgħid, u staqsini minn fejn irrid nibdew.</string>
     <string name="assistant_attach_show">Programm tar-radju</string>
     <string name="assistant_attach_read">Qari</string>
     <string name="assistant_attach_estimate">≈ %1$d minuti awdjo, ≈ €%2$s, lest f\'~%3$d minuti.</string>
+    <string name="assistant_attach_length_short">Qasir</string>
+    <string name="assistant_attach_length_medium">Medju</string>
+    <string name="assistant_attach_length_long">Twil</string>
     <string name="assistant_attach_start">Ibda</string>
     <string name="assistant_attach_started">Qed nagħmilha fil-isfond. Ngħidlek meta jkun lest.</string>
     <string name="assistant_attach_skipped">Tajjeb, ma nagħmilhiex.</string>

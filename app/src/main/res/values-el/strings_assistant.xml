@@ -155,12 +155,15 @@
     <string name="assistant_attach_pill_show">🎙 Κάνε το ραδιοφωνική εκπομπή</string>
     <string name="assistant_attach_pill_live">💬 Ζωντανή συζήτηση για το έγγραφο</string>
     <string name="assistant_attach_pill_read">🔊 Διάβασέ το μου</string>
-    <string name="assistant_attach_show_prompt">Κάνε το «%1$s» ραδιοφωνική εκπομπή σε αρχείο ήχου: ένας παρουσιαστής και ένας ειδικός, περίπου 15 λεπτά, με ένα παράδειγμα και ανακεφαλαίωση σε κάθε ενότητα.</string>
+    <string name="assistant_attach_show_prompt">Κάνε το «%1$s» ραδιοφωνική εκπομπή σε αρχείο ήχου: ένας παρουσιαστής και ένας ειδικός, με ένα παράδειγμα και ανακεφαλαίωση σε κάθε ενότητα.</string>
     <string name="assistant_attach_read_prompt">Διάβασέ μου το «%1$s» ολόκληρο σε αρχείο ήχου, με μία φωνή.</string>
     <string name="assistant_attach_live_prompt">Ας συζητήσουμε το έγγραφο «%1$s». Πες μου σε δύο προτάσεις τι λέει και ρώτα με από πού θέλω να ξεκινήσουμε.</string>
     <string name="assistant_attach_show">Ραδιοφωνική εκπομπή</string>
     <string name="assistant_attach_read">Ανάγνωση</string>
     <string name="assistant_attach_estimate">≈ %1$d λεπτά ήχου, ≈ €%2$s, έτοιμο σε ~%3$d λεπτά.</string>
+    <string name="assistant_attach_length_short">Σύντομη</string>
+    <string name="assistant_attach_length_medium">Μεσαία</string>
+    <string name="assistant_attach_length_long">Μεγάλη</string>
     <string name="assistant_attach_start">Ξεκίνα</string>
     <string name="assistant_attach_started">Το φτιάχνω στο παρασκήνιο. Θα σε ειδοποιήσω όταν είναι έτοιμο.</string>
     <string name="assistant_attach_skipped">Εντάξει, δεν το φτιάχνω.</string>

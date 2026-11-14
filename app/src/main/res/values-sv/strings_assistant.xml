@@ -155,12 +155,15 @@
     <string name="assistant_attach_pill_show">🎙 Gör det till ett radioprogram</string>
     <string name="assistant_attach_pill_live">💬 Live-samtal om dokumentet</string>
     <string name="assistant_attach_pill_read">🔊 Läs upp den för mig</string>
-    <string name="assistant_attach_show_prompt">Gör «%1$s» till ett radioprogram som ljudfil: en programledare och en expert, cirka 15 minuter, med ett exempel och en sammanfattning för varje avsnitt.</string>
+    <string name="assistant_attach_show_prompt">Gör «%1$s» till ett radioprogram som ljudfil: en programledare och en expert, med ett exempel och en sammanfattning för varje avsnitt.</string>
     <string name="assistant_attach_read_prompt">Läs upp «%1$s» hela som ljudfil, med en röst.</string>
     <string name="assistant_attach_live_prompt">Låt oss prata om dokumentet «%1$s». Berätta med två meningar vad det säger och fråga mig var jag vill börja.</string>
     <string name="assistant_attach_show">Radioprogram</string>
     <string name="assistant_attach_read">Uppläsning</string>
     <string name="assistant_attach_estimate">≈ %1$d minuter ljud, ≈ €%2$s, klart om ~%3$d minuter.</string>
+    <string name="assistant_attach_length_short">Kort</string>
+    <string name="assistant_attach_length_medium">Mellan</string>
+    <string name="assistant_attach_length_long">Lång</string>
     <string name="assistant_attach_start">Starta</string>
     <string name="assistant_attach_started">Jag gör det i bakgrunden. Jag säger till när det är klart.</string>
     <string name="assistant_attach_skipped">Okej, då gör jag det inte.</string>
