@@ -84,7 +84,8 @@ internal object Presenter {
 
 /** The show: the TV comes on, the presenter walks in and reads; Page for the page itself, AI Assist, ✕ switches it off. */
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
-@Composable internal fun NewsShow(title: String, html: String, page: () -> Unit, close: () -> Unit) {
+/** [chat]: a scheduled action's run kept as a chat, which the AI Assist button goes on with («Συνέχεια στη συνομιλία»). */
+@Composable internal fun NewsShow(title: String, html: String, page: () -> Unit, close: () -> Unit, chat: String? = null) {
     val c = LocalContext.current
     val scope = rememberCoroutineScope()
     val reader = rememberReadAloud()
@@ -109,7 +110,8 @@ internal object Presenter {
             VhsTv(0, false, Modifier.padding(bottom = 12.dp), off = off) { NewsScreen(speaking, title, color, Modifier.fillMaxWidth().height(260.dp)) }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 PixelButton(stringResource(R.string.news_page), Color(0xFFFFE082), R.drawable.ic_file) { voice?.stop(); reader.stop(); page() }
-                PixelButton(stringResource(R.string.app_assistant), color, R.drawable.ic_chat) { openAssistant(c); bye() }
+                PixelButton(stringResource(if (chat != null) R.string.assistant_sched_continue else R.string.app_assistant), color, R.drawable.ic_chat) {
+                    chat?.let { id -> AssistantChats.get(c, id)?.let { SharedChat.open(c, it) } }; openAssistant(c); bye() }
                 PixelButton(stringResource(R.string.common_close), Color(0xFFE0E0E0), R.drawable.ic_close) { bye() }
             }
         }

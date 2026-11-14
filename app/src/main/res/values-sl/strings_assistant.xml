@@ -263,4 +263,15 @@
     <string name="ai_bad_key">Ključ %1$s je napačen. Preveri ga v Nastavitve › AI Assist.</string>
     <string name="ai_busy">%1$s je zaseden ali pa ključ nima več kredita. Poskusi znova čez minuto.</string>
     <string name="ai_server">%1$s je odgovoril z napako (%2$d).</string>
+    <string name="assistant_sched_allow">Sme narediti samo</string>
+    <string name="assistant_sched_allow_how">Po branju pošte ali spleta se to zgodi brez vprašanja. Pošiljanje, klicanje in brisanje vedno čakajo vas.</string>
+    <string name="assistant_sched_allow_calendar">Dodaj v koledar</string>
+    <string name="assistant_sched_allow_notes">Zapiski in seznami</string>
+    <string name="assistant_sched_allow_timers">Časovniki in budilke</string>
+    <string name="assistant_sched_allow_files">Shrani datoteke in slike</string>
+    <string name="assistant_sched_report">Kaj je naredil</string>
+    <string name="assistant_sched_done">Narejeno</string>
+    <string name="assistant_sched_waiting">Čaka na vaš da</string>
+    <string name="assistant_sched_failed">Ni uspelo</string>
+    <string name="assistant_sched_continue">Nadaljuj v klepetu</string>
 </resources>

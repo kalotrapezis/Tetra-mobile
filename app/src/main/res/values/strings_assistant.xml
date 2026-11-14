@@ -262,4 +262,15 @@
     <string name="ai_bad_key">The %1$s key is wrong. Check it in Settings › AI Assist.</string>
     <string name="ai_busy">%1$s is busy, or the key has no credit left. Try again in a minute.</string>
     <string name="ai_server">%1$s answered with an error (%2$d).</string>
+    <string name="assistant_sched_allow">May do on its own</string>
+    <string name="assistant_sched_allow_how">After reading mail or the web, these are done without asking you. Sending, calling and deleting always wait for you.</string>
+    <string name="assistant_sched_allow_calendar">Add to the calendar</string>
+    <string name="assistant_sched_allow_notes">Make notes and lists</string>
+    <string name="assistant_sched_allow_timers">Set timers and alarms</string>
+    <string name="assistant_sched_allow_files">Save files and pictures</string>
+    <string name="assistant_sched_report">What it did</string>
+    <string name="assistant_sched_done">Done</string>
+    <string name="assistant_sched_waiting">Waiting for your yes</string>
+    <string name="assistant_sched_failed">Could not</string>
+    <string name="assistant_sched_continue">Continue in chat</string>
 </resources>

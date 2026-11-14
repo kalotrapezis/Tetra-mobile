@@ -259,4 +259,15 @@
     <string name="ai_bad_key">Ключът за %1$s е грешен. Провери го в Настройки › AI Assist.</string>
     <string name="ai_busy">%1$s е заета или ключът няма повече кредит. Опитай пак след минута.</string>
     <string name="ai_server">%1$s отговори с грешка (%2$d).</string>
+    <string name="assistant_sched_allow">Може да прави само</string>
+    <string name="assistant_sched_allow_how">След като прочете поща или интернет, тези действия се извършват, без да ви пита. Изпращане, обаждане и изтриване винаги чакат вас.</string>
+    <string name="assistant_sched_allow_calendar">Добавяне в календара</string>
+    <string name="assistant_sched_allow_notes">Бележки и списъци</string>
+    <string name="assistant_sched_allow_timers">Таймери и аларми</string>
+    <string name="assistant_sched_allow_files">Запазване на файлове и снимки</string>
+    <string name="assistant_sched_report">Какво направи</string>
+    <string name="assistant_sched_done">Направено</string>
+    <string name="assistant_sched_waiting">Чака вашето „да“</string>
+    <string name="assistant_sched_failed">Не успя</string>
+    <string name="assistant_sched_continue">Продължи в чата</string>
 </resources>

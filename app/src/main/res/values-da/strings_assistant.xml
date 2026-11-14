@@ -259,4 +259,15 @@
     <string name="ai_bad_key">%1$s-nøglen er forkert. Tjek den i Indstillinger › AI Assist.</string>
     <string name="ai_busy">%1$s har travlt, eller nøglen har ikke mere kredit. Prøv igen om et minut.</string>
     <string name="ai_server">%1$s svarede med en fejl (%2$d).</string>
+    <string name="assistant_sched_allow">Må gøre selv</string>
+    <string name="assistant_sched_allow_how">Efter at have læst mail eller nettet gøres dette uden at spørge dig. Afsendelse, opkald og sletning venter altid på dig.</string>
+    <string name="assistant_sched_allow_calendar">Tilføj til kalenderen</string>
+    <string name="assistant_sched_allow_notes">Noter og lister</string>
+    <string name="assistant_sched_allow_timers">Timere og alarmer</string>
+    <string name="assistant_sched_allow_files">Gem filer og billeder</string>
+    <string name="assistant_sched_report">Hvad den gjorde</string>
+    <string name="assistant_sched_done">Udført</string>
+    <string name="assistant_sched_waiting">Venter på dit ja</string>
+    <string name="assistant_sched_failed">Kunne ikke</string>
+    <string name="assistant_sched_continue">Fortsæt i chatten</string>
 </resources>

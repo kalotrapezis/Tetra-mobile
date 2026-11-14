@@ -261,4 +261,15 @@
     <string name="ai_bad_key">La chiave %1$s non è corretta. Controllala in Impostazioni › AI Assist.</string>
     <string name="ai_busy">%1$s è occupato oppure la chiave non ha più credito. Riprova tra un minuto.</string>
     <string name="ai_server">%1$s ha risposto con un errore (%2$d).</string>
+    <string name="assistant_sched_allow">Può fare da solo</string>
+    <string name="assistant_sched_allow_how">Dopo aver letto la posta o il web, queste azioni si fanno senza chiederti. Inviare, chiamare ed eliminare aspettano sempre te.</string>
+    <string name="assistant_sched_allow_calendar">Aggiungi al calendario</string>
+    <string name="assistant_sched_allow_notes">Note ed elenchi</string>
+    <string name="assistant_sched_allow_timers">Timer e sveglie</string>
+    <string name="assistant_sched_allow_files">Salva file e immagini</string>
+    <string name="assistant_sched_report">Cosa ha fatto</string>
+    <string name="assistant_sched_done">Fatto</string>
+    <string name="assistant_sched_waiting">Aspetta il tuo sì</string>
+    <string name="assistant_sched_failed">Non è riuscito</string>
+    <string name="assistant_sched_continue">Continua nella chat</string>
 </resources>

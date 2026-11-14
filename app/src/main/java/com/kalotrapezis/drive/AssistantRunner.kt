@@ -87,17 +87,41 @@ internal object AssistantRunner {
         val title = title(c, s)
         if (AssistantUsage.of(c).capped()) { AssistantBriefs.notice(c, title, c.getString(R.string.usage_capped)); return }
         val now = System.currentTimeMillis()
-        val chat by lazy { assistantChat(c) }
-        val (html, line) = if (s.optString("kind") == "brief") brief(c, tetra, now, title, gate) { chat.ask(it).text }
-            else chat.ask("${s.optString("prompt")}\n\n(This runs by itself on a schedule and the answer is shown as a page: it may be longer than usual, in short paragraphs.)").text
-                .let { t -> page(c, title, heading(c, now) + " " + clock(now), listOf(Part(c.getString(R.string.home_label_assistant), paragraphs(t)))) to t }
+        val allow = s.optJSONArray("allow")?.let { a -> (0 until a.length()).map { a.optString(it) } }.orEmpty()
+        val chat by lazy { assistantChat(c).also { it.allow = AssistantGuard.allowed(allow) } }
         val day = Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault()).toLocalDate().toString()
+        val base = if (s.optString("kind") == "brief") day else "$day-${s.optString("id").take(8)}"
+        val (html, line) = if (s.optString("kind") == "brief") brief(c, tetra, now, title, gate) { chat.ask(it).text }
+            else chat.ask("${s.optString("prompt")}\n\n(This runs by itself on a schedule and the answer is shown as a page: it may be longer than usual, in short paragraphs.)").text.let { t ->
+                val done = report(c, chat.log)
+                // the run as a chat too (the user, 14 Nov: "an actual chat"), named as its page, which offers it
+                runCatching { AssistantChats.save(c, base, listOf(JSONObject().put("mine", true).put("text", s.optString("prompt")),
+                    JSONObject().put("mine", false).put("text", listOfNotNull(t, done?.second).joinToString("\n\n"))), chat.saved(), title) }
+                    .onFailure { WriterLog.e("Scheduled AI: the chat could not be kept", it) }
+                page(c, title, heading(c, now) + " " + clock(now), listOfNotNull(Part(c.getString(R.string.home_label_assistant), paragraphs(t)), done?.first)) to t
+            }
         val dir = AssistantBriefs.dir().apply { mkdirs() }
-        val file = File(dir, if (s.optString("kind") == "brief") "$day.html" else "$day-${s.optString("id").take(8)}.html").apply { writeText(html) }
+        val file = File(dir, "$base.html").apply { writeText(html) }
         File(dir, "latest.json").writeText(JSONObject().put("at", now).put("title", title).put("text", line.take(300)).put("file", file.name).toString())
         AssistantBriefs.shown(c, now)
         AssistantBriefs.post(c, title, line.take(200), file, clock(now))
         WriterLog.i("Scheduled AI: ${file.name} made here")
+    }
+
+    /**
+     * What a scheduled action did (the user, 14 Nov: "have it actually report back what it can and it couldn't do"), from its
+     * chat's log: done, waiting for the user's yes, could not; brief.js report() the same. The page's part and the chat's words.
+     */
+    internal fun report(c: Context, log: List<JSONObject>): Pair<Part, String>? {
+        val group = AssistantGuard.ALLOW.entries.flatMap { (g, ns) -> ns.map { it to g } }.toMap()
+        fun label(e: JSONObject) = (group[e.optString("name")]?.let { g -> ALLOW_LABEL.first { it.first == g }.second }?.let(c::getString) ?: e.optString("name")) + ": " + e.optString("what")
+        fun why(e: JSONObject) = e.optString("why").take(200)
+        val lists = listOf("done" to R.string.assistant_sched_done, "held" to R.string.assistant_sched_waiting, "failed" to R.string.assistant_sched_failed)
+            .map { (k, name) -> c.getString(name) to log.filter { it.optString("kind") == k } }.filter { it.second.isNotEmpty() }
+        if (lists.isEmpty()) return null
+        val html = lists.joinToString("") { (name, l) -> "<h3>${esc(name)}</h3><ul>" + l.joinToString("") { e -> "<li>${esc(label(e))}${why(e).takeIf { it.isNotEmpty() }?.let { " <span class=\"muted\">· ${esc(it)}</span>" }.orEmpty()}</li>" } + "</ul>" }
+        val text = lists.joinToString("\n\n") { (name, l) -> "$name:\n" + l.joinToString("\n") { e -> "• ${label(e)}${why(e).takeIf { it.isNotEmpty() }?.let { " ($it)" }.orEmpty()}" } }
+        return Part(c.getString(R.string.assistant_sched_report), html) to text
     }
 
     // ---- The brief (brief.js) ----

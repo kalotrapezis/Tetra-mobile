@@ -261,4 +261,15 @@
     <string name="ai_bad_key">%1$s atslēga ir nepareiza. Pārbaudi to sadaļā Iestatījumi › AI Assist.</string>
     <string name="ai_busy">%1$s ir aizņemts, vai atslēgai vairs nav kredīta. Mēģini vēlreiz pēc minūtes.</string>
     <string name="ai_server">%1$s atbildēja ar kļūdu (%2$d).</string>
+    <string name="assistant_sched_allow">Drīkst darīt pats</string>
+    <string name="assistant_sched_allow_how">Pēc pasta vai tīmekļa lasīšanas tas tiek darīts, jums nejautājot. Sūtīšana, zvanīšana un dzēšana vienmēr gaida jūs.</string>
+    <string name="assistant_sched_allow_calendar">Pievienot kalendāram</string>
+    <string name="assistant_sched_allow_notes">Piezīmes un saraksti</string>
+    <string name="assistant_sched_allow_timers">Taimeri un modinātāji</string>
+    <string name="assistant_sched_allow_files">Saglabāt failus un attēlus</string>
+    <string name="assistant_sched_report">Ko tas izdarīja</string>
+    <string name="assistant_sched_done">Izdarīts</string>
+    <string name="assistant_sched_waiting">Gaida jūsu jā</string>
+    <string name="assistant_sched_failed">Neizdevās</string>
+    <string name="assistant_sched_continue">Turpināt tērzēšanā</string>
 </resources>

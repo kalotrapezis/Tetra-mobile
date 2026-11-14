@@ -263,4 +263,15 @@
     <string name="ai_bad_key">Iċ-ċavetta ta\' %1$s hija ħażina. Iċċekkja f\'Settings › AI Assist.</string>
     <string name="ai_busy">%1$s huwa okkupat, jew iċ-ċavetta m\'għandhiex kreditu. Erġa\' pprova f\'minuta.</string>
     <string name="ai_server">%1$s wieġeb b\'żball (%2$d).</string>
+    <string name="assistant_sched_allow">Jista’ jagħmel waħdu</string>
+    <string name="assistant_sched_allow_how">Wara li jaqra l-posta jew il-web, dawn isiru mingħajr ma jistaqsik. Il-bgħit, it-telefonati u t-tħassir dejjem jistennewk.</string>
+    <string name="assistant_sched_allow_calendar">Żid mal-kalendarju</string>
+    <string name="assistant_sched_allow_notes">Noti u listi</string>
+    <string name="assistant_sched_allow_timers">Tajmers u allarmi</string>
+    <string name="assistant_sched_allow_files">Issejvja fajls u stampi</string>
+    <string name="assistant_sched_report">X’għamel</string>
+    <string name="assistant_sched_done">Lest</string>
+    <string name="assistant_sched_waiting">Qed jistenna l-iva tiegħek</string>
+    <string name="assistant_sched_failed">Ma setax</string>
+    <string name="assistant_sched_continue">Kompli fiċ-chat</string>
 </resources>

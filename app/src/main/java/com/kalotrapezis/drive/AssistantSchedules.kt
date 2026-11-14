@@ -15,7 +15,7 @@ import org.json.JSONObject
  *
  *   Tetra/.System/Assistant/Shared/schedules.json, synced as "AI Assist/schedules.json"
  *   { list: [{ id, kind: prompt|brief, title, prompt, time: HH:MM, repeat: once|daily|weekly|monthly|yearly, days: [0-6, 0 = Sunday],
- *              date: YYYY-MM-DD, paused, created, last, runNow }], brief: { sections, place }, runner, removed: { id: ms } }
+ *              date: YYYY-MM-DD, paused, created, last, runNow, allow: [calendar|notes|timers|files] }], brief: { sections, place }, runner, removed: { id: ms } }
  *
  * Each change rewrites the whole file and keeps every key it does not know (the computer's own). When both changed it before
  * a sync, the computer merges the two by id (schedule.js mergeSchedules); a deletion is kept in "removed" (id → when) for that.
@@ -52,6 +52,7 @@ internal object AssistantSchedules {
         if (x.has("repeat")) { val r = x.getString("repeat"); require(r in REPEATS) { "Not a repetition: $r" }; s.put("repeat", r) }
         x.optJSONArray("days")?.let { a -> s.put("days", JSONArray((0 until a.length()).map { a.optInt(it, -1) }.filter { it in 0..6 }.distinct().sorted())) }
         if (x.has("date")) { val d = x.optString("date").takeIf { !x.isNull("date") && it.isNotBlank() }; require(d == null || Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(d)) { "Not a date: $d" }; s.put("date", d ?: JSONObject.NULL) }
+        x.optJSONArray("allow")?.let { a -> s.put("allow", JSONArray((0 until a.length()).map { a.optString(it) }.distinct().filter { it in AssistantGuard.ALLOW })) }
         if (x.has("paused")) s.put("paused", x.getBoolean("paused"))
         if (x.has("runNow")) s.put("runNow", x.getBoolean("runNow"))
         if (s.optString("repeat") == "weekly") require((s.optJSONArray("days")?.length() ?: 0) > 0) { "Say on which weekdays." }

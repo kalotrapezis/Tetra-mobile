@@ -140,6 +140,12 @@ internal object SharedChat {
     @Synchronized fun chat(c: Context, now: Long = System.currentTimeMillis(), make: () -> AssistantChat = { assistantChat(c) }): AssistantChat {
         load(file(c), now); return chat ?: make().also { it.restore(messages); chat = it }
     }
+    /** A kept chat as the open one (a scheduled action's page: «Συνέχεια στη συνομιλία»), before AI Assist opens on it. */
+    @Synchronized fun open(c: Context, s: AssistantChats.Saved, now: Long = System.currentTimeMillis()) {
+        val f = file(c); load(f, now)
+        chat?.restore(s.turns); messages = s.turns
+        bubbles.clear(); bubbles += s.bubbles.map(Bubble::of); id = s.id; at = now; save(f)
+    }
     /** Messages for the model, when no chat is live (the tests). */
     @Synchronized fun kept(): org.json.JSONArray = chat?.saved() ?: org.json.JSONArray(messages.toString())
 }
@@ -540,7 +546,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
                 AssistSection.Scheduled -> ScheduledTab(::offer)
                 AssistSection.History -> HistoryTab(::offer) { saved ->
                     AssistantAutoMemory.soon(context, chat.saved()); confirming = null
-                    chat.restore(saved.messages); bubbles.clear(); bubbles += saved.bubbles.map(Bubble::of)
+                    chat.restore(saved.turns); bubbles.clear(); bubbles += saved.bubbles.map(Bubble::of)
                     // its file is read again only if the chat asks for it
                     chat.attach(bubbles.flatMap { it.files }.lastOrNull()?.let { File(it.path) })
                     SharedChat.id = saved.id; SharedChat.at = System.currentTimeMillis(); pending = null; pendingAudio = null; expanded = false }

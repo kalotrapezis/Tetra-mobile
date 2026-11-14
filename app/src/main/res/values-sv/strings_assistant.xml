@@ -259,4 +259,15 @@
     <string name="ai_bad_key">%1$s-nyckeln är fel. Kontrollera den i Inställningar › AI Assist.</string>
     <string name="ai_busy">%1$s är upptagen, eller så har nyckeln slut på kredit. Försök igen om en minut.</string>
     <string name="ai_server">%1$s svarade med ett fel (%2$d).</string>
+    <string name="assistant_sched_allow">Får göra själv</string>
+    <string name="assistant_sched_allow_how">Efter att ha läst mejl eller webben görs detta utan att fråga dig. Skicka, ringa och radera väntar alltid på dig.</string>
+    <string name="assistant_sched_allow_calendar">Lägg till i kalendern</string>
+    <string name="assistant_sched_allow_notes">Anteckningar och listor</string>
+    <string name="assistant_sched_allow_timers">Timers och larm</string>
+    <string name="assistant_sched_allow_files">Spara filer och bilder</string>
+    <string name="assistant_sched_report">Vad den gjorde</string>
+    <string name="assistant_sched_done">Klart</string>
+    <string name="assistant_sched_waiting">Väntar på ditt ja</string>
+    <string name="assistant_sched_failed">Kunde inte</string>
+    <string name="assistant_sched_continue">Fortsätt i chatten</string>
 </resources>
