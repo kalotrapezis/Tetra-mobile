@@ -92,7 +92,7 @@ internal object AssistantRunner {
         val day = Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault()).toLocalDate().toString()
         val base = if (s.optString("kind") == "brief") day else "$day-${s.optString("id").take(8)}"
         val (html, line) = if (s.optString("kind") == "brief") brief(c, tetra, now, title, gate) { chat.ask(it).text }
-            else chat.ask("${s.optString("prompt")}\n\n(This runs by itself on a schedule and the answer is shown as a page: it may be longer than usual, in short paragraphs.)").text.let { t ->
+            else chat.ask("${s.optString("prompt")}\n\n(Now: ${java.time.ZonedDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("EEEE d MMMM yyyy, HH:mm", java.util.Locale.ENGLISH))}. This runs by itself on a schedule; your answer is kept as a chat the user reads later, so write the whole result here, as long as it needs, in short paragraphs, with dates, and say what has passed and what is still to come.)").text.let { t ->
                 val done = report(c, chat.log)
                 // the run as a chat too (the user, 14 Nov: "an actual chat"), named as its page, which offers it
                 runCatching { AssistantChats.save(c, base, listOf(JSONObject().put("mine", true).put("text", s.optString("prompt")),

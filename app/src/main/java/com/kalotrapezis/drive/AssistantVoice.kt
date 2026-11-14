@@ -215,7 +215,8 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
             "schedules", "memory" -> ScopedSync.soon(app, "assistant", 0, orWhole = true) // the computer runs the schedules: it hears at once
         } },
         search = { q ->
-            val (text, sources, _) = Mistral.output(mistral.tagged("web").conversation(q, "web_search", "Search the web and answer briefly with the facts found."))
+            val (text, sources, _) = Mistral.output(// the search is a request of its own: it gets today too (the user, 14 Nov: "it does not seem to know date and time")
+            mistral.tagged("web").conversation(q, "web_search", "Today is ${java.time.ZonedDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("EEEE d MMMM yyyy, HH:mm", java.util.Locale.ENGLISH))}. Search the web and answer briefly with the facts found, each with its date; say plainly what has already passed and what is still to come."))
             text to sources.map { it.split(" — ").let { p -> ResultCard.Source(p.first(), p.last()) } }.filter { it.url.startsWith("http") }
         },
         image = { prompt ->
