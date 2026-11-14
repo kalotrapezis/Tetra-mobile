@@ -57,4 +57,23 @@
     <string name="maps_all_places">Vsa mesta</string>
     <plurals name="maps_n_places"><item quantity="one">%d mesto</item><item quantity="two">%d mesti</item><item quantity="few">%d mesta</item><item quantity="other">%d mest</item></plurals>
     <string name="maps_list_find">Išči na tem seznamu</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Položaj iz</string>
+    <string name="car_gps_source_summary">Položaj telefona vsako sekundo prihaja prek povezave z avtom; kadar ne prihaja, ga nadomesti položaj avta samega.</string>
+    <string name="car_gps_car">Ta avto</string>
+    <string name="car_gps_phone">Telefon</string>
+    <string name="car_gps_test">Preizkusi GPS</string>
+    <string name="car_gps_test_summary">Avtov in telefonov vzporedno, v živo</string>
+    <string name="car_gps_test_note">Manjši ± je boljši. Primerjaj na isti vožnji: v mestu, pod drevesi, na vhodu v predor.</string>
+    <string name="car_gps_none">Še ni položaja</string>
+    <string name="car_gps_satellites">%1$d od %2$d satelitov</string>
+    <string name="car_gps_speed">Hitrost %1$s</string>
+    <string name="car_gps_age">Položaj star %1$s</string>
+    <string name="car_gps_apart">%1$s narazen</string>
+    <string name="car_share_send">Pošlji v telefon</string>
+    <string name="car_share_empty">Kar deliš iz telefona v avto (Deli › Tetra › Pošlji v avto), pride sem. Aplikacija, poslana tako, je ponujena za namestitev.</string>
+    <string name="car_share_sent">%1$s je v telefonu, v Tetra › Iz avta.</string>
+    <string name="car_share_failed">%1$s ni bil poslan: %2$s</string>
+    <string name="car_share_arrived">Iz telefona: %1$s</string>
+    <string name="car_share_no_app">Nobena aplikacija tukaj ne odpre %1$s.</string>
 </resources>

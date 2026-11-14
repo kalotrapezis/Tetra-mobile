@@ -57,4 +57,23 @@
     <string name="maps_all_places">Minden hely</string>
     <plurals name="maps_n_places"><item quantity="one">%d hely</item><item quantity="other">%d hely</item></plurals>
     <string name="maps_list_find">Keresés ebben a listában</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">A pozíció forrása</string>
+    <string name="car_gps_source_summary">A telefon pozíciója másodpercenként érkezik az autós kapcsolaton; ha nem érkezik, az autó saját GPS-e veszi át.</string>
+    <string name="car_gps_car">Ez az autó</string>
+    <string name="car_gps_phone">A telefon</string>
+    <string name="car_gps_test">GPS-teszt</string>
+    <string name="car_gps_test_summary">Az autóé és a telefoné egymás mellett, élőben</string>
+    <string name="car_gps_test_note">Minél kisebb a ±, annál jobb. Egy úton hasonlítsd össze: városban, fák alatt, alagút bejáratánál.</string>
+    <string name="car_gps_none">Még nincs pozíció</string>
+    <string name="car_gps_satellites">%1$d / %2$d műhold</string>
+    <string name="car_gps_speed">Sebesség: %1$s</string>
+    <string name="car_gps_age">Pozíció %1$s régi</string>
+    <string name="car_gps_apart">Egymástól %1$s</string>
+    <string name="car_share_send">Küldés a telefonra</string>
+    <string name="car_share_empty">Ami a telefonról az autóba van megosztva (Megosztás › Tetra › Küldés az autóba), itt jelenik meg. Az így küldött alkalmazást telepítésre ajánljuk.</string>
+    <string name="car_share_sent">A(z) %1$s a telefonon van, a Tetra › Az autóból mappában.</string>
+    <string name="car_share_failed">A(z) %1$s nem lett elküldve: %2$s</string>
+    <string name="car_share_arrived">A telefonról: %1$s</string>
+    <string name="car_share_no_app">Itt nincs olyan alkalmazás, amely megnyitja a(z) %1$s fájlt.</string>
 </resources>

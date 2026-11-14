@@ -57,4 +57,23 @@
     <string name="maps_all_places">Gach áit</string>
     <plurals name="maps_n_places"><item quantity="one">%d áit</item><item quantity="two">%d áit</item><item quantity="few">%d áit</item><item quantity="many">%d n-áit</item><item quantity="other">%d áit</item></plurals>
     <string name="maps_list_find">Aimsigh sa liosta seo</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Suíomh ó</string>
+    <string name="car_gps_source_summary">Tagann suíomh an fhóin trí nasc an chairr gach soicind; nuair nach dtagann sé, glacann suíomh an chairr a áit.</string>
+    <string name="car_gps_car">An carr seo</string>
+    <string name="car_gps_phone">An fón</string>
+    <string name="car_gps_test">Tástáil GPS</string>
+    <string name="car_gps_test_summary">Suíomh an chairr agus an fhóin os comhair a chéile, beo</string>
+    <string name="car_gps_test_note">Is fearr an ± is lú. Déan comparáid ar an turas céanna: sa chathair, faoi chrainn, ag bél tollán.</string>
+    <string name="car_gps_none">Gan suíomh go fóill</string>
+    <string name="car_gps_satellites">%1$d de %2$d satailít</string>
+    <string name="car_gps_speed">Luas %1$s</string>
+    <string name="car_gps_age">Suíomh %1$s d’aois</string>
+    <string name="car_gps_apart">%1$s óna chéile</string>
+    <string name="car_share_send">Seol chuig an bhfón</string>
+    <string name="car_share_empty">Cibé rud a roinnfidh tú ón bhfón chuig an gcarr (Roinn › Tetra › Seol chuig an gcarr), tiocfaidh sé anseo. Cuirtear app a seoltar mar seo ar fáil le suiteáil.</string>
+    <string name="car_share_sent">Tá %1$s ar an bhfón, i Tetra › Ón gcarr.</string>
+    <string name="car_share_failed">Níor seoladh %1$s: %2$s</string>
+    <string name="car_share_arrived">Ón bhfón: %1$s</string>
+    <string name="car_share_no_app">Ní oscloidh aon app anseo %1$s.</string>
 </resources>

@@ -47,6 +47,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import android.widget.Toast
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 
@@ -66,7 +68,7 @@ internal object CarMaps {
      * Besides the maps, under these prefixes: the Browser's bookmarks (each device's file, BrowserSync; never its passwords or tabs)
      * and AI Assist's shared folder (its switches, its memory, the user's words).
      */
-    private val MORE = mapOf("@browser/Bookmarks/" to { File(BrowserSync.root(), "Bookmarks") }, "@assistant/" to { AiGate.file(driveRoot()).parentFile!! })
+    private val MORE = mapOf("@browser/Bookmarks/" to { File(BrowserSync.root(), "Bookmarks") }, "@assistant/" to { AiGate.file(driveRoot()).parentFile!! }, CarShare.PREFIX to { CarShare.dir() })
 
     /** Where [path] is on this device: in the Maps folder or one of [MORE] (no way out of any). */
     private fun local(path: String): File? {
@@ -131,18 +133,24 @@ internal object CarMaps {
         Thread {
             // AI Assist as on the phone: its settings and keys (the user, 13 Nov: "the Mistral key is a pain to write on a touchscreen")
             runCatching { CarAssistant.take(c.applicationContext, CarWire.assistant(c.applicationContext)) }.onFailure { WriterLog.w("Car: AI Assist's settings not taken (${it.message})") }
+            runCatching { // the Browser's logins as on the phone: the phone's wins for the same site and user
+                val mine = BrowserSecrets.vault(c.applicationContext)
+                val both = mine.with(CarWire.vault(c.applicationContext))
+                if (both != mine) { BrowserSecrets.save(c.applicationContext, both); WriterLog.i("Car: the Browser's logins from the phone, ${both.logins.size} now") }
+            }.onFailure { WriterLog.w("Car: the Browser's logins not taken (${it.message})") }
+            runCatching { CarWire.log(c.applicationContext) }.onFailure { WriterLog.w("Car: the log not sent to the phone (${it.message})") }
             val next: State = runCatching {
                 val theirs = CarWire.maps(c.applicationContext)
                 val all = wanted(theirs, ::local)
-                val want = all.filterNot { personal(it.first) }
-                if (want.isEmpty() && all.isNotEmpty()) { // only places or bookmarks: just taken
-                    runCatching { fetch(c, all) { } }.onSuccess { WriterLog.i("Car maps: ${all.size} places or bookmarks from the phone") }
-                        .onFailure { WriterLog.w("Car maps: places or bookmarks not taken (${it.message})") }
+                val (mine, want) = all.partition { personal(it.first) }
+                if (mine.isNotEmpty()) { // places, bookmarks, AI Assist's and Share's: just taken, never offered
+                    runCatching { fetch(c, mine) { } }.onSuccess { WriterLog.i("Car maps: ${mine.size} places, bookmarks or shared files from the phone") }
+                        .onFailure { WriterLog.w("Car maps: places, bookmarks or shared files not taken (${it.message})") }
                     main.post { version.intValue++ }
                 }
                 if (want.isEmpty() || want.map { it.first }.toSet() == declined) State.Idle
-                else State.Offer(all, want.map { it.first }.filter { it.endsWith(".pmtiles") }.map { it.removeSuffix(".pmtiles").replaceFirstChar(Char::uppercase) },
-                    all.sumOf { it.second.optLong("size") }, !haveMap())
+                else State.Offer(want, want.map { it.first }.filter { it.endsWith(".pmtiles") }.map { it.removeSuffix(".pmtiles").replaceFirstChar(Char::uppercase) },
+                    want.sumOf { it.second.optLong("size") }, !haveMap())
             }.getOrElse { State.Failed(it.message ?: "") }
             main.post { state.value = next }
         }.start()
@@ -162,6 +170,12 @@ internal object CarMaps {
             f.delete(); check(part.renameTo(f)) { "$path not kept." }
             f.setLastModified(info.optLong("modified"))
             before += info.optLong("size")
+        }
+        // Share's: off the phone's To car now that the car has them, and said on the car's screen
+        val shared = files.map { it.first }.filter { it.startsWith(CarShare.PREFIX) }.map { it.removePrefix(CarShare.PREFIX) }
+        if (shared.isNotEmpty()) {
+            runCatching { CarWire.ask(c.applicationContext, JSONObject().put("taken", JSONArray(shared))) }
+            main.post { Toast.makeText(c.applicationContext, c.getString(R.string.car_share_arrived, shared.joinToString(", ")), Toast.LENGTH_LONG).show() }
         }
     }
 

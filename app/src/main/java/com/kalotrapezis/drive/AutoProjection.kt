@@ -619,7 +619,8 @@ class AutoShareActivity : Activity() {
         super.onCreate(savedInstanceState)
         val uris = @Suppress("DEPRECATION") (intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM) ?: listOfNotNull(intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)))
         val s = AutoProjection.session
-        if (s == null) Toast.makeText(this, R.string.auto_no_car, Toast.LENGTH_LONG).show()
+        if (s == null && uris.isNotEmpty() && CarWire.alive()) { CarShare.send(this, uris); Toast.makeText(this, resources.getQuantityString(R.plurals.auto_sending, uris.size, uris.size), Toast.LENGTH_SHORT).show() } // Tetra Auto SE's Share
+        else if (s == null) Toast.makeText(this, R.string.auto_no_car, Toast.LENGTH_LONG).show()
         else if (uris.isNotEmpty()) { s.sendFiles(uris); Toast.makeText(this, resources.getQuantityString(R.plurals.auto_sending, uris.size, uris.size), Toast.LENGTH_SHORT).show() }
         finish()
     }

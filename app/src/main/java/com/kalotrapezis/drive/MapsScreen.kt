@@ -71,6 +71,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -620,9 +621,24 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
     }
 
     fix = ::onFix
+    // the car build with the phone's GPS (Settings › Tetra Car › GPS): its fix each second; the car's own only while the phone's are not coming
+    val phoneAt = remember { longArrayOf(0L, 0L) } // when the last phone fix came (elapsedRealtime), and that fix's time on the phone
+    LaunchedEffect(granted) {
+        if (!CarMaps.edition || !CarGps.phone(context)) return@LaunchedEffect
+        WriterLog.i("Maps: the phone's GPS")
+        while (true) {
+            val o = withContext(Dispatchers.IO) { runCatching { CarWire.where(context) }.getOrNull() }
+            if (o != null && o.has("lat") && o.optLong("age") < 3000 && o.optLong("t") != phoneAt[1]) {
+                phoneAt[0] = android.os.SystemClock.elapsedRealtime(); phoneAt[1] = o.optLong("t")
+                onFix(CarGps.location(o))
+            }
+            delay(1000)
+        }
+    }
     DisposableEffect(granted) {
         val lm = context.getSystemService(LocationManager::class.java)
         val listener = locationListener { loc ->
+            if (android.os.SystemClock.elapsedRealtime() - phoneAt[0] < 3000) return@locationListener // the phone's GPS is the one
             // a network fix only until GPS has one, and never over a fresher GPS one
             val h = here
             if (loc.provider == LocationManager.NETWORK_PROVIDER && h != null && h.provider == LocationManager.GPS_PROVIDER && loc.time - h.time < 10_000) return@locationListener
@@ -1078,13 +1094,13 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                     Box(Modifier.size(width = 36.dp, height = 4.dp).clip(CircleShape).background(islandContentColor().copy(alpha = 0.5f)))
                 }
                 if (navSheet) NavSheet(n, navTolls)
-                Row(Modifier.padding(start = 20.dp, end = 8.dp, top = 2.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f).padding(end = 12.dp)) {
-                        val left = n.p?.left ?: n.route.metres
-                        val minutes = Math.round(n.route.millis / 60_000.0 * (left / n.route.metres.coerceAtLeast(1.0)))
-                        Text("${metresText(left)} · ${minutesText(context, minutes)}", style = MaterialTheme.typography.titleMedium)
-                        Text(if (nav == null) stringResource(R.string.maps_on_car_screen_bar, n.target.name) else n.target.name, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    }
+                val left = n.p?.left ?: n.route.metres
+                val minutes = Math.round(n.route.millis / 60_000.0 * (left / n.route.metres.coerceAtLeast(1.0)))
+                val words: @Composable () -> Unit = {
+                    Text("${metresText(left)} · ${minutesText(context, minutes)}", style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(if (nav == null) stringResource(R.string.maps_on_car_screen_bar, n.target.name) else n.target.name, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                val buttons: @Composable () -> Unit = {
                     if (nav == null) Button(colors = panelButton(), onClick = { CarLink.stop?.invoke() }) { Text(stringResource(R.string.common_stop), maxLines = 1, overflow = TextOverflow.Ellipsis) }
                     else {
                     IconButton(onClick = { follow(n.mode) }) {
@@ -1093,11 +1109,22 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                     IconButton(onClick = { muted = !muted; if (muted) tts.value?.stop() }) {
                         Icon(painterResource(if (muted) R.drawable.ic_volume_off else R.drawable.ic_volume_up), contentDescription = stringResource(if (muted) R.string.maps_voice_on else R.string.maps_voice_off))
                     }
-                    Button(colors = panelButton(), onClick = {
+                    val stop = {
                         stopNav(); tripRun = null; nextStop = null
                         if (n.mode == "car" && MapsPrefs.autoPark(context)) here?.let { park(it, "a car trip stopped") }
-                    }) { Text(stringResource(R.string.common_stop), maxLines = 1, overflow = TextOverflow.Ellipsis) }
                     }
+                    // Tetra Car: an ✕, no word (the user, 14 Nov: "make the stop button just an X with no text")
+                    if (Car.running) IconButton(onClick = stop) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_stop)) }
+                    else Button(colors = panelButton(), onClick = stop) { Text(stringResource(R.string.common_stop), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    }
+                }
+                // a small window of the car's: the words above, the three buttons in a row under them (the user, 14 Nov: "so all three buttons fit")
+                if (Car.running && androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp < 420) Column(Modifier.padding(start = 16.dp, end = 4.dp, bottom = 2.dp)) {
+                    words()
+                    Row(Modifier.offset(x = (-12).dp), verticalAlignment = Alignment.CenterVertically) { buttons() }
+                } else Row(Modifier.padding(start = 20.dp, end = 8.dp, top = 2.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f).padding(end = 12.dp)) { words() }
+                    buttons()
                 }
               }
             } } else if (placing != null) {

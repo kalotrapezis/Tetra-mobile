@@ -57,4 +57,23 @@
     <string name="maps_all_places">Všechna místa</string>
     <plurals name="maps_n_places"><item quantity="one">%d místo</item><item quantity="few">%d místa</item><item quantity="many">%d místa</item><item quantity="other">%d míst</item></plurals>
     <string name="maps_list_find">Hledat v tomto seznamu</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Poloha z</string>
+    <string name="car_gps_source_summary">Poloha telefonu přichází přes spojení s autem každou sekundu; když nepřichází, nahradí ji vlastní poloha auta.</string>
+    <string name="car_gps_car">Toto auto</string>
+    <string name="car_gps_phone">Telefon</string>
+    <string name="car_gps_test">Test GPS</string>
+    <string name="car_gps_test_summary">Auto a telefon vedle sebe, živě</string>
+    <string name="car_gps_test_note">Menší ± je lepší. Porovnejte je na stejné jízdě: ve městě, pod stromy, u vjezdu do tunelu.</string>
+    <string name="car_gps_none">Zatím žádná poloha</string>
+    <string name="car_gps_satellites">%1$d z %2$d satelitů</string>
+    <string name="car_gps_speed">Rychlost %1$s</string>
+    <string name="car_gps_age">Poloha stará %1$s</string>
+    <string name="car_gps_apart">%1$s od sebe</string>
+    <string name="car_share_send">Odeslat do telefonu</string>
+    <string name="car_share_empty">Co z telefonu sdílíte do auta (Sdílet › Tetra › Odeslat do auta), přijde sem. Aplikace poslaná tímto způsobem se nabídne k instalaci.</string>
+    <string name="car_share_sent">%1$s je v telefonu, v Tetra › Z auta.</string>
+    <string name="car_share_failed">%1$s nebyl odeslán: %2$s</string>
+    <string name="car_share_arrived">Z telefonu: %1$s</string>
+    <string name="car_share_no_app">Žádná aplikace tady neotevře %1$s.</string>
 </resources>

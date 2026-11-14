@@ -57,4 +57,23 @@
     <string name="maps_all_places">Visos vietos</string>
     <plurals name="maps_n_places"><item quantity="one">%d vieta</item><item quantity="few">%d vietos</item><item quantity="many">%d vietos</item><item quantity="other">%d vietų</item></plurals>
     <string name="maps_list_find">Ieškoti šiame sąraše</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Padėtis iš</string>
+    <string name="car_gps_source_summary">Telefono padėtis kas sekundę ateina per ryšį su automobiliu; kai nebeateina, ją pakeičia automobilio pačio padėtis.</string>
+    <string name="car_gps_car">Šis automobilis</string>
+    <string name="car_gps_phone">Telefonas</string>
+    <string name="car_gps_test">GPS bandymas</string>
+    <string name="car_gps_test_summary">Automobilio ir telefono šalia, tiesiogiai</string>
+    <string name="car_gps_test_note">Kuo mažesnis ±, tuo geriau. Palyginkite toje pačioje kelionėje: mieste, po medžiais, tunelio įvažiavime.</string>
+    <string name="car_gps_none">Padėties dar nėra</string>
+    <string name="car_gps_satellites">%1$d iš %2$d palydovų</string>
+    <string name="car_gps_speed">Greitis %1$s</string>
+    <string name="car_gps_age">Padėtis senesnė nei %1$s</string>
+    <string name="car_gps_apart">%1$s atstumu</string>
+    <string name="car_share_send">Siųsti į telefoną</string>
+    <string name="car_share_empty">Ką bendrinate iš telefono į automobilį (Bendrinti › Tetra › Siųsti į automobilį), atkeliauja čia. Taip išsiųsta programa siūloma įdiegti.</string>
+    <string name="car_share_sent">%1$s yra telefone, Tetra › Iš automobilio.</string>
+    <string name="car_share_failed">%1$s neišsiųsta: %2$s</string>
+    <string name="car_share_arrived">Iš telefono: %1$s</string>
+    <string name="car_share_no_app">Čia jokia programa neatidaro %1$s.</string>
 </resources>

@@ -57,4 +57,23 @@
     <string name="maps_all_places">Tous les lieux</string>
     <plurals name="maps_n_places"><item quantity="one">%d lieu</item><item quantity="many">%d lieux</item><item quantity="other">%d lieux</item></plurals>
     <string name="maps_list_find">Chercher dans cette liste</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Position venant de</string>
+    <string name="car_gps_source_summary">La position du téléphone arrive chaque seconde par la liaison avec la voiture ; celle de la voiture prend le relais quand elle n’arrive pas.</string>
+    <string name="car_gps_car">Cette voiture</string>
+    <string name="car_gps_phone">Le téléphone</string>
+    <string name="car_gps_test">Tester le GPS</string>
+    <string name="car_gps_test_summary">Celui de la voiture et celui du téléphone côte à côte, en direct</string>
+    <string name="car_gps_test_note">Plus le ± est petit, mieux c’est. Compare-les sur le même trajet : en ville, sous les arbres, à l’entrée d’un tunnel.</string>
+    <string name="car_gps_none">Pas encore de position</string>
+    <string name="car_gps_satellites">%1$d satellites sur %2$d</string>
+    <string name="car_gps_speed">Vitesse %1$s</string>
+    <string name="car_gps_age">Position vieille de %1$s</string>
+    <string name="car_gps_apart">À %1$s l’un de l’autre</string>
+    <string name="car_share_send">Envoyer au téléphone</string>
+    <string name="car_share_empty">Ce que tu partages du téléphone vers la voiture (Partager › Tetra › Envoyer à la voiture) arrive ici. Une appli envoyée ainsi est proposée à l’installation.</string>
+    <string name="car_share_sent">%1$s est sur le téléphone, dans Tetra › De la voiture.</string>
+    <string name="car_share_failed">%1$s n’a pas été envoyé : %2$s</string>
+    <string name="car_share_arrived">Depuis le téléphone : %1$s</string>
+    <string name="car_share_no_app">Aucune appli ici n’ouvre %1$s.</string>
 </resources>

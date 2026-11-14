@@ -144,6 +144,7 @@ internal object CarWire {
                 val main = Handler(Looper.getMainLooper())
                 when (body.optString("type")) {
                     "sms" -> main.post { Car.message?.invoke(CarMessage(body.optString("from"), body.optString("name"), body.optString("body"), remote = true)) }
+                    "share" -> main.post { CarMaps.check(c) } // the phone's Send to car: taken now
                     "call" -> main.post {
                         call.value = body
                         if (body.optString("state") == "ended") main.postDelayed({ if (call.value === body) call.value = null }, 1200)
@@ -153,6 +154,13 @@ internal object CarWire {
             }
             "/car/maps" -> 200 to CarMaps.list() // on the phone: its maps, for the unit to add or update its own
             "/car/assistant" -> 200 to CarAssistant.give(c) // on the phone: AI Assist's settings and keys, for the paired unit only
+            // on the phone: the Browser's saved logins (never its cards), for the paired unit only (the user, 14 Nov: "I had to type my password all over again")
+            "/car/vault" -> 200 to JSONObject().put("vault", BrowserVault(logins = BrowserSecrets.vault(c).logins).json())
+            "/car/where" -> 200 to CarGps.where(c) // on the phone: its GPS fix, for the car that uses the phone's (Settings › Tetra Car › GPS)
+            "/car/log" -> { // on the phone: the car's own log, each time it connects (its crashes read from the phone)
+                java.io.File(WriterLog.dir(c), "car.log").writeText(body.optString("log"))
+                200 to JSONObject().put("ok", true)
+            }
             "/car/do" -> { // on the phone: the unit's buttons and AI Assist
                 body.optString("call").takeIf { it.isNotEmpty() }?.let { what ->
                     val ok = PhoneCalls.act(what.take(9)) ?: false
@@ -163,6 +171,7 @@ internal object CarWire {
                     WriterLog.i("Car link: a call placed from the car")
                     return if (placePhoneCall(c, number)) 200 to JSONObject().put("ok", true) else 409 to JSONObject().put("error", "Calls are not allowed on the phone.")
                 }
+                body.optJSONArray("taken")?.let { names -> CarShare.taken(names); return 200 to JSONObject().put("ok", true) } // the car has these
                 body.optJSONObject("sms")?.let { s ->
                     if (!SmsBox.canSend(c)) return 409 to JSONObject().put("error", "SMS are not allowed on the phone.")
                     SmsBox.send(c, s.getString("to"), s.getString("text").take(2000))
@@ -193,6 +202,44 @@ internal object CarWire {
     /** On the unit: the phone's AI Assist settings and keys (CarAssistant). */
     fun assistant(c: Context): JSONObject = link(c)?.let { l -> anyHost(l) { h -> post(h, l.port, l.fingerprint, l.token, "/car/assistant", JSONObject()) } }
         ?: throw SyncException("No phone is paired with Tetra Car.")
+
+    /** On the unit: the phone's saved logins (CarMaps.check keeps them in this unit's own vault). */
+    fun vault(c: Context): BrowserVault = link(c)?.let { l -> BrowserVault.of(anyHost(l) { h -> post(h, l.port, l.fingerprint, l.token, "/car/vault", JSONObject()) }.optString("vault")) }
+        ?: throw SyncException("No phone is paired with Tetra Car.")
+
+    /** On the unit: the phone's GPS fix now (CarGps). */
+    fun where(c: Context): JSONObject = link(c)?.let { l -> anyHost(l) { h -> post(h, l.port, l.fingerprint, l.token, "/car/where", JSONObject()) } }
+        ?: throw SyncException("No phone is paired with Tetra Car.")
+
+    /** On the phone: [bearer] is the paired car's. */
+    fun paired(c: Context, bearer: String?) = bearer != null && bearer == link(c)?.theirToken
+
+    /** On the unit: a file of the car's to the phone's Tetra › From car (Share), its SHA-256 checked there. */
+    fun put(c: Context, uri: android.net.Uri, name: String) {
+        val l = link(c) ?: throw SyncException("No phone is paired with Tetra Car.")
+        val r = c.contentResolver
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+        var size = 0L
+        r.openInputStream(uri)!!.use { input -> val b = ByteArray(1 shl 16); while (true) { val n = input.read(b); if (n < 0) break; digest.update(b, 0, n); size += n } }
+        val sha = digest.digest().joinToString("") { "%02x".format(it) }
+        anyHost(l) { h ->
+            val conn = open(h, l.port, l.fingerprint, l.token, "/car/send?sha=$sha&name=" + java.net.URLEncoder.encode(name, "UTF-8")).apply {
+                requestMethod = "PUT"; doOutput = true; setFixedLengthStreamingMode(size); readTimeout = 60_000
+            }
+            r.openInputStream(uri)!!.use { input -> conn.outputStream.use { input.copyTo(it, 1 shl 16) } }
+            val ok = conn.responseCode in 200..299
+            val text = (if (ok) conn.inputStream else conn.errorStream)?.bufferedReader()?.use { it.readText() }.orEmpty()
+            conn.disconnect()
+            if (!ok) throw SyncException(runCatching { JSONObject(text).optString("error") }.getOrNull()?.takeIf { it.isNotEmpty() } ?: "The phone answered ${conn.responseCode}.")
+        }
+    }
+
+    /** On the unit: the end of its own log, to the phone (logs/car.log there), as the car has no other way out for it. */
+    fun log(c: Context) {
+        val l = link(c) ?: return
+        val text = WriterLog.export(c)?.readText()?.takeLast(300_000) ?: return
+        anyHost(l) { h -> post(h, l.port, l.fingerprint, l.token, "/car/log", JSONObject().put("log", text)) }
+    }
 
     /** On the unit: the phone's maps, path → {size, modified} (CarMaps). */
     fun maps(c: Context): JSONObject = link(c)?.let { l -> anyHost(l) { h -> post(h, l.port, l.fingerprint, l.token, "/car/maps", JSONObject()) } }

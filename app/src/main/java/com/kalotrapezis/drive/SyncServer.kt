@@ -272,6 +272,21 @@ internal class SyncServer(private val context: Context, private val store: SyncS
                 reply(output, if ("transit" in e.message.orEmpty()) 422 else 400, JSONObject().put("error", e.message))
             }
         }
+        // Tetra Auto SE's Share: a file from the paired car's unit, into Tetra › From car, checked by its SHA-256
+        if (method == "PUT" && path.startsWith("/car/send?")) {
+            if (!CarWire.paired(context, bearer)) return reply(output, 401, JSONObject().put("error", "Not paired with this car."))
+            val url = android.net.Uri.parse("https://x$path")
+            val sha = url.getQueryParameter("sha").orEmpty()
+            if (!Regex("[0-9a-f]{64}").matches(sha)) return reply(output, 400, JSONObject().put("error", "Invalid file."))
+            return try {
+                val kept = FromComputer.receive(stream, length, java.io.File(driveRoot(), AutoSession.FROM_CAR), sha, url.getQueryParameter("name").orEmpty(), 0)
+                WriterLog.i("Car share: ${kept.name} from the car")
+                android.os.Handler(android.os.Looper.getMainLooper()).post { android.widget.Toast.makeText(context, context.getString(R.string.auto_file_from_car, kept.name, AutoSession.FROM_CAR), android.widget.Toast.LENGTH_LONG).show() }
+                reply(output, 200, JSONObject().put("ok", true))
+            } catch (e: IllegalArgumentException) {
+                reply(output, 400, JSONObject().put("error", e.message))
+            }
+        }
         // Tetra Auto SE: a map file of this phone's, to the paired car's unit (CarMaps), streamed
         if (method == "GET" && path.startsWith("/car/map?")) {
             val f = CarWire.mapFile(context, bearer, android.net.Uri.parse("https://x$path").getQueryParameter("path"))
@@ -282,7 +297,7 @@ internal class SyncServer(private val context: Context, private val store: SyncS
             return
         }
         // Tetra Car's own link (CarWire): live calls and messages between the car's screen and the phone; never sync, never peers
-        if (method == "POST" && path.startsWith("/car/") && length in 0..65536) {
+        if (method == "POST" && path.startsWith("/car/") && length in 0..(if (path == "/car/log") 1L shl 20 else 65536L)) { // the car's log: up to 1 MB
             val raw = ByteArray(length.toInt()).also { var read = 0; while (read < length.toInt()) { val n = stream.read(it, read, length.toInt() - read); if (n < 0) break; read += n } }
             val (status, answer) = CarWire.serve(context, path.substringBefore('?'), runCatching { JSONObject(String(raw, Charsets.UTF_8)) }.getOrDefault(JSONObject()),
                 bearer, { useCode(it) }, fingerprint, port)

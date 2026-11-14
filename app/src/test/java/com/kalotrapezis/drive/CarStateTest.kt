@@ -67,4 +67,16 @@ class CarStateTest {
         assertEquals(CarApp.Browser, carAppFor("Spotify"))
         assertEquals(null, carAppFor("Viber"))
     }
+
+    @org.junit.Test fun theDockMovesNothing() {
+        val s = CarState(CarLayout.Wide, listOf(CarApp.Maps, CarApp.Phone), 0)
+        assertEquals(s.copy(focus = 1), s.docked(CarApp.Phone, false)) // on the screen: stays where it is
+        assertEquals(listOf(CarApp.Maps, CarApp.Browser), s.docked(CarApp.Browser, false).panes) // the pane without the map
+        assertEquals(listOf(CarApp.Browser, CarApp.Maps), CarState(CarLayout.Wide, listOf(CarApp.Phone, CarApp.Maps), 0).docked(CarApp.Browser, false).panes)
+        val half = CarState(CarLayout.Half, listOf(CarApp.Phone, CarApp.Messages), 0)
+        assertEquals(listOf(CarApp.Phone, CarApp.Browser), half.docked(CarApp.Browser, false).panes) // no map, the same size: away from a left-hand driver
+        assertEquals(listOf(CarApp.Browser, CarApp.Messages), half.docked(CarApp.Browser, true).panes)
+        assertEquals(listOf(CarApp.Phone, CarApp.Maps), CarState(CarLayout.Wide, listOf(CarApp.Phone, CarApp.Browser), 0).docked(CarApp.Maps, false).panes) // the small one
+        assertEquals(listOf(CarApp.Maps, CarApp.Browser, CarApp.Messages), CarState(CarLayout.Three, listOf(CarApp.Maps, CarApp.Browser, CarApp.Phone), 0).docked(CarApp.Messages, false).panes)
+    }
 }

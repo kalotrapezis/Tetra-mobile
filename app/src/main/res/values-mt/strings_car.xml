@@ -57,4 +57,23 @@
     <string name="maps_all_places">Il-postijiet kollha</string>
     <plurals name="maps_n_places"><item quantity="one">%d post</item><item quantity="two">%d postijiet</item><item quantity="few">%d postijiet</item><item quantity="many">%d post</item><item quantity="other">%d post</item></plurals>
     <string name="maps_list_find">Fittex f\'din il-lista</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Pożizzjoni minn</string>
+    <string name="car_gps_source_summary">Il-pożizzjoni tat-telefon tasal kull sekonda permezz tal-konnessjoni mal-karozza; meta ma tasalx, tieħu postha dik tal-karozza nnifisha.</string>
+    <string name="car_gps_car">Din il-karozza</string>
+    <string name="car_gps_phone">It-telefon</string>
+    <string name="car_gps_test">Ittestja l-GPS</string>
+    <string name="car_gps_test_summary">Dik tal-karozza u tat-telefon one biswa l-oħra, b’mod dirett</string>
+    <string name="car_gps_test_note">Aktar ± iċken, aħjar. Qabbadhom fl-istess vjaġġ: fil-belt, taħt is-siġar, fl-idħla ta’ mina.</string>
+    <string name="car_gps_none">Għadha m’hemm l-ebda pożizzjoni</string>
+    <string name="car_gps_satellites">%1$d minn %2$d satelliti</string>
+    <string name="car_gps_speed">Veloċità %1$s</string>
+    <string name="car_gps_age">Pożizzjoni ta’ %1$s ilu</string>
+    <string name="car_gps_apart">%1$s ’l bogħod</string>
+    <string name="car_share_send">Ibgħat lit-telefon</string>
+    <string name="car_share_empty">Dak li tikkondividi mit-telefon għall-karozza (Aqsam › Tetra › Ibgħat lill-karozza) jasal hawn. App mibgħuta b’dan il-mod tiġi offruta għall-installazzjoni.</string>
+    <string name="car_share_sent">%1$s qiegħed fuq it-telefon, f’Tetra › Mill-karozza.</string>
+    <string name="car_share_failed">%1$s ma nbgħatx: %2$s</string>
+    <string name="car_share_arrived">Mit-telefon: %1$s</string>
+    <string name="car_share_no_app">L-ebda app hawn ma tiftaħ %1$s.</string>
 </resources>

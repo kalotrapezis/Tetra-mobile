@@ -46,6 +46,7 @@ val carManifest = layout.buildDirectory.file("generated/car/AndroidManifest.xml"
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.HOME" /><category android:name="android.intent.category.DEFAULT" /></intent-filter>
         </activity>"""
     }.replace("<application ", """<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <application android:requestLegacyExternalStorage="true" """)) // Android 10: /sdcard/Tetra with the storage permission
 }
 

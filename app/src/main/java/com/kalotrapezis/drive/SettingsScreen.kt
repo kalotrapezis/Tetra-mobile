@@ -514,6 +514,15 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
             right = it; Car.setDriverRight(context, it)
         }
     }
+    // the car build's GPS: its own or the phone's, and both side by side (the user, 14 Nov: "add a test page, not on the map")
+    if (CarMaps.edition) SettingsSection(stringResource(R.string.car_gps)) {
+        var phone by remember { mutableStateOf(CarGps.phone(context)) }
+        ChoiceRow(stringResource(R.string.car_gps_source), stringResource(R.string.car_gps_source_summary),
+            listOf(false to stringResource(R.string.car_gps_car), true to stringResource(R.string.car_gps_phone)), phone) { phone = it; CarGps.setPhone(context, it) }
+        var testing by remember { mutableStateOf(false) }
+        SettingRow(stringResource(R.string.car_gps_test), stringResource(R.string.car_gps_test_summary), onClick = { testing = true })
+        if (testing) androidx.compose.ui.window.Dialog({ testing = false }, androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) { CarGpsTest { testing = false } }
+    }
     // what happens in the car (Tetra Car open, the car's Bluetooth, or the car's screen paired): also AI Assist's car_assist
     SettingsSection(stringResource(R.string.car_settings_summary)) {
         var reads by remember { mutableStateOf(Car.reads(context)) }
@@ -979,6 +988,14 @@ private val PART_NAMES = mapOf(AiPart.CHAT to R.string.ai_part_chat, AiPart.LIST
 /** Settings › Maps (21 Oct): what is installed, where updates come from, the directions' language and voice, parking, places. */
 @Composable private fun MapsPage() {
     val mapsContext = LocalContext.current
+    // the car build: Tetra Car's map view as a page of its own (the user, 14 Nov: "a separate page, it has too many settings (map view ›)")
+    if (CarMaps.edition) SettingsSection(stringResource(R.string.app_car)) {
+        var viewing by remember { mutableStateOf(false) }
+        SettingRow(stringResource(R.string.car_map_view) + "  ›", onClick = { viewing = true })
+        if (viewing) androidx.compose.ui.window.Dialog({ viewing = false }, androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) {
+            CarViewPage({}, {}, startSettings = true, inSettings = true) { viewing = false }
+        }
+    }
     var mapTheme by remember { mutableStateOf(MapsPrefs.mapTheme(mapsContext)) }
     var rolling by remember { mutableStateOf(MapsPrefs.rolling(mapsContext)) }
     SettingsSection(stringResource(R.string.settings_map)) {

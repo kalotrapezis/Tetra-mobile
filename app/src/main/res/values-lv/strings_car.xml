@@ -57,4 +57,23 @@
     <string name="maps_all_places">Visas vietas</string>
     <plurals name="maps_n_places"><item quantity="zero">%d vietu</item><item quantity="one">%d vieta</item><item quantity="other">%d vietas</item></plurals>
     <string name="maps_list_find">Meklēt šajā sarakstā</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Pozīcija no</string>
+    <string name="car_gps_source_summary">Tālruņa pozīcija katru sekundi nāk pa savienojumu ar auto; kad tā nenāk, to aizstāj auto pašā pozīcija.</string>
+    <string name="car_gps_car">Šis auto</string>
+    <string name="car_gps_phone">Tālrunis</string>
+    <string name="car_gps_test">Pārbaudīt GPS</string>
+    <string name="car_gps_test_summary">Auto un tālruņa pozīcijas līdzās, tiešraidē</string>
+    <string name="car_gps_test_note">Jo mazāks ±, jo labāk. Salīdziniet vienā braucienā: pilsētā, zem kokiem, tuneļa ieejā.</string>
+    <string name="car_gps_none">Pozīciju vēl nav</string>
+    <string name="car_gps_satellites">%1$d no %2$d satelītiem</string>
+    <string name="car_gps_speed">Ātrums %1$s</string>
+    <string name="car_gps_age">Pozīcija ir %1$s veca</string>
+    <string name="car_gps_apart">%1$s attālumā</string>
+    <string name="car_share_send">Sūtīt uz tālruni</string>
+    <string name="car_share_empty">Ko no tālruņa kopīgojat uz auto (Kopīgot › Tetra › Sūtīt uz auto), nonāk šeit. Tā nosūtīta lietotne tiek piedāvāta instalēšanai.</string>
+    <string name="car_share_sent">%1$s ir tālrunī, Tetra › No auto.</string>
+    <string name="car_share_failed">%1$s nav nosūtīts: %2$s</string>
+    <string name="car_share_arrived">No tālruņa: %1$s</string>
+    <string name="car_share_no_app">Šeit nav lietotnes, kas atvērtu %1$s.</string>
 </resources>

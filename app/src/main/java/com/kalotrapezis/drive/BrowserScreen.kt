@@ -419,6 +419,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     }
     /** The tab's page as it is now, small, for the tabs' list (the user's sketch, 13 Nov); nothing when its view is not shown. */
     fun capture(t: BrowserTab) {
+        if (CarMaps.edition) return // the car build: no tabs' list, no pictures of them
         if (!t.view.isAttachedToWindow || t.view.width == 0 || t.view.session == null) return
         runCatching { t.view.capturePixels().accept({ big -> big ?: return@accept
             val w = TAB_SHOT_PX.coerceAtMost(big.width)
@@ -465,7 +466,10 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                 return GeckoResult.deny()
             }
             // target=_blank, window.open: a tab of its own
-            override fun onNewSession(session: GeckoSession, uri: String): GeckoResult<GeckoSession> = GeckoResult.fromValue(openTab(uri, true).session)
+            override fun onNewSession(session: GeckoSession, uri: String): GeckoResult<GeckoSession> {
+                if (CarMaps.edition) { load(tab, uri); return GeckoResult.fromValue(null) } // the car build: in the one view, no new window
+                return GeckoResult.fromValue(openTab(uri, true).session)
+            }
             // never the whole of Tetra for a page that did not open: Gecko's own error page if Tetra's fails
             override fun onLoadError(session: GeckoSession, uri: String?, error: WebRequestError): GeckoResult<String>? =
                 runCatching { GeckoResult.fromValue(errorPage(tab, uri, error)) }.onFailure { WriterLog.e("Browser: the error page not made", it) }.getOrNull()
@@ -579,6 +583,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
 
     var nextId by remember { mutableIntStateOf(kept.first.size + 1) }
     val tabs = remember {
+        // the car build: one view, no tabs (the user, 14 Nov: "the car browser has no tabs, just one view"): the last page only
+        if (CarMaps.edition) return@remember mutableStateListOf(newTab(0, start.ifEmpty { kept.first.lastOrNull()?.url.orEmpty() }))
         val back = kept.first.mapIndexed { i, k -> newTab(i + 1, k.url, lazy = true).apply { title = k.title; pinned = k.pinned; group = k.group } }
         mutableStateListOf(*(back + newTab(0, start)).toTypedArray())
     }
@@ -615,7 +621,11 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         if (!tabsRun) old?.let { o -> o.send(JSONObject().put("media", "pause")); o.session.setActive(false) }
         to.session.setActive(true); wake(to); currentId = to.id; editing = false; player = false; barShown = true
     }
-    fun open(address: String = "", gecko: Boolean = false): BrowserTab = newTab(nextId++, address, gecko = gecko).also { tabs += it; switch(it) }
+    fun open(address: String = "", gecko: Boolean = false): BrowserTab {
+        // the car build: what would open a tab opens in the one view
+        if (CarMaps.edition && !gecko) tabs.firstOrNull { it.id == currentId }?.let { t -> if (address.isNotEmpty()) load(t, address); return t }
+        return newTab(nextId++, address, gecko = gecko).also { tabs += it; switch(it) }
+    }
     fun close(t: BrowserTab) {
         if (t !in tabs) return
         if (splitPair?.let { t.id == it.first || t.id == it.second } == true) splitPair = null
@@ -645,8 +655,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     val switchFrom = remember { IntArray(1) }
     var slid by remember { mutableStateOf(false) }
     // the gestures switched on (Settings › Browser › Gestures, their guide), read again on coming back; the guide by itself once
-    var gestures by remember { mutableStateOf(BrowserGesture.onSet(prefs)) }
-    var gestureGuide by remember { mutableStateOf(!prefs.getBoolean(BrowserGesture.GUIDE_SEEN, false)) }
+    var gestures by remember { mutableStateOf(if (CarMaps.edition) emptySet() else BrowserGesture.onSet(prefs)) } // the car build: no tabs to move between
+    var gestureGuide by remember { mutableStateOf(!CarMaps.edition && !prefs.getBoolean(BrowserGesture.GUIDE_SEEN, false)) }
     var lastClosed by remember { mutableStateOf<Pair<Int, SavedTab>?>(null) } // a tab swiped away in the list, for its Undo
     fun showTabs() {
         tabs.firstOrNull { it.id == currentId }?.let(::capture)
@@ -710,6 +720,13 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         onDispose { if (BrowserEngine.tabs === host) BrowserEngine.tabs = null }
     }
 
+    // the car build: off the screen (another page in its pane), the page sleeps unless it plays (the user, 14 Nov: "no active tabs in background")
+    val paneShown = LocalCarPaneShown.current
+    LaunchedEffect(paneShown) {
+        if (!CarMaps.edition) return@LaunchedEffect
+        val t = tabs.firstOrNull { it.id == currentId } ?: return@LaunchedEffect
+        if (paneShown) t.session.setActive(true) else if (!t.media.playing && t.session.isOpen) { t.session.setActive(false); WriterLog.i("Browser: asleep off the screen") }
+    }
     // a network that reaches the internet (back, or a better one): the tabs that could not open load again, once per 10 s at most
     DisposableEffect(Unit) {
         val cm = context.getSystemService(android.net.ConnectivityManager::class.java)
@@ -885,7 +902,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         // (an observer added now is told ON_RESUME at once)
         val back = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
             if (!private) vault = BrowserSecrets.vault(context) // the Passwords applet may have changed it meanwhile
-            gestures = BrowserGesture.onSet(prefs)
+            if (!CarMaps.edition) gestures = BrowserGesture.onSet(prefs)
             syncMarks(BookmarkLibrary(bookmarks, bookFolders), false); readOthers(); syncVault(vault, false); shareTabs() } }
         lifecycle.lifecycle.addObserver(back)
         onDispose { lifecycle.lifecycle.removeObserver(back); watch.stopWatching(); main.removeCallbacks(marksSoon); main.removeCallbacks(tabsSoon); main.removeCallbacks(vaultSoon) }
@@ -944,8 +961,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         // the puzzle piece (the user, 3 Nov): every extension, its switch, its own page
         "extensions" -> BrowserTool(R.drawable.ic_extension, stringResource(R.string.browser_extensions)) { extensions = true }
         "private" -> BrowserTool(R.drawable.ic_visibility_off, stringResource(R.string.browser_private), private) { setPrivate(!private, url) }
-        "desktop" -> BrowserTool(R.drawable.ic_computer, stringResource(R.string.browser_desktop), tab.desktop) { setDesktop(tab, !tab.desktop) }
-        "html" -> BrowserTool(R.drawable.ic_code, stringResource(R.string.browser_html), tab.html, url.isNotEmpty()) { toggleHtml(tab) }
+        "desktop" -> if (CarMaps.edition) null else BrowserTool(R.drawable.ic_computer, stringResource(R.string.browser_desktop), tab.desktop) { setDesktop(tab, !tab.desktop) }
+        "html" -> if (CarMaps.edition) null else BrowserTool(R.drawable.ic_code, stringResource(R.string.browser_html), tab.html, url.isNotEmpty()) { toggleHtml(tab) }
         "bookmarks" -> BrowserTool(R.drawable.ic_bookmark, stringResource(R.string.browser_bookmarks)) { panel = BrowserPanel.Bookmarks }
         "history" -> if (private) null else BrowserTool(R.drawable.ic_history, stringResource(R.string.browser_history)) { panel = BrowserPanel.History }
         // the Passwords applet (the user, 4 Nov: "Instead of making a better password page, create a password manager in tetra"), this page's site looked up
@@ -958,7 +975,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             runCatching { context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, url)
                 .putExtra(Intent.EXTRA_SUBJECT, tab.title), null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
         }
-        "split" -> if (!wide) null else BrowserTool(R.drawable.ic_view_column, stringResource(R.string.browser_split), splitPair != null) { toggleSplit() }
+        "split" -> if (!wide || CarMaps.edition) null else BrowserTool(R.drawable.ic_view_column, stringResource(R.string.browser_split), splitPair != null) { toggleSplit() }
         "forward" -> if (wide) null else BrowserTool(R.drawable.ic_chevron_right, stringResource(R.string.browser_forward), enabled = tab.canForward) { tab.session.goForward() }
         "player" -> BrowserTool(R.drawable.ic_play, stringResource(R.string.browser_player), enabled = media.has) { player = true }
         "import" -> if (private) null else BrowserTool(R.drawable.ic_file_download, stringResource(R.string.browser_import)) { imported = null; panel = BrowserPanel.Import }
@@ -1109,7 +1126,8 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
                     else BrowserTabs(tabs, groups, openGroups, currentId, wide, !private, splitPair?.takeIf { wide && !player }, switch = ::switch, close = ::close, add = { open(); editing = true; typed = TextFieldValue("") },
                         fold = { g -> openGroups = if (g in openGroups) openGroups - g else openGroups + g }, options = { tabOptions = it.id }, groupOptions = { groupOptions = it }, dropOn = ::dropOn)
                     }
-                    if (top) { tabsRow(); addressRow() } else { addressRow(); tabsRow() }
+                    if (CarMaps.edition) addressRow() // the car build: the address only, no tabs
+                    else if (top) { tabsRow(); addressRow() } else { addressRow(); tabsRow() }
                 }
                 // a phone: two columns of three small ones (the user's choice, by a long press)
                 if (!wide && !narrow) shown.chunked(3).forEach { column ->
@@ -1491,7 +1509,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     BrowserEngine.ask?.let { ExtAskDialog(it) }
     BrowserEngine.popup?.let { ExtPopupSheet(it) }
     BrowserPromptView(prompter)
-    if (gestureGuide) BrowserGesturesGuide(prefs) { gestureGuide = false; gestures = BrowserGesture.onSet(prefs) }
+    if (gestureGuide && !CarMaps.edition) BrowserGesturesGuide(prefs) { gestureGuide = false; gestures = BrowserGesture.onSet(prefs) }
     filing?.let { b -> FolderDialog(b.title.ifBlank { BrowserRules.host(b.url) }, b.folder, library.tree(), close = { filing = null }) { f ->
         keepLibrary(library.move(setOf(b.url), emptySet(), f)); filing = null
     } }

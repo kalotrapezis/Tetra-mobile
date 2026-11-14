@@ -57,4 +57,23 @@
     <string name="maps_all_places">Kaikki paikat</string>
     <plurals name="maps_n_places"><item quantity="one">%d paikka</item><item quantity="other">%d paikkaa</item></plurals>
     <string name="maps_list_find">Etsi tästä luettelosta</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Sijainnin lähde</string>
+    <string name="car_gps_source_summary">Puhelimen sijainti tulee autoyhteyden kautta joka sekunti; kun se ei tule, auton oma sijainti korvaa sen.</string>
+    <string name="car_gps_car">Tämä auto</string>
+    <string name="car_gps_phone">Puhelin</string>
+    <string name="car_gps_test">Testaa GPS</string>
+    <string name="car_gps_test_summary">Auton ja puhelimen rinnakkain, suorana</string>
+    <string name="car_gps_test_note">Pienempi ± on parempi. Vertaa samalla ajomatkalla: kaupungissa, puiden alla, tunnelin suulla.</string>
+    <string name="car_gps_none">Ei vielä paikkaa</string>
+    <string name="car_gps_satellites">%1$d / %2$d satelliittia</string>
+    <string name="car_gps_speed">Nopeus %1$s</string>
+    <string name="car_gps_age">Paikka %1$s vanha</string>
+    <string name="car_gps_apart">%1$s päässä toisistaan</string>
+    <string name="car_share_send">Lähetä puhelimeen</string>
+    <string name="car_share_empty">Mitä jaat puhelimesta autoon (Jaa › Tetra › Lähetä autoon), tulee tänne. Näin lähetetty sovellus tarjotaan asennettavaksi.</string>
+    <string name="car_share_sent">%1$s on puhelimessa, kansiossa Tetra › Autosta.</string>
+    <string name="car_share_failed">%1$s ei lähetetty: %2$s</string>
+    <string name="car_share_arrived">Puhelimesta: %1$s</string>
+    <string name="car_share_no_app">Mikään täällä oleva sovellus ei avaa kohdetta %1$s.</string>
 </resources>

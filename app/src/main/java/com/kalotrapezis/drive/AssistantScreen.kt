@@ -89,7 +89,7 @@ class AssistantSheetActivity : AssistantActivity() { override val sheet = true }
 internal val ASSISTANT_COLOR = Color(0xFFFD6A04)
 
 /** AI Assist listening, thinking or speaking, wherever its screen is: for the mic buttons that pulse meanwhile. */
-internal object AssistBusy { val on = mutableStateOf(false) }
+internal object AssistBusy { val on = mutableStateOf(false); /** the car build: AI Assist open without its TV (Tetra Car's dock mic flashes) */ val open = mutableStateOf(false) }
 
 internal fun openAssistant(c: Context) = c.startActivity(Intent(c, AssistantActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 internal const val ASK_EXTRA = "com.kalotrapezis.drive.ASK"

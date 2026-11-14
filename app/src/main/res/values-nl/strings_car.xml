@@ -57,4 +57,23 @@
     <string name="maps_all_places">Alle plaatsen</string>
     <plurals name="maps_n_places"><item quantity="one">%d plaats</item><item quantity="other">%d plaatsen</item></plurals>
     <string name="maps_list_find">Zoeken in deze lijst</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Positie van</string>
+    <string name="car_gps_source_summary">De positie van de telefoon komt elke seconde binnen via de verbinding met de auto; valt die weg, dan neemt die van de auto het over.</string>
+    <string name="car_gps_car">Deze auto</string>
+    <string name="car_gps_phone">De telefoon</string>
+    <string name="car_gps_test">GPS testen</string>
+    <string name="car_gps_test_summary">Die van de auto en die van de telefoon naast elkaar, live</string>
+    <string name="car_gps_test_note">Hoe kleiner de ±, hoe beter. Vergelijk ze op dezelfde rit: in de stad, onder bomen, bij de ingang van een tunnel.</string>
+    <string name="car_gps_none">Nog geen positie</string>
+    <string name="car_gps_satellites">%1$d van %2$d satellieten</string>
+    <string name="car_gps_speed">Snelheid %1$s</string>
+    <string name="car_gps_age">Positie %1$s oud</string>
+    <string name="car_gps_apart">%1$s uit elkaar</string>
+    <string name="car_share_send">Naar de telefoon sturen</string>
+    <string name="car_share_empty">Wat je vanaf de telefoon naar de auto deelt (Delen › Tetra › Naar de auto sturen), komt hier. Een app die zo wordt gestuurd, wordt aangeboden om te installeren.</string>
+    <string name="car_share_sent">%1$s staat op de telefoon, in Tetra › Van de auto.</string>
+    <string name="car_share_failed">%1$s is niet gestuurd: %2$s</string>
+    <string name="car_share_arrived">Van de telefoon: %1$s</string>
+    <string name="car_share_no_app">Geen app hier opent %1$s.</string>
 </resources>

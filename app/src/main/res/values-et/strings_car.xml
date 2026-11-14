@@ -57,4 +57,23 @@
     <string name="maps_all_places">Kõik kohad</string>
     <plurals name="maps_n_places"><item quantity="one">%d koht</item><item quantity="other">%d kohta</item></plurals>
     <string name="maps_list_find">Otsi sellest loendist</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Asukoht allikast</string>
+    <string name="car_gps_source_summary">Telefoni asukoht tuleb autoühenduse kaudu iga sekund; kui see ei tule, asendab seda auto enda oma.</string>
+    <string name="car_gps_car">See auto</string>
+    <string name="car_gps_phone">Telefon</string>
+    <string name="car_gps_test">GPS-i test</string>
+    <string name="car_gps_test_summary">Auto ja telefon kõrvuti, otse</string>
+    <string name="car_gps_test_note">Väiksem ± on parem. Võrrelge samal sõidul: linnas, puude all, tunneli suus.</string>
+    <string name="car_gps_none">Asukohta veel pole</string>
+    <string name="car_gps_satellites">%1$d / %2$d satelliiti</string>
+    <string name="car_gps_speed">Kiirus %1$s</string>
+    <string name="car_gps_age">Asukoht %1$s vana</string>
+    <string name="car_gps_apart">%1$s kaugusel</string>
+    <string name="car_share_send">Saada telefoni</string>
+    <string name="car_share_empty">Mida jagad telefonist autosse (Jaga › Tetra › Saada autosse), tuleb siia. Nii saadetud rakendus pakutakse installimiseks.</string>
+    <string name="car_share_sent">%1$s on telefonis kaustas Tetra › Autost.</string>
+    <string name="car_share_failed">%1$s ei saadetud: %2$s</string>
+    <string name="car_share_arrived">Telefonist: %1$s</string>
+    <string name="car_share_no_app">Ükski rakendus siin ei ava faili %1$s.</string>
 </resources>

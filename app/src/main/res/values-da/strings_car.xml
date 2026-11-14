@@ -57,4 +57,23 @@
     <string name="maps_all_places">Alle steder</string>
     <plurals name="maps_n_places"><item quantity="one">%d sted</item><item quantity="other">%d steder</item></plurals>
     <string name="maps_list_find">Find i denne liste</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Position fra</string>
+    <string name="car_gps_source_summary">Telefonens position kommer over bilforbindelsen hvert sekund; bilens egen træder til, når telefonens ikke kommer.</string>
+    <string name="car_gps_car">Denne bil</string>
+    <string name="car_gps_phone">Telefonen</string>
+    <string name="car_gps_test">Test GPS’en</string>
+    <string name="car_gps_test_summary">Bilens og telefonens side om side, live</string>
+    <string name="car_gps_test_note">Jo mindre ±, desto bedre. Sammenlign på samme tur: i byen, under træer, ved en tunnelmunding.</string>
+    <string name="car_gps_none">Ingen position endnu</string>
+    <string name="car_gps_satellites">%1$d af %2$d satellitter</string>
+    <string name="car_gps_speed">Fart %1$s</string>
+    <string name="car_gps_age">Position %1$s gammel</string>
+    <string name="car_gps_apart">%1$s fra hinanden</string>
+    <string name="car_share_send">Send til telefonen</string>
+    <string name="car_share_empty">Det du deler til bilen fra telefonen (Del › Tetra › Send til bilen), kommer her. En app sendt på den måde tilbydes til installation.</string>
+    <string name="car_share_sent">%1$s er på telefonen, i Tetra › Fra bilen.</string>
+    <string name="car_share_failed">%1$s blev ikke sendt: %2$s</string>
+    <string name="car_share_arrived">Fra telefonen: %1$s</string>
+    <string name="car_share_no_app">Ingen app her åbner %1$s.</string>
 </resources>

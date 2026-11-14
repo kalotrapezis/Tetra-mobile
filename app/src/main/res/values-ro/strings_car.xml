@@ -57,4 +57,23 @@
     <string name="maps_all_places">Toate locurile</string>
     <plurals name="maps_n_places"><item quantity="one">%d loc</item><item quantity="few">%d locuri</item><item quantity="other">%d de locuri</item></plurals>
     <string name="maps_list_find">Caută în această listă</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Poziția de la</string>
+    <string name="car_gps_source_summary">Poziția telefonului vine prin legătura cu mașina în fiecare secundă; când nu vine, o înlocuiește cea a mașinii.</string>
+    <string name="car_gps_car">Această mașină</string>
+    <string name="car_gps_phone">Telefonul</string>
+    <string name="car_gps_test">Testează GPS-ul</string>
+    <string name="car_gps_test_summary">Cea a mașinii și cea a telefonului una lângă alta, în direct</string>
+    <string name="car_gps_test_note">Cu cât ± e mai mic, cu atât mai bine. Compară-le pe același drum: în oraș, sub copaci, la intrarea într-un tunel.</string>
+    <string name="car_gps_none">Încă nu există poziție</string>
+    <string name="car_gps_satellites">%1$d din %2$d sateliți</string>
+    <string name="car_gps_speed">Viteză %1$s</string>
+    <string name="car_gps_age">Poziție veche de %1$s</string>
+    <string name="car_gps_apart">La %1$s unul de altul</string>
+    <string name="car_share_send">Trimite la telefon</string>
+    <string name="car_share_empty">Ce distribui de pe telefon către mașină (Distribuie › Tetra › Trimite la mașină) ajunge aici. O aplicație trimisă astfel este oferită spre instalare.</string>
+    <string name="car_share_sent">%1$s este pe telefon, în Tetra › De la mașină.</string>
+    <string name="car_share_failed">%1$s nu a fost trimis: %2$s</string>
+    <string name="car_share_arrived">De pe telefon: %1$s</string>
+    <string name="car_share_no_app">Nicio aplicație de aici nu deschide %1$s.</string>
 </resources>

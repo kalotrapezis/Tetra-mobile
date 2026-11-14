@@ -57,4 +57,23 @@
     <string name="maps_all_places">Всички места</string>
     <plurals name="maps_n_places"><item quantity="one">%d място</item><item quantity="other">%d места</item></plurals>
     <string name="maps_list_find">Търсене в този списък</string>
+    <string name="car_gps">GPS</string>
+    <string name="car_gps_source">Позиция от</string>
+    <string name="car_gps_source_summary">Позицията от телефона идва през връзката с колата всяка секунда; когато не идва, работи тази на колата.</string>
+    <string name="car_gps_car">Тази кола</string>
+    <string name="car_gps_phone">Телефонът</string>
+    <string name="car_gps_test">Тест на GPS</string>
+    <string name="car_gps_test_summary">Тази на колата и на телефона една до друга, на живо</string>
+    <string name="car_gps_test_note">По-малкото ± е по-добре. Сравнявайте на едно и също пътуване: в града, под дървета, на входа на тунел.</string>
+    <string name="car_gps_none">Още няма засичане</string>
+    <string name="car_gps_satellites">%1$d от %2$d сателита</string>
+    <string name="car_gps_speed">Скорост %1$s</string>
+    <string name="car_gps_age">Засичане преди %1$s</string>
+    <string name="car_gps_apart">На %1$s разстояние</string>
+    <string name="car_share_send">Изпрати към телефона</string>
+    <string name="car_share_empty">Каквото споделите от телефона към колата (Сподели › Tetra › Изпрати към колата), пристига тук. Приложение, изпратено така, се предлага за инсталиране.</string>
+    <string name="car_share_sent">%1$s е в телефона, в Tetra › От колата.</string>
+    <string name="car_share_failed">%1$s не беше изпратен: %2$s</string>
+    <string name="car_share_arrived">От телефона: %1$s</string>
+    <string name="car_share_no_app">Никое приложение тук не отваря %1$s.</string>
 </resources>
