@@ -76,5 +76,11 @@
     <string name="car_share_failed">%1$s nav nosūtīts: %2$s</string>
     <string name="car_share_arrived">No tālruņa: %1$s</string>
     <string name="car_assist_no_key">No tālruņa vēl nav AI atslēgas. Savieno tālruni ar automašīnu.</string>
+    <string name="car_assist_moment">Brīdi.</string>
+    <string name="car_assist_searching">Meklēju: %1$s.</string>
+    <string name="car_assist_looking">Skatos: %1$s.</string>
+    <string name="car_assist_opening">Atveru: %1$s.</string>
+    <string name="car_assist_playing">Atskaņoju: %1$s.</string>
+    <string name="car_assist_calling">Zvanu: %1$s.</string>
     <string name="car_share_no_app">Šeit nav lietotnes, kas atvērtu %1$s.</string>
 </resources>

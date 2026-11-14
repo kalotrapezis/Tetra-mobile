@@ -1771,7 +1771,7 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
 
     /** The user's [text] answered, the tools run on the way; [onText] gets the answer's words as they come; [file] goes with it, this turn only. */
     /** Each tool as the model calls it (Home's widget: a magnifier while it searches). */
-    @Volatile var onTool: ((String) -> Unit)? = null
+    @Volatile var onTool: ((String, JSONObject) -> Unit)? = null
     /** Tools run after outside text without a yes (a scheduled action's permission, [AssistantGuard.ALLOW]). */
     var allow: Set<String> = emptySet()
     /** What it did, held and could not, for a scheduled action's report: { kind: done|held|failed, name, what, why? }. */
@@ -1814,7 +1814,7 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
                 val c = calls.getJSONObject(i); val f = c.getJSONObject("function")
                 val args = when (val a = f.opt("arguments")) { is JSONObject -> a; is String -> runCatching { JSONObject(a.ifBlank { "{}" }) }.getOrDefault(JSONObject()); else -> JSONObject() }
                 val name = f.getString("name")
-                onTool?.invoke(name)
+                onTool?.invoke(name, args)
                 // after outside text, a change waits for the user's yes (AssistantGuard); shortcut: one held call per turn, the last, until the model ever asks several at once
                 val acts = AssistantGuard.acts(name, args)
                 val r = if (outside && acts && name !in allow) { confirm = AssistantGuard.Confirm(name, args, AssistantGuard.what(name, args, tools.picked(name, args))).also { log += entry("held", name, it.what) }; ToolResult(AssistantGuard.held(name)) }

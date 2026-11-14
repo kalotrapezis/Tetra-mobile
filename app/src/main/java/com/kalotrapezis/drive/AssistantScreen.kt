@@ -180,7 +180,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
     val car = sheet && CarMaps.edition // the car build: no window of its own, so tones and spoken words instead
     val close: () -> Unit = { if (car || !sheet || !decorated || !AssistantKey.has(context)) closeNow() else if (!tvOff) { tvOff = true; Zap.play(); scope.launch { delay(520); closeNow() } } }
     LaunchedEffect(Unit) { if (!car && sheet && decorated && AssistantKey.has(context)) Zap.play() } // and on, as it opens
-    DisposableEffect(Unit) { onDispose { if (car) Chime.play(up = false) } } // however it ends: a tap on the mic, an answer done, a failure
+    DisposableEffect(Unit) { onDispose { if (car) { Chime.play(up = false); Thread { runCatching { CarWire.log(context.applicationContext) } }.start() } } } // however it ends: a tap on the mic, an answer done, a failure
     // every way in goes on with the open conversation (the user, 8 Nov), the sheet's or the full screen's
     val chat = remember { SharedChat.chat(context) }
     val bubbles = remember { SharedChat.bubbles.apply { openJob?.let { add(Bubble(false, "", job = it)) } } }
@@ -337,11 +337,17 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
         live?.muted = true; if (inLive) livePhase = LivePhase.Thinking
         // the answer comes a few words at a time and is read a sentence at a time: the first is heard while the rest is made
         hush()
+        if (car && !inLive) reader.add(context.getString(R.string.car_assist_moment)) // heard, and on it
         val speech = if (aloud || inLive) AnswerVoice(context, reader, chat.bill.part("voice"), scope).also { voice = it } else null
         val cut = Sentences()
         AssistantTools.beside = Beside.can(context)
         val said = StringBuilder(); tvCue = TalkCue.None; tvMood = TalkMood.Normal
-        chat.onTool = { name -> TalkCue.ofTool(name).takeIf { it != TalkCue.None }?.let { found -> scope.launch { tvCue = found } } }
+        val told = mutableSetOf<String>()
+        chat.onTool = { name, args ->
+            TalkCue.ofTool(name).takeIf { it != TalkCue.None }?.let { found -> scope.launch { tvCue = found } }
+            // the car: what it is doing, said as it starts (the user, 14 Nov: "I am opening this, I am searching for this")
+            if (car) CarDoing.of(context, name, args)?.takeIf { told.add(it) }?.let { reader.add(it) }
+        }
         val r = withContext(Dispatchers.IO) { runCatching { try { chat.ask(text, file = file) { words ->
             said.append(words); val cue = TalkCue.of(said); val mood = TalkMood.of(said)
             scope.launch { talking = speech != null; if (cue != TalkCue.None || tvCue.weather) tvCue = cue.takeIf { it != TalkCue.None } ?: tvCue; tvMood = mood }
@@ -1098,5 +1104,22 @@ internal fun AssistantKeyField(p: AiProvider = AiProviders.of(LocalContext.curre
                 key = ""; has = AssistantKey.get(context, p) != null; if (has) saved() }, enabled = key.isNotBlank()) { Text(stringResource(R.string.common_save), maxLines = 1) }
         }
         Text(if (p.isMistral) stringResource(R.string.assistant_key_note) else stringResource(R.string.ai_provider_key_note, p.site, p.name), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+    }
+}
+
+/** Tetra Car: an AI Assist tool said as it starts ("Searching for …", "Opening …"), with the words it was given; null for the rest. */
+internal object CarDoing {
+    private val KEYS = listOf("query", "destination", "place", "name", "app", "station", "title", "what", "to", "q")
+    fun of(c: Context, tool: String, args: org.json.JSONObject): String? {
+        val res = when (tool) {
+            "web_search", "youtube", "notes_search", "files_find", "mail_find", "mail_stored_find" -> R.string.car_assist_searching
+            "contacts_find", "navigate", "place_reminder", "photos_place" -> R.string.car_assist_looking
+            "app_open", "file_open", "note_open", "mail_open" -> R.string.car_assist_opening
+            "media_play", "radio_play", "spotify_mix" -> R.string.car_assist_playing
+            "contact_call" -> R.string.car_assist_calling
+            else -> return null
+        }
+        val what = KEYS.firstNotNullOfOrNull { k -> args.optString(k).trim().takeIf { it.isNotEmpty() && it.length <= 60 } } ?: return null
+        return c.getString(res, what)
     }
 }

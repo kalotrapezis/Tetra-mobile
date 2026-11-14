@@ -76,5 +76,11 @@
     <string name="car_share_failed">Nie wysłano pliku %1$s: %2$s</string>
     <string name="car_share_arrived">Z telefonu: %1$s</string>
     <string name="car_assist_no_key">Nie ma jeszcze klucza AI z telefonu. Połącz telefon z samochodem.</string>
+    <string name="car_assist_moment">Chwileczkę.</string>
+    <string name="car_assist_searching">Szukam: %1$s.</string>
+    <string name="car_assist_looking">Wyszukuję: %1$s.</string>
+    <string name="car_assist_opening">Otwieram: %1$s.</string>
+    <string name="car_assist_playing">Odtwarzam: %1$s.</string>
+    <string name="car_assist_calling">Dzwonię: %1$s.</string>
     <string name="car_share_no_app">Żadna aplikacja tutaj nie otworzy %1$s.</string>
 </resources>

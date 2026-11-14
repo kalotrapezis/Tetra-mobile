@@ -76,5 +76,11 @@
     <string name="car_share_failed">%1$s ei lähetetty: %2$s</string>
     <string name="car_share_arrived">Puhelimesta: %1$s</string>
     <string name="car_assist_no_key">Puhelimesta ei ole vielä tekoälyavainta. Yhdistä puhelin autoon.</string>
+    <string name="car_assist_moment">Hetkinen.</string>
+    <string name="car_assist_searching">Etsin: %1$s.</string>
+    <string name="car_assist_looking">Haen: %1$s.</string>
+    <string name="car_assist_opening">Avaan: %1$s.</string>
+    <string name="car_assist_playing">Toistan: %1$s.</string>
+    <string name="car_assist_calling">Soitan: %1$s.</string>
     <string name="car_share_no_app">Mikään täällä oleva sovellus ei avaa kohdetta %1$s.</string>
 </resources>

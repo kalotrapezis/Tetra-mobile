@@ -76,5 +76,11 @@
     <string name="car_share_failed">%1$s neišsiųsta: %2$s</string>
     <string name="car_share_arrived">Iš telefono: %1$s</string>
     <string name="car_assist_no_key">Iš telefono dar nėra AI rakto. Prijunk telefoną prie automobilio.</string>
+    <string name="car_assist_moment">Akimirką.</string>
+    <string name="car_assist_searching">Ieškau: %1$s.</string>
+    <string name="car_assist_looking">Žiūriu: %1$s.</string>
+    <string name="car_assist_opening">Atidarau: %1$s.</string>
+    <string name="car_assist_playing">Leidžiu: %1$s.</string>
+    <string name="car_assist_calling">Skambinu: %1$s.</string>
     <string name="car_share_no_app">Čia jokia programa neatidaro %1$s.</string>
 </resources>

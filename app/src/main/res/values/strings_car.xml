@@ -76,5 +76,11 @@
     <string name="car_share_failed">%1$s was not sent: %2$s</string>
     <string name="car_share_arrived">From the phone: %1$s</string>
     <string name="car_assist_no_key">No AI key from the phone yet. Connect the phone to the car.</string>
+    <string name="car_assist_moment">One moment.</string>
+    <string name="car_assist_searching">Searching for %1$s.</string>
+    <string name="car_assist_looking">Looking for %1$s.</string>
+    <string name="car_assist_opening">Opening %1$s.</string>
+    <string name="car_assist_playing">Playing %1$s.</string>
+    <string name="car_assist_calling">Calling %1$s.</string>
     <string name="car_share_no_app">No app here opens %1$s.</string>
 </resources>

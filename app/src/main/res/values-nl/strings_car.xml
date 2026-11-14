@@ -76,5 +76,11 @@
     <string name="car_share_failed">%1$s is niet gestuurd: %2$s</string>
     <string name="car_share_arrived">Van de telefoon: %1$s</string>
     <string name="car_assist_no_key">Nog geen AI-sleutel van de telefoon. Verbind de telefoon met de auto.</string>
+    <string name="car_assist_moment">Een moment.</string>
+    <string name="car_assist_searching">Ik zoek naar %1$s.</string>
+    <string name="car_assist_looking">Ik kijk even naar %1$s.</string>
+    <string name="car_assist_opening">Ik open %1$s.</string>
+    <string name="car_assist_playing">Ik speel %1$s af.</string>
+    <string name="car_assist_calling">Ik bel %1$s.</string>
     <string name="car_share_no_app">Geen app hier opent %1$s.</string>
 </resources>

@@ -76,5 +76,11 @@
     <string name="car_share_failed">Níor seoladh %1$s: %2$s</string>
     <string name="car_share_arrived">Ón bhfón: %1$s</string>
     <string name="car_assist_no_key">Níl eochair AI ón bhfón fós. Ceangail an fón leis an gcarr.</string>
+    <string name="car_assist_moment">Nóiméad amháin.</string>
+    <string name="car_assist_searching">Ag cuardach: %1$s.</string>
+    <string name="car_assist_looking">Ag lorg: %1$s.</string>
+    <string name="car_assist_opening">Ag oscailt: %1$s.</string>
+    <string name="car_assist_playing">Ag seinm: %1$s.</string>
+    <string name="car_assist_calling">Ag glaoch: %1$s.</string>
     <string name="car_share_no_app">Ní oscloidh aon app anseo %1$s.</string>
 </resources>

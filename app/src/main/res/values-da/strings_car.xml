@@ -76,5 +76,11 @@
     <string name="car_share_failed">%1$s blev ikke sendt: %2$s</string>
     <string name="car_share_arrived">Fra telefonen: %1$s</string>
     <string name="car_assist_no_key">Der er endnu ingen AI-nøgle fra telefonen. Forbind telefonen til bilen.</string>
+    <string name="car_assist_moment">Et øjeblik.</string>
+    <string name="car_assist_searching">Søger: %1$s.</string>
+    <string name="car_assist_looking">Leder: %1$s.</string>
+    <string name="car_assist_opening">Åbner: %1$s.</string>
+    <string name="car_assist_playing">Afspiller: %1$s.</string>
+    <string name="car_assist_calling">Ringer til: %1$s.</string>
     <string name="car_share_no_app">Ingen app her åbner %1$s.</string>
 </resources>

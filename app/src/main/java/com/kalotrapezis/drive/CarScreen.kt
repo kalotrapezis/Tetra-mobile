@@ -669,6 +669,8 @@ internal fun CarScreen(projected: Boolean = false) {
         // the car build: AI Assist heard and heard from, nothing shown but the dock's mic flashing (the user, 14 Nov: "remove the TV stuff,
         // no window switching, just a flashing mic"); a tap on the mic again ends it
         LaunchedEffect(assist) { AssistBusy.open.value = assist && CarMaps.edition }
+        // the car's log on the phone every 5 minutes, not only as they meet (the user, 14 Nov: the drive's lines were still in the car)
+        LaunchedEffect(Unit) { if (CarMaps.edition) while (true) { delay(5 * 60_000L); Thread { runCatching { CarWire.log(context.applicationContext) } }.start() } }
         if (assist && CarMaps.edition) Box(Modifier.size(1.dp).graphicsLayer { alpha = 0f }) { key(assistLive) { AssistantApp(sheet = true, liveFirst = assistLive) { assist = false } } }
         // one layout for both children whichever side the dock is on: the pages are never put elsewhere in the tree (the route, the sound go on)
         Layout(modifier = Modifier.fillMaxSize(), content = {

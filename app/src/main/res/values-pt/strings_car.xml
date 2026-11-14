@@ -76,5 +76,11 @@
     <string name="car_share_failed">%1$s não foi enviado: %2$s</string>
     <string name="car_share_arrived">Do telemóvel: %1$s</string>
     <string name="car_assist_no_key">Ainda não há chave de IA do telemóvel. Liga o telemóvel ao carro.</string>
+    <string name="car_assist_moment">Um momento.</string>
+    <string name="car_assist_searching">Procurando: %1$s.</string>
+    <string name="car_assist_looking">Localizando: %1$s.</string>
+    <string name="car_assist_opening">Abrindo: %1$s.</string>
+    <string name="car_assist_playing">Reproduzindo: %1$s.</string>
+    <string name="car_assist_calling">Ligando para: %1$s.</string>
     <string name="car_share_no_app">Nenhuma app aqui abre %1$s.</string>
 </resources>

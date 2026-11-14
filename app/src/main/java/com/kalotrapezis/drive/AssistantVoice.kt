@@ -484,7 +484,7 @@ private val SOURCES = mapOf(MediaRecorder.AudioSource.VOICE_RECOGNITION to "voic
 
 /**
  * Records until the speaker pauses, [stop] says so, or nobody spoke for [waitMs]; null when nothing was said, [micTrouble] why.
- * [speaking] follows whether a phrase has begun, for the screen. A pause of [pauseMs] ends it; a minute at most (the car: 15 s).
+ * [speaking] follows whether a phrase has begun, for the screen. A pause of [pauseMs] ends it; a minute at most (the car: 15 s, a lower bar).
  * A source that cannot be opened, fails, or gives only zeros (another app holds the mic, or the unit routes it elsewhere) gives way
  * to the next. Each try is one line in the log: the source, where Android routed it, the noise, the loudest and the bar speech must pass.
  */
@@ -501,7 +501,10 @@ internal fun listen(waitMs: Long, stop: () -> Boolean, speaking: (Boolean) -> Un
             WriterLog.w("AI Assist: the microphone (${SOURCES[source]}) did not open"); continue
         }
         mic?.let(rec::setPreferredDevice)
-        val vad = if (car) Vad(pauseMs / 30, 15 * 1000 / 30, factor = 1.8, least = 160.0) else Vad(pauseMs / 30, 60 * 1000 / 30)
+        // the car: a quiet cabin, its microphone up in the door, far from the driver (the user, 14 Nov: "don't have too high a threshold, if it
+        // needs to be higher I will tell you"): a low bar, and all it heard kept for a voice still under it (sent to be heard anyway)
+        val vad = if (car) Vad(pauseMs / 30, 15 * 1000 / 30, factor = 1.3, least = 60.0) else Vad(pauseMs / 30, 60 * 1000 / 30)
+        val all = if (car) ArrayList<ShortArray>() else null
         val started = System.currentTimeMillis()
         var frames = 0; var peak = 0
         var how = "nobody spoke"; var routed = ""
@@ -514,12 +517,18 @@ internal fun listen(waitMs: Long, stop: () -> Boolean, speaking: (Boolean) -> Un
                 if (n < frame.size) break
                 if (frames++ == 3) routed = rec.routedDevice?.let { "${it.productName} (type ${it.type})" } ?: "?"
                 frame.forEach { val a = kotlin.math.abs(it.toInt()); if (a > peak) peak = a }
+                all?.add(frame)
                 // 0.6 s of exact zeros: nothing reaches this source (a real microphone always hisses a little)
                 if (frames == 20 && peak == 0) { how = "only zeros"; micTrouble = R.string.assistant_mic_silent; break }
                 val done = vad.push(frame)
                 speaking(vad.speaking)
-                if (done || stop()) { how = if (done) "heard" else "stopped"; goodSource = source; return vad.phrase().takeIf { it.isNotEmpty() } }
-                if (!vad.speaking && System.currentTimeMillis() - started > waitMs) { goodSource = source; return null }
+                if (done || stop()) { how = if (done) "heard" else "stopped"; goodSource = source; return vad.phrase().takeIf { it.isNotEmpty() }?.let { if (car) louder(it) else it } }
+                if (!vad.speaking && System.currentTimeMillis() - started > waitMs) {
+                    goodSource = source
+                    // something above the road was there, under the bar: the whole of it goes to be heard; "nothing" comes back if it was nothing
+                    if (all != null && vad.loudest > vad.noise * 1.2) { how = "quiet, sent anyway"; return louder(ShortArray(all.size * Vad.FRAME).also { o -> all.forEachIndexed { i, f -> f.copyInto(o, i * Vad.FRAME) } }) }
+                    return null
+                }
             }
         } finally {
             runCatching { rec.stop() }; rec.release()
@@ -527,6 +536,13 @@ internal fun listen(waitMs: Long, stop: () -> Boolean, speaking: (Boolean) -> Un
         }
     }
     return null
+}
+
+/** A far voice made louder for the listening service (peak to about 70%, at most 8x). */
+internal fun louder(pcm: ShortArray): ShortArray {
+    val peak = pcm.maxOfOrNull { kotlin.math.abs(it.toInt()) } ?: return pcm
+    val gain = minOf(8.0, 23_000.0 / maxOf(peak, 1))
+    return if (gain < 1.2) pcm else ShortArray(pcm.size) { (pcm[it] * gain).toInt().coerceIn(-32768, 32767).toShort() }
 }
 
 /*
@@ -623,6 +639,7 @@ internal class AnswerVoice(private val c: Context, private val reader: ReadAloud
         try {
             for (a in audio) when (a) {
                 is FloatArray -> {
+                    if (track == null) while (isActive && reader.speaking) delay(50) // "one moment", "searching for …" (the car) finish first
                     val t = track ?: newTrack().also { track = it; speaker?.let(it::setPreferredDevice); it.play() }
                     var at = 0
                     while (at < a.size && isActive) { val n = t.write(a, at, minOf(2_400, a.size - at), AudioTrack.WRITE_BLOCKING); if (n <= 0) break; at += n }

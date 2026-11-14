@@ -102,7 +102,7 @@ internal class HomeTalk(private val c: Context, private val scope: CoroutineScop
         val cut = Sentences()
         AssistantTools.beside = Beside.can(c)
         val said = StringBuilder()
-        chat.onTool = { name -> TalkCue.ofTool(name).takeIf { it != TalkCue.None }?.let { found -> scope.launch { cue = found } } }
+        chat.onTool = { name, _ -> TalkCue.ofTool(name).takeIf { it != TalkCue.None }?.let { found -> scope.launch { cue = found } } }
         val reply = withContext(Dispatchers.IO) { try { chat.ask(text) { words ->
             cut.push(words).forEach { speech.say(it) }
             said.append(words); val now = TalkCue.of(said); val feel = TalkMood.of(said); scope.launch { phase = LivePhase.Speaking; if (now != TalkCue.None || cue.weather) cue = now.takeIf { it != TalkCue.None } ?: cue; mood = feel }

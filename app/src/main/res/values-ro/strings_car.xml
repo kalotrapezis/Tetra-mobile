@@ -76,5 +76,11 @@
     <string name="car_share_failed">%1$s nu a fost trimis: %2$s</string>
     <string name="car_share_arrived">De pe telefon: %1$s</string>
     <string name="car_assist_no_key">Nu există încă o cheie AI de pe telefon. Conectează telefonul la mașină.</string>
+    <string name="car_assist_moment">Un moment.</string>
+    <string name="car_assist_searching">Caut: %1$s.</string>
+    <string name="car_assist_looking">Localizez: %1$s.</string>
+    <string name="car_assist_opening">Deschid: %1$s.</string>
+    <string name="car_assist_playing">Redau: %1$s.</string>
+    <string name="car_assist_calling">Apelez: %1$s.</string>
     <string name="car_share_no_app">Nicio aplicație de aici nu deschide %1$s.</string>
 </resources>

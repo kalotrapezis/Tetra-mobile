@@ -76,5 +76,11 @@
     <string name="car_share_failed">%1$s ei saadetud: %2$s</string>
     <string name="car_share_arrived">Telefonist: %1$s</string>
     <string name="car_assist_no_key">Telefonist ei ole veel AI-võtit. Ühenda telefon autoga.</string>
+    <string name="car_assist_moment">Üks hetk.</string>
+    <string name="car_assist_searching">Otsin: %1$s.</string>
+    <string name="car_assist_looking">Uurin: %1$s.</string>
+    <string name="car_assist_opening">Avan: %1$s.</string>
+    <string name="car_assist_playing">Mängin: %1$s.</string>
+    <string name="car_assist_calling">Helistan: %1$s.</string>
     <string name="car_share_no_app">Ükski rakendus siin ei ava faili %1$s.</string>
 </resources>

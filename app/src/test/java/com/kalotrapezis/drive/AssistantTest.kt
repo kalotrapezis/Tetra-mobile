@@ -289,10 +289,10 @@ class AssistantTest {
 
     @Test fun inTheCarAVoiceOverRoadNoiseIsHeard() {
         fun frame(amp: Int) = ShortArray(Vad.FRAME) { i -> (amp * Math.sin(i * 0.3)).toInt().toShort() }
-        // road noise at rms ~420, a far voice at ~2x it: the phone's bar (2.5x) misses it, the car's (1.8x) does not
+        // road noise at rms ~420, a far voice at ~2x it: the phone's bar (2.5x) misses it, the car's (1.3x) does not
         fun hears(vad: Vad): Boolean { repeat(20) { vad.push(frame(600)) }; repeat(30) { vad.push(frame(1200)) }; return vad.speaking }
         assertFalse(hears(Vad()))
-        assertTrue(hears(Vad(30, 15 * 1000 / 30, factor = 1.8, least = 160.0)))
+        assertTrue(hears(Vad(30, 15 * 1000 / 30, factor = 1.3, least = 60.0)))
         // one bump, then quiet: it goes back to waiting instead of listening until tapped
         val bump = Vad()
         repeat(20) { bump.push(frame(30)) }; bump.push(frame(4000)); assertTrue(bump.speaking)
