@@ -251,13 +251,15 @@ internal fun ScheduledTab(offer: (String) -> Unit) {
                 "weekly" -> s.optJSONArray("days")?.let { a -> " (" + (0 until a.length()).joinToString(", ") { weekday(c, a.optInt(it)) } + ")" }.orEmpty()
                 "daily" -> ""
                 else -> s.optString("date").takeIf { !s.isNull("date") && it.isNotBlank() }?.let { " ($it)" }.orEmpty()
-            } + " · " + s.optString("time")
+            } + " · " + s.optString("time") + (s.optString("until").takeIf { !s.isNull("until") && it.isNotBlank() }?.let { " → $it" } ?: "")
             val state = if (s.optBoolean("paused")) c.getString(R.string.assistant_sched_paused)
                 else AssistantSchedules.due(s)?.let { c.getString(R.string.assistant_sched_next, dateTime.format(Date(it))) } ?: c.getString(R.string.common_done)
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(10.dp).background(if (s.optString("kind") == "brief") AppColor.calendar else AppColor.mail, CircleShape))
+                        // its last run (the user, 14 Nov): green done, yellow waiting for a yes, red failed; none yet, the app's colour
+                        Box(Modifier.size(10.dp).background(when (s.optString("result")) { "ok" -> Color(0xFF2E9D4F); "held" -> Color(0xFFE0A800); "failed" -> Color(0xFFD93636)
+                            else -> if (s.optString("kind") == "brief") AppColor.calendar else AppColor.mail }, CircleShape))
                         Spacer(Modifier.width(8.dp))
                         Text(title(s), style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     }

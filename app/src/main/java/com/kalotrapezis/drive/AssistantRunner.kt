@@ -71,6 +71,7 @@ internal object AssistantRunner {
                 if (late) continue
                 runCatching { run(c, tetra, s) }.onFailure { e ->
                     WriterLog.e("Scheduled AI: ${s.optString("id")} failed", e)
+                    runCatching { AssistantSchedules.result(tetra, s.optString("id"), "failed") }
                     AssistantBriefs.notice(c, title(c, s), c.getString(R.string.brief_failed, e.message ?: e.javaClass.simpleName))
                 }
             }
@@ -103,6 +104,7 @@ internal object AssistantRunner {
         val dir = AssistantBriefs.dir().apply { mkdirs() }
         val file = File(dir, "$base.html").apply { writeText(html) }
         File(dir, "latest.json").writeText(JSONObject().put("at", now).put("title", title).put("text", line.take(300)).put("file", file.name).toString())
+        AssistantSchedules.result(tetra, s.optString("id"), if (s.optString("kind") == "brief") "ok" else AssistantSchedules.outcome(chat.log))
         AssistantBriefs.shown(c, now)
         AssistantBriefs.post(c, title, line.take(200), file, clock(now))
         WriterLog.i("Scheduled AI: ${file.name} made here")

@@ -424,12 +424,12 @@ internal class AssistantTools(
             "memory_add" -> AssistantMemory.add(tetra, args.getString("text"), device).let { changed("memory"); ToolResult("Kept: \"${it.text}\". Settings › AI Assist › Personal details shows it.") }
             "memory_list" -> facts().also { factsShown = it }.let { l -> ToolResult(if (l.isEmpty()) "Nothing is kept." else l.mapIndexed { i, f -> "${i + 1}. ${f.text}" }.joinToString("\n")) }
             "memory_forget" -> pick(factsShown, args) { f -> AssistantMemory.change(tetra, f.id, "", device); factsShown = factsShown - f; changed("memory"); ToolResult("Forgot \"${f.text}\".") }
-            "schedule_add" -> AssistantSchedules.add(tetra, args).let { changed("schedules"); ToolResult("Scheduled: ${scheduleLine(it)}. The computer runs it and the answer comes here as a notification.") }
+            "schedule_add" -> AssistantSchedules.add(tetra, args).let { changed("schedules"); ToolResult(checked(it, "Scheduled")) }
             "schedule_list" -> AssistantSchedules.list(tetra).also { schedulesShown = it }.let { l -> ToolResult(l.mapIndexed { i, x -> "${i + 1}. ${scheduleLine(x)}" }.joinToString("\n").ifEmpty { "Nothing is scheduled." }) }
             "schedule_change" -> pick(schedulesShown, args) { x ->
                 args.optJSONObject("sections")?.takeIf { x.optString("kind") == "brief" }?.let { AssistantSchedules.setSections(tetra, it) }
                 val c = AssistantSchedules.change(tetra, x.getString("id"), JSONObject(args.toString()).apply { remove("choice"); remove("sections") })
-                changed("schedules"); ToolResult("Changed: ${scheduleLine(c)}.") }
+                changed("schedules"); ToolResult(checked(c, "Changed")) }
             "schedule_delete" -> pick(schedulesShown, args) { x ->
                 if (x.optString("kind") == "brief") ToolResult("The daily brief cannot be deleted; pause it instead (schedule_change with paused).")
                 else { AssistantSchedules.remove(tetra, x.getString("id")); schedulesShown = schedulesShown - x; changed("schedules"); ToolResult("Deleted \"${x.optString("title")}\".") } }
@@ -1516,8 +1516,18 @@ internal class AssistantTools(
         val days = x.optJSONArray("days")?.let { a -> (0 until a.length()).joinToString(", ") { listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")[a.optInt(it).coerceIn(0, 6)] } }.orEmpty()
         val how = when (val r = x.optString("repeat")) { "weekly" -> "weekly on $days"; "once" -> "once on ${x.optString("date")}"; else -> r }
         val next = AssistantSchedules.due(x)?.let { java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).format(SHOWN) }
-        return "${x.optString("title")} — $how at ${x.optString("time")}" + when { x.optBoolean("paused") -> ", paused"; next != null -> ", next $next"; else -> ", done" } +
-            if (x.optString("kind") == "brief") " (the daily brief)" else ": \"${x.optString("prompt")}\""
+        val until = x.optString("until").takeIf { !x.isNull("until") && it.isNotBlank() }?.let { " until $it" }.orEmpty()
+        val allow = x.optJSONArray("allow")?.let { a -> (0 until a.length()).joinToString(", ") { a.optString(it) } }?.ifBlank { null } ?: "nothing"
+        return "${x.optString("title")} — $how at ${x.optString("time")}$until" + when { x.optBoolean("paused") -> ", paused"; next != null -> ", next $next"; else -> ", done" } +
+            if (x.optString("kind") == "brief") " (the daily brief)" else ": \"${x.optString("prompt")}\"; may do on its own: $allow"
+    }
+
+    /** A schedule just made or changed, read back from the file (the user, 14 Nov: "make it check, and ask for permissions or say all is OK"). */
+    private fun checked(s: JSONObject, did: String): String {
+        val now = AssistantSchedules.list(tetra).firstOrNull { it.optString("id") == s.optString("id") } ?: return "Failed: it is not in the list after saving. Tell the user it was not set."
+        return "$did and checked, it is in the list: ${scheduleLine(now)}.\nTell the user in one or two sentences that it is set: when it runs first" +
+            (if (now.has("until") && !now.isNull("until")) " and its last day" else "") + ". Then, if the task will want to add to the calendar, make notes, set timers or save files after reading the web or mail " +
+            "and it may not do that on its own yet, ask whether it may (then schedule_change with allow); sending, calling and deleting always wait for them. Otherwise say all is OK."
     }
 
     private fun relationForget(a: JSONObject): ToolResult {
@@ -1546,7 +1556,10 @@ internal class AssistantTools(
         private val SCHEDULE = arrayOf("prompt" to p("string", "What to do then, as a request to AI Assist in the user's words (\"πες μου τι έχω την εβδομάδα\")."), "title" to p("string", "A short name for it."),
             "time" to p("string", "Local time, HH:MM."), "repeat" to JSONObject().put("type", "string").put("enum", JSONArray(AssistantSchedules.REPEATS)).put("description", "How often."),
             "days" to JSONObject().put("type", "array").put("items", JSONObject().put("type", "integer")).put("description", "For weekly: the weekdays, 0 = Sunday, 1 = Monday … 6 = Saturday."),
-            "date" to p("string", "YYYY-MM-DD: for once, the day; for monthly, a day of the month it runs on; for yearly, its day and month. Leave out for today."))
+            "date" to p("string", "YYYY-MM-DD: for once, the day; for monthly, a day of the month it runs on; for yearly, its day and month. Leave out for today."),
+            "until" to p("string", "YYYY-MM-DD: the last day it runs (\"for the next 15 days\"); leave out for no end."),
+            "allow" to JSONObject().put("type", "array").put("items", JSONObject().put("type", "string").put("enum", JSONArray(listOf("calendar", "notes", "timers", "files"))))
+                .put("description", "Only what the user said it may do on its own after reading the web or mail: add to the calendar, make notes, set timers, save files. Sending, calling and deleting always wait for the user."))
 
         private const val NO_ME = "Tetra does not know which contact is the user. Ask the user for their own name as saved in Contacts, then call my_card, then try again."
         private const val RELATION = "Spouse, Partner, Mother, Father, Parent, Brother, Sister, Child, Friend, Assistant or Manager in English; any other in the user's own word (κουμπάρος)."

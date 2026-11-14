@@ -53,6 +53,7 @@ internal object AssistantSchedules {
         x.optJSONArray("days")?.let { a -> s.put("days", JSONArray((0 until a.length()).map { a.optInt(it, -1) }.filter { it in 0..6 }.distinct().sorted())) }
         if (x.has("date")) { val d = x.optString("date").takeIf { !x.isNull("date") && it.isNotBlank() }; require(d == null || Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(d)) { "Not a date: $d" }; s.put("date", d ?: JSONObject.NULL) }
         x.optJSONArray("allow")?.let { a -> s.put("allow", JSONArray((0 until a.length()).map { a.optString(it) }.distinct().filter { it in AssistantGuard.ALLOW })) }
+        if (x.has("until")) { val d = x.optString("until").takeIf { !x.isNull("until") && it.isNotBlank() }; require(d == null || Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(d)) { "Not a date: $d" }; s.put("until", d ?: JSONObject.NULL) }
         if (x.has("paused")) s.put("paused", x.getBoolean("paused"))
         if (x.has("runNow")) s.put("runNow", x.getBoolean("runNow"))
         if (s.optString("repeat") == "weekly") require((s.optJSONArray("days")?.length() ?: 0) > 0) { "Say on which weekdays." }
@@ -158,6 +159,20 @@ internal object AssistantSchedules {
         return null
     }
 
-    /** When it runs next: null when paused or done. */
-    fun due(s: JSONObject): Long? = if (s.optBoolean("paused")) null else nextRun(s, s.optLong("last", s.optLong("created", 0)).takeIf { it > 0 } ?: s.optLong("created", 0))
+    /** When it runs next: null when paused or done (past its "until" day too, schedule.js the same). */
+    fun due(s: JSONObject): Long? {
+        if (s.optBoolean("paused")) return null
+        val next = nextRun(s, s.optLong("last", s.optLong("created", 0)).takeIf { it > 0 } ?: s.optLong("created", 0)) ?: return null
+        val until = s.optString("until").takeIf { !s.isNull("until") && it.isNotBlank() } ?: return next
+        val end = runCatching { LocalDate.parse(until).plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli() }.getOrNull() ?: return next
+        return next.takeIf { it < end }
+    }
+
+    /** How its last run went (the user, 14 Nov: a green, yellow or red dot): ok, held (waits for a yes) or failed. */
+    fun result(tetra: File, id: String, r: String) {
+        val o = read(tetra); val a = o.getJSONArray("list")
+        (0 until a.length()).map { a.getJSONObject(it) }.firstOrNull { it.optString("id") == id }?.let { s -> s.put("result", r).put("resultAt", System.currentTimeMillis()) } ?: return
+        write(tetra, o)
+    }
+    fun outcome(log: List<JSONObject>) = when { log.any { it.optString("kind") == "failed" } -> "failed"; log.any { it.optString("kind") == "held" } -> "held"; else -> "ok" }
 }

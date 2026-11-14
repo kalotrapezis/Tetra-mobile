@@ -177,19 +177,38 @@ internal object AssistantNet {
 
     private fun send(key: String, path: String, type: String?, body: ByteArray?, p: AiProvider = AiProviders.MISTRAL): ByteArray = request(key, path, type, body, p) { it.readBytes() }
 
+    /** No answer came at all (the connection dropped before it): safe to ask again, nothing was read yet. */
+    private class NoAnswer(e: IOException) : IOException(e)
+    private const val RETRIES = 3
+    private const val RETRY_MS = 2_000L
+
+    /** Again when the connection drops before an answer: three more tries, two seconds apart (the user, 14 Nov: "3 tries of 2 sec"). */
     private fun <T> request(key: String, path: String, type: String?, body: ByteArray?, p: AiProvider = AiProviders.MISTRAL, read: (java.io.InputStream) -> T): T {
+        var tries = 0
+        while (true) {
+            try { return attempt(key, path, type, body, p, read) } catch (e: NoAnswer) {
+                if (tries++ >= RETRIES) throw DriveProblem("Offline: ${e.cause?.message}", R.string.assistant_offline)
+                WriterLog.w("Assistant: ${p.name} $path did not go (${e.cause?.message}), again in 2 s")
+                Thread.sleep(RETRY_MS)
+            }
+        }
+    }
+
+    private fun <T> attempt(key: String, path: String, type: String?, body: ByteArray?, p: AiProvider, read: (java.io.InputStream) -> T): T {
         AiGate.check() // nothing leaves for the AI while it is off, whoever asks
         val c = URL(p.api + path).openConnection() as HttpURLConnection
         try {
             c.connectTimeout = 15_000; c.readTimeout = 120_000 // a picture takes a while
             if (p == AiProviders.ELEVENLABS) c.setRequestProperty("xi-api-key", key) else c.setRequestProperty("Authorization", "Bearer $key")
-            if (body != null) { c.requestMethod = "POST"; c.doOutput = true; c.setRequestProperty("Content-Type", type); c.outputStream.use { it.write(body) } }
-            val code = try { c.responseCode } catch (e: IOException) { throw DriveProblem("Offline: ${e.message}", R.string.assistant_offline) }
+            val code = try {
+                if (body != null) { c.requestMethod = "POST"; c.doOutput = true; c.setRequestProperty("Content-Type", type); c.outputStream.use { it.write(body) } }
+                c.responseCode
+            } catch (e: IOException) { throw NoAnswer(e) }
             if (code in 200..299) return c.inputStream.use(read)
             val said = runCatching { c.errorStream?.use { it.readBytes().decodeToString() } }.getOrNull().orEmpty().take(300)
             WriterLog.w("Assistant: ${p.name} $path answered $code $said")
             throw problem(code, p)
-        } catch (e: IOException) {
+        } catch (e: NoAnswer) { throw e } catch (e: IOException) {
             throw DriveProblem("Offline: ${e.message}", R.string.assistant_offline)
         } finally { c.disconnect() }
     }
