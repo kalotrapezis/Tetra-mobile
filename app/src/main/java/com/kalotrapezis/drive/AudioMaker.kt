@@ -83,7 +83,7 @@ Not these: greetings, questions, transitions, recaps of what the source says, an
         var done = 0
         val scripts = pool(groups, if (mode == "show") 2 else PARALLEL) { text, i ->
             val sys = if (mode == "show") showPrompt(d.name, Math.round(minutes * WORDS_A_MINUTE / groups.size.toDouble()).toInt(), i == 0, i == groups.size - 1, focus, style) else NARRATE
-            var lines = parseScript(api.tagged("script").complete(msgs(sys, text), model = if (mode == "show") Mistral.BUILT_IN else Mistral.CHAT))
+            var lines = parseScript(api.tagged("script").complete(msgs(sys, text), model = if (mode == "show") Mistral.LARGE else Mistral.CHAT))
             var dropped = 0
             if (mode == "show" && lines.isNotEmpty()) {
                 val said = runCatching { api.tagged("verify").complete(msgs(CHECK, "Source:\n<<<\n$text\n>>>\nScript:\n" + lines.mapIndexed { n, l -> "${n + 1}. ${l.text}" }.joinToString("\n")), json = true) }.getOrDefault("{}")

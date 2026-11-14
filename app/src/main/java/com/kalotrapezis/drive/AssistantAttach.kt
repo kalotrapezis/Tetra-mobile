@@ -175,7 +175,11 @@ internal object Attach {
 }
 
 /** audio_make's estimate, waiting for the user's yes: nothing is spent until then. */
-internal data class AudioAsk(val doc: Attach.Doc, val mode: String, val minutes: Int, val focus: String, val style: String, val perSection: Boolean, val estimate: AudioJobs.Estimate)
+internal data class AudioAsk(val doc: Attach.Doc, val mode: String, val minutes: Int, val focus: String, val style: String, val perSection: Boolean, val estimate: AudioJobs.Estimate,
+    val length: String = "medium", val estimates: Map<String, AudioJobs.Estimate> = emptyMap()) {
+    /** The same ask at another length, chosen on the card. */
+    fun sized(l: String) = estimates[l]?.let { copy(length = l, minutes = it.minutes, estimate = it) } ?: this
+}
 
 /**
  * Audio of a file (the user, 1 Nov 2026: "I give the file and it gives me an mp3"; «M4A στο κινητό»), made on the phone
@@ -191,16 +195,18 @@ internal object AudioJobs {
 
     private const val CHARS_A_MINUTE = 900 // Greek read aloud: ~150 words of ~6 letters
     private const val TOKEN = 3.5 // letters a token, Greek
+    /** A show's length, chosen on the card: half, the usual, twice. */
+    val LENGTHS = linkedMapOf("short" to 0.5, "medium" to 1.0, "long" to 2.0)
 
     /** How long, how much, how soon (the desktop's audio.js estimate(), the same figures): said before anything is spent. */
-    fun estimate(chars: Int, mode: String, minutes: Int = 0): Estimate {
-        val show = mode == "show"
-        // a show runs about as long as one and a half readings of its source (tried: two pages made 2 minutes, not the 6 asked)
-        val min = if (show) maxOf(3L, minOf(60L, Math.round(chars / 600.0), Math.round(if (minutes > 0) minutes.toDouble() else minOf(20.0, maxOf(8.0, chars / 2500.0))))).toInt()
+    fun estimate(chars: Int, mode: String, minutes: Int = 0, length: String = "medium"): Estimate {
+        val show = mode == "show"; val f = LENGTHS[length] ?: 1.0
+        // a show runs about as long as one and a half readings of its source (tried: two pages made 2 minutes, not the 6 asked); a long one three
+        val min = if (show) maxOf(3L, minOf(60L, Math.round(chars / 600.0 * maxOf(1.0, f)), Math.round(if (minutes > 0) minutes.toDouble() else f * minOf(20.0, maxOf(8.0, chars / 2500.0))))).toInt()
             else maxOf(1L, Math.round(chars.toDouble() / CHARS_A_MINUTE)).toInt()
         val spoken = min * CHARS_A_MINUTE.toDouble()
         fun tok(model: String, inChars: Double, outChars: Double) = Bill.TOKENS.getValue(model).let { (i, o) -> (inChars / TOKEN * i + outChars / TOKEN * o) / 1e6 }
-        val usd = spoken * Bill.PER_CHAR + if (show) tok(Mistral.BUILT_IN, chars.toDouble(), spoken) + tok(Mistral.CHAT, chars + spoken, 200.0) else tok(Mistral.CHAT, chars.toDouble(), chars.toDouble())
+        val usd = spoken * Bill.PER_CHAR + if (show) tok(Mistral.LARGE, chars.toDouble(), spoken) + tok(Mistral.CHAT, chars + spoken, 200.0) else tok(Mistral.CHAT, chars.toDouble(), chars.toDouble())
         return Estimate(min, usd, maxOf(2, Math.ceil(min / 4.0).toInt() + if (show) 1 else 0))
     }
 

@@ -155,12 +155,15 @@
     <string name="assistant_attach_pill_show">🎙 Fă-l emisiune radio</string>
     <string name="assistant_attach_pill_live">💬 Discuție live despre document</string>
     <string name="assistant_attach_pill_read">🔊 Citește-mi-l</string>
-    <string name="assistant_attach_show_prompt">Fă din «%1$s» o emisiune radio ca fișier audio: un prezentator și un expert, circa 15 minute, cu un exemplu și un rezumat pentru fiecare secțiune.</string>
+    <string name="assistant_attach_show_prompt">Fă din «%1$s» o emisiune radio ca fișier audio: un prezentator și un expert, cu un exemplu și un rezumat pentru fiecare secțiune.</string>
     <string name="assistant_attach_read_prompt">Citește-mi «%1$s» întreg, ca fișier audio, cu o singură voce.</string>
     <string name="assistant_attach_live_prompt">Să vorbim despre documentul «%1$s». Spune-mi în două propoziții ce spune și întreabă-mă de unde vreau să încep.</string>
     <string name="assistant_attach_show">Emisiune radio</string>
     <string name="assistant_attach_read">Citire</string>
     <string name="assistant_attach_estimate">≈ %1$d minute de audio, ≈ €%2$s, gata în ~%3$d minute.</string>
+    <string name="assistant_attach_length_short">Scurtă</string>
+    <string name="assistant_attach_length_medium">Medie</string>
+    <string name="assistant_attach_length_long">Lungă</string>
     <string name="assistant_attach_start">Pornește</string>
     <string name="assistant_attach_started">Îl fac în fundal. Te anunț când e gata.</string>
     <string name="assistant_attach_skipped">Bine, nu îl mai fac.</string>

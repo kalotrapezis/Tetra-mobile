@@ -155,12 +155,15 @@
     <string name="assistant_attach_pill_show">🎙 Legyen belőle rádióműsor</string>
     <string name="assistant_attach_pill_live">💬 Élő beszélgetés a dokumentumról</string>
     <string name="assistant_attach_pill_read">🔊 Olvasd fel nekem</string>
-    <string name="assistant_attach_show_prompt">Készíts a(z) «%1$s» fájlból rádióműsort hangfájlként: egy műsorvezető és egy szakértő, körülbelül 15 perc, minden részben példával és összefoglalóval.</string>
+    <string name="assistant_attach_show_prompt">Készíts a(z) «%1$s» fájlból rádióműsort hangfájlként: egy műsorvezető és egy szakértő, minden részben példával és összefoglalóval.</string>
     <string name="assistant_attach_read_prompt">Olvasd fel nekem a(z) «%1$s» fájlt egészben hangfájlként, egy hanggal.</string>
     <string name="assistant_attach_live_prompt">Beszélgessünk a(z) «%1$s» dokumentumról. Két mondatban mondd el, mit tartalmaz, és kérdezd meg, honnan szeretnék kezdeni.</string>
     <string name="assistant_attach_show">Rádióműsor</string>
     <string name="assistant_attach_read">Felolvasás</string>
     <string name="assistant_attach_estimate">≈ %1$d perc hang, ≈ €%2$s, kész ~%3$d perc alatt.</string>
+    <string name="assistant_attach_length_short">Rövid</string>
+    <string name="assistant_attach_length_medium">Közepes</string>
+    <string name="assistant_attach_length_long">Hosszú</string>
     <string name="assistant_attach_start">Indítás</string>
     <string name="assistant_attach_started">A háttérben készítem. Szólok, ha kész.</string>
     <string name="assistant_attach_skipped">Rendben, nem készítem el.</string>

@@ -129,8 +129,23 @@ class AssistantAttachTest {
         assertEquals(3, AudioJobs.estimate(600, "show", 15).minutes)
         assertEquals(20, AudioJobs.estimate(200_000, "show").minutes)
         val show = AudioJobs.estimate(30_000, "show", 15)
-        assertEquals(30_000 / 3.5 * 0.4e-6 + 13_500 / 3.5 * 2e-6 + 43_500 / 3.5 * 0.1e-6 + 200 / 3.5 * 0.3e-6 + 13_500 * 0.016e-3, show.usd, 1e-9)
+        assertEquals(30_000 / 3.5 * 0.5e-6 + 13_500 / 3.5 * 1.5e-6 + 43_500 / 3.5 * 0.1e-6 + 200 / 3.5 * 0.3e-6 + 13_500 * 0.016e-3, show.usd, 1e-9)
         assertEquals(5, show.ready)
+        // short, medium, long: half, the usual, twice (a long one up to three readings of its source)
+        assertEquals(listOf(6, 12, 24), listOf("short", "medium", "long").map { AudioJobs.estimate(30_000, "show", length = it).minutes })
+        assertEquals(40, AudioJobs.estimate(60_000, "show", length = "long").minutes)
+    }
+
+    @Test fun aShowsLengthIsChosenOnTheCard() {
+        val d = doc("Κείμενο για εκπομπή. ".repeat(1500))
+        val s = Script(calls("audio_make", """{"mode":"show","length":"long"}"""), says("Περίπου 24 λεπτά. Να ξεκινήσω;"))
+        val a = AssistantChat(s.api, tools(), now = { now }).ask("Κάνε το μεγάλη εκπομπή.", file = d).audio!!
+        assertEquals("long", a.length); assertEquals(a.estimates.getValue("long"), a.estimate)
+        val e = a.estimates.values.toList()
+        assertTrue(e[0].minutes < e[1].minutes && e[1].minutes < e[2].minutes)
+        assertTrue(e[0].usd < e[1].usd && e[1].usd < e[2].usd)
+        val short = a.sized("short")
+        assertEquals("short", short.length); assertEquals(e[0].minutes, short.minutes); assertTrue(short.doc === a.doc)
     }
 
     @Test fun theJobIsAFolderItsCardFollows() {

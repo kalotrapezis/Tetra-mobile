@@ -105,7 +105,7 @@ internal class Bill(private val counted: (Double) -> Unit = {}, private val reco
 
     companion object {
         // shortcut: Mistral's list prices in $ as published Oct 2026 (tools' from price tables, not Mistral's page); update when they change
-        val TOKENS = mapOf(Mistral.CHAT to (0.1 to 0.3), Mistral.BUILT_IN to (0.4 to 2.0))
+        val TOKENS = mapOf(Mistral.CHAT to (0.1 to 0.3), Mistral.BUILT_IN to (0.4 to 2.0), Mistral.LARGE to (0.5 to 1.5))
         private val PER_MINUTE = mapOf(Mistral.TRANSCRIBE to 0.004, Mistral.REALTIME to 0.006)
         fun perMinute(model: String) = PER_MINUTE[model] ?: 0.0
         val PER_CALL = mapOf("web_search" to 0.03, "image_generation" to 0.10)
@@ -217,6 +217,7 @@ internal class Mistral(private val http: (path: String, body: String) -> String,
         const val API = "https://api.mistral.ai/v1"
         const val CHAT = "mistral-small-latest"
         const val BUILT_IN = "mistral-medium-latest" // the model Mistral's web search and image examples use
+        const val LARGE = "mistral-large-latest" // a show's script (the user, 14 Nov 2026: "when it creates a podcast can we use the bigger model")
         const val TRANSCRIBE = "voxtral-small-transcribe-3"
         const val REALTIME = "voxtral-mini-transcribe-realtime-3"
         const val TTS = "voxtral-mini-tts-3"
@@ -853,9 +854,12 @@ internal class AssistantTools(
         val d = if (n > 0 && files.isNotEmpty()) files.getOrNull(n - 1)?.let(extract) ?: return ToolResult("No choice $n: the last files list had ${files.size}.") else attached()
         d ?: return ToolResult("No file: the user attaches one (the paperclip), or files_find one first.")
         val mode = if (a.optString("mode") == "show") "show" else "narration"
-        val est = AudioJobs.estimate(d.text.length, mode, a.optInt("minutes", 0))
-        return ToolResult("Estimate: ≈ ${est.minutes} minutes of audio, ≈ €${"%.2f".format(java.util.Locale.ROOT, est.usd)}, ready in ~${est.ready} minutes; the phone makes it in the background and a notification says when it is ready. Say this in one sentence in the user's language and ask whether to start.",
-            audio = AudioAsk(d, mode, est.minutes, a.optString("focus"), a.optString("style"), a.optBoolean("per_section", false), est))
+        val length = a.optString("length").takeIf { it in AudioJobs.LENGTHS } ?: "medium"
+        // each length's estimate, so the card's short / medium / long shows its own; the minutes said go with the length said
+        val estimates = AudioJobs.LENGTHS.keys.associateWith { AudioJobs.estimate(d.text.length, mode, if (it == length) a.optInt("minutes", 0) else 0, it) }
+        val est = estimates.getValue(length)
+        return ToolResult("Estimate: ≈ ${est.minutes} minutes of audio, ≈ €${"%.2f".format(java.util.Locale.ROOT, est.usd)}, ready in ~${est.ready} minutes; the phone makes it in the background and a notification says when it is ready.${if (mode == "show") " The card lets the user make it short, medium or long." else ""} Say this in one sentence in the user's language and ask whether to start.",
+            audio = AudioAsk(d, mode, est.minutes, a.optString("focus"), a.optString("style"), a.optBoolean("per_section", false), est, length, estimates))
     }
 
     // ---- Mail (the user, 31 Oct: new mail, what needs attention, a mail from someone, write one) ----
@@ -1700,7 +1704,8 @@ internal class AssistantTools(
             fn("tetra", AssistantCommands.description(), listOf("command"), "command" to p("string", "One command line, as listed (\"calls missed\", \"calls back 2\").")),
             fn("audio_make", "Make an audio file (.m4a) of the attached file (or of a file from the last files_find list): \"narration\" reads it whole with one voice; \"show\" is a radio show, a host and an expert talking it through with examples and recaps. It answers an estimate (minutes, cost, when ready): say it in one sentence and ask whether to start. It starts only on the user's yes, which Tetra hears; never say it has started or is done.", listOf("mode"),
                 "mode" to JSONObject().put("type", "string").put("enum", JSONArray(listOf("narration", "show"))).put("description", "\"narration\": read it to me; \"show\": a radio show."),
-                "minutes" to p("integer", "For a show: how long, if the user said."), "focus" to p("string", "For a show: what to dwell on, if said."),
+                "minutes" to p("integer", "For a show: how many minutes, only if the user said a number."),
+                "length" to JSONObject().put("type", "string").put("enum", JSONArray(AudioJobs.LENGTHS.keys.toList())).put("description", "For a show: short («σύντομο»), medium or long («μεγάλο»), if the user said."), "focus" to p("string", "For a show: what to dwell on, if said."),
                 "style" to p("string", "For a show: the tone, if said (e.g. \"για εξετάσεις\", \"χαλαρό\")."), "per_section" to p("boolean", "Also one MP3 a section, if asked."),
                 "choice" to p("integer", "A file from the last files_find list instead of the attached one.")),
         ))

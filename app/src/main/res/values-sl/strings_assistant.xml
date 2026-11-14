@@ -155,12 +155,15 @@
     <string name="assistant_attach_pill_show">🎙 Naredi iz tega radijsko oddajo</string>
     <string name="assistant_attach_pill_live">💬 Živ pogovor o dokumentu</string>
     <string name="assistant_attach_pill_read">🔊 Preberi mi</string>
-    <string name="assistant_attach_show_prompt">Naredi iz «%1$s» radijsko oddajo kot zvočno datoteko: voditelj in strokovnjak, približno 15 minut, s primerom in povzetkom za vsak del.</string>
+    <string name="assistant_attach_show_prompt">Naredi iz «%1$s» radijsko oddajo kot zvočno datoteko: voditelj in strokovnjak, s primerom in povzetkom za vsak del.</string>
     <string name="assistant_attach_read_prompt">Preberi mi «%1$s» v celoti kot zvočno datoteko, z enim glasom.</string>
     <string name="assistant_attach_live_prompt">Pogovorimo se o dokumentu «%1$s». Povej mi v dveh stavkih, kaj piše, in me vprašaj, kje želim začeti.</string>
     <string name="assistant_attach_show">Radijska oddaja</string>
     <string name="assistant_attach_read">Branje</string>
     <string name="assistant_attach_estimate">≈ %1$d minut zvoka, ≈ €%2$s, pripravljeno v ~%3$d minutah.</string>
+    <string name="assistant_attach_length_short">Kratka</string>
+    <string name="assistant_attach_length_medium">Srednja</string>
+    <string name="assistant_attach_length_long">Dolga</string>
     <string name="assistant_attach_start">Začni</string>
     <string name="assistant_attach_started">Delam v ozadju. Sporočil ti bom, ko bo pripravljeno.</string>
     <string name="assistant_attach_skipped">Prav, ne bom naredil.</string>

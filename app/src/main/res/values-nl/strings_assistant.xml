@@ -155,12 +155,15 @@
     <string name="assistant_attach_pill_show">🎙 Maak er een radioprogramma van</string>
     <string name="assistant_attach_pill_live">💬 Live gesprek over het document</string>
     <string name="assistant_attach_pill_read">🔊 Lees het voor</string>
-    <string name="assistant_attach_show_prompt">Maak van «%1$s» een radioprogramma als audiobestand: een presentator en een expert, ongeveer 15 minuten, met een voorbeeld en een samenvatting per onderdeel.</string>
+    <string name="assistant_attach_show_prompt">Maak van «%1$s» een radioprogramma als audiobestand: een presentator en een expert, met een voorbeeld en een samenvatting per onderdeel.</string>
     <string name="assistant_attach_read_prompt">Lees «%1$s» in zijn geheel voor als audiobestand, met één stem.</string>
     <string name="assistant_attach_live_prompt">Laten we praten over het document «%1$s». Vertel me in twee zinnen wat het zegt en vraag waar ik wil beginnen.</string>
     <string name="assistant_attach_show">Radioprogramma</string>
     <string name="assistant_attach_read">Voorlezen</string>
     <string name="assistant_attach_estimate">≈ %1$d minuten audio, ≈ €%2$s, klaar over ~%3$d minuten.</string>
+    <string name="assistant_attach_length_short">Kort</string>
+    <string name="assistant_attach_length_medium">Middel</string>
+    <string name="assistant_attach_length_long">Lang</string>
     <string name="assistant_attach_start">Start</string>
     <string name="assistant_attach_started">Ik maak het op de achtergrond. Ik laat je weten wanneer het klaar is.</string>
     <string name="assistant_attach_skipped">Goed, ik maak het niet.</string>
