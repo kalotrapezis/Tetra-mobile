@@ -75,5 +75,6 @@
     <string name="car_share_sent">Tá %1$s ar an bhfón, i Tetra › Ón gcarr.</string>
     <string name="car_share_failed">Níor seoladh %1$s: %2$s</string>
     <string name="car_share_arrived">Ón bhfón: %1$s</string>
+    <string name="car_assist_no_key">Níl eochair AI ón bhfón fós. Ceangail an fón leis an gcarr.</string>
     <string name="car_share_no_app">Ní oscloidh aon app anseo %1$s.</string>
 </resources>

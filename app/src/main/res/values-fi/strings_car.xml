@@ -75,5 +75,6 @@
     <string name="car_share_sent">%1$s on puhelimessa, kansiossa Tetra › Autosta.</string>
     <string name="car_share_failed">%1$s ei lähetetty: %2$s</string>
     <string name="car_share_arrived">Puhelimesta: %1$s</string>
+    <string name="car_assist_no_key">Puhelimesta ei ole vielä tekoälyavainta. Yhdistä puhelin autoon.</string>
     <string name="car_share_no_app">Mikään täällä oleva sovellus ei avaa kohdetta %1$s.</string>
 </resources>

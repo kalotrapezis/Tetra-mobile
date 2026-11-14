@@ -75,5 +75,6 @@
     <string name="car_share_sent">%1$s está en el móvil, en Tetra › Del coche.</string>
     <string name="car_share_failed">No se envió %1$s: %2$s</string>
     <string name="car_share_arrived">Desde el móvil: %1$s</string>
+    <string name="car_assist_no_key">Todavía no hay clave de IA del móvil. Conecta el móvil al coche.</string>
     <string name="car_share_no_app">Ninguna app de aquí abre %1$s.</string>
 </resources>

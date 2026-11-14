@@ -75,5 +75,6 @@
     <string name="car_share_sent">%1$s qiegħed fuq it-telefon, f’Tetra › Mill-karozza.</string>
     <string name="car_share_failed">%1$s ma nbgħatx: %2$s</string>
     <string name="car_share_arrived">Mit-telefon: %1$s</string>
+    <string name="car_assist_no_key">Għadu ma hemm l-ebda ċavetta AI mit-telefon. Waħħal it-telefon mal-karozza.</string>
     <string name="car_share_no_app">L-ebda app hawn ma tiftaħ %1$s.</string>
 </resources>

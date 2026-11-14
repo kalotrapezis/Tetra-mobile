@@ -177,8 +177,10 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
     val decorated = remember { AiLook.decorated(context) }
     // the sheet's TV switches off before it goes: the line, the dot, its «fsst»
     var tvOff by remember { mutableStateOf(false) }
-    val close: () -> Unit = { if (!sheet || !decorated || !AssistantKey.has(context)) closeNow() else if (!tvOff) { tvOff = true; Zap.play(); scope.launch { delay(520); closeNow() } } }
-    LaunchedEffect(Unit) { if (sheet && decorated && AssistantKey.has(context)) Zap.play() } // and on, as it opens
+    val car = sheet && CarMaps.edition // the car build: no window of its own, so tones and spoken words instead
+    val close: () -> Unit = { if (car || !sheet || !decorated || !AssistantKey.has(context)) closeNow() else if (!tvOff) { tvOff = true; Zap.play(); scope.launch { delay(520); closeNow() } } }
+    LaunchedEffect(Unit) { if (!car && sheet && decorated && AssistantKey.has(context)) Zap.play() } // and on, as it opens
+    DisposableEffect(Unit) { onDispose { if (car) Chime.play(up = false) } } // however it ends: a tap on the mic, an answer done, a failure
     // every way in goes on with the open conversation (the user, 8 Nov), the sheet's or the full screen's
     val chat = remember { SharedChat.chat(context) }
     val bubbles = remember { SharedChat.bubbles.apply { openJob?.let { add(Bubble(false, "", job = it)) } } }
@@ -233,7 +235,12 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
     DisposableEffect(Unit) { onDispose { endLive(); AssistantAutoMemory.soon(context, chat.saved()) } } // a closed pane or a car gone: its minutes still billed
     BackHandler { if (live != null) endLive() else close() }
 
-    fun say(text: String, error: Boolean = false) { bubbles += Bubble(false, text, error = error) }
+    fun say(text: String, error: Boolean = false) {
+        bubbles += Bubble(false, text, error = error)
+        if (car && error && text.isNotBlank()) { android.widget.Toast.makeText(context, text, android.widget.Toast.LENGTH_LONG).show(); reader.add(text) }
+    }
+    /** The car: what went wrong is being said; it closes once it has been. */
+    suspend fun carDone() { delay(500); while (reader.speaking) delay(200); close() }
     fun open(f: File) = runCatching {
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", f)
         val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(f.extension.lowercase(Locale.ROOT)) ?: "application/octet-stream"
@@ -381,17 +388,20 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
         if (!hasKey) return@launch
         if (!hasMic(context)) { askMic.launch(Manifest.permission.RECORD_AUDIO); return@launch }
         hush(); stopNow.set(false); phase = Phase.Listening
+        if (car) withContext(Dispatchers.IO) { Chime.play(up = true).join() } // speak now; done before the noise is measured
         val pcm = withContext(Dispatchers.IO) { runCatching { listen(waitMs, { stopNow.get() || !isActive }, { hearing = it }, AssistantPause.ms(context), AssistantAudio.mic(context)) }.getOrNull() }
         hearing = false
+        if (pcm == null && car) { phase = Phase.Idle; say(context.getString(micTrouble ?: R.string.assistant_heard_nothing), true); carDone(); return@launch }
         if (pcm == null) { phase = Phase.Idle; if (sheet && pending == null && confirming == null && dialing == null && bubbles.lastOrNull()?.images.isNullOrEmpty() && bubbles.lastOrNull()?.cards.isNullOrEmpty()) close(); return@launch }
         phase = Phase.Thinking
         val text = withContext(Dispatchers.IO) { runCatching { AssistantNet.transcribe(context, pcm, AssistantWords.terms(context), chat.bill.part("dictation")) } }
         phase = Phase.Idle; spent = chat.bill.usd
-        text.onSuccess { if (it.isBlank()) say(context.getString(R.string.assistant_heard_nothing)) else send(it) }
-            .onFailure { say(it.shownMessage(context) ?: "", true) }
+        text.onSuccess { if (it.isBlank()) { say(context.getString(R.string.assistant_heard_nothing), car); if (car) carDone() } else send(it) }
+            .onFailure { say(it.shownMessage(context) ?: "", true); if (car) carDone() }
     } }
     fun mic() = when (phase) { Phase.Idle -> hear(10_000); Phase.Listening -> stopNow.set(true); Phase.Thinking -> Unit }
     LaunchedEffect(Unit) { if (sheet && hasKey && !liveFirst) hear(8_000) }
+    LaunchedEffect(Unit) { if (car && !hasKey) { say(context.getString(R.string.car_assist_no_key), true); carDone() } }
     // opened live (Tetra Car's held mic): the pane goes once live has ended and its goodbye is said
     var wasLive by remember { mutableStateOf(false) }
     LaunchedEffect(liveShown) { if (liveShown) wasLive = true else if (liveFirst && wasLive) { while (reader.speaking) delay(200); close() } }
@@ -402,6 +412,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
         if (!hasMic(context)) { askMic.launch(Manifest.permission.RECORD_AUDIO); return@launch }
         if (!AssistantKey.has(context, AiProviders.MISTRAL)) { hear(8_000); return@launch } // live talk is Mistral's own: without its key, a phrase at a time
         hush()
+        if (car) withContext(Dispatchers.IO) { Chime.play(up = true).join() }
         liveYou = ""; liveAi = ""; liveLevel = 0f; livePhase = LivePhase.Connecting; liveShown = true; liveTurns = 0
         liveStart = System.currentTimeMillis(); liveLast = liveStart; liveNow = liveStart
         val terms = withContext(Dispatchers.IO) { AssistantWords.terms(context) }

@@ -75,5 +75,6 @@
     <string name="car_share_sent">%1$s on telefonis kaustas Tetra › Autost.</string>
     <string name="car_share_failed">%1$s ei saadetud: %2$s</string>
     <string name="car_share_arrived">Telefonist: %1$s</string>
+    <string name="car_assist_no_key">Telefonist ei ole veel AI-võtit. Ühenda telefon autoga.</string>
     <string name="car_share_no_app">Ükski rakendus siin ei ava faili %1$s.</string>
 </resources>

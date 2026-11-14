@@ -75,5 +75,6 @@
     <string name="car_share_sent">%1$s finns i telefonen, i Tetra › Från bilen.</string>
     <string name="car_share_failed">%1$s skickades inte: %2$s</string>
     <string name="car_share_arrived">Från telefonen: %1$s</string>
+    <string name="car_assist_no_key">Det finns ännu ingen AI-nyckel från telefonen. Anslut telefonen till bilen.</string>
     <string name="car_share_no_app">Ingen app här öppnar %1$s.</string>
 </resources>

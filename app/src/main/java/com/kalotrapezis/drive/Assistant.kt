@@ -1945,29 +1945,38 @@ internal class Sentences {
 }
 
 /** Voice activity: 30 ms frames of 16 kHz speech in, one phrase out when the speaker pauses (the VOICE app's Vad, ported). */
-internal class Vad(private val pauseFrames: Int = 30, private val maxFrames: Int = 20 * 1000 / 30) {
-    private var noise = 200.0
+internal class Vad(private val pauseFrames: Int = 30, private val maxFrames: Int = 20 * 1000 / 30, private val factor: Double = 2.5, private val least: Double = 280.0) {
+    var noise = 200.0; private set
+    /** The loudest 30 ms so far, for the log. */
+    var loudest = 0.0; private set
     private val calib = mutableListOf<Double>()
     private val pre = ArrayDeque<ShortArray>()
     private val seg = mutableListOf<ShortArray>()
     private var silence = 0
     private var speech = 0
+    private var wasLoud = false
     var speaking = false; private set
 
     /** True when a phrase has ended: [phrase] holds it. */
     fun push(frame: ShortArray): Boolean {
         val r = rms(frame)
+        loudest = maxOf(loudest, r)
         if (calib.size < 13) { calib += r; noise = calib.average(); return false }
-        val th = maxOf(noise * 2.5 + 120, 280.0)
+        val th = threshold()
         if (!speaking) {
             pre.addLast(frame); if (pre.size > 6) pre.removeFirst()
             if (r > th) { speaking = true; silence = 0; speech = 1; seg.clear(); seg += pre } else noise = 0.95 * noise + 0.05 * r
             return false
         }
         seg += frame
-        if (r > th) { silence = 0; speech++ } else silence++
+        // a lone loud frame in road noise does not hold the pause open: speech is two in a row
+        if (r > th) { speech++; if (wasLoud) silence = 0 else silence++; wasLoud = true } else { silence++; wasLoud = false }
+        // a click or a bump in the road, then quiet: not a phrase, so back to waiting (it used to listen until tapped)
+        if (silence >= pauseFrames && speech < 7) { speaking = false; seg.clear(); noise = 0.95 * noise + 0.05 * r; return false }
         return (silence >= pauseFrames || seg.size >= maxFrames) && speech >= 7
     }
+
+    fun threshold() = maxOf(noise * factor + least / 2.3, least)
 
     /** What was said so far (also when the user taps stop mid-phrase); empty when nothing was. */
     fun phrase(): ShortArray = if (speech < 7) ShortArray(0) else ShortArray(seg.sumOf { it.size }).also { out -> var n = 0; seg.forEach { it.copyInto(out, n); n += it.size } }

@@ -475,30 +475,58 @@ private const val FOLDER = "Assistant"
 
 internal fun hasMic(c: Context) = c.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
 
+/** Why the last [listen] gave nothing, as words to say (null: it heard sound but nobody spoke). */
+@Volatile internal var micTrouble: Int? = null
+/** The source that last gave sound: the next [listen] starts with it. */
+@Volatile private var goodSource = MediaRecorder.AudioSource.VOICE_RECOGNITION
+private val SOURCES = mapOf(MediaRecorder.AudioSource.VOICE_RECOGNITION to "voice recognition", MediaRecorder.AudioSource.MIC to "mic",
+    MediaRecorder.AudioSource.VOICE_COMMUNICATION to "voice communication")
+
 /**
- * Records until the speaker pauses, [stop] says so, or nobody spoke for [waitMs]; null when nothing was said.
- * [speaking] follows whether a phrase has begun, for the screen. A pause of [pauseMs] ends it; a minute at most.
+ * Records until the speaker pauses, [stop] says so, or nobody spoke for [waitMs]; null when nothing was said, [micTrouble] why.
+ * [speaking] follows whether a phrase has begun, for the screen. A pause of [pauseMs] ends it; a minute at most (the car: 15 s).
+ * A source that cannot be opened, fails, or gives only zeros (another app holds the mic, or the unit routes it elsewhere) gives way
+ * to the next. Each try is one line in the log: the source, where Android routed it, the noise, the loudest and the bar speech must pass.
  */
 @SuppressLint("MissingPermission")
 internal fun listen(waitMs: Long, stop: () -> Boolean, speaking: (Boolean) -> Unit = {}, pauseMs: Int = AssistantPause.DEFAULT_MS, mic: AudioDeviceInfo? = null): ShortArray? {
+    micTrouble = null
     val size = maxOf(AudioRecord.getMinBufferSize(Vad.RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT), Vad.FRAME * 2 * 8)
-    val rec = AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, Vad.RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, size)
-    mic?.let(rec::setPreferredDevice)
-    val vad = Vad(pauseMs / 30, 60 * 1000 / 30)
-    val started = System.currentTimeMillis()
-    try {
-        rec.startRecording()
-        while (true) {
-            val frame = ShortArray(Vad.FRAME)
-            var n = 0
-            while (n < frame.size) { val r = rec.read(frame, n, frame.size - n); if (r <= 0) return null; n += r }
-            val done = vad.push(frame)
-            speaking(vad.speaking)
-            if (done || stop()) break
-            if (!vad.speaking && System.currentTimeMillis() - started > waitMs) return null
+    // a car's microphone is far and its road noise loud (the user, 14 Nov: 4-5 tries speaking loudly, nothing heard): a lower bar over the noise
+    val car = CarMaps.edition
+    for (source in (listOf(goodSource) + SOURCES.keys).distinct()) {
+        val rec = runCatching { AudioRecord(source, Vad.RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, size) }.getOrNull()
+        if (rec?.state != AudioRecord.STATE_INITIALIZED) {
+            rec?.release(); micTrouble = R.string.assistant_mic_closed
+            WriterLog.w("AI Assist: the microphone (${SOURCES[source]}) did not open"); continue
         }
-    } finally { runCatching { rec.stop() }; rec.release() }
-    return vad.phrase().takeIf { it.isNotEmpty() }
+        mic?.let(rec::setPreferredDevice)
+        val vad = if (car) Vad(pauseMs / 30, 15 * 1000 / 30, factor = 1.8, least = 160.0) else Vad(pauseMs / 30, 60 * 1000 / 30)
+        val started = System.currentTimeMillis()
+        var frames = 0; var peak = 0
+        var how = "nobody spoke"; var routed = ""
+        try {
+            rec.startRecording()
+            while (true) {
+                val frame = ShortArray(Vad.FRAME)
+                var n = 0
+                while (n < frame.size) { val r = rec.read(frame, n, frame.size - n); if (r <= 0) { how = "read $r"; micTrouble = R.string.assistant_mic_closed; break }; n += r }
+                if (n < frame.size) break
+                if (frames++ == 3) routed = rec.routedDevice?.let { "${it.productName} (type ${it.type})" } ?: "?"
+                frame.forEach { val a = kotlin.math.abs(it.toInt()); if (a > peak) peak = a }
+                // 0.6 s of exact zeros: nothing reaches this source (a real microphone always hisses a little)
+                if (frames == 20 && peak == 0) { how = "only zeros"; micTrouble = R.string.assistant_mic_silent; break }
+                val done = vad.push(frame)
+                speaking(vad.speaking)
+                if (done || stop()) { how = if (done) "heard" else "stopped"; goodSource = source; return vad.phrase().takeIf { it.isNotEmpty() } }
+                if (!vad.speaking && System.currentTimeMillis() - started > waitMs) { goodSource = source; return null }
+            }
+        } finally {
+            runCatching { rec.stop() }; rec.release()
+            WriterLog.i("AI Assist: mic ${SOURCES[source]} on $routed, ${frames * 30} ms, noise ${vad.noise.toInt()}, loudest ${vad.loudest.toInt()}, bar ${vad.threshold().toInt()}, peak $peak: $how")
+        }
+    }
+    return null
 }
 
 /*

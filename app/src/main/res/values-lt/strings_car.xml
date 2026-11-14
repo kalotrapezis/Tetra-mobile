@@ -75,5 +75,6 @@
     <string name="car_share_sent">%1$s yra telefone, Tetra › Iš automobilio.</string>
     <string name="car_share_failed">%1$s neišsiųsta: %2$s</string>
     <string name="car_share_arrived">Iš telefono: %1$s</string>
+    <string name="car_assist_no_key">Iš telefono dar nėra AI rakto. Prijunk telefoną prie automobilio.</string>
     <string name="car_share_no_app">Čia jokia programa neatidaro %1$s.</string>
 </resources>

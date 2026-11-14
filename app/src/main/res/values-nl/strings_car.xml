@@ -75,5 +75,6 @@
     <string name="car_share_sent">%1$s staat op de telefoon, in Tetra › Van de auto.</string>
     <string name="car_share_failed">%1$s is niet gestuurd: %2$s</string>
     <string name="car_share_arrived">Van de telefoon: %1$s</string>
+    <string name="car_assist_no_key">Nog geen AI-sleutel van de telefoon. Verbind de telefoon met de auto.</string>
     <string name="car_share_no_app">Geen app hier opent %1$s.</string>
 </resources>

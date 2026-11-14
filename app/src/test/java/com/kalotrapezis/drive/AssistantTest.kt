@@ -287,6 +287,24 @@ class AssistantTest {
         assertEquals(0, Vad().phrase().size) // nothing said
     }
 
+    @Test fun inTheCarAVoiceOverRoadNoiseIsHeard() {
+        fun frame(amp: Int) = ShortArray(Vad.FRAME) { i -> (amp * Math.sin(i * 0.3)).toInt().toShort() }
+        // road noise at rms ~420, a far voice at ~2x it: the phone's bar (2.5x) misses it, the car's (1.8x) does not
+        fun hears(vad: Vad): Boolean { repeat(20) { vad.push(frame(600)) }; repeat(30) { vad.push(frame(1200)) }; return vad.speaking }
+        assertFalse(hears(Vad()))
+        assertTrue(hears(Vad(30, 15 * 1000 / 30, factor = 1.8, least = 160.0)))
+        // one bump, then quiet: it goes back to waiting instead of listening until tapped
+        val bump = Vad()
+        repeat(20) { bump.push(frame(30)) }; bump.push(frame(4000)); assertTrue(bump.speaking)
+        repeat(30) { assertFalse(bump.push(frame(30))) }
+        assertFalse(bump.speaking); assertEquals(0, bump.phrase().size)
+        // after a phrase, road noise with a loud frame every 10 still lets it end at the pause
+        val road = Vad()
+        repeat(20) { road.push(frame(30)) }; repeat(30) { road.push(frame(4000)) }
+        assertTrue((1..60).any { road.push(frame(if (it % 10 == 0) 4000 else 30)) })
+        assertTrue(Math.abs(Vad().threshold() - (200 * 2.5 + 120)) < 3) // the phone's bar is as it was
+    }
+
     @Test fun aContactCardMarksTheDefaultNumber() {
         val i = ContactInfo(formatted = "Νίκος", phones = listOf(VField("Work", "2310000001"), VField("Mobile", "+306900000003")), defaultPhone = "+306900000003")
         assertEquals(listOf(ResultCard.Number("Work", "2310000001", false), ResultCard.Number("Mobile", "+306900000003", true)), ResultCard.numbers(i))

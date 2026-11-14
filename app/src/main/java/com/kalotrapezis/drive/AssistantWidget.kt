@@ -491,6 +491,27 @@ internal object Zap {
     }.apply { isDaemon = true; start() }
 }
 
+/** Tetra Car's AI Assist on and off (the user, 14 Nov: "a tone so I can hear it clearly"): two short notes up, or down, loud over road noise. */
+internal object Chime {
+    fun play(up: Boolean) = Thread {
+        val rate = 22_050; val note = rate * 11 / 100; val gap = rate / 50
+        val notes = if (up) listOf(784.0, 1175.0) else listOf(1175.0, 784.0)
+        val buf = FloatArray(note * 2 + gap)
+        notes.forEachIndexed { k, f -> for (i in 0 until note) {
+            val t = i.toDouble() / rate; val env = minOf(1.0, i / (rate * 0.006), (note - i) / (rate * 0.03)) // no click in, a short ring out
+            buf[k * (note + gap) + i] = ((Math.sin(2 * Math.PI * f * t) + 0.3 * Math.sin(4 * Math.PI * f * t)) * env * 0.6).toFloat()
+        } }
+        runCatching {
+            val t = android.media.AudioTrack.Builder()
+                .setAudioAttributes(android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_MEDIA).setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+                .setAudioFormat(android.media.AudioFormat.Builder().setEncoding(android.media.AudioFormat.ENCODING_PCM_FLOAT).setSampleRate(rate).setChannelMask(android.media.AudioFormat.CHANNEL_OUT_MONO).build())
+                .setBufferSizeInBytes(buf.size * 4).setTransferMode(android.media.AudioTrack.MODE_STATIC).build()
+            t.write(buf, 0, buf.size, android.media.AudioTrack.WRITE_BLOCKING); t.play()
+            Thread.sleep(buf.size * 1000L / rate + 80); t.release()
+        }.onFailure { WriterLog.w("AI Assist: the tone: ${it.message}") }
+    }.apply { isDaemon = true; start() }
+}
+
 /** The pixel mascot at [top], [cell] a pixel: [skin] its shell, eyes [shut] for a blink, its voice's waves going while it [speaks], the sparkle twinkling with [t]. */
 internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawMascot(top: Offset, cell: Float, skin: Color, shut: Boolean, speaks: Boolean, t: Float) {
     val soft = Color(0xFFF4F1EA)

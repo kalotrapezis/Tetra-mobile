@@ -75,5 +75,6 @@
     <string name="car_share_sent">A(z) %1$s a telefonon van, a Tetra › Az autóból mappában.</string>
     <string name="car_share_failed">A(z) %1$s nem lett elküldve: %2$s</string>
     <string name="car_share_arrived">A telefonról: %1$s</string>
+    <string name="car_assist_no_key">Még nincs AI-kulcs a telefonról. Csatlakoztasd a telefont az autóhoz.</string>
     <string name="car_share_no_app">Itt nincs olyan alkalmazás, amely megnyitja a(z) %1$s fájlt.</string>
 </resources>

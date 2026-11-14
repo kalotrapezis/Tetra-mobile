@@ -75,5 +75,6 @@
     <string name="car_share_sent">%1$s je v telefóne, v Tetra › Z auta.</string>
     <string name="car_share_failed">Súbor %1$s nebol odoslaný: %2$s</string>
     <string name="car_share_arrived">Z telefónu: %1$s</string>
+    <string name="car_assist_no_key">Z telefónu zatiaľ nie je AI kľúč. Pripoj telefón k autu.</string>
     <string name="car_share_no_app">Žiadna aplikácia tu neotvorí %1$s.</string>
 </resources>

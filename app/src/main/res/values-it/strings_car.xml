@@ -75,5 +75,6 @@
     <string name="car_share_sent">%1$s è sul telefono, in Tetra › Dall’auto.</string>
     <string name="car_share_failed">%1$s non è stato inviato: %2$s</string>
     <string name="car_share_arrived">Dal telefono: %1$s</string>
+    <string name="car_assist_no_key">Non c\'è ancora una chiave AI dal telefono. Collega il telefono all\'auto.</string>
     <string name="car_share_no_app">Nessuna app qui apre %1$s.</string>
 </resources>
