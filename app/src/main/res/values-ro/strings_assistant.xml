@@ -261,4 +261,15 @@
     <string name="ai_bad_key">Cheia %1$s este greșită. Verific-o în Setări › AI Assist.</string>
     <string name="ai_busy">%1$s este ocupat sau cheia nu mai are credit. Încearcă din nou peste un minut.</string>
     <string name="ai_server">%1$s a răspuns cu o eroare (%2$d).</string>
+    <string name="assistant_sched_allow">Poate face singur</string>
+    <string name="assistant_sched_allow_how">După ce citește e-mailul sau webul, acestea se fac fără să te întrebe. Trimiterea, apelarea și ștergerea te așteaptă mereu.</string>
+    <string name="assistant_sched_allow_calendar">Adaugă în calendar</string>
+    <string name="assistant_sched_allow_notes">Notițe și liste</string>
+    <string name="assistant_sched_allow_timers">Cronometre și alarme</string>
+    <string name="assistant_sched_allow_files">Salvează fișiere și imagini</string>
+    <string name="assistant_sched_report">Ce a făcut</string>
+    <string name="assistant_sched_done">Gata</string>
+    <string name="assistant_sched_waiting">Așteaptă un da de la tine</string>
+    <string name="assistant_sched_failed">Nu a reușit</string>
+    <string name="assistant_sched_continue">Continuă în chat</string>
 </resources>

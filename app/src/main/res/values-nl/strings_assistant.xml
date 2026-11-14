@@ -259,4 +259,15 @@
     <string name="ai_bad_key">De %1$s-sleutel klopt niet. Controleer hem in Instellingen › AI Assist.</string>
     <string name="ai_busy">%1$s is druk bezig, of de sleutel heeft geen tegoed meer. Probeer het over een minuut opnieuw.</string>
     <string name="ai_server">%1$s antwoordde met een fout (%2$d).</string>
+    <string name="assistant_sched_allow">Mag zelf doen</string>
+    <string name="assistant_sched_allow_how">Na het lezen van mail of het web gebeurt dit zonder het je te vragen. Versturen, bellen en verwijderen wachten altijd op jou.</string>
+    <string name="assistant_sched_allow_calendar">Toevoegen aan de agenda</string>
+    <string name="assistant_sched_allow_notes">Notities en lijsten</string>
+    <string name="assistant_sched_allow_timers">Timers en wekkers</string>
+    <string name="assistant_sched_allow_files">Bestanden en afbeeldingen opslaan</string>
+    <string name="assistant_sched_report">Wat het deed</string>
+    <string name="assistant_sched_done">Gedaan</string>
+    <string name="assistant_sched_waiting">Wacht op je ja</string>
+    <string name="assistant_sched_failed">Lukte niet</string>
+    <string name="assistant_sched_continue">Verder in de chat</string>
 </resources>

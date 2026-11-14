@@ -259,4 +259,15 @@
     <string name="ai_bad_key">Λάθος κλειδί %1$s. Έλεγξέ το στις Ρυθμίσεις › AI Assist.</string>
     <string name="ai_busy">Η %1$s είναι απασχολημένη ή το κλειδί δεν έχει άλλη πίστωση. Δοκίμασε ξανά σε ένα λεπτό.</string>
     <string name="ai_server">Η %1$s απάντησε με σφάλμα (%2$d).</string>
+    <string name="assistant_sched_allow">Μπορεί να κάνει μόνο του</string>
+    <string name="assistant_sched_allow_how">Αφού διαβάσει mail ή το διαδίκτυο, αυτά γίνονται χωρίς να σε ρωτήσει. Αποστολή, κλήση και διαγραφή περιμένουν πάντα εσένα.</string>
+    <string name="assistant_sched_allow_calendar">Προσθήκη στο ημερολόγιο</string>
+    <string name="assistant_sched_allow_notes">Σημειώσεις και λίστες</string>
+    <string name="assistant_sched_allow_timers">Χρονόμετρα και ξυπνητήρια</string>
+    <string name="assistant_sched_allow_files">Αποθήκευση αρχείων και εικόνων</string>
+    <string name="assistant_sched_report">Τι έκανε</string>
+    <string name="assistant_sched_done">Έγινε</string>
+    <string name="assistant_sched_waiting">Περιμένει το ναι σου</string>
+    <string name="assistant_sched_failed">Δεν μπόρεσε</string>
+    <string name="assistant_sched_continue">Συνέχεια στη συνομιλία</string>
 </resources>

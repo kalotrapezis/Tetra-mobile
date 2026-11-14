@@ -261,4 +261,15 @@
     <string name="ai_bad_key">A chave da %1$s está errada. Verifica-a em Definições › AI Assist.</string>
     <string name="ai_busy">A %1$s está ocupada ou a chave já não tem crédito. Tenta outra vez dentro de um minuto.</string>
     <string name="ai_server">A %1$s respondeu com um erro (%2$d).</string>
+    <string name="assistant_sched_allow">Pode fazer sozinho</string>
+    <string name="assistant_sched_allow_how">Depois de ler o email ou a web, isto é feito sem te perguntar. Enviar, ligar e apagar esperam sempre por ti.</string>
+    <string name="assistant_sched_allow_calendar">Adicionar ao calendário</string>
+    <string name="assistant_sched_allow_notes">Notas e listas</string>
+    <string name="assistant_sched_allow_timers">Temporizadores e alarmes</string>
+    <string name="assistant_sched_allow_files">Guardar ficheiros e imagens</string>
+    <string name="assistant_sched_report">O que fez</string>
+    <string name="assistant_sched_done">Feito</string>
+    <string name="assistant_sched_waiting">Espera o teu sim</string>
+    <string name="assistant_sched_failed">Não conseguiu</string>
+    <string name="assistant_sched_continue">Continuar no chat</string>
 </resources>

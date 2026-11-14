@@ -110,10 +110,12 @@ class BriefActivity : ComponentActivity() {
                         fitsSystemWindows = true
                         loadDataWithBaseURL(null, html ?: "<p>…</p>", "text/html", "utf-8", null)
                     } }, modifier = androidx.compose.ui.Modifier.fillMaxSize())
+                    // a scheduled action's run is a chat as well, named as its page (14 Nov, the user: "an actual chat"): it goes on there
+                    val chatId = f.nameWithoutExtension.takeIf { html != null && AssistantChats.has(it) }
                     androidx.compose.material3.ExtendedFloatingActionButton(
-                        onClick = { openAssistant(this@BriefActivity) },
+                        onClick = { chatId?.let { id -> AssistantChats.get(this@BriefActivity, id)?.let { SharedChat.open(this@BriefActivity, it) } }; openAssistant(this@BriefActivity) },
                         icon = { ArtImage(R.drawable.assistant_art, 28.dp) },
-                        text = { androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.app_assistant)) },
+                        text = { androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(if (chatId != null) R.string.assistant_sched_continue else R.string.app_assistant)) },
                         modifier = androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.BottomEnd).navigationBarsPadding().padding(16.dp),
                     )
                 }

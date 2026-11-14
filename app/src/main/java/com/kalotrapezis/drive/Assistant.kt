@@ -1754,6 +1754,10 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
     /** The user's [text] answered, the tools run on the way; [onText] gets the answer's words as they come; [file] goes with it, this turn only. */
     /** Each tool as the model calls it (Home's widget: a magnifier while it searches). */
     @Volatile var onTool: ((String) -> Unit)? = null
+    /** Tools run after outside text without a yes (a scheduled action's permission, [AssistantGuard.ALLOW]). */
+    var allow: Set<String> = emptySet()
+    /** What it did, held and could not, for a scheduled action's report: { kind: done|held|failed, name, what, why? }. */
+    val log = mutableListOf<JSONObject>()
 
     fun ask(text: String, at: Long = System.currentTimeMillis(), file: Attach.Doc? = null, onText: ((String) -> Unit)? = null): AssistantReply {
         if (at - lastAt > forgetMs) messages.clear()
@@ -1794,8 +1798,10 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
                 val name = f.getString("name")
                 onTool?.invoke(name)
                 // after outside text, a change waits for the user's yes (AssistantGuard); shortcut: one held call per turn, the last, until the model ever asks several at once
-                val r = if (outside && AssistantGuard.acts(name, args)) { confirm = AssistantGuard.Confirm(name, args, AssistantGuard.what(name, args, tools.picked(name, args))); ToolResult(AssistantGuard.held(name)) }
-                    else tools.run(name, args).let { if (AssistantGuard.external(name, args)) { outside = true; it.copy(forModel = AssistantGuard.wrap(name, it.forModel)) } else it }
+                val acts = AssistantGuard.acts(name, args)
+                val r = if (outside && acts && name !in allow) { confirm = AssistantGuard.Confirm(name, args, AssistantGuard.what(name, args, tools.picked(name, args))).also { log += entry("held", name, it.what) }; ToolResult(AssistantGuard.held(name)) }
+                    else tools.run(name, args).also { if (acts) log += entry(if (AssistantGuard.failed(it.forModel)) "failed" else "done", name, AssistantGuard.what(name, args, tools.picked(name, args)), it.forModel.takeIf { f -> AssistantGuard.failed(f) }) }
+                        .let { if (AssistantGuard.external(name, args)) { outside = true; it.copy(forModel = AssistantGuard.wrap(name, it.forModel)) } else it }
                 if (r.choices.isNotEmpty()) { choices.clear(); choices += r.choices }
                 r.call?.let { call = it }; r.image?.let { images += it }; images += r.photos; r.open?.let { open = it }; r.go?.let { go = it }; if (r.open != null || r.go != null) beside = r.beside
                 r.audio?.let { audio = it }
@@ -1806,6 +1812,8 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
         }
         return AssistantReply("", choices, call, images, open, go, beside, audio, cards, confirm)
     }
+
+    private fun entry(kind: String, name: String, what: String, why: String? = null) = JSONObject().put("kind", kind).put("name", name).put("what", what).apply { why?.let { put("why", it.take(200)) } }
 
     /** The user's yes to a [AssistantGuard.Confirm]: the tool run as it was asked, and the chat told. */
     fun approve(c: AssistantGuard.Confirm): AssistantReply {
@@ -1819,7 +1827,7 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
 
     /** A kept chat's file, read again only if it is asked about. */
     fun attach(f: File?) = tools.attach(f)
-    fun clear() { messages.clear(); bill.reset(); tools.attach(null as File?) }
+    fun clear() { messages.clear(); bill.reset(); tools.attach(null as File?); log.clear() }
     /** The conversation as it is, for the History (AssistantChats); [restore] takes one back to go on with it. */
     fun saved() = JSONArray(messages.map { JSONObject(it.toString()) })
     /** A line said to the user outside a turn (a pill reminder), so the next words are read with it in mind. */

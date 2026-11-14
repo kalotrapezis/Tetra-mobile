@@ -263,4 +263,15 @@
     <string name="ai_bad_key">Klucz %1$s jest nieprawidłowy. Sprawdź go w Ustawienia › AI Assist.</string>
     <string name="ai_busy">%1$s jest zajęty albo na kluczu skończyły się środki. Spróbuj ponownie za minutę.</string>
     <string name="ai_server">%1$s odpowiedział błędem (%2$d).</string>
+    <string name="assistant_sched_allow">Może zrobić sam</string>
+    <string name="assistant_sched_allow_how">Po przeczytaniu poczty lub stron www dzieje się to bez pytania. Wysyłanie, dzwonienie i usuwanie zawsze czekają na Ciebie.</string>
+    <string name="assistant_sched_allow_calendar">Dodaj do kalendarza</string>
+    <string name="assistant_sched_allow_notes">Notatki i listy</string>
+    <string name="assistant_sched_allow_timers">Minutniki i alarmy</string>
+    <string name="assistant_sched_allow_files">Zapisz pliki i obrazy</string>
+    <string name="assistant_sched_report">Co zrobił</string>
+    <string name="assistant_sched_done">Zrobione</string>
+    <string name="assistant_sched_waiting">Czeka na Twoje tak</string>
+    <string name="assistant_sched_failed">Nie udało się</string>
+    <string name="assistant_sched_continue">Kontynuuj w czacie</string>
 </resources>

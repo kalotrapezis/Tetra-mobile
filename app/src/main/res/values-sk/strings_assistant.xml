@@ -263,4 +263,15 @@
     <string name="ai_bad_key">Kľúč %1$s je nesprávny. Skontroluj ho v ponuke Nastavenia › AI Assist.</string>
     <string name="ai_busy">%1$s je zaneprázdnený alebo kľúč už nemá kredit. Skús to znova o minútu.</string>
     <string name="ai_server">%1$s odpovedal chybou (%2$d).</string>
+    <string name="assistant_sched_allow">Smie urobiť samo</string>
+    <string name="assistant_sched_allow_how">Po prečítaní pošty alebo webu sa tieto akcie urobia bez pýtania. Odoslanie, volanie a mazanie vždy čakajú na vás.</string>
+    <string name="assistant_sched_allow_calendar">Pridať do kalendára</string>
+    <string name="assistant_sched_allow_notes">Poznámky a zoznamy</string>
+    <string name="assistant_sched_allow_timers">Časovače a budíky</string>
+    <string name="assistant_sched_allow_files">Uložiť súbory a obrázky</string>
+    <string name="assistant_sched_report">Čo urobilo</string>
+    <string name="assistant_sched_done">Hotovo</string>
+    <string name="assistant_sched_waiting">Čaká na vaše áno</string>
+    <string name="assistant_sched_failed">Nepodarilo sa</string>
+    <string name="assistant_sched_continue">Pokračovať v chate</string>
 </resources>

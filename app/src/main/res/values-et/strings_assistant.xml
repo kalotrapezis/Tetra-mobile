@@ -259,4 +259,15 @@
     <string name="ai_bad_key">%1$s võti on vale. Kontrolli seda jaotises Seaded › AI Assist.</string>
     <string name="ai_busy">%1$s on hõivatud või võtmel pole enam krediiti. Proovi minuti pärast uuesti.</string>
     <string name="ai_server">%1$s vastas veaga (%2$d).</string>
+    <string name="assistant_sched_allow">Võib ise teha</string>
+    <string name="assistant_sched_allow_how">Pärast meili või veebi lugemist tehakse need sinult küsimata. Saatmine, helistamine ja kustutamine ootavad alati sind.</string>
+    <string name="assistant_sched_allow_calendar">Lisa kalendrisse</string>
+    <string name="assistant_sched_allow_notes">Märkmed ja loendid</string>
+    <string name="assistant_sched_allow_timers">Taimerid ja äratused</string>
+    <string name="assistant_sched_allow_files">Salvesta failid ja pildid</string>
+    <string name="assistant_sched_report">Mida see tegi</string>
+    <string name="assistant_sched_done">Tehtud</string>
+    <string name="assistant_sched_waiting">Ootab sinu jah-i</string>
+    <string name="assistant_sched_failed">Ei õnnestunud</string>
+    <string name="assistant_sched_continue">Jätka vestluses</string>
 </resources>

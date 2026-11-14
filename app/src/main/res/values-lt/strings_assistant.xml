@@ -263,4 +263,15 @@
     <string name="ai_bad_key">%1$s raktas neteisingas. Patikrink jį skiltyje Nustatymai › AI Assist.</string>
     <string name="ai_busy">%1$s užimtas arba rakte nebėra kredito. Pabandyk dar kartą po minutės.</string>
     <string name="ai_server">%1$s atsakė klaida (%2$d).</string>
+    <string name="assistant_sched_allow">Gali atlikti pats</string>
+    <string name="assistant_sched_allow_how">Perskaičius paštą ar žiniatinklį, tai atliekama jūsų neklausiant. Siuntimas, skambinimas ir trynimas visada laukia jūsų.</string>
+    <string name="assistant_sched_allow_calendar">Įtraukti į kalendorių</string>
+    <string name="assistant_sched_allow_notes">Užrašai ir sąrašai</string>
+    <string name="assistant_sched_allow_timers">Laikmačiai ir žadintuvai</string>
+    <string name="assistant_sched_allow_files">Išsaugoti failus ir paveikslėlius</string>
+    <string name="assistant_sched_report">Ką atliko</string>
+    <string name="assistant_sched_done">Atlikta</string>
+    <string name="assistant_sched_waiting">Laukia jūsų sutikimo</string>
+    <string name="assistant_sched_failed">Nepavyko</string>
+    <string name="assistant_sched_continue">Tęsti pokalbyje</string>
 </resources>

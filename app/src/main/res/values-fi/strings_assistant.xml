@@ -259,4 +259,15 @@
     <string name="ai_bad_key">%1$s-avain on väärä. Tarkista se kohdassa Asetukset › AI Assist.</string>
     <string name="ai_busy">%1$s on kiireinen tai avaimen krediitti on loppu. Yritä uudelleen minuutin kuluttua.</string>
     <string name="ai_server">%1$s vastasi virheellä (%2$d).</string>
+    <string name="assistant_sched_allow">Saa tehdä itse</string>
+    <string name="assistant_sched_allow_how">Postin tai verkon lukemisen jälkeen nämä tehdään kysymättä. Lähettäminen, soittaminen ja poistaminen odottavat aina sinua.</string>
+    <string name="assistant_sched_allow_calendar">Lisää kalenteriin</string>
+    <string name="assistant_sched_allow_notes">Muistiinpanot ja listat</string>
+    <string name="assistant_sched_allow_timers">Ajastimet ja herätykset</string>
+    <string name="assistant_sched_allow_files">Tallenna tiedostot ja kuvat</string>
+    <string name="assistant_sched_report">Mitä se teki</string>
+    <string name="assistant_sched_done">Tehty</string>
+    <string name="assistant_sched_waiting">Odottaa kyllääsi</string>
+    <string name="assistant_sched_failed">Ei onnistunut</string>
+    <string name="assistant_sched_continue">Jatka keskustelussa</string>
 </resources>

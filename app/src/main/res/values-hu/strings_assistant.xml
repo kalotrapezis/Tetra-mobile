@@ -259,4 +259,15 @@
     <string name="ai_bad_key">A %1$s-kulcs hibás. Ellenőrizd itt: Beállítások › AI Assist.</string>
     <string name="ai_busy">A %1$s foglalt, vagy a kulcsnak elfogyott a kreditje. Próbáld újra egy perc múlva.</string>
     <string name="ai_server">A %1$s hibával válaszolt (%2$d).</string>
+    <string name="assistant_sched_allow">Magától megteheti</string>
+    <string name="assistant_sched_allow_how">Levél vagy web olvasása után ezek kérdés nélkül megtörténnek. Küldés, hívás és törlés mindig rád vár.</string>
+    <string name="assistant_sched_allow_calendar">Hozzáadás a naptárhoz</string>
+    <string name="assistant_sched_allow_notes">Jegyzetek és listák</string>
+    <string name="assistant_sched_allow_timers">Időzítők és ébresztők</string>
+    <string name="assistant_sched_allow_files">Fájlok és képek mentése</string>
+    <string name="assistant_sched_report">Mit csinált</string>
+    <string name="assistant_sched_done">Kész</string>
+    <string name="assistant_sched_waiting">Az igenedre vár</string>
+    <string name="assistant_sched_failed">Nem sikerült</string>
+    <string name="assistant_sched_continue">Folytatás a csevegésben</string>
 </resources>

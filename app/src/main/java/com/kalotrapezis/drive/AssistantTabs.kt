@@ -296,6 +296,10 @@ internal fun ScheduledTab(offer: (String) -> Unit) {
     } }
 }
 
+/** A scheduled action's permission groups (AssistantGuard.ALLOW) and their words. */
+internal val ALLOW_LABEL = listOf("calendar" to R.string.assistant_sched_allow_calendar, "notes" to R.string.assistant_sched_allow_notes,
+    "timers" to R.string.assistant_sched_allow_timers, "files" to R.string.assistant_sched_allow_files)
+
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun ScheduleDialog(s: JSONObject, runnerNow: String?, close: () -> Unit, save: (JSONObject, JSONObject?, String?) -> Unit) {
@@ -306,6 +310,8 @@ private fun ScheduleDialog(s: JSONObject, runnerNow: String?, close: () -> Unit,
     var repeat by remember { mutableStateOf(s.optString("repeat", "daily")) }
     var days by remember { mutableStateOf(s.optJSONArray("days")?.let { a -> (0 until a.length()).map { a.optInt(it) }.toSet() } ?: setOf(1)) }
     var date by remember { mutableStateOf(s.optString("date").takeIf { !s.isNull("date") }.orEmpty()) }
+    // what it may do on its own after mail or the web (the user, 14 Nov: "can I save my permission")
+    var allow by remember { mutableStateOf(s.optJSONArray("allow")?.let { a -> (0 until a.length()).map { a.optString(it) }.toSet() } ?: emptySet()) }
     val tetra = remember { driveRoot() }
     val now = remember { AssistantSchedules.read(tetra).optJSONObject("brief")?.optJSONObject("sections") ?: JSONObject() }
     val sections = remember { mutableStateMapOf<String, Boolean>().apply { listOf("calendar", "mail", "weather", "notes").forEach { put(it, now.optBoolean(it, true)) } } }
@@ -338,6 +344,13 @@ private fun ScheduleDialog(s: JSONObject, runnerNow: String?, close: () -> Unit,
                 if (repeat == "weekly") FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     listOf(1, 2, 3, 4, 5, 6, 0).forEach { d -> FilterChip(d in days, { days = if (d in days) days - d else days + d }, { Text(weekday(c, d)) }) }
                 }
+                if (!brief) {
+                    Text(stringResource(R.string.assistant_sched_allow), style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(R.string.assistant_sched_allow_how), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    ALLOW_LABEL.forEach { (k, label) ->
+                        Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(k in allow, { allow = if (it) allow + k else allow - k }); Text(stringResource(label)) }
+                    }
+                }
                 if (brief) {
                     Text(stringResource(R.string.assistant_brief_sections), style = MaterialTheme.typography.titleSmall)
                     listOf("calendar" to R.string.app_calendar, "mail" to R.string.app_mail, "weather" to R.string.assistant_brief_weather, "notes" to R.string.assistant_brief_lists).forEach { (k, label) ->
@@ -348,7 +361,7 @@ private fun ScheduleDialog(s: JSONObject, runnerNow: String?, close: () -> Unit,
         },
         confirmButton = { TextButton({
             val x = JSONObject().put("time", time.trim()).put("repeat", repeat).put("days", JSONArray(days.sorted())).put("date", date.trim().ifEmpty { JSONObject.NULL })
-            if (!brief) x.put("prompt", prompt)
+            if (!brief) x.put("prompt", prompt).put("allow", JSONArray(ALLOW_LABEL.map { it.first }.filter { it in allow }))
             save(x, if (brief) JSONObject(sections.toMap() as Map<*, *>) else null, who)
         }, enabled = brief || prompt.isNotBlank()) { Text(stringResource(R.string.common_save)) } },
         dismissButton = { TextButton(close) { Text(stringResource(R.string.common_cancel)) } })

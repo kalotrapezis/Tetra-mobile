@@ -261,4 +261,15 @@
     <string name="ai_bad_key">%1$s ključ nije ispravan. Provjeri ga pod Postavke › AI Assist.</string>
     <string name="ai_busy">%1$s je zauzet ili ključ nema više kredita. Pokušaj ponovno za minutu.</string>
     <string name="ai_server">%1$s je odgovorio pogreškom (%2$d).</string>
+    <string name="assistant_sched_allow">Smije samo učiniti</string>
+    <string name="assistant_sched_allow_how">Nakon čitanja pošte ili weba ovo se radi bez pitanja. Slanje, pozivanje i brisanje uvijek čekaju vas.</string>
+    <string name="assistant_sched_allow_calendar">Dodaj u kalendar</string>
+    <string name="assistant_sched_allow_notes">Bilješke i popisi</string>
+    <string name="assistant_sched_allow_timers">Mjerači vremena i alarmi</string>
+    <string name="assistant_sched_allow_files">Spremi datoteke i slike</string>
+    <string name="assistant_sched_report">Što je učinio</string>
+    <string name="assistant_sched_done">Gotovo</string>
+    <string name="assistant_sched_waiting">Čeka vaše da</string>
+    <string name="assistant_sched_failed">Nije uspio</string>
+    <string name="assistant_sched_continue">Nastavi u razgovoru</string>
 </resources>

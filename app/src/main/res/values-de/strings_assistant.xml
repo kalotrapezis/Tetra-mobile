@@ -259,4 +259,15 @@
     <string name="ai_bad_key">Der %1$s-Schlüssel ist falsch. Prüfe ihn unter Einstellungen › AI Assist.</string>
     <string name="ai_busy">%1$s ist ausgelastet oder der Schlüssel hat kein Guthaben mehr. Versuch es in einer Minute noch einmal.</string>
     <string name="ai_server">%1$s hat mit einem Fehler geantwortet (%2$d).</string>
+    <string name="assistant_sched_allow">Darf selbst erledigen</string>
+    <string name="assistant_sched_allow_how">Nach dem Lesen von Mail oder Web wird dies ohne Rückfrage erledigt. Senden, Anrufen und Löschen warten immer auf dich.</string>
+    <string name="assistant_sched_allow_calendar">Zum Kalender hinzufügen</string>
+    <string name="assistant_sched_allow_notes">Notizen und Listen</string>
+    <string name="assistant_sched_allow_timers">Timer und Wecker</string>
+    <string name="assistant_sched_allow_files">Dateien und Bilder speichern</string>
+    <string name="assistant_sched_report">Was es getan hat</string>
+    <string name="assistant_sched_done">Erledigt</string>
+    <string name="assistant_sched_waiting">Wartet auf dein Ja</string>
+    <string name="assistant_sched_failed">Ging nicht</string>
+    <string name="assistant_sched_continue">Im Chat weitermachen</string>
 </resources>

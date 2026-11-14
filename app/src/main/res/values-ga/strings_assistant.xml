@@ -265,4 +265,15 @@
     <string name="ai_bad_key">Tá eochair %1$s mícheart. Seiceáil í faoi Socruithe › AI Assist.</string>
     <string name="ai_busy">Tá %1$s gnóthach, nó níl aon chreidmheas fágtha ar an eochair. Bain triail eile as i gceann nóiméid.</string>
     <string name="ai_server">D\'fhreagair %1$s le earráid (%2$d).</string>
+    <string name="assistant_sched_allow">Is féidir leis a dhéanamh leis féin</string>
+    <string name="assistant_sched_allow_how">Tar éis ríomhphost nó an gréasán a léamh, déantar iad seo gan ceist a chur ort. Fanann seoladh, glaoch agus scriosadh ort i gcónaí.</string>
+    <string name="assistant_sched_allow_calendar">Cuir leis an bhféilire</string>
+    <string name="assistant_sched_allow_notes">Nótaí agus liostaí</string>
+    <string name="assistant_sched_allow_timers">Amadóirí agus aláraim</string>
+    <string name="assistant_sched_allow_files">Sábháil comhaid agus pictiúir</string>
+    <string name="assistant_sched_report">Cad a rinne sé</string>
+    <string name="assistant_sched_done">Déanta</string>
+    <string name="assistant_sched_waiting">Ag fanacht le do thoil</string>
+    <string name="assistant_sched_failed">Níorbh fhéidir</string>
+    <string name="assistant_sched_continue">Lean ar aghaidh sa chomhrá</string>
 </resources>
