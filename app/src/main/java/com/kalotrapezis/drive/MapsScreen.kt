@@ -1341,8 +1341,9 @@ internal class MapsDuck(c: Context) : android.speech.tts.UtteranceProgressListen
     companion object {
         val speech: android.media.AudioAttributes = android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
             .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH).build()
-        /** At least 4 s, or the time to say [text] at ~12 letters a second and 1 s more: the longest said so far, 102 letters, ~9.5 s. */
-        fun backup(text: String) = maxOf(4_000L, text.length * 1_000L / 12 + 1_000L)
+        /** 10 s whatever is said (the user: "make it 10 sec, we should not need it if the code works properly"); the longest said so
+         *  far, 102 letters, takes ~8 s. [text] kept for the log. */
+        @Suppress("UNUSED_PARAMETER") fun backup(text: String) = 10_000L
     }
     private val audio = c.getSystemService(android.media.AudioManager::class.java)
     private val focus = android.media.AudioFocusRequest.Builder(android.media.AudioManager.AUDIOFOCUS_GAIN_TRANSIENT).setAudioAttributes(speech).build()
@@ -1351,7 +1352,7 @@ internal class MapsDuck(c: Context) : android.speech.tts.UtteranceProgressListen
     private var ducked = false
     private val main = android.os.Handler(android.os.Looper.getMainLooper())
     /** Before speaking [text]: the music silent; the id to speak with. Back by itself after [backup] ms, should the voice never say
-     *  it is done (the user, 15 Nov: one «get on that road» on the car and the music never came back; a backup by length, at least 4 s). */
+     *  it is done (the user, 15 Nov: one «get on that road» on the car and the music never came back; a backup of 10 s). */
     @Synchronized fun start(text: String = ""): String = "maps${++n}".also { id ->
         last = id; audio.requestAudioFocus(focus)
         if (!ducked) { ducked = true; BrowserMedia.duck(true); WriterLog.i("Maps: the music silent for the voice") }
