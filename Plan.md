@@ -12,7 +12,7 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
-- [~] (hey-tetra session, 15 Nov; branch `claude/hey-tetra-5ec56d`, not merged) **Wake phrases "Tetra", "OK Tetra", "Hey Tetra", "Ahoy Tetra",
+- [x] (hey-tetra session, 15 Nov; branch `claude/hey-tetra-5ec56d`, not merged) **Wake phrases "Tetra", "OK Tetra", "Hey Tetra", "Ahoy Tetra",
       no trained model** (the user: no training on this PC; match the voice's signature; "Just Tetra, ok Tetra and hey Tetra"; "Ahoy" as a
       tribute to Bell). MFCC + DTW against the user's 4 takes of each phrase, each phrase its own threshold, the best match wakes
       (WakeWord.kt; tools/wake-test.py the same pipeline, tools/wake-record.sh the takes). PC test on the user's voice: every held-out take
@@ -26,7 +26,9 @@ How to write here:
       locked: only Android's unlock (UnlockActivity), not in the car. Paused while
       AI Assist is open, another recording, a call, in the car. On the phone (15 Nov): woke on OK Tetra and Hey Tetra; near misses came
       from speaking 13–20 dB quieter than the takes (further away): takes now asked near and far. Copies for tuning in
-      files/wake-tuning (takes, last 40 near windows). Car build leaves it out. **Open:** voice-only wake and unlock on the phone; an hour's battery.
+      files/wake-tuning (takes, last 40 near windows). Car build leaves it out. On the phone: the voice-only wake, a web search
+      answered by voice, music started; Ahoy Tetra wakes from across the room, the others mostly closer. **Open:** the hour's battery
+      not measured (the user: "I will test it and if I don't like it I will turn it off"); the unlock-then-open path not seen run.
 - [ ] (assistant-tools session, 8 Nov; branch `claude/assistant-safety-mailai-5de496`, not merged) **AI Assist: data, pin/colour notes,
       open a page, the brief as a card** (the user: how much mobile data was used / is left / the month's forecast and whether to cut
       back; pin or recolour notes; open a website or the web search results or the daily report as a card in the chat or in Tetra's own
