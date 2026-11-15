@@ -1341,6 +1341,8 @@ internal class MapsDuck(c: Context) : android.speech.tts.UtteranceProgressListen
     companion object {
         val speech: android.media.AudioAttributes = android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
             .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH).build()
+        /** At least 4 s, or the time to say [text] at ~12 letters a second and 1 s more: the longest said so far, 102 letters, ~9.5 s. */
+        fun backup(text: String) = maxOf(4_000L, text.length * 1_000L / 12 + 1_000L)
     }
     private val audio = c.getSystemService(android.media.AudioManager::class.java)
     private val focus = android.media.AudioFocusRequest.Builder(android.media.AudioManager.AUDIOFOCUS_GAIN_TRANSIENT).setAudioAttributes(speech).build()
@@ -1348,12 +1350,12 @@ internal class MapsDuck(c: Context) : android.speech.tts.UtteranceProgressListen
     @Volatile private var last: String? = null
     private var ducked = false
     private val main = android.os.Handler(android.os.Looper.getMainLooper())
-    /** Before speaking [text]: the music silent; the id to speak with. Back by itself after [FAILSAFE_MS], should the voice never say
-     *  it is done (the user, 15 Nov: one «get on that road» on the car and the music never came back; "a timer as a failsafe of 3-4 sec"). */
+    /** Before speaking [text]: the music silent; the id to speak with. Back by itself after [backup] ms, should the voice never say
+     *  it is done (the user, 15 Nov: one «get on that road» on the car and the music never came back; a backup by length, at least 4 s). */
     @Synchronized fun start(text: String = ""): String = "maps${++n}".also { id ->
         last = id; audio.requestAudioFocus(focus)
         if (!ducked) { ducked = true; BrowserMedia.duck(true); WriterLog.i("Maps: the music silent for the voice") }
-        main.postDelayed({ if (last == id) { WriterLog.w("Maps: the voice never said it was done; the music back after $FAILSAFE_MS ms (\"$text\")"); end(id) } }, FAILSAFE_MS)
+        main.postDelayed({ if (last == id) { WriterLog.w("Maps: the voice never said it was done; the music back after ${backup(text)} ms (\"$text\")"); end(id) } }, backup(text))
     }
     /** The music back, unless something newer is being said (QUEUE_FLUSH stops the one before it). */
     @Synchronized fun end(id: String? = last) {
@@ -1361,7 +1363,6 @@ internal class MapsDuck(c: Context) : android.speech.tts.UtteranceProgressListen
         last = null; audio.abandonAudioFocusRequest(focus)
         if (ducked) { ducked = false; BrowserMedia.duck(false); WriterLog.i("Maps: the music back") }
     }
-    private val FAILSAFE_MS = 4_000L
     override fun onStart(id: String?) = Unit
     override fun onDone(id: String?) = end(id)
     override fun onStop(id: String?, interrupted: Boolean) = end(id)

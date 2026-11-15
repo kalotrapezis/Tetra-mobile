@@ -1091,4 +1091,12 @@ class PlusCodeTest {
         assertEquals(41.1364, c.lat, 1e-9); assertEquals(24.8937, c.lng, 1e-9)
         assertEquals("Ξάνθη", MapsSearch.search(listOf(xanthi), "Ξάνθη", 0.0, 0.0).single().name) // words stay words
     }
+
+    @Test fun theMusicsBackupTimerFollowsTheSentence() {
+        // the voice's own «done» brings the music back; this only when it never comes (the user, 15 Nov: by length, at least 4 s)
+        assertEquals(4_000L, MapsDuck.backup("Νέα διαδρομή"))
+        val longest = "Σε 3 χιλιόμετρα, Μείνετε δεξιά και οδηγείστε προς Θηβα, Χαλκιδα, Νοσοκομειο Θηβας, από τη δεξιά λωρίδα"
+        assertEquals(102, longest.length)
+        assertEquals(9_500L, MapsDuck.backup(longest))
+    }
 }
