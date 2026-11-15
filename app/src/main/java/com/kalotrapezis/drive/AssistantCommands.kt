@@ -19,6 +19,8 @@ internal object AssistantCommands {
         Command("media play", "", "media", "Go on playing what was paused («συνέχισε»)."),
         Command("media next", "", "media", "The next song or episode («επόμενο»)."),
         Command("media previous", "", "media", "The song before, or this one from its start («προηγούμενο»)."),
+        Command("media mute", "", "media", "Silence the music without stopping it («σίγαση», «βάλε τη μουσική στο αθόρυβο», «mute the music»): voices (directions, AI Assist) are still heard. Use this, not volume mute, for the music."),
+        Command("media unmute", "", "media", "The music heard again after media mute («βάλε πάλι ήχο στη μουσική», «unmute»)."),
         // Quiet
         Command("quiet on", "[until HH:MM]", "phone", "Android's Do Not Disturb, as the user set it up (what it lets through is theirs), until a time if said.", acts = true),
         Command("quiet off", "", "phone", "Do Not Disturb off.", acts = true),

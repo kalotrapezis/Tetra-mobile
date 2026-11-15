@@ -180,6 +180,15 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
     val car = sheet && CarMaps.edition // the car build: no window of its own, so tones and spoken words instead
     val close: () -> Unit = { if (car || !sheet || !decorated || !AssistantKey.has(context)) closeNow() else if (!tvOff) { tvOff = true; Zap.play(); scope.launch { delay(520); closeNow() } } }
     LaunchedEffect(Unit) { if (!car && sheet && decorated && AssistantKey.has(context)) Zap.play() } // and on, as it opens
+    // the music silent while it listens and answers, back as it closes, as for Maps' voice (the user, 15 Nov: "if I start talking with the
+    // assistant the music should mute"): other apps pause for Android's transient focus, Tetra's Browser is muted
+    DisposableEffect(Unit) {
+        val audio = context.getSystemService(android.media.AudioManager::class.java)
+        val focus = if (sheet) android.media.AudioFocusRequest.Builder(android.media.AudioManager.AUDIOFOCUS_GAIN_TRANSIENT).setAudioAttributes(
+            android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_ASSISTANT).setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH).build()).build() else null
+        focus?.let { audio.requestAudioFocus(it); BrowserMedia.duck(true) }
+        onDispose { focus?.let { audio.abandonAudioFocusRequest(it); BrowserMedia.duck(false) } }
+    }
     DisposableEffect(Unit) { onDispose { if (car) { Chime.play(up = false); Thread { runCatching { CarWire.log(context.applicationContext) } }.start() } } } // however it ends: a tap on the mic, an answer done, a failure
     // every way in goes on with the open conversation (the user, 8 Nov), the sheet's or the full screen's
     val chat = remember { SharedChat.chat(context) }

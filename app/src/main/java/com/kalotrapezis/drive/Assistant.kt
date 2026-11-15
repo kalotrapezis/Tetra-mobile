@@ -282,6 +282,8 @@ internal class AssistantTools(
     private val here: () -> Pair<Double, Double>? = { null },
     /** A media key (KeyEvent.KEYCODE_MEDIA_…) to whatever plays. */
     private val mediaKey: (Int) -> Unit = {},
+    /** The music muted or heard again, the voices still heard. */
+    private val muteMusic: (Boolean) -> Unit = {},
     /** Do Not Disturb on (until a time, ms) or off: what happened, for the model. */
     private val quiet: (Boolean, Long?) -> String = { _, _ -> "Do Not Disturb cannot be set here." },
     /** A web page's HTML (web read). */
@@ -989,6 +991,8 @@ internal class AssistantTools(
             "media play" -> media(android.view.KeyEvent.KEYCODE_MEDIA_PLAY, "Playing again.")
             "media next" -> media(android.view.KeyEvent.KEYCODE_MEDIA_NEXT, "The next one.")
             "media previous" -> media(android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS, "The one before.")
+            "media mute" -> { muteMusic(true); ToolResult("The music is muted. Say nothing more.") }
+            "media unmute" -> { muteMusic(false); ToolResult("The music is heard again. Say nothing more.") }
             "quiet on" -> ToolResult(quiet(true, rest.lastOrNull()?.let { t -> clock(t)?.let { at(it).toInstant().toEpochMilli() } })) // "until 21:00" or "21:00"
             "quiet off" -> ToolResult(quiet(false, null))
             "mail read", "mail archive", "mail delete" -> mailAct(c.key.substringAfter(' '), rest)

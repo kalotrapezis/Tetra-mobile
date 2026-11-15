@@ -287,6 +287,19 @@ class AssistantTest {
         assertEquals(0, Vad().phrase().size) // nothing said
     }
 
+    @Test fun theMusicStaysSilentWhileAnyVoiceSpeaksOrTheUserMutedIt() {
+        val told = mutableListOf<String>()
+        val s = Silence { told += it }
+        s.duck(true); s.duck(true)        // AI Assist listening, then a turn said by Maps
+        s.duck(false)                     // Maps done: AI Assist still talks
+        assertEquals(listOf("duck"), told)
+        s.mute(true); s.duck(false)       // «σίγαση», then AI Assist closes: still muted
+        assertEquals(listOf("duck"), told)
+        s.duck(false)                     // an extra end changes nothing
+        s.mute(false)
+        assertEquals(listOf("duck", "unduck"), told)
+    }
+
     @Test fun inTheCarAVoiceOverRoadNoiseIsHeard() {
         fun frame(amp: Int) = ShortArray(Vad.FRAME) { i -> (amp * Math.sin(i * 0.3)).toInt().toShort() }
         // road noise at rms ~420, a far voice at ~2x it: the phone's bar (2.5x) misses it, the car's (1.3x) does not
