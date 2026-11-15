@@ -83,7 +83,7 @@ open class AssistantActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WriterLog.init(this)
-        if (intent.getBooleanExtra(WakeService.EXTRA, false)) { setShowWhenLocked(true); setTurnScreenOn(true); WakeService.cancelNotice(this); WriterLog.i("AI Assist: opened by Hey Tetra") }
+        if (intent.getBooleanExtra(WakeService.EXTRA, false)) { WakeService.cancelNotice(this); WriterLog.i("AI Assist: opened by Hey Tetra${if (this is AssistantWakeActivity) " over the lock screen" else ""}") }
         TetraLook.load(this)
         // AI off (Settings › Βοηθός AI): no assistant at all, from Home, its icon or the phone's assistant gesture
         if (!AiGate.load(this).enabled) { android.widget.Toast.makeText(this, R.string.ai_is_off, android.widget.Toast.LENGTH_LONG).show(); finish(); return }
@@ -98,6 +98,8 @@ open class AssistantActivity : ComponentActivity() {
 
 /** The small sheet over any app (the phone's assistant gesture, or its own icon): listens at once, answers, and goes. */
 class AssistantSheetActivity : AssistantActivity() { override val sheet = true }
+/** The sheet opened by "Hey Tetra" on a locked phone (WakeService): the same, in an opaque window over the lock screen. */
+class AssistantWakeActivity : AssistantActivity() { override val sheet = true }
 
 internal val ASSISTANT_COLOR = Color(0xFFFD6A04)
 

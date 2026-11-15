@@ -1512,7 +1512,9 @@ private fun carBluetoothDevices(c: Context): List<Pair<String, String>> = runCat
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val phrases = WakeWord.PHRASES
-    val takes = remember { mutableStateListOf<ShortArray?>().apply { repeat(phrases.size * Wake.TAKES) { add(null) } } }
+    // the kept takes to start from: only what is missing (a phrase added later) or tapped is recorded
+    val takes = remember { mutableStateListOf<ShortArray?>().apply { phrases.forEach { p -> (1..Wake.TAKES).forEach { k ->
+        add(Wake.take(context, p, k).takeIf { it.isFile }?.let { f -> runCatching { Wake.read(f) }.getOrNull() }) } } } }
     var busy by remember { mutableStateOf<Int?>(null) } // the take being recorded; takes.size: the try
     var message by remember { mutableStateOf<String?>(null) }
     val features = remember(takes.toList()) { phrases.indices.map { p -> takes.subList(p * Wake.TAKES, (p + 1) * Wake.TAKES).map { it?.let(WakeWord::features) } } }
@@ -1568,6 +1570,7 @@ private fun carBluetoothDevices(c: Context): List<Pair<String, String>> = runCat
         } },
         confirmButton = { TextButton(enabled = busy == null && next < 0, onClick = {
             takes.forEachIndexed { i, t -> Wake.write(Wake.take(context, phraseOf(i), i % Wake.TAKES + 1), t!!) }
+            Wake.keepTakes(context)
             WriterLog.i("Hey Tetra: takes kept, odd: ${odd.withIndex().filter { it.value }.joinToString { "${phraseOf(it.index)} ${it.index % Wake.TAKES + 1}" }.ifEmpty { "none" }}")
             onDone(true)
         }) { Text(stringResource(R.string.common_save)) } },

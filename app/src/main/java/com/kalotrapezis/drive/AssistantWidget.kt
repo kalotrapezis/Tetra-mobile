@@ -77,6 +77,26 @@ internal class HomeTalk(private val c: Context, private val scope: CoroutineScop
         else -> end()
     }
 
+    /** Woken by voice (WakeService): a short [hello] in AI Assist's voice, then the talk as from the widget; false without a key or the mic. */
+    fun wake(hello: String): Boolean {
+        if (phase != null) return true
+        if (!AssistantKey.has(c) || !hasMic(c)) return false
+        job = scope.launch {
+            try {
+                phase = LivePhase.Speaking
+                val bill = withContext(Dispatchers.IO) { SharedChat.chat(c).bill.part("voice") }
+                // shortcut: the hello is made by the voice service each time; keep its audio if the wait shows
+                AnswerVoice(c, reader, bill, scope).also { voice = it }.run { say(hello); finish(); await() }
+                voice = null
+                turn(8_000)
+            }
+            catch (e: CancellationException) { throw e }
+            catch (e: Exception) { WriterLog.w("Hey Tetra: the talk: ${e.message}") }
+            finally { phase = null; hearing = false; voice = null }
+        }
+        return true
+    }
+
     fun end() { cue = TalkCue.None; mood = TalkMood.Normal; stop.set(true); job?.cancel(); job = null; voice?.stop(); voice = null; reader.stop(); phase = null; hearing = false }
 
     private fun start() {

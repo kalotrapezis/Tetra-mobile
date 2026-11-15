@@ -12,16 +12,19 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
-- [~] (hey-tetra session, 15 Nov; branch `claude/hey-tetra-5ec56d`, not merged) **Wake phrases "Tetra", "OK Tetra", "Hey Tetra", no trained
-      model** (the user: no training on this PC; match the voice's signature; then "Just Tetra, ok Tetra and hey Tetra"). MFCC + DTW
-      against the user's 4 takes of each phrase, each phrase its own threshold, the best match wakes (WakeWord.kt; tools/wake-test.py the
-      same pipeline, tools/wake-record.sh the takes). PC test on the user's voice (4 takes each, the rest held out): every held-out take
-      caught (Hey Tetra also fast, slow, 2–3 m away, quiet); no false wake in 1 h 52 min of lectures and a podcast, in a minute of their talk,
-      or in 30 s of look-alike words (Τετάρτη, τετράδιο, Πέτρα, μέτρα…). Thresholds × each phrase's median leave-one-out distance: Hey
-      Tetra 1.45, OK Tetra 1.35, Tetra 1.20 (a look-alike word came to 1.25). Settings › AI Assist › Hey Tetra (off; per device — one
-      device only, as two would both answer), the 12 takes on one page with Try it; WakeService (microphone FGS, mic let go while AI Assist
-      is open, another recording, a call, in the car); a match: a tone, the sheet over the lock screen. Personal tools ask Android's
-      unlock when locked (WakeUnlock), not in the car. Car build leaves it out. **Open:** on the phone, waking and an hour's battery.
+- [~] (hey-tetra session, 15 Nov; branch `claude/hey-tetra-5ec56d`, not merged) **Wake phrases "Tetra", "OK Tetra", "Hey Tetra", "Ahoy Tetra",
+      no trained model** (the user: no training on this PC; match the voice's signature; "Just Tetra, ok Tetra and hey Tetra"; "Ahoy" as a
+      tribute to Bell). MFCC + DTW against the user's 4 takes of each phrase, each phrase its own threshold, the best match wakes
+      (WakeWord.kt; tools/wake-test.py the same pipeline, tools/wake-record.sh the takes). PC test on the user's voice: every held-out take
+      caught; no false wake in 1 h 52 min of lectures and a podcast, a minute of their talk, or 30 s of look-alike words (Τετάρτη,
+      τετράδιο, Πέτρα, μέτρα…). Thresholds × each phrase's median leave-one-out distance: Hey Tetra 1.45, OK Tetra 1.35, Tetra 1.20,
+      Ahoy Tetra 1.40 (not measured on the PC). Settings › AI Assist › Hey Tetra (off; per device — one device only, as two would both
+      answer); the takes on one page, kept ones filled in, Try it. A wake: no screen (the user: "I just want sound feedback… What's up?"),
+      a spoken hello ("What's up?", "Hey, I'm here.", "Ahoy!"), then AI Assist by voice (HomeTalk); a screen only for an answer that needs
+      one (opaque over the lock screen); a personal tool when locked: only Android's unlock (UnlockActivity), not in the car. Paused while
+      AI Assist is open, another recording, a call, in the car. On the phone (15 Nov): woke on OK Tetra and Hey Tetra; near misses came
+      from speaking 13–20 dB quieter than the takes (further away): takes now asked near and far. Copies for tuning in
+      files/wake-tuning (takes, last 40 near windows). Car build leaves it out. **Open:** voice-only wake and unlock on the phone; an hour's battery.
 - [ ] (assistant-tools session, 8 Nov; branch `claude/assistant-safety-mailai-5de496`, not merged) **AI Assist: data, pin/colour notes,
       open a page, the brief as a card** (the user: how much mobile data was used / is left / the month's forecast and whether to cut
       back; pin or recolour notes; open a website or the web search results or the daily report as a card in the chat or in Tetra's own

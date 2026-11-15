@@ -17,6 +17,8 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import java.io.File
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -30,12 +32,27 @@ internal object Wake {
     fun on(c: Context) = prefs(c).getBoolean("wake", false)
     fun dir(c: Context) = File(c.filesDir, "wake")
     fun take(c: Context, phrase: String, i: Int) = File(dir(c), "${phrase.lowercase().replace(' ', '_')}$i.pcm")
-    fun hasTakes(c: Context) = WakeWord.PHRASES.all { p -> (1..TAKES).all { take(c, p, it).isFile } }
-    /** Every phrase from its kept takes; null when one cannot be read. */
-    fun phrases(c: Context): List<WakePhrase>? = runCatching { WakeWord.PHRASES.map { p -> WakePhrase(p, (1..TAKES).map { WakeWord.features(read(take(c, p, it))) }) } }
-        .getOrNull()?.takeIf { l -> l.all { p -> p.templates.all { it.isNotEmpty() } } }
+    private fun complete(c: Context, p: String) = (1..TAKES).all { take(c, p, it).isFile }
+    /** At least one phrase recorded: a phrase added later (Ahoy Tetra) waits for its takes while the others listen. */
+    fun hasTakes(c: Context) = WakeWord.PHRASES.any { complete(c, it) }
+    /** The phrases whose takes are all kept; null when none, or one cannot be read. */
+    fun phrases(c: Context): List<WakePhrase>? = runCatching { WakeWord.PHRASES.filter { complete(c, it) }.map { p -> WakePhrase(p, (1..TAKES).map { WakeWord.features(read(take(c, p, it))) }) } }
+        .getOrNull()?.takeIf { l -> l.isNotEmpty() && l.all { p -> p.templates.all { it.isNotEmpty() } } }
     fun read(f: File): ShortArray { val b = f.readBytes(); return ShortArray(b.size / 2) { ((b[2 * it].toInt() and 0xff) or (b[2 * it + 1].toInt() shl 8)).toShort() } }
     fun write(f: File, pcm: ShortArray) { f.parentFile?.mkdirs(); f.writeBytes(ByteArray(pcm.size * 2) { (pcm[it / 2].toInt() shr (8 * (it % 2))).toByte() }) }
+
+    /**
+     * Copies for tuning on the PC (the user's voice, kept in Tetra's own folder on this phone, never synced): the takes, and the
+     * last 40 windows that came near a phrase, as 16 kHz 16-bit PCM. adb pull …/files/wake-tuning, then tools/wake-test.py.
+     */
+    fun tuning(c: Context) = File(c.getExternalFilesDir(null), "wake-tuning")
+    fun keepTakes(c: Context) = runCatching { val d = tuning(c); d.mkdirs(); dir(c).listFiles()?.forEach { it.copyTo(File(d, it.name), overwrite = true) } }
+    fun keepNear(c: Context, phrase: String, ratio: Double, window: FloatArray) = runCatching {
+        val d = File(tuning(c), "near"); d.mkdirs()
+        val name = "${System.currentTimeMillis()}_${phrase.lowercase().replace(' ', '_')}_${"%.2f".format(java.util.Locale.ROOT, ratio)}.pcm"
+        write(File(d, name), ShortArray(window.size) { (window[it] * 32767).toInt().coerceIn(-32768, 32767).toShort() })
+        d.listFiles()?.sortedBy { it.name }?.dropLast(40)?.forEach { it.delete() }
+    }
 
     fun set(c: Context, on: Boolean) {
         prefs(c).edit().putBoolean("wake", on).apply()
@@ -67,13 +84,19 @@ internal object Wake {
 
 /**
  * The listening (Plan.md § Hey Tetra): the mic in a foreground service with its notice. In quiet only each 10 ms frame's
- * loudness is worked out (WakeDetector); "Hey Tetra" heard: a tone, then AI Assist's sheet over the lock screen, listening.
+ * loudness is worked out (WakeDetector); a phrase heard: no screen (the user, 15 Nov: "I just want sound feedback… What's up?"),
+ * a short spoken hello, then AI Assist's talk by voice (HomeTalk, the home-screen TV's); a screen only for an answer that needs one.
  * The mic is let go while AI Assist is on the screen, while another of Tetra's recordings runs, and during a call.
  */
 class WakeService : Service() {
     @Volatile private var stop = false
     @Volatile private var inCar = false
     private var thread: Thread? = null
+    /** The voice talk after a wake: the mic is HomeTalk's until it rests. */
+    @Volatile private var talking = false
+    private val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main)
+    private val reader by lazy { ReadAloud(applicationContext) }
+    private val talk by lazy { HomeTalk(applicationContext, scope, reader, openScreen = { openSheet(this) }).also { t -> t.changed = { if (t.phase == null) talking = false } } }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -85,10 +108,15 @@ class WakeService : Service() {
         return START_STICKY
     }
 
-    override fun onDestroy() { stop = true; running = false; thread?.interrupt(); thread = null; WriterLog.i("Hey Tetra: stopped"); super.onDestroy() }
+    override fun onDestroy() {
+        stop = true; running = false; thread?.interrupt(); thread = null
+        scope.launch { talk.end() }.invokeOnCompletion { scope.cancel(); runCatching { reader.shutdown() } }
+        WriterLog.i("Hey Tetra: stopped"); super.onDestroy()
+    }
 
     @SuppressLint("MissingPermission")
     private fun listen() {
+        Wake.keepTakes(this)
         val phrases = Wake.phrases(this) ?: run { WriterLog.w("Hey Tetra: the takes could not be read; record them again"); stopSelf(); return }
         WriterLog.i("Hey Tetra: listening for " + phrases.joinToString { "${it.name} (under ${"%.2f".format(it.threshold)}, takes ${it.templates.joinToString("/") { t -> "${t.size}" }} frames)" })
         val audio = getSystemService(AudioManager::class.java)
@@ -96,8 +124,12 @@ class WakeService : Service() {
         var rec: AudioRecord? = null
         var near = Double.POSITIVE_INFINITY; var wakes = 0; var summaryAt = System.currentTimeMillis(); var pausedMs = 0L
         // every score near the threshold goes to the log, for tuning it on this phone
-        fun detector() = WakeDetector(phrases) { p, r -> near = minOf(near, r); if (r < 1.25) WriterLog.i("Hey Tetra: heard ${p.name} at ${"%.2f".format(r)} of its threshold${if (r < 1) ": wakes" else ""}") }
-        var det = detector()
+        var det: WakeDetector? = null
+        fun detector() = WakeDetector(phrases) { p, r -> near = minOf(near, r); if (r < 2.0) {
+            WriterLog.i("Hey Tetra: heard ${p.name} at ${"%.2f".format(r)} of its threshold${if (r < 1) ": wakes" else ""}")
+            det?.lastWindow?.let { Wake.keepNear(this, p.name, r, it) }
+        } }.also { det = it }
+        detector()
         fun release() { rec?.let { runCatching { it.stop() }; it.release() }; rec = null }
         var carCheckAt = 0L
         // in the car (its Bluetooth, Tetra Car open, or Tetra Car SE saying hello) the steering-wheel button is the way in (the user, 15 Nov)
@@ -106,10 +138,10 @@ class WakeService : Service() {
             while (!stop) {
                 val now = System.currentTimeMillis()
                 if (now - summaryAt >= SUMMARY_MS) {
-                    WriterLog.i("Hey Tetra: last ${SUMMARY_MS / 60_000} min: ${det.allFrames / 100} s heard, ${"%.0f".format(100.0 * det.loudFrames / maxOf(1, det.allFrames))}% over the gate, " +
-                        "${det.checks} looked at, nearest ${"%.2f".format(near)} of a threshold, $wakes woke, ${pausedMs / 1000} s let go")
+                    WriterLog.i("Hey Tetra: last ${SUMMARY_MS / 60_000} min: ${det!!.allFrames / 100} s heard, ${"%.0f".format(100.0 * det!!.loudFrames / maxOf(1, det!!.allFrames))}% over the gate, " +
+                        "${det!!.checks} looked at, nearest ${"%.2f".format(near)} of a threshold, $wakes woke, ${pausedMs / 1000} s let go")
                     near = Double.POSITIVE_INFINITY; wakes = 0; summaryAt = now; pausedMs = 0
-                    det = detector()
+                    detector()
                 }
                 val other = rec?.let { r -> audio.activeRecordingConfigurations.any { it.clientAudioSessionId != r.audioSessionId } } ?: audio.activeRecordingConfigurations.isNotEmpty()
                 val car = inCar(now)
@@ -122,16 +154,16 @@ class WakeService : Service() {
                         maxOf(AudioRecord.getMinBufferSize(WakeWord.RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT), buf.size * 4))
                     if (r.state != AudioRecord.STATE_INITIALIZED) { r.release(); WriterLog.w("Hey Tetra: the mic did not open; trying again in 5 s"); Thread.sleep(5000); continue }
                     r.startRecording(); rec = r
-                    det = detector()
+                    detector()
                 }
                 val n = rec!!.read(buf, 0, buf.size)
                 if (n <= 0) { WriterLog.w("Hey Tetra: the mic read $n; opening it again"); release(); Thread.sleep(1000); continue }
-                if (det.push(buf, n)) {
+                if (det!!.push(buf, n)) {
                     wakes++
                     release()
                     WriterLog.i("Hey Tetra: woke")
                     wake()
-                    Thread.sleep(3000) // the sheet opens and takes the mic; then assistantShown keeps this away
+                    while (talking && !stop) Thread.sleep(300) // the talk has the mic until it rests
                 }
             }
         } catch (_: InterruptedException) {
@@ -140,19 +172,11 @@ class WakeService : Service() {
         } finally { release() }
     }
 
-    /** A tone, then AI Assist's sheet listening, the screen on and over the lock screen. */
+    /** A short spoken hello in AI Assist's voice, then the talk by voice; no key yet: the sheet, which says what is missing. */
     private fun wake() {
-        Chime.play(up = true)
-        Thread.sleep(350) // the tone done before the sheet's mic opens
-        val open = Intent(this, AssistantSheetActivity::class.java).putExtra(EXTRA, true).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        // Android opens a screen from the background only with "Display over other apps"; otherwise as an alarm's full-screen notice
-        if (android.provider.Settings.canDrawOverlays(this)) { runCatching { startActivity(open) }.onFailure { WriterLog.w("Hey Tetra: the sheet did not open", it) }; return }
-        val tap = PendingIntent.getActivity(this, ID + 1, open, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val n = NotificationCompat.Builder(this, channel(this, WOKE_CHANNEL, R.string.wake_title, NotificationManager.IMPORTANCE_HIGH)).setSmallIcon(R.drawable.ic_mic)
-            .setContentTitle(getString(R.string.app_assistant)).setContentText(getString(R.string.assistant_listening)).setCategory(NotificationCompat.CATEGORY_CALL)
-            .setPriority(NotificationCompat.PRIORITY_HIGH).setContentIntent(tap).setFullScreenIntent(tap, true).setAutoCancel(true).setTimeoutAfter(15_000).build()
-        runCatching { NotificationManagerCompat.from(this).notify(ID + 1, n) }.onFailure { WriterLog.w("Hey Tetra: the notice was not allowed: ${it.message}") }
-        WriterLog.i("Hey Tetra: opened by a full-screen notice (no \"Display over other apps\")")
+        val hello = getString(listOf(R.string.wake_hello_1, R.string.wake_hello_2, R.string.wake_hello_3).random())
+        talking = true
+        scope.launch { if (!talk.wake(hello)) { talking = false; openSheet(this@WakeService) } }
     }
 
     private fun notice() = NotificationCompat.Builder(this, channel(this, CHANNEL, R.string.wake_title, NotificationManager.IMPORTANCE_LOW)).setSmallIcon(R.drawable.ic_mic)
@@ -172,6 +196,24 @@ class WakeService : Service() {
         /** AI Assist's screens now started (AssistantActivity): the mic is theirs meanwhile. */
         @Volatile var assistantShown = 0
         fun cancelNotice(c: Context) = NotificationManagerCompat.from(c).cancel(ID + 1)
+
+        /** AI Assist's sheet with the conversation: opaque over the lock screen (the only kind Android shows there), else over the app in use. */
+        fun openSheet(c: Context) {
+            val locked = c.getSystemService(KeyguardManager::class.java).isKeyguardLocked || !c.getSystemService(android.os.PowerManager::class.java).isInteractive
+            open(c, Intent(c, if (locked) AssistantWakeActivity::class.java else AssistantSheetActivity::class.java).putExtra(EXTRA, true))
+        }
+
+        /** A screen from the background: Android allows it only with "Display over other apps"; otherwise as an alarm's full-screen notice. */
+        fun open(c: Context, i: Intent) {
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (android.provider.Settings.canDrawOverlays(c)) { runCatching { c.startActivity(i) }.onFailure { WriterLog.w("Hey Tetra: ${i.component?.shortClassName} did not open", it) }; return }
+            val tap = PendingIntent.getActivity(c, ID + 1, i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            val n = NotificationCompat.Builder(c, channel(c, WOKE_CHANNEL, R.string.wake_title, NotificationManager.IMPORTANCE_HIGH)).setSmallIcon(R.drawable.ic_mic)
+                .setContentTitle(c.getString(R.string.app_assistant)).setContentText(c.getString(R.string.wake_title)).setCategory(NotificationCompat.CATEGORY_CALL)
+                .setPriority(NotificationCompat.PRIORITY_HIGH).setContentIntent(tap).setFullScreenIntent(tap, true).setAutoCancel(true).setTimeoutAfter(15_000).build()
+            runCatching { NotificationManagerCompat.from(c).notify(ID + 1, n) }.onFailure { WriterLog.w("Hey Tetra: the notice was not allowed: ${it.message}") }
+            WriterLog.i("Hey Tetra: ${i.component?.shortClassName} opened by a full-screen notice (no \"Display over other apps\")")
+        }
         private fun channel(c: Context, id: String, name: Int, importance: Int): String {
             c.getSystemService(NotificationManager::class.java).createNotificationChannel(NotificationChannel(id, c.getString(name), importance))
             return id
@@ -185,6 +227,9 @@ class WakeService : Service() {
  * (Tetra Car open, Tetra Car SE saying hello, or the car's Bluetooth) nothing is asked.
  */
 internal object WakeUnlock {
+    /** UnlockActivity's answer goes here. */
+    @Volatile var answer: ((Boolean) -> Unit)? = null
+    fun answered(ok: Boolean) { answer?.invoke(ok); answer = null }
     /** Set by AI Assist's screen while it is shown: asks Android's unlock, then says whether it happened. */
     @Volatile var ask: ((done: (Boolean) -> Unit) -> Unit)? = null
 
@@ -195,11 +240,26 @@ internal object WakeUnlock {
         Car.inCar(c) { inCar = it; car.countDown() }
         car.await(2, TimeUnit.SECONDS)
         if (inCar) { WriterLog.i("AI Assist: locked, in the car: no unlock asked"); return true }
-        val asking = ask ?: run { WriterLog.i("AI Assist: locked and no screen to ask the unlock on"); return false }
+        // no AI Assist screen (woken by voice): a screen of its own only for Android's unlock
+        val asking = ask ?: { done: (Boolean) -> Unit -> answer = done; WakeService.open(c, Intent(c, UnlockActivity::class.java)) }
         val done = CountDownLatch(1); var unlocked = false
         asking { unlocked = it; done.countDown() }
         done.await(60, TimeUnit.SECONDS)
         WriterLog.i("AI Assist: unlock asked for a personal tool: ${if (unlocked) "unlocked" else "not unlocked"}")
         return unlocked
     }
+}
+
+/** Android's unlock asked for AI Assist's voice talk on a locked phone (WakeUnlock): over the lock screen, the screen on, gone after. */
+class UnlockActivity : androidx.activity.ComponentActivity() {
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        WakeService.cancelNotice(this)
+        getSystemService(KeyguardManager::class.java).requestDismissKeyguard(this, object : KeyguardManager.KeyguardDismissCallback() {
+            override fun onDismissSucceeded() = done(true)
+            override fun onDismissCancelled() = done(false)
+            override fun onDismissError() = done(false)
+        })
+    }
+    private fun done(ok: Boolean) { WakeUnlock.answered(ok); finish() }
 }

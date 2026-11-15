@@ -26,14 +26,14 @@ internal object WakeWord {
     const val ONSET_SILENCE = 15        // frames of quiet before an onset counts
     const val WINDOW = 160              // frames (1.6 s) looked at after an onset
     const val PRE = 5                   // frames kept before it
-    /** The wake phrases (the user, 15 Nov: "Just Tetra, ok Tetra and hey Tetra"), each with its own takes and threshold. */
-    val PHRASES = listOf("Hey Tetra", "OK Tetra", "Tetra")
+    /** The wake phrases (the user, 15 Nov: "Just Tetra, ok Tetra and hey Tetra"; then "Ahoy", Bell's telephone greeting), each its own takes and threshold. */
+    val PHRASES = listOf("Hey Tetra", "OK Tetra", "Ahoy Tetra", "Tetra")
     /**
      * Each phrase's threshold: this times its takes' median leave-one-out distance. tools/wake-test.py on the user's voice,
      * 15 Nov: Hey Tetra's takes ≤ 1.32, their talk and look-alike words ≥ 1.50; OK Tetra's held-out 0.98, their talk ≥ 1.39;
      * Tetra's takes ≤ 1.03, a look-alike word 1.25 (other people's lectures ≥ 1.53 for all three).
      */
-    val FACTOR = mapOf("Hey Tetra" to 1.45, "OK Tetra" to 1.35, "Tetra" to 1.2)
+    val FACTOR = mapOf("Hey Tetra" to 1.45, "OK Tetra" to 1.35, "Ahoy Tetra" to 1.4 /* not measured on the PC: between its two-word neighbours */, "Tetra" to 1.2)
     /** Frames over the gate before a window is looked at: a lone "Tetra" is 0.4 s with a stop inside. */
     const val MIN_SPEECH = 15
     /** A take this much further from the others than the median is offered to be recorded again (15 Nov: one take was 1.40). */
@@ -205,6 +205,8 @@ internal class WakeDetector(private val phrases: List<WakePhrase>, private val h
     var loudFrames = 0L; private set
     val allFrames get() = frame
     var checks = 0; private set
+    /** The window last looked at (for the phone's near-miss copies, WakeService). */
+    var lastWindow: FloatArray? = null; private set
 
     fun push(pcm: ShortArray, n: Int = pcm.size): Boolean {
         var woke = false
@@ -238,6 +240,7 @@ internal class WakeDetector(private val phrases: List<WakePhrase>, private val h
     private fun check(on: Long, floorThen: Double): Boolean {
         val a = maxOf(0L, on - WakeWord.PRE); val b = on + WakeWord.WINDOW
         val seg = FloatArray(((b - a) * WakeWord.HOP).toInt()) { ring[((a * WakeWord.HOP + it) % ring.size).toInt()] }
+        lastWindow = seg
         val power = WakeWord.spectrum(seg)
         val bar = maxOf(WakeWord.GATE_ABS_DB, floorThen + WakeWord.GATE_OVER_FLOOR_DB)
         val loud = BooleanArray(power.size) { dbs[((a + it) % frames).toInt()] > bar }

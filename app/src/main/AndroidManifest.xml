@@ -333,6 +333,12 @@
         </activity-alias>
         <!-- Tetra Assistant (Assistant.kt): the chat, and the sheet the phone's assistant gesture opens over any app -->
         <activity android:name=".AssistantActivity" android:exported="false" android:label="@string/app_assistant" android:icon="@mipmap/applet_assistant" android:roundIcon="@mipmap/applet_assistant" android:taskAffinity="com.kalotrapezis.drive.assistant.chat" android:windowSoftInputMode="adjustResize" />
+        <!-- the sheet opened by "Hey Tetra" on a locked phone: opaque, as only an opaque window covers the lock screen and turns the screen on -->
+        <activity android:name=".UnlockActivity" android:exported="false" android:excludeFromRecents="true" android:taskAffinity=""
+            android:showWhenLocked="true" android:turnScreenOn="true" />
+        <activity android:name=".AssistantWakeActivity" android:exported="false" android:label="@string/home_label_assistant" android:icon="@mipmap/applet_assistant"
+            android:excludeFromRecents="true" android:launchMode="singleTask" android:taskAffinity="com.kalotrapezis.drive.assistant" android:windowSoftInputMode="adjustResize"
+            android:showWhenLocked="true" android:turnScreenOn="true" />
         <activity android:name=".AssistantSheetActivity" android:exported="true" android:label="@string/home_label_assistant" android:icon="@mipmap/applet_assistant" android:roundIcon="@mipmap/applet_assistant" android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:excludeFromRecents="true" android:launchMode="singleTask" android:taskAffinity="com.kalotrapezis.drive.assistant" android:windowSoftInputMode="adjustResize">
             <intent-filter><action android:name="android.intent.action.ASSIST" /><category android:name="android.intent.category.DEFAULT" /></intent-filter>

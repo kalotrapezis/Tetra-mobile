@@ -33,7 +33,7 @@ val carManifest = layout.buildDirectory.file("generated/car/AndroidManifest.xml"
         "CalendarActivity", "TimerActivity", "PillsActivity", "ContactsActivity", "MailActivity", "PasswordsActivity", "PasswordsAutofill", "AutofillUnlock",
         "AppPhotos", "AppFiles", "AppNotes", "AppScanner", "AppCodes", "AppOffice", "AppTextEditor", "AppCalendar", "AppTimer", "AppPills", "AppMaps",
         "AppMail", "AppMessages", "AppBrowser", "AppCar", "AppPasswords", "AppContacts", "AppPhone", "AppData", "AppAssistant", "CalendarOpen", "OfficeOpen",
-        "TextEditorActivity", "MailShare", "SendToComputer", "LocationReminderReceiver", "CalendarAlarmReceiver", "PillsReceiver", "PillsVoiceService", "WakeService")
+        "TextEditorActivity", "MailShare", "SendToComputer", "LocationReminderReceiver", "CalendarAlarmReceiver", "PillsReceiver", "PillsVoiceService", "WakeService", "AssistantWakeActivity", "UnlockActivity")
     for (name in unused) {
         val one = Regex("""\s*<(activity|activity-alias|service|receiver) android:name="\.$name"(?:[^>]*?/>|.*?</\1>)""", RegexOption.DOT_MATCHES_ALL)
         check(one.containsMatchIn(text)) { "$name is not in app's manifest: take it off this list" }
