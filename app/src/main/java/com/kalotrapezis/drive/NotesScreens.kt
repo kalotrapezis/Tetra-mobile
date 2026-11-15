@@ -138,6 +138,7 @@ internal fun NotesTab(back: () -> Unit, start: Boolean?, hasAccess: Boolean, gra
     var selected by remember { mutableStateOf(emptySet<String>()) }
     val remote by NotesSync.changed.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
+    LaunchedEffect(version) { if (version > 0) LocationReminders.tidySoon(context) } // a list deleted, trashed, archived or ticked: its place reminder goes
     LaunchedEffect(version, remote, hasAccess) {
         if (!hasAccess) return@LaunchedEffect
         // opened before the read-ahead finished: the list as the index file has it (one file), then the folder's

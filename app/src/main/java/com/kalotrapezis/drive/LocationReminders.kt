@@ -75,6 +75,28 @@ internal object LocationReminders {
             MapsSearch.fold(n.title).let { t -> w.all { it in t } } }.maxByOrNull { it.updatedAt }
     }
 
+    /** The checklist [noteId] still wants ringing: there, not in the trash or archived, something left to tick. */
+    fun wanted(noteId: String): Boolean = runCatching {
+        val store = NotesStore(TetraSystem.dir(driveRoot(), "Notes", "Shared"))
+        store.whole(listOf(noteId)).firstOrNull()?.let { n -> n.trashedAt == null && n.archivedAt == null && n.items.any { !it.checked && it.text.isNotBlank() } } ?: false
+    }.getOrDefault(true) // unreadable now: left as it is
+
+    /** A shown reminder answered (✕ Done) or gone: no longer followed. */
+    fun forget(c: Context, notification: Int) = prefs(c).let { p -> p.edit().putStringSet("shown", p.getStringSet("shown", emptySet())!!.filter { !it.startsWith("$notification|") }.toSet()).apply() }
+
+    /** A place reminder still on the screen whose checklist went (deleted, trashed, archived, all ticked; here or on another device):
+     *  taken away, its snooze too (the user, 15 Nov: "when I delete the note (Ψώνια) the notification persists"). */
+    fun tidySoon(c: Context) { val app = c.applicationContext; Thread { runCatching { tidy(app) }.onFailure { WriterLog.e("Place reminders: tidy failed", it) } }.start() }
+    @Synchronized fun tidy(c: Context) {
+        val p = prefs(c); val shown = p.getStringSet("shown", emptySet())!!
+        if (shown.isEmpty()) return
+        val keep = shown.filter { e ->
+            val id = e.substringBefore('|').toIntOrNull() ?: return@filter false
+            wanted(e.substringAfter('|')).also { if (!it) { CalendarAlarms.dismiss(c, id); WriterLog.i("Place reminders: its list is gone, the reminder taken away") } }
+        }
+        p.edit().putStringSet("shown", keep.toSet()).apply()
+    }
+
     fun planSoon(c: Context, here: Location? = null) { val app = c.applicationContext; Thread { runCatching { plan(app, here) }.onFailure { WriterLog.e("Place reminders: plan failed", it) } }.start() }
 
     private fun alert(c: Context, i: Int, w: Watched? = null) = PendingIntent.getBroadcast(c, 9100 + i,
@@ -124,7 +146,9 @@ internal object LocationReminders {
         p.edit().putLong("rang_$id", System.currentTimeMillis()).apply()
         val left = n.items.filter { !it.checked && it.text.isNotBlank() }.sortedBy { it.order }
         val place = i.getStringExtra("name").orEmpty().ifEmpty { r.name }
-        CalendarAlarms.post(c, "place|$id".hashCode(), n.title.ifBlank { c.getString(R.string.place_reminder_title) },
+        val shown = "place|$id".hashCode()
+        prefs(c).edit().putStringSet("shown", prefs(c).getStringSet("shown", emptySet())!!.filter { !it.startsWith("$shown|") }.toSet() + "$shown|${n.id}").apply()
+        CalendarAlarms.post(c, shown, n.title.ifBlank { c.getString(R.string.place_reminder_title) },
             (if (place.isNotEmpty()) "$place · " else "") + left.joinToString(", ") { it.text.trim() }, CalendarFiles.PALETTE[0],
             time = left.size.toString(), open = "note:${n.id}")
     }

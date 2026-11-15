@@ -75,6 +75,7 @@ internal fun ResultCards(cards: List<ResultCard>, a: CardActions) {
                 Text(c.label.ifBlank { stringResource(R.string.app_timer) }, style = MaterialTheme.typography.titleSmall)
                 Text("%d:%02d".format(java.util.Locale.ROOT, left / 60, left % 60), style = MaterialTheme.typography.headlineSmall)
             }
+            is ResultCard.Reminders -> RemindersCard(c)
             is ResultCard.Contact -> Unit
         } }
     }
@@ -279,5 +280,24 @@ internal object MailQuick {
         WriterLog.i("AI Assist: sending the mail written to ${m.to}")
         return if (MailEngine.ownAccounts(root).any { it.optString("id") == m.account }) { MailSend.send(c, root, out); R.string.mail_sent_ok }
         else { MailOutbox.write(c, root, out, "send", bodyHtml, "<${java.util.UUID.randomUUID()}@${m.from.substringAfter('@')}>"); ScopedSync.soon(c, "mail", 0, orWhole = true); R.string.mail_outbox_send }
+    }
+}
+
+/** The reminders by place, an × on each: a tap deletes that one, here and in Settings › Calendar. */
+@Composable private fun RemindersCard(c: ResultCard.Reminders) = CardBox(AppColor.calendar) {
+    val context = LocalContext.current
+    var left by remember(c) { mutableStateOf(c.items) }
+    Text(stringResource(R.string.place_reminders), style = MaterialTheme.typography.titleSmall)
+    if (left.isEmpty()) Text(stringResource(R.string.place_reminders_none), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    left.forEach { r ->
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(if (r.kind.isNotEmpty()) MapsSearch.label(r.kind, context) else r.name, style = MaterialTheme.typography.bodyLarge)
+                Text(r.note.ifEmpty { stringResource(R.string.place_reminders_any) }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            IconButton(onClick = { LocationReminders.remove(context, driveRoot(), r.id); left = left - r; WriterLog.i("AI Assist: place reminder deleted from its card") }) {
+                Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_delete))
+            }
+        }
     }
 }

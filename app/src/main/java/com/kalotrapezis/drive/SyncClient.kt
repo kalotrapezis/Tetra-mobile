@@ -1009,7 +1009,7 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         val store = notesStore()
         if (store.root.parentFile?.isDirectory != true) return 0
         val answer = postJson(host, p, "/notes", store.payload())
-        return (if (answer.optBoolean("off")) 0 else store.apply(answer)).also { if (it > 0) NotesSync.changed.value++ }
+        return (if (answer.optBoolean("off")) 0 else store.apply(answer)).also { if (it > 0) { NotesSync.changed.value++; LocationReminders.tidySoon(context) } } // a list deleted elsewhere: its reminder goes
     }
 
     /**

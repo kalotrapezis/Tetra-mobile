@@ -360,4 +360,15 @@ class AssistantTest {
         assertNull(r.go) // not sent, not opened: the card waits for Send
         assertEquals(ResultCard.Mail("gmail", "me@example.com", "maria@example.com", "Αύριο", "Γεια σου Μαρία,\nτα λέμε αύριο."), r.cards.single())
     }
+
+    @Test fun theRemindersByPlaceAreListedWithAnXEach() {
+        LocationReminders.save(tetra, emptyList())
+        assertEquals("No reminders by place.", tools().run("reminders_list", JSONObject()).forModel)
+        LocationReminders.save(tetra, listOf(PlaceReminder("r1", "supermarket", "", 0.0, 0.0, "Ψώνια"),
+            PlaceReminder("r2", "", "Σπίτι", 38.3, 23.3, LocationReminders.PILLS + "123"))) // a pill put off: Pills', not listed
+        val r = tools().run("reminders_list", JSONObject())
+        assertTrue(r.forModel, r.forModel.contains("\"Ψώνια\"") && !r.forModel.contains("Σπίτι"))
+        assertEquals(listOf("r1"), (r.cards.single() as ResultCard.Reminders).items.map { it.id })
+        LocationReminders.save(tetra, emptyList())
+    }
 }

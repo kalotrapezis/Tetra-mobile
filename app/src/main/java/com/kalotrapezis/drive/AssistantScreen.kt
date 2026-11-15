@@ -385,6 +385,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
         speech?.say(cut.rest()); speech?.finish()
         scope.launch { speech?.await(); talking = false }
         phase = Phase.Idle; spent = chat.bill.usd
+        LocationReminders.tidySoon(context) // a list AI Assist deleted or ticked: its place reminder goes
         val reply = r.getOrElse { speech?.stop(); say(it.shownMessage(context) ?: context.getString(R.string.assistant_server, 0), true); WriterLog.w("Assistant: ${it.message}"); listenAgain(); return@launch }
         bubbles += Bubble(false, reply.text, reply.choices, reply.call, reply.images, audio = reply.audio, cards = reply.cards, confirm = reply.confirm)
         keep()

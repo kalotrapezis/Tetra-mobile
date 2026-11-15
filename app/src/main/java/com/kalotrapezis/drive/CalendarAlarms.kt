@@ -143,6 +143,14 @@ internal object CalendarAlarms {
         if (front) ringing.value = Ringing(id, title, text, color, occurrence, time, open)
     }
 
+    /** Reminder [id] taken away, as if never shown: its notification, its pop-up and a snooze waiting to ring it again. */
+    fun dismiss(c: Context, id: Int) {
+        NotificationManagerCompat.from(c).cancel(id)
+        if (ringing.value?.id == id) ringing.value = null
+        PendingIntent.getBroadcast(c, id, Intent(c, CalendarAlarmReceiver::class.java).setAction(ACTION_AGAIN), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE)
+            ?.let { pi -> c.getSystemService(AlarmManager::class.java)?.cancel(pi); pi.cancel() }
+    }
+
     /** The pop-up's ✕ Done or Snooze: the same as the notification's buttons. */
     fun answer(c: Context, r: Ringing, done: Boolean) {
         ringing.value = null
@@ -178,10 +186,13 @@ internal object CalendarAlarms {
         ACTION_TEST -> post(c, 4242, c.getString(R.string.calendar_test_title), c.getString(R.string.calendar_test_text), CalendarFiles.PALETTE[0], "", java.time.LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")))
         ACTION_DONE -> {
             NotificationManagerCompat.from(c).cancel(i.getIntExtra("id", 0))
+            LocationReminders.forget(c, i.getIntExtra("id", 0))
             i.getStringExtra("occurrence")?.takeIf { it.isNotEmpty() }?.let { k -> prefs(c).edit().putStringSet("done", doneKeys(c) + k).apply() }
             plan(c)
         }
-        ACTION_AGAIN -> post(c, i.getIntExtra("id", 0), i.getStringExtra("title").orEmpty(), i.getStringExtra("text").orEmpty(), i.getIntExtra("color", CalendarFiles.PALETTE[0]),
+        // a snoozed place reminder whose checklist went meanwhile (deleted, trashed, archived, all ticked): not again
+        ACTION_AGAIN -> if (i.getStringExtra("open")?.startsWith("note:") == true && !LocationReminders.wanted(i.getStringExtra("open")!!.removePrefix("note:"))) {
+            WriterLog.i("Place reminders: a snoozed list is gone, not rung again"); LocationReminders.forget(c, i.getIntExtra("id", 0)) } else post(c, i.getIntExtra("id", 0), i.getStringExtra("title").orEmpty(), i.getStringExtra("text").orEmpty(), i.getIntExtra("color", CalendarFiles.PALETTE[0]),
             i.getStringExtra("occurrence").orEmpty(), i.getStringExtra("time").orEmpty(), i.getStringExtra("open") ?: Applet.Calendar.name)
         else -> plan(c) // its alarm, a start, a clock or zone change, an update
     }

@@ -46,6 +46,8 @@ internal sealed class ResultCard {
     data class Event(val title: String, val start: ZonedDateTime, val end: ZonedDateTime, val allDay: Boolean, val calendar: String, val place: String) : ResultCard()
     data class Note(val id: String, val title: String, val lines: List<String>) : ResultCard()
     data class Timer(val label: String, val endsAt: Long) : ResultCard()
+    /** The reminders by place, each with an × that deletes it (the user, 15 Nov: "show me a list with an x so I can select what to delete"). */
+    data class Reminders(val items: List<PlaceReminder>) : ResultCard()
     /** An SMS written, waiting for Send: to [name] ([number] itself when it is no contact). */
     data class Sms(val name: String, val number: String, val text: String) : ResultCard()
     /**
@@ -373,6 +375,7 @@ internal class AssistantTools(
             "navigate" -> navigate(args)
             "photos_place" -> photosPlace(args)
             "place_reminder" -> placeReminder(args)
+            "reminders_list" -> remindersList()
             "youtube" -> args.getString("query").trim().let { q -> ToolResult("YouTube is open on a search for \"$q\".", go = "youtube:$q") }
             // Tetra's Browser in Player mode: the site's search, its first result played (BrowserScreen's play)
             "media_play" -> args.getString("query").trim().let { q -> MediaSites.byId(args.optString("site")).let { site -> args.optBoolean("playlist").let { list ->
@@ -758,6 +761,14 @@ internal class AssistantTools(
         val list = if (note.isEmpty()) "the newest checklist with items left" else "the newest checklist titled \"$note\""
         return if (placesOn()) ToolResult("Set: arriving at $what shows $list.")
         else ToolResult("Saved: arriving at $what will show $list, but place reminders are off. Settings › Calendar is open: the user turns them on there and allows the location all the time.", go = LocationReminders.SCREEN)
+    }
+
+    private fun remindersList(): ToolResult {
+        val all = LocationReminders.list(tetra).filter { !it.note.startsWith(LocationReminders.PILLS) } // a pill put off is Pills', not a list's
+        if (all.isEmpty()) return ToolResult("No reminders by place.")
+        return ToolResult("${all.size} reminders by place, on the screen with an × each to delete it (deleting is the user's tap):\n" +
+            all.joinToString("\n") { r -> "- arriving at ${if (r.kind.isNotEmpty()) "any ${r.kind}" else r.name}: ${if (r.note.isEmpty()) "the newest checklist with items left" else "the checklist \"${r.note}\""}" },
+            cards = listOf(ResultCard.Reminders(all)))
     }
 
     private fun photosPlace(a: JSONObject): ToolResult {
@@ -1583,7 +1594,7 @@ internal class AssistantTools(
             "timer_start" to "timer", "timer_list" to "timer", "timer_stop" to "timer", "alarm_add" to "timer", "alarm_list" to "timer", "alarm_delete" to "timer", "stopwatch" to "timer",
             "notes_search" to "notes", "note_new" to "notes", "note_open" to "notes", "note_pin" to "notes", "note_color" to "notes", "shopping_list" to "notes", "files_find" to "files", "file_open" to "files",
             "contacts_find" to "contacts", "my_card" to "contacts", "relation_remember" to "contacts", "relation_forget" to "contacts", "contact_call" to "phone",
-            "navigate" to "maps", "place_reminder" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail", "mail_stored_find" to "mail", "mail_export" to "mail",
+            "navigate" to "maps", "place_reminder" to "maps", "reminders_list" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail", "mail_stored_find" to "mail", "mail_export" to "mail",
             "sms_list" to "sms", "sms_read" to "sms", "sms_write" to "sms",
             "web_search" to "web", "make_image" to "web", "youtube" to "web", "media_play" to "browser", "spotify_mix" to "browser", "app_open" to "browser", "car_assist" to "phone", "media_like" to "browser", "radio_play" to "browser", "open_url" to "browser", "send_to_device" to "browser", "attachment_read" to "files", "audio_make" to "files")
         private val PERSONAL_APPS = setOf("mail", "calendar", "notes", "files", "photos", "contacts", "phone", "sms", "writer", "pills")
@@ -1661,6 +1672,7 @@ internal class AssistantTools(
                 "kind" to JSONObject().put("type", "string").put("enum", JSONArray(MapsSearch.PILLS.map { it.key })).put("description", "A kind of place, for any of them (supermarket)."),
                 "place" to p("string", "One place instead: a saved place's name, a shop's name or an address."),
                 "note" to p("string", "Words of the checklist's title (Ψώνια for shopping); leave out for any checklist with items left.")),
+            fn("reminders_list", "The user's reminders by place (place_reminder's) on the screen, each with an × to delete it: «τι υπενθυμίσεις έχω;», «σβήσε μια υπενθύμιση». Deleting is the user's tap on the ×.", emptyList()),
             fn("photos_place", "Show the user's photos taken at a place.", listOf("place"), "place" to p("string", "A town or a place.")),
             fn("youtube", "Open the YouTube app on a search, only when the user names the YouTube app.", listOf("query"), "query" to p("string", "The song or video, with the artist if said.")),
             fn("media_play", "Play a song, a video or a playlist in Tetra's Browser: the site's search opens and its first result plays, in Player mode.", listOf("query"),
