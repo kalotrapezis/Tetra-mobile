@@ -33,7 +33,9 @@ internal object WakeWord {
      * 15 Nov: Hey Tetra's takes ≤ 1.32, their talk and look-alike words ≥ 1.50; OK Tetra's held-out 0.98, their talk ≥ 1.39;
      * Tetra's takes ≤ 1.03, a look-alike word 1.25 (other people's lectures ≥ 1.53 for all three).
      */
-    val FACTOR = mapOf("Hey Tetra" to 1.45, "OK Tetra" to 1.35, "Ahoy Tetra" to 1.4 /* not measured on the PC: between its two-word neighbours */, "Tetra" to 1.2)
+    // the phone, 15 Nov (near and far takes mixed): the user's tries from their chair 1.03–1.32 of the PC's thresholds, all other sound
+    // ≥ 1.35 (most ≥ 1.5): the long phrases a fifth looser, the short "Tetra" a tenth
+    val FACTOR = mapOf("Hey Tetra" to 1.75, "OK Tetra" to 1.6, "Ahoy Tetra" to 1.7, "Tetra" to 1.3)
     /** Frames over the gate before a window is looked at: a lone "Tetra" is 0.4 s with a stop inside. */
     const val MIN_SPEECH = 15
     /** A take this much further from the others than the median is offered to be recorded again (15 Nov: one take was 1.40). */

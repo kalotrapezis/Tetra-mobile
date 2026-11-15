@@ -17,11 +17,13 @@ How to write here:
       tribute to Bell). MFCC + DTW against the user's 4 takes of each phrase, each phrase its own threshold, the best match wakes
       (WakeWord.kt; tools/wake-test.py the same pipeline, tools/wake-record.sh the takes). PC test on the user's voice: every held-out take
       caught; no false wake in 1 h 52 min of lectures and a podcast, a minute of their talk, or 30 s of look-alike words (Τετάρτη,
-      τετράδιο, Πέτρα, μέτρα…). Thresholds × each phrase's median leave-one-out distance: Hey Tetra 1.45, OK Tetra 1.35, Tetra 1.20,
-      Ahoy Tetra 1.40 (not measured on the PC). Settings › AI Assist › Hey Tetra (off; per device — one device only, as two would both
+      τετράδιο, Πέτρα, μέτρα…). Thresholds × each phrase's median leave-one-out distance, set from the PC then loosened on the phone
+      (the user's tries from their chair 1.03–1.32 of the PC's, other sound ≥ 1.35): Hey Tetra 1.75, OK Tetra 1.6, Ahoy Tetra 1.7, Tetra 1.3. Settings › AI Assist › Hey Tetra (off; per device — one device only, as two would both
       answer); the takes on one page, kept ones filled in, Try it. A wake: no screen (the user: "I just want sound feedback… What's up?"),
-      a spoken hello ("What's up?", "Hey, I'm here.", "Ahoy!"), then AI Assist by voice (HomeTalk); a screen only for an answer that needs
-      one (opaque over the lock screen); a personal tool when locked: only Android's unlock (UnlockActivity), not in the car. Paused while
+      a spoken hello ("What's up?", "Hey, I'm here.", "Ahoy!"), then AI Assist by voice (HomeTalk); its screen only for an answer that needs
+      a tap (a call, choices, a yes); an answer that opens something (music, an app, a file) opens it, after the unlock when locked (the
+      Browser over the lock screen was tried and dropped: "it does not make sense"); a soft tick while it thinks; a personal tool when
+      locked: only Android's unlock (UnlockActivity), not in the car. Paused while
       AI Assist is open, another recording, a call, in the car. On the phone (15 Nov): woke on OK Tetra and Hey Tetra; near misses came
       from speaking 13–20 dB quieter than the takes (further away): takes now asked near and far. Copies for tuning in
       files/wake-tuning (takes, last 40 near windows). Car build leaves it out. **Open:** voice-only wake and unlock on the phone; an hour's battery.

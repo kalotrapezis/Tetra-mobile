@@ -102,7 +102,45 @@ class WakeService : Service() {
     @Volatile private var talking = false
     private val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main)
     private val reader by lazy { ReadAloud(applicationContext) }
-    private val talk by lazy { HomeTalk(applicationContext, scope, reader, openScreen = { openSheet(this) }).also { t -> t.changed = { if (t.phase == null) talking = false } } }
+    private val talk by lazy { HomeTalk(applicationContext, scope, reader, openScreen = { openSheet(this) }, act = ::act, pulse = true).also { t -> t.changed = { if (t.phase == null) talking = false } } }
+
+    /**
+     * An answer that only opens something (the user, 15 Nov: "it opens the assistant for a second time and it does nothing"): that
+     * thing is opened, after Android's unlock when the phone is locked (an app is not shown over the lock screen). AI Assist's
+     * screen only for what needs a tap there: a call, choices, a confirmation, audio.
+     */
+    private fun act(r: AssistantReply): Boolean {
+        // a tap is needed only for a call, a choice, a yes or an audio's estimate; cards and pictures stay in the kept chat (seen 15 Nov:
+        // a web search's sources opened the screen after the answer had been said)
+        if (r.call != null || r.confirm != null || r.audio != null || r.choices.isNotEmpty()) return false
+        if (r.go == null && r.open == null) return true
+        val target = r.go?.let { v -> when {
+            v.startsWith("youtube:") -> caught { openYouTube(it, v.removePrefix("youtube:")) }
+            v.startsWith("app:") -> caught { carOpenApp(it, v.removePrefix("app:")) }
+            else -> runCatching { appletIntent(this, v) }.getOrNull()
+        } } ?: r.open?.let { f -> runCatching {
+            val mime = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(f.extension.lowercase(java.util.Locale.ROOT)) ?: "application/octet-stream"
+            Intent(Intent.ACTION_VIEW).setDataAndType(androidx.core.content.FileProvider.getUriForFile(this, "$packageName.files", f), mime).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }.getOrNull() } ?: return false
+        val locked = getSystemService(KeyguardManager::class.java).isKeyguardLocked
+        // an app over the lock screen made no sense (the user, 15 Nov, after the Browser's player was tried there): unlock first
+        WriterLog.i("Hey Tetra: the answer opens ${target.component?.shortClassName ?: target.action}${if (locked) ", after the unlock" else ""}")
+        open(this, if (locked) Intent(this, UnlockActivity::class.java).putExtra(UnlockActivity.THEN, target) else target)
+        return true
+    }
+
+    /** The screen Tetra's own code would open ([run] given a stand-in Context), caught instead of opened; an app that is not there still fails. */
+    private fun caught(run: (Context) -> Unit): Intent? {
+        var got: Intent? = null
+        val stand = object : android.content.ContextWrapper(this) {
+            override fun startActivity(intent: Intent) {
+                if (intent.resolveActivity(packageManager) == null) throw android.content.ActivityNotFoundException(intent.toString())
+                if (got == null) got = intent
+            }
+        }
+        runCatching { run(stand) }
+        return got
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -269,5 +307,12 @@ class UnlockActivity : androidx.activity.ComponentActivity() {
             override fun onDismissError() = done(false)
         })
     }
-    private fun done(ok: Boolean) { WakeUnlock.answered(ok); finish() }
+    private fun done(ok: Boolean) {
+        WakeUnlock.answered(ok)
+        // what AI Assist's answer opens (WakeService.act), now that the phone is unlocked
+        if (ok) (if (android.os.Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(THEN, Intent::class.java) else @Suppress("DEPRECATION") intent.getParcelableExtra(THEN))
+            ?.let { runCatching { startActivity(it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }.onFailure { e -> WriterLog.w("Hey Tetra: after the unlock it did not open", e) } }
+        finish()
+    }
+    companion object { const val THEN = "com.kalotrapezis.drive.UNLOCK_THEN" }
 }

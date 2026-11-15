@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -55,7 +56,11 @@ import java.util.concurrent.atomic.AtomicBoolean
  * (a call, choices, a card, a file, an app) goes on in AI Assist with the conversation, which is the same one.
  */
 @Stable
-internal class HomeTalk(private val c: Context, private val scope: CoroutineScope, private val reader: ReadAloud, private val openScreen: () -> Unit = { openAssistant(c) }) {
+internal class HomeTalk(private val c: Context, private val scope: CoroutineScope, private val reader: ReadAloud, private val openScreen: () -> Unit = { openAssistant(c) },
+    /** An answer that opens something (music, an app, a file) carried out here instead of on AI Assist's screen; true when done (WakeService). */
+    private val act: ((AssistantReply) -> Boolean)? = null,
+    /** No screen at all (a voice wake): a soft tick while it works out the answer, so the silence is not mistaken for nothing. */
+    private val pulse: Boolean = false) {
     /** Told when [phase] changes: the home screen's TV follows it (TvTalkService). */
     var changed: (() -> Unit)? = null
     private val phaseState = mutableStateOf<LivePhase?>(null)
@@ -114,6 +119,8 @@ internal class HomeTalk(private val c: Context, private val scope: CoroutineScop
         hearing = false
         if (pcm == null) return
         phase = LivePhase.Thinking
+        // the user, 15 Nov: "a pulse sound while it does its thing" (transcribing and a web search took 13 s in silence)
+        if (pulse) scope.launch { delay(700); while (phase == LivePhase.Thinking) { Pulse.play(); delay(1400) } }
         val chat = withContext(Dispatchers.IO) { SharedChat.chat(c) }
         val text = withContext(Dispatchers.IO) { AssistantNet.transcribe(c, pcm, AssistantWords.terms(c), chat.bill.part("dictation")) }
         if (text.isBlank()) return
@@ -137,7 +144,7 @@ internal class HomeTalk(private val c: Context, private val scope: CoroutineScop
         }
         phase = LivePhase.Speaking
         speech.await(); voice = null
-        if (needsScreen(reply)) { openScreen(); return }
+        if (needsScreen(reply)) { if (act?.invoke(reply) != true) openScreen(); return }
         if (reply.text.trimEnd().endsWith('?')) turn(6_000) // a question waits for the answer, as the sheet does
     }
 
@@ -508,6 +515,23 @@ internal object Zap {
             t.write(buf, 0, n, android.media.AudioTrack.WRITE_BLOCKING); t.play()
             Thread.sleep(400); t.release()
         }.onFailure { WriterLog.w("AI Assist: the zap: ${it.message}") }
+    }.apply { isDaemon = true; start() }
+}
+
+/** A soft tick while AI Assist works by voice (HomeTalk's pulse): one low, short note, quiet beside the answer's voice. */
+internal object Pulse {
+    fun play() = Thread {
+        val rate = 22_050; val n = rate * 9 / 100
+        val buf = FloatArray(n) { i -> val t = i.toDouble() / rate; val env = minOf(1.0, i / (rate * 0.01), (n - i) / (rate * 0.06))
+            (Math.sin(2 * Math.PI * 523.0 * t) * env * 0.18).toFloat() }
+        runCatching {
+            val t = android.media.AudioTrack.Builder()
+                .setAudioAttributes(android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+                .setAudioFormat(android.media.AudioFormat.Builder().setEncoding(android.media.AudioFormat.ENCODING_PCM_FLOAT).setSampleRate(rate).setChannelMask(android.media.AudioFormat.CHANNEL_OUT_MONO).build())
+                .setBufferSizeInBytes(n * 4).setTransferMode(android.media.AudioTrack.MODE_STATIC).build()
+            t.write(buf, 0, n, android.media.AudioTrack.WRITE_BLOCKING); t.play()
+            Thread.sleep(n * 1000L / rate + 60); t.release()
+        }.onFailure { WriterLog.w("AI Assist: the pulse: ${it.message}") }
     }.apply { isDaemon = true; start() }
 }
 
