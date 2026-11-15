@@ -340,6 +340,8 @@ internal class AssistantTools(
     fun run(name: String, args: JSONObject): ToolResult = runCatching {
         // an app the user keeps the assistant out of (Settings › Βοηθός AI): neither read nor acted in
         APP_OF[name]?.takeIf { !AiGate.state.keeps(it) }?.let { return@runCatching ToolResult("The user does not let the assistant use their $it (Settings › AI Assist). Say so; do not try another way.") }
+        // the phone locked (AI Assist over the lock screen, e.g. woken by "Hey Tetra"): personal things only after Android's unlock
+        if (personal(name)) appContext?.let { if (!WakeUnlock.ok(it)) return@runCatching ToolResult("The phone is locked and the user did not unlock it, so this cannot be done now. Say they need to unlock the phone for it; do not try another way.") }
         when (name) {
             "calendar_add" -> calendarAdd(args)
             "calendar_list" -> calendarList(args)
@@ -1580,6 +1582,9 @@ internal class AssistantTools(
             "navigate" to "maps", "place_reminder" to "maps", "photos_place" to "photos", "mail_new" to "mail", "mail_attention" to "mail", "mail_find" to "mail", "mail_open" to "mail", "mail_write" to "mail", "mail_stored_find" to "mail", "mail_export" to "mail",
             "sms_list" to "sms", "sms_read" to "sms", "sms_write" to "sms",
             "web_search" to "web", "make_image" to "web", "youtube" to "web", "media_play" to "browser", "spotify_mix" to "browser", "app_open" to "browser", "car_assist" to "phone", "media_like" to "browser", "radio_play" to "browser", "open_url" to "browser", "send_to_device" to "browser", "attachment_read" to "files", "audio_make" to "files")
+        private val PERSONAL_APPS = setOf("mail", "calendar", "notes", "files", "photos", "contacts", "phone", "sms", "writer", "pills")
+        /** What asks for the unlock on a locked phone (WakeUnlock); timers, maps, music, the web and questions run locked. */
+        fun personal(name: String) = APP_OF[name] in PERSONAL_APPS || name == "tetra" || name == "brief_show" || name.startsWith("memory_") || name.startsWith("schedule_")
         /** The tools of the apps the assistant may use now: the others are not even offered. */
         fun allowed(): JSONArray = JSONArray((0 until SCHEMA.length()).map { SCHEMA.getJSONObject(it) }
             .filter { AiGate.state.keeps(APP_OF[it.getJSONObject("function").getString("name")]) && (beside || it.getJSONObject("function").getString("name") != "open_beside") })

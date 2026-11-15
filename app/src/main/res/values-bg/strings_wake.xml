@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wake_title">Hey Tetra</string>
+    <string name="wake_note">Кажете „Hey Tetra“, за да отворите AI Assist, дори при изключен екран. Сравнява чутото от микрофона с вашите пет записа, на телефона; нищо не се изпраща, докато слуша. При заключен телефон личните неща (обаждания, съобщения, поща, календар, бележки, файлове, контакти) първо искат отключване. Само на едно устройство: две биха отговорили заедно, затова на таблета остава изключено. Пауза в колата.</string>
+    <string name="wake_on">Слуша гласа ви</string>
+    <string name="wake_off">Изключено</string>
+    <string name="wake_record">Запишете гласа си</string>
+    <string name="wake_record_note">Кажете „Hey Tetra“ пет пъти както обикновено, в тиха стая, с телефона на една ръка разстояние.</string>
+    <string name="wake_take">Запис %1$d</string>
+    <string name="wake_take_odd">Различен от другите: запишете го отново</string>
+    <string name="wake_record_take">Запиши %1$d</string>
+    <string name="wake_speak">Кажете „Hey Tetra“ сега…</string>
+    <string name="wake_not_heard">Не се чу. Опитайте пак.</string>
+    <string name="wake_record_again">Пак</string>
+    <string name="wake_try">Опитайте</string>
+    <string name="wake_try_caught">Разпознато (%1$s, събужда под %2$s)</string>
+    <string name="wake_try_missed">Не е разпознато (%1$s, събужда под %2$s). Запишете отново.</string>
+    <string name="wake_notice">Слуша за „Hey Tetra“</string>
+    <string name="wake_turn_off">Изключи</string>
+</resources>

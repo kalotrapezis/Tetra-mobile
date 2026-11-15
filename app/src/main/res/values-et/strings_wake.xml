@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wake_title">Hey Tetra</string>
+    <string name="wake_note">Öelge „Hey Tetra“, et avada AI Assist ka kustunud ekraaniga. See võrdleb mikrofoni kuuldut teie viie salvestusega, telefonis; kuulamise ajal midagi ei saadeta. Lukus telefoni puhul küsivad isiklikud asjad (kõned, sõnumid, e-post, kalender, märkmed, failid, kontaktid) enne avamist. Ainult ühes seadmes: kaks vastaksid koos, seega jätke see tahvelarvutis välja. Autos peatatud.</string>
+    <string name="wake_on">Kuulab teie häält</string>
+    <string name="wake_off">Väljas</string>
+    <string name="wake_record">Salvestage oma hääl</string>
+    <string name="wake_record_note">Öelge „Hey Tetra“ viis korda nagu tavaliselt, vaikses ruumis, telefon käeulatuses.</string>
+    <string name="wake_take">Salvestus %1$d</string>
+    <string name="wake_take_odd">Teistest erinev: salvestage uuesti</string>
+    <string name="wake_record_take">Salvesta %1$d</string>
+    <string name="wake_speak">Öelge nüüd „Hey Tetra“…</string>
+    <string name="wake_not_heard">Ei kuulnud. Proovige uuesti.</string>
+    <string name="wake_record_again">Uuesti</string>
+    <string name="wake_try">Proovi</string>
+    <string name="wake_try_caught">Tuvastatud (%1$s, äratab alla %2$s)</string>
+    <string name="wake_try_missed">Ei tuvastatud (%1$s, äratab alla %2$s). Salvestage uuesti.</string>
+    <string name="wake_notice">Kuulab „Hey Tetra“</string>
+    <string name="wake_turn_off">Lülita välja</string>
+</resources>

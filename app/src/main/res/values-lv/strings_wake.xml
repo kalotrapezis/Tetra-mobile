@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wake_title">Hey Tetra</string>
+    <string name="wake_note">Sakiet “Hey Tetra”, lai atvērtu AI Assist, arī ar izslēgtu ekrānu. Tas salīdzina mikrofona dzirdēto ar jūsu pieciem ierakstiem, tālrunī; klausoties nekas netiek sūtīts. Ja tālrunis bloķēts, personiskas lietas (zvani, ziņas, pasts, kalendārs, piezīmes, faili, kontakti) vispirms prasa atbloķēt. Tikai vienā ierīcē: divas atbildētu kopā, tāpēc planšetē atstājiet izslēgtu. Automašīnā pauzēts.</string>
+    <string name="wake_on">Klausās jūsu balsi</string>
+    <string name="wake_off">Izslēgts</string>
+    <string name="wake_record">Ierakstiet savu balsi</string>
+    <string name="wake_record_note">Sakiet “Hey Tetra” piecas reizes kā parasti, klusā telpā, tālruni rokas attālumā.</string>
+    <string name="wake_take">Ieraksts %1$d</string>
+    <string name="wake_take_odd">Atšķiras no citiem: ierakstiet vēlreiz</string>
+    <string name="wake_record_take">Ierakstīt %1$d</string>
+    <string name="wake_speak">Tagad sakiet “Hey Tetra”…</string>
+    <string name="wake_not_heard">Nedzirdēja. Mēģiniet vēlreiz.</string>
+    <string name="wake_record_again">Vēlreiz</string>
+    <string name="wake_try">Izmēģināt</string>
+    <string name="wake_try_caught">Atpazīts (%1$s, modina zem %2$s)</string>
+    <string name="wake_try_missed">Nav atpazīts (%1$s, modina zem %2$s). Ierakstiet vēlreiz.</string>
+    <string name="wake_notice">Klausās “Hey Tetra”</string>
+    <string name="wake_turn_off">Izslēgt</string>
+</resources>

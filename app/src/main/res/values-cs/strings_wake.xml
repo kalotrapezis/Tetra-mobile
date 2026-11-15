@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wake_title">Hey Tetra</string>
+    <string name="wake_note">Řekněte „Hey Tetra“ a otevře se AI Assist, i při zhasnuté obrazovce. Porovnává, co mikrofon slyší, s vašimi pěti nahrávkami, v telefonu; nic se neodesílá. Při zamčeném telefonu osobní věci (hovory, zprávy, pošta, kalendář, poznámky, soubory, kontakty) nejdřív chtějí odemknout. Jen na jednom zařízení: dvě by odpověděla obě, na tabletu ho nechte vypnuté. V autě pozastaveno.</string>
+    <string name="wake_on">Poslouchá váš hlas</string>
+    <string name="wake_off">Vypnuto</string>
+    <string name="wake_record">Nahrát váš hlas</string>
+    <string name="wake_record_note">Řekněte „Hey Tetra“ pětkrát jako obvykle, v tiché místnosti, telefon na délku paže.</string>
+    <string name="wake_take">Nahrávka %1$d</string>
+    <string name="wake_take_odd">Jiná než ostatní: nahrajte znovu</string>
+    <string name="wake_record_take">Nahrát %1$d</string>
+    <string name="wake_speak">Teď řekněte „Hey Tetra“…</string>
+    <string name="wake_not_heard">Nezachyceno. Zkuste znovu.</string>
+    <string name="wake_record_again">Znovu</string>
+    <string name="wake_try">Vyzkoušet</string>
+    <string name="wake_try_caught">Zachyceno (%1$s, probouzí pod %2$s)</string>
+    <string name="wake_try_missed">Nezachyceno (%1$s, probouzí pod %2$s). Nahrajte znovu.</string>
+    <string name="wake_notice">Poslouchá „Hey Tetra“</string>
+    <string name="wake_turn_off">Vypnout</string>
+</resources>

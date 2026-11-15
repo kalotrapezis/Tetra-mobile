@@ -295,7 +295,7 @@ class MainActivity : ComponentActivity() {
     }
 
     // two windows side by side (Beside): Tetra leaves the front when the last one pauses
-    override fun onResume() { super.onResume(); resumed++; CalendarAlarms.front = true }
+    override fun onResume() { super.onResume(); resumed++; CalendarAlarms.front = true; Wake.ensure(this) } // "Hey Tetra" listens again once Tetra is on the screen
     override fun onPause() {
         super.onPause(); resumed--; CalendarAlarms.front = resumed > 0
         Thread { runCatching { AlarmPlan.plan(this) } }.start() // the next alarm posted again out of the front, where HyperOS gives it its island

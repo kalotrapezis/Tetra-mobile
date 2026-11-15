@@ -160,6 +160,7 @@
         <service android:name=".AudioService" android:exported="false" android:foregroundServiceType="dataSync" />
         <!-- AI Assist talking on the home screen's TV (8 Nov) -->
         <service android:name=".TvTalkService" android:exported="false" android:foregroundServiceType="microphone|mediaPlayback" />
+        <service android:name=".WakeService" android:exported="false" android:foregroundServiceType="microphone" />
         <!-- An alarm ringing: its time, Snooze and Dismiss, over the lock screen -->
         <activity android:name=".AlarmRingActivity" android:exported="false" android:launchMode="singleTask" android:taskAffinity="com.kalotrapezis.drive.alarm"
             android:excludeFromRecents="true" android:showWhenLocked="true" android:turnScreenOn="true" />

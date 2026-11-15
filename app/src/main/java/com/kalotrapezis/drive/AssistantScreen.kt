@@ -65,12 +65,25 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /** The assistant's chat (Home › Assistant): type or speak, answers as bubbles, read aloud when the speaker is on. */
 open class AssistantActivity : ComponentActivity() {
-    override fun onResume() { super.onResume(); runCatching { Notices.seen(this, "assistant") } } // a brief or a word from another device seen
+    override fun onResume() { super.onResume(); runCatching { Notices.seen(this, "assistant") }; Wake.ensure(this) } // a brief or a word from another device seen
+    // "Hey Tetra" lets the mic go while AI Assist is on the screen; a personal tool asks Android's unlock here (WakeUnlock)
+    override fun onStart() {
+        super.onStart(); WakeService.assistantShown++
+        WakeUnlock.ask = { done -> runOnUiThread {
+            getSystemService(android.app.KeyguardManager::class.java).requestDismissKeyguard(this, object : android.app.KeyguardManager.KeyguardDismissCallback() {
+                override fun onDismissSucceeded() = done(true)
+                override fun onDismissCancelled() = done(false)
+                override fun onDismissError() = done(false)
+            })
+        } }
+    }
+    override fun onStop() { WakeService.assistantShown--; WakeUnlock.ask = null; super.onStop() }
     protected open val sheet = false
     override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLocale.wrap(base))
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WriterLog.init(this)
+        if (intent.getBooleanExtra(WakeService.EXTRA, false)) { setShowWhenLocked(true); setTurnScreenOn(true); WakeService.cancelNotice(this); WriterLog.i("AI Assist: opened by Hey Tetra") }
         TetraLook.load(this)
         // AI off (Settings › Βοηθός AI): no assistant at all, from Home, its icon or the phone's assistant gesture
         if (!AiGate.load(this).enabled) { android.widget.Toast.makeText(this, R.string.ai_is_off, android.widget.Toast.LENGTH_LONG).show(); finish(); return }

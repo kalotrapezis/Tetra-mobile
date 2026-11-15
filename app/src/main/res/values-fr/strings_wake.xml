@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wake_title">Hey Tetra</string>
+    <string name="wake_note">Dites « Hey Tetra » pour ouvrir AI Assist, même écran éteint. Il compare ce qu’entend le micro à vos cinq enregistrements, sur le téléphone ; rien n’est envoyé pendant l’écoute. Téléphone verrouillé, ce qui est personnel (appels, messages, mail, agenda, notes, fichiers, contacts) demande d’abord le déverrouillage. Sur un seul appareil : deux répondraient ensemble, laissez-le donc désactivé sur la tablette. En pause en voiture.</string>
+    <string name="wake_on">À l’écoute de votre voix</string>
+    <string name="wake_off">Désactivé</string>
+    <string name="wake_record">Enregistrer votre voix</string>
+    <string name="wake_record_note">Dites « Hey Tetra » cinq fois comme d’habitude, dans une pièce calme, le téléphone à bout de bras.</string>
+    <string name="wake_take">Prise %1$d</string>
+    <string name="wake_take_odd">Différente des autres : réenregistrez-la</string>
+    <string name="wake_record_take">Enregistrer la prise %1$d</string>
+    <string name="wake_speak">Dites « Hey Tetra » maintenant…</string>
+    <string name="wake_not_heard">Rien entendu. Réessayez.</string>
+    <string name="wake_record_again">Refaire</string>
+    <string name="wake_try">Essayer</string>
+    <string name="wake_try_caught">Reconnu (%1$s, réveil sous %2$s)</string>
+    <string name="wake_try_missed">Non reconnu (%1$s, réveil sous %2$s). Réenregistrez.</string>
+    <string name="wake_notice">À l’écoute de « Hey Tetra »</string>
+    <string name="wake_turn_off">Désactiver</string>
+</resources>

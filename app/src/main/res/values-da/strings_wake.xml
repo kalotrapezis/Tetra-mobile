@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wake_title">Hey Tetra</string>
+    <string name="wake_note">Sig “Hey Tetra” for at åbne AI Assist, også med skærmen slukket. Den sammenligner det, mikrofonen hører, med dine fem optagelser, på telefonen; intet sendes, mens den lytter. Er telefonen låst, beder personlige ting (opkald, beskeder, mail, kalender, noter, filer, kontakter) først om oplåsning. Kun på én enhed: to ville begge svare, så lad det være slået fra på tabletten. På pause i bilen.</string>
+    <string name="wake_on">Lytter efter din stemme</string>
+    <string name="wake_off">Fra</string>
+    <string name="wake_record">Optag din stemme</string>
+    <string name="wake_record_note">Sig “Hey Tetra” fem gange som du plejer, i et stille rum, med telefonen en armlængde væk.</string>
+    <string name="wake_take">Optagelse %1$d</string>
+    <string name="wake_take_odd">Ulig de andre: optag den igen</string>
+    <string name="wake_record_take">Optag %1$d</string>
+    <string name="wake_speak">Sig “Hey Tetra” nu…</string>
+    <string name="wake_not_heard">Hørte det ikke. Prøv igen.</string>
+    <string name="wake_record_again">Igen</string>
+    <string name="wake_try">Prøv</string>
+    <string name="wake_try_caught">Genkendt (%1$s, vågner under %2$s)</string>
+    <string name="wake_try_missed">Ikke genkendt (%1$s, vågner under %2$s). Optag igen.</string>
+    <string name="wake_notice">Lytter efter “Hey Tetra”</string>
+    <string name="wake_turn_off">Slå fra</string>
+</resources>

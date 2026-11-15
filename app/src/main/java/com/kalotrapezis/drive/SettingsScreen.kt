@@ -834,6 +834,7 @@ internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
             Slider(pause, { pause = Math.round(it * 2) / 2f }, valueRange = 1f..6f, steps = 9, onValueChangeFinished = { AssistantPause.set(context, (pause * 1000).toInt()) })
         }
     }
+    if (AiGate.on && !CarMaps.edition) WakeSection() // the car has its steering-wheel button instead
     // the voice that reads answers: Mistral's (the user: the phone's was bad and slow), the phone's kept as the free one
     var voiceName by remember(providers) { mutableStateOf(AssistantVoices.id(context)?.let { if (it == AssistantVoices.PHONE) context.getString(R.string.assistant_voice_phone) else AssistantVoices.name(context) }) }
     var picking by remember { mutableStateOf(false) }
@@ -1481,3 +1482,81 @@ private val PART_NAMES = mapOf(AiPart.CHAT to R.string.ai_part_chat, AiPart.LIST
 private fun carBluetoothDevices(c: Context): List<Pair<String, String>> = runCatching {
     c.getSystemService(android.bluetooth.BluetoothManager::class.java).adapter.bondedDevices.map { it.address to (it.name ?: it.address) }.sortedBy { it.second.lowercase() }
 }.getOrDefault(emptyList())
+
+/** "Hey Tetra" (Settings › AI Assist): the switch, off unless turned on, and the five takes of the user's voice it matches. */
+@Composable private fun WakeSection() {
+    val context = LocalContext.current
+    var on by remember { mutableStateOf(Wake.on(context)) }
+    var recording by remember { mutableStateOf(false) }
+    val askMic = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok -> if (ok) recording = true }
+    fun record() = if (hasMic(context)) recording = true else askMic.launch(Manifest.permission.RECORD_AUDIO)
+    SettingsSection(stringResource(R.string.wake_title), stringResource(R.string.wake_note)) {
+        SwitchRow(stringResource(R.string.wake_title), stringResource(if (on) R.string.wake_on else R.string.wake_off), on) { want ->
+            if (want && !Wake.hasTakes(context)) record()
+            else { on = want; Wake.set(context, want); if (want && !Car.mayOpen(context)) Car.askOpen(context) }
+        }
+        SettingRow(stringResource(R.string.wake_record), onClick = { record() }) { Chevron() }
+    }
+    if (recording) WakeTakes(onDone = { saved -> recording = false
+        if (saved) { on = true; Wake.set(context, false); Wake.set(context, true); if (!Car.mayOpen(context)) Car.askOpen(context) } // stopped and started: the new takes read
+    })
+}
+
+/** Recording the five takes: each kept or recorded again, an odd one marked; then "Try it" says whether one more is caught. */
+@Composable private fun WakeTakes(onDone: (Boolean) -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val takes = remember { mutableStateListOf<ShortArray?>().apply { repeat(Wake.TAKES) { add(null) } } }
+    var busy by remember { mutableStateOf<Int?>(null) } // the take being recorded; Wake.TAKES: the try
+    var message by remember { mutableStateOf<String?>(null) }
+    val features = remember(takes.toList()) { if (takes.all { it != null }) takes.map { WakeWord.features(it!!) } else null }
+    val loo = remember(features) { features?.let(WakeWord::leaveOneOut) }
+    val median = loo?.let(WakeWord::median)
+    fun record(i: Int) {
+        busy = i; message = null
+        scope.launch {
+            val pcm = withContext(Dispatchers.IO) { Wake.record(if (i < Wake.TAKES) 2500 else 3000) }
+            if (pcm == null) { busy = null; message = context.getString(R.string.assistant_mic_closed); return@launch }
+            if (i < Wake.TAKES) {
+                val speech = WakeWord.trim(WakeWord.floats(pcm)).size / WakeWord.RATE.toDouble()
+                WriterLog.i("Hey Tetra: take ${i + 1}: ${"%.2f".format(speech)} s of speech")
+                if (speech !in 0.3..1.6) message = context.getString(R.string.wake_not_heard) else takes[i] = pcm
+            } else {
+                val f = features ?: return@launch
+                val th = WakeWord.threshold(f)
+                var best = Double.POSITIVE_INFINITY
+                withContext(Dispatchers.Default) { WakeDetector(f, th) { best = minOf(best, it) }.push(pcm + ShortArray(WakeWord.RATE * 17 / 10)) }
+                WriterLog.i("Hey Tetra: tried: ${"%.2f".format(best)}, wakes under ${"%.2f".format(th)}")
+                message = if (best.isInfinite()) context.getString(R.string.wake_not_heard)
+                    else context.getString(if (best < th) R.string.wake_try_caught else R.string.wake_try_missed, "%.1f".format(best), "%.1f".format(th))
+            }
+            busy = null
+        }
+    }
+    AlertDialog(onDismissRequest = { if (busy == null) onDone(false) }, title = { Text(stringResource(R.string.wake_record)) },
+        text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.wake_record_note), style = MaterialTheme.typography.bodyMedium)
+            takes.forEachIndexed { i, t ->
+                val odd = loo != null && median != null && loo[i] > WakeWord.ODD * median
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.wake_take, i + 1), style = MaterialTheme.typography.bodyLarge)
+                        Text(when { busy == i -> stringResource(R.string.wake_speak); odd -> stringResource(R.string.wake_take_odd); t != null -> "✓"; else -> "—" },
+                            style = MaterialTheme.typography.bodySmall, color = if (odd) MaterialTheme.colorScheme.error else quiet())
+                    }
+                    if (t != null) TextButton(onClick = { record(i) }, enabled = busy == null) { Text(stringResource(R.string.wake_record_again)) }
+                }
+            }
+            val next = takes.indexOfFirst { it == null }
+            if (next >= 0) Button(onClick = { record(next) }, enabled = busy == null, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.wake_record_take, next + 1)) }
+            else OutlinedButton(onClick = { record(Wake.TAKES) }, enabled = busy == null, modifier = Modifier.fillMaxWidth()) {
+                Text(if (busy == Wake.TAKES) stringResource(R.string.wake_speak) else stringResource(R.string.wake_try)) }
+            message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+        } },
+        confirmButton = { TextButton(enabled = busy == null && takes.all { it != null }, onClick = {
+            takes.forEachIndexed { i, t -> Wake.write(Wake.take(context, i + 1), t!!) }
+            WriterLog.i("Hey Tetra: five takes kept, leave-one-out ${loo?.joinToString { "%.2f".format(it) }}")
+            onDone(true)
+        }) { Text(stringResource(R.string.common_save)) } },
+        dismissButton = { TextButton(enabled = busy == null, onClick = { onDone(false) }) { Text(stringResource(R.string.common_cancel)) } })
+}
