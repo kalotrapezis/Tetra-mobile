@@ -425,7 +425,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         WriterLog.i("Maps: say \"$text\"${if (muted) " (muted)" else ""}" + if (why.isNotEmpty()) " ($why)" else "")
         if (muted) return
         val t = tts.value ?: return
-        val id = duck.start()
+        val id = duck.start(text)
         if (t.speak(text, TextToSpeech.QUEUE_FLUSH, null, id) != TextToSpeech.SUCCESS) duck.end(id)
     }
 
@@ -1347,10 +1347,22 @@ internal class MapsDuck(c: Context) : android.speech.tts.UtteranceProgressListen
     private var n = 0
     @Volatile private var last: String? = null
     private var ducked = false
-    /** Before speaking: the music silent; the id to speak with. */
-    @Synchronized fun start(): String = "maps${++n}".also { last = it; audio.requestAudioFocus(focus); if (!ducked) { ducked = true; BrowserMedia.duck(true) } }
+    private val main = android.os.Handler(android.os.Looper.getMainLooper())
+    /** Before speaking [text]: the music silent; the id to speak with. Back by itself once [text] has had time to be said, should
+     *  the voice never say it is done (the user, 15 Nov: one «get on that road» on the car, and the music never came back). */
+    @Synchronized fun start(text: String = ""): String = "maps${++n}".also { id ->
+        last = id; audio.requestAudioFocus(focus)
+        if (!ducked) { ducked = true; BrowserMedia.duck(true); WriterLog.i("Maps: the music silent for the voice") }
+        main.postDelayed({ if (last == id) { WriterLog.w("Maps: the voice never said it was done; the music back after ${longest(text)} ms"); end(id) } }, longest(text))
+    }
     /** The music back, unless something newer is being said (QUEUE_FLUSH stops the one before it). */
-    @Synchronized fun end(id: String? = last) { if (id == null || id != last) return; last = null; audio.abandonAudioFocusRequest(focus); if (ducked) { ducked = false; BrowserMedia.duck(false) } }
+    @Synchronized fun end(id: String? = last) {
+        if (id == null || id != last) return
+        last = null; audio.abandonAudioFocusRequest(focus)
+        if (ducked) { ducked = false; BrowserMedia.duck(false); WriterLog.i("Maps: the music back") }
+    }
+    /** What [text] may take to say, with room: a slow voice reads ~12 letters a second. */
+    private fun longest(text: String) = (2_500L + text.length * 110L).coerceAtMost(20_000L)
     override fun onStart(id: String?) = Unit
     override fun onDone(id: String?) = end(id)
     override fun onStop(id: String?, interrupted: Boolean) = end(id)

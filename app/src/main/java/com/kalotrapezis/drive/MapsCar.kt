@@ -990,7 +990,7 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
         if (text.isEmpty() || voice == "off" || (voice == "important" && !important)) return
         WriterLog.i("Maps car: say \"$text\"" + if (why.isNotEmpty()) " ($why)" else "")
         val t = tts ?: return
-        val id = duck.start()
+        val id = duck.start(text)
         if (t.speak(text, TextToSpeech.QUEUE_FLUSH, null, id) != TextToSpeech.SUCCESS) duck.end(id)
     }
 
