@@ -1350,18 +1350,23 @@ internal class MapsDuck(c: Context) : android.speech.tts.UtteranceProgressListen
     private var n = 0
     @Volatile private var last: String? = null
     private var ducked = false
+    private var focused = false
     private val main = android.os.Handler(android.os.Looper.getMainLooper())
     /** Before speaking [text]: the music silent; the id to speak with. Back by itself after [backup] ms, should the voice never say
      *  it is done (the user, 15 Nov: one «get on that road» on the car and the music never came back; a backup of 10 s). */
     @Synchronized fun start(text: String = ""): String = "maps${++n}".also { id ->
-        last = id; audio.requestAudioFocus(focus)
+        last = id
+        // Android's focus only for another app's sound (the car's radio): Tetra's own Browser is muted by hand, never paused (the user,
+        // 15 Nov: the focus kept by a voice that never said it was done made the head unit stop the Browser at every press of play)
+        if (!focused && BrowserMedia.othersPlaying(audio)) { focused = true; audio.requestAudioFocus(focus); WriterLog.i("Maps: another app's sound paused for the voice") }
         if (!ducked) { ducked = true; BrowserMedia.duck(true); WriterLog.i("Maps: the music silent for the voice") }
         main.postDelayed({ if (last == id) { WriterLog.w("Maps: the voice never said it was done; the music back after ${backup(text)} ms (\"$text\")"); end(id) } }, backup(text))
     }
     /** The music back, unless something newer is being said (QUEUE_FLUSH stops the one before it). */
     @Synchronized fun end(id: String? = last) {
         if (id == null || id != last) return
-        last = null; audio.abandonAudioFocusRequest(focus)
+        last = null
+        if (focused) { focused = false; audio.abandonAudioFocusRequest(focus) }
         if (ducked) { ducked = false; BrowserMedia.duck(false); WriterLog.i("Maps: the music back") }
     }
     override fun onStart(id: String?) = Unit

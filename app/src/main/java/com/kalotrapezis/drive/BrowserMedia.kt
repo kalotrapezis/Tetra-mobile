@@ -33,6 +33,8 @@ internal object BrowserMedia {
     @Volatile var service: BrowserMediaService? = null
 
     fun act(a: String) { val c = control ?: return; Handler(Looper.getMainLooper()).post { c(a) } }
+    /** Something plays that is not Tetra's Browser (the car's radio, Spotify): only then is Android's focus asked to pause it. */
+    fun othersPlaying(audio: android.media.AudioManager) = audio.isMusicActive && !(control != null && playing)
 
     /*
      * The music silent while a voice speaks (Maps, AI Assist) and while the user wants it muted: muted, not paused (a live station goes on).
@@ -93,8 +95,9 @@ internal class BrowserMediaService : Service() {
         // the headset's and the lock screen's keys come here too
         session = MediaSession(this, "TetraBrowser").apply {
             setCallback(object : MediaSession.Callback() {
-                override fun onPlay() = BrowserMedia.act("play")
-                override fun onPause() = BrowserMedia.act("pause")
+                // Android's own keys and the car's (logged: a head unit may send a pause of its own when its audio changes)
+                override fun onPlay() { WriterLog.i("Browser: play from Android's media keys"); BrowserMedia.act("play") }
+                override fun onPause() { WriterLog.i("Browser: pause from Android's media keys"); BrowserMedia.act("pause") }
                 override fun onSkipToNext() = BrowserMedia.act("next")
                 override fun onSkipToPrevious() = BrowserMedia.act("prev")
             })
