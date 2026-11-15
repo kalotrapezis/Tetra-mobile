@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Naredi iz tega radijsko oddajo</string>
     <string name="assistant_attach_pill_live">💬 Živ pogovor o dokumentu</string>
     <string name="assistant_attach_pill_read">🔊 Preberi mi</string>
+    <string name="assistant_reading_aloud">Berem na glas «%1$s»…</string>
     <string name="assistant_attach_show_prompt">Naredi iz «%1$s» radijsko oddajo kot zvočno datoteko: voditelj in strokovnjak, s primerom in povzetkom za vsak del.</string>
     <string name="assistant_attach_read_prompt">Preberi mi «%1$s» v celoti kot zvočno datoteko, z enim glasom.</string>
     <string name="assistant_attach_live_prompt">Pogovorimo se o dokumentu «%1$s». Povej mi v dveh stavkih, kaj piše, in me vprašaj, kje želim začeti.</string>

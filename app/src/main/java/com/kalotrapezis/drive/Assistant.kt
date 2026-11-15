@@ -1757,7 +1757,7 @@ internal class AssistantTools(
             The daily brief («πρωινή αναφορά», «ενημέρωση της ημέρας») is built in: never schedule_add it; schedule_list, then schedule_change it (time, paused: false, sections).
             «Πόσα data έφαγα;», «πόσα μου μένουν;», «θα μου φτάσουν;»: data_status, then the figures that answer it and its verdict (on track, or how much a day to stay within the plan).
             «Η αναφορά», «τι είπε η αναφορά», «δείξε μου την ενημέρωση»: brief_show, then a few words on what it says. «Άνοιξε το …» a site or a source: open_url. «Καρφίτσωσε / χρωμάτισε τη σημείωση»: notes_search (or the note just made), then note_pin or note_color.
-            A file attached to the user's message: answer from it; attachment_read the parts not given, never guess them. «Κάνε το ραδιοφωνική εκπομπή», «διάβασέ το μου», an MP3 of it: call audio_make at once, before saying anything; never make up minutes, cost or time yourself.
+            A file attached to the user's message: answer from it; attachment_read the parts not given, never guess them. To go through it («με τη σειρά», «επόμενο», «τι λέει;»): attachment_read the next part and tell it yourself, in a few sentences, then ask; never send the user to an audio file, a radio show or another app for it. A radio show is made only from its own button: when audio_make is offered, call it at once, before saying anything; never make up minutes, cost or time yourself.
         """.trimIndent() + AssistantGuard.RULE + if (facts.isEmpty()) "" else "\nWhat the user asked you to remember about them (use it when it helps; never read it out unasked):\n" + facts.joinToString("\n") { "- ${it.text}" }
     }
 }
@@ -1781,14 +1781,16 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
     /** What it did, held and could not, for a scheduled action's report: { kind: done|held|failed, name, what, why? }. */
     val log = mutableListOf<JSONObject>()
 
-    fun ask(text: String, at: Long = System.currentTimeMillis(), file: Attach.Doc? = null, onText: ((String) -> Unit)? = null): AssistantReply {
+    /** [show]: sent by the attached file's «Make it a radio show» button, the only way to one. */
+    fun ask(text: String, at: Long = System.currentTimeMillis(), file: Attach.Doc? = null, show: Boolean = false, onText: ((String) -> Unit)? = null): AssistantReply {
         if (at - lastAt > forgetMs) messages.clear()
         lastAt = at
         file?.let(tools::attach)
         val from = messages.size
         messages += JSONObject().put("role", "user").put("content", if (file != null) "$text\n\n${AssistantGuard.wrap("attachment", Attach.forModel(file))}" else text)
-        // an MP3 of the file asked for: mistral-small sometimes makes up the estimate instead of asking audio_make, so it is made to
-        val must = if (tools.docFile != null && MP3.containsMatchIn(text)) "audio_make" else null
+        // the radio show only from its button (the user, 15 Nov: "the podcast making should only work as a mode"): offered then and
+        // made to (mistral-small sometimes makes up the estimate), never otherwise: in a talk about a file it sent the user to audio files
+        val must = if (show && tools.docFile != null) "audio_make" else null
         // «βρες την επαφή»: shown, never called (the user: "it found the contact, and the only option was to call")
         findOnly = FIND.containsMatchIn(text) && !HandsFree.asked(text)
         try { return turn(onText, must, outside = file != null) } finally {
@@ -1806,7 +1808,8 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
         var cards = emptyList<ResultCard>()
         repeat(ROUNDS) { round ->
             // forced: only that tool, and a call is a must ("any")
-            val offered = AssistantTools.allowed().let { all -> if (!findOnly) all else JSONArray((0 until all.length()).map { all.getJSONObject(it) }.filter { it.getJSONObject("function").getString("name") != "contact_call" }) }
+            val offered = AssistantTools.allowed().let { all -> JSONArray((0 until all.length()).map { all.getJSONObject(it) }.filter { val n = it.getJSONObject("function").getString("name")
+                !(findOnly && n == "contact_call") && (must != null || n != "audio_make") }) }
             val only = if (must != null && round == 0) JSONArray((0 until offered.length()).map { offered.getJSONObject(it) }.filter { it.getJSONObject("function").getString("name") == must }) else null
             val forced = only != null && only.length() > 0
             val m = api.chat(JSONArray(listOf(JSONObject().put("role", "system").put("content", AssistantTools.system(now(), tools.facts()))) + messages), if (forced) only!! else offered, onText, if (forced) "any" else "auto")
@@ -1860,7 +1863,6 @@ internal class AssistantChat(private val api: Mistral, private val tools: Assist
         fun noteMessage(text: String): JSONObject = JSONObject().put("role", "assistant").put("content", text)
         const val ROUNDS = 5 // tool rounds in one turn at most: find, then act, with room to spare
         private val FIND = Regex("βρ[εέ]ς|δε[ιί]ξε|ψ[αά]ξε|\\bfind\\b|\\bshow\\b", RegexOption.IGNORE_CASE)
-        private val MP3 = Regex("\\bmp3\\b|\\bm4a\\b|ήχο|εκπομπ|radio show|διάβασ[εέ] (?:το|μου)|read it to me", RegexOption.IGNORE_CASE)
 
         /** A message's text: a string, or Mistral's chunks (text pieces among others). */
         fun text(m: JSONObject): String = words(m).trim()

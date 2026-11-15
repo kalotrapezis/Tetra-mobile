@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Déan clár raidió de</string>
     <string name="assistant_attach_pill_live">💬 Comhrá beo faoin doiciméad</string>
     <string name="assistant_attach_pill_read">🔊 Léigh dom é</string>
+    <string name="assistant_reading_aloud">Ag léamh «%1$s» os ard…</string>
     <string name="assistant_attach_show_prompt">Déan clár raidió fuaime de «%1$s»: láithreoir agus saineolaí, sampla agus achoimre do gach roinn.</string>
     <string name="assistant_attach_read_prompt">Léigh «%1$s» dom go hiomlán mar chomhad fuaime, le guth amháin.</string>
     <string name="assistant_attach_live_prompt">Labhróimid faoin doiciméad «%1$s». Inis dom i ndá abairt cad atá ann agus fiafraigh díom cá bhfuil mé ag iarraidh tosú.</string>

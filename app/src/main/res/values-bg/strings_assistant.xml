@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Направи го радиопредаване</string>
     <string name="assistant_attach_pill_live">💬 Жива беседа за документа</string>
     <string name="assistant_attach_pill_read">🔊 Прочети ми го</string>
+    <string name="assistant_reading_aloud">Чета «%1$s» на глас…</string>
     <string name="assistant_attach_show_prompt">Направи «%1$s» радиопредаване като аудиофайл: водещ и експерт, с пример и резюме за всяка секция.</string>
     <string name="assistant_attach_read_prompt">Прочети ми «%1$s» цял като аудиофайл, с един глас.</string>
     <string name="assistant_attach_live_prompt">Да поговорим за документа «%1$s». Кажи ми в две изречения какво казва и ме попитай откъде искам да започнем.</string>

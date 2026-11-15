@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Trasformalo in una trasmissione radio</string>
     <string name="assistant_attach_pill_live">💬 Conversazione dal vivo sul documento</string>
     <string name="assistant_attach_pill_read">🔊 Leggimelo</string>
+    <string name="assistant_reading_aloud">Leggo ad alta voce «%1$s»…</string>
     <string name="assistant_attach_show_prompt">Trasforma «%1$s» in una trasmissione radio in audio: un conduttore e un esperto, con un esempio e un riepilogo per ogni sezione.</string>
     <string name="assistant_attach_read_prompt">Leggimi «%1$s» per intero in audio, con una sola voce.</string>
     <string name="assistant_attach_live_prompt">Parliamo del documento «%1$s». Dimmi in due frasi che cosa dice e chiedimi da dove voglio cominciare.</string>

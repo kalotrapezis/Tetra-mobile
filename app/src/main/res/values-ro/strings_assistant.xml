@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Fă-l emisiune radio</string>
     <string name="assistant_attach_pill_live">💬 Discuție live despre document</string>
     <string name="assistant_attach_pill_read">🔊 Citește-mi-l</string>
+    <string name="assistant_reading_aloud">Citesc cu voce tare «%1$s»…</string>
     <string name="assistant_attach_show_prompt">Fă din «%1$s» o emisiune radio ca fișier audio: un prezentator și un expert, cu un exemplu și un rezumat pentru fiecare secțiune.</string>
     <string name="assistant_attach_read_prompt">Citește-mi «%1$s» întreg, ca fișier audio, cu o singură voce.</string>
     <string name="assistant_attach_live_prompt">Să vorbim despre documentul «%1$s». Spune-mi în două propoziții ce spune și întreabă-mă de unde vreau să încep.</string>

@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Udělej z toho rozhlasovou relaci</string>
     <string name="assistant_attach_pill_live">💬 Živý rozhovor o dokumentu</string>
     <string name="assistant_attach_pill_read">🔊 Přečti mi to</string>
+    <string name="assistant_reading_aloud">Čtu nahlas «%1$s»…</string>
     <string name="assistant_attach_show_prompt">Udělej z «%1$s» rozhlasovou relaci jako zvukový soubor: moderátor a odborník, s příkladem a shrnutím u každé části.</string>
     <string name="assistant_attach_read_prompt">Přečti mi «%1$s» celé jako zvukový soubor, jedním hlasem.</string>
     <string name="assistant_attach_live_prompt">Pojďme si popovídat o dokumentu «%1$s». Ve dvou větách mi řekni, co říká, a zeptej se, kde chci začít.</string>

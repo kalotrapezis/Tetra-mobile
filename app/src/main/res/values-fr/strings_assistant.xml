@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 En faire une émission de radio</string>
     <string name="assistant_attach_pill_live">💬 Discussion en direct sur le document</string>
     <string name="assistant_attach_pill_read">🔊 Lis-le-moi</string>
+    <string name="assistant_reading_aloud">Lecture à voix haute de «%1$s»…</string>
     <string name="assistant_attach_show_prompt">Fais de «%1$s» une émission de radio en fichier audio : un animateur et un expert, avec un exemple et un résumé pour chaque partie.</string>
     <string name="assistant_attach_read_prompt">Lis-moi «%1$s» en entier en fichier audio, avec une seule voix.</string>
     <string name="assistant_attach_live_prompt">Parlons du document «%1$s». Dis-moi en deux phrases ce qu\'il dit et demande-moi par où je veux commencer.</string>
