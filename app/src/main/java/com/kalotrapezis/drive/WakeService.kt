@@ -60,6 +60,12 @@ internal object Wake {
         if (on) ensure(c) else c.stopService(Intent(c, WakeService::class.java))
     }
 
+    /** New takes kept: the running service reads them again (a stop and a start raced: the start came before the stop had ended, 15 Nov). */
+    fun reload(c: Context) {
+        if (!WakeService.running) return ensure(c)
+        runCatching { c.startService(Intent(c, WakeService::class.java).setAction(WakeService.RELOAD)) }.onFailure { WriterLog.w("Hey Tetra: reload: ${it.message}") }
+    }
+
     /** Listening again whenever Tetra is on the screen (Android starts a microphone service only then: not at boot, not from the background). */
     fun ensure(c: Context) {
         if (CarMaps.edition || !on(c) || !hasTakes(c) || !hasMic(c) || WakeService.running) return
@@ -104,6 +110,7 @@ class WakeService : Service() {
         if (intent?.action == OFF) { Wake.set(this, false); return START_NOT_STICKY }
         runCatching { startForeground(ID, notice(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE) }
             .onFailure { WriterLog.w("Hey Tetra: Android did not let the mic start (Tetra not on the screen?): ${it.message}"); stopSelf(); return START_NOT_STICKY }
+        if (intent?.action == RELOAD) thread?.let { t -> stop = true; t.interrupt(); runCatching { t.join(3000) }; thread = null; WriterLog.i("Hey Tetra: reading the takes again") }
         if (thread == null) { stop = false; running = true; thread = Thread(::listen, "HeyTetra").apply { start() } }
         return START_STICKY
     }
@@ -189,6 +196,7 @@ class WakeService : Service() {
         private const val CHANNEL = "wake"
         private const val WOKE_CHANNEL = "wake_open"
         private const val OFF = "com.kalotrapezis.drive.WAKE_OFF"
+        const val RELOAD = "com.kalotrapezis.drive.WAKE_RELOAD"
         private const val SUMMARY_MS = 10 * 60_000L
         /** On the sheet's intent: opened by "Hey Tetra" (over the lock screen, the screen turned on). */
         const val EXTRA = "com.kalotrapezis.drive.WAKE"

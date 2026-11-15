@@ -1500,7 +1500,7 @@ private fun carBluetoothDevices(c: Context): List<Pair<String, String>> = runCat
         SettingRow(stringResource(R.string.wake_record), onClick = { record() }) { Chevron() }
     }
     if (recording) WakeTakes(onDone = { saved -> recording = false
-        if (saved) { on = true; Wake.set(context, false); Wake.set(context, true); if (!Car.mayOpen(context)) Car.askOpen(context) } // stopped and started: the new takes read
+        if (saved) { if (!on) { on = true; Wake.set(context, true) } else Wake.reload(context); if (!Car.mayOpen(context)) Car.askOpen(context) }
     })
 }
 
