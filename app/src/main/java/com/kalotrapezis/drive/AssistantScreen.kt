@@ -245,6 +245,8 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
     DisposableEffect(Unit) { onDispose { AssistBusy.on.value = false } }
     // the sheet's TV (8 Nov): what the robot shows while the answer is heard
     var talking by remember { mutableStateOf(false) }
+    var reading by remember { mutableStateOf<String?>(null) } // the file «Read it to me» is reading aloud
+    val showNext = remember { AtomicBoolean(false) } // the next message comes from «Make it a radio show»: the only way to one
     var tvCue by remember { mutableStateOf(TalkCue.None) }
     var tvMood by remember { mutableStateOf(TalkMood.Normal) }
     fun hush() { reader.stop(); voice?.stop(); voice = null; talking = false }
@@ -372,7 +374,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
             // the car: what it is doing, said as it starts (the user, 14 Nov: "I am opening this, I am searching for this")
             if (car) CarDoing.of(context, name, args)?.takeIf { told.add(it) }?.let { reader.add(it) }
         }
-        val r = withContext(Dispatchers.IO) { runCatching { try { chat.ask(text, file = file) { words ->
+        val r = withContext(Dispatchers.IO) { runCatching { try { chat.ask(text, file = file, show = showNext.getAndSet(false) && file != null) { words ->
             said.append(words); val cue = TalkCue.of(said); val mood = TalkMood.of(said)
             scope.launch { talking = speech != null; if (cue != TalkCue.None || tvCue.weather) tvCue = cue.takeIf { it != TalkCue.None } ?: tvCue; tvMood = mood }
             cut.push(words).forEach { speech?.say(it) }
@@ -402,6 +404,25 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
             reply.open != null -> close()
             reply.text.trimEnd().endsWith('?') || reply.choices.isNotEmpty() || reply.cards.isNotEmpty() || reply.call != null || reply.confirm != null -> hear(6_000)
             reply.images.isEmpty() -> { delay(1_500); close() }
+        }
+    }
+
+    /** «Read it to me» (the user, 15 Nov: "I just want it to read it to me"): the file read aloud now by AI Assist's voice, no
+     *  audio file; Stop, or anything said or sent, ends it, and its cost with it (a sentence is made only while the one before plays). */
+    fun readAloud(d: Attach.Doc) {
+        if (phase != Phase.Idle || reading != null) return
+        attached = null; hush()
+        bubbles += Bubble(true, context.getString(R.string.assistant_attach_pill_read), files = listOf(Attach.Ref(d.name, d.path, d.pages.size)))
+        val v = AnswerVoice(context, reader, chat.bill.part("voice"), scope).also { voice = it }
+        reading = d.name; talking = true
+        WriterLog.i("AI Assist: reading ${d.name} aloud (${d.pages.sumOf { it.length }} characters)")
+        scope.launch {
+            val cut = Sentences()
+            for (page in d.pages) for (para in page.split(Regex("\n+"))) cut.push(para + "\n").forEach(v::say)
+            v.say(cut.rest()); v.finish()
+            runCatching { v.await() }
+            if (voice === v) { voice = null; talking = false }
+            reading = null; spent = chat.bill.usd
         }
     }
 
@@ -603,14 +624,18 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
                 Column(Modifier.weight(1f).fillMaxHeight()) {
                     list(Modifier.weight(1f).fillMaxWidth())
                     status?.let { Text(it, Modifier.padding(horizontal = 20.dp), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
+                    reading?.takeIf { status == null }?.let { name -> Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.assistant_reading_aloud, name), Modifier.weight(1f, fill = false), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                        TextButton(onClick = { hush() }) { Text(stringResource(R.string.common_stop)) }
+                    } }
                     // what can be done with a file, as soon as it is attached and nothing is typed (the user: "so users know what they can do with the file")
                     attached?.takeIf { typed.isBlank() && phase == Phase.Idle }?.let { d -> val name = Attach.quoted(d.name)
-                        val show = stringResource(R.string.assistant_attach_show_prompt, name); val talk = stringResource(R.string.assistant_attach_live_prompt, name); val read = stringResource(R.string.assistant_attach_read_prompt, name)
+                        val show = stringResource(R.string.assistant_attach_show_prompt, name); val talk = stringResource(R.string.assistant_attach_live_prompt, name)
                         @OptIn(ExperimentalLayoutApi::class)
                         FlowRow(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            AppChip(stringResource(R.string.assistant_attach_pill_show), AppColor.assistant) { offer(show) }
+                            AppChip(stringResource(R.string.assistant_attach_pill_show), AppColor.assistant) { showNext.set(true); offer(show) }
                             AppChip(stringResource(R.string.assistant_attach_pill_live), Color(0xFF25C4FE)) { startLive(talk) }
-                            AppChip(stringResource(R.string.assistant_attach_pill_read), AppColor.timer) { offer(read) }
+                            AppChip(stringResource(R.string.assistant_attach_pill_read), AppColor.timer) { readAloud(d) }
                         }
                     }
                     val dragThreshold = with(androidx.compose.ui.platform.LocalDensity.current) { 24.dp.toPx() }
@@ -652,7 +677,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
                                             leadingIcon = { Icon(painterResource(R.drawable.ic_devices), contentDescription = null) })
                                     }
                                 }
-                                TextField(typed, { typed = it }, Modifier.weight(1f), placeholder = { Text(stringResource(R.string.assistant_hint), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                TextField(typed, { typed = it; if (it.isBlank()) showNext.set(false) }, Modifier.weight(1f), placeholder = { Text(stringResource(R.string.assistant_hint), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                                     shape = RoundedCornerShape(24.dp), maxLines = 5, enabled = hasKey,
                                     colors = TextFieldDefaults.colors(focusedContainerColor = Color.White.copy(alpha = 0.12f), unfocusedContainerColor = Color.White.copy(alpha = 0.12f), disabledContainerColor = Color.White.copy(alpha = 0.06f),
                                         focusedTextColor = Color.White, unfocusedTextColor = Color.White, cursorColor = Color.White, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,

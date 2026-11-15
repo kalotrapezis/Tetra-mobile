@@ -618,13 +618,17 @@ internal class AnswerVoice(private val c: Context, private val reader: ReadAloud
     private val sentences = Channel<String>(Channel.UNLIMITED)
     private val audio = Channel<Any>(Channel.UNLIMITED) // samples to play, or a sentence for the phone's voice
     @Volatile private var track: AudioTrack? = null
+    // samples made and not yet played: a sentence is made only while less than AHEAD waits, so a long reading (a whole file) is
+    // paid as it is heard and a stop stops its cost
+    private val waiting = java.util.concurrent.atomic.AtomicLong()
 
     private val making = scope.launch(Dispatchers.IO) {
         var voice = if (!AssistantKey.has(c, AiProviders.of(c, AiPart.VOICE))) AssistantVoices.PHONE else runCatching { AssistantVoices.chosen(c) }.getOrDefault(AssistantVoices.PHONE)
         for (s in sentences) {
             if (voice == AssistantVoices.PHONE) { audio.trySend(s); continue }
+            while (isActive && waiting.get() > AHEAD) delay(200)
             try {
-                AssistantNet.speech(c, voice, s, bill) { a -> if (audio.trySend(a).isFailure) throw CancellationException("stopped") }
+                AssistantNet.speech(c, voice, s, bill) { a -> waiting.addAndGet(a.size.toLong()); if (audio.trySend(a).isFailure) throw CancellationException("stopped") }
             } catch (e: CancellationException) { throw e
             } catch (e: Exception) { WriterLog.w("AI Assist voice: ${e.message}"); voice = AssistantVoices.PHONE; audio.trySend(s) }
         }
@@ -644,7 +648,7 @@ internal class AnswerVoice(private val c: Context, private val reader: ReadAloud
                     val t = track ?: newTrack().also { track = it; speaker?.let(it::setPreferredDevice); it.play() }
                     var at = 0
                     while (at < a.size && isActive) { val n = t.write(a, at, minOf(2_400, a.size - at), AudioTrack.WRITE_BLOCKING); if (n <= 0) break; at += n }
-                    written += a.size
+                    written += a.size; waiting.addAndGet(-a.size.toLong())
                 }
                 is String -> { drain(); if (speaker == null || !onPhone(a, speaker)) { reader.add(a); while (isActive && reader.speaking) delay(50) } }
             }
@@ -686,6 +690,7 @@ internal class AnswerVoice(private val c: Context, private val reader: ReadAloud
 
     private companion object {
         const val RATE = 24_000 // Mistral's voice: 24 kHz float samples
+        const val AHEAD = 20L * RATE // seconds of voice made ahead of what is heard
         val ATTRIBUTES: AudioAttributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANT).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build()
     }
 }

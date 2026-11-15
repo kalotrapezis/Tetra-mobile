@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Legyen belőle rádióműsor</string>
     <string name="assistant_attach_pill_live">💬 Élő beszélgetés a dokumentumról</string>
     <string name="assistant_attach_pill_read">🔊 Olvasd fel nekem</string>
+    <string name="assistant_reading_aloud">Felolvasom: «%1$s»…</string>
     <string name="assistant_attach_show_prompt">Készíts a(z) «%1$s» fájlból rádióműsort hangfájlként: egy műsorvezető és egy szakértő, minden részben példával és összefoglalóval.</string>
     <string name="assistant_attach_read_prompt">Olvasd fel nekem a(z) «%1$s» fájlt egészben hangfájlként, egy hanggal.</string>
     <string name="assistant_attach_live_prompt">Beszélgessünk a(z) «%1$s» dokumentumról. Két mondatban mondd el, mit tartalmaz, és kérdezd meg, honnan szeretnék kezdeni.</string>

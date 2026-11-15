@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Tee sellest raadiosaade</string>
     <string name="assistant_attach_pill_live">💬 Elav vestlus dokumendist</string>
     <string name="assistant_attach_pill_read">🔊 Loe mulle ette</string>
+    <string name="assistant_reading_aloud">Loen «%1$s» ette…</string>
     <string name="assistant_attach_show_prompt">Tee «%1$s» raadiosaateks helifailina: saatejuht ja ekspert, igas osas näide ja kokkuvõte.</string>
     <string name="assistant_attach_read_prompt">Loe mulle «%1$s» tervikuna ette helifailina, ühe häälega.</string>
     <string name="assistant_attach_live_prompt">Räägime dokumendist «%1$s». Ütle mulle kahe lausega, mis selles on, ja küsi, kust ma tahan alustada.</string>

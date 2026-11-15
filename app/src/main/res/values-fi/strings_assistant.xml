@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Tee siitä radio-ohjelma</string>
     <string name="assistant_attach_pill_live">💬 Elävä keskustelu asiakirjasta</string>
     <string name="assistant_attach_pill_read">🔊 Lue se minulle</string>
+    <string name="assistant_reading_aloud">Luen ääneen: «%1$s»…</string>
     <string name="assistant_attach_show_prompt">Tee «%1$s» radio-ohjelmaksi äänitiedostona: juontaja ja asiantuntija, jokaisessa osiossa esimerkki ja yhteenveto.</string>
     <string name="assistant_attach_read_prompt">Lue «%1$s» minulle kokonaan äänitiedostoksi yhdellä äänellä.</string>
     <string name="assistant_attach_live_prompt">Puhutaan asiakirjasta «%1$s». Kerro kahdessa lauseessa, mitä se sanoo, ja kysy, mistä haluan aloittaa.</string>

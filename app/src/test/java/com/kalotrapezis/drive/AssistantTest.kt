@@ -40,7 +40,7 @@ class AssistantTest {
         assertEquals("call0", tool.getString("tool_call_id"))
         assertTrue(tool.getString("content").startsWith("Started a timer of 5 min"))
         assertEquals("system", second.getJSONObject(0).getString("role"))
-        assertEquals(AssistantTools.SCHEMA.length() - 1, s.sent[0].getJSONArray("tools").length()) // open_beside only on a wide screen
+        assertEquals(AssistantTools.SCHEMA.length() - 2, s.sent[0].getJSONArray("tools").length()) // open_beside only on a wide screen, audio_make only from its button
     }
 
     @Test fun severalMatchesAreANumberedListAndTheCallWaitsForTheUser() {

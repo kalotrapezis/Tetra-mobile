@@ -113,8 +113,8 @@ class AssistantAttachTest {
     @Test fun anMp3IsAnEstimateThatWaitsForYes() {
         val d = doc("Κείμενο για ανάγνωση. ".repeat(500))
         val s = Script(calls("audio_make", """{"mode":"narration"}"""), says("Περίπου 12 λεπτά, €0,03. Να ξεκινήσω;"))
-        val reply = AssistantChat(s.api, tools(), now = { now }).ask("Διάβασέ μου το «Σημειώσεις» ολόκληρο σε MP3, με μία φωνή.", file = d)
-        // the first round offers only audio_make, and a call is a must: the model cannot make up the figures
+        val reply = AssistantChat(s.api, tools(), now = { now }).ask("Κάνε το «Σημειώσεις» ραδιοφωνική εκπομπή.", file = d, show = true)
+        // from the radio show's button the first round offers only audio_make, and a call is a must: the model cannot make up the figures
         assertEquals("any", s.sent[0].getString("tool_choice"))
         assertEquals(listOf("audio_make"), s.sent[0].getJSONArray("tools").let { t -> (0 until t.length()).map { t.getJSONObject(it).getJSONObject("function").getString("name") } })
         assertEquals("auto", s.sent[1].getString("tool_choice"))
@@ -136,10 +136,22 @@ class AssistantAttachTest {
         assertEquals(40, AudioJobs.estimate(60_000, "show", length = "long").minutes)
     }
 
+    @Test fun aRadioShowOnlyFromItsButton() {
+        // the user, 15 Nov: in a talk about a file «με τη σειρά» led to audio files; asked for in words, it is still not offered
+        val d = doc("Η νοημοσύνη δεν είναι ένας αριθμός. ".repeat(50))
+        val s = Script(says("Εντάξει."), says("Εντάξει."), says("Εντάξει."))
+        val chat = AssistantChat(s.api, tools(), now = { now })
+        chat.ask("Ας τα πάρουμε όλα με τη σειρά.", file = d); chat.ask("Δεν θα μου διαβάσεις τι λέει;"); chat.ask("Κάνε το ραδιοφωνική εκπομπή σε MP3.")
+        for (sent in s.sent) {
+            val names = sent.getJSONArray("tools").let { t -> (0 until t.length()).map { t.getJSONObject(it).getJSONObject("function").getString("name") } }
+            assertFalse(names.toString(), "audio_make" in names); assertTrue("attachment_read" in names)
+        }
+    }
+
     @Test fun aShowsLengthIsChosenOnTheCard() {
         val d = doc("Κείμενο για εκπομπή. ".repeat(1500))
         val s = Script(calls("audio_make", """{"mode":"show","length":"long"}"""), says("Περίπου 24 λεπτά. Να ξεκινήσω;"))
-        val a = AssistantChat(s.api, tools(), now = { now }).ask("Κάνε το μεγάλη εκπομπή.", file = d).audio!!
+        val a = AssistantChat(s.api, tools(), now = { now }).ask("Κάνε το μεγάλη εκπομπή.", file = d, show = true).audio!!
         assertEquals("long", a.length); assertEquals(a.estimates.getValue("long"), a.estimate)
         val e = a.estimates.values.toList()
         assertTrue(e[0].minutes < e[1].minutes && e[1].minutes < e[2].minutes)

@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Padaryk radijo laidą</string>
     <string name="assistant_attach_pill_live">💬 Tiesioginis pokalbis apie dokumentą</string>
     <string name="assistant_attach_pill_read">🔊 Perskaityk man</string>
+    <string name="assistant_reading_aloud">Skaitau garsiai «%1$s»…</string>
     <string name="assistant_attach_show_prompt">Padaryk iš «%1$s» radijo laidą garso failu: vedėjas ir ekspertas, su pavyzdžiu ir santrauka kiekvienai daliai.</string>
     <string name="assistant_attach_read_prompt">Perskaityk man «%1$s» visą garso failu, vienu balsu.</string>
     <string name="assistant_attach_live_prompt">Pakalbėkime apie dokumentą «%1$s». Pasakyk dviem sakiniais, ką jis sako, ir paklausk, nuo ko norėčiau pradėti.</string>

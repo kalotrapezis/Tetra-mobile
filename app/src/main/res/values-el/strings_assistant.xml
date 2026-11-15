@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Κάνε το ραδιοφωνική εκπομπή</string>
     <string name="assistant_attach_pill_live">💬 Ζωντανή συζήτηση για το έγγραφο</string>
     <string name="assistant_attach_pill_read">🔊 Διάβασέ το μου</string>
+    <string name="assistant_reading_aloud">Διαβάζω το «%1$s»…</string>
     <string name="assistant_attach_show_prompt">Κάνε το «%1$s» ραδιοφωνική εκπομπή σε αρχείο ήχου: ένας παρουσιαστής και ένας ειδικός, με ένα παράδειγμα και ανακεφαλαίωση σε κάθε ενότητα.</string>
     <string name="assistant_attach_read_prompt">Διάβασέ μου το «%1$s» ολόκληρο σε αρχείο ήχου, με μία φωνή.</string>
     <string name="assistant_attach_live_prompt">Ας συζητήσουμε το έγγραφο «%1$s». Πες μου σε δύο προτάσεις τι λέει και ρώτα με από πού θέλω να ξεκινήσουμε.</string>

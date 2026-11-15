@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Gör det till ett radioprogram</string>
     <string name="assistant_attach_pill_live">💬 Live-samtal om dokumentet</string>
     <string name="assistant_attach_pill_read">🔊 Läs upp den för mig</string>
+    <string name="assistant_reading_aloud">Läser upp «%1$s»…</string>
     <string name="assistant_attach_show_prompt">Gör «%1$s» till ett radioprogram som ljudfil: en programledare och en expert, med ett exempel och en sammanfattning för varje avsnitt.</string>
     <string name="assistant_attach_read_prompt">Läs upp «%1$s» hela som ljudfil, med en röst.</string>
     <string name="assistant_attach_live_prompt">Låt oss prata om dokumentet «%1$s». Berätta med två meningar vad det säger och fråga mig var jag vill börja.</string>

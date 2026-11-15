@@ -157,6 +157,7 @@
     <string name="assistant_attach_pill_show">🎙 Agħmilha programm tar-radju</string>
     <string name="assistant_attach_pill_live">💬 Taħdita diretta dwar id-dokument</string>
     <string name="assistant_attach_pill_read">🔊 Aqrali għalija</string>
+    <string name="assistant_reading_aloud">Qed naqra «%1$s» b\'leħen għoli…</string>
     <string name="assistant_attach_show_prompt">Agħmel «%1$s» programm tar-radju f\'fajl awdjo: presentatur u espert, b\'eżempju u sommarju għal kull sezzjoni.</string>
     <string name="assistant_attach_read_prompt">Aqrali «%1$s» kollu f\'fajl awdjo, b\'vuċi waħda.</string>
     <string name="assistant_attach_live_prompt">Ejja nitkellmu dwar id-dokument «%1$s». Għidli f\'żewġ sentenzi x\'jgħid, u staqsini minn fejn irrid nibdew.</string>

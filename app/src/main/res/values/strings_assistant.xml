@@ -160,6 +160,7 @@
     <string name="assistant_attach_pill_show">🎙 Make it a radio show</string>
     <string name="assistant_attach_pill_live">💬 Live talk about the document</string>
     <string name="assistant_attach_pill_read">🔊 Read it to me</string>
+    <string name="assistant_reading_aloud">Reading «%1$s» aloud…</string>
     <string name="assistant_attach_show_prompt">Make «%1$s» a radio show as an audio file: a host and an expert, with an example and a recap for each section.</string>
     <string name="assistant_attach_read_prompt">Read «%1$s» to me whole as an audio file, with one voice.</string>
     <string name="assistant_attach_live_prompt">Let\'s talk about the document «%1$s». Tell me in two sentences what it says and ask me where I want to start.</string>
