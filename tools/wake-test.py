@@ -16,6 +16,7 @@ GATE_ABS_DB, GATE_OVER_FLOOR_DB = -55.0, 9.0     # loudness gate: above both
 ONSET_SILENCE = 15                               # frames (150 ms) of quiet before a speech onset counts
 WINDOW = 160                                     # frames (1.6 s) looked at after an onset
 PRE = 5                                          # frames kept before the onset
+MIN_SPEECH = 15                                  # frames over the gate: a lone "Tetra" is 0.4 s with a stop inside
 
 
 def read_wav(p):
@@ -115,8 +116,9 @@ def score(feat, templates):
     return min(dtw_open_end(t, feat) for t in templates)          # the nearest take (measured better than the two nearest)
 
 
-def stream(x, templates, threshold, log=None):
-    """Runs a recording as the phone would. Returns (wakes as seconds, onsets checked, share of frames past the gate)."""
+def stream(x, phrases, log=None):
+    """Runs a recording as the phone would; phrases: name -> (templates, threshold), a wake when any scores under its own.
+    Returns (wakes as seconds, onsets checked, share of frames past the gate); log gets (seconds, {name: score})."""
     db = frames_db(x)
     floor, quiet, wakes, checked, passed, busy_until = db[0], 99, [], 0, 0, -1
     for i, e in enumerate(db):
@@ -127,20 +129,27 @@ def stream(x, templates, threshold, log=None):
             a, b = max(0, i - PRE), i + WINDOW
             seg = x[a * HOP:b * HOP]
             p = spectrum(seg)
-            # is it speech: most of the loud frames' energy in the voice band, and 0.3-1.6 s of it
+            # is it speech: most of the loud frames' energy in the voice band, and 0.15 s or more of it
             ldb = db[a:b][:len(p)]
             lf = ldb > max(GATE_ABS_DB, floor + GATE_OVER_FLOOR_DB)
             band = p[lf][:, SPEECH_BAND].sum() / max(p[lf].sum(), 1e-10) if lf.any() else 0
-            if band > 0.5 and lf.sum() >= 30:
+            if band > 0.5 and lf.sum() >= MIN_SPEECH:
                 checked += 1
-                s = score(mfcc(p), templates)
+                f = mfcc(p)
+                s = {k: score(f, t) for k, (t, _) in phrases.items()}
                 if log is not None:
                     log.append((i * HOP / SR, s))
-                if s < threshold:
+                if any(s[k] < th for k, (_, th) in phrases.items()):
                     wakes.append(i * HOP / SR)
                     busy_until = b                                  # the sheet opens; no second wake for this phrase
         quiet = 0 if loud else quiet + 1
     return wakes, checked, passed / max(len(db), 1)
+
+
+# phrase -> (its takes' file prefix, held-out recordings); the first N_TAKES takes are its templates, as on the phone
+PHRASES = {'Hey Tetra': ('template', ['template5', 'held1', 'fast', 'slow', 'far', 'quiet']),
+           'OK Tetra': ('ok', ['ok5']), 'Tetra': ('tetra', ['tetra5'])}
+N_TAKES = 4
 
 
 def main():
@@ -149,52 +158,57 @@ def main():
     args = args[:args.index('--noise')] if '--noise' in args else args
     d = os.path.expanduser(args[0] if args else '~/.cache/tetra-wake')
     w = lambda n: os.path.join(d, n + '.wav')
-    takes = {f't{i}': trim(read_wav(w(f'template{i}'))) for i in range(1, 6)}
-    feats = {k: mfcc(spectrum(v)) for k, v in takes.items()}
-    print('takes:', ', '.join(f'{k} {len(v) / SR:.2f}s' for k, v in takes.items()))
+    feats, loo, med = {}, {}, {}
+    print(f'1. Each phrase\'s {N_TAKES} takes, each against the other {N_TAKES - 1} (leave one out): DTW distance to the nearest')
+    for name, (prefix, _) in PHRASES.items():
+        if not os.path.exists(w(f'{prefix}{N_TAKES}')):
+            continue
+        takes = [trim(read_wav(w(f'{prefix}{i}'))) for i in range(1, N_TAKES + 1)]
+        feats[name] = [mfcc(spectrum(t)) for t in takes]
+        loo[name] = [score(np.vstack([f, np.zeros((40, f.shape[1]))]), [g for j, g in enumerate(feats[name]) if j != k])
+                     for k, f in enumerate(feats[name])]
+        med[name] = float(np.median(loo[name]))
+        print(f'   {name:9s} takes ' + ' '.join(f'{len(t) / SR:.2f}s' for t in takes) + '   leave-one-out ' +
+              ' '.join(f'{v:.2f}' for v in loo[name]) + f'   median {med[name]:.2f}')
+    phrases = {k: (v, -1) for k, v in feats.items()}
 
-    print('\n1. Each take against the other four (leave one out), score = DTW distance to the nearest')
-    loo = {k: score(np.vstack([feats[k], np.zeros((40, feats[k].shape[1]))]), [f for j, f in feats.items() if j != k])
-           for k in feats}
-    for k, s in loo.items():
-        print(f'   {k}: {s:.2f}')
-    templates = list(feats.values())
-
-    print('\n2. Held-out takes, the full stream (gate, onset, speech check, DTW); best score in the recording')
-    pos = {}
-    for n in ['held1', 'fast', 'slow', 'far', 'quiet']:
-        if os.path.exists(w(n)):
-            log = []
-            stream(read_wav(w(n)), templates, -1, log)
-            pos[n] = min((s for _, s in log), default=np.inf)
-            print(f'   {n:6s} {pos[n]:.2f}   peak {frames_db(read_wav(w(n))).max():.0f} dBFS')
+    # every score below is the phrase's DTW distance over its median: the phone's threshold is FACTOR times the median
+    print('\n2. Held-out takes, the full stream; each phrase\'s best score in the recording, as x its median')
+    pos = {k: [v / med[k] for v in loo[k]] for k in feats}
+    for name, (_, held) in PHRASES.items():
+        for n in held:
+            if name in feats and os.path.exists(w(n)):
+                log = []
+                stream(read_wav(w(n)), phrases, log)
+                best = {k: min((s[k] for _, s in log), default=np.inf) / med[k] for k in feats}
+                pos[name].append(best[name])
+                print(f'   {name:9s} {n:9s} ' + '  '.join(f'{k} {v:.2f}' for k, v in best.items()))
 
     neg = {}
-    srcs = ([w('near')] if os.path.exists(w('near')) else []) + noise
-    print('\n3. Other speech: every onset checked, its score (lower = more like "Hey Tetra")')
+    srcs = [w(n) for n in ('near', 'near2') if os.path.exists(w(n))] + noise
+    print('\n3. Other speech: every onset checked')
     for p in srcs:
         x = read_any(p, seconds=3600)
         log = []
-        _, checked, passed = stream(x, templates, -1, log)
-        neg[p] = (np.array([s for _, s in log]), len(x) / SR, log)
-        sc = neg[p][0]
-        print(f'   {os.path.basename(p)[:50]:50s} {len(x) / SR / 60:5.1f} min, {checked} onsets checked, '
-              f'{passed:.0%} of frames past the gate, nearest {sc.min() if len(sc) else np.inf:.2f}')
+        _, checked, passed = stream(x, phrases, log)
+        if p == w('near') and 'Tetra' in feats:     # it opens with a lone "Tetra" (15 Nov), a take now, not a miss
+            pos['Tetra'].append(min(s['Tetra'] for t, s in log if t < 2.5) / med['Tetra'])
+            log = [(t, s) for t, s in log if t >= 2.5]
+        neg[p] = (log, len(x) / SR)
+        print(f'   {os.path.basename(p)[:50]:50s} {len(x) / SR / 60:5.1f} min, {checked} onsets checked, {passed:.0%} of frames past the gate')
+    hrs = sum(v[1] for v in neg.values()) / 3600
 
-    worst_pos = max(list(pos.values()) + list(loo.values()))
-    print(f'\n4. Thresholds (positives caught must score below; worst positive {worst_pos:.2f})')
-    ref = float(np.median(list(loo.values())))
-    print(f'   leave-one-out median {ref:.2f}; the phone sets its threshold as a multiple of this (WakeWord.FACTOR)')
-    for th in np.round(ref * np.arange(1.2, 1.81, 0.05), 2):
-        caught = sum(v < th for v in list(pos.values()) + list(loo.values()))
-        fw = {p: (v[0] < th).sum() for p, v in neg.items()}
-        hrs = sum(v[1] for v in neg.values()) / 3600
-        print(f'   {th:5.1f} (x{th / ref:.2f}): caught {caught}/{len(pos) + len(loo)}   false wakes ' +
-              ', '.join(f'{os.path.basename(p)[:12]} {n}' for p, n in fw.items()) +
-              (f'   = {sum(fw.values()) / hrs:.1f}/hour' if hrs else ''))
-    for p, (sc, _, log) in neg.items():
-        near = sorted(log, key=lambda t: t[1])[:3]
-        print(f'   nearest in {os.path.basename(p)[:30]}: ' + ', '.join(f'{t:.1f}s ({s:.2f})' for t, s in near))
+    for name in feats:
+        r = {p: np.array([s[name] / med[name] for _, s in log]) for p, (log, _) in neg.items()}
+        print(f'\n4. {name}: held-out and leave-one-out worst x{max(pos[name]):.2f}; other speech nearest ' +
+              ', '.join(f'{os.path.basename(p)[:12]} x{v.min():.2f}' for p, v in r.items() if len(v)))
+        for f in np.round(np.arange(1.2, 1.81, 0.05), 2):
+            fw = {p: int((v < f).sum()) for p, v in r.items()}
+            print(f'   x{f:.2f}: caught {sum(v < f for v in pos[name])}/{len(pos[name])}   false wakes ' +
+                  ', '.join(f'{os.path.basename(p)[:12]} {n}' for p, n in fw.items()) + (f'   = {sum(fw.values()) / hrs:.1f}/hour' if hrs else ''))
+        for p, (log, _) in neg.items():
+            near = sorted(log, key=lambda t: t[1][name])[:3]
+            print(f'   nearest in {os.path.basename(p)[:30]}: ' + ', '.join(f'{t:.1f}s (x{s[name] / med[name]:.2f})' for t, s in near))
 
 
 if __name__ == '__main__':

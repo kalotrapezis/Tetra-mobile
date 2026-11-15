@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="wake_title">Hey Tetra</string>
-    <string name="wake_note">Pasakykite „Hey Tetra“, kad atsidarytų AI Assist, net užgesus ekranui. Lygina tai, ką girdi mikrofonas, su jūsų penkiais įrašais, telefone; klausantis niekas nesiunčiama. Užrakinus telefoną, asmeniniai dalykai (skambučiai, žinutės, paštas, kalendorius, užrašai, failai, kontaktai) pirma prašo atrakinti. Tik viename įrenginyje: du atsakytų kartu, tad planšetėje palikite išjungtą. Automobilyje pristabdyta.</string>
+    <string name="wake_note">Pasakykite „Tetra“, „OK Tetra“ arba „Hey Tetra“, kad atsidarytų AI Assist, net užgesus ekranui. Lygina tai, ką girdi mikrofonas, su jūsų pačių įrašais, telefone; klausantis niekas nesiunčiama. Užrakinus telefoną, asmeniniai dalykai (skambučiai, žinutės, paštas, kalendorius, užrašai, failai, kontaktai) pirma prašo atrakinti. Tik viename įrenginyje: du atsakytų kartu, tad planšetėje palikite išjungtą. Automobilyje pristabdyta.</string>
     <string name="wake_on">Klausosi jūsų balso</string>
     <string name="wake_off">Išjungta</string>
     <string name="wake_record">Įrašykite balsą</string>
-    <string name="wake_record_note">Pasakykite „Hey Tetra“ penkis kartus kaip įprastai, tylioje vietoje, telefoną laikydami per ištiestą ranką.</string>
+    <string name="wake_record_note">Pasakykite kiekvieną frazę keturis kartus kaip įprastai, tylioje vietoje, telefoną laikydami per ištiestą ranką. Bakstelėkite įrašą, kad įrašytumėte iš naujo.</string>
     <string name="wake_take">Įrašas %1$d</string>
     <string name="wake_take_odd">Skiriasi nuo kitų: įrašykite iš naujo</string>
-    <string name="wake_record_take">Įrašyti %1$d</string>
-    <string name="wake_speak">Dabar sakykite „Hey Tetra“…</string>
+    <string name="wake_record_take">Įrašyti „%1$s“, nr. %2$d</string>
+    <string name="wake_speak">Dabar sakykite „%1$s“…</string>
     <string name="wake_not_heard">Negirdėjo. Bandykite dar.</string>
     <string name="wake_record_again">Iš naujo</string>
     <string name="wake_try">Išbandyti</string>
-    <string name="wake_try_caught">Atpažinta (%1$s, pažadina žemiau %2$s)</string>
-    <string name="wake_try_missed">Neatpažinta (%1$s, pažadina žemiau %2$s). Įrašykite iš naujo.</string>
+    <string name="wake_try_caught">Atpažinta kaip „%1$s“ (%2$s ribos)</string>
+    <string name="wake_try_missed">Neatpažinta: artimiausia „%1$s“, %2$s ribos. Įrašykite iš naujo.</string>
     <string name="wake_notice">Klausosi „Hey Tetra“</string>
     <string name="wake_turn_off">Išjungti</string>
 </resources>

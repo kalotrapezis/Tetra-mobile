@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="wake_title">Hey Tetra</string>
-    <string name="wake_note">Πείτε «Hey Tetra» για να ανοίξει ο Βοηθός AI, ακόμη και με σβηστή οθόνη. Συγκρίνει ό,τι ακούει το μικρόφωνο με τις πέντε ηχογραφήσεις σας, στο τηλέφωνο· τίποτα δεν στέλνεται όσο ακούει. Με κλειδωμένο τηλέφωνο, τα προσωπικά (κλήσεις, μηνύματα, mail, ημερολόγιο, σημειώσεις, αρχεία, επαφές) ζητούν πρώτα ξεκλείδωμα. Σε μία συσκευή μόνο: δύο θα απαντούσαν μαζί, οπότε στο tablet μένει κλειστό. Σε παύση στο αυτοκίνητο.</string>
+    <string name="wake_note">Πείτε «Tetra», «OK Tetra» ή «Hey Tetra» για να ανοίξει ο Βοηθός AI, ακόμη και με σβηστή οθόνη. Συγκρίνει ό,τι ακούει το μικρόφωνο με τις δικές σας ηχογραφήσεις, στο τηλέφωνο· τίποτα δεν στέλνεται όσο ακούει. Με κλειδωμένο τηλέφωνο, τα προσωπικά (κλήσεις, μηνύματα, mail, ημερολόγιο, σημειώσεις, αρχεία, επαφές) ζητούν πρώτα ξεκλείδωμα. Σε μία συσκευή μόνο: δύο θα απαντούσαν μαζί, οπότε στο tablet μένει κλειστό. Σε παύση στο αυτοκίνητο.</string>
     <string name="wake_on">Ακούει τη φωνή σας</string>
     <string name="wake_off">Κλειστό</string>
     <string name="wake_record">Ηχογράφηση της φωνής σας</string>
-    <string name="wake_record_note">Πείτε «Hey Tetra» πέντε φορές όπως συνήθως, σε ήσυχο χώρο, με το τηλέφωνο σε απόσταση χεριού.</string>
+    <string name="wake_record_note">Πείτε κάθε φράση τέσσερις φορές όπως συνήθως, σε ήσυχο χώρο, με το τηλέφωνο σε απόσταση χεριού. Πατήστε μια λήψη για να την ξαναηχογραφήσετε.</string>
     <string name="wake_take">Λήψη %1$d</string>
     <string name="wake_take_odd">Διαφέρει από τις άλλες: ξαναηχογραφήστε τη</string>
-    <string name="wake_record_take">Ηχογράφηση λήψης %1$d</string>
-    <string name="wake_speak">Πείτε τώρα «Hey Tetra»…</string>
+    <string name="wake_record_take">Ηχογράφηση «%1$s», λήψη %2$d</string>
+    <string name="wake_speak">Πείτε τώρα «%1$s»…</string>
     <string name="wake_not_heard">Δεν ακούστηκε. Ξαναδοκιμάστε.</string>
     <string name="wake_record_again">Ξανά</string>
     <string name="wake_try">Δοκιμή</string>
-    <string name="wake_try_caught">Αναγνωρίστηκε (%1$s, ξυπνά κάτω από %2$s)</string>
-    <string name="wake_try_missed">Δεν αναγνωρίστηκε (%1$s, ξυπνά κάτω από %2$s). Ξαναηχογραφήστε τις λήψεις.</string>
+    <string name="wake_try_caught">Αναγνωρίστηκε ως «%1$s» (%2$s του ορίου)</string>
+    <string name="wake_try_missed">Δεν αναγνωρίστηκε: πλησιέστερο «%1$s», %2$s του ορίου. Ξαναηχογραφήστε τις λήψεις του.</string>
     <string name="wake_notice">Ακούει για «Hey Tetra»</string>
     <string name="wake_turn_off">Απενεργοποίηση</string>
 </resources>

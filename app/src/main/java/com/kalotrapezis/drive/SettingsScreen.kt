@@ -33,6 +33,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -1502,60 +1504,71 @@ private fun carBluetoothDevices(c: Context): List<Pair<String, String>> = runCat
     })
 }
 
-/** Recording the five takes: each kept or recorded again, an odd one marked; then "Try it" says whether one more is caught. */
+/**
+ * Recording the takes: four of each phrase, the phrases one after another on this one screen; a take kept or recorded again
+ * (a tap on it), an odd one marked; then "Try it" says which phrase one more was taken for, and how near.
+ */
 @Composable private fun WakeTakes(onDone: (Boolean) -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val takes = remember { mutableStateListOf<ShortArray?>().apply { repeat(Wake.TAKES) { add(null) } } }
-    var busy by remember { mutableStateOf<Int?>(null) } // the take being recorded; Wake.TAKES: the try
+    val phrases = WakeWord.PHRASES
+    val takes = remember { mutableStateListOf<ShortArray?>().apply { repeat(phrases.size * Wake.TAKES) { add(null) } } }
+    var busy by remember { mutableStateOf<Int?>(null) } // the take being recorded; takes.size: the try
     var message by remember { mutableStateOf<String?>(null) }
-    val features = remember(takes.toList()) { if (takes.all { it != null }) takes.map { WakeWord.features(it!!) } else null }
-    val loo = remember(features) { features?.let(WakeWord::leaveOneOut) }
-    val median = loo?.let(WakeWord::median)
+    val features = remember(takes.toList()) { phrases.indices.map { p -> takes.subList(p * Wake.TAKES, (p + 1) * Wake.TAKES).map { it?.let(WakeWord::features) } } }
+    val odd = remember(features) { features.flatMap { f ->
+        if (f.any { it == null }) List(f.size) { false } else WakeWord.leaveOneOut(f.map { it!! }).let { loo -> loo.map { it > WakeWord.ODD * WakeWord.median(loo) } }
+    } }
+    fun phraseOf(i: Int) = phrases[i / Wake.TAKES]
     fun record(i: Int) {
         busy = i; message = null
         scope.launch {
-            val pcm = withContext(Dispatchers.IO) { Wake.record(if (i < Wake.TAKES) 2500 else 3000) }
+            val pcm = withContext(Dispatchers.IO) { Wake.record(if (i < takes.size) 2500 else 3000) }
             if (pcm == null) { busy = null; message = context.getString(R.string.assistant_mic_closed); return@launch }
-            if (i < Wake.TAKES) {
+            if (i < takes.size) {
                 val speech = WakeWord.trim(WakeWord.floats(pcm)).size / WakeWord.RATE.toDouble()
-                WriterLog.i("Hey Tetra: take ${i + 1}: ${"%.2f".format(speech)} s of speech")
-                if (speech !in 0.3..1.6) message = context.getString(R.string.wake_not_heard) else takes[i] = pcm
+                WriterLog.i("Hey Tetra: ${phraseOf(i)} take ${i % Wake.TAKES + 1}: ${"%.2f".format(speech)} s of speech")
+                if (speech !in 0.25..1.6) message = context.getString(R.string.wake_not_heard) else takes[i] = pcm
             } else {
-                val f = features ?: return@launch
-                val th = WakeWord.threshold(f)
-                var best = Double.POSITIVE_INFINITY
-                withContext(Dispatchers.Default) { WakeDetector(f, th) { best = minOf(best, it) }.push(pcm + ShortArray(WakeWord.RATE * 17 / 10)) }
-                WriterLog.i("Hey Tetra: tried: ${"%.2f".format(best)}, wakes under ${"%.2f".format(th)}")
-                message = if (best.isInfinite()) context.getString(R.string.wake_not_heard)
-                    else context.getString(if (best < th) R.string.wake_try_caught else R.string.wake_try_missed, "%.1f".format(best), "%.1f".format(th))
+                val ready = withContext(Dispatchers.Default) { phrases.mapIndexed { p, name -> WakePhrase(name, features[p].map { it!! }) } }
+                var best: Pair<WakePhrase, Double>? = null
+                withContext(Dispatchers.Default) { WakeDetector(ready) { p, r -> if (best == null || r < best!!.second) best = p to r }.push(pcm + ShortArray(WakeWord.RATE * 17 / 10)) }
+                val b = best
+                WriterLog.i("Hey Tetra: tried: ${b?.first?.name} at ${b?.second?.let { "%.2f".format(it) }} of its threshold")
+                message = if (b == null) context.getString(R.string.wake_not_heard)
+                    else context.getString(if (b.second < 1) R.string.wake_try_caught else R.string.wake_try_missed, b.first.name, "%.0f%%".format(b.second * 100))
             }
             busy = null
         }
     }
+    val next = takes.indexOfFirst { it == null }
     AlertDialog(onDismissRequest = { if (busy == null) onDone(false) }, title = { Text(stringResource(R.string.wake_record)) },
-        text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(stringResource(R.string.wake_record_note), style = MaterialTheme.typography.bodyMedium)
-            takes.forEachIndexed { i, t ->
-                val odd = loo != null && median != null && loo[i] > WakeWord.ODD * median
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text(stringResource(R.string.wake_take, i + 1), style = MaterialTheme.typography.bodyLarge)
-                        Text(when { busy == i -> stringResource(R.string.wake_speak); odd -> stringResource(R.string.wake_take_odd); t != null -> "✓"; else -> "—" },
-                            style = MaterialTheme.typography.bodySmall, color = if (odd) MaterialTheme.colorScheme.error else quiet())
+            phrases.forEachIndexed { p, name ->
+                Text("“$name”", style = MaterialTheme.typography.titleMedium)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    (0 until Wake.TAKES).forEach { k ->
+                        val i = p * Wake.TAKES + k
+                        val color = when { busy == i -> MaterialTheme.colorScheme.primary; odd[i] -> MaterialTheme.colorScheme.error; takes[i] != null -> MaterialTheme.colorScheme.secondaryContainer; else -> rowColor() }
+                        // a kept take: a tap records it again
+                        Box(Modifier.size(48.dp).clip(CircleShape).background(color).clickable(enabled = busy == null && takes[i] != null) { record(i) },
+                            contentAlignment = Alignment.Center) {
+                            Text(if (takes[i] != null && !odd[i]) "✓" else "${k + 1}", style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.semantics { contentDescription = context.getString(R.string.wake_take, k + 1) })
+                        }
                     }
-                    if (t != null) TextButton(onClick = { record(i) }, enabled = busy == null) { Text(stringResource(R.string.wake_record_again)) }
                 }
+                if ((p * Wake.TAKES until (p + 1) * Wake.TAKES).any { odd[it] }) Text(stringResource(R.string.wake_take_odd), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
             }
-            val next = takes.indexOfFirst { it == null }
-            if (next >= 0) Button(onClick = { record(next) }, enabled = busy == null, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.wake_record_take, next + 1)) }
-            else OutlinedButton(onClick = { record(Wake.TAKES) }, enabled = busy == null, modifier = Modifier.fillMaxWidth()) {
-                Text(if (busy == Wake.TAKES) stringResource(R.string.wake_speak) else stringResource(R.string.wake_try)) }
+            if (busy != null) Text(stringResource(R.string.wake_speak, if (busy!! < takes.size) phraseOf(busy!!) else phrases.joinToString(" / ")), style = MaterialTheme.typography.bodyLarge)
+            else if (next >= 0) Button(onClick = { record(next) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.wake_record_take, phraseOf(next), next % Wake.TAKES + 1)) }
+            else OutlinedButton(onClick = { record(takes.size) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.wake_try)) }
             message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
         } },
-        confirmButton = { TextButton(enabled = busy == null && takes.all { it != null }, onClick = {
-            takes.forEachIndexed { i, t -> Wake.write(Wake.take(context, i + 1), t!!) }
-            WriterLog.i("Hey Tetra: five takes kept, leave-one-out ${loo?.joinToString { "%.2f".format(it) }}")
+        confirmButton = { TextButton(enabled = busy == null && next < 0, onClick = {
+            takes.forEachIndexed { i, t -> Wake.write(Wake.take(context, phraseOf(i), i % Wake.TAKES + 1), t!!) }
+            WriterLog.i("Hey Tetra: takes kept, odd: ${odd.withIndex().filter { it.value }.joinToString { "${phraseOf(it.index)} ${it.index % Wake.TAKES + 1}" }.ifEmpty { "none" }}")
             onDone(true)
         }) { Text(stringResource(R.string.common_save)) } },
         dismissButton = { TextButton(enabled = busy == null, onClick = { onDone(false) }) { Text(stringResource(R.string.common_cancel)) } })

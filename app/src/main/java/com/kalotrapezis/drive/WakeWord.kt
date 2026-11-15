@@ -26,8 +26,16 @@ internal object WakeWord {
     const val ONSET_SILENCE = 15        // frames of quiet before an onset counts
     const val WINDOW = 160              // frames (1.6 s) looked at after an onset
     const val PRE = 5                   // frames kept before it
-    /** The threshold: this times the takes' median leave-one-out distance. 15 Nov: the user's held-out takes ≤ 1.31, other talk ≥ 1.70. */
-    const val FACTOR = 1.5
+    /** The wake phrases (the user, 15 Nov: "Just Tetra, ok Tetra and hey Tetra"), each with its own takes and threshold. */
+    val PHRASES = listOf("Hey Tetra", "OK Tetra", "Tetra")
+    /**
+     * Each phrase's threshold: this times its takes' median leave-one-out distance. tools/wake-test.py on the user's voice,
+     * 15 Nov: Hey Tetra's takes ≤ 1.32, their talk and look-alike words ≥ 1.50; OK Tetra's held-out 0.98, their talk ≥ 1.39;
+     * Tetra's takes ≤ 1.03, a look-alike word 1.25 (other people's lectures ≥ 1.53 for all three).
+     */
+    val FACTOR = mapOf("Hey Tetra" to 1.45, "OK Tetra" to 1.35, "Tetra" to 1.2)
+    /** Frames over the gate before a window is looked at: a lone "Tetra" is 0.4 s with a stop inside. */
+    const val MIN_SPEECH = 15
     /** A take this much further from the others than the median is offered to be recorded again (15 Nov: one take was 1.40). */
     const val ODD = 1.3
 
@@ -140,7 +148,7 @@ internal object WakeWord {
         takes.filterIndexed { j, _ -> j != k }.minOf { dtw(it, q) }
     }
     fun median(v: DoubleArray) = v.sorted().let { if (it.size % 2 == 1) it[it.size / 2] else (it[it.size / 2 - 1] + it[it.size / 2]) / 2 }
-    fun threshold(takes: List<Array<FloatArray>>) = FACTOR * median(leaveOneOut(takes))
+    fun threshold(takes: List<Array<FloatArray>>, phrase: String) = FACTOR.getValue(phrase) * median(leaveOneOut(takes))
 
     /** In-place radix-2 FFT. */
     private fun fft(re: DoubleArray, im: DoubleArray) {
@@ -171,11 +179,17 @@ internal object WakeWord {
     }
 }
 
+/** One wake phrase's takes (features) and the distance under which it wakes. */
+internal class WakePhrase(val name: String, val templates: List<Array<FloatArray>>, val threshold: Double) {
+    constructor(name: String, templates: List<Array<FloatArray>>) : this(name, templates, WakeWord.threshold(templates, name))
+}
+
 /**
  * The live half: fed the mic's samples, says when "Hey Tetra" was heard. In quiet only the 10 ms loudness is worked out; an
- * onset after 150 ms of quiet is looked at 1.6 s later, from a ring of the last 1.65 s. [heard] gets each looked-at score.
+ * onset after 150 ms of quiet is looked at 1.6 s later, from a ring of the last 1.65 s, against every phrase; the best match
+ * (its distance over its own threshold) wakes under 1. [heard] gets each look: that phrase and its ratio.
  */
-internal class WakeDetector(private val templates: List<Array<FloatArray>>, private val threshold: Double, private val heard: (Double) -> Unit = {}) {
+internal class WakeDetector(private val phrases: List<WakePhrase>, private val heard: (WakePhrase, Double) -> Unit = { _, _ -> }) {
     private val frames = WakeWord.PRE + WakeWord.WINDOW + 2
     private val ring = FloatArray(frames * WakeWord.HOP)
     private val dbs = DoubleArray(frames)
@@ -227,11 +241,12 @@ internal class WakeDetector(private val templates: List<Array<FloatArray>>, priv
         val power = WakeWord.spectrum(seg)
         val bar = maxOf(WakeWord.GATE_ABS_DB, floorThen + WakeWord.GATE_OVER_FLOOR_DB)
         val loud = BooleanArray(power.size) { dbs[((a + it) % frames).toInt()] > bar }
-        // is it speech: 0.3 s or more over the gate, most of it in the voice's band
-        if (loud.count { it } < 30 || WakeWord.voiceShare(power, loud) <= 0.5) return false
+        // is it speech: 0.15 s or more over the gate, most of it in the voice's band
+        if (loud.count { it } < WakeWord.MIN_SPEECH || WakeWord.voiceShare(power, loud) <= 0.5) return false
         checks++
-        val s = WakeWord.score(WakeWord.mfcc(power), templates)
-        heard(s)
-        return s < threshold
+        val f = WakeWord.mfcc(power)
+        val (p, r) = phrases.map { it to WakeWord.score(f, it.templates) / it.threshold }.minBy { it.second }
+        heard(p, r)
+        return r < 1
     }
 }

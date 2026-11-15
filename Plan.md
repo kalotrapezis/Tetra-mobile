@@ -12,14 +12,16 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
-- [~] (hey-tetra session, 15 Nov; branch `claude/hey-tetra-5ec56d`, not merged) **"Hey Tetra" wake word, no trained model** (the user: no
-      training on this PC; match the voice's signature). MFCC + DTW against the user's 5 takes (WakeWord.kt; tools/wake-test.py the same
-      pipeline, tools/wake-record.sh the takes). PC test on the user's voice: 5/5 held-out takes (normal, fast, slow, 2–3 m, quiet), 0 false
-      wakes in 1 h 52 min of lectures and a podcast and in a minute of their talk except a lone "Tetra" (accepted). Threshold 1.5 × the
-      takes' median leave-one-out distance. Settings › AI Assist › Hey Tetra (off; per device — one device only, as two would both answer),
-      the takes recorded there with Try it; WakeService (microphone FGS, mic let go while AI Assist is open, another recording, a call, in
-      the car); a match: a tone, the sheet over the lock screen. Personal tools ask Android's unlock when locked (WakeUnlock), not in the
-      car. Car build leaves it out. **Open:** on the phone, an hour's battery.
+- [~] (hey-tetra session, 15 Nov; branch `claude/hey-tetra-5ec56d`, not merged) **Wake phrases "Tetra", "OK Tetra", "Hey Tetra", no trained
+      model** (the user: no training on this PC; match the voice's signature; then "Just Tetra, ok Tetra and hey Tetra"). MFCC + DTW
+      against the user's 4 takes of each phrase, each phrase its own threshold, the best match wakes (WakeWord.kt; tools/wake-test.py the
+      same pipeline, tools/wake-record.sh the takes). PC test on the user's voice (4 takes each, the rest held out): every held-out take
+      caught (Hey Tetra also fast, slow, 2–3 m away, quiet); no false wake in 1 h 52 min of lectures and a podcast, in a minute of their talk,
+      or in 30 s of look-alike words (Τετάρτη, τετράδιο, Πέτρα, μέτρα…). Thresholds × each phrase's median leave-one-out distance: Hey
+      Tetra 1.45, OK Tetra 1.35, Tetra 1.20 (a look-alike word came to 1.25). Settings › AI Assist › Hey Tetra (off; per device — one
+      device only, as two would both answer), the 12 takes on one page with Try it; WakeService (microphone FGS, mic let go while AI Assist
+      is open, another recording, a call, in the car); a match: a tone, the sheet over the lock screen. Personal tools ask Android's
+      unlock when locked (WakeUnlock), not in the car. Car build leaves it out. **Open:** on the phone, waking and an hour's battery.
 - [ ] (assistant-tools session, 8 Nov; branch `claude/assistant-safety-mailai-5de496`, not merged) **AI Assist: data, pin/colour notes,
       open a page, the brief as a card** (the user: how much mobile data was used / is left / the month's forecast and whether to cut
       back; pin or recolour notes; open a website or the web search results or the daily report as a card in the chat or in Tetra's own

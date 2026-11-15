@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="wake_title">Hey Tetra</string>
-    <string name="wake_note">Povedzte „Hey Tetra“ a otvorí sa AI Assist, aj pri zhasnutej obrazovke. Porovnáva, čo mikrofón počuje, s vašimi piatimi nahrávkami, v telefóne; nič sa neodosiela. Pri zamknutom telefóne osobné veci (hovory, správy, pošta, kalendár, poznámky, súbory, kontakty) najprv žiadajú odomknutie. Len na jednom zariadení: dve by odpovedali naraz, na tablete ho nechajte vypnuté. V aute pozastavené.</string>
+    <string name="wake_note">Povedzte „Tetra“, „OK Tetra“ alebo „Hey Tetra“ a otvorí sa AI Assist, aj pri zhasnutej obrazovke. Porovnáva, čo mikrofón počuje, s vašimi nahrávkami, v telefóne; nič sa neodosiela. Pri zamknutom telefóne osobné veci (hovory, správy, pošta, kalendár, poznámky, súbory, kontakty) najprv žiadajú odomknutie. Len na jednom zariadení: dve by odpovedali naraz, na tablete ho nechajte vypnuté. V aute pozastavené.</string>
     <string name="wake_on">Počúva váš hlas</string>
     <string name="wake_off">Vypnuté</string>
     <string name="wake_record">Nahrať váš hlas</string>
-    <string name="wake_record_note">Povedzte „Hey Tetra“ päťkrát ako zvyčajne, v tichej miestnosti, telefón na dĺžku ruky.</string>
+    <string name="wake_record_note">Povedzte každú frázu štyrikrát ako zvyčajne, v tichej miestnosti, telefón na dĺžku ruky. Ťuknutím na nahrávku ju nahráte znova.</string>
     <string name="wake_take">Nahrávka %1$d</string>
     <string name="wake_take_odd">Iná ako ostatné: nahrajte znova</string>
-    <string name="wake_record_take">Nahrať %1$d</string>
-    <string name="wake_speak">Teraz povedzte „Hey Tetra“…</string>
+    <string name="wake_record_take">Nahrať „%1$s“, nahrávka %2$d</string>
+    <string name="wake_speak">Teraz povedzte „%1$s“…</string>
     <string name="wake_not_heard">Nezachytené. Skúste znova.</string>
     <string name="wake_record_again">Znova</string>
     <string name="wake_try">Vyskúšať</string>
-    <string name="wake_try_caught">Zachytené (%1$s, prebúdza pod %2$s)</string>
-    <string name="wake_try_missed">Nezachytené (%1$s, prebúdza pod %2$s). Nahrajte znova.</string>
+    <string name="wake_try_caught">Zachytené ako „%1$s“ (%2$s prahu)</string>
+    <string name="wake_try_missed">Nezachytené: najbližšie „%1$s“, %2$s prahu. Nahrajte znova.</string>
     <string name="wake_notice">Počúva „Hey Tetra“</string>
     <string name="wake_turn_off">Vypnúť</string>
 </resources>

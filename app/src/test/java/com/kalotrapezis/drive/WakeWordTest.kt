@@ -31,17 +31,21 @@ class WakeWordTest {
     private val heyTetra = listOf(Triple(130.0, 4, 180), Triple(150.0, 2, 160), Triple(120.0, 6, 220))
     private val other = listOf(Triple(110.0, 7, 200), Triple(170.0, 1, 150), Triple(140.0, 9, 200), Triple(100.0, 3, 180))
 
-    @Test fun findsItsWordAndNotAnother() {
-        val takes = listOf(1.0 to 1.0, 0.9 to 1.03, 1.1 to 0.97, 1.0 to 0.98, 0.95 to 1.02).map { (s, p) -> WakeWord.features(quiet(400) + word(heyTetra, s, p) + quiet(400)) }
-        takes.forEach { assertTrue("a take is found in its recording", it.size in 40..80) }
-        val th = WakeWord.threshold(takes)
-        val scores = ArrayList<Double>()
-        val said = WakeDetector(takes, th) { scores += it }
-        assertTrue("said a little slower", said.push(quiet(1500) + word(heyTetra, 1.15, 1.01) + quiet(2000)))
-        val notSaid = WakeDetector(takes, th)
-        assertFalse("another word", notSaid.push(quiet(1500) + word(other) + quiet(2000)))
-        assertFalse("quiet is never looked at", WakeDetector(takes, th).push(quiet(5000)))
-        assertEquals(1, said.checks)
+    private val third = listOf(Triple(160.0, 5, 160), Triple(105.0, 8, 240))
+
+    @Test fun eachPhraseWakesAsItselfAndQuietNever() {
+        fun takes(w: List<Triple<Double, Int, Int>>) = listOf(1.0 to 1.0, 0.9 to 1.03, 1.1 to 0.97, 0.95 to 1.02).map { (s, p) -> WakeWord.features(quiet(400) + word(w, s, p) + quiet(400)) }
+        val phrases = listOf(WakePhrase("Hey Tetra", takes(heyTetra)), WakePhrase("Tetra", takes(other)))
+        phrases.flatMap { it.templates }.forEach { assertTrue("a take is found in its recording", it.size in 30..90) }
+        fun heard(pcm: ShortArray): Pair<String, Double>? { var best: Pair<String, Double>? = null
+            val woke = WakeDetector(phrases) { p, r -> if (best == null || r < best!!.second) best = p.name to r }.push(quiet(1500) + pcm + quiet(2000))
+            return best?.takeIf { woke } }
+        assertEquals("said a little slower", "Hey Tetra", heard(word(heyTetra, 1.15, 1.01))?.first)
+        assertEquals("the other phrase", "Tetra", heard(word(other, 0.9, 0.99))?.first)
+        assertEquals("a third word wakes neither", null, heard(word(third)))
+        val quietOnly = WakeDetector(phrases)
+        assertFalse(quietOnly.push(quiet(5000)))
+        assertEquals("quiet is never looked at", 0, quietOnly.checks)
     }
 
     /** The user's own takes (tools/wake-record.sh), only where they are: never in git. Numbers from tools/wake-test.py, 15 Nov. */
@@ -50,13 +54,23 @@ class WakeWordTest {
         assumeTrue(File(d, "template5.wav").exists())
         fun wav(n: String): ShortArray = javax.sound.sampled.AudioSystem.getAudioInputStream(File(d, "$n.wav")).use { s ->
             val b = s.readAllBytes(); ShortArray(b.size / 2) { ((b[2 * it].toInt() and 0xff) or (b[2 * it + 1].toInt() shl 8)).toShort() } }
-        val takes = (1..5).map { WakeWord.features(wav("template$it")) }
-        val loo = WakeWord.leaveOneOut(takes)
-        doubleArrayOf(12.96, 10.73, 16.16, 11.55, 10.75).forEachIndexed { i, v -> assertEquals("take ${i + 1}", v, loo[i], 0.05) }
-        mapOf("held1" to 11.52, "fast" to 13.26, "slow" to 13.03, "far" to 15.08, "quiet" to 14.85, "near" to 13.99).forEach { (n, v) ->
-            val scores = ArrayList<Double>()
-            WakeDetector(takes, -1.0) { scores += it }.push(wav(n))
-            assertEquals(n, v, scores.min(), 0.05)
+        // phrase -> its takes' prefix, the PC's leave-one-out distances, and held-out recordings' best distance over the median
+        val pc = mapOf("Hey Tetra" to Triple("template", doubleArrayOf(13.22, 11.96, 16.61, 11.55),
+                mapOf("template5" to 0.86, "held1" to 0.92, "fast" to 1.11, "slow" to 1.03, "far" to 1.20, "quiet" to 1.24)),
+            "OK Tetra" to Triple("ok", doubleArrayOf(14.28, 19.50, 14.32, 14.12), mapOf("ok5" to 0.98)),
+            "Tetra" to Triple("tetra", doubleArrayOf(11.54, 12.49, 11.86, 12.34), mapOf("tetra5" to 1.02)))
+        pc.forEach { (name, t) ->
+            val (prefix, looPc, held) = t
+            val takes = (1..4).map { WakeWord.features(wav("$prefix$it")) }
+            val loo = WakeWord.leaveOneOut(takes)
+            looPc.forEachIndexed { i, v -> assertEquals("$name take ${i + 1}", v, loo[i], 0.05) }
+            val median = WakeWord.median(loo)
+            val scoreOnly = WakePhrase(name, takes, 1e-9) // never wakes: every look is scored, as on the PC
+            held.forEach { (n, v) ->
+                var best = Double.POSITIVE_INFINITY
+                WakeDetector(listOf(scoreOnly)) { _, r -> best = minOf(best, r * 1e-9) }.push(wav(n))
+                assertEquals("$name $n", v, best / median, 0.006)
+            }
         }
     }
 }

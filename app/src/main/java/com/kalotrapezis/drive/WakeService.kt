@@ -22,15 +22,18 @@ import java.util.concurrent.TimeUnit
 
 /**
  * "Hey Tetra" (Settings › AI Assist, off unless switched on; the phone only — the car has its steering-wheel button and the car
- * build leaves this out). Its five takes live in files/wake, this device's own mic, never synced.
+ * build leaves this out). Its takes (four of each phrase) live in files/wake, this device's own mic, never synced.
  */
 internal object Wake {
-    const val TAKES = 5
+    const val TAKES = 4 // per phrase: 12 in all, a short session (the user, 15 Nov)
     private fun prefs(c: Context) = c.getSharedPreferences("assistant", Context.MODE_PRIVATE)
     fun on(c: Context) = prefs(c).getBoolean("wake", false)
     fun dir(c: Context) = File(c.filesDir, "wake")
-    fun take(c: Context, i: Int) = File(dir(c), "take$i.pcm")
-    fun hasTakes(c: Context) = (1..TAKES).all { take(c, it).isFile }
+    fun take(c: Context, phrase: String, i: Int) = File(dir(c), "${phrase.lowercase().replace(' ', '_')}$i.pcm")
+    fun hasTakes(c: Context) = WakeWord.PHRASES.all { p -> (1..TAKES).all { take(c, p, it).isFile } }
+    /** Every phrase from its kept takes; null when one cannot be read. */
+    fun phrases(c: Context): List<WakePhrase>? = runCatching { WakeWord.PHRASES.map { p -> WakePhrase(p, (1..TAKES).map { WakeWord.features(read(take(c, p, it))) }) } }
+        .getOrNull()?.takeIf { l -> l.all { p -> p.templates.all { it.isNotEmpty() } } }
     fun read(f: File): ShortArray { val b = f.readBytes(); return ShortArray(b.size / 2) { ((b[2 * it].toInt() and 0xff) or (b[2 * it + 1].toInt() shl 8)).toShort() } }
     fun write(f: File, pcm: ShortArray) { f.parentFile?.mkdirs(); f.writeBytes(ByteArray(pcm.size * 2) { (pcm[it / 2].toInt() shr (8 * (it % 2))).toByte() }) }
 
@@ -86,16 +89,14 @@ class WakeService : Service() {
 
     @SuppressLint("MissingPermission")
     private fun listen() {
-        val takes = runCatching { (1..Wake.TAKES).map { WakeWord.features(Wake.read(Wake.take(this, it))) } }.getOrNull()
-        if (takes == null || takes.any { it.isEmpty() }) { WriterLog.w("Hey Tetra: the takes could not be read; record them again"); stopSelf(); return }
-        val threshold = WakeWord.threshold(takes)
-        WriterLog.i("Hey Tetra: listening, threshold ${"%.2f".format(threshold)} (takes ${takes.joinToString { "${it.size}" }} frames)")
+        val phrases = Wake.phrases(this) ?: run { WriterLog.w("Hey Tetra: the takes could not be read; record them again"); stopSelf(); return }
+        WriterLog.i("Hey Tetra: listening for " + phrases.joinToString { "${it.name} (under ${"%.2f".format(it.threshold)}, takes ${it.templates.joinToString("/") { t -> "${t.size}" }} frames)" })
         val audio = getSystemService(AudioManager::class.java)
         val buf = ShortArray(WakeWord.RATE / 10) // 100 ms a read
         var rec: AudioRecord? = null
         var near = Double.POSITIVE_INFINITY; var wakes = 0; var summaryAt = System.currentTimeMillis(); var pausedMs = 0L
         // every score near the threshold goes to the log, for tuning it on this phone
-        fun detector() = WakeDetector(takes, threshold) { s -> near = minOf(near, s); if (s < threshold * 1.25) WriterLog.i("Hey Tetra: heard ${"%.2f".format(s)} (wakes under ${"%.2f".format(threshold)})") }
+        fun detector() = WakeDetector(phrases) { p, r -> near = minOf(near, r); if (r < 1.25) WriterLog.i("Hey Tetra: heard ${p.name} at ${"%.2f".format(r)} of its threshold${if (r < 1) ": wakes" else ""}") }
         var det = detector()
         fun release() { rec?.let { runCatching { it.stop() }; it.release() }; rec = null }
         var carCheckAt = 0L
@@ -106,7 +107,7 @@ class WakeService : Service() {
                 val now = System.currentTimeMillis()
                 if (now - summaryAt >= SUMMARY_MS) {
                     WriterLog.i("Hey Tetra: last ${SUMMARY_MS / 60_000} min: ${det.allFrames / 100} s heard, ${"%.0f".format(100.0 * det.loudFrames / maxOf(1, det.allFrames))}% over the gate, " +
-                        "${det.checks} looked at, nearest ${"%.2f".format(near)}, $wakes woke, ${pausedMs / 1000} s let go")
+                        "${det.checks} looked at, nearest ${"%.2f".format(near)} of a threshold, $wakes woke, ${pausedMs / 1000} s let go")
                     near = Double.POSITIVE_INFINITY; wakes = 0; summaryAt = now; pausedMs = 0
                     det = detector()
                 }
