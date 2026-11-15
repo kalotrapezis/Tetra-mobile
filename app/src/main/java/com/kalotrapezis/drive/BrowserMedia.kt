@@ -34,6 +34,23 @@ internal object BrowserMedia {
 
     fun act(a: String) { val c = control ?: return; Handler(Looper.getMainLooper()).post { c(a) } }
 
+    /*
+     * The music silent while a voice speaks (Maps, AI Assist) and while the user wants it muted: muted, not paused (a live station goes on).
+     * Counted, so one voice ending does not bring it back under another, and a mute the user asked for stays through them.
+     */
+    private val silence = Silence(::act)
+    fun duck(on: Boolean) = silence.duck(on)
+    /** The user's mute or unmute («σίγαση»); false when no Browser is open to do it. */
+    fun mute(on: Boolean): Boolean { if (control == null) return false; silence.mute(on); return true }
+
+    /** A media key (KeyEvent.KEYCODE_MEDIA_…) to the Browser when it has something to play; false: it goes to Android, to whatever plays. */
+    fun key(code: Int): Boolean {
+        if (service == null || control == null) return false
+        act(when (code) { android.view.KeyEvent.KEYCODE_MEDIA_PAUSE -> "pause"; android.view.KeyEvent.KEYCODE_MEDIA_PLAY -> "play"
+            android.view.KeyEvent.KEYCODE_MEDIA_NEXT -> "next"; android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS -> "prev"; else -> return false })
+        return true
+    }
+
     /** Maps' ♪ (the user, 2 Nov: "pick one FM from the browser as the one in maps, one link just playing music"): a page's address and name. */
     fun station(c: Context): Pair<String, String>? = c.getSharedPreferences("browser", Context.MODE_PRIVATE).let { p ->
         p.getString("maps_station", null)?.takeIf { it.isNotEmpty() }?.let { it to p.getString("maps_station_title", "").orEmpty() } }
@@ -120,4 +137,14 @@ internal class BrowserMediaService : Service() {
         private const val CHANNEL = "browser_media"
         private const val ID = 7301
     }
+}
+
+/** The Browser's music silent while any voice speaks ([duck], counted) or while the user muted it; [act] told only when that changes. */
+internal class Silence(private val act: (String) -> Unit) {
+    private var ducks = 0
+    private var muted = false
+    @Synchronized fun duck(on: Boolean) = change { ducks = maxOf(0, ducks + if (on) 1 else -1) }
+    @Synchronized fun mute(on: Boolean) = change { muted = on }
+    private fun silent() = ducks > 0 || muted
+    private fun change(how: () -> Unit) { val was = silent(); how(); if (silent() != was) act(if (silent()) "duck" else "unduck") }
 }

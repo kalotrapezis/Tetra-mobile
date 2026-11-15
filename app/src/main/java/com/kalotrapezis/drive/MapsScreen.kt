@@ -1346,10 +1346,11 @@ internal class MapsDuck(c: Context) : android.speech.tts.UtteranceProgressListen
     private val focus = android.media.AudioFocusRequest.Builder(android.media.AudioManager.AUDIOFOCUS_GAIN_TRANSIENT).setAudioAttributes(speech).build()
     private var n = 0
     @Volatile private var last: String? = null
+    private var ducked = false
     /** Before speaking: the music silent; the id to speak with. */
-    fun start(): String = "maps${++n}".also { last = it; audio.requestAudioFocus(focus); BrowserMedia.act("duck") }
+    @Synchronized fun start(): String = "maps${++n}".also { last = it; audio.requestAudioFocus(focus); if (!ducked) { ducked = true; BrowserMedia.duck(true) } }
     /** The music back, unless something newer is being said (QUEUE_FLUSH stops the one before it). */
-    fun end(id: String? = last) { if (id == null || id != last) return; last = null; audio.abandonAudioFocusRequest(focus); BrowserMedia.act("unduck") }
+    @Synchronized fun end(id: String? = last) { if (id == null || id != last) return; last = null; audio.abandonAudioFocusRequest(focus); if (ducked) { ducked = false; BrowserMedia.duck(false) } }
     override fun onStart(id: String?) = Unit
     override fun onDone(id: String?) = end(id)
     override fun onStop(id: String?, interrupted: Boolean) = end(id)

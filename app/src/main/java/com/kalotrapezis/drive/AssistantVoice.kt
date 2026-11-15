@@ -249,7 +249,8 @@ internal fun assistantChat(c: Context, forgetMs: Long = Long.MAX_VALUE): Assista
         texts = { if (SmsBox.canRead(app)) SmsBox.read(app) else null },
         here = { runCatching { app.getSystemService(android.location.LocationManager::class.java).let { lm ->
             lm.allProviders.mapNotNull { runCatching { lm.getLastKnownLocation(it) }.getOrNull() }.maxByOrNull { it.time }?.let { it.latitude to it.longitude } } }.getOrNull() },
-        mediaKey = { key -> app.getSystemService(android.media.AudioManager::class.java).let { am ->
+        muteMusic = { on -> if (!BrowserMedia.mute(on)) AssistantVolume.change(app, if (on) "mute" else "unmute", null) }, // no Browser open: the whole media volume
+        mediaKey = { key -> if (!BrowserMedia.key(key)) app.getSystemService(android.media.AudioManager::class.java).let { am ->
             am.dispatchMediaKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, key)); am.dispatchMediaKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_UP, key)) } },
         quiet = { on, until -> AssistantQuiet.set(app, on, until) },
         photosBetween = { from, to -> android.os.Environment.getExternalStorageDirectory().let { shared ->
