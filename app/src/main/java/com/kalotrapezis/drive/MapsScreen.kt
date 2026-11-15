@@ -1348,12 +1348,12 @@ internal class MapsDuck(c: Context) : android.speech.tts.UtteranceProgressListen
     @Volatile private var last: String? = null
     private var ducked = false
     private val main = android.os.Handler(android.os.Looper.getMainLooper())
-    /** Before speaking [text]: the music silent; the id to speak with. Back by itself once [text] has had time to be said, should
-     *  the voice never say it is done (the user, 15 Nov: one «get on that road» on the car, and the music never came back). */
+    /** Before speaking [text]: the music silent; the id to speak with. Back by itself after [FAILSAFE_MS], should the voice never say
+     *  it is done (the user, 15 Nov: one «get on that road» on the car and the music never came back; "a timer as a failsafe of 3-4 sec"). */
     @Synchronized fun start(text: String = ""): String = "maps${++n}".also { id ->
         last = id; audio.requestAudioFocus(focus)
         if (!ducked) { ducked = true; BrowserMedia.duck(true); WriterLog.i("Maps: the music silent for the voice") }
-        main.postDelayed({ if (last == id) { WriterLog.w("Maps: the voice never said it was done; the music back after ${longest(text)} ms"); end(id) } }, longest(text))
+        main.postDelayed({ if (last == id) { WriterLog.w("Maps: the voice never said it was done; the music back after $FAILSAFE_MS ms (\"$text\")"); end(id) } }, FAILSAFE_MS)
     }
     /** The music back, unless something newer is being said (QUEUE_FLUSH stops the one before it). */
     @Synchronized fun end(id: String? = last) {
@@ -1361,8 +1361,7 @@ internal class MapsDuck(c: Context) : android.speech.tts.UtteranceProgressListen
         last = null; audio.abandonAudioFocusRequest(focus)
         if (ducked) { ducked = false; BrowserMedia.duck(false); WriterLog.i("Maps: the music back") }
     }
-    /** What [text] may take to say, with room: a slow voice reads ~12 letters a second. */
-    private fun longest(text: String) = (2_500L + text.length * 110L).coerceAtMost(20_000L)
+    private val FAILSAFE_MS = 4_000L
     override fun onStart(id: String?) = Unit
     override fun onDone(id: String?) = end(id)
     override fun onStop(id: String?, interrupted: Boolean) = end(id)
