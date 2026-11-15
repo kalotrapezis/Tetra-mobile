@@ -12,7 +12,7 @@ How to write here:
 - The user's own original wishlist (Sept 2026) is at the bottom, unchanged.
 
 ## Now — who is doing what
-- [x] (hey-tetra session, 15 Nov; branch `claude/hey-tetra-5ec56d`, not merged) **Wake phrases "Tetra", "OK Tetra", "Hey Tetra", "Ahoy Tetra",
+- [x] (hey-tetra session, 15 Nov; branch `claude/hey-tetra-5ec56d`, merged into main 15 Nov, 3e0b4fae) **Wake phrases "Tetra", "OK Tetra", "Hey Tetra", "Ahoy Tetra",
       no trained model** (the user: no training on this PC; match the voice's signature; "Just Tetra, ok Tetra and hey Tetra"; "Ahoy" as a
       tribute to Bell). MFCC + DTW against the user's 4 takes of each phrase, each phrase its own threshold, the best match wakes
       (WakeWord.kt; tools/wake-test.py the same pipeline, tools/wake-record.sh the takes). PC test on the user's voice: every held-out take
