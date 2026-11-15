@@ -12,6 +12,11 @@
     <string name="car_quiet">Liniște în mașină</string>
     <string name="car_quiet_summary">Notificările altor aplicații așteaptă cât conduci; apelurile și mesajele citite cu voce tare trec.</string>
     <string name="car_pair_phone">Asociază telefonul</string>
+    <string name="car_phone_connected">%1$s · conectat</string>
+    <string name="car_phone_away">%1$s · indisponibil</string>
+    <string name="car_phone_disconnect">Deconectează</string>
+    <string name="car_phone_disconnect_ask">Deconectezi %1$s?</string>
+    <string name="car_phone_disconnect_note">Mașina uită acest telefon: apelurile, mesajele, hărțile și Partajarea se opresc până îl asociezi din nou cu codul.</string>
     <string name="car_pair_hint">Pe telefon: Tetra › Setări › Pictogramele aplicațiilor › Asociază cu mașina, apoi scanează acest cod.</string>
     <string name="car_pair_car">Asociază cu mașina</string>
     <string name="car_pair_car_summary">Scanează codul pe care Tetra Car îl arată pe ecranul mașinii: apelurile și mesajele acolo, live, fără sincronizare.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s este pe telefon, în Tetra › De la mașină.</string>
     <string name="car_share_failed">%1$s nu a fost trimis: %2$s</string>
     <string name="car_share_arrived">De pe telefon: %1$s</string>
+    <string name="car_share_receiving">Se primește %1$s · %2$s din %3$s</string>
+    <string name="car_share_not_arrived">%1$s nu a ajuns: %2$s</string>
+    <string name="car_share_again">Din nou</string>
     <string name="car_assist_no_key">Nu există încă o cheie AI de pe telefon. Conectează telefonul la mașină.</string>
     <string name="car_assist_moment">Un moment.</string>
     <string name="car_assist_searching">Caut: %1$s.</string>

@@ -12,6 +12,11 @@
     <string name="car_quiet">Quiet in the car</string>
     <string name="car_quiet_summary">Other apps\' notifications wait while you drive; calls and your messages read aloud come through.</string>
     <string name="car_pair_phone">Pair your phone</string>
+    <string name="car_phone_connected">%1$s · connected</string>
+    <string name="car_phone_away">%1$s · not reachable</string>
+    <string name="car_phone_disconnect">Disconnect</string>
+    <string name="car_phone_disconnect_ask">Disconnect %1$s?</string>
+    <string name="car_phone_disconnect_note">The car forgets this phone: calls, messages, maps and Share from it stop until you pair again with the code.</string>
     <string name="car_pair_hint">On your phone: Tetra › Settings › App icons › Pair with the car, then scan this code.</string>
     <string name="car_pair_car">Pair with the car</string>
     <string name="car_pair_car_summary">Scan the code Tetra Car shows on the car’s screen: its calls and messages there, live, with nothing synced.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s is on the phone, in Tetra › From car.</string>
     <string name="car_share_failed">%1$s was not sent: %2$s</string>
     <string name="car_share_arrived">From the phone: %1$s</string>
+    <string name="car_share_receiving">Receiving %1$s · %2$s of %3$s</string>
+    <string name="car_share_not_arrived">%1$s did not arrive: %2$s</string>
+    <string name="car_share_again">Try again</string>
     <string name="car_assist_no_key">No AI key from the phone yet. Connect the phone to the car.</string>
     <string name="car_assist_moment">One moment.</string>
     <string name="car_assist_searching">Searching for %1$s.</string>

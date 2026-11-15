@@ -984,7 +984,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
             message = context.getString(if (tabsRun) R.string.browser_tabs_run_on else R.string.browser_tabs_run_off)
         }
         "autohide" -> BrowserTool(R.drawable.ic_fullscreen, stringResource(R.string.browser_autohide), autohide) { autohide = !autohide; barShown = true; prefs.edit().putBoolean("autohide", autohide).apply() }
-        "background" -> BrowserTool(R.drawable.ic_headphones, stringResource(R.string.browser_background), background) {
+        "background" -> if (CarMaps.edition) null else BrowserTool(R.drawable.ic_headphones, stringResource(R.string.browser_background), background) {
             background = !background; BrowserMedia.setBackground(context, background)
             tabs.forEach { it.port?.postMessage(JSONObject().put("bg", background)) }
             message = context.getString(if (background) R.string.browser_background_on else R.string.browser_background_off)

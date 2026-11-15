@@ -436,7 +436,7 @@ internal fun SettingsTab(
     }
 }
 
-internal val CAR_APP_COLOR = Color(0xFF2B3A4A)
+internal val CAR_APP_COLOR = Color(0xFF1E5AA8) // dark blue: the slate before was black on black in the dark look (the user, 15 Nov)
 
 /** Settings › Tetra Car: its icon, what it does in the car, the car's Bluetooth and the link to the car's screen. */
 @Composable private fun CarSettingsPage() {

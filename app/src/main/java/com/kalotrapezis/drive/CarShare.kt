@@ -121,6 +121,17 @@ internal fun CarSharePage(close: () -> Unit) {
             }
         }
         sending?.let { Text(it, Modifier.padding(top = 12.dp)); LinearProgressIndicator(Modifier.fillMaxWidth().padding(top = 4.dp)) }
+        // a file from the phone on its way: its name, how much has come, a bar; why it did not arrive, and Try again
+        CarMaps.receiving.value?.let { r ->
+            val size = { b: Long -> android.text.format.Formatter.formatShortFileSize(context, b) }
+            if (r.failed == null) {
+                Text(stringResource(R.string.car_share_receiving, r.name, size(r.got), size(r.size)), Modifier.padding(top = 12.dp), style = MaterialTheme.typography.bodyLarge)
+                LinearProgressIndicator({ if (r.size > 0) (r.got.toFloat() / r.size).coerceIn(0f, 1f) else 0f }, Modifier.fillMaxWidth().padding(top = 4.dp))
+            } else Row(Modifier.padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.car_share_not_arrived, r.name, r.failed), Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+                Button({ CarMaps.receiving.value = null; CarMaps.check(context) }) { Text(stringResource(R.string.car_share_again)) }
+            }
+        }
         said?.let { Text(it, Modifier.padding(top = 12.dp), style = MaterialTheme.typography.bodyLarge) }
         if (files.isEmpty()) Text(stringResource(R.string.car_share_empty), Modifier.padding(top = 24.dp), style = MaterialTheme.typography.bodyLarge)
         LazyColumn(Modifier.fillMaxWidth().padding(top = 12.dp)) {

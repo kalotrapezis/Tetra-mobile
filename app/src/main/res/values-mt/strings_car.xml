@@ -12,6 +12,11 @@
     <string name="car_quiet">Kwiet fil-karozza</string>
     <string name="car_quiet_summary">In-notifiki ta’ apps oħra jistennew waqt li ssuq; it-telefonati u l-messaġġi moqrija b’leħen għoli jgħaddu.</string>
     <string name="car_pair_phone">Qabbad it-telefon</string>
+    <string name="car_phone_connected">%1$s · konness</string>
+    <string name="car_phone_away">%1$s · ma jistax jintlaħaq</string>
+    <string name="car_phone_disconnect">Aqta’</string>
+    <string name="car_phone_disconnect_ask">Taqta’ %1$s?</string>
+    <string name="car_phone_disconnect_note">Il-karozza tinsa dan it-telefon: sejħiet, messaġġi, mapep u Aqsam jieqfu sakemm terġa’ tqabbadha bil-kodiċi.</string>
     <string name="car_pair_hint">Fuq it-telefon: Tetra › Settings › Ikoni tal-apps › Qabbad mal-karozza, imbagħad skennja dan il-kodiċi.</string>
     <string name="car_pair_car">Qabbad mal-karozza</string>
     <string name="car_pair_car_summary">Skennja l-kodiċi li juri Tetra Car fuq l-iskrin tal-karozza: telefonati u messaġġi hemm, live, mingħajr sinkronizzazzjoni.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s qiegħed fuq it-telefon, f’Tetra › Mill-karozza.</string>
     <string name="car_share_failed">%1$s ma nbgħatx: %2$s</string>
     <string name="car_share_arrived">Mit-telefon: %1$s</string>
+    <string name="car_share_receiving">Qed jasal %1$s · %2$s minn %3$s</string>
+    <string name="car_share_not_arrived">%1$s ma waslitx: %2$s</string>
+    <string name="car_share_again">Erġa’ pprova</string>
     <string name="car_assist_no_key">Għadu ma hemm l-ebda ċavetta AI mit-telefon. Waħħal it-telefon mal-karozza.</string>
     <string name="car_assist_moment">Mument.</string>
     <string name="car_assist_searching">Qed infittex: %1$s.</string>

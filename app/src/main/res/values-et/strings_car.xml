@@ -12,6 +12,11 @@
     <string name="car_quiet">Vaikus autos</string>
     <string name="car_quiet_summary">Teiste rakenduste teavitused ootavad, kuni sõidad; kõned ja etteloetud sõnumid tulevad läbi.</string>
     <string name="car_pair_phone">Seo telefon</string>
+    <string name="car_phone_connected">%1$s · ühendatud</string>
+    <string name="car_phone_away">%1$s · kättesaamatu</string>
+    <string name="car_phone_disconnect">Katkesta</string>
+    <string name="car_phone_disconnect_ask">Katkestada ühendus: %1$s?</string>
+    <string name="car_phone_disconnect_note">Auto unustab selle telefoni: kõned, sõnumid, kaardid ja Jagamine peatuvad, kuni sidud selle koodiga uuesti.</string>
     <string name="car_pair_hint">Telefonis: Tetra › Seaded › Rakenduste ikoonid › Seo autoga, siis skanni see kood.</string>
     <string name="car_pair_car">Seo autoga</string>
     <string name="car_pair_car_summary">Skanni kood, mida Tetra Car auto ekraanil näitab: kõned ja sõnumid seal, otse, ilma sünkroonimata.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s on telefonis kaustas Tetra › Autost.</string>
     <string name="car_share_failed">%1$s ei saadetud: %2$s</string>
     <string name="car_share_arrived">Telefonist: %1$s</string>
+    <string name="car_share_receiving">Vastuvõtt: %1$s · %2$s / %3$s</string>
+    <string name="car_share_not_arrived">%1$s ei jõudnud kohale: %2$s</string>
+    <string name="car_share_again">Proovi uuesti</string>
     <string name="car_assist_no_key">Telefonist ei ole veel AI-võtit. Ühenda telefon autoga.</string>
     <string name="car_assist_moment">Üks hetk.</string>
     <string name="car_assist_searching">Otsin: %1$s.</string>

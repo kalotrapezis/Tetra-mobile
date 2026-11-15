@@ -12,6 +12,11 @@
     <string name="car_quiet">Csend az autóban</string>
     <string name="car_quiet_summary">Más alkalmazások értesítései várnak vezetés közben; a hívások és a felolvasott üzenetek átjönnek.</string>
     <string name="car_pair_phone">Telefon párosítása</string>
+    <string name="car_phone_connected">%1$s · csatlakoztatva</string>
+    <string name="car_phone_away">%1$s · nem elérhető</string>
+    <string name="car_phone_disconnect">Leválasztás</string>
+    <string name="car_phone_disconnect_ask">Leválasztod: %1$s?</string>
+    <string name="car_phone_disconnect_note">Az autó elfelejti ezt a telefont: a hívások, üzenetek, térképek és a Megosztás leállnak, amíg újra nem párosítod a kóddal.</string>
     <string name="car_pair_hint">A telefonon: Tetra › Beállítások › Alkalmazásikonok › Párosítás az autóval, majd olvasd be ezt a kódot.</string>
     <string name="car_pair_car">Párosítás az autóval</string>
     <string name="car_pair_car_summary">Olvasd be a kódot, amit a Tetra Car az autó kijelzőjén mutat: hívások és üzenetek ott, élőben, szinkronizálás nélkül.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">A(z) %1$s a telefonon van, a Tetra › Az autóból mappában.</string>
     <string name="car_share_failed">A(z) %1$s nem lett elküldve: %2$s</string>
     <string name="car_share_arrived">A telefonról: %1$s</string>
+    <string name="car_share_receiving">Fogadás: %1$s · %2$s / %3$s</string>
+    <string name="car_share_not_arrived">%1$s nem érkezett meg: %2$s</string>
+    <string name="car_share_again">Újra</string>
     <string name="car_assist_no_key">Még nincs AI-kulcs a telefonról. Csatlakoztasd a telefont az autóhoz.</string>
     <string name="car_assist_moment">Egy pillanat.</string>
     <string name="car_assist_searching">Keresés: %1$s.</string>

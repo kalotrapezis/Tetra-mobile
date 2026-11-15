@@ -12,6 +12,11 @@
     <string name="car_quiet">Ciúnas sa charr</string>
     <string name="car_quiet_summary">Fanann fógraí aipeanna eile fad a bhíonn tú ag tiomáint; tagann glaonna agus do theachtaireachtaí léite os ard tríd.</string>
     <string name="car_pair_phone">Péireáil do ghuthán</string>
+    <string name="car_phone_connected">%1$s · ceangailte</string>
+    <string name="car_phone_away">%1$s · as raon</string>
+    <string name="car_phone_disconnect">Dícheangail</string>
+    <string name="car_phone_disconnect_ask">%1$s a dhícheangal?</string>
+    <string name="car_phone_disconnect_note">Déanann an carr dearmad ar an bhfón seo: stopann glaonna, teachtaireachtaí, léarscáileanna agus Comhroinn go dtí go bpéireálann tú arís leis an gcód.</string>
     <string name="car_pair_hint">Ar an nguthán: Tetra › Socruithe › Deilbhíní aipe › Péireáil leis an gcarr, ansin scanáil an cód seo.</string>
     <string name="car_pair_car">Péireáil leis an gcarr</string>
     <string name="car_pair_car_summary">Scanáil an cód a thaispeánann Tetra Car ar scáileán an chairr: glaonna agus teachtaireachtaí ansin, beo, gan sioncronú.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">Tá %1$s ar an bhfón, i Tetra › Ón gcarr.</string>
     <string name="car_share_failed">Níor seoladh %1$s: %2$s</string>
     <string name="car_share_arrived">Ón bhfón: %1$s</string>
+    <string name="car_share_receiving">Á fháil: %1$s · %2$s as %3$s</string>
+    <string name="car_share_not_arrived">Níor tháinig %1$s: %2$s</string>
+    <string name="car_share_again">Arís</string>
     <string name="car_assist_no_key">Níl eochair AI ón bhfón fós. Ceangail an fón leis an gcarr.</string>
     <string name="car_assist_moment">Nóiméad amháin.</string>
     <string name="car_assist_searching">Ag cuardach: %1$s.</string>

@@ -987,9 +987,35 @@ private fun CarApps(close: () -> Unit, settings: () -> Unit, share: () -> Unit, 
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(close) { Icon(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.common_back)) }
             Text(stringResource(R.string.car_apps), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
-            // the car's own link to the phone (CarWire): its QR, scanned once by the phone
-            if (CarMaps.edition || PhoneRelay.noCalls(context)) androidx.compose.material3.TextButton({ pairing = true }) {
-                Icon(painterResource(R.drawable.ic_phone), null, Modifier.size(20.dp)); Text("  " + stringResource(R.string.car_pair_phone))
+            // the car's own link to the phone (CarWire): its QR, scanned once by the phone; once paired, the phone's name, green while it
+            // answers, and a red ✕ that unpairs (the user, 15 Nov: "red X disconnect, green connected (Xiaomi 15)")
+            if (CarMaps.edition || PhoneRelay.noCalls(context)) {
+                LaunchedEffect(pairing) { if (!pairing) CarWire.linkName.value = withContext(Dispatchers.IO) { CarWire.link(context)?.name } }
+                val phone = CarWire.linkName.value
+                if (phone == null) androidx.compose.material3.TextButton({ pairing = true }) {
+                    Icon(painterResource(R.drawable.ic_phone), null, Modifier.size(20.dp)); Text("  " + stringResource(R.string.car_pair_phone))
+                } else {
+                    val on = CarWire.reached.value
+                    val green = Color(0xFF2E7D32)
+                    Row(Modifier.clip(RoundedCornerShape(50)).background((if (on) green else MaterialTheme.colorScheme.outline).copy(alpha = 0.18f)).padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(R.drawable.ic_phone), null, Modifier.size(18.dp), tint = if (on) green else MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("  " + if (on) stringResource(R.string.car_phone_connected, phone) else stringResource(R.string.car_phone_away, phone),
+                            color = if (on) green else MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.titleSmall)
+                    }
+                    var unpair by remember { mutableStateOf(false) }
+                    androidx.compose.material3.TextButton({ unpair = true }, colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = Color(0xFFD32F2F))) {
+                        Icon(painterResource(R.drawable.ic_close), null, Modifier.size(20.dp)); Text(" " + stringResource(R.string.car_phone_disconnect))
+                    }
+                    if (unpair) androidx.compose.material3.AlertDialog(onDismissRequest = { unpair = false },
+                        title = { Text(stringResource(R.string.car_phone_disconnect_ask, phone)) },
+                        text = { Text(stringResource(R.string.car_phone_disconnect_note)) },
+                        confirmButton = { androidx.compose.material3.TextButton({
+                            CarWire.forget(context); CarWire.linkName.value = null; CarWire.reached.value = false; unpair = false
+                            WriterLog.i("Car link: unpaired from the car's menu")
+                        }) { Text(stringResource(R.string.car_phone_disconnect), color = Color(0xFFD32F2F)) } },
+                        dismissButton = { androidx.compose.material3.TextButton({ unpair = false }) { Text(stringResource(R.string.common_cancel)) } })
+                }
             }
         }
         if (pairing) CarPairDialog { pairing = false }

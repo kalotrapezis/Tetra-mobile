@@ -55,7 +55,7 @@ internal object CarWire {
     /** The phone scanned the unit's QR (CodeScannerTab): the unit's address and keys kept here, ours given there. */
     fun pair(c: Context, qr: PairingQr): String {
         val ours = token()
-        val body = JSONObject().put("code", qr.code).put("name", "${Build.MANUFACTURER} ${Build.MODEL}").put("port", SyncServer.PORT)
+        val body = JSONObject().put("code", qr.code).put("name", DataFiles.deviceName(c).ifBlank { "${Build.MANUFACTURER} ${Build.MODEL}" }).put("port", SyncServer.PORT)
             .put("hosts", JSONArray(SyncServer.lanAddresses())).put("token", ours)
             .put("fp", SyncServer.fingerprint(SyncServer.identity().second))
         var last: Exception? = null
@@ -90,6 +90,8 @@ internal object CarWire {
 
     /** On the unit: the phone answered the last hello. */
     val reached = mutableStateOf(false)
+    /** On the unit: the paired phone's name for the menu (null: none paired), kept fresh by the hello. */
+    val linkName = mutableStateOf<String?>(null)
     /** On the unit: the phone's battery (per cent, charging), from its answer to the hello; null without a phone. */
     val battery = mutableStateOf<Pair<Int, Boolean>?>(null)
     /** On the unit: the phone's call now, for the side pane; null with none. */
@@ -101,6 +103,7 @@ internal object CarWire {
         val answer = runCatching { anyHost(l) { h -> post(h, l.port, l.fingerprint, l.token, "/car/hello", JSONObject().put("hosts", JSONArray(SyncServer.lanAddresses()))) } }.getOrNull()
         val ok = answer != null
         val power = answer?.optInt("battery", -1)?.takeIf { it >= 0 }?.let { it to answer.optBoolean("charging") }
+        answer?.optString("name")?.takeIf { it.isNotBlank() && it != l.name }?.let { save(c, l.copy(name = it.take(80))); Handler(Looper.getMainLooper()).post { linkName.value = it.take(80) } }
         Handler(Looper.getMainLooper()).post { if (ok != reached.value) reached.value = ok; battery.value = power }
     }
 
@@ -139,6 +142,7 @@ internal object CarWire {
                 // the phone's battery for the dock on the car's screen (CarStatus)
                 val power = c.getSystemService(android.os.BatteryManager::class.java)
                 200 to JSONObject().put("ok", true).put("battery", power.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY)).put("charging", power.isCharging)
+                    .put("name", DataFiles.deviceName(c)) // the name the user gave the phone ("Xiaomi 15"), for the car's menu
             }
             "/car/event" -> { // on the unit: from the phone
                 val main = Handler(Looper.getMainLooper())

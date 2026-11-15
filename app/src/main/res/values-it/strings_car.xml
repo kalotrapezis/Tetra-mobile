@@ -12,6 +12,11 @@
     <string name="car_quiet">Silenzio in auto</string>
     <string name="car_quiet_summary">Le notifiche delle altre app aspettano mentre guidi; le chiamate e i tuoi messaggi letti ad alta voce passano.</string>
     <string name="car_pair_phone">Abbina il telefono</string>
+    <string name="car_phone_connected">%1$s · connesso</string>
+    <string name="car_phone_away">%1$s · non raggiungibile</string>
+    <string name="car_phone_disconnect">Disconnetti</string>
+    <string name="car_phone_disconnect_ask">Disconnettere %1$s?</string>
+    <string name="car_phone_disconnect_note">L’auto dimentica questo telefono: chiamate, messaggi, mappe e Condividi si fermano finché non lo abbini di nuovo con il codice.</string>
     <string name="car_pair_hint">Sul telefono: Tetra › Impostazioni › Icone app › Abbina all’auto, poi scansiona questo codice.</string>
     <string name="car_pair_car">Abbina all’auto</string>
     <string name="car_pair_car_summary">Scansiona il codice che Tetra Car mostra sullo schermo dell’auto: chiamate e messaggi lì, dal vivo, senza sincronizzare.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s è sul telefono, in Tetra › Dall’auto.</string>
     <string name="car_share_failed">%1$s non è stato inviato: %2$s</string>
     <string name="car_share_arrived">Dal telefono: %1$s</string>
+    <string name="car_share_receiving">Ricezione di %1$s · %2$s di %3$s</string>
+    <string name="car_share_not_arrived">%1$s non è arrivato: %2$s</string>
+    <string name="car_share_again">Riprova</string>
     <string name="car_assist_no_key">Non c\'è ancora una chiave AI dal telefono. Collega il telefono all\'auto.</string>
     <string name="car_assist_moment">Un momento.</string>
     <string name="car_assist_searching">Cerco: %1$s.</string>

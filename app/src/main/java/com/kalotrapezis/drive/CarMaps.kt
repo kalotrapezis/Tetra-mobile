@@ -118,6 +118,10 @@ internal object CarMaps {
     val state = mutableStateOf<State>(State.Idle)
     /** Bumped when maps came: Maps draws them again. */
     val version = mutableIntStateOf(0)
+    /** A file of Share's coming from the phone (the user, 15 Nov: "no progress bar, I don't know if it is receiving or not"): its name,
+     *  the bytes so far and in all; [failed]: why it did not arrive. Null when nothing comes. */
+    data class Receiving(val name: String, val got: Long, val size: Long, val failed: String? = null)
+    val receiving = androidx.compose.runtime.mutableStateOf<Receiving?>(null)
     private val main by lazy { Handler(Looper.getMainLooper()) } // lazy: the JVM tests have no Looper
     /** "Not now" for this offer: asked again when the phone has something else. */
     private var declined: Set<String> = emptySet()
@@ -144,8 +148,10 @@ internal object CarMaps {
                 val all = wanted(theirs, ::local)
                 val (mine, want) = all.partition { personal(it.first) }
                 if (mine.isNotEmpty()) { // places, bookmarks, AI Assist's and Share's: just taken, never offered
-                    runCatching { fetch(c, mine) { } }.onSuccess { WriterLog.i("Car maps: ${mine.size} places, bookmarks or shared files from the phone") }
-                        .onFailure { WriterLog.w("Car maps: places, bookmarks or shared files not taken (${it.message})") }
+                    var now: Receiving? = null
+                    runCatching { fetch(c, mine, each = { path, got, size -> if (path.startsWith(CarShare.PREFIX)) Receiving(path.removePrefix(CarShare.PREFIX), got, size).let { r -> now = r; main.post { receiving.value = r } } }) { } }
+                        .onSuccess { WriterLog.i("Car maps: ${mine.size} places, bookmarks or shared files from the phone"); main.post { receiving.value = null } }
+                        .onFailure { e -> WriterLog.w("Car maps: places, bookmarks or shared files not taken (${e.message})"); now?.let { r -> main.post { receiving.value = r.copy(failed = e.message.orEmpty()) } } }
                     main.post { version.intValue++ }
                 }
                 if (want.isEmpty() || want.map { it.first }.toSet() == declined) State.Idle
@@ -157,16 +163,29 @@ internal object CarMaps {
     }
 
     /** [files] from the phone, one after another, each kept only once it has all arrived; [moved]: the bytes so far, now and then. */
-    private fun fetch(c: Context, files: List<Pair<String, JSONObject>>, moved: (Long) -> Unit) {
+    private fun fetch(c: Context, files: List<Pair<String, JSONObject>>, each: (String, Long, Long) -> Unit = { _, _, _ -> }, moved: (Long) -> Unit) {
         var before = 0L
         for ((path, info) in files) {
             val f = checkNotNull(local(path)) { "$path is not a map." }.also { it.parentFile?.mkdirs() }
             val part = File(f.parentFile, ".${f.name}.part")
-            var last = 0L
-            part.outputStream().buffered(1 shl 16).use { out ->
-                CarWire.download(c.applicationContext, path, out) { got -> if (got - last > (4L shl 20)) { last = got; moved(before + got) } }
+            val size = info.optLong("size")
+            // three tries, each from the start: a dropped Wi-Fi halfway through a 260 MB app left it "incomplete" (the user, 15 Nov)
+            for (attempt in 1..3) {
+                var last = 0L; var told = 0L
+                each(path, 0, size)
+                val failed = runCatching {
+                    part.outputStream().buffered(1 shl 16).use { out ->
+                        CarWire.download(c.applicationContext, path, out) { got ->
+                            if (got - last > (4L shl 20)) { last = got; moved(before + got) }
+                            if (got - told > (1L shl 20)) { told = got; each(path, got, size) } // each MB: a bar that moves
+                        }
+                    }
+                }.exceptionOrNull()
+                each(path, part.length(), size)
+                if (failed == null && part.length() == size) break
+                WriterLog.w("Car maps: $path stopped at ${part.length()} of $size bytes, try $attempt of 3 (${failed?.message ?: "short"})")
+                if (attempt == 3) { part.delete(); throw failed ?: IllegalStateException("$path came incomplete.") }
             }
-            check(part.length() == info.optLong("size")) { "$path came incomplete." }
             f.delete(); check(part.renameTo(f)) { "$path not kept." }
             f.setLastModified(info.optLong("modified"))
             before += info.optLong("size")

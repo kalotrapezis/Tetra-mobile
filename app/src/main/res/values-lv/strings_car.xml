@@ -12,6 +12,11 @@
     <string name="car_quiet">Klusums automašīnā</string>
     <string name="car_quiet_summary">Citu lietotņu paziņojumi gaida, kamēr brauc; zvani un skaļi nolasītas ziņas tiek cauri.</string>
     <string name="car_pair_phone">Savienot tālruni</string>
+    <string name="car_phone_connected">%1$s · savienots</string>
+    <string name="car_phone_away">%1$s · nav sasniedzams</string>
+    <string name="car_phone_disconnect">Atvienot</string>
+    <string name="car_phone_disconnect_ask">Atvienot %1$s?</string>
+    <string name="car_phone_disconnect_note">Auto aizmirst šo tālruni: zvani, ziņas, kartes un Kopīgot apstājas, līdz to atkal savienosiet ar kodu.</string>
     <string name="car_pair_hint">Tālrunī: Tetra › Iestatījumi › Lietotņu ikonas › Savienot ar auto, tad skenē šo kodu.</string>
     <string name="car_pair_car">Savienot ar auto</string>
     <string name="car_pair_car_summary">Skenē kodu, ko Tetra Car rāda auto ekrānā: zvani un ziņas tur, tiešraidē, bez sinhronizācijas.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s ir tālrunī, Tetra › No auto.</string>
     <string name="car_share_failed">%1$s nav nosūtīts: %2$s</string>
     <string name="car_share_arrived">No tālruņa: %1$s</string>
+    <string name="car_share_receiving">Saņem %1$s · %2$s no %3$s</string>
+    <string name="car_share_not_arrived">%1$s nepienāca: %2$s</string>
+    <string name="car_share_again">Vēlreiz</string>
     <string name="car_assist_no_key">No tālruņa vēl nav AI atslēgas. Savieno tālruni ar automašīnu.</string>
     <string name="car_assist_moment">Brīdi.</string>
     <string name="car_assist_searching">Meklēju: %1$s.</string>

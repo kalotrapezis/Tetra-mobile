@@ -12,6 +12,11 @@
     <string name="car_quiet">Rust in de auto</string>
     <string name="car_quiet_summary">Meldingen van andere apps wachten terwijl je rijdt; oproepen en voorgelezen berichten komen door.</string>
     <string name="car_pair_phone">Telefoon koppelen</string>
+    <string name="car_phone_connected">%1$s · verbonden</string>
+    <string name="car_phone_away">%1$s · niet bereikbaar</string>
+    <string name="car_phone_disconnect">Ontkoppelen</string>
+    <string name="car_phone_disconnect_ask">%1$s ontkoppelen?</string>
+    <string name="car_phone_disconnect_note">De auto vergeet deze telefoon: bellen, berichten, kaarten en Delen ervan stoppen tot je opnieuw koppelt met de code.</string>
     <string name="car_pair_hint">Op de telefoon: Tetra › Instellingen › App-pictogrammen › Koppelen met de auto, en scan dan deze code.</string>
     <string name="car_pair_car">Koppelen met de auto</string>
     <string name="car_pair_car_summary">Scan de code die Tetra Car op het scherm van de auto toont: oproepen en berichten daar, live, zonder synchronisatie.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s staat op de telefoon, in Tetra › Van de auto.</string>
     <string name="car_share_failed">%1$s is niet gestuurd: %2$s</string>
     <string name="car_share_arrived">Van de telefoon: %1$s</string>
+    <string name="car_share_receiving">%1$s ontvangen · %2$s van %3$s</string>
+    <string name="car_share_not_arrived">%1$s is niet aangekomen: %2$s</string>
+    <string name="car_share_again">Opnieuw</string>
     <string name="car_assist_no_key">Nog geen AI-sleutel van de telefoon. Verbind de telefoon met de auto.</string>
     <string name="car_assist_moment">Een moment.</string>
     <string name="car_assist_searching">Ik zoek naar %1$s.</string>

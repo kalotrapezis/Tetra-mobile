@@ -12,6 +12,11 @@
     <string name="car_quiet">Ησυχία στο αυτοκίνητο</string>
     <string name="car_quiet_summary">Οι ειδοποιήσεις των άλλων εφαρμογών περιμένουν όσο οδηγείς· οι κλήσεις και τα μηνύματά σου που διαβάζονται φωναχτά περνούν.</string>
     <string name="car_pair_phone">Σύνδεση κινητού</string>
+    <string name="car_phone_connected">%1$s · συνδεδεμένο</string>
+    <string name="car_phone_away">%1$s · εκτός εμβέλειας</string>
+    <string name="car_phone_disconnect">Αποσύνδεση</string>
+    <string name="car_phone_disconnect_ask">Αποσύνδεση από %1$s;</string>
+    <string name="car_phone_disconnect_note">Το αυτοκίνητο ξεχνά αυτό το κινητό: κλήσεις, μηνύματα, χάρτες και Κοινοποίηση σταματούν ώσπου να το συνδέσετε ξανά με τον κωδικό.</string>
     <string name="car_pair_hint">Στο κινητό: Tetra › Ρυθμίσεις › Εικονίδια εφαρμογών › Σύνδεση με το αυτοκίνητο, και σκάναρε αυτόν τον κωδικό.</string>
     <string name="car_pair_car">Σύνδεση με το αυτοκίνητο</string>
     <string name="car_pair_car_summary">Σκάναρε τον κωδικό που δείχνει το Tetra Car στην οθόνη του αυτοκινήτου: κλήσεις και μηνύματα εκεί, ζωντανά, χωρίς συγχρονισμό.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">Το %1$s είναι στο κινητό, στο Tetra › Από το αυτοκίνητο.</string>
     <string name="car_share_failed">Το %1$s δεν στάλθηκε: %2$s</string>
     <string name="car_share_arrived">Από το κινητό: %1$s</string>
+    <string name="car_share_receiving">Λήψη: %1$s · %2$s από %3$s</string>
+    <string name="car_share_not_arrived">Το %1$s δεν ήρθε: %2$s</string>
+    <string name="car_share_again">Ξανά</string>
     <string name="car_assist_no_key">Δεν έχει έρθει ακόμη κλειδί AI από το κινητό. Σύνδεσε το κινητό με το αυτοκίνητο.</string>
     <string name="car_assist_moment">Μια στιγμή.</string>
     <string name="car_assist_searching">Ψάχνω: %1$s.</string>

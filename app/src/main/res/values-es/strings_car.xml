@@ -12,6 +12,11 @@
     <string name="car_quiet">Silencio en el coche</string>
     <string name="car_quiet_summary">Las notificaciones de otras apps esperan mientras conduces; las llamadas y tus mensajes leídos en voz alta pasan.</string>
     <string name="car_pair_phone">Vincular el teléfono</string>
+    <string name="car_phone_connected">%1$s · conectado</string>
+    <string name="car_phone_away">%1$s · no disponible</string>
+    <string name="car_phone_disconnect">Desconectar</string>
+    <string name="car_phone_disconnect_ask">¿Desconectar %1$s?</string>
+    <string name="car_phone_disconnect_note">El coche olvida este teléfono: llamadas, mensajes, mapas y Compartir se detienen hasta que lo vincules de nuevo con el código.</string>
     <string name="car_pair_hint">En el teléfono: Tetra › Ajustes › Iconos de apps › Vincular con el coche, y escanea este código.</string>
     <string name="car_pair_car">Vincular con el coche</string>
     <string name="car_pair_car_summary">Escanea el código que Tetra Car muestra en la pantalla del coche: llamadas y mensajes allí, en directo, sin sincronizar.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s está en el móvil, en Tetra › Del coche.</string>
     <string name="car_share_failed">No se envió %1$s: %2$s</string>
     <string name="car_share_arrived">Desde el móvil: %1$s</string>
+    <string name="car_share_receiving">Recibiendo %1$s · %2$s de %3$s</string>
+    <string name="car_share_not_arrived">%1$s no llegó: %2$s</string>
+    <string name="car_share_again">Reintentar</string>
     <string name="car_assist_no_key">Todavía no hay clave de IA del móvil. Conecta el móvil al coche.</string>
     <string name="car_assist_moment">Un momento.</string>
     <string name="car_assist_searching">Buscando: %1$s.</string>

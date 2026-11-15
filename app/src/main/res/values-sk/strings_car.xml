@@ -12,6 +12,11 @@
     <string name="car_quiet">Ticho v aute</string>
     <string name="car_quiet_summary">Upozornenia ostatných aplikácií počas jazdy počkajú; hovory a správy čítané nahlas prejdú.</string>
     <string name="car_pair_phone">Spárovať telefón</string>
+    <string name="car_phone_connected">%1$s · pripojený</string>
+    <string name="car_phone_away">%1$s · nedostupný</string>
+    <string name="car_phone_disconnect">Odpojiť</string>
+    <string name="car_phone_disconnect_ask">Odpojiť %1$s?</string>
+    <string name="car_phone_disconnect_note">Auto tento telefón zabudne: hovory, správy, mapy a Zdieľanie z neho prestanú, kým ho znova nespárujete kódom.</string>
     <string name="car_pair_hint">V telefóne: Tetra › Nastavenia › Ikony aplikácií › Spárovať s autom, potom naskenuj tento kód.</string>
     <string name="car_pair_car">Spárovať s autom</string>
     <string name="car_pair_car_summary">Naskenuj kód, ktorý Tetra Car ukazuje na obrazovke auta: hovory a správy tam, naživo, bez synchronizácie.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s je v telefóne, v Tetra › Z auta.</string>
     <string name="car_share_failed">Súbor %1$s nebol odoslaný: %2$s</string>
     <string name="car_share_arrived">Z telefónu: %1$s</string>
+    <string name="car_share_receiving">Prijíma sa %1$s · %2$s z %3$s</string>
+    <string name="car_share_not_arrived">%1$s neprišiel: %2$s</string>
+    <string name="car_share_again">Znova</string>
     <string name="car_assist_no_key">Z telefónu zatiaľ nie je AI kľúč. Pripoj telefón k autu.</string>
     <string name="car_assist_moment">Chvíľku.</string>
     <string name="car_assist_searching">Hľadám: %1$s.</string>

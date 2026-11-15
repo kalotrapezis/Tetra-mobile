@@ -12,6 +12,11 @@
     <string name="car_quiet">Тишина в колата</string>
     <string name="car_quiet_summary">Известията на другите приложения чакат, докато шофираш; обажданията и прочетените на глас съобщения минават.</string>
     <string name="car_pair_phone">Сдвои телефона</string>
+    <string name="car_phone_connected">%1$s · свързан</string>
+    <string name="car_phone_away">%1$s · недостъпен</string>
+    <string name="car_phone_disconnect">Прекъсни</string>
+    <string name="car_phone_disconnect_ask">Прекъсване на %1$s?</string>
+    <string name="car_phone_disconnect_note">Колата забравя този телефон: обажданията, съобщенията, картите и Споделяне спират, докато не го сдвоите отново с кода.</string>
     <string name="car_pair_hint">На телефона: Tetra › Настройки › Икони на приложенията › Сдвояване с колата, после сканирай този код.</string>
     <string name="car_pair_car">Сдвояване с колата</string>
     <string name="car_pair_car_summary">Сканирай кода, който Tetra Car показва на екрана на колата: обажданията и съобщенията там, на живо, без синхронизиране.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s е в телефона, в Tetra › От колата.</string>
     <string name="car_share_failed">%1$s не беше изпратен: %2$s</string>
     <string name="car_share_arrived">От телефона: %1$s</string>
+    <string name="car_share_receiving">Получаване: %1$s · %2$s от %3$s</string>
+    <string name="car_share_not_arrived">%1$s не пристигна: %2$s</string>
+    <string name="car_share_again">Отново</string>
     <string name="car_assist_no_key">Все още няма AI ключ от телефона. Свържи телефона с колата.</string>
     <string name="car_assist_moment">Един момент.</string>
     <string name="car_assist_searching">Търся: %1$s.</string>

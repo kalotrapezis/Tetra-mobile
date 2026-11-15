@@ -12,6 +12,11 @@
     <string name="car_quiet">Tišina u autu</string>
     <string name="car_quiet_summary">Obavijesti drugih aplikacija čekaju dok voziš; pozivi i poruke pročitane naglas prolaze.</string>
     <string name="car_pair_phone">Upari telefon</string>
+    <string name="car_phone_connected">%1$s · povezan</string>
+    <string name="car_phone_away">%1$s · nedostupan</string>
+    <string name="car_phone_disconnect">Prekini vezu</string>
+    <string name="car_phone_disconnect_ask">Prekinuti vezu s %1$s?</string>
+    <string name="car_phone_disconnect_note">Auto zaboravlja ovaj telefon: pozivi, poruke, karte i Dijeljenje s njega prestaju dok ga ponovno ne uparite kodom.</string>
     <string name="car_pair_hint">Na telefonu: Tetra › Postavke › Ikone aplikacija › Upari s autom, pa skeniraj ovaj kod.</string>
     <string name="car_pair_car">Upari s autom</string>
     <string name="car_pair_car_summary">Skeniraj kod koji Tetra Car prikazuje na zaslonu auta: pozivi i poruke tamo, uživo, bez sinkronizacije.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s je na telefonu, u Tetra › Iz auta.</string>
     <string name="car_share_failed">%1$s nije poslano: %2$s</string>
     <string name="car_share_arrived">S telefona: %1$s</string>
+    <string name="car_share_receiving">Prima se %1$s · %2$s od %3$s</string>
+    <string name="car_share_not_arrived">%1$s nije stigao: %2$s</string>
+    <string name="car_share_again">Ponovno</string>
     <string name="car_assist_no_key">Još nema AI ključa s telefona. Poveži telefon s automobilom.</string>
     <string name="car_assist_moment">Trenutak.</string>
     <string name="car_assist_searching">Tražim: %1$s.</string>

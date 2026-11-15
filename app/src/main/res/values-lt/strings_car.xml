@@ -12,6 +12,11 @@
     <string name="car_quiet">Tyla automobilyje</string>
     <string name="car_quiet_summary">Kitų programų pranešimai laukia, kol vairuoji; skambučiai ir garsiai skaitomos žinutės praeina.</string>
     <string name="car_pair_phone">Susieti telefoną</string>
+    <string name="car_phone_connected">%1$s · prijungtas</string>
+    <string name="car_phone_away">%1$s · nepasiekiamas</string>
+    <string name="car_phone_disconnect">Atjungti</string>
+    <string name="car_phone_disconnect_ask">Atjungti %1$s?</string>
+    <string name="car_phone_disconnect_note">Automobilis pamirš šį telefoną: skambučiai, žinutės, žemėlapiai ir Bendrinimas sustos, kol vėl susiesite jį kodu.</string>
     <string name="car_pair_hint">Telefone: Tetra › Nustatymai › Programų piktogramos › Susieti su automobiliu, tada nuskenuok šį kodą.</string>
     <string name="car_pair_car">Susieti su automobiliu</string>
     <string name="car_pair_car_summary">Nuskenuok kodą, kurį Tetra Car rodo automobilio ekrane: skambučiai ir žinutės ten, tiesiogiai, be sinchronizavimo.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s yra telefone, Tetra › Iš automobilio.</string>
     <string name="car_share_failed">%1$s neišsiųsta: %2$s</string>
     <string name="car_share_arrived">Iš telefono: %1$s</string>
+    <string name="car_share_receiving">Gaunama %1$s · %2$s iš %3$s</string>
+    <string name="car_share_not_arrived">%1$s neatkeliavo: %2$s</string>
+    <string name="car_share_again">Bandyti dar</string>
     <string name="car_assist_no_key">Iš telefono dar nėra AI rakto. Prijunk telefoną prie automobilio.</string>
     <string name="car_assist_moment">Akimirką.</string>
     <string name="car_assist_searching">Ieškau: %1$s.</string>

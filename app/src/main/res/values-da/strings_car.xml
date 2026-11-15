@@ -12,6 +12,11 @@
     <string name="car_quiet">Ro i bilen</string>
     <string name="car_quiet_summary">Andre apps’ notifikationer venter, mens du kører; opkald og dine beskeder læst højt kommer igennem.</string>
     <string name="car_pair_phone">Par din telefon</string>
+    <string name="car_phone_connected">%1$s · forbundet</string>
+    <string name="car_phone_away">%1$s · kan ikke nås</string>
+    <string name="car_phone_disconnect">Afbryd</string>
+    <string name="car_phone_disconnect_ask">Afbryd %1$s?</string>
+    <string name="car_phone_disconnect_note">Bilen glemmer telefonen: opkald, beskeder, kort og Del fra den stopper, indtil du parrer igen med koden.</string>
     <string name="car_pair_hint">På telefonen: Tetra › Indstillinger › App-ikoner › Par med bilen, og scan så denne kode.</string>
     <string name="car_pair_car">Par med bilen</string>
     <string name="car_pair_car_summary">Scan koden, som Tetra Car viser på bilens skærm: opkald og beskeder dér, live, uden synkronisering.</string>
@@ -75,6 +80,9 @@
     <string name="car_share_sent">%1$s er på telefonen, i Tetra › Fra bilen.</string>
     <string name="car_share_failed">%1$s blev ikke sendt: %2$s</string>
     <string name="car_share_arrived">Fra telefonen: %1$s</string>
+    <string name="car_share_receiving">Modtager %1$s · %2$s af %3$s</string>
+    <string name="car_share_not_arrived">%1$s kom ikke frem: %2$s</string>
+    <string name="car_share_again">Prøv igen</string>
     <string name="car_assist_no_key">Der er endnu ingen AI-nøgle fra telefonen. Forbind telefonen til bilen.</string>
     <string name="car_assist_moment">Et øjeblik.</string>
     <string name="car_assist_searching">Søger: %1$s.</string>

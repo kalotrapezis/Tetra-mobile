@@ -1339,8 +1339,8 @@ internal fun routeFeatures(r: Route?): FeatureCollection = if (r == null) Featur
  */
 internal class MapsDuck(c: Context) : android.speech.tts.UtteranceProgressListener() {
     companion object {
-        val speech: android.media.AudioAttributes = android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
-            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH).build()
+        val speech: android.media.AudioAttributes by lazy { android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH).build() } // lazy: the backup below is tested off Android
         /** 10 s whatever is said (the user: "make it 10 sec, we should not need it if the code works properly"); the longest said so
          *  far, 102 letters, takes ~8 s. [text] kept for the log. */
         @Suppress("UNUSED_PARAMETER") fun backup(text: String) = 10_000L
