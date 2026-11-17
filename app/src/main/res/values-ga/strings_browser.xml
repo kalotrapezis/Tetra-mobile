@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Leabharmharcanna</string>
     <string name="browser_no_bookmarks">Níl aon leabharmharc fós</string>
     <string name="browser_history">Stair</string>
+    <string name="browser_saved_list">Leathanaigh shábháilte</string>
+    <string name="browser_saved_pages_note">Gach leathanach a shábháil tú le ♡ agus a theideal, fiú tar éis duit é a bhaint nó má imíonn an leathanach. Freisin in Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Faic fós: tapáil ♡ ar leathanach nó amhrán agus fanfaidh sé anseo.</string>
+    <string name="browser_saved_export">Easpórtáil</string>
     <string name="browser_history_note">Coinnítear í ar feadh 24 uair, ansin déantar dearmad uirthi</string>
     <string name="browser_no_history">Faic le 24 uair anuas</string>
     <string name="browser_saved_note">Criptithe, ar an bhfón seo amháin</string>

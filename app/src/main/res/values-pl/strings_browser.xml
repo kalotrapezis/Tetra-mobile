@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Zakładki</string>
     <string name="browser_no_bookmarks">Brak zakładek</string>
     <string name="browser_history">Historia</string>
+    <string name="browser_saved_list">Zapisane strony</string>
+    <string name="browser_saved_pages_note">Każda strona zapisana przez ♡ wraz z tytułem – zostaje nawet po usunięciu lub zniknięciu strony. Także w Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Jeszcze nic: dotknij ♡ na stronie lub utworze, a zostanie tutaj.</string>
+    <string name="browser_saved_export">Eksportuj</string>
     <string name="browser_history_note">Przechowywana 24 godziny, potem zapomniana</string>
     <string name="browser_no_history">Nic w ciągu ostatnich 24 godzin</string>
     <string name="browser_saved_note">Zaszyfrowane, tylko na tym telefonie</string>

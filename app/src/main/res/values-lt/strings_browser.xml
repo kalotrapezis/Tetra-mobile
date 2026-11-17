@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Žymelės</string>
     <string name="browser_no_bookmarks">Žymelių dar nėra</string>
     <string name="browser_history">Istorija</string>
+    <string name="browser_saved_list">Išsaugoti puslapiai</string>
+    <string name="browser_saved_pages_note">Kiekvienas su ♡ išsaugotas puslapis ir jo pavadinimas – lieka net jį pašalinus ar puslapiui dingus. Taip pat Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Kol kas nieko: bakstelėkite ♡ puslapyje ar dainoje ir ji liks čia.</string>
+    <string name="browser_saved_export">Eksportuoti</string>
     <string name="browser_history_note">Laikoma 24 valandas, paskui pamirštama</string>
     <string name="browser_no_history">Per pastarąsias 24 valandas nieko</string>
     <string name="browser_saved_note">Šifruotai, tik šiame telefone</string>

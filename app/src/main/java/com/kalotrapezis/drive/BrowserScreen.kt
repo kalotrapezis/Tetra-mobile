@@ -112,7 +112,7 @@ private val PRIVATE_COLOR = Color(0xFF2B2140)
 private val NET_DOWN = setOf(WebRequestError.ERROR_NET_INTERRUPT, WebRequestError.ERROR_NET_TIMEOUT, WebRequestError.ERROR_CONNECTION_REFUSED,
     WebRequestError.ERROR_OFFLINE, WebRequestError.ERROR_NET_RESET, WebRequestError.ERROR_UNKNOWN_HOST, WebRequestError.ERROR_UNKNOWN_PROXY_HOST, WebRequestError.ERROR_PROXY_CONNECTION_REFUSED)
 
-private enum class BrowserPanel { Bookmarks, History, Import }
+private enum class BrowserPanel { Bookmarks, History, Import, Saved }
 
 /**
  * The Browser in a window of its own (the user, 2 Nov: "I can't use the maps and the browser together, to play music in the
@@ -874,9 +874,12 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         BROWSER_SYNC.launch {
             val r = runCatching { BrowserSync.bookmarks(syncRoot, me, l, File(context.filesDir, "browser-sync/bookmarks.json")) }.onFailure { WriterLog.e("Browser sync: bookmarks not merged", it) }.getOrNull()
             if (pushed) ScopedSync.soon(context.applicationContext, "browser", orWhole = true)
+            if (pushed && CarMaps.edition && r != null) CarMaps.sendBookmarks(context.applicationContext, me) // the car's to the phone at once
             withContext(Dispatchers.Main) { if (r != null && n == marksRun[0] && (r.marks != bookmarks || r.extra != bookFolders)) store(r) }
         }
     }
+    // every page saved here or come from another device, into Documents › Saved pages.txt (BrowserSync.savedList)
+    LaunchedEffect(bookmarks) { if (!private) withContext(Dispatchers.IO) { BrowserSync.keepSaved(bookmarks.map { it.url to it.title }) } }
     fun keepLibrary(l: BookmarkLibrary) { store(l); syncMarks(l, true) }
     fun keepBookmarks(b: List<Bookmark>) = keepLibrary(BookmarkLibrary(b, bookFolders))
     // the other devices' bookmarks and tabs: read now, and again when sync brings a file of theirs
@@ -965,13 +968,16 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         "html" -> if (CarMaps.edition) null else BrowserTool(R.drawable.ic_code, stringResource(R.string.browser_html), tab.html, url.isNotEmpty()) { toggleHtml(tab) }
         "bookmarks" -> BrowserTool(R.drawable.ic_bookmark, stringResource(R.string.browser_bookmarks)) { panel = BrowserPanel.Bookmarks }
         "history" -> if (private) null else BrowserTool(R.drawable.ic_history, stringResource(R.string.browser_history)) { panel = BrowserPanel.History }
+        "saved_list" -> BrowserTool(R.drawable.ic_favorite, stringResource(R.string.browser_saved_list)) { panel = BrowserPanel.Saved }
         // the Passwords applet (the user, 4 Nov: "Instead of making a better password page, create a password manager in tetra"), this page's site looked up
         "saved" -> if (private || CarMaps.edition) null else BrowserTool(R.drawable.ic_lock, stringResource(R.string.app_passwords)) { openApplet(context, PasswordsActivity.WORD + host) }
         "copy" -> BrowserTool(R.drawable.ic_copy, stringResource(R.string.browser_copy_url), enabled = url.isNotEmpty()) {
             context.getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(android.content.ClipData.newPlainText(host, url))
             message = context.getString(R.string.browser_copied)
         }
-        "share" -> BrowserTool(R.drawable.ic_share, stringResource(R.string.browser_share), enabled = url.isNotEmpty()) {
+        // the car build: Reload in its place (the user, 17 Nov: "hide the share button, add a refresh: the pull is hard on such a small screen")
+        "share" -> if (CarMaps.edition) BrowserTool(R.drawable.ic_refresh, stringResource(R.string.browser_reload), enabled = url.isNotEmpty()) { tab.session.reload() }
+        else BrowserTool(R.drawable.ic_share, stringResource(R.string.browser_share), enabled = url.isNotEmpty()) {
             runCatching { context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, url)
                 .putExtra(Intent.EXTRA_SUBJECT, tab.title), null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
         }
@@ -1457,7 +1463,13 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
     if (panel == BrowserPanel.Bookmarks) BookmarksManager(library, wide, managerFolder, keep = ::keepLibrary, close = { panel = null }, others = others,
         openNew = { u -> panel = null; open(u) }) { u -> panel = null; go(u) }
     else panel?.let { p -> BrowserSheet(onDismissRequest = { panel = null }) {
-        BrowserPanelView(p, close = { panel = null }, visits = visits, vault = vault, imported = imported, open = ::go,
+        // Saved pages (the user, 17 Nov: "the favourite songs, a page and a button in every Android browser, to export"): its text file
+        val saved by produceState(emptyList<Triple<String, String, String>>(), p) {
+            if (p == BrowserPanel.Saved) value = withContext(Dispatchers.IO) { runCatching { BrowserSync.savedPages(BrowserSync.savedFile().readText()) }.getOrDefault(emptyList()) } }
+        BrowserPanelView(p, close = { panel = null }, visits = visits, vault = vault, imported = imported, open = ::go, saved = saved,
+                    export = if (CarMaps.edition) null else ({ runCatching { context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain")
+                        .putExtra(Intent.EXTRA_TEXT, BrowserSync.savedFile().readText()).putExtra(Intent.EXTRA_SUBJECT, BrowserSync.savedFile().nameWithoutExtension), null)) }
+                        .onFailure { message = context.getString(R.string.browser_saved_none) } }),
                     keepHistory = keepHistory,
                     clearHistory = { visits = emptyList(); prefs.edit().remove("history").apply() },
                     keep = ::keep, choose = { importer.launch(arrayOf("*/*")) },
@@ -2023,14 +2035,15 @@ internal val TILE_COLORS = listOf(Color(0xFF1A87FD), Color(0xFF2E7D32), Color(0x
 
 @Composable
 private fun BrowserPanelView(p: BrowserPanel, close: () -> Unit, visits: List<Visit>, vault: BrowserVault, imported: Pair<String, Uri?>?,
-                             open: (String) -> Unit, keepHistory: String, clearHistory: () -> Unit, keep: (BrowserVault) -> Unit, choose: () -> Unit, deleteFile: (Uri) -> Unit) =
+                             open: (String) -> Unit, saved: List<Triple<String, String, String>>, export: (() -> Unit)?, keepHistory: String, clearHistory: () -> Unit, keep: (BrowserVault) -> Unit, choose: () -> Unit, deleteFile: (Uri) -> Unit) =
     Box(Modifier.navigationBarsPadding()) {
         LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(bottom = 16.dp)) {
             item {
                 Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 4.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(when (p) { BrowserPanel.Bookmarks -> R.string.browser_bookmarks; BrowserPanel.History -> R.string.browser_history
-                        BrowserPanel.Import -> R.string.browser_import }), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
+                        BrowserPanel.Import -> R.string.browser_import; BrowserPanel.Saved -> R.string.browser_saved_list }), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
                     if (p == BrowserPanel.History && visits.isNotEmpty()) TextButton(onClick = clearHistory) { Text(stringResource(R.string.common_clear)) }
+                    if (p == BrowserPanel.Saved && saved.isNotEmpty() && export != null) TextButton(onClick = export) { Text(stringResource(R.string.browser_saved_export)) }
                     IconButton(onClick = close) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_close)) }
                 }
             }
@@ -2038,6 +2051,10 @@ private fun BrowserPanelView(p: BrowserPanel, close: () -> Unit, visits: List<Vi
             @Composable fun head(text: String) = Text(text, Modifier.padding(start = 20.dp, top = 16.dp, bottom = 4.dp), style = MaterialTheme.typography.titleSmall, color = BROWSER_COLOR)
             when (p) {
                 BrowserPanel.Bookmarks -> Unit // BookmarksManager
+                BrowserPanel.Saved -> {
+                    item { note(stringResource(if (saved.isEmpty()) R.string.browser_saved_none else R.string.browser_saved_pages_note)) }
+                    items(saved, key = { it.third + it.first }) { (day, title, url) -> BrowserRow(title, "$day · ${BrowserRules.host(url)}", click = { open(url) }) }
+                }
                 BrowserPanel.History -> {
                     item { note(stringResource(when { visits.isEmpty() -> R.string.browser_no_history; keepHistory == BrowserRules.ON_EXIT -> R.string.browser_history_exit_note
                         keepHistory == BrowserRules.NEVER -> R.string.browser_history_never_note; else -> R.string.browser_history_note })) }

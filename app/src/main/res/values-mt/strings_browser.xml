@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Bookmarks</string>
     <string name="browser_no_bookmarks">Għad m’hemmx bookmarks</string>
     <string name="browser_history">Storja</string>
+    <string name="browser_saved_list">Paġni ssejvjati</string>
+    <string name="browser_saved_pages_note">Kull paġna li ssejvjajt b\'♡ u t-titlu tagħha, anke wara li tneħħiha jew il-paġna tisparixxi. Ukoll f\'Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Għad xejn: agħfas ♡ fuq paġna jew kanzunetta u tibqa\' hawn.</string>
+    <string name="browser_saved_export">Esporta</string>
     <string name="browser_history_note">Tinżamm 24 siegħa, imbagħad tintesa</string>
     <string name="browser_no_history">Xejn fl-aħħar 24 siegħa</string>
     <string name="browser_saved_note">Kriptat, fuq dan it-telefon biss</string>

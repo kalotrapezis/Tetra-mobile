@@ -130,6 +130,13 @@ internal object CarMaps {
 
     fun storageOk(c: Context) = storageAllowed(c)
 
+    /** The car's own bookmarks file to the phone (the user, 17 Nov: "sync between bookmarks on the phone and the car"); the phone's come back in [check]. */
+    fun sendBookmarks(c: Context, me: String) = runCatching {
+        val f = File(BrowserSync.root(), "Bookmarks/$me.json").takeIf { it.isFile } ?: return@runCatching
+        val r = CarWire.ask(c, JSONObject().put("bookmarks", JSONObject().put("name", f.name).put("text", f.readText())))
+        if (r.has("error")) WriterLog.w("Car: bookmarks not sent to the phone (${r.optString("error")})")
+    }.onFailure { WriterLog.w("Car: bookmarks not sent to the phone (${it.message})") }
+
     /** Asks the phone what maps it has (on a thread of its own); an offer when it has more or newer. */
     fun check(c: Context) {
         if (state.value is State.Moving || state.value is State.Checking) return
@@ -143,9 +150,11 @@ internal object CarMaps {
                 if (both != mine) { BrowserSecrets.save(c.applicationContext, both); WriterLog.i("Car: the Browser's logins from the phone, ${both.logins.size} now") }
             }.onFailure { WriterLog.w("Car: the Browser's logins not taken (${it.message})") }
             runCatching { CarWire.log(c.applicationContext) }.onFailure { WriterLog.w("Car: the log not sent to the phone (${it.message})") }
+            val me = BrowserSync.device(c)
+            sendBookmarks(c.applicationContext, me)
             val next: State = runCatching {
                 val theirs = CarWire.maps(c.applicationContext)
-                val all = wanted(theirs, ::local)
+                val all = wanted(theirs, ::local).filter { it.first != "@browser/Bookmarks/$me.json" } // the car's own: written here only
                 val (mine, want) = all.partition { personal(it.first) }
                 if (mine.isNotEmpty()) { // places, bookmarks, AI Assist's and Share's: just taken, never offered
                     var now: Receiving? = null

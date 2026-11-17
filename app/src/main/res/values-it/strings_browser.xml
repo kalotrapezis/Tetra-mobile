@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Segnalibri</string>
     <string name="browser_no_bookmarks">Ancora nessun segnalibro</string>
     <string name="browser_history">Cronologia</string>
+    <string name="browser_saved_list">Pagine salvate</string>
+    <string name="browser_saved_pages_note">Ogni pagina salvata con ♡ e il suo titolo, anche dopo averla rimossa o se la pagina sparisce. Anche in Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Ancora niente: tocca ♡ su una pagina o un brano e resterà qui.</string>
+    <string name="browser_saved_export">Esporta</string>
     <string name="browser_history_note">Conservata 24 ore, poi dimenticata</string>
     <string name="browser_no_history">Niente nelle ultime 24 ore</string>
     <string name="browser_saved_note">Cifrati, solo su questo telefono</string>

@@ -100,6 +100,25 @@ function autoplay() { var n = 0, said = 0, t = setInterval(function () { var m =
   if (m && !m.paused) { clearInterval(t); return; }
   if (m && (m.currentSrc || m.src)) m.play().catch(function (e) { if (!said) { said = 1; post({ error: 'autoplay: ' + e }); } }); else if (n == 4) click('[data-testid=play-button],.jp-play,[class*=play-button],button[aria-label*=Play i],button[title*=Play i]');
   if (++n > 30) clearInterval(t); }, 500); }
+// YouTube stuck (the user, 17 Nov, the car: after Phone, every play stopped within a second until another page loaded): once its page
+// is resized while it plays, YouTube's own player calls pause() on a timer, 3–4 times a second, and only a new page clears it. Seen
+// as four of its pause() calls within 1.5 s on something that played: the page opened again at the same second and played on
+if (/(^|\.)youtube\.com$/.test(location.hostname)) try {
+  var pause0 = window.wrappedJSObject.HTMLMediaElement.prototype.pause, pauses = [], stopped = false;
+  window.wrappedJSObject.HTMLMediaElement.prototype.pause = exportFunction(function () {
+    var now = Date.now(); pauses = pauses.filter(function (t) { return now - t < 1500; });
+    if (!pauses.length) stopped = false;
+    pauses.push(now); stopped = stopped || !this.paused;
+    if (pauses.length == 4 && stopped) unstick();
+    return pause0.apply(this, arguments); }, window);
+  if (sessionStorage.getItem('tetraResume')) { sessionStorage.removeItem('tetraResume'); autoplay(); }
+} catch (e) {}
+function unstick() { try { var m = cur();
+  if (!m || !/^\/watch/.test(location.pathname) || Date.now() - (+sessionStorage.getItem('tetraUnstuck') || 0) < 30000) return;
+  var u = new URL(location.href); u.searchParams.set('t', Math.floor(m.currentTime) + 's');
+  sessionStorage.setItem('tetraUnstuck', String(Date.now())); sessionStorage.setItem('tetraResume', '1');
+  post({ error: 'YouTube paused itself again and again: opened again at ' + Math.floor(m.currentTime) + ' s' });
+  location.replace(u.href); } catch (e) {} }
 // AI Assist's search: its first result, past shorts and ads. Looked for as the page draws its results, for up to a minute:
 // YouTube's mobile page draws them seconds after it has loaded, slower in Gecko than the WebView's 10 s allowed (4 Nov)
 var firstOff = null;

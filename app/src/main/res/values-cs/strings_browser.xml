@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Záložky</string>
     <string name="browser_no_bookmarks">Zatím žádné záložky</string>
     <string name="browser_history">Historie</string>
+    <string name="browser_saved_list">Uložené stránky</string>
+    <string name="browser_saved_pages_note">Každá stránka uložená přes ♡ i s názvem – zůstane, i když ji smažete nebo stránka zmizí. Také v Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Zatím nic: klepněte na ♡ u stránky nebo skladby a zůstane zde.</string>
+    <string name="browser_saved_export">Exportovat</string>
     <string name="browser_history_note">Uchovává se 24 hodin, pak se zapomene</string>
     <string name="browser_no_history">Za posledních 24 hodin nic</string>
     <string name="browser_saved_note">Šifrovaně, jen v tomto telefonu</string>

@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Zaznamki</string>
     <string name="browser_no_bookmarks">Še ni zaznamkov</string>
     <string name="browser_history">Zgodovina</string>
+    <string name="browser_saved_list">Shranjene strani</string>
+    <string name="browser_saved_pages_note">Vsaka stran, shranjena s ♡, in njen naslov – ostane tudi, ko jo odstranite ali stran izgine. Tudi v Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Še nič: tapnite ♡ na strani ali skladbi in ostane tukaj.</string>
+    <string name="browser_saved_export">Izvozi</string>
     <string name="browser_history_note">Hrani se 24 ur, nato pozabi</string>
     <string name="browser_no_history">Nič v zadnjih 24 urah</string>
     <string name="browser_saved_note">Šifrirano, samo v tem telefonu</string>

@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Отметки</string>
     <string name="browser_no_bookmarks">Още няма отметки</string>
     <string name="browser_history">История</string>
+    <string name="browser_saved_list">Запазени страници</string>
+    <string name="browser_saved_pages_note">Всяка страница, запазена с ♡, и заглавието ѝ – остава и след като я изтриете или страницата изчезне. Също в Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Още няма нищо: натиснете ♡ на страница или песен и тя остава тук.</string>
+    <string name="browser_saved_export">Експорт</string>
     <string name="browser_history_note">Пази се 24 часа, после се забравя</string>
     <string name="browser_no_history">Нищо през последните 24 часа</string>
     <string name="browser_saved_note">Шифровано, само на този телефон</string>

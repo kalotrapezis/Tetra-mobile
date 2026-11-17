@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Σελιδοδείκτες</string>
     <string name="browser_no_bookmarks">Δεν υπάρχουν ακόμη σελιδοδείκτες</string>
     <string name="browser_history">Ιστορικό</string>
+    <string name="browser_saved_list">Αποθηκευμένα</string>
+    <string name="browser_saved_pages_note">Κάθε σελίδα που αποθήκευσες με ♡ και ο τίτλος της, ακόμη κι αν τη σβήσεις ή η σελίδα χαθεί. Και στα Έγγραφα › Saved pages.txt.</string>
+    <string name="browser_saved_none">Τίποτα ακόμη: πάτησε ♡ σε μια σελίδα ή ένα τραγούδι και μένει εδώ.</string>
+    <string name="browser_saved_export">Εξαγωγή</string>
     <string name="browser_history_note">Κρατιέται 24 ώρες και μετά ξεχνιέται</string>
     <string name="browser_no_history">Τίποτα τις τελευταίες 24 ώρες</string>
     <string name="browser_saved_note">Κρυπτογραφημένα, μόνο σε αυτό το κινητό</string>

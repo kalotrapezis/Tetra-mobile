@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Grāmatzīmes</string>
     <string name="browser_no_bookmarks">Vēl nav grāmatzīmju</string>
     <string name="browser_history">Vēsture</string>
+    <string name="browser_saved_list">Saglabātās lapas</string>
+    <string name="browser_saved_pages_note">Katra ar ♡ saglabātā lapa un tās nosaukums – paliek arī pēc noņemšanas vai lapas pazušanas. Arī Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Vēl nekā: pieskarieties ♡ lapai vai dziesmai, un tā paliks šeit.</string>
+    <string name="browser_saved_export">Eksportēt</string>
     <string name="browser_history_note">Glabā 24 stundas, pēc tam aizmirst</string>
     <string name="browser_no_history">Pēdējās 24 stundās nekā</string>
     <string name="browser_saved_note">Šifrēti, tikai šajā tālrunī</string>

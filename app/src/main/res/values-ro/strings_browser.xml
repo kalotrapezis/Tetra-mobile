@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Marcaje</string>
     <string name="browser_no_bookmarks">Încă nu ai marcaje</string>
     <string name="browser_history">Istoric</string>
+    <string name="browser_saved_list">Pagini salvate</string>
+    <string name="browser_saved_pages_note">Fiecare pagină salvată cu ♡ și titlul ei, chiar după ce o elimini sau pagina dispare. Și în Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Nimic încă: atinge ♡ pe o pagină sau o melodie și rămâne aici.</string>
+    <string name="browser_saved_export">Exportă</string>
     <string name="browser_history_note">Păstrat 24 de ore, apoi uitat</string>
     <string name="browser_no_history">Nimic în ultimele 24 de ore</string>
     <string name="browser_saved_note">Criptat, doar pe acest telefon</string>

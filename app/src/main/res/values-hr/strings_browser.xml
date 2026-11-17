@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Oznake</string>
     <string name="browser_no_bookmarks">Još nema oznaka</string>
     <string name="browser_history">Povijest</string>
+    <string name="browser_saved_list">Spremljene stranice</string>
+    <string name="browser_saved_pages_note">Svaka stranica spremljena s ♡ i njezin naslov – ostaje i nakon što je uklonite ili stranica nestane. Također u Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Još ništa: dodirnite ♡ na stranici ili pjesmi i ostat će ovdje.</string>
+    <string name="browser_saved_export">Izvezi</string>
     <string name="browser_history_note">Čuva se 24 sata, zatim se zaboravlja</string>
     <string name="browser_no_history">Ništa u posljednja 24 sata</string>
     <string name="browser_saved_note">Šifrirano, samo na ovom telefonu</string>

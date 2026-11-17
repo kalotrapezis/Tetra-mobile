@@ -401,7 +401,7 @@ internal object MediaSites {
  * or on the bar"); one list for a phone, one for a tablet. Order is the order chosen.
  */
 internal object BrowserTools {
-    val ALL = listOf("fill", "extensions", "private", "desktop", "html", "bookmarks", "history", "saved", "copy", "share", "split", "forward", "player", "import", "autohide", "background", "tabs_run", "close")
+    val ALL = listOf("fill", "extensions", "private", "desktop", "html", "bookmarks", "history", "saved_list", "saved", "copy", "share", "split", "forward", "player", "import", "autohide", "background", "tabs_run", "close")
     /** uBlock Origin's button, where the ad blocker's shield was (the user, 3 Nov): its count of the page's blocked requests. */
     const val UBLOCK = "ext:" + BrowserEngine.UBLOCK
     val PHONE = listOf("fill", UBLOCK, "private", "bookmarks", "copy", "share") // two columns of three small (the user, 2 Nov: "fit 2 more tools")

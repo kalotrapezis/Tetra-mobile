@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Bladwijzers</string>
     <string name="browser_no_bookmarks">Nog geen bladwijzers</string>
     <string name="browser_history">Geschiedenis</string>
+    <string name="browser_saved_list">Bewaarde pagina\'s</string>
+    <string name="browser_saved_pages_note">Elke pagina die je met ♡ bewaarde, met titel – ook nadat je hem verwijdert of de pagina verdwijnt. Ook in Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Nog niets: tik ♡ op een pagina of nummer en het blijft hier staan.</string>
+    <string name="browser_saved_export">Exporteren</string>
     <string name="browser_history_note">24 uur bewaard, daarna vergeten</string>
     <string name="browser_no_history">Niets in de afgelopen 24 uur</string>
     <string name="browser_saved_note">Versleuteld, alleen op deze telefoon</string>

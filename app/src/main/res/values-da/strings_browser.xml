@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Bogmærker</string>
     <string name="browser_no_bookmarks">Ingen bogmærker endnu</string>
     <string name="browser_history">Historik</string>
+    <string name="browser_saved_list">Gemte sider</string>
+    <string name="browser_saved_pages_note">Hver side, du har gemt med ♡, og dens titel – også efter du fjerner den, eller siden forsvinder. Også i Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Intet endnu: tryk ♡ på en side eller sang, så bliver den her.</string>
+    <string name="browser_saved_export">Eksportér</string>
     <string name="browser_history_note">Gemmes i 24 timer og glemmes så</string>
     <string name="browser_no_history">Intet de seneste 24 timer</string>
     <string name="browser_saved_note">Krypteret, kun på denne telefon</string>

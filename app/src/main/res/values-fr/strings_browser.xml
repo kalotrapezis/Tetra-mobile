@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Favoris</string>
     <string name="browser_no_bookmarks">Aucun favori pour l’instant</string>
     <string name="browser_history">Historique</string>
+    <string name="browser_saved_list">Pages enregistrées</string>
+    <string name="browser_saved_pages_note">Chaque page enregistrée avec ♡ et son titre, même après l\'avoir retirée ou si la page disparaît. Aussi dans Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Rien pour l\'instant : touchez ♡ sur une page ou une chanson et elle restera ici.</string>
+    <string name="browser_saved_export">Exporter</string>
     <string name="browser_history_note">Gardé 24 heures, puis oublié</string>
     <string name="browser_no_history">Rien ces dernières 24 heures</string>
     <string name="browser_saved_note">Chiffré, sur ce téléphone uniquement</string>

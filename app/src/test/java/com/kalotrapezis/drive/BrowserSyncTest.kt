@@ -218,4 +218,34 @@ class BrowserSyncTest {
         phone.from(tablet); phone.sync(5_000)
         assertEquals("Stations", phone.folderOf("https://a.gr"))
     }
+
+    @Test fun theCarsBookmarksReachThePhoneOverTheLinkAndGoBack() {
+        val car = Device("car"); val phone = Device("phone")
+        car.keep(BookmarkLibrary(listOf(b("https://youtube.com/watch?v=1", title = "Song one"))), 1_000)
+        val text = File(car.root, "Bookmarks/car.json").readText()
+        assertTrue(BrowserSync.keepCar(phone.root, "phone", "car.json", text) != null)
+        phone.sync(2_000)
+        assertEquals(setOf("https://youtube.com/watch?v=1"), phone.urls())
+        // never a file outside Bookmarks, never the phone's own, never one that is not bookmarks
+        assertNull(BrowserSync.keepCar(phone.root, "phone", "../car.json", text))
+        assertNull(BrowserSync.keepCar(phone.root, "phone", "phone.json", text))
+        assertNull(BrowserSync.keepCar(phone.root, "phone", "car.json", "not json"))
+        // the phone's, taken by the car as before (CarMaps), merged there
+        phone.keep(BookmarkLibrary(phone.lib.marks + b("https://live24.gr", title = "Radio")), 3_000)
+        car.from(phone); car.sync(4_000)
+        assertEquals(setOf("https://youtube.com/watch?v=1", "https://live24.gr"), car.urls())
+    }
+
+    @Test fun savedPagesKeepEveryPageOnceWithItsTitleTheNewestFirst() {
+        val t = 1_763_400_000_000L
+        val first = BrowserSync.savedList("", listOf("https://y.com/1" to "Song — Live", "https://y.com/2" to ""), t)!!
+        assertTrue(first.startsWith("Pages saved"))
+        assertNull(BrowserSync.savedList(first, listOf("https://y.com/1" to "Song — Live"), t + day)) // nothing new
+        val second = BrowserSync.savedList(first, listOf("https://y.com/1" to "x", "https://y.com/3" to "Three"), t + day)!!
+        assertTrue(second.startsWith(first)) // only added to, never rewritten
+        val pages = BrowserSync.savedPages(second)
+        assertEquals(listOf("https://y.com/3", "https://y.com/2", "https://y.com/1"), pages.map { it.third })
+        assertEquals("Song — Live", pages.last().second) // a title with the separator in it stays whole
+        assertEquals("https://y.com/2", pages[1].second) // no title: its address
+    }
 }

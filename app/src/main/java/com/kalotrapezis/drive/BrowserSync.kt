@@ -145,6 +145,37 @@ internal object BrowserSync {
 
     private fun files(dir: File) = dir.listFiles().orEmpty().filter { it.isFile && !it.name.startsWith(".") && it.name.endsWith(".json") }
 
+    /** On the phone: the paired car's own bookmarks file, kept beside the others (merged as theirs, synced on to the computer). */
+    fun keepCar(root: File, me: String, name: String, text: String): BookmarkSet? {
+        if (!Regex("[A-Za-z0-9._-]{1,80}\\.json").matches(name) || name.startsWith(".") || name == "$me.json" || text.length > 4_000_000) return null
+        val set = BookmarkSet.parse(text) ?: return null
+        save(File(root, "Bookmarks/$name"), text)
+        return set
+    }
+
+    /**
+     * Every page ever saved, a line each, in a text file of the user's (the user, 17 Nov: "keep a text file with the pages I save, the
+     * title; I want to know the songs if the pages go away"): the pages of [marks] (address → title) not yet in [old] added at the end,
+     * the deleted ones too. Never rewritten, so it keeps what the bookmarks no longer do. Null: nothing new.
+     */
+    fun savedList(old: String, marks: List<Pair<String, String>>, now: Long): String? {
+        val known = old.lineSequence().map { it.substringAfterLast(" — ", "").trim() }.filter { it.isNotEmpty() }.toSet()
+        val new = marks.filter { (url, _) -> url.isNotEmpty() && url !in known }.distinctBy { it.first }
+        if (new.isEmpty()) return null
+        val day = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.ROOT).format(java.util.Date(now))
+        return old.ifEmpty { "Pages saved in Tetra's Browser: date, title — address\n\n" } + new.joinToString("") { (url, title) -> "$day  ${title.ifBlank { url }.replace('\n', ' ')} — $url\n" }
+    }
+    /** [savedList]'s lines as (date, title, address), the newest first. */
+    fun savedPages(text: String): List<Triple<String, String, String>> = text.lineSequence().mapNotNull { l ->
+        val at = l.lastIndexOf(" — ")
+        if (at < 18 || !l[4].equals('-') || l.substring(16, 18) != "  ") null else Triple(l.take(16), l.substring(18, at), l.substring(at + 3).trim())
+    }.toList().asReversed()
+    fun savedFile() = File(TetraFolder.root(android.os.Environment.getExternalStorageDirectory()), "Documents/Saved pages.txt")
+    fun keepSaved(marks: List<Pair<String, String>>) = runCatching {
+        val f = savedFile()
+        savedList(f.takeIf { it.isFile }?.readText().orEmpty(), marks, System.currentTimeMillis())?.let { f.parentFile?.mkdirs(); save(f, it); WriterLog.i("Browser: Saved pages.txt, ${marks.size} pages looked at") }
+    }.onFailure { WriterLog.w("Browser: Saved pages.txt not written (${it.message})") }
+
     /** [text] into [to], written beside then renamed over: sync never reads half a file. */
     fun save(to: File, text: String) {
         to.parentFile?.mkdirs()

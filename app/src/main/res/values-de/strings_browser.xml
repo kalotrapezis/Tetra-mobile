@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Lesezeichen</string>
     <string name="browser_no_bookmarks">Noch keine Lesezeichen</string>
     <string name="browser_history">Verlauf</string>
+    <string name="browser_saved_list">Gespeicherte Seiten</string>
+    <string name="browser_saved_pages_note">Jede mit ♡ gespeicherte Seite samt Titel – auch nachdem du sie entfernst oder die Seite verschwindet. Auch unter Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Noch nichts: Tippe ♡ bei einer Seite oder einem Song, dann bleibt er hier.</string>
+    <string name="browser_saved_export">Exportieren</string>
     <string name="browser_history_note">24 Stunden behalten, dann vergessen</string>
     <string name="browser_no_history">Nichts in den letzten 24 Stunden</string>
     <string name="browser_saved_note">Verschlüsselt, nur auf diesem Telefon</string>

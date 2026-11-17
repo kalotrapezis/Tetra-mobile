@@ -755,6 +755,7 @@ private fun CarPanes(state: CarState, opened: List<CarApp>, coverAt: Int?, cover
                      modifier: Modifier, focus: (CarApp) -> Unit, content: @Composable (CarApp) -> Unit) {
     val ring = MaterialTheme.colorScheme.primary
     val shape = RoundedCornerShape(16.dp)
+    val widths = remember { mutableMapOf<CarApp, Int>() }
     Layout(modifier = modifier, content = {
         opened.forEach { app ->
             key(app) {
@@ -772,7 +773,11 @@ private fun CarPanes(state: CarState, opened: List<CarApp>, coverAt: Int?, cover
         val spans = carSpans(c.maxWidth, 8.dp.roundToPx(), state.layout.weights)
         val covers = if (coverAt != null) 1 else 0
         fun at(i: Int) = when { i < opened.size -> state.panes.indexOf(opened[i]); i < opened.size + covers -> coverAt ?: 0; else -> i - opened.size - covers }
-        val placeables = measurables.mapIndexed { i, m -> m.measure(Constraints.fixed((spans.getOrNull(at(i)) ?: spans[0]).second, c.maxHeight)) }
+        // a page off the screen keeps the width it last had (the user, 17 Nov: the Browser made as wide as the map behind Phone, then narrow
+        // again, left YouTube's page pausing every play until another page loaded)
+        val placeables = measurables.mapIndexed { i, m ->
+            val w = spans.getOrNull(at(i))?.second?.also { if (i < opened.size) widths[opened[i]] = it } ?: (if (i < opened.size) widths[opened[i]] else null) ?: spans[0].second
+            m.measure(Constraints.fixed(w, c.maxHeight)) }
         layout(c.maxWidth, c.maxHeight) {
             placeables.forEachIndexed { i, p ->
                 val at = at(i)

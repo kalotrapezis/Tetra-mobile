@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Bookmarks</string>
     <string name="browser_no_bookmarks">No bookmarks yet</string>
     <string name="browser_history">History</string>
+    <string name="browser_saved_list">Saved pages</string>
+    <string name="browser_saved_pages_note">Every page you saved with ♡ and its title, kept even after you remove it or the page goes away. Also in Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Nothing saved yet: ♡ a page or a song and it stays listed here.</string>
+    <string name="browser_saved_export">Export</string>
     <string name="browser_history_note">Kept for 24 hours, then forgotten</string>
     <string name="browser_no_history">Nothing in the last 24 hours</string>
     <string name="browser_saved_note">Kept encrypted, on this phone only</string>

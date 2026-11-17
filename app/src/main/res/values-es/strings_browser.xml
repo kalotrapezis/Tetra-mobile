@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Marcadores</string>
     <string name="browser_no_bookmarks">Aún no hay marcadores</string>
     <string name="browser_history">Historial</string>
+    <string name="browser_saved_list">Páginas guardadas</string>
+    <string name="browser_saved_pages_note">Cada página que guardaste con ♡ y su título, aunque la quites o la página desaparezca. También en Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Nada aún: toca ♡ en una página o canción y quedará aquí.</string>
+    <string name="browser_saved_export">Exportar</string>
     <string name="browser_history_note">Se guarda 24 horas y luego se olvida</string>
     <string name="browser_no_history">Nada en las últimas 24 horas</string>
     <string name="browser_saved_note">Cifrado, solo en este teléfono</string>

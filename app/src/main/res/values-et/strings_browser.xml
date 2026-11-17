@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Järjehoidjad</string>
     <string name="browser_no_bookmarks">Järjehoidjaid veel pole</string>
     <string name="browser_history">Ajalugu</string>
+    <string name="browser_saved_list">Salvestatud lehed</string>
+    <string name="browser_saved_pages_note">Iga ♡-ga salvestatud leht koos pealkirjaga – jääb alles ka siis, kui selle eemaldad või leht kaob. Ka kaustas Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Veel pole midagi: vajuta lehel või laulul ♡ ja see jääb siia.</string>
+    <string name="browser_saved_export">Ekspordi</string>
     <string name="browser_history_note">Hoitakse 24 tundi, siis unustatakse</string>
     <string name="browser_no_history">Viimase 24 tunni jooksul mitte midagi</string>
     <string name="browser_saved_note">Krüpteeritult, ainult selles telefonis</string>

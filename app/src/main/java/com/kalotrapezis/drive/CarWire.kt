@@ -176,6 +176,13 @@ internal object CarWire {
                     return if (placePhoneCall(c, number)) 200 to JSONObject().put("ok", true) else 409 to JSONObject().put("error", "Calls are not allowed on the phone.")
                 }
                 body.optJSONArray("taken")?.let { names -> CarShare.taken(names); return 200 to JSONObject().put("ok", true) } // the car has these
+                body.optJSONObject("bookmarks")?.let { b -> // the car's bookmarks file, kept with the others (BrowserSync), on to the computer
+                    val set = BrowserSync.keepCar(BrowserSync.root(), BrowserSync.device(c), b.optString("name"), b.optString("text"))
+                        ?: return 400 to JSONObject().put("error", "Not a bookmarks file.")
+                    BrowserSync.keepSaved(set.marks.values.map { it.url to it.title }) // the deleted too: their titles stay in Saved pages.txt
+                    ScopedSync.soon(c.applicationContext, "browser", orWhole = true)
+                    return 200 to JSONObject().put("ok", true)
+                }
                 body.optJSONObject("sms")?.let { s ->
                     if (!SmsBox.canSend(c)) return 409 to JSONObject().put("error", "SMS are not allowed on the phone.")
                     SmsBox.send(c, s.getString("to"), s.getString("text").take(2000))

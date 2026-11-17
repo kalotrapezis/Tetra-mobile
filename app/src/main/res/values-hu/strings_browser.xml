@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Könyvjelzők</string>
     <string name="browser_no_bookmarks">Még nincsenek könyvjelzők</string>
     <string name="browser_history">Előzmények</string>
+    <string name="browser_saved_list">Mentett oldalak</string>
+    <string name="browser_saved_pages_note">Minden ♡-val mentett oldal a címével – akkor is megmarad, ha törlöd, vagy az oldal eltűnik. A Documents › Saved pages.txt fájlban is.</string>
+    <string name="browser_saved_none">Még semmi: koppints a ♡-ra egy oldalon vagy dalon, és itt marad.</string>
+    <string name="browser_saved_export">Exportálás</string>
     <string name="browser_history_note">24 óráig marad, aztán feledésbe merül</string>
     <string name="browser_no_history">Semmi az elmúlt 24 órában</string>
     <string name="browser_saved_note">Titkosítva, csak ezen a telefonon</string>

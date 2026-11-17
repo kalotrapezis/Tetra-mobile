@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Kirjanmerkit</string>
     <string name="browser_no_bookmarks">Ei vielä kirjanmerkkejä</string>
     <string name="browser_history">Historia</string>
+    <string name="browser_saved_list">Tallennetut sivut</string>
+    <string name="browser_saved_pages_note">Jokainen ♡:lla tallentamasi sivu otsikkoineen – säilyy, vaikka poistaisit sen tai sivu katoaisi. Myös kansiossa Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Ei vielä mitään: napauta ♡ sivulla tai kappaleessa, niin se jää tähän.</string>
+    <string name="browser_saved_export">Vie</string>
     <string name="browser_history_note">Säilytetään 24 tuntia, sitten unohdetaan</string>
     <string name="browser_no_history">Ei mitään viimeisten 24 tunnin ajalta</string>
     <string name="browser_saved_note">Salattuna, vain tässä puhelimessa</string>

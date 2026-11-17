@@ -18,6 +18,10 @@
     <string name="browser_bookmarks">Bokmärken</string>
     <string name="browser_no_bookmarks">Inga bokmärken än</string>
     <string name="browser_history">Historik</string>
+    <string name="browser_saved_list">Sparade sidor</string>
+    <string name="browser_saved_pages_note">Varje sida du sparat med ♡ och dess titel – finns kvar även efter att du tar bort den eller sidan försvinner. Även i Documents › Saved pages.txt.</string>
+    <string name="browser_saved_none">Inget ännu: tryck ♡ på en sida eller låt så stannar den här.</string>
+    <string name="browser_saved_export">Exportera</string>
     <string name="browser_history_note">Sparas i 24 timmar, sedan glöms den</string>
     <string name="browser_no_history">Inget de senaste 24 timmarna</string>
     <string name="browser_saved_note">Krypterat, bara på den här telefonen</string>
