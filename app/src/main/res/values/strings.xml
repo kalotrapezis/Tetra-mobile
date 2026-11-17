@@ -4719,6 +4719,9 @@
     <string name="brief_place_use_phone">Use where the phone is</string>
     <string name="car_map_view">Map view</string>
     <string name="car_map_size">Size</string>
+    <string name="car_map_card">Top card</string>
+    <string name="car_map_island">Bottom island</string>
+    <string name="car_map_side">Side: speed and limit</string>
     <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Tilt</string>
     <string name="car_map_tilt_auto">By speed</string>

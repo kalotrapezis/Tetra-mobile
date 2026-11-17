@@ -4718,6 +4718,9 @@
     <string name="brief_place_use_phone">Seal, kus on telefon</string>
     <string name="car_map_view">Kaardivaade</string>
     <string name="car_map_size">Suurus</string>
+    <string name="car_map_card">Ülemine paneel</string>
+    <string name="car_map_island">Alumine riba</string>
+    <string name="car_map_side">Küljel: kiirus ja piirang</string>
     <string name="car_map_zoom">Suum</string>
     <string name="car_map_tilt">Kalle</string>
     <string name="car_map_tilt_auto">Kiiruse järgi</string>

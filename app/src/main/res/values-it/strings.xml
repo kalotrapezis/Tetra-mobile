@@ -4718,6 +4718,9 @@
     <string name="brief_place_use_phone">Dove si trova il telefono</string>
     <string name="car_map_view">Vista mappa</string>
     <string name="car_map_size">Dimensione</string>
+    <string name="car_map_card">Scheda in alto</string>
+    <string name="car_map_island">Barra in basso</string>
+    <string name="car_map_side">Lato: velocità e limite</string>
     <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Inclinazione</string>
     <string name="car_map_tilt_auto">In base alla velocità</string>

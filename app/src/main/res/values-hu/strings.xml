@@ -4718,6 +4718,9 @@
     <string name="brief_place_use_phone">Ahol a telefon van</string>
     <string name="car_map_view">Térképnézet</string>
     <string name="car_map_size">Méret</string>
+    <string name="car_map_card">Felső kártya</string>
+    <string name="car_map_island">Alsó sáv</string>
+    <string name="car_map_side">Oldalt: sebesség és korlát</string>
     <string name="car_map_zoom">Nagyítás</string>
     <string name="car_map_tilt">Dőlés</string>
     <string name="car_map_tilt_auto">Sebesség szerint</string>

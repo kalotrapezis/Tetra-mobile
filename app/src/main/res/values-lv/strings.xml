@@ -4819,6 +4819,9 @@
     <string name="brief_place_use_phone">Tur, kur ir tālrunis</string>
     <string name="car_map_view">Kartes skats</string>
     <string name="car_map_size">Izmērs</string>
+    <string name="car_map_card">Augšējā kartīte</string>
+    <string name="car_map_island">Apakšējā josla</string>
+    <string name="car_map_side">Malā: ātrums un ierobežojums</string>
     <string name="car_map_zoom">Tālummaiņa</string>
     <string name="car_map_tilt">Slīpums</string>
     <string name="car_map_tilt_auto">Pēc ātruma</string>

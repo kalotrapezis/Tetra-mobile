@@ -4920,6 +4920,9 @@
     <string name="brief_place_use_phone">Ten, kur yra telefonas</string>
     <string name="car_map_view">Žemėlapio vaizdas</string>
     <string name="car_map_size">Dydis</string>
+    <string name="car_map_card">Viršutinė kortelė</string>
+    <string name="car_map_island">Apatinė juosta</string>
+    <string name="car_map_side">Šonas: greitis ir riba</string>
     <string name="car_map_zoom">Mastelis</string>
     <string name="car_map_tilt">Pokrypis</string>
     <string name="car_map_tilt_auto">Pagal greitį</string>

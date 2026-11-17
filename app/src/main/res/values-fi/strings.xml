@@ -4718,6 +4718,9 @@
     <string name="brief_place_use_phone">Missä puhelin on</string>
     <string name="car_map_view">Karttanäkymä</string>
     <string name="car_map_size">Koko</string>
+    <string name="car_map_card">Yläkortti</string>
+    <string name="car_map_island">Alapalkki</string>
+    <string name="car_map_side">Sivu: nopeus ja rajoitus</string>
     <string name="car_map_zoom">Zoomaus</string>
     <string name="car_map_tilt">Kallistus</string>
     <string name="car_map_tilt_auto">Nopeuden mukaan</string>

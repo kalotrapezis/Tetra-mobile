@@ -318,6 +318,19 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
  * on the phone (MapsRouting) and spoken in Greek. [go] (a place on Home's card) starts its directions as soon as there is a fix.
  */
 @SuppressLint("MissingPermission")
+/** Tetra Car's sizes for the map's top card, bottom island and side (speed, limit, P), each over the map's own (Car › Map view); 1 elsewhere. */
+internal data class MapParts(val card: Float = 1f, val island: Float = 1f, val side: Float = 1f) {
+    /** The small window beside another app holds less (the user, 17 Nov: "the small can't fit all the info, it should not follow the big
+     *  one's settings to the letter"): there a part only ever gets smaller than its own size, never bigger. */
+    fun small() = MapParts(minOf(card, 1f), minOf(island, 1f), minOf(side, 1f))
+}
+internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf { MapParts() }
+/** [content] drawn [f] times the size around it. */
+@Composable private fun Sized(f: Float, content: @Composable () -> Unit) {
+    val d = androidx.compose.ui.platform.LocalDensity.current
+    androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(d.density * f, d.fontScale), content = content)
+}
+
 @Composable internal fun MapsScreen(root: File, go: Place?, back: () -> Unit, search: String? = null) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -966,7 +979,8 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
         val driving = (nav ?: carNav)?.mode.let { it == null || it == "car" }
         val shownSpeed = speed?.takeIf { driving && !reckoning } // not the guess made while the GPS is lost
         val badge = (nav ?: carNav)?.mode == "car" || (shownSpeed != null && limit != null) // without directions: beside a sign, as before
-        if (live && (limit != null || badge)) {
+        val parts = LocalMapParts.current.let { if (androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp < 600) it.small() else it } // as `narrow` below
+        if (live && (limit != null || badge)) Sized(parts.side) {
             // clear of the island and the bars below it (the user, 21 Oct: "ακουμπάει πάνω στο νησί … δώσε λίγο αέρα")
             val over = limit?.let { l -> (shownSpeed ?: 0) > l + 3 } == true
             // Tetra Car: the limit over my speed, at the very left, where the driver looks (the user, 13 Nov), the map free beside it
@@ -995,7 +1009,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                 roadName?.let { Text(it, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 260.dp)) }
             }
         } }
-        if (n != null && narrow) {
+        Sized(parts.card) { if (n != null && narrow) {
             // a narrow screen: one pill, the road above and the next turn below (the user, 21 Oct)
             // one card: the road I am on at its top (the user, 22 Oct: the pill and the card "seam from a diferent planet")
             // Tetra Car: as small as what it says, at the top left, the map seen around it (the user, 13 Nov, Android Auto's photo: "don't leave empty space")
@@ -1008,10 +1022,10 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
             }
             // top right: the next turn in a small window (the user: "A small window will open at the top right to tell me what lane to take")
             if (n != null) NavBanner(n, root, Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(12.dp))
-        }
+        } }
         // bottom right, above the island: P and where I am (the user, 21 Oct: at the top they covered the map's compass);
         // away while a panel or a place's page is open
-        if (n == null && tab == null && selected == null && preview == null) Column(Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(end = 12.dp, bottom = 76.dp),
+        if (n == null && tab == null && selected == null && preview == null) Sized(parts.side) { Column(Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(end = 12.dp, bottom = 76.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Island(R.drawable.ic_parking, stringResource(R.string.maps_parked_here)) {
                 val h = here
@@ -1023,11 +1037,11 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                 if (h == null) Toast.makeText(context, context.getString(if (granted) R.string.maps_waiting_location else R.string.maps_location_off), Toast.LENGTH_SHORT).show()
                 else mapRef?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(h.latitude, h.longitude), 16.0))
             }
-        }
+        } }
 
         // bottom: directions running; or a place's page; or a panel and the island
         // above the keyboard while one is typing in Search or Directions
-        Column(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().imePadding().padding(12.dp).widthIn(max = 560.dp).fillMaxWidth(),
+        Sized(parts.island) { Column(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().imePadding().padding(12.dp).widthIn(max = 560.dp).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             finding?.let { Pill(it) }
             plan?.takeIf { it.size < planCount }?.let { pl ->
@@ -1231,7 +1245,7 @@ internal fun hasLocation(context: Context) = ContextCompat.checkSelfPermission(c
                 LaunchedEffect(Unit) { while (true) { music = BrowserMedia.playing && BrowserMedia.service != null; delay(1000) } }
                 MapsIsland(tab, music, playMusic = { if (!BrowserMedia.mapsMusic(context)) Toast.makeText(context, context.getString(R.string.maps_music_none), Toast.LENGTH_LONG).show() }) { t -> tab = if (tab == t) null else t }
             }
-        }
+        } }
     }
 
     listEditing?.let { l -> ListDialog(l, { listEditing = null }, if (l.id.isEmpty()) null else ({

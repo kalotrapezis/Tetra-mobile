@@ -4920,6 +4920,9 @@
     <string name="brief_place_use_phone">Fejn hu t-telefon</string>
     <string name="car_map_view">Veduta tal-mappa</string>
     <string name="car_map_size">Daqs</string>
+    <string name="car_map_card">Il-kard ta\' fuq</string>
+    <string name="car_map_island">Il-bar t\'isfel</string>
+    <string name="car_map_side">Il-ġenb: veloċità u limitu</string>
     <string name="car_map_zoom">Żum</string>
     <string name="car_map_tilt">Inklinazzjoni</string>
     <string name="car_map_tilt_auto">Skont il-veloċità</string>

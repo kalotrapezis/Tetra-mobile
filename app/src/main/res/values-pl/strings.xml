@@ -4920,6 +4920,9 @@
     <string name="brief_place_use_phone">Tam, gdzie jest telefon</string>
     <string name="car_map_view">Widok mapy</string>
     <string name="car_map_size">Rozmiar</string>
+    <string name="car_map_card">Górna karta</string>
+    <string name="car_map_island">Dolny pasek</string>
+    <string name="car_map_side">Bok: prędkość i limit</string>
     <string name="car_map_zoom">Powiększenie</string>
     <string name="car_map_tilt">Nachylenie</string>
     <string name="car_map_tilt_auto">Według prędkości</string>

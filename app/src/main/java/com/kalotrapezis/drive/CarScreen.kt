@@ -181,14 +181,21 @@ private fun CarPlaces(go: (Place) -> Unit, close: () -> Unit) {
  * [ui] Tetra Car's own screens; [map] Maps' map and buttons, instead of [ui]; [zoom] added to the camera's zoom while driving;
  * [tilt] fixed degrees, -1 the camera's own (45° rising to 60° with speed); [low] the arrow low on the screen, the road ahead above it;
  * [res] the picture drawn at that part of the size the car asks for, its shape kept (0.8: 1024×576 for its 1280×720, the panel's 1024 wide), so all is bigger and sharper.
+ * [card], [island], [side]: the map's top card, its bottom island and the speed and limit at its side, each its own size (the user, 17 Nov:
+ * "separate their size on the screen", the map seen around them); 0 until chosen: as [map], which stays as it was.
  */
-internal data class CarView(val ui: Float, val map: Float, val zoom: Float, val tilt: Int, val low: Boolean, val res: Float = 1f) {
+internal data class CarView(val ui: Float, val map: Float, val zoom: Float, val tilt: Int, val low: Boolean, val res: Float = 1f,
+                            val card: Float = 0f, val island: Float = 0f, val side: Float = 0f) {
+    /** The map's parts, each over the map's own size (Maps is drawn at [map]). */
+    fun parts() = MapParts(card.ifZero(map) / map, island.ifZero(map) / map, side.ifZero(map) / map)
+    private fun Float.ifZero(o: Float) = if (this == 0f) o else this
     /** A driving camera's zoom and tilt, as chosen here. */
     fun camera(v: Pair<Double, Double>) = (v.first + zoom).coerceIn(5.0, 19.0) to (if (tilt >= 0) tilt.toDouble() else v.second)
     companion object {
         val PHONE = CarView(1f, 1f, 0f, -1, false)
         val UI = listOf(1f, 1.25f, 1.5f, 1.75f, 2f) // 25% steps (the user, 13 Nov)
         val MAP = listOf(1f, 1.25f, 1.5f, 1.75f, 2f, 2.25f, 2.5f, 2.75f, 3f)
+        val PART = listOf(0.75f, 0.9f, 1f, 1.1f, 1.25f, 1.5f, 1.75f, 2f, 2.5f) // smaller than the map's too (the user: "a bit smaller")
         val ZOOM = listOf(-1f, -0.5f, 0f, 0.5f, 1f)
         val TILT = listOf(-1, 0, 30, 45, 60)
         val RES = listOf(1f, 0.8f, 2f / 3)
@@ -251,6 +258,12 @@ internal fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, startSetting
                 IconButton(close) { Icon(painterResource(R.drawable.ic_close), stringResource(R.string.common_close)) }
             }
                 row(R.string.car_map_size, CarView.MAP, v.map, { pct(it) }) { Car.setView(context, v.copy(map = it)) }
+                // each chip the part's size on the screen, as the map's: until chosen, the one nearest the map's lit
+                @Composable fun part(label: Int, now: Float, set: (Float) -> CarView) =
+                    row(label, CarView.PART, CarView.PART.minBy { kotlin.math.abs(it - if (now == 0f) v.map else now) }, { pct(it) }) { Car.setView(context, set(it)) }
+                part(R.string.car_map_card, v.card) { v.copy(card = it) }
+                part(R.string.car_map_island, v.island) { v.copy(island = it) }
+                part(R.string.car_map_side, v.side) { v.copy(side = it) }
                 row(R.string.car_map_zoom, CarView.ZOOM, v.zoom, { if (it == 0f) "0" else "%+.1f".format(it) }) { Car.setView(context, v.copy(zoom = it)) }
                 row(R.string.car_map_tilt, CarView.TILT, v.tilt, { if (it < 0) stringResource(R.string.car_map_tilt_auto) else "$it°" }) { Car.setView(context, v.copy(tilt = it)) }
                 row(R.string.car_map_arrow, listOf(false, true), v.low, { stringResource(if (it) R.string.car_map_arrow_low else R.string.car_map_arrow_middle) }) { Car.setView(context, v.copy(low = it)) }
@@ -353,12 +366,14 @@ internal object Car {
     private val viewState = mutableStateOf<CarView?>(null)
     /** Tetra Car's sizes and Maps' camera (the car's menu): one state, so the screen and the map follow a change at once. */
     fun view(c: Context): CarView = viewState.value ?: prefs(c).let { p ->
-        CarView(if (CarMaps.edition) 1f else p.getFloat("ui_scale", 1f) /* the car's build: CarSize instead */, p.getFloat("map_scale", if (CarMaps.edition) 1.25f else 2f) /* the car's build is 150 % already (CarSize) */, p.getFloat("map_zoom", 0f), p.getInt("map_tilt", -1), p.getBoolean("map_low", true), p.getFloat("resolution", 1f))
+        CarView(if (CarMaps.edition) 1f else p.getFloat("ui_scale", 1f) /* the car's build: CarSize instead */, p.getFloat("map_scale", if (CarMaps.edition) 1.25f else 2f) /* the car's build is 150 % already (CarSize) */, p.getFloat("map_zoom", 0f), p.getInt("map_tilt", -1), p.getBoolean("map_low", true), p.getFloat("resolution", 1f),
+            p.getFloat("card_scale", 0f), p.getFloat("island_scale", 0f), p.getFloat("side_scale", 0f))
     }.also { viewState.value = it }
     fun setView(c: Context, v: CarView) {
         val old = viewState.value
         viewState.value = v
-        prefs(c).edit().putFloat("ui_scale", v.ui).putFloat("map_scale", v.map).putFloat("map_zoom", v.zoom).putInt("map_tilt", v.tilt).putBoolean("map_low", v.low).putFloat("resolution", v.res).apply()
+        prefs(c).edit().putFloat("ui_scale", v.ui).putFloat("map_scale", v.map).putFloat("map_zoom", v.zoom).putInt("map_tilt", v.tilt).putBoolean("map_low", v.low).putFloat("resolution", v.res)
+            .putFloat("card_scale", v.card).putFloat("island_scale", v.island).putFloat("side_scale", v.side).apply()
         WriterLog.i("Car: view $v")
         // another resolution: the car's picture again at that size (the car joins again by itself)
         if (old != null && old.res != v.res) AutoProjection.session?.end()
@@ -682,7 +697,7 @@ internal fun CarScreen(projected: Boolean = false) {
                 CompositionLocalProvider(LocalOnBackPressedDispatcherOwner provides backs.getValue(app)) {
                     when (app) {
                         CarApp.Maps -> Box(Modifier.fillMaxSize()) {
-                            CompositionLocalProvider(LocalDensity provides Density(base.density * view.map, base.fontScale)) { // Maps' own size, instead of the interface's
+                            CompositionLocalProvider(LocalDensity provides Density(base.density * view.map, base.fontScale), LocalMapParts provides view.parts()) { // Maps' own size, instead of the interface's; its parts' own
                                 key(CarMaps.version.intValue) { PaneSized { MapsScreen(MapsFiles.root(driveRoot()), mapsGo, back = {}, search = mapsSearch) } } // its pane's size in its own dp; again when maps came
                             }
                             if (places) CarPlaces(go = { p -> mapsGo = p.copy(id = "ask-${System.nanoTime()}"); places = false; WriterLog.i("Car: to a saved place") }, close = { places = false })

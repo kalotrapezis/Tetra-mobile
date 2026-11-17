@@ -4819,6 +4819,9 @@
     <string name="brief_place_use_phone">Unde este telefonul</string>
     <string name="car_map_view">Vizualizare hartă</string>
     <string name="car_map_size">Mărime</string>
+    <string name="car_map_card">Cardul de sus</string>
+    <string name="car_map_island">Bara de jos</string>
+    <string name="car_map_side">Lateral: viteză și limită</string>
     <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Înclinare</string>
     <string name="car_map_tilt_auto">După viteză</string>

@@ -4718,6 +4718,9 @@
     <string name="brief_place_use_phone">Hvor telefonen er</string>
     <string name="car_map_view">Kortvisning</string>
     <string name="car_map_size">Størrelse</string>
+    <string name="car_map_card">Øverste felt</string>
+    <string name="car_map_island">Nederste bjælke</string>
+    <string name="car_map_side">Siden: fart og grænse</string>
     <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Hældning</string>
     <string name="car_map_tilt_auto">Efter fart</string>

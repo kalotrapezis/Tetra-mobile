@@ -5021,6 +5021,9 @@
     <string name="brief_place_use_phone">An áit a bhfuil an fón</string>
     <string name="car_map_view">Amharc léarscáile</string>
     <string name="car_map_size">Méid</string>
+    <string name="car_map_card">Cárta barr</string>
+    <string name="car_map_island">Barra bun</string>
+    <string name="car_map_side">Taobh: luas agus teorainn</string>
     <string name="car_map_zoom">Súmáil</string>
     <string name="car_map_tilt">Claonadh</string>
     <string name="car_map_tilt_auto">De réir luais</string>

@@ -4718,6 +4718,9 @@
     <string name="brief_place_use_phone">Където е телефонът</string>
     <string name="car_map_view">Изглед на картата</string>
     <string name="car_map_size">Размер</string>
+    <string name="car_map_card">Горен панел</string>
+    <string name="car_map_island">Долна лента</string>
+    <string name="car_map_side">Отстрани: скорост и ограничение</string>
     <string name="car_map_zoom">Мащаб</string>
     <string name="car_map_tilt">Наклон</string>
     <string name="car_map_tilt_auto">По скорост</string>

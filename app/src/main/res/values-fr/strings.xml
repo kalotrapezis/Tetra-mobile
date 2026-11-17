@@ -4819,6 +4819,9 @@
     <string name="brief_place_use_phone">Là où est le téléphone</string>
     <string name="car_map_view">Vue de la carte</string>
     <string name="car_map_size">Taille</string>
+    <string name="car_map_card">Encadré du haut</string>
+    <string name="car_map_island">Barre du bas</string>
+    <string name="car_map_side">Côté : vitesse et limite</string>
     <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Inclinaison</string>
     <string name="car_map_tilt_auto">Selon la vitesse</string>

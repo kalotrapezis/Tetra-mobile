@@ -4819,6 +4819,9 @@
     <string name="brief_place_use_phone">Gdje je telefon</string>
     <string name="car_map_view">Prikaz karte</string>
     <string name="car_map_size">Veličina</string>
+    <string name="car_map_card">Gornja kartica</string>
+    <string name="car_map_island">Donja traka</string>
+    <string name="car_map_side">Strana: brzina i ograničenje</string>
     <string name="car_map_zoom">Zum</string>
     <string name="car_map_tilt">Nagib</string>
     <string name="car_map_tilt_auto">Prema brzini</string>

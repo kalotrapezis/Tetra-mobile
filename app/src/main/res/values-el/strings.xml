@@ -4717,6 +4717,9 @@
     <string name="brief_place_use_phone">Εκεί που είναι το κινητό</string>
     <string name="car_map_view">Προβολή χάρτη</string>
     <string name="car_map_size">Μέγεθος</string>
+    <string name="car_map_card">Πάνω κάρτα</string>
+    <string name="car_map_island">Κάτω νησίδα</string>
+    <string name="car_map_side">Πλάι: ταχύτητα και όριο</string>
     <string name="car_map_zoom">Ζουμ</string>
     <string name="car_map_tilt">Κλίση</string>
     <string name="car_map_tilt_auto">Με την ταχύτητα</string>

@@ -4920,6 +4920,9 @@
     <string name="brief_place_use_phone">Kde je telefón</string>
     <string name="car_map_view">Zobrazenie mapy</string>
     <string name="car_map_size">Veľkosť</string>
+    <string name="car_map_card">Horná karta</string>
+    <string name="car_map_island">Spodná lišta</string>
+    <string name="car_map_side">Bok: rýchlosť a limit</string>
     <string name="car_map_zoom">Priblíženie</string>
     <string name="car_map_tilt">Náklon</string>
     <string name="car_map_tilt_auto">Podľa rýchlosti</string>

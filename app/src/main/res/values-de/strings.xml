@@ -4718,6 +4718,9 @@
     <string name="brief_place_use_phone">Ort des Telefons nehmen</string>
     <string name="car_map_view">Kartenansicht</string>
     <string name="car_map_size">Größe</string>
+    <string name="car_map_card">Oberes Feld</string>
+    <string name="car_map_island">Untere Leiste</string>
+    <string name="car_map_side">Seite: Tempo und Limit</string>
     <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Neigung</string>
     <string name="car_map_tilt_auto">Nach Tempo</string>

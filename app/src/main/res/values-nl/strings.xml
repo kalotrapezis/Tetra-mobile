@@ -4718,6 +4718,9 @@
     <string name="brief_place_use_phone">Waar de telefoon is</string>
     <string name="car_map_view">Kaartweergave</string>
     <string name="car_map_size">Grootte</string>
+    <string name="car_map_card">Bovenste vak</string>
+    <string name="car_map_island">Onderste balk</string>
+    <string name="car_map_side">Zijkant: snelheid en limiet</string>
     <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Kanteling</string>
     <string name="car_map_tilt_auto">Naar snelheid</string>
