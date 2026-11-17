@@ -1968,7 +1968,8 @@ internal class Sentences {
 }
 
 /** Voice activity: 30 ms frames of 16 kHz speech in, one phrase out when the speaker pauses (the VOICE app's Vad, ported). */
-internal class Vad(private val pauseFrames: Int = 30, private val maxFrames: Int = 20 * 1000 / 30, private val factor: Double = 2.5, private val least: Double = 280.0) {
+internal class Vad(private val pauseFrames: Int = 30, private val maxFrames: Int = 20 * 1000 / 30, private val factor: Double = 2.5, private val least: Double = 280.0,
+                   private val byVoice: Boolean = false) {
     var noise = 200.0; private set
     /** The loudest 30 ms so far, for the log. */
     var loudest = 0.0; private set
@@ -1978,6 +1979,7 @@ internal class Vad(private val pauseFrames: Int = 30, private val maxFrames: Int
     private var silence = 0
     private var speech = 0
     private var wasLoud = false
+    private var voiced = 0.0 // the frames over the bar, summed: the voice's own level
     var speaking = false; private set
 
     /** True when a phrase has ended: [phrase] holds it. */
@@ -1988,12 +1990,16 @@ internal class Vad(private val pauseFrames: Int = 30, private val maxFrames: Int
         val th = threshold()
         if (!speaking) {
             pre.addLast(frame); if (pre.size > 6) pre.removeFirst()
-            if (r > th) { speaking = true; silence = 0; speech = 1; seg.clear(); seg += pre } else noise = 0.95 * noise + 0.05 * r
+            if (r > th) { speaking = true; silence = 0; speech = 1; voiced = r; seg.clear(); seg += pre } else noise = 0.95 * noise + 0.05 * r
             return false
         }
         seg += frame
         // a lone loud frame in road noise does not hold the pause open: speech is two in a row
-        if (r > th) { speech++; if (wasLoud) silence = 0 else silence++; wasLoud = true } else { silence++; wasLoud = false }
+        if (r > th) { speech++; voiced += r }
+        // [byVoice], the car: road noise keeps passing a bar just over it, so the phrase never ended (car.log, 17 Nov: 15 s every time, or
+        // closed by hand); once it is speech, a pause is anything under halfway (geometric) between the road and the voice's own level
+        val loud = r > th && (!byVoice || speech < 7 || r > Math.sqrt(noise * voiced / speech))
+        if (loud) { if (wasLoud) silence = 0 else silence++; wasLoud = true } else { silence++; wasLoud = false }
         // a click or a bump in the road, then quiet: not a phrase, so back to waiting (it used to listen until tapped)
         if (silence >= pauseFrames && speech < 7) { speaking = false; seg.clear(); noise = 0.95 * noise + 0.05 * r; return false }
         return (silence >= pauseFrames || seg.size >= maxFrames) && speech >= 7

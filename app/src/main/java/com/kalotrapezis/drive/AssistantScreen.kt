@@ -252,6 +252,11 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
     var tvCue by remember { mutableStateOf(TalkCue.None) }
     var tvMood by remember { mutableStateOf(TalkMood.Normal) }
     fun hush() { reader.stop(); voice?.stop(); voice = null; talking = false }
+    // the car: the mic closed and the words on their way, a soft beat until the answer speaks, quiet while Tetra says what it is doing
+    var sending by remember { mutableStateOf(false) }
+    val beat = car && sending && !talking && !reader.speaking
+    DisposableEffect(beat) { val stop = if (beat) Chime.pulse() else null; onDispose { stop?.invoke() } }
+    LaunchedEffect(talking) { if (talking) sending = false }
     fun endLive(@androidx.annotation.StringRes why: Int? = null) {
         val l = live ?: return
         live = null; l.end(); hush()
@@ -384,7 +389,7 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
         } } finally { chat.onTool = null } } }
         speech?.say(cut.rest()); speech?.finish()
         scope.launch { speech?.await(); talking = false }
-        phase = Phase.Idle; spent = chat.bill.usd
+        phase = Phase.Idle; spent = chat.bill.usd; sending = false
         LocationReminders.tidySoon(context) // a list AI Assist deleted or ticked: its place reminder goes
         val reply = r.getOrElse { speech?.stop(); say(it.shownMessage(context) ?: context.getString(R.string.assistant_server, 0), true); WriterLog.w("Assistant: ${it.message}"); listenAgain(); return@launch }
         bubbles += Bubble(false, reply.text, reply.choices, reply.call, reply.images, audio = reply.audio, cards = reply.cards, confirm = reply.confirm)
@@ -445,12 +450,14 @@ internal fun AssistantApp(sheet: Boolean, openJob: String? = null, liveFirst: Bo
         if (car) withContext(Dispatchers.IO) { Chime.play(up = true).join() } // speak now; done before the noise is measured
         val pcm = withContext(Dispatchers.IO) { runCatching { listen(waitMs, { stopNow.get() || !isActive }, { hearing = it }, AssistantPause.ms(context), AssistantAudio.mic(context)) }.getOrNull() }
         hearing = false
+        sending = car && pcm != null
         if (pcm == null && car) { phase = Phase.Idle; say(context.getString(micTrouble ?: R.string.assistant_heard_nothing), true); carDone(); return@launch }
         if (pcm == null) { phase = Phase.Idle; if (sheet && pending == null && confirming == null && dialing == null && bubbles.lastOrNull()?.images.isNullOrEmpty() && bubbles.lastOrNull()?.cards.isNullOrEmpty()) close(); return@launch }
         phase = Phase.Thinking
         val text = withContext(Dispatchers.IO) { runCatching { AssistantNet.transcribe(context, pcm, AssistantWords.terms(context), chat.bill.part("dictation")) } }
         phase = Phase.Idle; spent = chat.bill.usd
-        text.onSuccess { if (it.isBlank()) { say(context.getString(R.string.assistant_heard_nothing), car); if (car) carDone() } else send(it) }
+        text.onSuccess { if (it.isBlank()) sending = false }.onFailure { sending = false }
+        text.onSuccess { WriterLog.i("AI Assist: heard «${it.take(80)}»${if (it.length > 80) "…" else ""}"); if (it.isBlank()) { say(context.getString(R.string.assistant_heard_nothing), car); if (car) carDone() } else send(it) }
             .onFailure { say(it.shownMessage(context) ?: "", true); if (car) carDone() }
     } }
     fun mic() = when (phase) { Phase.Idle -> hear(10_000); Phase.Listening -> stopNow.set(true); Phase.Thinking -> Unit }

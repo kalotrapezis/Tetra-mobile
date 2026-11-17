@@ -815,7 +815,7 @@ internal val CAR_APP_COLOR = Color(0xFF1E5AA8) // dark blue: the slate before wa
     (listOf(AiProviders.MISTRAL) + providers).distinct().forEach { p -> key(p.id) { SettingsSection { AssistantKeyField(p = p) } } }
     // AI decorations (8 Nov): the record, the cassette, the TV with the robot, the snow and the CRT; off, the plain conversation
     var decorations by remember { mutableStateOf(AiLook.decorated(context)) }
-    SettingsSection(stringResource(R.string.ai_decorations), null) {
+    if (!CarMaps.edition) SettingsSection(stringResource(R.string.ai_decorations), null) { // the car has none (AiLook)
         SwitchRow(stringResource(R.string.ai_decorations), stringResource(R.string.ai_decorations_note), decorations) { decorations = it; AiLook.set(context, it); TvWidget.refresh(context) }
         var presenter by remember { mutableStateOf(Presenter.on(context)) }
         if (decorations) SwitchRow(stringResource(R.string.ai_presenter), stringResource(R.string.ai_presenter_note), presenter) { presenter = it; Presenter.set(context, it) }

@@ -316,6 +316,12 @@ class AssistantTest {
         repeat(20) { road.push(frame(30)) }; repeat(30) { road.push(frame(4000)) }
         assertTrue((1..60).any { road.push(frame(if (it % 10 == 0) 4000 else 30)) })
         assertTrue(Math.abs(Vad().threshold() - (200 * 2.5 + 120)) < 3) // the phone's bar is as it was
+        // the car (car.log, 17 Nov): after the voice, road noise just over the bar went on forever; measured against the voice it is a pause
+        fun car() = Vad(30, 15 * 1000 / 30, factor = 1.3, least = 60.0, byVoice = true)
+        fun afterVoice(vad: Vad): Int? { repeat(20) { vad.push(frame(1500)) }; repeat(30) { vad.push(frame(6000)) }
+            return (1..200).firstOrNull { vad.push(frame(if (it % 2 == 0) 2200 else 2100)) } }
+        assertNull(afterVoice(Vad(30, 15 * 1000 / 30, factor = 1.3, least = 60.0))) // as it was: never
+        assertEquals(30, afterVoice(car()))
     }
 
     @Test fun aContactCardMarksTheDefaultNumber() {

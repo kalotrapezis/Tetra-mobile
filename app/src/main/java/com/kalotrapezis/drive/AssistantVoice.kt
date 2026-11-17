@@ -92,6 +92,19 @@ internal object AssistantNet {
     /** Speech to text by the service chosen to listen (Voxtral unless chosen), in Greek, spelling [terms] as given (My words). */
     fun transcribe(c: Context, pcm: ShortArray, terms: List<String>, bill: Bill? = null): String {
         val p = AiProviders.of(c, AiPart.LISTEN); val key = key(c, p)
+        // AAC, a tenth of the WAV (car.log, 17 Nov: 10 s of speech took 40 s to go up the car's weak uplink); WAV where the service refused it
+        val prefs = c.getSharedPreferences("assistant", Context.MODE_PRIVATE); val refused = "aac_refused_${p.id}"
+        val aac = if (prefs.getBoolean(refused, false)) null else m4a(pcm, c.cacheDir)
+        if (aac != null) try { return transcribe(p, key, aac, "speech.m4a", "audio/mp4", terms).also { bill?.minutes(p.listen!!, pcm.size.toDouble() / Vad.RATE) } }
+        catch (e: DriveProblem) {
+            // shortcut: a refused file is told by the status in the message ("Mistral 400"); a code on DriveProblem would be cleaner if this grows
+            if (e.message?.contains(Regex(" (400|415|422)$")) != true) throw e
+            WriterLog.w("AI Assist: ${p.name} refused AAC (${e.message}), WAV from now on"); prefs.edit().putBoolean(refused, true).apply()
+        }
+        return transcribe(p, key, Vad.wav(pcm), "speech.wav", "audio/wav", terms).also { bill?.minutes(p.listen!!, pcm.size.toDouble() / Vad.RATE) }
+    }
+
+    private fun transcribe(p: AiProvider, key: String, audio: ByteArray, name: String, type: String, terms: List<String>): String {
         val scribe = p == AiProviders.ELEVENLABS // its /speech-to-text names the fields its own way
         val b = "tetra" + System.nanoTime()
         val body = ByteArrayOutputStream().apply {
@@ -102,11 +115,10 @@ internal object AssistantNet {
                 scribe -> terms.filter { it.length <= 50 && it.split(' ').size <= 5 && it.none { ch -> ch in "<>{}[]\\" } }.forEach { field("keyterms", it) } // its limits on a term
                 terms.isNotEmpty() -> field("prompt", terms.joinToString(", ")) // Whisper's way to the spellings
             }
-            write("--$b\r\nContent-Disposition: form-data; name=\"file\"; filename=\"speech.wav\"\r\nContent-Type: audio/wav\r\n\r\n".toByteArray())
-            write(Vad.wav(pcm)); write("\r\n--$b--\r\n".toByteArray())
+            write("--$b\r\nContent-Disposition: form-data; name=\"file\"; filename=\"$name\"\r\nContent-Type: $type\r\n\r\n".toByteArray())
+            write(audio); write("\r\n--$b--\r\n".toByteArray())
         }.toByteArray()
         return JSONObject(send(key, if (scribe) "/speech-to-text" else "/audio/transcriptions", "multipart/form-data; boundary=$b", body, p).decodeToString()).optString("text").trim()
-            .also { bill?.minutes(p.listen!!, pcm.size.toDouble() / Vad.RATE) }
     }
 
     /** A failed live connection in the user's words, as [send] says a failed request. */
@@ -197,14 +209,19 @@ internal object AssistantNet {
     private fun <T> attempt(key: String, path: String, type: String?, body: ByteArray?, p: AiProvider, read: (java.io.InputStream) -> T): T {
         AiGate.check() // nothing leaves for the AI while it is off, whoever asks
         val c = URL(p.api + path).openConnection() as HttpURLConnection
+        val t0 = System.currentTimeMillis(); var sent = t0; var answered = t0
         try {
             c.connectTimeout = 15_000; c.readTimeout = 120_000 // a picture takes a while
             if (p == AiProviders.ELEVENLABS) c.setRequestProperty("xi-api-key", key) else c.setRequestProperty("Authorization", "Bearer $key")
             val code = try {
-                if (body != null) { c.requestMethod = "POST"; c.doOutput = true; c.setRequestProperty("Content-Type", type); c.outputStream.use { it.write(body) } }
-                c.responseCode
+                if (body != null) { c.requestMethod = "POST"; c.doOutput = true; c.setRequestProperty("Content-Type", type); c.setFixedLengthStreamingMode(body.size); c.outputStream.use { it.write(body) } }
+                sent = System.currentTimeMillis()
+                c.responseCode.also { answered = System.currentTimeMillis() }
             } catch (e: IOException) { throw NoAnswer(e) }
-            if (code in 200..299) return c.inputStream.use(read)
+            // each request's size and time, to tell a slow uplink from a slow service (car.log, 17 Nov: 40 s for one phrase)
+            if (code in 200..299) return c.inputStream.use(read).also {
+                WriterLog.i("Assistant: ${p.name} $path ${(body?.size ?: 0) / 1024} KB sent in ${sent - t0} ms, answer began ${answered - sent} ms later, done ${System.currentTimeMillis() - answered} ms after")
+            }
             val said = runCatching { c.errorStream?.use { it.readBytes().decodeToString() } }.getOrNull().orEmpty().take(300)
             WriterLog.w("Assistant: ${p.name} $path answered $code $said")
             throw problem(code, p)
@@ -504,7 +521,7 @@ internal fun listen(waitMs: Long, stop: () -> Boolean, speaking: (Boolean) -> Un
         mic?.let(rec::setPreferredDevice)
         // the car: a quiet cabin, its microphone up in the door, far from the driver (the user, 14 Nov: "don't have too high a threshold, if it
         // needs to be higher I will tell you"): a low bar, and all it heard kept for a voice still under it (sent to be heard anyway)
-        val vad = if (car) Vad(pauseMs / 30, 15 * 1000 / 30, factor = 1.3, least = 60.0) else Vad(pauseMs / 30, 60 * 1000 / 30)
+        val vad = if (car) Vad(pauseMs / 30, 15 * 1000 / 30, factor = 1.3, least = 60.0, byVoice = true) else Vad(pauseMs / 30, 60 * 1000 / 30)
         val all = if (car) ArrayList<ShortArray>() else null
         val started = System.currentTimeMillis()
         var frames = 0; var peak = 0
@@ -538,6 +555,52 @@ internal fun listen(waitMs: Long, stop: () -> Boolean, speaking: (Boolean) -> Un
     }
     return null
 }
+
+/**
+ * [pcm] (16 kHz mono) as AAC in an .m4a, about a tenth of the WAV, by Android's own encoder; null when this phone or unit cannot
+ * (WAV goes instead). The car's uplink is slow (car.log, 17 Nov: 10 s of speech, 330 KB of WAV, took 40 s to send).
+ */
+internal fun m4a(pcm: ShortArray, dir: File): ByteArray? = runCatching {
+    val f = File.createTempFile("speech", ".m4a", dir)
+    try {
+        val fmt = android.media.MediaFormat.createAudioFormat(android.media.MediaFormat.MIMETYPE_AUDIO_AAC, Vad.RATE, 1).apply {
+            setInteger(android.media.MediaFormat.KEY_AAC_PROFILE, android.media.MediaCodecInfo.CodecProfileLevel.AACObjectLC)
+            setInteger(android.media.MediaFormat.KEY_BIT_RATE, 32_000)
+        }
+        val codec = android.media.MediaCodec.createEncoderByType(android.media.MediaFormat.MIMETYPE_AUDIO_AAC)
+        val mux = android.media.MediaMuxer(f.path, android.media.MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+        var track = -1
+        try {
+            codec.configure(fmt, null, null, android.media.MediaCodec.CONFIGURE_FLAG_ENCODE); codec.start()
+            val info = android.media.MediaCodec.BufferInfo()
+            var pos = 0; var fed = false; var done = false
+            val until = System.currentTimeMillis() + 15_000 // a codec that never ends: WAV instead
+            while (!done) {
+                check(System.currentTimeMillis() < until) { "the encoder took too long" }
+                if (!fed) codec.dequeueInputBuffer(10_000).takeIf { it >= 0 }?.let { i ->
+                    val buf = codec.getInputBuffer(i)!!.apply { clear(); order(java.nio.ByteOrder.LITTLE_ENDIAN) }
+                    val n = minOf(buf.remaining() / 2, pcm.size - pos)
+                    buf.asShortBuffer().put(pcm, pos, n)
+                    val us = pos * 1_000_000L / Vad.RATE
+                    pos += n; fed = pos >= pcm.size
+                    codec.queueInputBuffer(i, 0, n * 2, us, if (fed) android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM else 0)
+                }
+                val o = codec.dequeueOutputBuffer(info, 10_000)
+                if (o == android.media.MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) { track = mux.addTrack(codec.outputFormat); mux.start() }
+                else if (o >= 0) {
+                    val out = codec.getOutputBuffer(o)!!
+                    if (info.flags and android.media.MediaCodec.BUFFER_FLAG_CODEC_CONFIG == 0 && info.size > 0 && track >= 0) {
+                        out.position(info.offset); out.limit(info.offset + info.size); mux.writeSampleData(track, out, info)
+                    }
+                    codec.releaseOutputBuffer(o, false)
+                    done = info.flags and android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0
+                }
+            }
+        } finally { runCatching { codec.stop() }; codec.release(); runCatching { if (track >= 0) mux.stop() }; mux.release() }
+        check(track >= 0) { "no audio came out" }
+        f.readBytes()
+    } finally { f.delete() }
+}.onFailure { WriterLog.w("AI Assist: no AAC here, WAV sent (${it.message})") }.getOrNull()
 
 /** A far voice made louder for the listening service (peak to about 70%, at most 8x). */
 internal fun louder(pcm: ShortArray): ShortArray {
