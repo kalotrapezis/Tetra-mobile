@@ -51,12 +51,6 @@ import kotlinx.coroutines.withContext
  * longer explanations under their section. One accent (the theme's own); an applet's colour only tints its icon in
  * the list. [items] are the rows' titles, for the search.
  */
-/**
- * The car's build (Tetra Auto SE): only what a head unit uses (the user, 13 Nov: "the old settings that don't make sense, hide
- * them"): Tetra Car, Maps, the Browser, AI Assist and the look. No computer sync, Office, mail, photos or the phone's own calls.
- */
-internal val CAR_PAGES = listOf(SettingsPage.Car, SettingsPage.Maps, SettingsPage.Browser, SettingsPage.Assistant, SettingsPage.Appearance)
-
 internal enum class SettingsPage(@androidx.annotation.StringRes val title: Int, val icon: Int, val tint: Color?, @androidx.annotation.StringRes val summary: Int, val items: List<Int>) {
     Sync(R.string.app_sync, R.drawable.ic_sync, null, R.string.settings_sync_summary, listOf(R.string.settings_computer, R.string.settings_open_sync, R.string.settings_sync_auto, R.string.settings_listen)),
     Appearance(R.string.settings_appearance, R.drawable.ic_palette, null, R.string.settings_appearance_summary, listOf(R.string.settings_theme, R.string.settings_language, R.string.settings_photo_on_home, R.string.settings_hidden_from_home, R.string.settings_app_icons)),
@@ -113,7 +107,7 @@ internal fun SettingsTab(
     var open by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
     LaunchedEffect(start) { start?.let { open = it; started() } } // a notification's page (MapsAge: Maps)
     var query by remember { mutableStateOf("") }
-    val shown = open ?: if (!wide) null else if (CarMaps.edition) SettingsPage.Car else SettingsPage.Sync
+    val shown = open ?: if (!wide) null else SettingsPage.Sync
     BackHandler { when { !wide && open != null -> open = null; query.isNotEmpty() -> query = ""; else -> back() } }
 
     val list: @Composable (Modifier) -> Unit = { m ->
@@ -140,9 +134,7 @@ internal fun SettingsTab(
                 @Composable fun PageRow(p: SettingsPage, summary: String) = SettingRow(stringResource(p.title), summary, onClick = { open = p; query = "" },
                     chosen = wide && p == shown, leading = { Icon(painterResource(p.icon), contentDescription = null, tint = p.tint ?: quiet(), modifier = Modifier.size(24.dp)) },
                 ) { if (!wide) Chevron() }
-                if (query.isBlank() && CarMaps.edition) {
-                    SettingsSection(stringResource(R.string.settings_apps)) { CAR_PAGES.forEach { PageRow(it, stringResource(it.summary)) } }
-                } else if (query.isBlank()) {
+                if (query.isBlank()) {
                     SettingsSection(stringResource(R.string.app_name)) {
                         SettingRow(stringResource(R.string.guide_title), stringResource(R.string.guide_summary), onClick = openGuide,
                             leading = { Icon(painterResource(R.drawable.ic_school), contentDescription = null, tint = quiet(), modifier = Modifier.size(24.dp)) }) { if (!wide) Chevron() }
@@ -153,7 +145,7 @@ internal fun SettingsTab(
                     // the words as shown, in the language shown
                     val res = LocalContext.current.resources
                     val q = query.trim().lowercase()
-                    val hits = (if (CarMaps.edition) CAR_PAGES else SettingsPage.entries).flatMap { p -> p.items.map(res::getString).filter { q in it.lowercase() || q in res.getString(p.title).lowercase() }.map { p to it } }
+                    val hits = SettingsPage.entries.flatMap { p -> p.items.map(res::getString).filter { q in it.lowercase() || q in res.getString(p.title).lowercase() }.map { p to it } }
                     SettingsSection(pluralStringResource(R.plurals.settings_found, hits.size, hits.size)) { hits.forEach { (p, item) ->
                         SettingRow(item, stringResource(p.title), onClick = { open = p; query = "" },
                             leading = { Icon(painterResource(p.icon), contentDescription = null, tint = p.tint ?: quiet(), modifier = Modifier.size(24.dp)) }) { Chevron() }
@@ -413,8 +405,7 @@ internal fun SettingsTab(
     val wide = LocalConfiguration.current.screenWidthDp >= 700
     var layout by remember(wide) { mutableStateOf(HomeLayout.load(context, wide)) }
     val hidden = layout.filter { it.hidden }
-    // the car's build has no phone home screen and no app icons to switch (their components are not in its manifest)
-    if (!CarMaps.edition) SettingsSection(stringResource(R.string.app_home), if (hidden.isEmpty()) null else stringResource(R.string.settings_hidden_note)) {
+    SettingsSection(stringResource(R.string.app_home), if (hidden.isEmpty()) null else stringResource(R.string.settings_hidden_note)) {
         SwitchRow(stringResource(R.string.settings_photo_on_home), stringResource(R.string.settings_photo_on_home_summary), photoBackdrop, setPhotoBackdrop)
         if (hidden.isEmpty()) SettingRow(stringResource(R.string.settings_hidden_from_home), stringResource(R.string.settings_nothing_hidden))
         hidden.forEach { item ->
@@ -426,7 +417,7 @@ internal fun SettingsTab(
         }
     }
     // a launcher icon for each part (asked 17 Oct): on the home screen and in the app list, opening straight into it
-    if (!CarMaps.edition) SettingsSection(stringResource(R.string.settings_app_icons), stringResource(R.string.settings_app_icons_note)) {
+    SettingsSection(stringResource(R.string.settings_app_icons), stringResource(R.string.settings_app_icons_note)) {
         Applet.entries.forEach { a ->
             var on by remember { mutableStateOf(a.shown(context)) }
             SettingRow(stringResource(a.label), onClick = { on = !on; a.show(context, on) }, leading = { Image(painterResource(a.art), contentDescription = null, modifier = Modifier.size(32.dp)) }) {
@@ -441,11 +432,11 @@ internal val CAR_APP_COLOR = Color(0xFF1E5AA8) // dark blue: the slate before wa
 /** Settings › Tetra Car: its icon, what it does in the car, the car's Bluetooth and the link to the car's screen. */
 @Composable private fun CarSettingsPage() {
     val context = LocalContext.current
-    val onUnit = CarMaps.edition || PhoneRelay.noCalls(context) // the car's screen: its own Tetra Car, paired with the phone, not the phone's settings for a car
+    val onUnit = PhoneRelay.noCalls(context) // the car's screen: its own Tetra Car, paired with the phone, not the phone's settings for a car
     SettingsSection(stringResource(R.string.app_car)) {
         // Tetra Car: an icon, and a choice of home screen on a head unit
         var car by remember { mutableStateOf(CarIcon.shown(context)) }
-        if (!CarMaps.edition) SettingRow(stringResource(R.string.app_car), onClick = { car = !car; CarIcon.show(context, car) }, leading = {
+        SettingRow(stringResource(R.string.app_car), onClick = { car = !car; CarIcon.show(context, car) }, leading = {
             Icon(painterResource(R.drawable.ic_directions_car), contentDescription = null, tint = Color.White,
                 modifier = Modifier.size(32.dp).background(CAR_APP_COLOR, RoundedCornerShape(8.dp)).padding(5.dp))
         }) { Switch(checked = car, onCheckedChange = { car = it; CarIcon.show(context, it) }) }
@@ -486,7 +477,7 @@ internal val CAR_APP_COLOR = Color(0xFF1E5AA8) // dark blue: the slate before wa
     // opening by itself: as the home screen (the surest), at start, or as the chosen Bluetooth joins
     SettingsSection(stringResource(R.string.car_open)) {
         SettingRow(stringResource(R.string.car_home), stringResource(R.string.car_home_summary), onClick = {
-            if (!CarMaps.edition && !CarIcon.shown(context)) CarIcon.show(context, true) // the home screen is the icon's alias (the car's build: Tetra Car itself)
+            if (!CarIcon.shown(context)) CarIcon.show(context, true) // the home screen is the icon's alias
             runCatching { context.startActivity(Intent(android.provider.Settings.ACTION_HOME_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
         })
         var boot by remember { mutableStateOf(Car.opensOnBoot(context)) }
@@ -504,26 +495,11 @@ internal val CAR_APP_COLOR = Color(0xFF1E5AA8) // dark blue: the slate before wa
                 RadioButton(side == d, { side = d; Car.setSide(context, d) }); Text(stringResource(label))
             }
         }
-        if (CarMaps.edition) {
-            var size by remember { mutableStateOf(CarSize.of(context)) }
-            ChoiceRow(stringResource(R.string.car_screen_size), stringResource(R.string.car_screen_size_summary), CarSize.STEPS.map { it to "${(it * 100).toInt()} %" }, size) {
-                size = it; CarSize.set(context, it); (context as? android.app.Activity)?.recreate()
-            }
-        }
         // the driver's seat (left-hand or right-hand drive): where Auto puts the dock on a wide screen
         var right by remember { mutableStateOf(Car.driverRight(context)) }
         ChoiceRow(stringResource(R.string.car_driver), stringResource(R.string.car_driver_summary), listOf(false to stringResource(R.string.words_left), true to stringResource(R.string.words_right)), right) {
             right = it; Car.setDriverRight(context, it)
         }
-    }
-    // the car build's GPS: its own or the phone's, and both side by side (the user, 14 Nov: "add a test page, not on the map")
-    if (CarMaps.edition) SettingsSection(stringResource(R.string.car_gps)) {
-        var phone by remember { mutableStateOf(CarGps.phone(context)) }
-        ChoiceRow(stringResource(R.string.car_gps_source), stringResource(R.string.car_gps_source_summary),
-            listOf(false to stringResource(R.string.car_gps_car), true to stringResource(R.string.car_gps_phone)), phone) { phone = it; CarGps.setPhone(context, it) }
-        var testing by remember { mutableStateOf(false) }
-        SettingRow(stringResource(R.string.car_gps_test), stringResource(R.string.car_gps_test_summary), onClick = { testing = true })
-        if (testing) androidx.compose.ui.window.Dialog({ testing = false }, androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) { CarGpsTest { testing = false } }
     }
     // what happens in the car (Tetra Car open, the car's Bluetooth, or the car's screen paired): also AI Assist's car_assist
     SettingsSection(stringResource(R.string.car_settings_summary)) {
@@ -815,7 +791,7 @@ internal val CAR_APP_COLOR = Color(0xFF1E5AA8) // dark blue: the slate before wa
     (listOf(AiProviders.MISTRAL) + providers).distinct().forEach { p -> key(p.id) { SettingsSection { AssistantKeyField(p = p) } } }
     // AI decorations (8 Nov): the record, the cassette, the TV with the robot, the snow and the CRT; off, the plain conversation
     var decorations by remember { mutableStateOf(AiLook.decorated(context)) }
-    if (!CarMaps.edition) SettingsSection(stringResource(R.string.ai_decorations), null) { // the car has none (AiLook)
+    SettingsSection(stringResource(R.string.ai_decorations), null) {
         SwitchRow(stringResource(R.string.ai_decorations), stringResource(R.string.ai_decorations_note), decorations) { decorations = it; AiLook.set(context, it); TvWidget.refresh(context) }
         var presenter by remember { mutableStateOf(Presenter.on(context)) }
         if (decorations) SwitchRow(stringResource(R.string.ai_presenter), stringResource(R.string.ai_presenter_note), presenter) { presenter = it; Presenter.set(context, it) }
@@ -836,7 +812,7 @@ internal val CAR_APP_COLOR = Color(0xFF1E5AA8) // dark blue: the slate before wa
             Slider(pause, { pause = Math.round(it * 2) / 2f }, valueRange = 1f..6f, steps = 9, onValueChangeFinished = { AssistantPause.set(context, (pause * 1000).toInt()) })
         }
     }
-    if (AiGate.on && !CarMaps.edition) WakeSection() // the car has its steering-wheel button instead
+    if (AiGate.on) WakeSection()
     // the voice that reads answers: Mistral's (the user: the phone's was bad and slow), the phone's kept as the free one
     var voiceName by remember(providers) { mutableStateOf(AssistantVoices.id(context)?.let { if (it == AssistantVoices.PHONE) context.getString(R.string.assistant_voice_phone) else AssistantVoices.name(context) }) }
     var picking by remember { mutableStateOf(false) }
@@ -991,14 +967,6 @@ private val PART_NAMES = mapOf(AiPart.CHAT to R.string.ai_part_chat, AiPart.LIST
 /** Settings › Maps (21 Oct): what is installed, where updates come from, the directions' language and voice, parking, places. */
 @Composable private fun MapsPage() {
     val mapsContext = LocalContext.current
-    // the car build: Tetra Car's map view as a page of its own (the user, 14 Nov: "a separate page, it has too many settings (map view ›)")
-    if (CarMaps.edition) SettingsSection(stringResource(R.string.app_car)) {
-        var viewing by remember { mutableStateOf(false) }
-        SettingRow(stringResource(R.string.car_map_view) + "  ›", onClick = { viewing = true })
-        if (viewing) androidx.compose.ui.window.Dialog({ viewing = false }, androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) {
-            CarViewPage({}, {}, startSettings = true, inSettings = true) { viewing = false }
-        }
-    }
     var mapTheme by remember { mutableStateOf(MapsPrefs.mapTheme(mapsContext)) }
     var rolling by remember { mutableStateOf(MapsPrefs.rolling(mapsContext)) }
     SettingsSection(stringResource(R.string.settings_map)) {

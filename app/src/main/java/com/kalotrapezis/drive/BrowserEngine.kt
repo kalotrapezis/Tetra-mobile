@@ -77,11 +77,6 @@ internal object BrowserEngine {
 
     private fun scheme() = if (TetraLook.light) GeckoRuntimeSettings.COLOR_SCHEME_LIGHT else GeckoRuntimeSettings.COLOR_SCHEME_DARK
 
-    /** The car build's lighter Gecko (the user, 14 Nov: "can we go lighter?"): no spare page process kept ready, pages drawn without a GPU process. */
-    private fun carConfig(c: Context): String = java.io.File(c.filesDir, "gecko-car.yaml").apply {
-        writeText("prefs:\n  dom.ipc.processPrelaunch.enabled: false\n  layers.gpu-process.enabled: false\n")
-    }.path
-
     private fun create(c: Context, language: String): GeckoRuntime {
         app = c
         val t0 = System.currentTimeMillis()
@@ -98,9 +93,6 @@ internal object BrowserEngine {
             .locales(arrayOf(language)) // Gecko's own words (an alert's title) and Accept-Language in Tetra's language
             .loginAutofillEnabled(false) // Tetra's own vault fills (assets/tetra-ext)
             .consoleOutput(false)
-            // the car build: one page process for every site, not one a site, and caches let go when Android is short of memory: on a 2 GB
-            // head unit four page processes (746 MB in all with one page, emulator, 14 Nov) left Android closing Tetra every minute or two
-            .apply { if (CarMaps.edition) { fissionEnabled(false); lowMemoryDetection(true); extensionsProcessEnabled(false); configFilePath(carConfig(c)) } }
             .build())
         WriterLog.i("Browser: Gecko runtime made in ${System.currentTimeMillis() - t0} ms")
         val ctl = r.webExtensionController
@@ -227,15 +219,7 @@ internal object BrowserEngine {
         val ctl = runtime(c).webExtensionController
         followLook() // the look may have changed since the runtime was made
         val done = prefs().getStringSet("ext_auto", null).orEmpty()
-        // the car build: uBlock only, Dark Reader neither installed nor kept on (the user, 14 Nov: "no many addons, just the uBlock and the
-        // password saving"): on a 2 GB head unit Android closed Tetra every minute or two with both and the tabs (car.log, 14 Nov)
-        if (CarMaps.edition && !prefs().getBoolean("ext_car_off", false)) ctl.list().accept({ all ->
-            all.orEmpty().filter { it.id == DARK_READER && it.metaData.enabled }.forEach { ext ->
-                ctl.disable(ext, WebExtensionController.EnableSource.USER).accept({ WriterLog.i("Browser: ${ext.id} off on the car"); refresh() }, { e -> WriterLog.w("Browser: ${ext.id} not switched off", e); null })
-            }
-            prefs().edit().putBoolean("ext_car_off", true).apply()
-        }, { null })
-        AUTO.filter { !CarMaps.edition || it.first != DARK_READER }.filter { it.first !in done && it.first !in silent }.forEach { (id, slug) ->
+        AUTO.filter { it.first !in done && it.first !in silent }.forEach { (id, slug) ->
             silent += id; quiet[id] = System.currentTimeMillis()
             WriterLog.i("Browser: installing $slug")
             ctl.install("https://addons.mozilla.org/firefox/downloads/latest/$slug/latest.xpi", WebExtensionController.INSTALLATION_METHOD_MANAGER).accept({ ext ->
@@ -256,7 +240,6 @@ internal object BrowserEngine {
     /** Pages in Tetra's look; Dark Reader on in the dark one, off in the light — set when the look changes, so the user's own switch holds until then. */
     private fun followLook() {
         rt?.settings?.preferredColorScheme = scheme()
-        if (CarMaps.edition) return // the car build: Dark Reader stays as the user left it (off by itself, firstStart)
         val dr = extensions.firstOrNull { it.id == DARK_READER } ?: return
         val look = if (TetraLook.light) "light" else "dark"
         if (prefs().getString("ext_dark_look", null) == look) return

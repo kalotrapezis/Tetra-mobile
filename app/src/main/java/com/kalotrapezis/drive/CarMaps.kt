@@ -57,12 +57,9 @@ import java.io.File
  * add or update the maps from the phone if there are more countries on the phone"). The phone lists what its Maps folder has
  * (/car/maps) and gives each file (GET /car/map) to the paired unit only, over Tetra Car's own pinned link (CarWire); the unit
  * takes what it does not have or has older — a country more, a newer map, its routing graph, the saved places — over the
- * hotspot's Wi-Fi, never the phone's mobile data being needed for it. Only on the car's own build (BuildConfig .se).
+ * hotspot's Wi-Fi, never the phone's mobile data being needed for it.
  */
 internal object CarMaps {
-    /** Tetra Auto SE: Tetra for Android built for a head unit (the car module). */
-    val edition: Boolean get() = BuildConfig.APPLICATION_ID.endsWith(".se")
-
     private fun root() = MapsFiles.root(driveRoot())
     /**
      * Besides the maps, under these prefixes: the Browser's bookmarks (each device's file, BrowserSync; never its passwords or tabs)
@@ -270,92 +267,6 @@ internal object CarAssistant {
     }
 }
 
-/**
- * The guide over Tetra Car's map, on the car's build only: with no map yet, the first run's three steps — Tetra's storage, the
- * phone paired, the maps from it; after that a line when the phone has more countries or newer maps.
- */
-@Composable
-internal fun CarMapsGuide(modifier: Modifier = Modifier, pair: () -> Unit) {
-    if (!CarMaps.edition) return
-    val context = LocalContext.current
-    val state by CarMaps.state
-    val reached by CarWire.reached
-    var storage by remember { mutableStateOf(CarMaps.storageOk(context)) }
-    val ask = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { storage = CarMaps.storageOk(context) }
-    val paired = CarWire.link(context) != null
-    LaunchedEffect(reached, storage) { if (reached && storage) CarMaps.check(context) }
-    val first = !CarMaps.haveMap()
-    val s = state
-    if (!first && (s is CarMaps.State.Idle || s is CarMaps.State.Checking)) return // nothing to say over a map that is there
-    Box(modifier.fillMaxSize().then(if (first) Modifier.background(MaterialTheme.colorScheme.background) else Modifier).padding(16.dp), contentAlignment = if (first) Alignment.Center else Alignment.TopCenter) {
-        Surface(Modifier.widthIn(max = 620.dp), shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh, shadowElevation = 8.dp) {
-            Column(Modifier.verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) { // scrolls when a big size leaves too little height
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Icon(painterResource(R.drawable.ic_map), null, Modifier.size(24.dp), tint = MAPS_COLOR)
-                    Text(stringResource(if (first) R.string.car_maps_title else R.string.car_maps_update_title), style = MaterialTheme.typography.titleLarge)
-                }
-                if (first) {
-                    Text(stringResource(R.string.car_maps_intro), style = MaterialTheme.typography.bodyMedium)
-                    Step(1, stringResource(R.string.car_maps_step_storage), storage) {
-                        if (Build.VERSION.SDK_INT >= 30) context.startActivity(Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${context.packageName}")))
-                        else ask.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    }
-                    Step(2, stringResource(R.string.car_maps_step_pair), paired && reached, pair)
-                }
-                when (s) {
-                    is CarMaps.State.Offer -> {
-                        Text(stringResource(R.string.car_maps_offer, s.countries.ifEmpty { listOf(stringResource(R.string.car_maps_updates)) }.joinToString(", "), s.bytes shr 20),
-                            style = MaterialTheme.typography.titleMedium)
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Button({ CarMaps.download(context, s) }, Modifier.height(36.dp), contentPadding = SMALL) { Text(stringResource(if (s.first) R.string.car_maps_download else R.string.car_maps_update)) }
-                            if (!s.first) TextButton({ CarMaps.decline(s) }, Modifier.height(36.dp), contentPadding = SMALL) { Text(stringResource(R.string.photos_not_now)) }
-                        }
-                    }
-                    is CarMaps.State.Moving -> {
-                        Text(stringResource(R.string.car_maps_moving, s.done shr 20, s.total shr 20), style = MaterialTheme.typography.titleMedium)
-                        LinearProgressIndicator(progress = { if (s.total > 0) s.done.toFloat() / s.total else 0f }, Modifier.fillMaxWidth())
-                    }
-                    is CarMaps.State.Failed -> {
-                        Text(stringResource(R.string.car_maps_failed, s.why), color = MaterialTheme.colorScheme.error)
-                        TextButton({ CarMaps.check(context) }, Modifier.height(36.dp), contentPadding = SMALL) { Text(stringResource(R.string.common_retry)) }
-                    }
-                    CarMaps.State.Checking -> Text(stringResource(R.string.car_maps_checking))
-                    CarMaps.State.Idle -> if (first && storage && paired && reached) Text(stringResource(R.string.car_maps_phone_none))
-                }
-            }
-        }
-    }
-}
-
-/** One step of the guide: its number (a tick when done) and what to do, a tap to do it. */
-@Composable
-private fun Step(n: Int, text: String, done: Boolean, act: () -> Unit) {
-    Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerHighest, RoundedCornerShape(14.dp)).padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Box(Modifier.size(28.dp).background(if (done) MAPS_COLOR else MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
-            Text(if (done) "✓" else "$n", style = MaterialTheme.typography.titleSmall, color = androidx.compose.ui.graphics.Color.White)
-        }
-        Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-        if (!done) Button(act, Modifier.height(36.dp), contentPadding = SMALL) { Text(stringResource(R.string.car_maps_do)) }
-    }
-}
-
-/** The guide's buttons: small (at the car's 150 % Material's own were too big, 13 Nov). */
-private val SMALL = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
-
 /** Whether Tetra may use its folder: all files access (Android 11 and later), the storage permission on Android 10 (Tetra Auto SE's head units). */
 internal fun storageAllowed(c: Context) = if (Build.VERSION.SDK_INT >= 30) Environment.isExternalStorageManager()
     else c.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-
-/**
- * Tetra Auto SE's size on the car's screen (the user, 13 Nov: "the arrow … and the UI elements big enough … scaling settings in
- * 25% increments"): a head unit says 160 dpi, so Tetra drew at a phone's size there — the arrow a dot, the names tiny. Every
- * screen of Tetra is drawn this much bigger (AppLocale.wrap sets the density), the map's names and arrow with it, as Android
- * itself does on a denser screen. 150 % until chosen; 1 on the phone, which is never scaled.
- */
-internal object CarSize {
-    // 10 % steps (the user, 13 Nov: "I don't want to go from too small to too big"), 120 % at first: 125 % looked right in the car
-    val STEPS = (10..20).map { it / 10f }
-    fun of(c: Context): Float = if (!CarMaps.edition) 1f else c.getSharedPreferences("car", Context.MODE_PRIVATE).getFloat("screen_scale", 1.2f).let { v -> STEPS.minBy { kotlin.math.abs(it - v) } }
-    fun set(c: Context, v: Float) = c.getSharedPreferences("car", Context.MODE_PRIVATE).edit().putFloat("screen_scale", v).commit()
-}

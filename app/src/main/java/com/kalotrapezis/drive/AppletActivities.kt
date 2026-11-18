@@ -165,8 +165,5 @@ internal fun appletIntent(c: Context, word: String): Intent {
 }
 
 internal fun openApplet(c: Context, word: String) {
-    val i = appletIntent(c, word)
-    // the car's build leaves the phone's applets out (Passwords, Contacts…): nothing opens rather than a crash, never the phone's screens
-    if (CarMaps.edition && (i.component?.className == MainActivity::class.java.name || c.packageManager.resolveActivity(i, 0) == null)) { WriterLog.i("Car: $word is not on the car"); return }
-    c.startActivity(i)
+    c.startActivity(appletIntent(c, word))
 }

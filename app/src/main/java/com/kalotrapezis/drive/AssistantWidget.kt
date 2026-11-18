@@ -497,8 +497,7 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.toolCard(cue: TalkC
 /** AI decorations (Settings › AI Assist, 8 Nov): the record, the cassette, the TV and its cues, the snow and the CRT; off, plain — the conversation and its buttons. */
 internal object AiLook {
     private fun prefs(c: Context) = c.getSharedPreferences("assistant", Context.MODE_PRIVATE)
-    // the car: none, the TV's snow and hiss least of all (the user, 17 Nov: "I had said to take it out of the car")
-    fun decorated(c: Context) = !CarMaps.edition && prefs(c).getBoolean("decorations", true)
+    fun decorated(c: Context) = prefs(c).getBoolean("decorations", true)
     fun set(c: Context, on: Boolean) = prefs(c).edit().putBoolean("decorations", on).apply()
 }
 
@@ -534,49 +533,6 @@ internal object Pulse {
             Thread.sleep(n * 1000L / rate + 60); t.release()
         }.onFailure { WriterLog.w("AI Assist: the pulse: ${it.message}") }
     }.apply { isDaemon = true; start() }
-}
-
-/** Tetra Car's AI Assist on and off (the user, 14 Nov: "a tone so I can hear it clearly"): two short notes up, or down, loud over road noise. */
-internal object Chime {
-    fun play(up: Boolean) = Thread {
-        val rate = 22_050; val note = rate * 11 / 100; val gap = rate / 50
-        val notes = if (up) listOf(784.0, 1175.0) else listOf(1175.0, 784.0)
-        val buf = FloatArray(note * 2 + gap)
-        notes.forEachIndexed { k, f -> for (i in 0 until note) {
-            val t = i.toDouble() / rate; val env = minOf(1.0, i / (rate * 0.006), (note - i) / (rate * 0.03)) // no click in, a short ring out
-            buf[k * (note + gap) + i] = ((Math.sin(2 * Math.PI * f * t) + 0.3 * Math.sin(4 * Math.PI * f * t)) * env * 0.6).toFloat()
-        } }
-        runCatching {
-            val t = android.media.AudioTrack.Builder()
-                .setAudioAttributes(android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_MEDIA).setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
-                .setAudioFormat(android.media.AudioFormat.Builder().setEncoding(android.media.AudioFormat.ENCODING_PCM_FLOAT).setSampleRate(rate).setChannelMask(android.media.AudioFormat.CHANNEL_OUT_MONO).build())
-                .setBufferSizeInBytes(buf.size * 4).setTransferMode(android.media.AudioTrack.MODE_STATIC).build()
-            t.write(buf, 0, buf.size, android.media.AudioTrack.WRITE_BLOCKING); t.play()
-            Thread.sleep(buf.size * 1000L / rate + 80); t.release()
-        }.onFailure { WriterLog.w("AI Assist: the tone: ${it.message}") }
-    }.apply { isDaemon = true; start() }
-
-    /**
-     * The car's «heard you, it is on its way» (the user, 17 Nov: instead of the TV's snow from every speaker, "a soft tut… tut… that does
-     * not bother the ear", light on a 2 GB unit): one low soft beat, looped by the audio track itself, about once a second until stopped.
-     */
-    fun pulse(): () -> Unit {
-        val rate = 16_000; val beat = rate * 7 / 100
-        val buf = FloatArray(rate * 9 / 10) // the beat, then quiet to 0.9 s
-        for (i in 0 until beat) {
-            val t = i.toDouble() / rate; val env = minOf(1.0, i / (rate * 0.008)) * Math.exp(-t * 45) // soft in, dying away
-            buf[i] = (Math.sin(2 * Math.PI * 520 * t) * env * 0.22).toFloat()
-        }
-        val track = runCatching {
-            android.media.AudioTrack.Builder()
-                .setAudioAttributes(android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_MEDIA).setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
-                .setAudioFormat(android.media.AudioFormat.Builder().setEncoding(android.media.AudioFormat.ENCODING_PCM_FLOAT).setSampleRate(rate).setChannelMask(android.media.AudioFormat.CHANNEL_OUT_MONO).build())
-                .setBufferSizeInBytes(buf.size * 4).setTransferMode(android.media.AudioTrack.MODE_STATIC).build().apply {
-                    write(buf, 0, buf.size, android.media.AudioTrack.WRITE_BLOCKING); setLoopPoints(0, buf.size, -1); play()
-                }
-        }.onFailure { WriterLog.w("AI Assist: the beat: ${it.message}") }.getOrNull()
-        return { track?.let { runCatching { it.stop() }; it.release() } }
-    }
 }
 
 /** The pixel mascot at [top], [cell] a pixel: [skin] its shell, eyes [shut] for a blink, its voice's waves going while it [speaks], the sparkle twinkling with [t]. */

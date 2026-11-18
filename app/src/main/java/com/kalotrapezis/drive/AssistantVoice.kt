@@ -502,7 +502,7 @@ private val SOURCES = mapOf(MediaRecorder.AudioSource.VOICE_RECOGNITION to "voic
 
 /**
  * Records until the speaker pauses, [stop] says so, or nobody spoke for [waitMs]; null when nothing was said, [micTrouble] why.
- * [speaking] follows whether a phrase has begun, for the screen. A pause of [pauseMs] ends it; a minute at most (the car: 15 s, a lower bar).
+ * [speaking] follows whether a phrase has begun, for the screen. A pause of [pauseMs] ends it; a minute at most.
  * A source that cannot be opened, fails, or gives only zeros (another app holds the mic, or the unit routes it elsewhere) gives way
  * to the next. Each try is one line in the log: the source, where Android routed it, the noise, the loudest and the bar speech must pass.
  */
@@ -510,8 +510,6 @@ private val SOURCES = mapOf(MediaRecorder.AudioSource.VOICE_RECOGNITION to "voic
 internal fun listen(waitMs: Long, stop: () -> Boolean, speaking: (Boolean) -> Unit = {}, pauseMs: Int = AssistantPause.DEFAULT_MS, mic: AudioDeviceInfo? = null): ShortArray? {
     micTrouble = null
     val size = maxOf(AudioRecord.getMinBufferSize(Vad.RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT), Vad.FRAME * 2 * 8)
-    // a car's microphone is far and its road noise loud (the user, 14 Nov: 4-5 tries speaking loudly, nothing heard): a lower bar over the noise
-    val car = CarMaps.edition
     for (source in (listOf(goodSource) + SOURCES.keys).distinct()) {
         val rec = runCatching { AudioRecord(source, Vad.RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, size) }.getOrNull()
         if (rec?.state != AudioRecord.STATE_INITIALIZED) {
@@ -519,10 +517,7 @@ internal fun listen(waitMs: Long, stop: () -> Boolean, speaking: (Boolean) -> Un
             WriterLog.w("AI Assist: the microphone (${SOURCES[source]}) did not open"); continue
         }
         mic?.let(rec::setPreferredDevice)
-        // the car: a quiet cabin, its microphone up in the door, far from the driver (the user, 14 Nov: "don't have too high a threshold, if it
-        // needs to be higher I will tell you"): a low bar, and all it heard kept for a voice still under it (sent to be heard anyway)
-        val vad = if (car) Vad(pauseMs / 30, 15 * 1000 / 30, factor = 1.3, least = 60.0, byVoice = true) else Vad(pauseMs / 30, 60 * 1000 / 30)
-        val all = if (car) ArrayList<ShortArray>() else null
+        val vad = Vad(pauseMs / 30, 60 * 1000 / 30)
         val started = System.currentTimeMillis()
         var frames = 0; var peak = 0
         var how = "nobody spoke"; var routed = ""
@@ -535,16 +530,13 @@ internal fun listen(waitMs: Long, stop: () -> Boolean, speaking: (Boolean) -> Un
                 if (n < frame.size) break
                 if (frames++ == 3) routed = rec.routedDevice?.let { "${it.productName} (type ${it.type})" } ?: "?"
                 frame.forEach { val a = kotlin.math.abs(it.toInt()); if (a > peak) peak = a }
-                all?.add(frame)
                 // 0.6 s of exact zeros: nothing reaches this source (a real microphone always hisses a little)
                 if (frames == 20 && peak == 0) { how = "only zeros"; micTrouble = R.string.assistant_mic_silent; break }
                 val done = vad.push(frame)
                 speaking(vad.speaking)
-                if (done || stop()) { how = if (done) "heard" else "stopped"; goodSource = source; return vad.phrase().takeIf { it.isNotEmpty() }?.let { if (car) louder(it) else it } }
+                if (done || stop()) { how = if (done) "heard" else "stopped"; goodSource = source; return vad.phrase().takeIf { it.isNotEmpty() } }
                 if (!vad.speaking && System.currentTimeMillis() - started > waitMs) {
                     goodSource = source
-                    // something above the road was there, under the bar: the whole of it goes to be heard; "nothing" comes back if it was nothing
-                    if (all != null && vad.loudest > vad.noise * 1.2) { how = "quiet, sent anyway"; return louder(ShortArray(all.size * Vad.FRAME).also { o -> all.forEachIndexed { i, f -> f.copyInto(o, i * Vad.FRAME) } }) }
                     return null
                 }
             }
@@ -601,13 +593,6 @@ internal fun m4a(pcm: ShortArray, dir: File): ByteArray? = runCatching {
         f.readBytes()
     } finally { f.delete() }
 }.onFailure { WriterLog.w("AI Assist: no AAC here, WAV sent (${it.message})") }.getOrNull()
-
-/** A far voice made louder for the listening service (peak to about 70%, at most 8x). */
-internal fun louder(pcm: ShortArray): ShortArray {
-    val peak = pcm.maxOfOrNull { kotlin.math.abs(it.toInt()) } ?: return pcm
-    val gain = minOf(8.0, 23_000.0 / maxOf(peak, 1))
-    return if (gain < 1.2) pcm else ShortArray(pcm.size) { (pcm[it] * gain).toInt().coerceIn(-32768, 32767).toShort() }
-}
 
 /*
  * Tetra as the phone's digital assistant (Settings › Apps › Default apps › Digital assistant app): holding the power

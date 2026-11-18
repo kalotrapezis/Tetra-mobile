@@ -67,8 +67,7 @@ internal object BrowserMedia {
         return true
     }
 
-    // the car build: always on, no switch (the user, 15 Nov: off, YouTube stopped every play within a second, the page on the screen or not)
-    fun background(c: Context) = CarMaps.edition || c.getSharedPreferences("browser", Context.MODE_PRIVATE).getBoolean("background", true)
+    fun background(c: Context) = c.getSharedPreferences("browser", Context.MODE_PRIVATE).getBoolean("background", true)
     fun setBackground(c: Context, on: Boolean) = c.getSharedPreferences("browser", Context.MODE_PRIVATE).edit().putBoolean("background", on).apply()
 
     /** The notification shown or brought up to date (started while Tetra is in front: Android allows no new one from behind). */

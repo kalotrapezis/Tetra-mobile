@@ -15,5 +15,3 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Local Drive"
 include(":app")
-
-include(":car")

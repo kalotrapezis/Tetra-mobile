@@ -68,7 +68,7 @@ internal object Wake {
 
     /** Listening again whenever Tetra is on the screen (Android starts a microphone service only then: not at boot, not from the background). */
     fun ensure(c: Context) {
-        if (CarMaps.edition || !on(c) || !hasTakes(c) || !hasMic(c) || WakeService.running) return
+        if (!on(c) || !hasTakes(c) || !hasMic(c) || WakeService.running) return
         runCatching { c.startForegroundService(Intent(c, WakeService::class.java)) }.onFailure { WriterLog.w("Hey Tetra: the service did not start: ${it.message}") }
     }
 

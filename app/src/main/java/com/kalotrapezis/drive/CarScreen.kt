@@ -105,11 +105,7 @@ import kotlin.math.roundToInt
  */
 class CarActivity : ComponentActivity() {
     override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLocale.wrap(base))
-    private var size = 1f
-    // a new size on the car's screen (Settings › Tetra Car): this screen drawn again at it
-    override fun onResume() { super.onResume(); if (CarSize.of(this) != size) recreate() }
     override fun onCreate(savedInstanceState: Bundle?) {
-        size = CarSize.of(this)
         super.onCreate(savedInstanceState)
         WriterLog.init(this)
         TetraLook.load(this)
@@ -208,11 +204,11 @@ internal data class CarView(val ui: Float, val map: Float, val zoom: Float, val 
  * row of choices changed at once, with its way back.
  */
 @Composable
-internal fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, startSettings: Boolean = false, inSettings: Boolean = false, close: () -> Unit) {
+internal fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, close: () -> Unit) {
     val context = LocalContext.current
     val v = Car.view(context)
-    var settings by remember { mutableStateOf(startSettings) }
-    fun back() { if (settings && !startSettings) settings = false else close() } // opened at its settings (the car's build): back closes it
+    var settings by remember { mutableStateOf(false) }
+    fun back() { if (settings) settings = false else close() }
     fun pct(f: Float) = "${(f * 100).toInt()} %"
     @Composable fun <T> row(label: Int, options: List<T>, chosen: T, name: @Composable (T) -> String, pick: (T) -> Unit) {
         Text(stringResource(label), Modifier.padding(top = 12.dp, bottom = 4.dp), style = MaterialTheme.typography.titleMedium)
@@ -244,7 +240,7 @@ internal fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, startSetting
                 tile(look.second, { close(); open(app) }, w) { Image(painterResource(look.first), null, Modifier.size(72.dp)) }
             }
             tile(R.string.car_media, { close(); media() }, w) { icon(R.drawable.ic_play, Color(0xFFE53935)) }
-            if (!CarMaps.edition) tile(R.string.auto_share, { close(); AutoProjection.session?.openShare() }, w) { icon(R.drawable.ic_share, MaterialTheme.colorScheme.secondary) } // Tetra Auto's Share
+            tile(R.string.auto_share, { close(); AutoProjection.session?.openShare() }, w) { icon(R.drawable.ic_share, MaterialTheme.colorScheme.secondary) } // Tetra Auto's Share
             tile(R.string.common_settings, { settings = true }, w) { icon(R.drawable.ic_settings, Color(0xFF1A73E8)) }
             Spacer(w) // the last row's empty place, so its tiles keep their width
         }
@@ -267,17 +263,9 @@ internal fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, startSetting
                 row(R.string.car_map_zoom, CarView.ZOOM, v.zoom, { if (it == 0f) "0" else "%+.1f".format(it) }) { Car.setView(context, v.copy(zoom = it)) }
                 row(R.string.car_map_tilt, CarView.TILT, v.tilt, { if (it < 0) stringResource(R.string.car_map_tilt_auto) else "$it°" }) { Car.setView(context, v.copy(tilt = it)) }
                 row(R.string.car_map_arrow, listOf(false, true), v.low, { stringResource(if (it) R.string.car_map_arrow_low else R.string.car_map_arrow_middle) }) { Car.setView(context, v.copy(low = it)) }
-                // the car's build: one size for all of Tetra (CarSize, also in Settings › Tetra Car), not a second one over Tetra Car's alone
-                if (CarMaps.edition) row(R.string.car_screen_size, CarSize.STEPS, CarSize.of(context), { pct(it) }) { CarSize.set(context, it); (context as? android.app.Activity)?.recreate() }
-                else row(R.string.car_ui_size, CarView.UI, v.ui, { pct(it) }) { Car.setView(context, v.copy(ui = it)) }
+                row(R.string.car_ui_size, CarView.UI, v.ui, { pct(it) }) { Car.setView(context, v.copy(ui = it)) }
                 val asked = AutoProjection.session?.asked
-                // the car's build: the rest of Tetra's settings for the car (Tetra Car, Maps, Browser, AI Assist, the look)
-                if (CarMaps.edition && !inSettings) androidx.compose.material3.TextButton({
-                    AppLocale.reopenSettings = true
-                    runCatching { context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
-                    close()
-                }, Modifier.padding(top = 12.dp)) { Text(stringResource(R.string.common_settings) + "  ›", style = MaterialTheme.typography.titleMedium) }
-                if (!CarMaps.edition) row(R.string.car_resolution, CarView.RES, v.res, { r -> asked?.let { (w, h) -> "${(w * r).toInt() and 1.inv()}×${(h * r).toInt() and 1.inv()}" } ?: pct(r) }) { Car.setView(context, v.copy(res = it)) }
+                row(R.string.car_resolution, CarView.RES, v.res, { r -> asked?.let { (w, h) -> "${(w * r).toInt() and 1.inv()}×${(h * r).toInt() and 1.inv()}" } ?: pct(r) }) { Car.setView(context, v.copy(res = it)) }
         }
     }
 }
@@ -366,7 +354,7 @@ internal object Car {
     private val viewState = mutableStateOf<CarView?>(null)
     /** Tetra Car's sizes and Maps' camera (the car's menu): one state, so the screen and the map follow a change at once. */
     fun view(c: Context): CarView = viewState.value ?: prefs(c).let { p ->
-        CarView(if (CarMaps.edition) 1f else p.getFloat("ui_scale", 1f) /* the car's build: CarSize instead */, p.getFloat("map_scale", if (CarMaps.edition) 1.25f else 2f) /* the car's build is 150 % already (CarSize) */, p.getFloat("map_zoom", 0f), p.getInt("map_tilt", -1), p.getBoolean("map_low", true), p.getFloat("resolution", 1f),
+        CarView(p.getFloat("ui_scale", 1f), p.getFloat("map_scale", 2f), p.getFloat("map_zoom", 0f), p.getInt("map_tilt", -1), p.getBoolean("map_low", true), p.getFloat("resolution", 1f),
             p.getFloat("card_scale", 0f), p.getFloat("island_scale", 0f), p.getFloat("side_scale", 0f))
     }.also { viewState.value = it }
     fun setView(c: Context, v: CarView) {
@@ -452,9 +440,6 @@ internal object CarIcon {
         WriterLog.i("App icon ${if (on) "shown" else "hidden"}: Car")
     }
 }
-
-/** A page of Tetra Car's is in a pane now (false: kept running off the screen); outside Tetra Car always true. */
-internal val LocalCarPaneShown = androidx.compose.runtime.compositionLocalOf { true }
 
 /** What a pane shows. Media is the Browser too (one Browser: its tabs and its sound), opened on its three tiles. */
 internal enum class CarApp { Maps, Browser, Phone, Messages }
@@ -585,7 +570,6 @@ internal fun CarScreen(projected: Boolean = false) {
     // expose (the user, 11 Nov): every pane shows the pages to choose from; the panes chosen so far, null when it is not up
     var expose by remember { mutableStateOf<Set<Int>?>(null) }
     var apps by remember { mutableStateOf(false) }
-    var carShare by remember { mutableStateOf(false) } // the car's build: the menu's Share (CarShare)
     val config = LocalConfiguration.current
     val side = dockFor(Car.side(context), config.screenWidthDp, config.screenHeightDp, Car.driverRight(context)) // Settings › Tetra Car › Dock: changed there, followed here at once
     // AI Assist's «άνοιξε …» reaches the panes while this screen is up
@@ -599,7 +583,7 @@ internal fun CarScreen(projected: Boolean = false) {
     var assist by remember { mutableStateOf(false) }
     var assistLive by remember { mutableStateOf(false) }
     // the mic (the user, 11 Nov): a tap asks once, held starts a live talk; a tap while live talks ends it (the wheel's voice key is a tap)
-    fun mic(live: Boolean) { if (assist && (assistLive || CarMaps.edition) && !live) assist = false else { assistLive = live; assist = true } } // the car build: a tap ends it too, nothing else shows it
+    fun mic(live: Boolean) { if (assist && assistLive && !live) assist = false else { assistLive = live; assist = true } }
     androidx.compose.runtime.DisposableEffect(Unit) { Car.assist = { mic(false) }; onDispose { Car.assist = null } }
     // AI Assist's «πήγαινέ με…», «παίξε…», «άνοιξε τα μηνύματα» (the user, 10 Nov: "it recognised the command but nothing loaded in the
     // car's map"): into the panes here, not a window of their own
@@ -630,7 +614,7 @@ internal fun CarScreen(projected: Boolean = false) {
     // and with the map alone on the screen, the screen splits until it is over
     val remote by CarWire.call // the phone's call, through the car's link (on a head unit)
     val calling = PhoneCalls.calls.isNotEmpty() || remote != null
-    val covering = calling || message != null || (assist && !CarMaps.edition) // the car build: AI Assist with no pane of its own
+    val covering = calling || message != null || assist
     val shownState = if (covering && state.panes.all { it == CarApp.Maps }) state.laid(CarLayout.Wide) else state
     val coverAt = if (!covering) null else shownState.panes.indices.let { all -> all.firstOrNull { shownState.panes[it] != CarApp.Maps && it == shownState.focus } ?: all.firstOrNull { shownState.panes[it] != CarApp.Maps } ?: 0 }
     var pausedForCall by remember { mutableStateOf(false) }
@@ -677,21 +661,15 @@ internal fun CarScreen(projected: Boolean = false) {
         WriterLog.i("Car: expose put $app in pane $i")
     }
     val base = LocalDensity.current
-    val view = if (projected || CarMaps.edition) Car.view(context) else CarView.PHONE // the sizes are the car's screen's; Tetra Car on the phone stays as drawn
+    val view = if (projected) Car.view(context) else CarView.PHONE // the sizes are the car's screen's; Tetra Car on the phone stays as drawn
     var viewPage by remember { mutableStateOf(false) } // the car's menu
     CompositionLocalProvider(LocalDensity provides Density(base.density * view.ui, base.fontScale)) { // Tetra Car's interface size
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding()) {
-        // the car build: AI Assist heard and heard from, nothing shown but the dock's mic flashing (the user, 14 Nov: "remove the TV stuff,
-        // no window switching, just a flashing mic"); a tap on the mic again ends it
-        LaunchedEffect(assist) { AssistBusy.open.value = assist && CarMaps.edition }
-        // the car's log on the phone every 5 minutes, not only as they meet (the user, 14 Nov: the drive's lines were still in the car)
-        LaunchedEffect(Unit) { if (CarMaps.edition) while (true) { delay(5 * 60_000L); Thread { runCatching { CarWire.log(context.applicationContext) } }.start() } }
-        if (assist && CarMaps.edition) Box(Modifier.size(1.dp).graphicsLayer { alpha = 0f }) { key(assistLive) { AssistantApp(sheet = true, liveFirst = assistLive) { assist = false } } }
         // one layout for both children whichever side the dock is on: the pages are never put elsewhere in the tree (the route, the sound go on)
         Layout(modifier = Modifier.fillMaxSize(), content = {
             CarPanes(shownState, opened, coverAt, cover = {
                 if (PhoneCalls.calls.isNotEmpty()) CarCallPane() else remote?.let { CarRemoteCallPane(it) } ?: message?.let { m -> CarSmsPane(m) { message = null } }
-                    ?: if (assist && !CarMaps.edition) key(assistLive) { AssistantApp(sheet = true, liveFirst = assistLive) { assist = false } } else Unit
+                    ?: if (assist) key(assistLive) { AssistantApp(sheet = true, liveFirst = assistLive) { assist = false } } else Unit
             }, expose = expose?.let { ::pick }, modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = if (side == DockSide.Bottom) 0.dp else 8.dp),
                 focus = { app -> state.panes.indexOf(app).takeIf { it >= 0 && it != state.focus }?.let { set(state.focused(it)) } }) { app ->
                 CompositionLocalProvider(LocalOnBackPressedDispatcherOwner provides backs.getValue(app)) {
@@ -701,10 +679,6 @@ internal fun CarScreen(projected: Boolean = false) {
                                 key(CarMaps.version.intValue) { PaneSized { MapsScreen(MapsFiles.root(driveRoot()), mapsGo, back = {}, search = mapsSearch) } } // its pane's size in its own dp; again when maps came
                             }
                             if (places) CarPlaces(go = { p -> mapsGo = p.copy(id = "ask-${System.nanoTime()}"); places = false; WriterLog.i("Car: to a saved place") }, close = { places = false })
-                            // Tetra Auto SE: the maps from the phone, the first time and whenever it has more or newer
-                            var pairPhone by remember { mutableStateOf(false) }
-                            CarMapsGuide(pair = { pairPhone = true })
-                            if (pairPhone) CarPairDialog { pairPhone = false }
                         }
                         CarApp.Browser -> Box(Modifier.fillMaxSize()) {
                             BrowserScreen(back = {}, play = play, hide = {})
@@ -739,12 +713,8 @@ internal fun CarScreen(projected: Boolean = false) {
                 }
             }
         }
-        if (apps) CarApps(close = { apps = false }, settings = { // the car's build: Settings itself, the map's view in it under Maps (the user, 14 Nov: "I don't like going through them to press Settings")
-            AppLocale.reopenSettings = true
-            runCatching { context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
-        }, share = { carShare = true }) { id -> if (id == "media") media() else CarApp.entries.firstOrNull { it.name.lowercase() == id }?.let(::openApp) } // a page of Tetra's from the grid: as from the dock
+        if (apps) CarApps(close = { apps = false }) { id -> if (id == "media") media() else CarApp.entries.firstOrNull { it.name.lowercase() == id }?.let(::openApp) } // a page of Tetra's from the grid: as from the dock
         if (viewPage) CarViewPage(::openApp, ::media) { viewPage = false }
-        if (carShare) CarSharePage { carShare = false }
     }
     }
 }
@@ -763,7 +733,7 @@ private fun CarPanes(state: CarState, opened: List<CarApp>, coverAt: Int?, cover
                 Box(Modifier.clip(shape)
                     .pointerInput(app) { awaitEachGesture { awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial); focus(app) } }
                     .drawWithContent { drawContent(); if (on) drawRoundRect(ring, cornerRadius = CornerRadius(16.dp.toPx()), style = Stroke(3.dp.toPx())) }) {
-                    CompositionLocalProvider(LocalCarPaneShown provides (app in state.panes)) { PaneSized { content(app) } }
+                    PaneSized { content(app) }
                 }
             }
         }
@@ -808,7 +778,7 @@ private fun CarDock(state: CarState, side: DockSide, layouts: Boolean, setLayout
             }
         }
     }
-    val busy = AssistBusy.on.value || AssistBusy.open.value
+    val busy = AssistBusy.on.value
     val pulse by androidx.compose.animation.core.rememberInfiniteTransition(label = "mic").animateFloat(1f, 1.18f,
         androidx.compose.animation.core.infiniteRepeatable<Float>(androidx.compose.animation.core.tween(550), androidx.compose.animation.core.RepeatMode.Reverse), label = "pulse")
     // the apps' grid and AI Assist's mic side by side (the user, 13 Nov: "the assistant mic next to the app menu"), as Android Auto has them
@@ -991,7 +961,7 @@ private fun CarMediaTiles(modifier: Modifier, pick: (JSONObject) -> Unit) {
 
 /** The dock's Apps: every app on the head unit; Android puts it beside Tetra Car where the unit allows, else in front. */
 @Composable
-private fun CarApps(close: () -> Unit, settings: () -> Unit, share: () -> Unit, page: (String) -> Unit) {
+private fun CarApps(close: () -> Unit, page: (String) -> Unit) {
     val context = LocalContext.current
     val all by produceState(emptyList<Triple<ComponentName, String, ImageBitmap>>()) {
         value = withContext(Dispatchers.IO) {
@@ -1009,7 +979,7 @@ private fun CarApps(close: () -> Unit, settings: () -> Unit, share: () -> Unit, 
             Text(stringResource(R.string.car_apps), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
             // the car's own link to the phone (CarWire): its QR, scanned once by the phone; once paired, the phone's name, green while it
             // answers, and a red ✕ that unpairs (the user, 15 Nov: "red X disconnect, green connected (Xiaomi 15)")
-            if (CarMaps.edition || PhoneRelay.noCalls(context)) {
+            if (PhoneRelay.noCalls(context)) {
                 LaunchedEffect(pairing) { if (!pairing) CarWire.linkName.value = withContext(Dispatchers.IO) { CarWire.link(context)?.name } }
                 val phone = CarWire.linkName.value
                 if (phone == null) androidx.compose.material3.TextButton({ pairing = true }) {
@@ -1040,22 +1010,6 @@ private fun CarApps(close: () -> Unit, settings: () -> Unit, share: () -> Unit, 
         }
         if (pairing) CarPairDialog { pairing = false }
         LazyVerticalGrid(GridCells.Adaptive(112.dp), Modifier.fillMaxSize().padding(8.dp)) {
-            // the car's build: Tetra Car's own settings first (the map's size, zoom, tilt and arrow, the size of everything), the rest under them
-            if (CarMaps.edition) item {
-                Column(Modifier.clip(RoundedCornerShape(12.dp)).clickable { close(); settings() }.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painterResource(R.drawable.settings_art), null, Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)))
-                    Text(stringResource(R.string.common_settings), fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                }
-            }
-            // Share with the phone, both ways (CarShare), as Tetra Auto's Share
-            if (CarMaps.edition) item {
-                Column(Modifier.clip(RoundedCornerShape(12.dp)).clickable { close(); share() }.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.secondary), contentAlignment = Alignment.Center) {
-                        Icon(painterResource(R.drawable.ic_share), null, Modifier.size(32.dp), tint = Color.White)
-                    }
-                    Text(stringResource(R.string.auto_share), fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                }
-            }
             // Tetra's own pages with the rest, all apps in one place (the user, 13 Nov: "group all the apps together")
             listOf(Triple("maps", R.drawable.maps_art, R.string.app_maps), Triple("media", 0, R.string.car_media), Triple("phone", R.drawable.phone_art, R.string.app_phone),
                 Triple("messages", R.drawable.sms_art, R.string.app_sms), Triple("browser", R.drawable.browser_art, R.string.app_browser)).forEach { (id, art, label) ->

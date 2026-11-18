@@ -634,24 +634,9 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
     }
 
     fix = ::onFix
-    // the car build with the phone's GPS (Settings › Tetra Car › GPS): its fix each second; the car's own only while the phone's are not coming
-    val phoneAt = remember { longArrayOf(0L, 0L) } // when the last phone fix came (elapsedRealtime), and that fix's time on the phone
-    LaunchedEffect(granted) {
-        if (!CarMaps.edition || !CarGps.phone(context)) return@LaunchedEffect
-        WriterLog.i("Maps: the phone's GPS")
-        while (true) {
-            val o = withContext(Dispatchers.IO) { runCatching { CarWire.where(context) }.getOrNull() }
-            if (o != null && o.has("lat") && o.optLong("age") < 3000 && o.optLong("t") != phoneAt[1]) {
-                phoneAt[0] = android.os.SystemClock.elapsedRealtime(); phoneAt[1] = o.optLong("t")
-                onFix(CarGps.location(o))
-            }
-            delay(1000)
-        }
-    }
     DisposableEffect(granted) {
         val lm = context.getSystemService(LocationManager::class.java)
         val listener = locationListener { loc ->
-            if (android.os.SystemClock.elapsedRealtime() - phoneAt[0] < 3000) return@locationListener // the phone's GPS is the one
             // a network fix only until GPS has one, and never over a fresher GPS one
             val h = here
             if (loc.provider == LocationManager.NETWORK_PROVIDER && h != null && h.provider == LocationManager.GPS_PROVIDER && loc.time - h.time < 10_000) return@locationListener
