@@ -4955,4 +4955,6 @@
     <string name="maps_closed">Magħluq</string>
     <string name="maps_open_closes">Miftuħ · jagħlaq %1$s</string>
     <string name="maps_closed_opens">Magħluq · jiftaħ %1$s</string>
+    <string name="wake_charging_only">Biss waqt li jiċċarġja</string>
+    <string name="wake_charging_only_note">Il-mikrofonu jisma\' biss meta t-telefown ikun fuq iċ-ċarġer</string>
 </resources>

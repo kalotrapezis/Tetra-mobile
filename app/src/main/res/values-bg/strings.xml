@@ -4753,4 +4753,6 @@
     <string name="maps_closed">Затворено</string>
     <string name="maps_open_closes">Отворено · затваря в %1$s</string>
     <string name="maps_closed_opens">Затворено · отваря в %1$s</string>
+    <string name="wake_charging_only">Само при зареждане</string>
+    <string name="wake_charging_only_note">Микрофонът слуша само докато телефонът е на зарядно</string>
 </resources>

@@ -4955,4 +4955,6 @@
     <string name="maps_closed">Zamknięte</string>
     <string name="maps_open_closes">Otwarte · zamknięcie %1$s</string>
     <string name="maps_closed_opens">Zamknięte · otwarcie %1$s</string>
+    <string name="wake_charging_only">Tylko podczas ładowania</string>
+    <string name="wake_charging_only_note">Mikrofon słucha tylko wtedy, gdy telefon jest podłączony do ładowarki</string>
 </resources>

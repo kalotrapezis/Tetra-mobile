@@ -4752,4 +4752,6 @@
     <string name="maps_closed">Κλειστό</string>
     <string name="maps_open_closes">Ανοιχτό · κλείνει %1$s</string>
     <string name="maps_closed_opens">Κλειστό · ανοίγει %1$s</string>
+    <string name="wake_charging_only">Μόνο όταν φορτίζει</string>
+    <string name="wake_charging_only_note">Το μικρόφωνο ακούει μόνο όταν το κινητό είναι στον φορτιστή</string>
 </resources>

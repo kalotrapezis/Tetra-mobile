@@ -4854,4 +4854,6 @@
     <string name="maps_closed">Fechado</string>
     <string name="maps_open_closes">Aberto · fecha às %1$s</string>
     <string name="maps_closed_opens">Fechado · abre às %1$s</string>
+    <string name="wake_charging_only">Só a carregar</string>
+    <string name="wake_charging_only_note">O microfone só ouve enquanto o telemóvel está no carregador</string>
 </resources>

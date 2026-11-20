@@ -54,6 +54,12 @@ internal object Wake {
         d.listFiles()?.sortedBy { it.name }?.dropLast(40)?.forEach { it.delete() }
     }
 
+    /** Only while on the charger (the user, 20 Nov: "a hey tetra only on when charging"): the service stays, the mic is let go off it. */
+    fun chargingOnly(c: Context) = prefs(c).getBoolean("wake_charging", false)
+    fun setChargingOnly(c: Context, on: Boolean) { prefs(c).edit().putBoolean("wake_charging", on).apply(); WriterLog.i("Hey Tetra: only while charging ${if (on) "on" else "off"}") }
+    /** On a charger or a USB port (full and still plugged counts): the battery's last word, which Android keeps. */
+    fun charging(c: Context) = (c.registerReceiver(null, android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED))?.getIntExtra(android.os.BatteryManager.EXTRA_PLUGGED, 0) ?: 0) != 0
+
     fun set(c: Context, on: Boolean) {
         prefs(c).edit().putBoolean("wake", on).apply()
         WriterLog.i("Hey Tetra: switched ${if (on) "on" else "off"}")
@@ -179,6 +185,8 @@ class WakeService : Service() {
         var carCheckAt = 0L
         // in the car (its Bluetooth, Tetra Car open, or Tetra Car SE saying hello) the steering-wheel button is the way in (the user, 15 Nov)
         fun inCar(now: Long): Boolean { if (now - carCheckAt >= 30_000) { carCheckAt = now; Car.inCar(this) { inCar = it } }; return inCar }
+        var plugCheckAt = 0L; var plugged = true
+        fun unplugged(now: Long): Boolean { if (!Wake.chargingOnly(this)) return false; if (now - plugCheckAt >= 5000) { plugCheckAt = now; plugged = Wake.charging(this) }; return !plugged }
         try {
             while (!stop) {
                 val now = System.currentTimeMillis()
@@ -190,8 +198,9 @@ class WakeService : Service() {
                 }
                 val other = rec?.let { r -> audio.activeRecordingConfigurations.any { it.clientAudioSessionId != r.audioSessionId } } ?: audio.activeRecordingConfigurations.isNotEmpty()
                 val car = inCar(now)
-                if (assistantShown > 0 || other || car || audio.mode != AudioManager.MODE_NORMAL) {
-                    if (rec != null) { release(); WriterLog.i("Hey Tetra: mic let go (${if (assistantShown > 0) "AI Assist open" else if (other) "another recording" else if (car) "in the car" else "a call"})") }
+                val off = unplugged(now)
+                if (assistantShown > 0 || other || car || off || audio.mode != AudioManager.MODE_NORMAL) {
+                    if (rec != null) { release(); WriterLog.i("Hey Tetra: mic let go (${if (assistantShown > 0) "AI Assist open" else if (other) "another recording" else if (car) "in the car" else if (off) "not charging" else "a call"})") }
                     Thread.sleep(500); pausedMs += 500; continue
                 }
                 if (rec == null) {

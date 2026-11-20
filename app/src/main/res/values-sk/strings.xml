@@ -4955,4 +4955,6 @@
     <string name="maps_closed">Zatvorené</string>
     <string name="maps_open_closes">Otvorené · zatvára o %1$s</string>
     <string name="maps_closed_opens">Zatvorené · otvára o %1$s</string>
+    <string name="wake_charging_only">Len pri nabíjaní</string>
+    <string name="wake_charging_only_note">Mikrofón počúva len vtedy, keď je telefón na nabíjačke</string>
 </resources>

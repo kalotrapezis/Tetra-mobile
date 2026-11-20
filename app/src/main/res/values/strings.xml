@@ -4754,4 +4754,6 @@
     <string name="maps_closed">Closed</string>
     <string name="maps_open_closes">Open · closes %1$s</string>
     <string name="maps_closed_opens">Closed · opens %1$s</string>
+    <string name="wake_charging_only">Only while charging</string>
+    <string name="wake_charging_only_note">The mic listens only while the phone is on the charger</string>
 </resources>

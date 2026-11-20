@@ -4753,4 +4753,6 @@
     <string name="maps_closed">Gesloten</string>
     <string name="maps_open_closes">Open · sluit om %1$s</string>
     <string name="maps_closed_opens">Gesloten · opent om %1$s</string>
+    <string name="wake_charging_only">Alleen tijdens opladen</string>
+    <string name="wake_charging_only_note">De microfoon luistert alleen als de telefoon aan de lader ligt</string>
 </resources>

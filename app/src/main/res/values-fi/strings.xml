@@ -4753,4 +4753,6 @@
     <string name="maps_closed">Suljettu</string>
     <string name="maps_open_closes">Auki · sulkeutuu %1$s</string>
     <string name="maps_closed_opens">Suljettu · avautuu %1$s</string>
+    <string name="wake_charging_only">Vain latauksen aikana</string>
+    <string name="wake_charging_only_note">Mikrofoni kuuntelee vain, kun puhelin on laturissa</string>
 </resources>

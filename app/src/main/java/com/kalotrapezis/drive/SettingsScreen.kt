@@ -1465,6 +1465,10 @@ private fun carBluetoothDevices(c: Context): List<Pair<String, String>> = runCat
             if (want && !Wake.hasTakes(context)) record()
             else { on = want; Wake.set(context, want); if (want && !Car.mayOpen(context)) Car.askOpen(context) }
         }
+        if (on) {
+            var charging by remember { mutableStateOf(Wake.chargingOnly(context)) }
+            SwitchRow(stringResource(R.string.wake_charging_only), stringResource(R.string.wake_charging_only_note), charging) { charging = it; Wake.setChargingOnly(context, it) }
+        }
         SettingRow(stringResource(R.string.wake_record), onClick = { record() }) { Chevron() }
     }
     if (recording) WakeTakes(onDone = { saved -> recording = false

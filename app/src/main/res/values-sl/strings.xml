@@ -4955,4 +4955,6 @@
     <string name="maps_closed">Zaprto</string>
     <string name="maps_open_closes">Odprto · zapre ob %1$s</string>
     <string name="maps_closed_opens">Zaprto · odpre ob %1$s</string>
+    <string name="wake_charging_only">Samo med polnjenjem</string>
+    <string name="wake_charging_only_note">Mikrofon posluša samo, ko je telefon na polnilniku</string>
 </resources>

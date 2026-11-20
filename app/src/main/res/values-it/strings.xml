@@ -4753,4 +4753,6 @@
     <string name="maps_closed">Chiuso</string>
     <string name="maps_open_closes">Aperto · chiude alle %1$s</string>
     <string name="maps_closed_opens">Chiuso · apre alle %1$s</string>
+    <string name="wake_charging_only">Solo in carica</string>
+    <string name="wake_charging_only_note">Il microfono ascolta solo quando il telefono è in carica</string>
 </resources>

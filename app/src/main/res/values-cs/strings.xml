@@ -4955,4 +4955,6 @@
     <string name="maps_closed">Zavřeno</string>
     <string name="maps_open_closes">Otevřeno · zavírá v %1$s</string>
     <string name="maps_closed_opens">Zavřeno · otevírá v %1$s</string>
+    <string name="wake_charging_only">Jen při nabíjení</string>
+    <string name="wake_charging_only_note">Mikrofon poslouchá jen tehdy, když je telefon na nabíječce</string>
 </resources>

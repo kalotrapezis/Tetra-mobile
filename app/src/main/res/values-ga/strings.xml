@@ -5056,4 +5056,6 @@
     <string name="maps_closed">Dúnta</string>
     <string name="maps_open_closes">Oscailte · dúnann %1$s</string>
     <string name="maps_closed_opens">Dúnta · osclaíonn %1$s</string>
+    <string name="wake_charging_only">Le linn luchtaithe amháin</string>
+    <string name="wake_charging_only_note">Ní éisteann an micreafón ach nuair atá an fón ar an luchtaire</string>
 </resources>

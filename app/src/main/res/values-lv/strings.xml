@@ -4854,4 +4854,6 @@
     <string name="maps_closed">Slēgts</string>
     <string name="maps_open_closes">Atvērts · slēdz %1$s</string>
     <string name="maps_closed_opens">Slēgts · atver %1$s</string>
+    <string name="wake_charging_only">Tikai uzlādes laikā</string>
+    <string name="wake_charging_only_note">Mikrofons klausās tikai tad, kad tālrunis ir pie lādētāja</string>
 </resources>

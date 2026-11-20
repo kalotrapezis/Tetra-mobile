@@ -4955,4 +4955,6 @@
     <string name="maps_closed">Uždaryta</string>
     <string name="maps_open_closes">Atidaryta · uždaro %1$s</string>
     <string name="maps_closed_opens">Uždaryta · atidaro %1$s</string>
+    <string name="wake_charging_only">Tik kraunant</string>
+    <string name="wake_charging_only_note">Mikrofonas klauso tik tada, kai telefonas kraunamas</string>
 </resources>

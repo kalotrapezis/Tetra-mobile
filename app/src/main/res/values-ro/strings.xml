@@ -4854,4 +4854,6 @@
     <string name="maps_closed">Închis</string>
     <string name="maps_open_closes">Deschis · se închide la %1$s</string>
     <string name="maps_closed_opens">Închis · se deschide la %1$s</string>
+    <string name="wake_charging_only">Doar la încărcare</string>
+    <string name="wake_charging_only_note">Microfonul ascultă doar când telefonul este la încărcător</string>
 </resources>

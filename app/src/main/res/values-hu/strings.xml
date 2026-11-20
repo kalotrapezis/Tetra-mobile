@@ -4753,4 +4753,6 @@
     <string name="maps_closed">Zárva</string>
     <string name="maps_open_closes">Nyitva · zár: %1$s</string>
     <string name="maps_closed_opens">Zárva · nyit: %1$s</string>
+    <string name="wake_charging_only">Csak töltés közben</string>
+    <string name="wake_charging_only_note">A mikrofon csak akkor figyel, ha a telefon töltőn van</string>
 </resources>

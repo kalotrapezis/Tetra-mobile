@@ -4753,4 +4753,6 @@
     <string name="maps_closed">Stängt</string>
     <string name="maps_open_closes">Öppet · stänger %1$s</string>
     <string name="maps_closed_opens">Stängt · öppnar %1$s</string>
+    <string name="wake_charging_only">Bara vid laddning</string>
+    <string name="wake_charging_only_note">Mikrofonen lyssnar bara när telefonen sitter i laddaren</string>
 </resources>
