@@ -29,7 +29,7 @@ class MapsCarViewTest {
     }
 
     @Test fun theMapsPartsHaveTheirOwnSizes() {
-        val v = CarView(1f, 1.25f, 0f, -1, true)
+        val v = CarView(1f, 1.25f, 0f, -1, CarView.RIGHT)
         assertEquals(MapParts(), v.parts()) // until chosen: as the map
         // the map bigger, the card and the island smaller, each on the screen as chosen
         val p = v.copy(map = 2f, card = 1f, island = 0.75f).parts()

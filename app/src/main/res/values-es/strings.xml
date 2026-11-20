@@ -4856,4 +4856,7 @@
     <string name="maps_closed_opens">Cerrado · abre a las %1$s</string>
     <string name="wake_charging_only">Solo mientras carga</string>
     <string name="wake_charging_only_note">El micrófono escucha solo mientras el teléfono está en el cargador</string>
+    <string name="car_map_focus">Enfoque</string>
+    <string name="car_map_arrow_right">Abajo a la derecha</string>
+    <string name="maps_focus_summary">Dónde está el coche al conducir en una pantalla ancha (tableta, teléfono en horizontal)</string>
 </resources>

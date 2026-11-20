@@ -4856,4 +4856,7 @@
     <string name="maps_closed_opens">Slēgts · atver %1$s</string>
     <string name="wake_charging_only">Tikai uzlādes laikā</string>
     <string name="wake_charging_only_note">Mikrofons klausās tikai tad, kad tālrunis ir pie lādētāja</string>
+    <string name="car_map_focus">Fokuss</string>
+    <string name="car_map_arrow_right">Apakšā pa labi</string>
+    <string name="maps_focus_summary">Kur atrodas auto braucot platā ekrānā (planšete, tālrunis horizontāli)</string>
 </resources>

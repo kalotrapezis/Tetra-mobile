@@ -4957,4 +4957,7 @@
     <string name="maps_closed_opens">Zatvorené · otvára o %1$s</string>
     <string name="wake_charging_only">Len pri nabíjaní</string>
     <string name="wake_charging_only_note">Mikrofón počúva len vtedy, keď je telefón na nabíjačke</string>
+    <string name="car_map_focus">Zameranie</string>
+    <string name="car_map_arrow_right">Dole vpravo</string>
+    <string name="maps_focus_summary">Kde je auto pri jazde na širokej obrazovke (tablet, telefón na šírku)</string>
 </resources>

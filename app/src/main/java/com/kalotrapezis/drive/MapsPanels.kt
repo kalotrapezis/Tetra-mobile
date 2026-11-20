@@ -78,8 +78,11 @@ internal enum class MapsTab(@androidx.annotation.StringRes val label: Int, val i
 }
 
 /** The panels above the island: dark glass like the other islands, at most half the screen. */
+/** How tall a panel may grow: up the side of a wide screen (a tablet), else 460 dp over the map. */
+internal val LocalPanelMax = androidx.compose.runtime.staticCompositionLocalOf { 460.dp }
+
 @Composable internal fun MapsPanel(content: @Composable () -> Unit) = Surface(color = islandColor(), contentColor = islandContentColor(),
-    shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.fillMaxWidth().heightIn(max = 460.dp)) { Column(Modifier.padding(vertical = 12.dp)) { content() } }
+    shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.fillMaxWidth().heightIn(max = LocalPanelMax.current)) { Column(Modifier.padding(vertical = 12.dp)) { content() } }
 
 @Composable private fun chipColors() = FilterChipDefaults.filterChipColors(labelColor = Color.White, selectedContainerColor = Color.White.copy(alpha = 0.22f),
     selectedLabelColor = Color.White, iconColor = Color.White, selectedLeadingIconColor = Color.White)

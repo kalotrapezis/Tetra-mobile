@@ -4755,4 +4755,7 @@
     <string name="maps_closed_opens">Затворено · отваря в %1$s</string>
     <string name="wake_charging_only">Само при зареждане</string>
     <string name="wake_charging_only_note">Микрофонът слуша само докато телефонът е на зарядно</string>
+    <string name="car_map_focus">Фокус</string>
+    <string name="car_map_arrow_right">Долу вдясно</string>
+    <string name="maps_focus_summary">Къде е колата при шофиране на широк екран (таблет, телефон хоризонтално)</string>
 </resources>

@@ -180,7 +180,7 @@ private fun CarPlaces(go: (Place) -> Unit, close: () -> Unit) {
  * [card], [island], [side]: the map's top card, its bottom island and the speed and limit at its side, each its own size (the user, 17 Nov:
  * "separate their size on the screen", the map seen around them); 0 until chosen: as [map], which stays as it was.
  */
-internal data class CarView(val ui: Float, val map: Float, val zoom: Float, val tilt: Int, val low: Boolean, val res: Float = 1f,
+internal data class CarView(val ui: Float, val map: Float, val zoom: Float, val tilt: Int, val focus: Int, val res: Float = 1f,
                             val card: Float = 0f, val island: Float = 0f, val side: Float = 0f) {
     /** The map's parts, each over the map's own size (Maps is drawn at [map]). */
     fun parts() = MapParts(card.ifZero(map) / map, island.ifZero(map) / map, side.ifZero(map) / map)
@@ -188,7 +188,9 @@ internal data class CarView(val ui: Float, val map: Float, val zoom: Float, val 
     /** A driving camera's zoom and tilt, as chosen here. */
     fun camera(v: Pair<Double, Double>) = (v.first + zoom).coerceIn(5.0, 19.0) to (if (tilt >= 0) tilt.toDouble() else v.second)
     companion object {
-        val PHONE = CarView(1f, 1f, 0f, -1, false)
+        val PHONE = CarView(1f, 1f, 0f, -1, 0)
+        /** Where the car is on the driving map ([focus]): mid-screen, low, or low and to the right, beside the column of the turn and the trip (Google's). */
+        const val MIDDLE = 0; const val LOW = 1; const val RIGHT = 2
         val UI = listOf(1f, 1.25f, 1.5f, 1.75f, 2f) // 25% steps (the user, 13 Nov)
         val MAP = listOf(1f, 1.25f, 1.5f, 1.75f, 2f, 2.25f, 2.5f, 2.75f, 3f)
         val PART = listOf(0.75f, 0.9f, 1f, 1.1f, 1.25f, 1.5f, 1.75f, 2f, 2.5f) // smaller than the map's too (the user: "a bit smaller")
@@ -262,7 +264,8 @@ internal fun CarViewPage(open: (CarApp) -> Unit, media: () -> Unit, close: () ->
                 part(R.string.car_map_side, v.side) { v.copy(side = it) }
                 row(R.string.car_map_zoom, CarView.ZOOM, v.zoom, { if (it == 0f) "0" else "%+.1f".format(it) }) { Car.setView(context, v.copy(zoom = it)) }
                 row(R.string.car_map_tilt, CarView.TILT, v.tilt, { if (it < 0) stringResource(R.string.car_map_tilt_auto) else "$it°" }) { Car.setView(context, v.copy(tilt = it)) }
-                row(R.string.car_map_arrow, listOf(false, true), v.low, { stringResource(if (it) R.string.car_map_arrow_low else R.string.car_map_arrow_middle) }) { Car.setView(context, v.copy(low = it)) }
+                row(R.string.car_map_focus, listOf(CarView.MIDDLE, CarView.LOW, CarView.RIGHT), v.focus, { stringResource(when (it) { CarView.LOW -> R.string.car_map_arrow_low
+                    CarView.RIGHT -> R.string.car_map_arrow_right; else -> R.string.car_map_arrow_middle }) }) { Car.setView(context, v.copy(focus = it)) }
                 row(R.string.car_ui_size, CarView.UI, v.ui, { pct(it) }) { Car.setView(context, v.copy(ui = it)) }
                 val asked = AutoProjection.session?.asked
                 row(R.string.car_resolution, CarView.RES, v.res, { r -> asked?.let { (w, h) -> "${(w * r).toInt() and 1.inv()}×${(h * r).toInt() and 1.inv()}" } ?: pct(r) }) { Car.setView(context, v.copy(res = it)) }
@@ -354,13 +357,13 @@ internal object Car {
     private val viewState = mutableStateOf<CarView?>(null)
     /** Tetra Car's sizes and Maps' camera (the car's menu): one state, so the screen and the map follow a change at once. */
     fun view(c: Context): CarView = viewState.value ?: prefs(c).let { p ->
-        CarView(p.getFloat("ui_scale", 1f), p.getFloat("map_scale", 2f), p.getFloat("map_zoom", 0f), p.getInt("map_tilt", -1), p.getBoolean("map_low", true), p.getFloat("resolution", 1f),
+        CarView(p.getFloat("ui_scale", 1f), p.getFloat("map_scale", 2f), p.getFloat("map_zoom", 0f), p.getInt("map_tilt", -1), p.getInt("map_focus", if (p.getBoolean("map_low", true)) CarView.RIGHT else CarView.MIDDLE), p.getFloat("resolution", 1f),
             p.getFloat("card_scale", 0f), p.getFloat("island_scale", 0f), p.getFloat("side_scale", 0f))
     }.also { viewState.value = it }
     fun setView(c: Context, v: CarView) {
         val old = viewState.value
         viewState.value = v
-        prefs(c).edit().putFloat("ui_scale", v.ui).putFloat("map_scale", v.map).putFloat("map_zoom", v.zoom).putInt("map_tilt", v.tilt).putBoolean("map_low", v.low).putFloat("resolution", v.res)
+        prefs(c).edit().putFloat("ui_scale", v.ui).putFloat("map_scale", v.map).putFloat("map_zoom", v.zoom).putInt("map_tilt", v.tilt).putInt("map_focus", v.focus).putFloat("resolution", v.res)
             .putFloat("card_scale", v.card).putFloat("island_scale", v.island).putFloat("side_scale", v.side).apply()
         WriterLog.i("Car: view $v")
         // another resolution: the car's picture again at that size (the car joins again by itself)

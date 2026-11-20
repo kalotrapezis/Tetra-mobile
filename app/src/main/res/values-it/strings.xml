@@ -4755,4 +4755,7 @@
     <string name="maps_closed_opens">Chiuso · apre alle %1$s</string>
     <string name="wake_charging_only">Solo in carica</string>
     <string name="wake_charging_only_note">Il microfono ascolta solo quando il telefono è in carica</string>
+    <string name="car_map_focus">Centratura</string>
+    <string name="car_map_arrow_right">In basso a destra</string>
+    <string name="maps_focus_summary">Dove si trova l\'auto durante la guida su uno schermo largo (tablet, telefono in orizzontale)</string>
 </resources>

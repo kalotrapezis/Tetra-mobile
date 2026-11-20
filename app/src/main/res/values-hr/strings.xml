@@ -4856,4 +4856,7 @@
     <string name="maps_closed_opens">Zatvoreno · otvara u %1$s</string>
     <string name="wake_charging_only">Samo tijekom punjenja</string>
     <string name="wake_charging_only_note">Mikrofon sluša samo dok je telefon na punjaču</string>
+    <string name="car_map_focus">Fokus</string>
+    <string name="car_map_arrow_right">Dolje desno</string>
+    <string name="maps_focus_summary">Gdje je auto tijekom vožnje na širokom zaslonu (tablet, telefon položeno)</string>
 </resources>

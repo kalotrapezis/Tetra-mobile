@@ -4755,4 +4755,7 @@
     <string name="maps_closed_opens">Zárva · nyit: %1$s</string>
     <string name="wake_charging_only">Csak töltés közben</string>
     <string name="wake_charging_only_note">A mikrofon csak akkor figyel, ha a telefon töltőn van</string>
+    <string name="car_map_focus">Fókusz</string>
+    <string name="car_map_arrow_right">Lent jobbra</string>
+    <string name="maps_focus_summary">Hol van az autó vezetés közben széles képernyőn (táblagép, fekvő telefon)</string>
 </resources>

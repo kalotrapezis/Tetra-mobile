@@ -240,6 +240,9 @@ internal object MapsPrefs {
     fun setNoLeft(c: Context, on: Boolean) = prefs(c).edit().putBoolean("no_left", on).apply()
     /** What is said a little before a sharp bend ([bendsOn]). */
     fun bendWords(w: Words, right: Boolean) = w.s(if (right) R.string.maps_bend_right else R.string.maps_bend_left)
+    /** Where the car sits while driving on a wide screen (a tablet, the phone sideways), as Tetra Car's menu: low right unless set (the user, 20 Nov). */
+    fun focus(c: Context) = prefs(c).getInt("focus", CarView.RIGHT)
+    fun setFocus(c: Context, f: Int) = prefs(c).edit().putInt("focus", f).apply()
     fun autoPark(c: Context) = prefs(c).getBoolean("auto_park", true)
     fun setAutoPark(c: Context, on: Boolean) = prefs(c).edit().putBoolean("auto_park", on).apply()
     fun openAtCar(c: Context) = prefs(c).getBoolean("open_at_car", false)
@@ -420,7 +423,15 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
     var touchedAt by remember { mutableStateOf(0L) } // a finger last moved the map
     var loose by remember { mutableStateOf(false) } // directions running, the camera off me (logged once)
     val onCar = LocalOnCar.current
-    val carView = if (onCar) Car.view(context) else null // Tetra Car's menu: the driving camera's zoom, tilt and where the arrow sits
+    // Tetra Car's menu: the driving camera's zoom, tilt and where the arrow sits; on the head unit too, where Maps is no projection
+    val carView = if (onCar || Car.running) Car.view(context) else null
+    // the car's driving layout on a wide screen too, a tablet or the phone sideways (the user, 20 Nov: "this map view we have on the car
+    // we could bring on the Android app for the wide view"): the turn, the speed and the trip in a column on the driver's side, the map
+    // beside it free for the road ahead; a phone held upright keeps the centred layout
+    val cfg = androidx.compose.ui.platform.LocalConfiguration.current
+    val wide = Car.running || (cfg.screenWidthDp > cfg.screenHeightDp && cfg.screenWidthDp >= 600)
+    val short = cfg.screenHeightDp < 420 // the phone sideways: the limit beside my speed, not over it
+    val rightSeat = Car.driverRight(context) // right-hand drive: the column on the right, the car to the left of the map
     val tts = remember { mutableStateOf<TextToSpeech?>(null) }
     val duck = remember { MapsDuck(context) }
     DisposableEffect(Unit) {
@@ -475,7 +486,16 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
      */
     fun ahead(tilt: Double, car: Boolean = false): DoubleArray {
         val f = ((tilt - 45) / 15).coerceIn(0.0, 1.0)
-        return doubleArrayOf(0.0, context.resources.displayMetrics.heightPixels * (if (car && carView?.low == true) 0.3 + 0.2 * f else 0.4 * f), 0.0, 0.0)
+        // the map's own size: in Tetra Car it is a pane, not the screen
+        val h = mapRef?.height?.toDouble()?.takeIf { it > 0 } ?: context.resources.displayMetrics.heightPixels.toDouble()
+        val w = mapRef?.width?.toDouble()?.takeIf { it > 0 } ?: context.resources.displayMetrics.widthPixels.toDouble()
+        val focus = if (!car) CarView.MIDDLE else carView?.focus ?: if (wide) MapsPrefs.focus(context) else CarView.MIDDLE
+        return when (focus) {
+            // near the bottom, about 90 % down, beside the column: the road ahead, not the one passed (the user, 20 Nov)
+            CarView.RIGHT -> if (rightSeat) doubleArrayOf(0.0, h * (0.76 + 0.04 * f), w * 0.4, 0.0) else doubleArrayOf(w * 0.4, h * (0.76 + 0.04 * f), 0.0, 0.0)
+            CarView.LOW -> doubleArrayOf(0.0, h * (0.3 + 0.2 * f), 0.0, 0.0)
+            else -> doubleArrayOf(0.0, h * 0.4 * f, 0.0, 0.0)
+        }
     }
     /** The driving camera's zoom and tilt for [v], as Tetra Car's menu sets them (elsewhere [v] itself). */
     fun cam(v: Pair<Double, Double>) = carView?.camera(v) ?: v
@@ -487,7 +507,8 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         lc.setCameraMode(CameraMode.TRACKING_GPS, object : org.maplibre.android.location.OnLocationCameraTransitionListener {
             override fun onLocationCameraTransitionFinished(cameraMode: Int) {
                 val (z, t) = if (mode == "car") cam(view) else 17.5 to 0.0
-                lc.zoomWhileTracking(z); lc.tiltWhileTracking(t); lc.paddingWhileTracking(if (mode == "car") ahead(t, true) else ahead(0.0))
+                // the padding at once: animated beside the zoom and tilt it was cancelled, the car left mid-screen (the log, 20 Nov: "me at 50%, 50%")
+                lc.paddingWhileTracking(if (mode == "car") ahead(t, true) else ahead(0.0), 0); lc.zoomWhileTracking(z); lc.tiltWhileTracking(t)
             }
             override fun onLocationCameraTransitionCanceled(cameraMode: Int) = Unit
         })
@@ -624,9 +645,11 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         // by car, the camera: further out at speed on a long stretch, closer towards a busy crossing or a turn slowed for
         if (car && g.view != view) {
             view = g.view
-            WriterLog.i("Maps: camera zoom ${view.first} tilt ${view.second.toInt()} (step ${p.next} ${p.toNext.toInt()} m ahead, ${Math.round(speedMs * 3.6)} km/h)")
+            // where the arrow is drawn, across and down the map: the camera of before this change
+            val me = mapRef?.let { m -> m.projection.toScreenLocation(LatLng(loc.latitude, loc.longitude)).let { pt -> " me at ${(pt.x * 100 / m.width).toInt()}%, ${(pt.y * 100 / m.height).toInt()}%" } }.orEmpty()
+            WriterLog.i("Maps: camera zoom ${view.first} tilt ${view.second.toInt()} (step ${p.next} ${p.toNext.toInt()} m ahead, ${Math.round(speedMs * 3.6)} km/h)$me")
             val (z, t) = cam(view)
-            lc?.takeIf { it.cameraMode == CameraMode.TRACKING_GPS }?.let { it.zoomWhileTracking(z, 1500); it.tiltWhileTracking(t, 1500); it.paddingWhileTracking(ahead(t, true), 1500) }
+            lc?.takeIf { it.cameraMode == CameraMode.TRACKING_GPS }?.let { it.paddingWhileTracking(ahead(t, true), 0); it.zoomWhileTracking(z, 1500); it.tiltWhileTracking(t, 1500) }
         }
         g.words(words, car)?.let { say(it, why = g.why()) }
         g.bend?.let { b -> say(MapsPrefs.bendWords(words, n.bends[b].right), why = "bend ${(n.bends[b].along - p.along).toInt()} m ahead, ${Math.round(speedMs * 3.6)} km/h") }
@@ -835,7 +858,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
     LaunchedEffect(carView) {
         if (nav.let { it != null && it.mode != "car" }) return@LaunchedEffect
         val lc = mapRef?.locationComponent?.takeIf { it.isLocationComponentActivated && it.cameraMode == CameraMode.TRACKING_GPS } ?: return@LaunchedEffect
-        val (z, t) = cam(view); lc.zoomWhileTracking(z, 800); lc.tiltWhileTracking(t, 800); lc.paddingWhileTracking(ahead(t, true), 800)
+        val (z, t) = cam(view); lc.paddingWhileTracking(ahead(t, true), 0); lc.zoomWhileTracking(z, 800); lc.tiltWhileTracking(t, 800)
     }
     // the added ones, but not where one of my places stands on it (the five work schools are both); again when one is added
     LaunchedEffect(mapRef, places, added) {
@@ -965,12 +988,20 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         val shownSpeed = speed?.takeIf { driving && !reckoning } // not the guess made while the GPS is lost
         val badge = (nav ?: carNav)?.mode == "car" || (shownSpeed != null && limit != null) // without directions: beside a sign, as before
         val parts = LocalMapParts.current.let { if (androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp < 600) it.small() else it } // as `narrow` below
-        if (live && (limit != null || badge)) Sized(parts.side) {
+        // a panel up the side of a wide screen covers where they stand: away meanwhile
+        if (live && (limit != null || badge) && !(wide && !Car.running && tab != null)) Sized(parts.side) {
             // clear of the island and the bars below it (the user, 21 Oct: "ακουμπάει πάνω στο νησί … δώσε λίγο αέρα")
             val over = limit?.let { l -> (shownSpeed ?: 0) > l + 3 } == true
             // Tetra Car: the limit over my speed, at the very left, where the driver looks (the user, 13 Nov), the map free beside it
-            if (Car.running) Column(Modifier.align(Alignment.BottomStart).navigationBarsPadding().padding(start = 6.dp, bottom = if (nav != null) 110.dp else 80.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            val driving = (nav ?: carNav) != null
+            if (wide && !short) Column(Modifier.align(if (rightSeat) Alignment.BottomEnd else Alignment.BottomStart).navigationBarsPadding()
+                .padding(start = 6.dp, end = 6.dp, bottom = if (driving) 150.dp else 80.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                limit?.let { LimitSign(it) }
+                if (badge) SpeedBadge(shownSpeed, over)
+            }
+            else if (wide) Row(Modifier.align(if (rightSeat) Alignment.BottomEnd else Alignment.BottomStart).navigationBarsPadding()
+                .padding(start = if (driving && !rightSeat) 264.dp else 6.dp, end = if (driving && rightSeat) 264.dp else 6.dp, bottom = if (driving) 16.dp else 80.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 limit?.let { LimitSign(it) }
                 if (badge) SpeedBadge(shownSpeed, over)
             }
@@ -994,11 +1025,11 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
                 roadName?.let { Text(it, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 260.dp)) }
             }
         } }
-        Sized(parts.card) { if (n != null && narrow) {
+        Sized(parts.card) { if (n != null && (narrow || wide)) {
             // a narrow screen: one pill, the road above and the next turn below (the user, 21 Oct)
             // one card: the road I am on at its top (the user, 22 Oct: the pill and the card "seam from a diferent planet")
             // Tetra Car: as small as what it says, at the top left, the map seen around it (the user, 13 Nov, Android Auto's photo: "don't leave empty space")
-            if (Car.running) NavBanner(n, root, Modifier.align(Alignment.TopStart).statusBarsPadding().padding(6.dp), roadName, roadCode, compact = true)
+            if (wide) NavBanner(n, root, Modifier.align(if (rightSeat) Alignment.TopEnd else Alignment.TopStart).statusBarsPadding().padding(6.dp), roadName, roadCode, compact = true, short = short)
             else NavBanner(n, root, Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(12.dp).fillMaxWidth(), roadName, roadCode)
         } else {
             Row(Modifier.align(Alignment.TopStart).statusBarsPadding().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -1026,7 +1057,9 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
 
         // bottom: directions running; or a place's page; or a panel and the island
         // above the keyboard while one is typing in Search or Directions
-        Sized(parts.island) { Column(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().imePadding().padding(12.dp).widthIn(max = 560.dp).fillMaxWidth(),
+        Sized(parts.island) { androidx.compose.runtime.CompositionLocalProvider(LocalPanelMax provides if (wide && !Car.running) (cfg.screenHeightDp - if (short) 130 else 200).coerceAtLeast(150).dp else 460.dp) {
+            Column(Modifier.align(if (!wide) Alignment.BottomCenter else if (rightSeat) Alignment.BottomEnd else Alignment.BottomStart).navigationBarsPadding().imePadding().padding(12.dp)
+                .widthIn(max = if (wide && !Car.running) 440.dp else 560.dp).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             finding?.let { Pill(it) }
             plan?.takeIf { it.size < planCount }?.let { pl ->
@@ -1083,7 +1116,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
             fun away(lat: Double, lng: Double) = here?.let { metresBetween(it.latitude, it.longitude, lat, lng) }
             // Tetra Car: the bar as wide as what it holds, on the left (the user, 13 Nov: "cut them off when empty, so more of the map is visible")
             if (n != null) Box(Modifier.fillMaxWidth()) { Surface(color = islandColor(), contentColor = islandContentColor(), shape = MaterialTheme.shapes.extraLarge,
-                modifier = Modifier.align(Alignment.CenterStart).then(if (Car.running) Modifier.width(IntrinsicSize.Max) else Modifier.fillMaxWidth())) {
+                modifier = Modifier.align(if (rightSeat && wide) Alignment.CenterEnd else Alignment.CenterStart).then(if (wide) Modifier.width(IntrinsicSize.Max).widthIn(max = 240.dp) else Modifier.fillMaxWidth())) {
               Column {
                 // the handle, as Tetra's others: drag up (or tap) for the tolls and the turns ahead
                 var drag by remember { mutableStateOf(0f) }
@@ -1113,12 +1146,13 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
                         if (n.mode == "car" && MapsPrefs.autoPark(context)) here?.let { park(it, "a car trip stopped") }
                     }
                     // Tetra Car: an ✕, no word (the user, 14 Nov: "make the stop button just an X with no text")
-                    if (Car.running) IconButton(onClick = stop) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_stop)) }
+                    if (wide) IconButton(onClick = stop) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_stop)) }
                     else Button(colors = panelButton(), onClick = stop) { Text(stringResource(R.string.common_stop), maxLines = 1, overflow = TextOverflow.Ellipsis) }
                     }
                 }
-                // a small window of the car's: the words above, the three buttons in a row under them (the user, 14 Nov: "so all three buttons fit")
-                if (Car.running && androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp < 420) Column(Modifier.padding(start = 16.dp, end = 4.dp, bottom = 2.dp)) {
+                // a wide screen (Tetra Car, a tablet, the phone sideways): the words above, the three buttons in a row under them (the user, 14 Nov:
+                // "so all three buttons fit"; 20 Nov: as Google's, a narrow column, the map beside it free for the car)
+                if (wide) Column(Modifier.padding(start = 16.dp, end = 4.dp, bottom = 2.dp)) {
                     words()
                     Row(Modifier.offset(x = (-12).dp), verticalAlignment = Alignment.CenterVertically) { buttons() }
                 } else Row(Modifier.padding(start = 20.dp, end = 8.dp, top = 2.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -1235,7 +1269,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
                 MapsIsland(tab, music, playMusic = { if (!BrowserMedia.mapsMusic(context)) Toast.makeText(context, context.getString(R.string.maps_music_none), Toast.LENGTH_LONG).show() }) { t -> tab = if (tab == t) null else t }
             }
         } }
-    }
+    } }
 
     listEditing?.let { l -> ListDialog(l, { listEditing = null }, if (l.id.isEmpty()) null else ({
         listEditing = null; if (shownList == l.id) shownList = null
@@ -1464,7 +1498,7 @@ private fun roadAt(map: MapLibreMap?, loc: Location, lang: String): Pair<String,
  * The next turn, in the car's card style (MapsCar's turn card): the arrow and the distance big, the street, the instruction
  * smaller; [road] and [code], the road I am on, as a small line at its top.
  */
-@Composable private fun NavBanner(n: Nav, root: File, modifier: Modifier, road: String? = null, code: String? = null, compact: Boolean = false) {
+@Composable private fun NavBanner(n: Nav, root: File, modifier: Modifier, road: String? = null, code: String? = null, compact: Boolean = false, short: Boolean = false) {
     val step = n.route.steps.getOrNull(n.p?.next ?: 0) ?: return
     val white = androidx.compose.ui.graphics.Color.White
     Surface(color = androidx.compose.ui.graphics.Color(0xF0303134), contentColor = white, shape = MaterialTheme.shapes.extraLarge, modifier = modifier.widthIn(max = 560.dp)) {
@@ -1484,8 +1518,15 @@ private fun roadAt(map: MapLibreMap?, loc: Location, lang: String): Pair<String,
                     maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
             // the car: the turn on the left, the distance, the street and what to do stacked beside it, as Android Auto's
+            val j = step.junction?.takeIf { showJunction(it, n.p?.toNext ?: Double.MAX_VALUE) }
+            val crossing: @Composable (Modifier) -> Unit = { m -> j?.let { jj ->
+                val picture = remember(jj) { junctionPicture(jj, 480, MapsFiles.driveLeftAt(root, n.route, step.at)).asImageBitmap() }
+                androidx.compose.foundation.Image(picture, contentDescription = null, modifier = m)
+            } }
+            // a short screen (the phone sideways): the crossing beside the words, the card no taller than it must be
             if (compact) Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
                 turn(); Column(Modifier.widthIn(max = 320.dp)) { distance(); words() }
+                if (short) crossing(Modifier.size(72.dp))
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) { turn(); distance() }
                 words()
@@ -1494,14 +1535,11 @@ private fun roadAt(map: MapLibreMap?, loc: Location, lang: String): Pair<String,
             val lanes = step.lanes?.takeIf { showLanes(it, n.p?.toNext ?: Double.MAX_VALUE) }
             if (lanes != null) {
                 val strip = remember(lanes) { lanesPicture(lanes, 120).asImageBitmap() }
-                androidx.compose.foundation.Image(strip, contentDescription = null, modifier = Modifier.padding(top = 4.dp).height(40.dp).aspectRatio(strip.width.toFloat() / strip.height).align(Alignment.CenterHorizontally))
+                androidx.compose.foundation.Image(strip, contentDescription = null, modifier = Modifier.padding(top = 4.dp).height(if (compact) 32.dp else 40.dp).aspectRatio(strip.width.toFloat() / strip.height)
+                    .align(if (compact) Alignment.Start else Alignment.CenterHorizontally))
             }
             // a busy crossing near: its picture, the way on in blue (the user, 23 Oct)
-            val j = step.junction?.takeIf { showJunction(it, n.p?.toNext ?: Double.MAX_VALUE) }
-            if (j != null) {
-                val picture = remember(j) { junctionPicture(j, 480, MapsFiles.driveLeftAt(root, n.route, step.at)).asImageBitmap() }
-                androidx.compose.foundation.Image(picture, contentDescription = null, modifier = Modifier.padding(top = 4.dp).size(120.dp).align(Alignment.CenterHorizontally))
-            }
+            if (!short) crossing(Modifier.padding(top = 4.dp).size(if (compact) 88.dp else 120.dp).align(if (compact) Alignment.Start else Alignment.CenterHorizontally))
         }
     }
 }
