@@ -4951,4 +4951,8 @@
     <string name="car_driver_summary">Volan na levi (večina Evrope) ali na desni (Velika Britanija, Irska, Ciper, Malta)</string>
     <string name="car_screen_size">Velikost na tem zaslonu</string>
     <string name="car_screen_size_summary">Vse večje: imena in puščica na zemljevidu, kartice, dock</string>
+    <string name="maps_open">Odprto</string>
+    <string name="maps_closed">Zaprto</string>
+    <string name="maps_open_closes">Odprto · zapre ob %1$s</string>
+    <string name="maps_closed_opens">Zaprto · odpre ob %1$s</string>
 </resources>

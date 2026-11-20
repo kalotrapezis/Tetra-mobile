@@ -96,7 +96,8 @@ internal enum class MapsTab(@androidx.annotation.StringRes val label: Int, val i
 
 /** Search: words, or a pill of a kind, nearest the map's middle first (the area or town on the screen). */
 @Composable internal fun SearchPanel(query: String, setQuery: (String) -> Unit, pill: String?, setPill: (String?) -> Unit, results: List<Poi>,
-    distance: (Poi) -> Double?, hasList: Boolean, near: String?, clearNear: () -> Unit, loading: Boolean, ok: () -> Unit, open: (Poi) -> Unit) = MapsPanel {
+    distance: (Poi) -> Double?, hasList: Boolean, near: String?, clearNear: () -> Unit, loading: Boolean, ok: () -> Unit,
+    town: (Poi) -> String? = { null }, saved: (Poi) -> String? = { null }, go: ((Poi) -> Unit)? = null, open: (Poi) -> Unit) = MapsPanel {
     near?.let { n -> Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
         FilterChip(true, clearNear, label = { Text(stringResource(R.string.maps_near, n), maxLines = 1, overflow = TextOverflow.Ellipsis) }, colors = chipColors(),
             trailingIcon = { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.maps_anywhere), modifier = Modifier.size(16.dp)) })
@@ -117,20 +118,57 @@ internal enum class MapsTab(@androidx.annotation.StringRes val label: Int, val i
         query.isBlank() && pill == null && near == null -> Text(stringResource(R.string.maps_search_how),
             style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 16.dp))
         results.isEmpty() -> Text(stringResource(R.string.maps_nothing_found), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 16.dp))
-        else -> LazyColumn { items(results) { p -> PoiRow(p, distance(p)) { open(p) } } }
+        else -> LazyColumn { items(results) { p -> PoiRow(p, distance(p), town, saved(p), go?.let { g -> { g(p) } }) { open(p) } } }
     }
 }
 
-@Composable internal fun PoiRow(p: Poi, metres: Double?, click: () -> Unit) = Row(Modifier.fillMaxWidth().clickable(onClick = click).padding(horizontal = 16.dp, vertical = 8.dp),
-    horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-    Text(MapsSearch.emoji(p.kind), style = MaterialTheme.typography.titleMedium)
-    Column(Modifier.weight(1f)) {
-        val context = LocalContext.current
-        Text(p.title(context), maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(listOfNotNull(p.named(context), MapsSearch.label(p.kind, context), p.more).filter { it.isNotEmpty() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall,
-            maxLines = 1, overflow = TextOverflow.Ellipsis, color = Color.White.copy(alpha = 0.7f))
+/**
+ * A search result as Google lists them (the user, 20 Nov, its list of «My Market» beside ours: "we can do better"): its name,
+ * then what it is and in which town, open now or not and its phone, the list it is saved in; how far, and Directions at once.
+ * All from the offline map (OSM): no stars or reviews. [town] runs off the main thread.
+ */
+@Composable internal fun PoiRow(p: Poi, metres: Double?, town: (Poi) -> String? = { null }, saved: String? = null, go: (() -> Unit)? = null, click: () -> Unit) {
+    val context = LocalContext.current
+    val car = LocalOnCar.current
+    val dim = Color.White.copy(alpha = 0.7f)
+    val small = if (car) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium
+    val where by androidx.compose.runtime.produceState<String?>(null, p) { value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { runCatching { town(p) }.getOrNull() } }
+    Row(Modifier.fillMaxWidth().clickable(onClick = click).padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+        Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.12f), modifier = Modifier.size(if (car) 56.dp else 44.dp)) {
+            Box(contentAlignment = Alignment.Center) { Text(MapsSearch.emoji(p.kind), style = if (car) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge) }
+        }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(p.title(context), style = if (car) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium,
+                maxLines = if (car) 1 else 2, overflow = TextOverflow.Ellipsis)
+            // what it is · where: its street when OSM has one, and the town
+            Text(listOfNotNull(p.named(context)?.takeIf { !p.title(context).contains(it, ignoreCase = true) }, MapsSearch.label(p.kind, context).takeIf { p.name.isNotEmpty() },
+                p.more.takeIf { it.isNotEmpty() && !MapsSearch.settlement(p.kind) }, where?.takeIf { w -> !p.more.contains(w) && w != p.name })
+                .filter { it.isNotEmpty() }.joinToString(" · "), style = small, color = dim, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            val now = remember(p.hours) { OpenHours.now(p.hours, java.time.LocalDateTime.now()) }
+            val hm = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+            val status = now?.let { n ->
+                val at = n.change?.let { c -> (if (c.toLocalDate() != java.time.LocalDate.now()) c.dayOfWeek.getDisplayName(java.time.format.TextStyle.SHORT, context.resources.configuration.locales[0]) + " " else "") + c.format(hm) }
+                when { n.open && at != null -> stringResource(R.string.maps_open_closes, at); n.open -> stringResource(R.string.maps_open)
+                    at != null -> stringResource(R.string.maps_closed_opens, at); else -> stringResource(R.string.maps_closed) }
+            }
+            val extra = listOfNotNull(if (p.wheelchair == "yes") "♿" else null, p.phone.substringBefore(';').trim().takeIf { it.isNotEmpty() }?.let { "📞 $it" }).joinToString(" · ")
+            if (status != null || extra.isNotEmpty()) Text(androidx.compose.ui.text.buildAnnotatedString {
+                status?.let { pushStyle(androidx.compose.ui.text.SpanStyle(color = if (now!!.open) Color(0xFF81C995) else Color(0xFFF28B82))); append(it); pop() }
+                if (status != null && extra.isNotEmpty()) append(" · ")
+                append(extra)
+            }, style = small, color = dim, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            saved?.let { Text("♥ $it", style = small, color = Color(0xFFF8BBD0), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            go?.let { g ->
+                Surface(shape = CircleShape, color = Color(0xFF5C6BC0), contentColor = Color.White, onClick = g, modifier = Modifier.size(if (car) 56.dp else 44.dp)) {
+                    Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.ic_navigation), contentDescription = stringResource(R.string.maps_go), modifier = Modifier.size(if (car) 28.dp else 22.dp)) }
+                }
+            }
+            metres?.let { Text(metresText(it), style = if (car) MaterialTheme.typography.titleMedium else MaterialTheme.typography.labelMedium) }
+        }
     }
-    metres?.let { Text(metresText(it), style = MaterialTheme.typography.labelMedium) }
 }
 
 /**

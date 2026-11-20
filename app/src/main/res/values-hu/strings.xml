@@ -4749,4 +4749,8 @@
     <string name="car_driver_summary">Bal oldali kormány (Európa nagy része) vagy jobb oldali (Egyesült Királyság, Írország, Ciprus, Málta)</string>
     <string name="car_screen_size">Méret ezen a kijelzőn</string>
     <string name="car_screen_size_summary">Minden nagyobb: a térkép nevei és nyila, a kártyák, a dokk</string>
+    <string name="maps_open">Nyitva</string>
+    <string name="maps_closed">Zárva</string>
+    <string name="maps_open_closes">Nyitva · zár: %1$s</string>
+    <string name="maps_closed_opens">Zárva · nyit: %1$s</string>
 </resources>

@@ -4850,4 +4850,8 @@
     <string name="car_driver_summary">Volante a la izquierda (la mayor parte de Europa) o a la derecha (Reino Unido, Irlanda, Chipre, Malta)</string>
     <string name="car_screen_size">Tamaño en esta pantalla</string>
     <string name="car_screen_size_summary">Todo más grande: los nombres y la flecha del mapa, las tarjetas, el panel</string>
+    <string name="maps_open">Abierto</string>
+    <string name="maps_closed">Cerrado</string>
+    <string name="maps_open_closes">Abierto · cierra a las %1$s</string>
+    <string name="maps_closed_opens">Cerrado · abre a las %1$s</string>
 </resources>

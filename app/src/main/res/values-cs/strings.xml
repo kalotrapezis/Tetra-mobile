@@ -4951,4 +4951,8 @@
     <string name="car_driver_summary">Levostranné řízení (většina Evropy) nebo pravostranné (Velká Británie, Irsko, Kypr, Malta)</string>
     <string name="car_screen_size">Velikost na této obrazovce</string>
     <string name="car_screen_size_summary">Vše větší: názvy a šipka na mapě, karty, lišta</string>
+    <string name="maps_open">Otevřeno</string>
+    <string name="maps_closed">Zavřeno</string>
+    <string name="maps_open_closes">Otevřeno · zavírá v %1$s</string>
+    <string name="maps_closed_opens">Zavřeno · otevírá v %1$s</string>
 </resources>

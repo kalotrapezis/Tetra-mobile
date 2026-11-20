@@ -4749,4 +4749,8 @@
     <string name="car_driver_summary">Vasakpoolne roolilaud (suurem osa Euroopast) või parempoolne (Suurbritannia, Iirimaa, Küpros, Malta)</string>
     <string name="car_screen_size">Suurus sellel ekraanil</string>
     <string name="car_screen_size_summary">Kõik suuremad: kaardi nimed ja nool, kaardid, paneel</string>
+    <string name="maps_open">Avatud</string>
+    <string name="maps_closed">Suletud</string>
+    <string name="maps_open_closes">Avatud · sulgeb %1$s</string>
+    <string name="maps_closed_opens">Suletud · avab %1$s</string>
 </resources>

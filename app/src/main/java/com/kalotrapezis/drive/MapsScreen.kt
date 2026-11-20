@@ -1175,7 +1175,11 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
                     // Nearby: how far from the place it is around, not from me
                     MapsTab.Search -> SearchPanel(query, { query = it }, pill, { pill = it }, results,
                         { p -> near?.let { n -> metresBetween(n.lat, n.lng, p.lat, p.lng) } ?: away(p.lat, p.lng) }, all.isNotEmpty() || listLoading,
-                        near?.name, { near = null }, listLoading, ok = {
+                        near?.name, { near = null }, listLoading,
+                        town = { MapsSearch.town(all, it.lat, it.lng) },
+                        saved = { p -> places.firstOrNull { metresBetween(it.lat, it.lng, p.lat, p.lng) < 40 }?.let { pl ->
+                            lists.filter { it.id in pl.lists }.joinToString { "${it.emoji} ${it.name}" }.ifEmpty { context.getString(R.string.maps_saved_mine) } } },
+                        go = { p -> tab = null; startNav(p.place(context), navMode, choose = true) }, ok = {
                             // what is on the screen and a little round it (half a screen each way), else the nearest found
                             val map = mapRef
                             val b = map?.projection?.visibleRegion?.latLngBounds

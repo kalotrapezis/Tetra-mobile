@@ -4749,4 +4749,8 @@
     <string name="car_driver_summary">Venstrestyret (det meste af Europa) eller højrestyret (Storbritannien, Irland, Cypern, Malta)</string>
     <string name="car_screen_size">Størrelse på denne skærm</string>
     <string name="car_screen_size_summary">Alt større: kortets navne og pil, kortene, panelet</string>
+    <string name="maps_open">Åben</string>
+    <string name="maps_closed">Lukket</string>
+    <string name="maps_open_closes">Åben · lukker %1$s</string>
+    <string name="maps_closed_opens">Lukket · åbner %1$s</string>
 </resources>

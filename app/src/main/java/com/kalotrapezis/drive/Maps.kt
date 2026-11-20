@@ -792,6 +792,14 @@ internal object MapsSearch {
         "island" to R.string.maps_kind_island, "islet" to R.string.maps_kind_islet, "locality" to R.string.maps_kind_locality,
         "region" to R.string.maps_kind_region)
     fun settlement(kind: String) = kind in SETTLEMENTS
+
+    private var townsFrom: List<Poi>? = null; private var towns: List<Poi> = emptyList()
+    /** The town or village a place is in or beside (within about 5 km), for a search row: which «My Market» it is. */
+    fun town(all: List<Poi>, lat: Double, lng: Double): String? {
+        val t = synchronized(this) { if (townsFrom !== all) { towns = all.filter { it.kind in setOf("city", "town", "village", "suburb", "hamlet") }; townsFrom = all }; towns }
+        return t.asSequence().filter { Math.abs(it.lat - lat) < 0.05 && Math.abs(it.lng - lng) < 0.06 }.map { it to metresBetween(lat, lng, it.lat, it.lng) }
+            .filter { it.second < 5000 }.minByOrNull { it.second }?.first?.let { it.name.ifEmpty { it.nameEn } }?.takeIf { it.isNotEmpty() }
+    }
     /** A place of [kind] in words ("Pharmacy"); a kind Tetra has no name for as OSM writes it. */
     fun label(kind: String, c: android.content.Context) = (PILLS.firstOrNull { it.key == kind }?.one ?: SETTLEMENTS[kind])?.let(c::getString)
         ?: kind.replace('_', ' ').replaceFirstChar { it.uppercase() }
@@ -1032,7 +1040,10 @@ internal object MapsSearch {
             return if (la in -90.0..90.0 && lo in -180.0..180.0) Poi("", la, lo, t) else null
         }
         val m = Regex("""^([${PlusCode.ALPHABET}]{2,8}\+[${PlusCode.ALPHABET}]{0,3})(?:[\s,]+(.+))?$""", RegexOption.IGNORE_CASE).find(t) ?: return null
-        val town = m.groupValues[2].trim().takeIf { it.isNotEmpty() }?.let { w -> search(all, w, lat, lng, limit = 20).firstOrNull { settlement(it.kind) } ?: return null }
+        // as Google copies it, "6G7X+5G, Σκούρτα 190 12, Ελλάδα" (the user, 20 Nov: nothing found): the first piece that is a town, postcodes
+        // aside; none, near here
+        val town = m.groupValues[2].split(',').map { it.replace(Regex("\\d"), " ").trim() }.filter { it.isNotEmpty() }
+            .firstNotNullOfOrNull { w -> search(all, w, lat, lng, limit = 20).firstOrNull { settlement(it.kind) } }
         val at = PlusCode.decode(m.groupValues[1], town?.lat ?: lat, town?.lng ?: lng) ?: return null
         return Poi("", at.first, at.second, t)
     }

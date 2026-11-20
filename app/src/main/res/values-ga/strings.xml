@@ -5052,4 +5052,8 @@
     <string name="car_driver_summary">Tiomáint ar an taobh clé (formhór na hEorpa) nó ar an taobh deas (an Ríocht Aontaithe, Éire, an Chipir, Málta)</string>
     <string name="car_screen_size">Méid ar an scáileán seo</string>
     <string name="car_screen_size_summary">Gach rud níos mó: ainmneacha agus saighead an léarscáil, na cártaí, an dock</string>
+    <string name="maps_open">Oscailte</string>
+    <string name="maps_closed">Dúnta</string>
+    <string name="maps_open_closes">Oscailte · dúnann %1$s</string>
+    <string name="maps_closed_opens">Dúnta · osclaíonn %1$s</string>
 </resources>

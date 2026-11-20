@@ -4749,4 +4749,8 @@
     <string name="car_driver_summary">Linkslenker (die meisten Länder Europas) oder Rechtslenker (Großbritannien, Irland, Zypern, Malta)</string>
     <string name="car_screen_size">Größe auf diesem Bildschirm</string>
     <string name="car_screen_size_summary">Alles größer: Namen und Pfeil auf der Karte, die Karten, das Dock</string>
+    <string name="maps_open">Geöffnet</string>
+    <string name="maps_closed">Geschlossen</string>
+    <string name="maps_open_closes">Geöffnet · schließt %1$s</string>
+    <string name="maps_closed_opens">Geschlossen · öffnet %1$s</string>
 </resources>

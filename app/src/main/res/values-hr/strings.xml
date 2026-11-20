@@ -4850,4 +4850,8 @@
     <string name="car_driver_summary">Upravljač s lijeve strane (većina Europe) ili s desne (Velika Britanija, Irska, Cipar, Malta)</string>
     <string name="car_screen_size">Veličina na ovom zaslonu</string>
     <string name="car_screen_size_summary">Sve veće: nazivi i strelica na karti, kartice, dock</string>
+    <string name="maps_open">Otvoreno</string>
+    <string name="maps_closed">Zatvoreno</string>
+    <string name="maps_open_closes">Otvoreno · zatvara u %1$s</string>
+    <string name="maps_closed_opens">Zatvoreno · otvara u %1$s</string>
 </resources>

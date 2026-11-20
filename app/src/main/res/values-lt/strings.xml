@@ -4951,4 +4951,8 @@
     <string name="car_driver_summary">Vairas kairėje (dauguma Europos) arba dešinėje (Jungtinė Karalystė, Airija, Kipras, Malta)</string>
     <string name="car_screen_size">Dydis šiame ekrane</string>
     <string name="car_screen_size_summary">Viskas didesnis: žemėlapio pavadinimai ir rodyklė, kortelės, dokas</string>
+    <string name="maps_open">Atidaryta</string>
+    <string name="maps_closed">Uždaryta</string>
+    <string name="maps_open_closes">Atidaryta · uždaro %1$s</string>
+    <string name="maps_closed_opens">Uždaryta · atidaro %1$s</string>
 </resources>

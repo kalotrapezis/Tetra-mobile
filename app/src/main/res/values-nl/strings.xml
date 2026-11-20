@@ -4749,4 +4749,8 @@
     <string name="car_driver_summary">Linkse besturing (het grootste deel van Europa) of rechtse besturing (Verenigd Koninkrijk, Ierland, Cyprus, Malta)</string>
     <string name="car_screen_size">Grootte op dit scherm</string>
     <string name="car_screen_size_summary">Alles groter: de namen en de pijl op de kaart, de kaarten, het dock</string>
+    <string name="maps_open">Open</string>
+    <string name="maps_closed">Gesloten</string>
+    <string name="maps_open_closes">Open · sluit om %1$s</string>
+    <string name="maps_closed_opens">Gesloten · opent om %1$s</string>
 </resources>

@@ -4748,4 +4748,8 @@
     <string name="car_driver_summary">Τιμόνι αριστερά (σχεδόν όλη η Ευρώπη) ή δεξιά (Βρετανία, Ιρλανδία, Κύπρος, Μάλτα)</string>
     <string name="car_screen_size">Μέγεθος σε αυτή την οθόνη</string>
     <string name="car_screen_size_summary">Όλα μεγαλύτερα: τα ονόματα και το βέλος του χάρτη, οι κάρτες, η μπάρα</string>
+    <string name="maps_open">Ανοιχτό</string>
+    <string name="maps_closed">Κλειστό</string>
+    <string name="maps_open_closes">Ανοιχτό · κλείνει %1$s</string>
+    <string name="maps_closed_opens">Κλειστό · ανοίγει %1$s</string>
 </resources>

@@ -4749,4 +4749,8 @@
     <string name="car_driver_summary">Vasemmanpuoleinen ohjaus (suurin osa Euroopasta) tai oikeanpuoleinen (Iso-Britannia, Irlanti, Kypros, Malta)</string>
     <string name="car_screen_size">Koko tällä näytöllä</string>
     <string name="car_screen_size_summary">Kaikki isompana: kartan nimet ja nuoli, kortit, telakka</string>
+    <string name="maps_open">Auki</string>
+    <string name="maps_closed">Suljettu</string>
+    <string name="maps_open_closes">Auki · sulkeutuu %1$s</string>
+    <string name="maps_closed_opens">Suljettu · avautuu %1$s</string>
 </resources>

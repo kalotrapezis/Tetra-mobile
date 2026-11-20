@@ -4850,4 +4850,8 @@
     <string name="car_driver_summary">Kreisā stūre (lielākā daļa Eiropas) vai labā stūre (Lielbritānija, Īrija, Kipra, Malta)</string>
     <string name="car_screen_size">Izmērs šajā ekrānā</string>
     <string name="car_screen_size_summary">Viss lielāks: kartes nosaukumi un bulta, kartītes, panelis</string>
+    <string name="maps_open">Atvērts</string>
+    <string name="maps_closed">Slēgts</string>
+    <string name="maps_open_closes">Atvērts · slēdz %1$s</string>
+    <string name="maps_closed_opens">Slēgts · atver %1$s</string>
 </resources>

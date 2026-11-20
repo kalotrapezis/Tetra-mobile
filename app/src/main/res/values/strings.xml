@@ -4750,4 +4750,8 @@
     <string name="car_driver_summary">Left-hand drive (most of Europe) or right-hand drive (UK, Ireland, Cyprus, Malta)</string>
     <string name="car_screen_size">Size on this screen</string>
     <string name="car_screen_size_summary">Everything bigger: the map\'s names and arrow, the cards, the dock</string>
+    <string name="maps_open">Open</string>
+    <string name="maps_closed">Closed</string>
+    <string name="maps_open_closes">Open · closes %1$s</string>
+    <string name="maps_closed_opens">Closed · opens %1$s</string>
 </resources>

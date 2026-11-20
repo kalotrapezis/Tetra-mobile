@@ -4951,4 +4951,8 @@
     <string name="car_driver_summary">Kierownica po lewej (większość Europy) lub po prawej (Wielka Brytania, Irlandia, Cypr, Malta)</string>
     <string name="car_screen_size">Rozmiar na tym ekranie</string>
     <string name="car_screen_size_summary">Wszystko większe: nazwy i strzałka na mapie, karty, dok</string>
+    <string name="maps_open">Otwarte</string>
+    <string name="maps_closed">Zamknięte</string>
+    <string name="maps_open_closes">Otwarte · zamknięcie %1$s</string>
+    <string name="maps_closed_opens">Zamknięte · otwarcie %1$s</string>
 </resources>

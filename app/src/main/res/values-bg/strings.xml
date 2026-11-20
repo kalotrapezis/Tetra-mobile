@@ -4749,4 +4749,8 @@
     <string name="car_driver_summary">Волан отляво (по-голямата част от Европа) или отдясно (Великобритания, Ирландия, Кипър, Малта)</string>
     <string name="car_screen_size">Размер на този екран</string>
     <string name="car_screen_size_summary">Всичко по-голямо: имената и стрелката на картата, картите, панелът</string>
+    <string name="maps_open">Отворено</string>
+    <string name="maps_closed">Затворено</string>
+    <string name="maps_open_closes">Отворено · затваря в %1$s</string>
+    <string name="maps_closed_opens">Затворено · отваря в %1$s</string>
 </resources>

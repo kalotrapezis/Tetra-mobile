@@ -4749,4 +4749,8 @@
     <string name="car_driver_summary">Vänsterstyrt (största delen av Europa) eller högerstyrt (Storbritannien, Irland, Cypern, Malta)</string>
     <string name="car_screen_size">Storlek på den här skärmen</string>
     <string name="car_screen_size_summary">Allt större: kartans namn och pil, korten, docken</string>
+    <string name="maps_open">Öppet</string>
+    <string name="maps_closed">Stängt</string>
+    <string name="maps_open_closes">Öppet · stänger %1$s</string>
+    <string name="maps_closed_opens">Stängt · öppnar %1$s</string>
 </resources>

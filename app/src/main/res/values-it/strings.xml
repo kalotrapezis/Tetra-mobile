@@ -4749,4 +4749,8 @@
     <string name="car_driver_summary">Guida a sinistra (gran parte d\'Europa) o a destra (Regno Unito, Irlanda, Cipro, Malta)</string>
     <string name="car_screen_size">Dimensione su questo schermo</string>
     <string name="car_screen_size_summary">Tutto più grande: nomi e freccia della mappa, schede, dock</string>
+    <string name="maps_open">Aperto</string>
+    <string name="maps_closed">Chiuso</string>
+    <string name="maps_open_closes">Aperto · chiude alle %1$s</string>
+    <string name="maps_closed_opens">Chiuso · apre alle %1$s</string>
 </resources>

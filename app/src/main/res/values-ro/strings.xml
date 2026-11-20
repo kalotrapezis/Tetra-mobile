@@ -4850,4 +4850,8 @@
     <string name="car_driver_summary">Volan pe stânga (cea mai mare parte a Europei) sau pe dreapta (Regatul Unit, Irlanda, Cipru, Malta)</string>
     <string name="car_screen_size">Dimensiune pe acest ecran</string>
     <string name="car_screen_size_summary">Totul mai mare: numele și săgeata de pe hartă, cardurile, dock-ul</string>
+    <string name="maps_open">Deschis</string>
+    <string name="maps_closed">Închis</string>
+    <string name="maps_open_closes">Deschis · se închide la %1$s</string>
+    <string name="maps_closed_opens">Închis · se deschide la %1$s</string>
 </resources>

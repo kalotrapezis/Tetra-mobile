@@ -4850,4 +4850,8 @@
     <string name="car_driver_summary">Volante à esquerda (a maior parte da Europa) ou à direita (Reino Unido, Irlanda, Chipre, Malta)</string>
     <string name="car_screen_size">Tamanho neste ecrã</string>
     <string name="car_screen_size_summary">Tudo maior: os nomes e a seta do mapa, os cartões, o dock</string>
+    <string name="maps_open">Aberto</string>
+    <string name="maps_closed">Fechado</string>
+    <string name="maps_open_closes">Aberto · fecha às %1$s</string>
+    <string name="maps_closed_opens">Fechado · abre às %1$s</string>
 </resources>

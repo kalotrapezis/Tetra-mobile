@@ -4951,4 +4951,8 @@
     <string name="car_driver_summary">Sewwieq fuq ix-xellug (ħafna mill-Ewropa) jew fuq il-lemin (ir-Renju Unit, l-Irlanda, Ċipru, Malta)</string>
     <string name="car_screen_size">Daqs fuq dan l-iskrin</string>
     <string name="car_screen_size_summary">Kollox akbar: ismijiet u vleġġa tal-mappa, il-kards, id-dock</string>
+    <string name="maps_open">Miftuħ</string>
+    <string name="maps_closed">Magħluq</string>
+    <string name="maps_open_closes">Miftuħ · jagħlaq %1$s</string>
+    <string name="maps_closed_opens">Magħluq · jiftaħ %1$s</string>
 </resources>

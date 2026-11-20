@@ -4951,4 +4951,8 @@
     <string name="car_driver_summary">Volant vľavo (väčšina Európy) alebo vpravo (Spojené kráľovstvo, Írsko, Cyprus, Malta)</string>
     <string name="car_screen_size">Veľkosť na tomto displeji</string>
     <string name="car_screen_size_summary">Všetko väčšie: názvy a šípka na mape, karty, lišta</string>
+    <string name="maps_open">Otvorené</string>
+    <string name="maps_closed">Zatvorené</string>
+    <string name="maps_open_closes">Otvorené · zatvára o %1$s</string>
+    <string name="maps_closed_opens">Zatvorené · otvára o %1$s</string>
 </resources>
