@@ -865,7 +865,7 @@ private fun BrowserPage(private: Boolean, start: String, said: String?, play: St
         }
     }
     // every page saved here or come from another device, into Documents › Saved pages.txt (BrowserSync.savedList)
-    LaunchedEffect(bookmarks) { if (!private) withContext(Dispatchers.IO) { BrowserSync.keepSaved(bookmarks.map { it.url to it.title }) } }
+    LaunchedEffect(bookmarks) { if (!private) withContext(Dispatchers.IO) { BrowserSync.keepSaved(bookmarks) } }
     fun keepLibrary(l: BookmarkLibrary) { store(l); syncMarks(l, true) }
     fun keepBookmarks(b: List<Bookmark>) = keepLibrary(BookmarkLibrary(b, bookFolders))
     // the other devices' bookmarks and tabs: read now, and again when sync brings a file of theirs

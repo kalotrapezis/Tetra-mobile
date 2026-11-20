@@ -21,7 +21,7 @@ import java.security.MessageDigest
  * deleted elsewhere keeps that folder. Passwords never come here (BrowserSecrets; BrowserPasswordSync when chosen).
  */
 
-internal data class MarkRec(val url: String, val title: String, val folder: String, val pinned: Boolean, val at: Long, val gone: Boolean = false)
+internal data class MarkRec(val url: String, val title: String, val folder: String, val pinned: Boolean, val at: Long, val gone: Boolean = false, val stream: String = "")
 internal data class FolderRec(val id: String, val name: String, val parent: String, val at: Long, val gone: Boolean = false)
 
 internal data class BookmarkSet(val marks: Map<String, MarkRec> = emptyMap(), val folders: Map<String, FolderRec> = emptyMap()) {
@@ -51,7 +51,7 @@ internal data class BookmarkSet(val marks: Map<String, MarkRec> = emptyMap(), va
         val p = paths()
         val order = prev.marks.withIndex().associate { it.value.url to it.index }
         val marks = this.marks.values.filter { !it.gone }.sortedWith(compareBy({ order[it.url] ?: Int.MAX_VALUE }, { it.at }, { it.url }))
-            .map { Bookmark(it.url, it.title, it.pinned, p[it.folder].orEmpty()) }
+            .map { Bookmark(it.url, it.title, it.pinned, p[it.folder].orEmpty(), it.stream) }
         val forder = prev.folders.withIndex().associate { it.value to it.index }
         val extra = folders.values.filter { !it.gone }.map { p.getValue(it.id) }.filter { it.isNotEmpty() }.distinct().sortedWith(compareBy({ forder[it] ?: Int.MAX_VALUE }, { it }))
         return BookmarkLibrary(marks, extra)
@@ -88,8 +88,8 @@ internal data class BookmarkSet(val marks: Map<String, MarkRec> = emptyMap(), va
         val marks = this.marks.toMutableMap()
         for (b in lib.marks) {
             val r = marks[b.url]
-            if (r == null || r.gone || r.title != b.title || r.pinned != b.pinned || p[r.folder].orEmpty() != b.folder)
-                marks[b.url] = MarkRec(b.url, b.title, ensure(b.folder), b.pinned, now)
+            if (r == null || r.gone || r.title != b.title || r.pinned != b.pinned || r.stream != b.stream || p[r.folder].orEmpty() != b.folder)
+                marks[b.url] = MarkRec(b.url, b.title, ensure(b.folder), b.pinned, now, stream = b.stream)
         }
         val urls = lib.marks.map { it.url }.toSet()
         marks.values.filter { !it.gone && it.url !in urls }.forEach { marks[it.url] = it.copy(gone = true, at = now) }
@@ -98,7 +98,7 @@ internal data class BookmarkSet(val marks: Map<String, MarkRec> = emptyMap(), va
 
     fun json(): String = JSONObject()
         .put("marks", JSONArray(marks.values.sortedBy { it.url }.map { m -> JSONObject().put("url", m.url).put("title", m.title).put("folder", m.folder)
-            .put("pinned", m.pinned).put("at", m.at).apply { if (m.gone) put("gone", true) } }))
+            .put("pinned", m.pinned).put("at", m.at).apply { if (m.gone) put("gone", true); if (m.stream.isNotEmpty()) put("stream", m.stream) } }))
         .put("folders", JSONArray(folders.values.sortedBy { it.id }.map { f -> JSONObject().put("id", f.id).put("name", f.name).put("parent", f.parent)
             .put("at", f.at).apply { if (f.gone) put("gone", true) } }))
         .toString(1) + "\n"
@@ -112,7 +112,7 @@ internal data class BookmarkSet(val marks: Map<String, MarkRec> = emptyMap(), va
             val o = JSONObject(text)
             val m = o.getJSONArray("marks"); val f = o.getJSONArray("folders")
             BookmarkSet((0 until m.length()).map { m.getJSONObject(it) }.filter { it.optString("url").isNotEmpty() }.associate { j ->
-                j.getString("url") to MarkRec(j.getString("url"), j.optString("title"), j.optString("folder"), j.optBoolean("pinned"), j.optLong("at"), j.optBoolean("gone")) },
+                j.getString("url") to MarkRec(j.getString("url"), j.optString("title"), j.optString("folder"), j.optBoolean("pinned"), j.optLong("at"), j.optBoolean("gone"), j.optString("stream")) },
                 (0 until f.length()).map { f.getJSONObject(it) }.filter { it.optString("id").isNotEmpty() }.associate { j ->
                 j.getString("id") to FolderRec(j.getString("id"), j.optString("name"), j.optString("parent"), j.optLong("at"), j.optBoolean("gone")) })
         }.getOrNull()
@@ -155,23 +155,46 @@ internal object BrowserSync {
 
     /**
      * Every page ever saved, a line each, in a text file of the user's (the user, 17 Nov: "keep a text file with the pages I save, the
-     * title; I want to know the songs if the pages go away"): the pages of [marks] (address → title) not yet in [old] added at the end,
-     * the deleted ones too. Never rewritten, so it keeps what the bookmarks no longer do. Null: nothing new.
+     * title; I want to know the songs if the pages go away"): the pages of [marks] not yet in [old] added at the end,
+     * the deleted ones too. Only added to (a Media page's name, service and stream put in), so it keeps what the bookmarks no longer do.
+     * Null: nothing new.
      */
-    fun savedList(old: String, marks: List<Pair<String, String>>, now: Long): String? {
-        val known = old.lineSequence().map { it.substringAfterLast(" — ", "").trim() }.filter { it.isNotEmpty() }.toSet()
-        val new = marks.filter { (url, _) -> url.isNotEmpty() && url !in known }.distinctBy { it.first }
-        if (new.isEmpty()) return null
+    fun savedList(old: String, marks: List<Bookmark>, now: Long): String? {
+        val names = BrowserRules.MEDIA_FOLDERS.map { BookmarkLibrary.nameOf(it) }
+        val byUrl = marks.filter { it.url.isNotEmpty() }.associateBy { it.url }
+        val lines = old.split('\n').toMutableList()
+        val known = HashSet<String>()
+        var changed = false
+        var i = 0
+        while (i < lines.size) {
+            val l = lines[i]; val at = l.lastIndexOf(" — ")
+            val url = if (at >= 0) l.substring(at + 3).trim() else ""
+            if (url.isNotEmpty()) known += url
+            val b = byUrl[url]
+            // a line written before its page went into a Media folder, or before its stream was known: its name, service and stream
+            // put in (the user, 20 Nov), no line lost
+            if (b != null && b.folder in BrowserRules.MEDIA_FOLDERS && at >= 18 && l[4] == '-' && l.substring(16, 18) == "  ") {
+                if (names.none { l.substring(18, at).endsWith(" › $it") }) { lines[i] = l.take(18) + BrowserRules.savedTitle(b) + l.substring(at); changed = true }
+                if (b.stream.isNotEmpty() && lines.getOrNull(i + 1)?.startsWith(STREAM) != true) { lines.add(i + 1, STREAM + b.stream); changed = true; i++ }
+            }
+            i++
+        }
+        val new = marks.filter { it.url.isNotEmpty() && it.url !in known }.distinctBy { it.url }
+        if (new.isEmpty() && !changed) return null
         val day = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.ROOT).format(java.util.Date(now))
-        return old.ifEmpty { "Pages saved in Tetra's Browser: date, title — address\n\n" } + new.joinToString("") { (url, title) -> "$day  ${title.ifBlank { url }.replace('\n', ' ')} — $url\n" }
+        return lines.joinToString("\n").ifEmpty { "Pages saved in Tetra's Browser: date, title — address\n\n" } + new.joinToString("") { b ->
+            "$day  ${BrowserRules.savedTitle(b).ifBlank { b.url }.replace('\n', ' ')} — ${b.url}\n" + (if (b.stream.isNotEmpty()) "$STREAM${b.stream}\n" else "")
+        }
     }
+    /** A radio's stream, on the line under its page's. */
+    const val STREAM = "    stream: "
     /** [savedList]'s lines as (date, title, address), the newest first. */
     fun savedPages(text: String): List<Triple<String, String, String>> = text.lineSequence().mapNotNull { l ->
         val at = l.lastIndexOf(" — ")
         if (at < 18 || !l[4].equals('-') || l.substring(16, 18) != "  ") null else Triple(l.take(16), l.substring(18, at), l.substring(at + 3).trim())
     }.toList().asReversed()
     fun savedFile() = File(TetraFolder.root(android.os.Environment.getExternalStorageDirectory()), "Documents/Saved pages.txt")
-    fun keepSaved(marks: List<Pair<String, String>>) = runCatching {
+    fun keepSaved(marks: List<Bookmark>) = runCatching {
         val f = savedFile()
         savedList(f.takeIf { it.isFile }?.readText().orEmpty(), marks, System.currentTimeMillis())?.let { f.parentFile?.mkdirs(); save(f, it); WriterLog.i("Browser: Saved pages.txt, ${marks.size} pages looked at") }
     }.onFailure { WriterLog.w("Browser: Saved pages.txt not written (${it.message})") }

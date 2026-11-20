@@ -179,7 +179,7 @@ internal object CarWire {
                 body.optJSONObject("bookmarks")?.let { b -> // the car's bookmarks file, kept with the others (BrowserSync), on to the computer
                     val set = BrowserSync.keepCar(BrowserSync.root(), BrowserSync.device(c), b.optString("name"), b.optString("text"))
                         ?: return 400 to JSONObject().put("error", "Not a bookmarks file.")
-                    BrowserSync.keepSaved(set.marks.values.map { it.url to it.title }) // the deleted too: their titles stay in Saved pages.txt
+                    BrowserSync.keepSaved(set.paths().let { dirs -> set.marks.values.map { Bookmark(it.url, it.title, folder = dirs[it.folder].orEmpty(), stream = it.stream) } }) // the deleted too: their titles stay in Saved pages.txt
                     ScopedSync.soon(c.applicationContext, "browser", orWhole = true)
                     return 200 to JSONObject().put("ok", true)
                 }

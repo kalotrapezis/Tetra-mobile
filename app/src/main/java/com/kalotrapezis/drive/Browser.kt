@@ -11,7 +11,8 @@ import java.net.URLEncoder
 internal data class Visit(val url: String, val title: String, val at: Long)
 // pinned: at the start page's front; folder: a path of folders, "Radios" or "Imported/Bookmarks Toolbar/News", "" for none
 // (a saved name with no "/" is a top-level folder, as before)
-internal data class Bookmark(val url: String, val title: String, val pinned: Boolean = false, val folder: String = "")
+/** [stream]: a radio's own sound address, learnt by Tetra Car as it plays (the user, 20 Nov), kept for Saved pages.txt. */
+internal data class Bookmark(val url: String, val title: String, val pinned: Boolean = false, val folder: String = "", val stream: String = "")
 
 /**
  * The bookmarks and the folders kept even when empty (the manager's, 3 Nov: "a proper bookmarks manager, Firefox-like"):
@@ -128,6 +129,19 @@ internal object BrowserRules {
         return list[(i + (if (forward) 1 else -1) + list.size) % list.size]
     }
 
+    /** Tetra Car's ♥ folders (the user, 20 Nov), as Saved pages.txt names them: written there by the car's and this device's pages alike. */
+    val MEDIA_FOLDERS = listOf("YouTube", "YouTube Music", "Live Radio", "Spotify").map { "Media/$it" }
+
+    /**
+     * Saved pages.txt's title for [b] (the user, 20 Nov: "the title of the songs › the service, on the radios the name"): in a
+     * Media folder its name cleaned and the folder after it ("Δίεση 101.3 - Αθήνα › Live Radio"), the others as they are.
+     */
+    fun savedTitle(b: Bookmark) = b.folder.takeIf { it in MEDIA_FOLDERS }?.let { "${cleanTitle(b.title)} › ${BookmarkLibrary.nameOf(it)}" } ?: b.title
+
+    /** A page's title without its site's words: " - YouTube", " | Spotify", live24.gr's " on LIVE24.gr - … Listen Live". */
+    fun cleanTitle(t: String) = t.substringBefore(" on LIVE24.gr").substringBefore(" | Spotify").replace(" - song and lyrics by ", " - ")
+        .removeSuffix(" - YouTube Music").removeSuffix(" - YouTube").trim().ifEmpty { t }
+
     fun host(url: String?) = url?.substringAfter("://", "")?.substringBefore('/')?.substringBefore('?')?.substringAfterLast('@')?.substringBefore(':')?.lowercase().orEmpty()
 
     /** shortcut: a site without the Public Suffix List — the last two labels, or three under com.gr, co.uk and their like; use the PSL if a site is split wrongly. */
@@ -143,8 +157,8 @@ internal object BrowserRules {
 
     fun visitsJson(v: List<Visit>) = JSONArray(v.map { JSONObject().put("url", it.url).put("title", it.title).put("at", it.at) }).toString()
     fun visits(s: String?) = runCatching { JSONArray(s).let { a -> (0 until a.length()).map { a.getJSONObject(it).run { Visit(getString("url"), optString("title"), getLong("at")) } } } }.getOrDefault(emptyList())
-    fun bookmarksJson(b: List<Bookmark>) = JSONArray(b.map { JSONObject().put("url", it.url).put("title", it.title).apply { if (it.pinned) put("pinned", true); if (it.folder.isNotEmpty()) put("folder", it.folder) } }).toString()
-    fun bookmarks(s: String?) = runCatching { JSONArray(s).let { a -> (0 until a.length()).map { a.getJSONObject(it).run { Bookmark(getString("url"), optString("title"), optBoolean("pinned"), optString("folder")) } } } }.getOrDefault(emptyList())
+    fun bookmarksJson(b: List<Bookmark>) = JSONArray(b.map { JSONObject().put("url", it.url).put("title", it.title).apply { if (it.pinned) put("pinned", true); if (it.folder.isNotEmpty()) put("folder", it.folder); if (it.stream.isNotEmpty()) put("stream", it.stream) } }).toString()
+    fun bookmarks(s: String?) = runCatching { JSONArray(s).let { a -> (0 until a.length()).map { a.getJSONObject(it).run { Bookmark(getString("url"), optString("title"), optBoolean("pinned"), optString("folder"), optString("stream")) } } } }.getOrDefault(emptyList())
 
     /** The start page's order: the pinned at the front, then the newest first. */
     fun front(b: List<Bookmark>) = b.reversed().sortedByDescending { it.pinned }

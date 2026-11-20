@@ -238,14 +238,30 @@ class BrowserSyncTest {
 
     @Test fun savedPagesKeepEveryPageOnceWithItsTitleTheNewestFirst() {
         val t = 1_763_400_000_000L
-        val first = BrowserSync.savedList("", listOf("https://y.com/1" to "Song — Live", "https://y.com/2" to ""), t)!!
+        val first = BrowserSync.savedList("", listOf(Bookmark("https://y.com/1", "Song — Live"), Bookmark("https://y.com/2", "")), t)!!
         assertTrue(first.startsWith("Pages saved"))
-        assertNull(BrowserSync.savedList(first, listOf("https://y.com/1" to "Song — Live"), t + day)) // nothing new
-        val second = BrowserSync.savedList(first, listOf("https://y.com/1" to "x", "https://y.com/3" to "Three"), t + day)!!
+        assertNull(BrowserSync.savedList(first, listOf(Bookmark("https://y.com/1", "Song — Live")), t + day)) // nothing new
+        val second = BrowserSync.savedList(first, listOf(Bookmark("https://y.com/1", "x"), Bookmark("https://y.com/3", "Three")), t + day)!!
         assertTrue(second.startsWith(first)) // only added to, never rewritten
         val pages = BrowserSync.savedPages(second)
         assertEquals(listOf("https://y.com/3", "https://y.com/2", "https://y.com/1"), pages.map { it.third })
         assertEquals("Song — Live", pages.last().second) // a title with the separator in it stays whole
         assertEquals("https://y.com/2", pages[1].second) // no title: its address
+    }
+
+    @Test fun savedPagesNameSongsAndRadiosWithTheirStream() {
+        val t = 1_763_400_000_000L
+        val first = BrowserSync.savedList("", listOf(Bookmark("https://live24.gr/radio/menta", "Μέντα FM 88.0 - Αθήνα on LIVE24.gr - Μέντα FM 88.0 Radio Listen Live"), Bookmark("https://r.com/", "Reddit")), t)!!
+        val marks = listOf(Bookmark("https://live24.gr/radio/menta", "Μέντα FM 88.0 - Αθήνα on LIVE24.gr - x", folder = "Media/Live Radio", stream = "https://s.gr/menta"),
+            Bookmark("https://r.com/", "Reddit"), Bookmark("https://open.spotify.com/track/1", "Song - song and lyrics by Artist | Spotify", folder = "Media/Spotify"))
+        val tagged = BrowserSync.savedList(first, marks, t + day)!!
+        assertTrue(tagged, "  Μέντα FM 88.0 - Αθήνα › Live Radio — https://live24.gr/radio/menta\n    stream: https://s.gr/menta\n" in tagged)
+        assertEquals(listOf("Song - Artist › Spotify", "Reddit", "Μέντα FM 88.0 - Αθήνα › Live Radio"), BrowserSync.savedPages(tagged).map { it.second })
+        assertNull(BrowserSync.savedList(tagged, marks, t + day)) // once
+    }
+
+    @Test fun theCarsStreamGoesThroughSync() {
+        val lib = BookmarkLibrary(listOf(Bookmark("https://live24.gr/radio/menta", "Menta", folder = "Media/Live Radio", stream = "https://s/menta")))
+        assertEquals(lib.marks, BookmarkSet.parse(BookmarkSet().record(lib, 1).json())!!.library().marks)
     }
 }
