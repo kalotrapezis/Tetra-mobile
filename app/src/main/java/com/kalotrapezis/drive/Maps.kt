@@ -396,8 +396,8 @@ internal fun cumulative(r: Route): DoubleArray {
  * The fix [lat],[lng] put on route [r] (its [cum]ulative metres): the nearest point of its line, searched from [from] on
  * first (so a route that comes back past itself does not jump back), the whole line when that is far.
  */
-internal fun progress(r: Route, cum: DoubleArray, lat: Double, lng: Double, from: Int = 0): Pair<Progress, Int> {
-    fun best(range: IntRange): Triple<Double, Int, Double> {
+internal fun progress(r: Route, cum: DoubleArray, lat: Double, lng: Double, from: Int = 0, heading: Double = Double.NaN): Pair<Progress, Int> {
+    fun best(range: IntRange, facing: Double = heading): Triple<Double, Int, Double> {
         var bd = Double.MAX_VALUE; var bi = 0; var bt = 0.0
         val k = Math.cos(Math.toRadians(lat)) // metres per degree east, relative to north
         for (i in range) {
@@ -405,6 +405,9 @@ internal fun progress(r: Route, cum: DoubleArray, lat: Double, lng: Double, from
             val bx = (r.lngs[i + 1] - lng) * k; val by = r.lats[i + 1] - lat
             val dx = bx - ax; val dy = by - ay
             val len = dx * dx + dy * dy
+            // not a part of the route running against the car: a later bridge right over the road it is on (the user, 21 Nov:
+            // under the bridge to Κάστρο on the A1 it jumped to the roundabout past it for four seconds)
+            if (facing.isFinite() && len > 0 && Math.abs(((Math.toDegrees(Math.atan2(dx, dy)) - facing) % 360 + 540) % 360 - 180) > 90) continue
             val t = if (len == 0.0) 0.0 else (-(ax * dx + ay * dy) / len).coerceIn(0.0, 1.0)
             val px = ax + t * dx; val py = ay + t * dy
             val d = Math.sqrt(px * px + py * py) * 111_195.0
@@ -416,6 +419,7 @@ internal fun progress(r: Route, cum: DoubleArray, lat: Double, lng: Double, from
     if (last < 0) return Progress(metresBetween(lat, lng, r.lats[0], r.lngs[0]), 0.0, 0.0, r.steps.lastIndex, 0.0) to 0
     var (d, i, t) = best(from.coerceIn(0, last)..last)
     if (d > 60) best(0..last).let { (d2, i2, t2) -> if (d2 < d) { d = d2; i = i2; t = t2 } }
+    if (d == Double.MAX_VALUE) best(0..last, Double.NaN).let { (d2, i2, t2) -> d = d2; i = i2; t = t2 } // all of it against the car: the nearest
     val along = cum[i] + t * (cum[i + 1] - cum[i])
     val next = r.steps.indexOfFirst { it.at > i }.let { if (it < 0) r.steps.lastIndex else it }
     val toNext = (cum[r.steps[next].at.coerceAtMost(cum.lastIndex)] - along).coerceAtLeast(0.0)

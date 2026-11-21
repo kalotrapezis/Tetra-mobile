@@ -611,7 +611,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         val n = nav ?: return
         val car = n.mode == "car"
         val speedMs = if (loc.hasSpeed()) loc.speed.toDouble() else 0.0
-        val g = guide(n, loc.latitude, loc.longitude, speedMs, System.currentTimeMillis(), MapsPrefs.bends(context), finding != null)
+        val g = guide(n, loc.latitude, loc.longitude, speedMs, System.currentTimeMillis(), MapsPrefs.bends(context), finding != null, headingOf(loc))
         val p = g.p
         val lc = mapRef?.locationComponent?.takeIf { it.isLocationComponentActivated }
         MapsTrace.fix(loc, p.takeIf { !g.off }, lc?.let { (if (it.cameraMode == CameraMode.TRACKING_GPS) "follow" else "free") +

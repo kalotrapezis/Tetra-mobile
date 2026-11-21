@@ -1098,4 +1098,26 @@ class PlusCodeTest {
         assertEquals(10_000L, MapsDuck.backup(longest))
         assertTrue(longest.length * 1_000L / 13 < MapsDuck.backup(longest)) // ~13 letters a second: said before the backup
     }
+
+    @Test fun signSaysTheFirstTownAndWhereTheRoadLeads() {
+        val signs = listOf(null, "Λιβαδειά, Κάστρο, Δελφοί, Παρνασσός, Κυρτώνη, Πύργος", "Δελφοί;Κάστρο", "Δελφοί")
+        assertEquals("Λιβαδειά, Δελφοί", signTowns(signs, 1, "el")) // Δελφοί signposted on to the last step
+        assertEquals("Λιβαδειά", signTowns(listOf("Λιβαδειά;Κάστρο;Δελφοί"), 0, "el")) // nothing later: the first alone
+        assertEquals("Λαμία", signTowns(listOf("Λαμία;Lamia;Θήβα;Thiva"), 0, "el"))
+        assertEquals("Lamia", signTowns(listOf("Λαμία;Lamia;Θήβα;Thiva"), 0, "en"))
+        assertNull(signTowns(listOf(null), 0, "el"))
+    }
+
+    @Test fun bridgeOverTheRoadIsNotWhereTheCarIs() {
+        // the user's drive, 21 Nov, the A1 to Λιβαδειά: the route keeps right off the motorway, loops round and comes back west
+        // over it on a bridge to a roundabout; under that bridge, going north, the fix was put on the bridge for 4 s
+        val p = "38.46054 23.16401;38.46087 23.16399;38.46152 23.16399;38.48873 23.16404;38.48928 23.16423;38.48937 23.16428;38.48946 23.16435;38.48955 23.16444;38.48959 23.16449;38.48964 23.16460;38.48969 23.16474;38.48971 23.16489;38.48971 23.16504;38.48968 23.16521;38.48963 23.16537;38.48956 23.16552;38.48945 23.16570;38.48939 23.16578;38.48931 23.16585;38.48922 23.16591;38.48913 23.16596;38.48902 23.16599;38.48889 23.16602;38.48878 23.16603;38.48856 23.16604;38.48856 23.16442;38.48856 23.16342;38.48857 23.16287;38.48858 23.16258;38.48860 23.16228;38.48862 23.16199;38.48866 23.16170;38.48878 23.16100;38.48881 23.16090;38.48885 23.16080;38.48890 23.16071;38.48896 23.16063;38.48899 23.16060;38.48902 23.16056;38.48904 23.16050;38.48904 23.16044;38.48902 23.16038;38.48899 23.16034".split(';').map { it.split(' ').let { (a, b) -> a.toDouble() to b.toDouble() } }
+        val r = Route("car", p.map { it.first }.toDoubleArray(), p.map { it.second }.toDoubleArray(), 0.0, 0L,
+            listOf(Step("", 0, 0.0, 0, ""), Step("Μείνετε δεξιά", 7, 0.0, 3, ""), Step("Στρίψτε δεξιά", 2, 0.0, 24, ""), Step("Κυκλικός", 6, 0.0, 36, ""), Step("", 4, 0.0, p.lastIndex, "")))
+        val cum = cumulative(r)
+        assertEquals(3, progress(r, cum, 38.488569, 23.164124, 1).first.next) // 10:05:50 without the heading: on the bridge, the roundabout next
+        val (fix, _) = progress(r, cum, 38.488569, 23.164124, 1, 9.0)
+        assertEquals(1, fix.next) // the keep right still ahead, not the roundabout
+        assertTrue(fix.off < 20)
+    }
 }

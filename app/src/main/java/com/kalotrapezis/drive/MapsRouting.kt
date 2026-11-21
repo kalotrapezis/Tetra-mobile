@@ -265,7 +265,11 @@ internal object MapsRouting {
             return listOfNotNull(longest(refs)?.substringBefore(';'), longest(names)).distinct().joinToString(" ")
         }
         var at = 0
-        val steps = best.instructions.map { ins ->
+        val signs = best.instructions.map { it.extraInfoJSON["street_destination"] as? String }
+        val steps = best.instructions.mapIndexed { i, ins ->
+            // GraphHopper says a sign's every town ("…προς Λιβαδειά, Κάστρο, Δελφοί, Παρνασσός, Κυρτώνη, Πύργος, …"): two of them, one road code
+            ins.extraInfoJSON.let { x -> signTowns(signs, i, w.lang)?.let { x["street_destination"] = it }
+                (x["street_destination_ref"] as? String)?.let { x["street_destination_ref"] = it.split(';', ',').first().trim() } }
             var text = ins.getTurnDescription(tr)
             var street = ins.name.orEmpty(); var ref = (ins.extraInfoJSON["street_ref"] as? String).orEmpty()
             var toward = (ins.extraInfoJSON["street_destination"] as? String).orEmpty().ifEmpty { (ins.extraInfoJSON["street_destination_ref"] as? String).orEmpty() }
@@ -695,4 +699,21 @@ internal object MapsRouting {
                 em.getBooleanEncodedValue("roundabout"), if (hints.getBool(NO_LEFT, false)) towns else null) else turns, p)
         }
     }
+}
+
+/**
+ * A sign's towns cut to what a driver needs (the user, 21 Nov, the A1 to Λιβαδειά: "it said half of Greece"): the first, and of
+ * the others the one still signposted furthest along the route, where the road leads; in the directions' script where a sign has
+ * both. [signs]: each step's sign as GraphHopper keeps it (towns between ";" or ", "), [i] this step's.
+ */
+internal fun signTowns(signs: List<String?>, i: Int, lang: String): String? {
+    fun towns(s: String?) = s.orEmpty().split(';', ',').map { it.trim() }.filter { it.isNotEmpty() }.distinct().let { all ->
+        val greek = all.filter { t -> t.any { it in '\u0370'..'\u03FF' || it in '\u1F00'..'\u1FFF' } }
+        if (greek.isEmpty() || greek.size == all.size) all else if (lang == "el") greek else all - greek.toSet()
+    }
+    val here = towns(signs.getOrNull(i))
+    if (here.size <= 1) return here.firstOrNull()
+    val later = signs.map { towns(it).map(String::lowercase) }
+    val goal = here.drop(1).map { t -> t to later.indexOfLast { t.lowercase() in it } }.filter { it.second > i }.maxByOrNull { it.second }?.first
+    return listOfNotNull(here[0], goal).joinToString(", ")
 }

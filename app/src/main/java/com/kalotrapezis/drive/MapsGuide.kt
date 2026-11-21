@@ -78,9 +78,9 @@ internal fun where(loc: android.location.Location) = "%.5f,%.5f".format(Locale.R
     (if (loc.hasSpeed()) " ${Math.round(loc.speed * 3.6f)} km/h" else "") + (if (loc.hasBearing()) " facing ${loc.bearing.toInt()}°" else "") +
     (if (loc.hasAccuracy()) " ±${loc.accuracy.toInt()} m" else "")
 
-/** [n] at a fix [lat],[lng] going [speed] m/s at [now] (ms); [bends] the setting; [finding] while a route is being found. */
-internal fun guide(n: Nav, lat: Double, lng: Double, speed: Double, now: Long, bends: Boolean, finding: Boolean): Tick {
-    val (p, i) = progress(n.route, n.cum, lat, lng, n.index)
+/** [n] at a fix [lat],[lng] going [speed] m/s at [now] (ms); [bends] the setting; [finding] while a route is being found; [heading] the way it moves (NaN: not known). */
+internal fun guide(n: Nav, lat: Double, lng: Double, speed: Double, now: Long, bends: Boolean, finding: Boolean, heading: Double = Double.NaN): Tick {
+    val (p, i) = progress(n.route, n.cum, lat, lng, n.index, heading)
     val car = n.mode == "car"
     val step = n.route.steps[p.next]
     // short of the route's start, as far off as it began (the user, 5 Nov: parked 250 m inside a prison's grounds, a new
