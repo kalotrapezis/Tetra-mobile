@@ -4758,4 +4758,5 @@
     <string name="car_map_focus">Fokus</string>
     <string name="car_map_arrow_right">Lågt, till höger</string>
     <string name="maps_focus_summary">Var bilen är vid körning på en bred skärm (surfplatta, telefon liggande)</string>
+    <string name="maps_tilt_summary">Kartans vinkel under vägvisning med bil; annars sedd ovanifrån</string>
 </resources>

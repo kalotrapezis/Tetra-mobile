@@ -999,6 +999,9 @@ private val PART_NAMES = mapOf(AiPart.CHAT to R.string.ai_part_chat, AiPart.LIST
         var focus by remember { mutableStateOf(MapsPrefs.focus(mapsContext)) }
         ChoiceRow(stringResource(R.string.car_map_focus), stringResource(R.string.maps_focus_summary), listOf(CarView.MIDDLE to stringResource(R.string.car_map_arrow_middle),
             CarView.LOW to stringResource(R.string.car_map_arrow_low), CarView.RIGHT to stringResource(R.string.car_map_arrow_right)), focus) { focus = it; MapsPrefs.setFocus(mapsContext, it) }
+        var tilt by remember { mutableStateOf(MapsPrefs.tilt(mapsContext)) }
+        ChoiceRow(stringResource(R.string.car_map_tilt), stringResource(R.string.maps_tilt_summary),
+            CarView.TILT.map { it to if (it < 0) stringResource(R.string.car_map_tilt_auto) else "$it°" }, tilt) { tilt = it; MapsPrefs.setTilt(mapsContext, it) }
     }
     var autoPark by remember { mutableStateOf(MapsPrefs.autoPark(mapsContext)) }
     var openAtCar by remember { mutableStateOf(MapsPrefs.openAtCar(mapsContext)) }

@@ -4859,4 +4859,5 @@
     <string name="car_map_focus">Centrage</string>
     <string name="car_map_arrow_right">En bas à droite</string>
     <string name="maps_focus_summary">Où se trouve la voiture en conduite sur un écran large (tablette, téléphone à l\'horizontale)</string>
+    <string name="maps_tilt_summary">L\'angle de la carte pendant le guidage en voiture ; sinon vue de dessus</string>
 </resources>

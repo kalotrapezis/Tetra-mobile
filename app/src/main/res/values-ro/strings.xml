@@ -4859,4 +4859,5 @@
     <string name="car_map_focus">Focalizare</string>
     <string name="car_map_arrow_right">Jos, în dreapta</string>
     <string name="maps_focus_summary">Unde se află mașina la condus pe un ecran lat (tabletă, telefon orizontal)</string>
+    <string name="maps_tilt_summary">Unghiul hărții în navigarea cu mașina; altfel văzută de sus</string>
 </resources>

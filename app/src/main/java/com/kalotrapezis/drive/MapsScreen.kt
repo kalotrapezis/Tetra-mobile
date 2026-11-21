@@ -243,6 +243,9 @@ internal object MapsPrefs {
     /** Where the car sits while driving on a wide screen (a tablet, the phone sideways), as Tetra Car's menu: low right unless set (the user, 20 Nov). */
     fun focus(c: Context) = prefs(c).getInt("focus", CarView.RIGHT)
     fun setFocus(c: Context, f: Int) = prefs(c).edit().putInt("focus", f).apply()
+    /** The directions' camera tilt by car on the phone and tablet, as Tetra Car's menu: -1 by speed (45° to 60°), else fixed degrees. */
+    fun tilt(c: Context) = prefs(c).getInt("tilt", -1)
+    fun setTilt(c: Context, t: Int) = prefs(c).edit().putInt("tilt", t).apply()
     fun autoPark(c: Context) = prefs(c).getBoolean("auto_park", true)
     fun setAutoPark(c: Context, on: Boolean) = prefs(c).edit().putBoolean("auto_park", on).apply()
     fun openAtCar(c: Context) = prefs(c).getBoolean("open_at_car", false)
@@ -500,7 +503,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
     }
     /** The driving camera's zoom and tilt for [v], as Tetra Car's menu sets them (elsewhere [v] itself). */
     // tilted only while directions run; driving without them, seen from above (the user, 21 Nov)
-    fun cam(v: Pair<Double, Double>) = (carView?.camera(v) ?: v).let { if (nav == null) it.first to 0.0 else it }
+    fun cam(v: Pair<Double, Double>) = (carView?.camera(v) ?: MapsPrefs.tilt(context).let { t -> if (t >= 0) v.first to t.toDouble() else v }).let { if (nav == null) it.first to 0.0 else it }
 
     /** The camera on me, turned the way I go; zoom and tilt through the tracking itself (a camera move of ours would end it). */
     fun follow(mode: String) {

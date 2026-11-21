@@ -4960,4 +4960,5 @@
     <string name="car_map_focus">Fokus</string>
     <string name="car_map_arrow_right">Spodaj desno</string>
     <string name="maps_focus_summary">Kje je avto med vožnjo na širokem zaslonu (tablica, telefon ležeče)</string>
+    <string name="maps_tilt_summary">Kot zemljevida med navigacijo z avtom; sicer pogled od zgoraj</string>
 </resources>

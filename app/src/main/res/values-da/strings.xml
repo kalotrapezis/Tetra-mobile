@@ -4758,4 +4758,5 @@
     <string name="car_map_focus">Fokus</string>
     <string name="car_map_arrow_right">Lavt, til højre</string>
     <string name="maps_focus_summary">Hvor bilen er under kørsel på en bred skærm (tablet, telefon på tværs)</string>
+    <string name="maps_tilt_summary">Kortets vinkel under rutevejledning i bil; ellers set ovenfra</string>
 </resources>

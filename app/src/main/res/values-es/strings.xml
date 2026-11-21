@@ -4859,4 +4859,5 @@
     <string name="car_map_focus">Enfoque</string>
     <string name="car_map_arrow_right">Abajo a la derecha</string>
     <string name="maps_focus_summary">Dónde está el coche al conducir en una pantalla ancha (tableta, teléfono en horizontal)</string>
+    <string name="maps_tilt_summary">El ángulo del mapa al navegar en coche; si no, se ve desde arriba</string>
 </resources>

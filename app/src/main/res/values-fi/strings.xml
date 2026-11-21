@@ -4758,4 +4758,5 @@
     <string name="car_map_focus">Kohdistus</string>
     <string name="car_map_arrow_right">Alhaalla oikealla</string>
     <string name="maps_focus_summary">Missä auto on ajaessa leveällä näytöllä (tabletti, puhelin vaakatasossa)</string>
+    <string name="maps_tilt_summary">Kartan kulma autolla navigoitaessa; muuten ylhäältä katsottuna</string>
 </resources>

@@ -4960,4 +4960,5 @@
     <string name="car_map_focus">Fokusas</string>
     <string name="car_map_arrow_right">Apačioje dešinėje</string>
     <string name="maps_focus_summary">Kur yra automobilis vairuojant plačiame ekrane (planšetė, telefonas gulsčiai)</string>
+    <string name="maps_tilt_summary">Žemėlapio kampas naršant automobiliu; kitaip matomas iš viršaus</string>
 </resources>

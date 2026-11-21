@@ -5061,4 +5061,5 @@
     <string name="car_map_focus">Fócas</string>
     <string name="car_map_arrow_right">Íseal, ar dheis</string>
     <string name="maps_focus_summary">Cá bhfuil an carr agus tú ag tiomáint ar scáileán leathan (táibléad, fón ar a thaobh)</string>
+    <string name="maps_tilt_summary">Uillinn an léarscáil le linn treoracha sa charr; murach sin, ó thuas</string>
 </resources>

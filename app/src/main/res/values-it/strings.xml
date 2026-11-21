@@ -4758,4 +4758,5 @@
     <string name="car_map_focus">Centratura</string>
     <string name="car_map_arrow_right">In basso a destra</string>
     <string name="maps_focus_summary">Dove si trova l\'auto durante la guida su uno schermo largo (tablet, telefono in orizzontale)</string>
+    <string name="maps_tilt_summary">L\'angolo della mappa durante la navigazione in auto; altrimenti vista dall\'alto</string>
 </resources>

@@ -4759,4 +4759,5 @@
     <string name="car_map_focus">Focus</string>
     <string name="car_map_arrow_right">Low, right</string>
     <string name="maps_focus_summary">Where the car sits while driving on a wide screen (a tablet, the phone sideways)</string>
+    <string name="maps_tilt_summary">The map\'s angle while directions run by car; otherwise it is seen from above</string>
 </resources>

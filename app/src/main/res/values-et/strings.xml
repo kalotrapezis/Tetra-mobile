@@ -4758,4 +4758,5 @@
     <string name="car_map_focus">Fookus</string>
     <string name="car_map_arrow_right">All paremal</string>
     <string name="maps_focus_summary">Kus auto sõidu ajal laial ekraanil on (tahvel, telefon rõhtsalt)</string>
+    <string name="maps_tilt_summary">Kaardi nurk autoga navigeerides; muidu ülevalt vaadatuna</string>
 </resources>

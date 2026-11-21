@@ -4960,4 +4960,5 @@
     <string name="car_map_focus">Zaměření</string>
     <string name="car_map_arrow_right">Dole vpravo</string>
     <string name="maps_focus_summary">Kde je auto při jízdě na širokém displeji (tablet, telefon na šířku)</string>
+    <string name="maps_tilt_summary">Úhel mapy při navigaci autem; jinak pohled shora</string>
 </resources>

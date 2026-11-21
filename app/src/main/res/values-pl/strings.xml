@@ -4960,4 +4960,5 @@
     <string name="car_map_focus">Ostrość</string>
     <string name="car_map_arrow_right">Nisko po prawej</string>
     <string name="maps_focus_summary">Gdzie jest samochód podczas jazdy na szerokim ekranie (tablet, telefon poziomo)</string>
+    <string name="maps_tilt_summary">Kąt mapy podczas nawigacji samochodem; poza nią widok z góry</string>
 </resources>
