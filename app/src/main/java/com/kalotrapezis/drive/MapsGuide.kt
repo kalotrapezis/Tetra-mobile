@@ -109,6 +109,59 @@ internal fun guide(n: Nav, lat: Double, lng: Double, speed: Double, now: Long, b
  *
  * Space-separated; the place's name last, as it may have spaces. Only on this phone, never synced.
  */
+/**
+ * The driver's own pace (the user, 21 Nov: after comparing with Google Maps, "learn my pace from my drives"): by car with
+ * directions, each second on the route adds its real time, and the time the route gave it before this pace, to its road
+ * group — motorways, main and country roads, the rest ([MapsRouting.group]). A group's pace is their ratio, pulled towards 1
+ * by ten minutes as the route gives them (so one drive moves it a little), kept within 0.75–1.25, the last ~4 hours of
+ * driving counting. A stop of over 2 minutes (a café, fuel) is not driving and is left out; lights and queues are.
+ */
+internal object MapsPace {
+    /** The sums, pure for the tests: [real] and [given] seconds per group. */
+    class Tally(val real: DoubleArray = DoubleArray(3), val given: DoubleArray = DoubleArray(3)) {
+        fun add(g: Int, realS: Double, givenS: Double) {
+            real[g] += realS; given[g] += givenS
+            if (given[g] > KEEP) { val k = KEEP / given[g]; real[g] *= k; given[g] *= k }
+        }
+        fun pace(g: Int) = ((real[g] + PRIOR) / (given[g] + PRIOR)).coerceIn(0.75, 1.25)
+        fun paces() = DoubleArray(3) { pace(it) }
+    }
+    private const val PRIOR = 600.0; private const val KEEP = 4 * 3600.0
+    private val tally = Tally(); private var loaded = false; private var unsaved = 0.0
+    private var last: Triple<Long, Double, Route>? = null; private var stillSince = 0L
+
+    private fun prefs(c: Context) = c.getSharedPreferences("maps_pace", Context.MODE_PRIVATE)
+    /** The learnt pace into [MapsRouting.pace], once. */
+    @Synchronized fun load(c: Context) {
+        if (loaded) return; loaded = true
+        val p = prefs(c)
+        for (g in 0..2) { tally.real[g] = p.getFloat("real$g", 0f).toDouble(); tally.given[g] = p.getFloat("given$g", 0f).toDouble() }
+        MapsRouting.pace = tally.paces()
+        WriterLog.i("Maps: my pace ${text()}")
+    }
+    private fun text() = listOf("motorways", "main roads", "the rest").mapIndexed { g, n -> "$n ×%.2f (%d min)".format(Locale.ROOT, tally.pace(g), (tally.given[g] / 60).toInt()) }.joinToString(", ")
+    private fun save(c: Context) {
+        prefs(c).edit().apply { for (g in 0..2) { putFloat("real$g", tally.real[g].toFloat()); putFloat("given$g", tally.given[g].toFloat()) } }.apply()
+        unsaved = 0.0; MapsRouting.pace = tally.paces()
+        WriterLog.i("Maps: my pace now ${text()}")
+    }
+    /** A fix of [n]'s at [p] ([off] the route), [speed] m/s, at [now] ms. */
+    @Synchronized fun fix(c: Context, n: Nav, p: Progress, off: Boolean, speed: Double, now: Long) {
+        load(c)
+        val r = n.route
+        if (n.mode != "car" || r.secs.size != n.cum.size || r.groups.size != n.cum.size - 1) { last = null; return }
+        if (speed > 1) stillSince = 0L else if (stillSince == 0L) stillSince = now
+        val prev = last; last = Triple(now, p.along, r)
+        if (prev == null || prev.third !== r || off || p.off > 25) return
+        val dt = (now - prev.first) / 1000.0
+        if (dt < 0.5 || dt > 3 || p.along < prev.second - 5 || (stillSince != 0L && now - stillSince > 120_000)) return
+        val g = r.groups[stretchAt(n.cum, prev.second)].toInt()
+        tally.add(g, dt, (secondsAt(r, n.cum, p.along) - secondsAt(r, n.cum, prev.second)).coerceAtLeast(0.0) / r.pace[g])
+        unsaved += dt
+        if (unsaved >= 60) save(c)
+    }
+}
+
 internal object MapsTrace {
     const val DAYS = 7L
     private val day = DateTimeFormatter.ofPattern("yyyy-MM-dd")

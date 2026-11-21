@@ -388,9 +388,17 @@ internal data class Progress(val off: Double, val along: Double, val left: Doubl
 /** The seconds still to drive on [r] from [along] metres ([cum]: its metres at each point): by its own time at each point, else by distance. */
 internal fun secondsLeft(r: Route, cum: DoubleArray, along: Double): Double {
     if (r.secs.size != cum.size || cum.size < 2) return r.millis / 1000.0 * ((cum.lastOrNull() ?: r.metres) - along).coerceAtLeast(0.0) / r.metres.coerceAtLeast(1.0)
-    val i = java.util.Arrays.binarySearch(cum, along).let { if (it >= 0) it else -it - 2 }.coerceIn(0, cum.size - 2)
+    return (r.secs.last() - secondsAt(r, cum, along)).coerceAtLeast(0.0)
+}
+
+/** The stretch of a route ([cum]: its metres at each point) that [along] metres falls on. */
+internal fun stretchAt(cum: DoubleArray, along: Double) = java.util.Arrays.binarySearch(cum, along).let { if (it >= 0) it else -it - 2 }.coerceIn(0, cum.size - 2)
+
+/** The seconds [r] gives to drive to [along] metres ([cum]: its metres at each point; [r] has its own [Route.secs]). */
+internal fun secondsAt(r: Route, cum: DoubleArray, along: Double): Double {
+    val i = stretchAt(cum, along)
     val f = if (cum[i + 1] > cum[i]) ((along - cum[i]) / (cum[i + 1] - cum[i])).coerceIn(0.0, 1.0) else 0.0
-    return (r.secs.last() - (r.secs[i] + f * (r.secs[i + 1] - r.secs[i]))).coerceAtLeast(0.0)
+    return r.secs[i] + f * (r.secs[i + 1] - r.secs[i])
 }
 
 /** A route's running total of metres at each point, for [progress]. */

@@ -31,9 +31,10 @@ import java.util.Locale
 internal data class Step(val text: String, val sign: Int, val metres: Double, val at: Int, val street: String, val ref: String = "",
     val junction: Junction? = null, val lanes: Lanes? = null, val toward: String = "")
 
-/** [secs]: the seconds driven to each point (empty: not known, the time spread by distance). [roads]: what it mostly runs on — "motorway", "main" or "local" — for the choice between routes. */
+/** [secs]: the seconds driven to each point (empty: not known, the time spread by distance); [groups] each stretch's road group
+ *  ([MapsRouting.group]) and [pace] the driver's pace on each when it was made ([MapsPace]). [roads]: what it mostly runs on — "motorway", "main" or "local" — for the choice between routes. */
 internal data class Route(val mode: String, val lats: DoubleArray, val lngs: DoubleArray, val metres: Double, val millis: Long, val steps: List<Step>,
-    val roads: String = "", val secs: DoubleArray = DoubleArray(0))
+    val roads: String = "", val secs: DoubleArray = DoubleArray(0), val groups: ByteArray = ByteArray(0), val pace: DoubleArray = doubleArrayOf(1.0, 1.0, 1.0))
 
 /**
  * Offline routing on the phone: the graph the computer built (tools/maps-greece.sh, tools/maps-graph.yml) opened read-only
@@ -50,6 +51,10 @@ internal object MapsRouting {
      * rest a third slower (crossings, parked cars, bumps). Its mean miss against Google went from 15 % to 9 %.
      */
     fun carTime(roadClass: String?) = when (roadClass) { "motorway", "trunk" -> 1.07; "primary", "secondary", "tertiary" -> 1.0; else -> 1.3 }
+    /** The road groups of the driver's own pace ([MapsPace]): 0 motorways, 1 main and country roads, 2 the rest. */
+    fun group(roadClass: String?) = when (roadClass) { "motorway", "trunk" -> 0; "primary", "secondary", "tertiary" -> 1; else -> 2 }
+    /** The driver's own pace on each group against [carTime], as [MapsPace] has learnt it; 1 until then. */
+    @Volatile var pace = doubleArrayOf(1.0, 1.0, 1.0)
 
     /** How far a search that keeps the car's heading may look before the shortcuts take over (on the computer it gives up on Athens–Thessaloniki in 0.8 s). */
     private const val MAX_HEADED_NODES = 300_000
@@ -208,7 +213,8 @@ internal object MapsRouting {
         var before = 0.0
         val secs = if (parts.all { it.secs.size == it.lats.size }) parts.flatMapIndexed { i, r ->
             val t = before; before += r.secs.last(); r.secs.asList().drop(if (i == 0) 0 else 1).map { it + t } }.toDoubleArray() else DoubleArray(0)
-        return Route(parts[0].mode, line { it.lats }, line { it.lngs }, parts.sumOf { it.metres }, parts.sumOf { it.millis }, steps, parts.maxBy { it.metres }.roads, secs)
+        val groups = if (parts.all { it.groups.size == it.lats.size - 1 }) parts.flatMap { it.groups.asList() }.toByteArray() else ByteArray(0)
+        return Route(parts[0].mode, line { it.lats }, line { it.lngs }, parts.sumOf { it.metres }, parts.sumOf { it.millis }, steps, parts.maxBy { it.metres }.roads, secs, groups, parts[0].pace)
     }
 
     /** [routes] on the one graph [dir]; without [alternatives], the fastest alone (a leg across a border). */
@@ -315,11 +321,13 @@ internal object MapsRouting {
         // the seconds to each point: each stretch's time (a car's by its road, carTime) spread along its points by length
         val secs = DoubleArray(pts.size())
         val classes = best.pathDetails["road_class"].orEmpty()
-        val each = DoubleArray(maxOf(0, pts.size() - 1))
+        val each = DoubleArray(maxOf(0, pts.size() - 1)); val groups = ByteArray(each.size) { 2 }; val pace = pace.copyOf()
         best.pathDetails["time"].orEmpty().forEach { d ->
-            val k = if (mode != "car") 1.0 else carTime(classes.firstOrNull { d.first >= it.first && d.first < it.last }?.value?.toString()?.lowercase())
+            val c = classes.firstOrNull { d.first >= it.first && d.first < it.last }?.value?.toString()?.lowercase(); val g = group(c)
+            val k = if (mode != "car") 1.0 else carTime(c) * pace[g]
             val s = (d.value as? Number)?.toDouble()?.div(1000)?.times(k) ?: return@forEach
             val to = minOf(d.last, each.size); if (d.first >= to) return@forEach
+            for (i in d.first until to) groups[i] = g.toByte()
             val lens = (d.first until to).map { metresBetween(pts.getLat(it), pts.getLon(it), pts.getLat(it + 1), pts.getLon(it + 1)) }
             val sum = lens.sum()
             lens.forEachIndexed { j, m -> each[d.first + j] += if (sum > 0) s * m / sum else s / lens.size }
@@ -328,7 +336,7 @@ internal object MapsRouting {
         val known = secs.last() > 0
         val millis = if (known) (secs.last() * 1000).toLong() else best.time
         return Route(mode, DoubleArray(pts.size()) { pts.getLat(it) }, DoubleArray(pts.size()) { pts.getLon(it) }, best.distance, millis, steps, roads,
-            if (known) secs else DoubleArray(0))
+            if (known) secs else DoubleArray(0), if (known) groups else ByteArray(0), pace)
     }
 
     /**

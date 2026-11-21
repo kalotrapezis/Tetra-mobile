@@ -808,6 +808,7 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
         val n = nav ?: return
         val speed = if (loc.hasSpeed()) loc.speed.toDouble() else 0.0
         val g = guide(n, loc.latitude, loc.longitude, speed, System.currentTimeMillis(), MapsPrefs.bends(carContext), finding != null, headingOf(loc))
+        MapsPace.fix(carContext, n, g.p, g.off, speed, System.currentTimeMillis())
         val p = g.p
         MapsTrace.fix(loc, p.takeIf { !g.off }, camera())
         // the GPS unsure: written down, once a minute at most

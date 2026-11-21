@@ -1132,3 +1132,17 @@ class PlusCodeTest {
         assertEquals(1.07, MapsRouting.carTime("motorway"), 0.0); assertEquals(1.3, MapsRouting.carTime("residential"), 0.0)
     }
 }
+
+class MapsPaceTest {
+    @Test fun paceLearnsFromDrivesAndStaysSane() {
+        val t = MapsPace.Tally()
+        assertEquals(1.0, t.pace(0), 0.0) // nothing learnt: as the routes say
+        t.add(0, 600.0, 600.0); assertEquals(1.0, t.pace(0), 1e-9)
+        // the user, 21 Nov: about 0.84 of the time the route gives on motorways; one 20 min drive moves it most of the way
+        repeat(1200) { t.add(0, 0.84, 1.0) }
+        assertEquals((600 + 600 + 1008.0) / (600 + 600 + 1200.0), t.pace(0), 1e-9)
+        assertEquals(1.0, t.pace(1), 0.0) // the other groups untouched
+        repeat(100_000) { t.add(2, 3.0, 1.0) }; assertEquals(1.25, t.pace(2), 0.0) // never past a quarter
+        assertTrue(t.given[2] <= 4 * 3600.0 + 1) // the last ~4 hours
+    }
+}

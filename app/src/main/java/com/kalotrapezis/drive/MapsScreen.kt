@@ -285,7 +285,7 @@ internal object MapsPrefs {
     fun lang(c: Context) = prefs(c).getString("lang", null) ?: c.resources.configuration.locales[0].language.let { if (it in AppLocale.tags) it else "en" }
     fun setLang(c: Context, lang: String) = prefs(c).edit().putString("lang", lang).apply()
     /** Tetra's words for the directions, in their language. */
-    fun words(c: Context) = Words.of(c, lang(c))
+    fun words(c: Context) = Words.of(c, lang(c)).also { MapsPace.load(c) } // the driver's pace before any route
     /**
      * How distances are said and shown, as the phone's region measures (Android's own setting): "us" miles and feet, "uk"
      * miles and yards, else "metric". Read once; JVM tests have no Android, so metric there.
@@ -612,6 +612,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         val car = n.mode == "car"
         val speedMs = if (loc.hasSpeed()) loc.speed.toDouble() else 0.0
         val g = guide(n, loc.latitude, loc.longitude, speedMs, System.currentTimeMillis(), MapsPrefs.bends(context), finding != null, headingOf(loc))
+        MapsPace.fix(context, n, g.p, g.off, speedMs, System.currentTimeMillis())
         val p = g.p
         val lc = mapRef?.locationComponent?.takeIf { it.isLocationComponentActivated }
         MapsTrace.fix(loc, p.takeIf { !g.off }, lc?.let { (if (it.cameraMode == CameraMode.TRACKING_GPS) "follow" else "free") +
