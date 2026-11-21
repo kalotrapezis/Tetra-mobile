@@ -478,6 +478,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         view = DRIVING_VIEW
         mapRef?.locationComponent?.takeIf { it.isLocationComponentActivated }?.apply { cameraMode = CameraMode.NONE; renderMode = RenderMode.COMPASS }
         mapRef?.moveCamera(org.maplibre.android.camera.CameraUpdateFactory.paddingTo(0.0, 0.0, 0.0, 0.0)) // me in the middle again
+        mapRef?.animateCamera(org.maplibre.android.camera.CameraUpdateFactory.tiltTo(0.0)) // seen from above again, as before directions
     }
 
     /**
@@ -498,7 +499,8 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         }
     }
     /** The driving camera's zoom and tilt for [v], as Tetra Car's menu sets them (elsewhere [v] itself). */
-    fun cam(v: Pair<Double, Double>) = carView?.camera(v) ?: v
+    // tilted only while directions run; driving without them, seen from above (the user, 21 Nov)
+    fun cam(v: Pair<Double, Double>) = (carView?.camera(v) ?: v).let { if (nav == null) it.first to 0.0 else it }
 
     /** The camera on me, turned the way I go; zoom and tilt through the tracking itself (a camera move of ours would end it). */
     fun follow(mode: String) {
