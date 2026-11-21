@@ -92,7 +92,8 @@ class MapsTest {
             val r = MapsRouting.route(dir, 37.9838, 23.7275, 40.6401, 22.9444, mode, el)
             println("$mode Athens–Thessaloniki: ${r.metres.toInt()} m, ${r.millis / 1000} s")
             assertEquals(want.first, r.metres, 2.0)
-            assertEquals(want.second * (if (mode == "car") MapsRouting.CAR_TIME else 1.0), r.millis / 1000.0, 3.0)
+            if (mode == "car") assertTrue(r.millis / 1000.0 / want.second in 1.03..1.15) // mostly motorway: carTime's 1.07, a little more for the towns
+            else assertEquals(want.second.toDouble(), r.millis / 1000.0, 3.0)
         }
     }
 }
@@ -1119,5 +1120,15 @@ class PlusCodeTest {
         val (fix, _) = progress(r, cum, 38.488569, 23.164124, 1, 9.0)
         assertEquals(1, fix.next) // the keep right still ahead, not the roundabout
         assertTrue(fix.off < 20)
+    }
+
+    @Test fun timeLeftGoesByTheRoadsLeft() {
+        // 100 m of street taking 30 s, then 100 m of main road taking 10 s: halfway along the main road, 5 s left, not a quarter of 40
+        val r = Route("car", doubleArrayOf(38.0, 38.0009, 38.0018), doubleArrayOf(23.0, 23.0, 23.0), 200.0, 40_000L, emptyList(), secs = doubleArrayOf(0.0, 30.0, 40.0))
+        assertEquals(5.0, secondsLeft(r, doubleArrayOf(0.0, 100.0, 200.0), 150.0), 0.01)
+        assertEquals(40.0, secondsLeft(r, doubleArrayOf(0.0, 100.0, 200.0), 0.0), 0.01)
+        // a route without its own times: by distance
+        assertEquals(10.0, secondsLeft(r.copy(secs = DoubleArray(0)), doubleArrayOf(0.0, 100.0, 200.0), 150.0), 0.01)
+        assertEquals(1.07, MapsRouting.carTime("motorway"), 0.0); assertEquals(1.3, MapsRouting.carTime("residential"), 0.0)
     }
 }

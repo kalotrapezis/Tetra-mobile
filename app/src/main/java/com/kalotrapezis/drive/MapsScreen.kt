@@ -1132,7 +1132,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
                 }
                 if (navSheet) NavSheet(n, navTolls)
                 val left = n.p?.left ?: n.route.metres
-                val minutes = Math.round(n.route.millis / 60_000.0 * (left / n.route.metres.coerceAtLeast(1.0)))
+                val minutes = Math.round(secondsLeft(n.route, n.cum, n.p?.along ?: 0.0) / 60.0) // by the roads left, not their share of the length
                 val words: @Composable () -> Unit = {
                     Text("${metresText(left)} · ${minutesText(context, minutes)}", style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(if (nav == null) stringResource(R.string.maps_on_car_screen_bar, n.target.name) else n.target.name, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)

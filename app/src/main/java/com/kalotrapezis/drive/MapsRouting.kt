@@ -31,9 +31,9 @@ import java.util.Locale
 internal data class Step(val text: String, val sign: Int, val metres: Double, val at: Int, val street: String, val ref: String = "",
     val junction: Junction? = null, val lanes: Lanes? = null, val toward: String = "")
 
-/** [roads]: what it mostly runs on — "motorway", "main" or "local" — for the choice between routes. */
+/** [secs]: the seconds driven to each point (empty: not known, the time spread by distance). [roads]: what it mostly runs on — "motorway", "main" or "local" — for the choice between routes. */
 internal data class Route(val mode: String, val lats: DoubleArray, val lngs: DoubleArray, val metres: Double, val millis: Long, val steps: List<Step>,
-    val roads: String = "")
+    val roads: String = "", val secs: DoubleArray = DoubleArray(0))
 
 /**
  * Offline routing on the phone: the graph the computer built (tools/maps-greece.sh, tools/maps-graph.yml) opened read-only
@@ -43,10 +43,13 @@ internal data class Route(val mode: String, val lats: DoubleArray, val lngs: Dou
  */
 internal object MapsRouting {
     /**
-     * A car's times as GraphHopper gives them, at the limits, are short of a real drive (the user, 21 Oct: Άγιος Λουκάς →
-     * Χαλκίδα "is 30 min in reality, our map says 25"): a fifth more.
+     * A car's time on a road of [roadClass] against GraphHopper's at the limits. A fifth more everywhere (the user, 21 Oct: Άγιος
+     * Λουκάς → Χαλκίδα "is 30 min in reality, our map says 25") made the A1 to Λιβαδειά 62 min that took ~44 (21 Nov). Against
+     * Google Maps on eight trips (Αθήνα → Λαμία, Πάτρα; Κόρινθος → Καλαμάτα; Θήβα, Άγιος Θωμάς → Χαλκίδα…) and the user's own
+     * drives: motorways a little slower than the limits, main and country roads as GraphHopper says, streets, tracks and the
+     * rest a third slower (crossings, parked cars, bumps). Its mean miss against Google went from 15 % to 9 %.
      */
-    const val CAR_TIME = 1.2
+    fun carTime(roadClass: String?) = when (roadClass) { "motorway", "trunk" -> 1.07; "primary", "secondary", "tertiary" -> 1.0; else -> 1.3 }
 
     /** How far a search that keeps the car's heading may look before the shortcuts take over (on the computer it gives up on Athens–Thessaloniki in 0.8 s). */
     private const val MAX_HEADED_NODES = 300_000
@@ -202,7 +205,10 @@ internal object MapsRouting {
                 .map { it.copy(at = it.at + offset) }.also { offset += r.lats.size - 1 }
         }
         fun line(of: (Route) -> DoubleArray) = parts.flatMapIndexed { i, r -> of(r).asList().drop(if (i == 0) 0 else 1) }.toDoubleArray()
-        return Route(parts[0].mode, line { it.lats }, line { it.lngs }, parts.sumOf { it.metres }, parts.sumOf { it.millis }, steps, parts.maxBy { it.metres }.roads)
+        var before = 0.0
+        val secs = if (parts.all { it.secs.size == it.lats.size }) parts.flatMapIndexed { i, r ->
+            val t = before; before += r.secs.last(); r.secs.asList().drop(if (i == 0) 0 else 1).map { it + t } }.toDoubleArray() else DoubleArray(0)
+        return Route(parts[0].mode, line { it.lats }, line { it.lngs }, parts.sumOf { it.metres }, parts.sumOf { it.millis }, steps, parts.maxBy { it.metres }.roads, secs)
     }
 
     /** [routes] on the one graph [dir]; without [alternatives], the fastest alone (a leg across a border). */
@@ -212,7 +218,7 @@ internal object MapsRouting {
         val tr = translation(w.lang); val locale = tr.locale
         val mode = if (mode == "wheelchair" && "wheelchair" !in profiles(dir)) "foot" else mode // a graph from before Rolling
         val req = GHRequest(fromLat, fromLng, toLat, toLng).setProfile(mode).setLocale(locale).setAlgorithm(if (alternatives) Parameters.Algorithms.ALT_ROUTE else "")
-            .setPathDetails(listOf("street_name", "street_ref", "road_environment", "road_class"))
+            .setPathDetails(listOf("street_name", "street_ref", "road_environment", "road_class", "time"))
         req.hints.putObject("alternative_route.max_paths", 3)
         if (main) req.hints.putObject(MAIN_ROADS, true).putObject(NO_LEFT, noLeft).putObject(Parameters.CH.DISABLE, true).putObject(Parameters.Routing.MAX_VISITED_NODES, MAX_MAIN_NODES)
         // a moving car goes on the way it faces (the user, 23 Oct: each new route said "turn back" for kilometres): one way,
@@ -306,8 +312,23 @@ internal object MapsRouting {
             part("motorway", "trunk", "primary", "secondary") >= 50 -> "main"
             else -> "local"
         }
-        val millis = if (mode == "car") (best.time * CAR_TIME).toLong() else best.time
-        return Route(mode, DoubleArray(pts.size()) { pts.getLat(it) }, DoubleArray(pts.size()) { pts.getLon(it) }, best.distance, millis, steps, roads)
+        // the seconds to each point: each stretch's time (a car's by its road, carTime) spread along its points by length
+        val secs = DoubleArray(pts.size())
+        val classes = best.pathDetails["road_class"].orEmpty()
+        val each = DoubleArray(maxOf(0, pts.size() - 1))
+        best.pathDetails["time"].orEmpty().forEach { d ->
+            val k = if (mode != "car") 1.0 else carTime(classes.firstOrNull { d.first >= it.first && d.first < it.last }?.value?.toString()?.lowercase())
+            val s = (d.value as? Number)?.toDouble()?.div(1000)?.times(k) ?: return@forEach
+            val to = minOf(d.last, each.size); if (d.first >= to) return@forEach
+            val lens = (d.first until to).map { metresBetween(pts.getLat(it), pts.getLon(it), pts.getLat(it + 1), pts.getLon(it + 1)) }
+            val sum = lens.sum()
+            lens.forEachIndexed { j, m -> each[d.first + j] += if (sum > 0) s * m / sum else s / lens.size }
+        }
+        for (i in each.indices) secs[i + 1] = secs[i] + each[i]
+        val known = secs.last() > 0
+        val millis = if (known) (secs.last() * 1000).toLong() else best.time
+        return Route(mode, DoubleArray(pts.size()) { pts.getLat(it) }, DoubleArray(pts.size()) { pts.getLon(it) }, best.distance, millis, steps, roads,
+            if (known) secs else DoubleArray(0))
     }
 
     /**

@@ -154,7 +154,7 @@ private class MapsCarScreen(car: CarContext) : Screen(car), DefaultLifecycleObse
         return t.build()
     }
 
-    private fun secondsLeft(n: Nav, p: Progress) = n.route.millis / 1000 * (p.left / n.route.metres.coerceAtLeast(1.0))
+    private fun secondsLeft(n: Nav, p: Progress) = com.kalotrapezis.drive.secondsLeft(n.route, n.cum, p.along)
 
     private fun action(title: String, click: () -> Unit) = Action.Builder().setTitle(title).setOnClickListener(click).build()
     private fun icon(res: Int, click: () -> Unit) =

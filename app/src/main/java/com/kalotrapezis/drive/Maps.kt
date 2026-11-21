@@ -385,6 +385,14 @@ internal const val YARDS = 1.093613
 /** Where on a route a fix is: how far off it, how far along, and the next turn ahead. */
 internal data class Progress(val off: Double, val along: Double, val left: Double, val next: Int, val toNext: Double)
 
+/** The seconds still to drive on [r] from [along] metres ([cum]: its metres at each point): by its own time at each point, else by distance. */
+internal fun secondsLeft(r: Route, cum: DoubleArray, along: Double): Double {
+    if (r.secs.size != cum.size || cum.size < 2) return r.millis / 1000.0 * ((cum.lastOrNull() ?: r.metres) - along).coerceAtLeast(0.0) / r.metres.coerceAtLeast(1.0)
+    val i = java.util.Arrays.binarySearch(cum, along).let { if (it >= 0) it else -it - 2 }.coerceIn(0, cum.size - 2)
+    val f = if (cum[i + 1] > cum[i]) ((along - cum[i]) / (cum[i + 1] - cum[i])).coerceIn(0.0, 1.0) else 0.0
+    return (r.secs.last() - (r.secs[i] + f * (r.secs[i + 1] - r.secs[i]))).coerceAtLeast(0.0)
+}
+
 /** A route's running total of metres at each point, for [progress]. */
 internal fun cumulative(r: Route): DoubleArray {
     val c = DoubleArray(r.lats.size)
