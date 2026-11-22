@@ -97,6 +97,27 @@ internal object LocationReminders {
         p.edit().putStringSet("shown", keep.toSet()).apply()
     }
 
+    // the location sampled, not held (the user, 22 Nov: "it does not sample location, it hangs it and never lets go"): one fix
+    // each half hour, then the nearest spots picked again; the old standing request (ACTION_MOVED) is only removed now
+    const val JOB = 4162
+    private fun sampleEvery(c: Context, on: Boolean) {
+        val jobs = c.getSystemService(android.app.job.JobScheduler::class.java) ?: return
+        if (!on) return jobs.cancel(JOB)
+        if (jobs.getPendingJob(JOB) != null) return
+        jobs.schedule(android.app.job.JobInfo.Builder(JOB, android.content.ComponentName(c, SyncJob::class.java)).setPeriodic(30 * 60_000L).setPersisted(true).build())
+    }
+    private val pool by lazy { java.util.concurrent.Executors.newSingleThreadExecutor() }
+    /** The half-hourly sample: one fix (the fused or network provider's), the spots picked again, [done]. */
+    @android.annotation.SuppressLint("MissingPermission") // ready() checks it
+    fun sample(c: Context, done: () -> Unit) {
+        val lm = c.getSystemService(LocationManager::class.java)
+        if (lm == null || !ready(c)) return done()
+        val provider = if (LocationManager.FUSED_PROVIDER in lm.allProviders) LocationManager.FUSED_PROVIDER else LocationManager.NETWORK_PROVIDER
+        runCatching { lm.getCurrentLocation(provider, android.os.CancellationSignal(), pool) { at ->
+            runCatching { plan(c, at) }.onFailure { WriterLog.e("Place reminders: plan failed", it) }; done()
+        } }.onFailure { WriterLog.w("Place reminders: no sample (${it.message})"); done() }
+    }
+
     fun planSoon(c: Context, here: Location? = null) { val app = c.applicationContext; Thread { runCatching { plan(app, here) }.onFailure { WriterLog.e("Place reminders: plan failed", it) } }.start() }
 
     private fun alert(c: Context, i: Int, w: Watched? = null) = PendingIntent.getBroadcast(c, 9100 + i,
@@ -112,8 +133,12 @@ internal object LocationReminders {
         lm.removeUpdates(moved)
         p.edit().putInt("watched", 0).apply()
         val tetra = driveRoot()
-        val all = list(tetra)
-        if (!ready(c) || all.isEmpty()) return
+        val saved = list(tetra)
+        sampleEvery(c, ready(c) && saved.isNotEmpty())
+        // a reminder whose checklist has nothing left (or is gone) watches nothing: a forgotten one held the location for days
+        val notes = runCatching { NotesStore(TetraSystem.dir(tetra, "Notes", "Shared")).let { s -> s.whole(s.list().map { it.id }) } }.getOrNull()
+        val all = saved.filter { r -> r.note.startsWith(PILLS) || notes == null || note(notes, r.note) != null }
+        if (!ready(c) || all.isEmpty()) return WriterLog.i("Place reminders: nothing to watch (${saved.size} saved, ${all.size} with a list left)")
         @Suppress("MissingPermission") // ready() checked it
         val at = here ?: lm.allProviders.mapNotNull { runCatching { lm.getLastKnownLocation(it) }.getOrNull() }.maxByOrNull { it.time }
         val pois = if (all.any { it.kind.isNotEmpty() }) runCatching { MapsSearch.load(MapsFiles.root(tetra)) }.getOrDefault(emptyList()) else emptyList()
@@ -122,10 +147,6 @@ internal object LocationReminders {
         @Suppress("MissingPermission")
         watched.forEachIndexed { i, w -> lm.addProximityAlert(w.lat, w.lng, RADIUS, -1, alert(c, i, w)) }
         p.edit().putInt("watched", watched.size).apply()
-        // a coarse fix each kilometre, at most every 10 minutes: the network's, not the GPS, so the battery hardly notices
-        val provider = listOf(LocationManager.FUSED_PROVIDER, LocationManager.NETWORK_PROVIDER, LocationManager.PASSIVE_PROVIDER).first { it in lm.allProviders }
-        @Suppress("MissingPermission")
-        if (all.any { it.kind.isNotEmpty() }) lm.requestLocationUpdates(provider, 10 * 60_000L, 1000f, moved)
         WriterLog.i("Place reminders: watching ${watched.size} spots")
     }
 

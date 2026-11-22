@@ -36,6 +36,7 @@ internal class SyncJob : JobService() {
             scope.launch { runCatching { AssistantRunner.runDue(applicationContext) }.onFailure { WriterLog.e("Scheduled AI: run failed", it) }; jobFinished(params, false) }
             return true
         }
+        if (params.jobId == LocationReminders.JOB) { LocationReminders.sample(applicationContext) { jobFinished(params, false) }; return true }
         if (params.jobId == DataStats.JOB) {
             scope.launch { DataStats.refresh(applicationContext); jobFinished(params, false) }
             return true
