@@ -241,7 +241,13 @@ internal object MapsPrefs {
     /** What is said a little before a sharp bend ([bendsOn]). */
     fun bendWords(w: Words, right: Boolean) = w.s(if (right) R.string.maps_bend_right else R.string.maps_bend_left)
     /** Where the car sits while driving on a wide screen (a tablet, the phone sideways), as Tetra Car's menu: low right unless set (the user, 20 Nov). */
-    fun focus(c: Context) = prefs(c).getInt("focus", CarView.RIGHT)
+    fun focus(c: Context) = prefs(c).getInt("focus", RIGHT)
+    /** Where the car is on the driving map ([focus]): mid-screen, low, or low and to the right, beside the column of the turn and the trip (Google's). */
+    const val MIDDLE = 0; const val LOW = 1; const val RIGHT = 2
+    val TILTS = listOf(-1, 0, 30, 45, 60)
+    /** The driver sits on the right (right-hand drive: UK, Ireland, Cyprus, Malta…): the wide layout's column goes down the right. */
+    fun driverRight(c: Context) = c.getSharedPreferences("car", Context.MODE_PRIVATE).getBoolean("driver_right", false) // kept where Tetra Car had it
+    fun setDriverRight(c: Context, right: Boolean) = c.getSharedPreferences("car", Context.MODE_PRIVATE).edit().putBoolean("driver_right", right).apply()
     fun setFocus(c: Context, f: Int) = prefs(c).edit().putInt("focus", f).apply()
     /** The directions' camera tilt by car on the phone and tablet, as Tetra Car's menu: -1 by speed (45° to 60°), else fixed degrees. */
     fun tilt(c: Context) = prefs(c).getInt("tilt", -1)
@@ -366,7 +372,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
     var stoppedAt by remember { mutableStateOf<Location?>(null) }
     LaunchedEffect(Unit) {
         // a trip left between stops (the map closed, or done in the car): its next leg waits here
-        if (go == null && !CarLink.connected.value) MapsPrefs.pendingTrip(context)?.let { (t, i) -> tripRun = t to i; nextStop = t.stops[i] }
+        if (go == null) MapsPrefs.pendingTrip(context)?.let { (t, i) -> tripRun = t to i; nextStop = t.stops[i] }
     }
     var listEditing by remember { mutableStateOf<PlaceList?>(null) }
     var detail by remember { mutableStateOf<Poi?>(null) } // what the search list knows of the place shown
@@ -401,8 +407,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
     var granted by remember { mutableStateOf(hasLocation(context)) }
     var nav by remember { mutableStateOf<Nav?>(null) }
     var tapRoad by remember { mutableStateOf<String?>(null) } // the road a spot was tapped on (roadAtPoint)
-    var view by remember { mutableStateOf(DRIVING_VIEW) } // by car, the camera's zoom and tilt (carView)
-    val carNav by CarLink.nav.collectAsState() // directions running on the car's screen, shown here too
+    var view by remember { mutableStateOf(DRIVING_VIEW) } // by car, the camera's zoom and tilt
     var preview by remember { mutableStateOf<Preview?>(null) }
     var navSheet by remember { mutableStateOf(false) } // the handle's sheet over the directions bar: tolls and the turns ahead
     var finding by remember { mutableStateOf<String?>(null) }
@@ -425,16 +430,13 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
     var fast by remember { mutableStateOf(0) } // fixes in a row at car speed
     var touchedAt by remember { mutableStateOf(0L) } // a finger last moved the map
     var loose by remember { mutableStateOf(false) } // directions running, the camera off me (logged once)
-    val onCar = LocalOnCar.current
-    // Tetra Car's menu: the driving camera's zoom, tilt and where the arrow sits; on the head unit too, where Maps is no projection
-    val carView = if (onCar || Car.running) Car.view(context) else null
     // the car's driving layout on a wide screen too, a tablet or the phone sideways (the user, 20 Nov: "this map view we have on the car
     // we could bring on the Android app for the wide view"): the turn, the speed and the trip in a column on the driver's side, the map
     // beside it free for the road ahead; a phone held upright keeps the centred layout
     val cfg = androidx.compose.ui.platform.LocalConfiguration.current
-    val wide = Car.running || (cfg.screenWidthDp > cfg.screenHeightDp && cfg.screenWidthDp >= 600)
+    val wide = cfg.screenWidthDp > cfg.screenHeightDp && cfg.screenWidthDp >= 600
     val short = cfg.screenHeightDp < 420 // the phone sideways: the limit beside my speed, not over it
-    val rightSeat = Car.driverRight(context) // right-hand drive: the column on the right, the car to the left of the map
+    val rightSeat = MapsPrefs.driverRight(context) // right-hand drive: the column on the right, the car to the left of the map
     val tts = remember { mutableStateOf<TextToSpeech?>(null) }
     val duck = remember { MapsDuck(context) }
     DisposableEffect(Unit) {
@@ -493,17 +495,17 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         // the map's own size: in Tetra Car it is a pane, not the screen
         val h = mapRef?.height?.toDouble()?.takeIf { it > 0 } ?: context.resources.displayMetrics.heightPixels.toDouble()
         val w = mapRef?.width?.toDouble()?.takeIf { it > 0 } ?: context.resources.displayMetrics.widthPixels.toDouble()
-        val focus = if (!car) CarView.MIDDLE else carView?.focus ?: if (wide) MapsPrefs.focus(context) else CarView.MIDDLE
+        val focus = if (car && wide) MapsPrefs.focus(context) else MapsPrefs.MIDDLE
         return when (focus) {
             // near the bottom, about 90 % down, beside the column: the road ahead, not the one passed (the user, 20 Nov)
-            CarView.RIGHT -> if (rightSeat) doubleArrayOf(0.0, h * (0.76 + 0.04 * f), w * 0.4, 0.0) else doubleArrayOf(w * 0.4, h * (0.76 + 0.04 * f), 0.0, 0.0)
-            CarView.LOW -> doubleArrayOf(0.0, h * (0.3 + 0.2 * f), 0.0, 0.0)
+            MapsPrefs.RIGHT -> if (rightSeat) doubleArrayOf(0.0, h * (0.76 + 0.04 * f), w * 0.4, 0.0) else doubleArrayOf(w * 0.4, h * (0.76 + 0.04 * f), 0.0, 0.0)
+            MapsPrefs.LOW -> doubleArrayOf(0.0, h * (0.3 + 0.2 * f), 0.0, 0.0)
             else -> doubleArrayOf(0.0, h * 0.4 * f, 0.0, 0.0)
         }
     }
-    /** The driving camera's zoom and tilt for [v], as Tetra Car's menu sets them (elsewhere [v] itself). */
+    /** The driving camera's zoom and tilt for [v], the tilt as Settings › Maps sets it. */
     // tilted only while directions run; driving without them, seen from above (the user, 21 Nov)
-    fun cam(v: Pair<Double, Double>) = (carView?.camera(v) ?: MapsPrefs.tilt(context).let { t -> if (t >= 0) v.first to t.toDouble() else v }).let { if (nav == null) it.first to 0.0 else it }
+    fun cam(v: Pair<Double, Double>) = MapsPrefs.tilt(context).let { t -> if (t >= 0) v.first to t.toDouble() else v }.let { if (nav == null) it.first to 0.0 else it }
 
     /** The camera on me, turned the way I go; zoom and tilt through the tracking itself (a camera move of ours would end it). */
     fun follow(mode: String) {
@@ -535,11 +537,6 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
 
     /** [choose]: the ways there shown to pick from (a place's Car / Walk / Bike); else the fastest at once (Home's one tap, a new route). */
     fun startNav(target: Place, mode: String, from: Location? = here, choose: Boolean = false) {
-        // the car connected: by car on its screen, which the phone then shows
-        if (CarLink.connected.value && mode == "car") {
-            CarLink.go?.invoke(target); selected = null; preview = null; tab = null
-            Toast.makeText(context, context.getString(R.string.maps_on_car_screen, target.name), Toast.LENGTH_SHORT).show(); return
-        }
         // directions start from a live fix: Android's stored last one can be hours old and towns away
         if (from == null || !live) { pending = target.copy(mode = mode); return }
         val graphDir = MapsFiles.graphAt(root, from.latitude, from.longitude)
@@ -567,13 +564,10 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         }
     }
 
-    /** A saved trip from its first stop: on the car's screen when the car is connected. */
+    /** A saved trip from its first stop. */
     fun startTrip(t: Trip) {
         WriterLog.i("Maps: trip ${t.name}, ${t.stops.size} stops")
         tab = null; nextStop = null
-        if (CarLink.connected.value && CarLink.goTrip != null) {
-            CarLink.goTrip?.invoke(t.stops); Toast.makeText(context, context.getString(R.string.maps_on_car_screen, t.name), Toast.LENGTH_SHORT).show(); return
-        }
         tripRun = t to 0
         startNav(t.stops[0], "car")
     }
@@ -604,10 +598,6 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
                 nextStop = null; MapsPrefs.setPendingTrip(context, null); startNav(ns, "car", loc)
             }
         }
-        // in Tetra Car, driving without directions: the camera on me and turned the way I go, as Google Maps does (the user, 13 Nov),
-        // unless the map was touched in the last 15 s or something is open on it
-        if (onCar && nav == null && loc.hasSpeed() && loc.speed > 3f && tab == null && selected == null && preview == null && System.currentTimeMillis() - touchedAt > 15_000)
-            mapRef?.locationComponent?.takeIf { it.isLocationComponentActivated && it.cameraMode != CameraMode.TRACKING_GPS }?.let { WriterLog.i("Maps: driving, the camera on me (Tetra Car)"); follow("car") }
         val n = nav ?: return
         val car = n.mode == "car"
         val speedMs = if (loc.hasSpeed()) loc.speed.toDouble() else 0.0
@@ -853,18 +843,11 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         val map = mapRef ?: return@LaunchedEffect
         val style = map.style ?: return@LaunchedEffect
         if (!granted || map.locationComponent.isLocationComponentActivated) return@LaunchedEffect
-        // in Tetra Car (160 dpi, seen from the seat, tilted, on the blue route) bigger: ~11 mm there (the user, 12 Nov: "just a white dot, very hard to see")
-        activateArrow(context, map, style, if (onCar) 1.0f else 0.6f)
+        activateArrow(context, map, style, 0.6f)
         map.locationComponent.isLocationComponentEnabled = true
         map.locationComponent.renderMode = RenderMode.COMPASS
         here?.let { map.locationComponent.forceLocationUpdate(it) }
         nav?.let { follow(it.mode) } // a new map (Tetra Car's map size changed) mid-route: on me again
-    }
-    // Tetra Car's menu changed the camera: at once, while it follows me
-    LaunchedEffect(carView) {
-        if (nav.let { it != null && it.mode != "car" }) return@LaunchedEffect
-        val lc = mapRef?.locationComponent?.takeIf { it.isLocationComponentActivated && it.cameraMode == CameraMode.TRACKING_GPS } ?: return@LaunchedEffect
-        val (z, t) = cam(view); lc.paddingWhileTracking(ahead(t, true), 0); lc.zoomWhileTracking(z, 800); lc.tiltWhileTracking(t, 800)
     }
     // the added ones, but not where one of my places stands on it (the five work schools are both); again when one is added
     LaunchedEffect(mapRef, places, added) {
@@ -903,12 +886,12 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         val shown = if (nav != null) navTolls else previewTolls.getOrNull(preview?.chosen ?: -1).orEmpty()
         (mapRef?.style?.getSource("tolls") as? GeoJsonSource)?.setGeoJson(FeatureCollection.fromFeatures(shown.map { (t, _) -> Feature.fromGeometry(Point.fromLngLat(t.lng, t.lat)) }))
     }
-    LaunchedEffect(mapRef, nav?.route, carNav?.route, preview) {
+    LaunchedEffect(mapRef, nav?.route, preview) {
         val src = mapRef?.style?.getSource("route") as? GeoJsonSource ?: return@LaunchedEffect
         fun line(r: Route) = Feature.fromGeometry(LineString.fromLngLats(r.lats.indices.map { Point.fromLngLat(r.lngs[it], r.lats[it]) }))
         (mapRef?.style?.getSource("alts") as? GeoJsonSource)?.setGeoJson(FeatureCollection.fromFeatures(
             preview?.let { p -> p.routes.filterIndexed { i, _ -> i != p.chosen }.map(::line) }.orEmpty()))
-        val r = nav?.route ?: carNav?.route ?: preview?.let { it.routes[it.chosen] }
+        val r = nav?.route ?: preview?.let { it.routes[it.chosen] }
         src.setGeoJson(routeFeatures(r))
     }
     /*
@@ -978,28 +961,24 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         if (mapFile.isFile) androidx.compose.runtime.key(mapView) { AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize()) } // a new map, a new view
         else Column(Modifier.align(Alignment.Center).padding(32.dp).widthIn(max = 480.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Icon(painterResource(R.drawable.ic_map), contentDescription = null, tint = MAPS_COLOR, modifier = Modifier.size(48.dp))
-            // on the car's screen one line (the user, 10 Nov: "it should just say no maps on the phone, please download a map first")
-            if (LocalOnCar.current) Text(stringResource(R.string.auto_no_map), style = MaterialTheme.typography.titleLarge)
-            else {
-                // Tetra comes without a map: a welcome that walks through making one on the computer (the user, 27 Oct)
-                Text(stringResource(R.string.maps_welcome_title), style = MaterialTheme.typography.titleLarge)
-                Text(stringResource(R.string.maps_welcome_intro), style = MaterialTheme.typography.bodyMedium)
-                Text(stringResource(R.string.maps_welcome_steps), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            // Tetra comes without a map: a welcome that walks through making one on the computer (the user, 27 Oct)
+            Text(stringResource(R.string.maps_welcome_title), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.maps_welcome_intro), style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.maps_welcome_steps), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
         // bottom left, by car: my speed in its badge, red when over the limit by more than 3 km/h, and the limit's sign beside it
         // (the user, 3 Nov: "No speed limit or speedometer. Wrong graphics"); the sign only where the road has a number, never guessed
-        val driving = (nav ?: carNav)?.mode.let { it == null || it == "car" }
+        val driving = nav?.mode.let { it == null || it == "car" }
         val shownSpeed = speed?.takeIf { driving && !reckoning } // not the guess made while the GPS is lost
-        val badge = (nav ?: carNav)?.mode == "car" || (shownSpeed != null && limit != null) // without directions: beside a sign, as before
+        val badge = nav?.mode == "car" || (shownSpeed != null && limit != null) // without directions: beside a sign, as before
         val parts = LocalMapParts.current.let { if (androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp < 600) it.small() else it } // as `narrow` below
         // a panel up the side of a wide screen covers where they stand: away meanwhile
-        if (live && (limit != null || badge) && !(wide && !Car.running && tab != null)) Sized(parts.side) {
+        if (live && (limit != null || badge) && !(wide && tab != null)) Sized(parts.side) {
             // clear of the island and the bars below it (the user, 21 Oct: "ακουμπάει πάνω στο νησί … δώσε λίγο αέρα")
             val over = limit?.let { l -> (shownSpeed ?: 0) > l + 3 } == true
             // Tetra Car: the limit over my speed, at the very left, where the driver looks (the user, 13 Nov), the map free beside it
-            val driving = (nav ?: carNav) != null
+            val driving = nav != null
             if (wide && !short) Column(Modifier.align(if (rightSeat) Alignment.BottomEnd else Alignment.BottomStart).navigationBarsPadding()
                 .padding(start = 6.dp, end = 6.dp, bottom = if (driving) 150.dp else 80.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 limit?.let { LimitSign(it) }
@@ -1020,7 +999,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
 
         // top left: back and the road I am on, with its code (the user, 21 Oct: "To the top left no title. info about the road the code");
         // no Back while directions run (the user: "the back button remove it when in active navigation")
-        val n = nav ?: carNav
+        val n = nav
         val step = n?.let { nn -> nn.route.steps.getOrNull(((nn.p?.next ?: 1) - 1).coerceAtLeast(0)) }
         val roadName = step?.street?.ifEmpty { null } ?: road?.first?.ifEmpty { null }
         val roadCode = step?.ref?.ifEmpty { null } ?: road?.second?.ifEmpty { null }
@@ -1063,9 +1042,9 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
 
         // bottom: directions running; or a place's page; or a panel and the island
         // above the keyboard while one is typing in Search or Directions
-        Sized(parts.island) { androidx.compose.runtime.CompositionLocalProvider(LocalPanelMax provides if (wide && !Car.running) (cfg.screenHeightDp - if (short) 130 else 200).coerceAtLeast(150).dp else 460.dp) {
+        Sized(parts.island) { androidx.compose.runtime.CompositionLocalProvider(LocalPanelMax provides if (wide) (cfg.screenHeightDp - if (short) 130 else 200).coerceAtLeast(150).dp else 460.dp) {
             Column(Modifier.align(if (!wide) Alignment.BottomCenter else if (rightSeat) Alignment.BottomEnd else Alignment.BottomStart).navigationBarsPadding().imePadding().padding(12.dp)
-                .widthIn(max = if (wide && !Car.running) 440.dp else 560.dp).fillMaxWidth(),
+                .widthIn(max = if (wide) 440.dp else 560.dp).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             finding?.let { Pill(it) }
             plan?.takeIf { it.size < planCount }?.let { pl ->
@@ -1136,11 +1115,9 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
                 val minutes = Math.round(secondsLeft(n.route, n.cum, n.p?.along ?: 0.0) / 60.0) // by the roads left, not their share of the length
                 val words: @Composable () -> Unit = {
                     Text("${metresText(left)} · ${minutesText(context, minutes)}", style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(if (nav == null) stringResource(R.string.maps_on_car_screen_bar, n.target.name) else n.target.name, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(n.target.name, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 val buttons: @Composable () -> Unit = {
-                    if (nav == null) Button(colors = panelButton(), onClick = { CarLink.stop?.invoke() }) { Text(stringResource(R.string.common_stop), maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                    else {
                     IconButton(onClick = { follow(n.mode) }) {
                         Icon(painterResource(R.drawable.ic_navigation), contentDescription = stringResource(R.string.maps_follow_me))
                     }
@@ -1154,7 +1131,6 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
                     // Tetra Car: an ✕, no word (the user, 14 Nov: "make the stop button just an X with no text")
                     if (wide) IconButton(onClick = stop) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_stop)) }
                     else Button(colors = panelButton(), onClick = stop) { Text(stringResource(R.string.common_stop), maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                    }
                 }
                 // a wide screen (Tetra Car, a tablet, the phone sideways): the words above, the three buttons in a row under them (the user, 14 Nov:
                 // "so all three buttons fit"; 20 Nov: as Google's, a narrow column, the map beside it free for the car)
@@ -1501,7 +1477,7 @@ private fun roadAt(map: MapLibreMap?, loc: Location, lang: String): Pair<String,
 
 /** The next turn: its arrow, how far, and GraphHopper's words for it. */
 /**
- * The next turn, in the car's card style (MapsCar's turn card): the arrow and the distance big, the street, the instruction
+ * The next turn, in the car's card style: the arrow and the distance big, the street, the instruction
  * smaller; [road] and [code], the road I am on, as a small line at its top.
  */
 @Composable private fun NavBanner(n: Nav, root: File, modifier: Modifier, road: String? = null, code: String? = null, compact: Boolean = false, short: Boolean = false) {

@@ -147,7 +147,6 @@ internal object CarWire {
             "/car/event" -> { // on the unit: from the phone
                 val main = Handler(Looper.getMainLooper())
                 when (body.optString("type")) {
-                    "sms" -> main.post { Car.message?.invoke(CarMessage(body.optString("from"), body.optString("name"), body.optString("body"), remote = true)) }
                     "share" -> main.post { CarMaps.check(c) } // the phone's Send to car: taken now
                     "call" -> main.post {
                         call.value = body

@@ -1596,7 +1596,6 @@
     <string name="maps_kind_region">Regija</string>
     <string name="maps_my_car">Moj avto</string>
     <string name="maps_parking_saved">Parkirno mesto shranjeno</string>
-    <string name="maps_on_car_screen">Na zaslonu avta: %1$s</string>
     <string name="maps_no_graph">Ta zemljevid še nima cest za navodila: posodobite ga v Tetra v računalniku › Nastavitve › Zemljevidi.</string>
     <string name="maps_finding">Iskanje poti…</string>
     <string name="maps_no_way_graph">Pot ni najdena: grafa za usmerjanje ni bilo mogoče prebrati</string>
@@ -1621,7 +1620,6 @@
     <string name="maps_no_gps_reckoning">Ni signala GPS: nadaljujem po poti</string>
     <string name="maps_minutes">%1$d min</string>
     <string name="maps_hours_minutes">%1$d h %2$d min</string>
-    <string name="maps_on_car_screen_bar">🚗 Na zaslonu avta · %1$s</string>
     <string name="maps_follow_me">Sledi mi</string>
     <string name="maps_voice_on">Glas vklopljen</string>
     <string name="maps_voice_off">Glas izklopljen</string>
@@ -1697,50 +1695,6 @@
     <string name="maps_roads_local">Lokalne ceste</string>
     <string name="maps_no_tolls">Brez cestnin</string>
     <string name="maps_fastest">Najhitrejša</string>
-    <string name="car_map">Zemljevid</string>
-    <string name="car_places">Kraji</string>
-    <string name="car_allow_location">Enkrat odprite Tetra Zemljevide v telefonu, da dovolite lokacijo</string>
-    <string name="car_no_map">Zemljevida še ni: ustvarite ga v Tetra v računalniku › Nastavitve › Zemljevidi</string>
-    <string name="car_end">Konec</string>
-    <string name="car_routes">Poti</string>
-    <string name="car_add_stop_button">Postanek</string>
-    <string name="car_favourites">Priljubljeno</string>
-    <string name="car_more">Še %1$d</string>
-    <string name="car_nearby_hint">Gorivo, lekarna…</string>
-    <string name="car_trips">Poti</string>
-    <string name="car_trips_saved">Shranjenih: %1$d</string>
-    <string name="car_near_me">Blizu mene</string>
-    <string name="car_no_gps">Ni GPS</string>
-    <string name="car_next">Naslednji: %1$s</string>
-    <string name="car_waiting_gps">Čakanje na GPS</string>
-    <string name="car_no_graph">Grafa za usmerjanje še ni v Tetra/.System/Maps/Shared</string>
-    <string name="car_no_way">Pot ni najdena</string>
-    <string name="car_pin">Žebljica</string>
-    <string name="car_no_other_places">Ni drugih shranjenih krajev</string>
-    <string name="car_voice_all">Vsa navodila</string>
-    <string name="car_voice_important">Le pomembno: napačna smer, nova pot, ni GPS, prihod</string>
-    <string name="car_voice_off">Glas izklopljen</string>
-    <string name="car_warn_bends">Opozori na ostre ovinke</string>
-    <string name="car_main_roads_off">Izklopljeno: najkrajša pot</string>
-    <string name="car_voice">Glas</string>
-    <string name="car_roads">Ceste</string>
-    <string name="car_amea_radius">Parkirišče za invalide blizu cilja</string>
-    <string name="car_search_hint">Kraj, ulica, mesto</string>
-    <string name="car_no_trips">Poti še ni: načrtujte jo v Tetra Zemljevidih v telefonu</string>
-    <string name="car_routes_to">Poti do %1$s</string>
-    <string name="car_no_other_way">Druge poti ni</string>
-    <string name="car_no_tolls">brez cestnin</string>
-    <string name="car_parking_near">♿ Parkiranje blizu %1$s</string>
-    <string name="car_no_amea_within">V razdalji %1$s ni znanega invalidskega mesta</string>
-    <string name="car_from">%1$s od %2$s</string>
-    <string name="car_add_stop">Dodaj postanek</string>
-    <string name="car_none_near">V bližini ni nobenega</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d cestnina</item>
-        <item quantity="two">%1$d cestnini</item>
-        <item quantity="few">%1$d cestnine</item>
-        <item quantity="other">%1$d cestnin</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Priljubljeno</string>
@@ -4818,11 +4772,6 @@
     <string name="maps_error_no_way">S tem prevoznim sredstvom tja ni poti.</string>
     <string name="maps_error_no_route">Ni poti.</string>
     <string name="maps_say_stop">Postanek %1$s. Naslednji, %2$s: %3$s, ko boste odpeljali</string>
-    <string name="maps_say_next_stop">Naslednji postanek %1$s: %2$s, ko boste odpeljali</string>
-    <string name="maps_say_gps_lost">Signal GPS izgubljen</string>
-    <string name="maps_say_wrong_way">Napačna smer. Obrnite se, ko bo varno</string>
-    <string name="maps_say_toll">cestninska postaja</string>
-    <string name="maps_say_new_route">Nova pot</string>
     <string name="maps_sample_turn">zavijte desno</string>
     <string name="maps_no_voice">Ta telefon nima glasu za jezik %1$s, zato so navodila prikazana, vendar ne izgovorjena. Glas lahko dodate v nastavitvah govora v Androidu.</string>
     <plurals name="maps_in_km">
@@ -4867,18 +4816,6 @@
         <item quantity="few">po enem od %1$d levih pasov</item>
         <item quantity="other">po enem od %1$d levih pasov</item>
     </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Blizu cilja je %1$d parkirno mesto za invalide. Pritisnite gumb za parkiranje, da greste tja.</item>
-        <item quantity="two">Blizu cilja sta %1$d parkirni mesti za invalide. Pritisnite gumb za parkiranje, da greste do enega.</item>
-        <item quantity="few">Blizu cilja so %1$d parkirna mesta za invalide. Pritisnite gumb za parkiranje, da greste do enega.</item>
-        <item quantity="other">Blizu cilja je %1$d parkirnih mest za invalide. Pritisnite gumb za parkiranje, da greste do enega.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">Pot ima %1$d cestninsko postajo</item>
-        <item quantity="two">Pot ima %1$d cestninski postaji</item>
-        <item quantity="few">Pot ima %1$d cestninske postaje</item>
-        <item quantity="other">Pot ima %1$d cestninskih postaj</item>
-    </plurals>
     <string name="maps_in_km_fraction">Čez %1$s kilometre, %2$s</string>
     <string name="maps_in_mi_fraction">Čez %1$s milje, %2$s</string>
     <string name="maps_old">Starejši od 3 mesecev</string>
@@ -4918,19 +4855,11 @@
     <string name="brief_place_phone">kjer je telefon</string>
     <string name="brief_place_not_found">Takega kraja ni.</string>
     <string name="brief_place_use_phone">Kjer je telefon</string>
-    <string name="car_map_view">Pogled zemljevida</string>
-    <string name="car_map_size">Velikost</string>
-    <string name="car_map_card">Zgornja kartica</string>
-    <string name="car_map_island">Spodnja vrstica</string>
-    <string name="car_map_side">Ob strani: hitrost in omejitev</string>
-    <string name="car_map_zoom">Povečava</string>
     <string name="car_map_tilt">Nagib</string>
     <string name="car_map_tilt_auto">Glede na hitrost</string>
     <string name="car_map_arrow">Puščica</string>
     <string name="car_map_arrow_middle">Na sredini</string>
     <string name="car_map_arrow_low">Nižje</string>
-    <string name="car_ui_size">Vmesnik</string>
-    <string name="car_resolution">Ločljivost</string>
     <string name="car_maps_title">Zemljevidi iz telefona</string>
     <string name="car_maps_update_title">Novi zemljevidi v telefonu</string>
     <string name="car_maps_intro">Zemljevidi Tetra Car delujejo brez povezave. Enkrat jih Tetra prenese iz telefona prek njegove dostopne točke; potem le novosti.</string>
@@ -4946,7 +4875,6 @@
     <string name="car_maps_phone_none">Telefon še nima zemljevidov. Ustvarite jih v računalniku (Tetra › Zemljevidi); pridejo v telefon in nato v to napravo.</string>
     <string name="car_maps_do">Izvedi</string>
     <string name="car_maps_no_space">V napravi ni dovolj prostora: zemljevidi potrebujejo %1$d MB, prostih je %2$d MB.</string>
-    <string name="car_dock_auto">Samodejno: ob voznikovi strani na širokem zaslonu, sicer ob spodnjem robu</string>
     <string name="car_driver">Voznikov sedež</string>
     <string name="car_driver_summary">Volan na levi (večina Evrope) ali na desni (Velika Britanija, Irska, Ciper, Malta)</string>
     <string name="car_screen_size">Velikost na tem zaslonu</string>

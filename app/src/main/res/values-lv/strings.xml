@@ -1553,7 +1553,6 @@
     <string name="maps_kind_region">Reģions</string>
     <string name="maps_my_car">Mans auto</string>
     <string name="maps_parking_saved">Stāvvieta saglabāta</string>
-    <string name="maps_on_car_screen">Auto ekrānā: %1$s</string>
     <string name="maps_no_graph">Šai kartei vēl nav ceļu norādījumiem: atjauniniet to sadaļā Tetra datorā › Iestatījumi › Kartes.</string>
     <string name="maps_finding">Meklē ceļu…</string>
     <string name="maps_no_way_graph">Ceļš nav atrasts: maršrutēšanas grafu neizdevās nolasīt</string>
@@ -1578,7 +1577,6 @@
     <string name="maps_no_gps_reckoning">Nav GPS signāla: turpina pa maršrutu</string>
     <string name="maps_minutes">%1$d min</string>
     <string name="maps_hours_minutes">%1$d h %2$d min</string>
-    <string name="maps_on_car_screen_bar">🚗 Auto ekrānā · %1$s</string>
     <string name="maps_follow_me">Sekot man</string>
     <string name="maps_voice_on">Balss ieslēgta</string>
     <string name="maps_voice_off">Balss izslēgta</string>
@@ -1654,49 +1652,6 @@
     <string name="maps_roads_local">Vietējie ceļi</string>
     <string name="maps_no_tolls">Bez maksas ceļiem</string>
     <string name="maps_fastest">Ātrākais</string>
-    <string name="car_map">Karte</string>
-    <string name="car_places">Vietas</string>
-    <string name="car_allow_location">Vienreiz atveriet Tetra Kartes tālrunī, lai atļautu atrašanās vietu</string>
-    <string name="car_no_map">Kartes vēl nav: izveidojiet to sadaļā Tetra datorā › Iestatījumi › Kartes</string>
-    <string name="car_end">Beigt</string>
-    <string name="car_routes">Maršruti</string>
-    <string name="car_add_stop_button">Pietura</string>
-    <string name="car_favourites">Izlase</string>
-    <string name="car_more">Vēl %1$d</string>
-    <string name="car_nearby_hint">Degviela, aptieka…</string>
-    <string name="car_trips">Braucieni</string>
-    <string name="car_trips_saved">Saglabāti: %1$d</string>
-    <string name="car_near_me">Man tuvumā</string>
-    <string name="car_no_gps">Nav GPS</string>
-    <string name="car_next">Nākamais: %1$s</string>
-    <string name="car_waiting_gps">Gaida GPS</string>
-    <string name="car_no_graph">Tetra/.System/Maps/Shared vēl nav maršrutēšanas grafa</string>
-    <string name="car_no_way">Ceļš nav atrasts</string>
-    <string name="car_pin">Sprauste</string>
-    <string name="car_no_other_places">Citu saglabātu vietu nav</string>
-    <string name="car_voice_all">Visas norādes</string>
-    <string name="car_voice_important">Tikai svarīgais: nepareizs virziens, jauns maršruts, nav GPS, ierašanās</string>
-    <string name="car_voice_off">Balss izslēgta</string>
-    <string name="car_warn_bends">Brīdināt par asiem pagriezieniem</string>
-    <string name="car_main_roads_off">Izslēgts: īsākais ceļš</string>
-    <string name="car_voice">Balss</string>
-    <string name="car_roads">Ceļi</string>
-    <string name="car_amea_radius">♿ stāvvieta pie galamērķa</string>
-    <string name="car_search_hint">Vieta, iela, pilsēta</string>
-    <string name="car_no_trips">Braucienu vēl nav: plānojiet tos Tetra Kartēs tālrunī</string>
-    <string name="car_routes_to">Maršruti uz %1$s</string>
-    <string name="car_no_other_way">Cits ceļš nav atrasts</string>
-    <string name="car_no_tolls">bez maksas ceļiem</string>
-    <string name="car_parking_near">♿ Stāvvieta pie %1$s</string>
-    <string name="car_no_amea_within">%1$s rādiusā nav zināmas ♿ vietas</string>
-    <string name="car_from">%1$s no %2$s</string>
-    <string name="car_add_stop">Pievienot pieturu</string>
-    <string name="car_none_near">Tuvumā nav</string>
-    <plurals name="car_tolls">
-        <item quantity="zero">%1$d maksas punktu</item>
-        <item quantity="one">%1$d maksas punkts</item>
-        <item quantity="other">%1$d maksas punkti</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Izlase</string>
@@ -4726,11 +4681,6 @@
     <string name="maps_error_no_way">Ar šo pārvietošanās veidu turp ceļa nav.</string>
     <string name="maps_error_no_route">Nav maršruta.</string>
     <string name="maps_say_stop">Pietura %1$s. Nākamā, %2$s: %3$s, kad dosieties tālāk</string>
-    <string name="maps_say_next_stop">Nākamā pietura %1$s: %2$s, kad dosieties tālāk</string>
-    <string name="maps_say_gps_lost">GPS signāls zudis</string>
-    <string name="maps_say_wrong_way">Nepareizs virziens. Apgriezieties, kad tas ir droši</string>
-    <string name="maps_say_toll">maksas punkts</string>
-    <string name="maps_say_new_route">Jauns maršruts</string>
     <string name="maps_sample_turn">pagriezieties pa labi</string>
     <string name="maps_no_voice">Šajā tālrunī nav balss valodai %1$s, tāpēc norādes tiek rādītas, bet netiek izrunātas. Balsi varat pievienot Android balss iestatījumos.</string>
     <plurals name="maps_in_km">
@@ -4767,16 +4717,6 @@
         <item quantity="zero">pa vienu no %1$d kreisajām joslām</item>
         <item quantity="one">pa kreiso joslu</item>
         <item quantity="other">pa vienu no %1$d kreisajām joslām</item>
-    </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="zero">Pie galamērķa ir %1$d stāvvietas cilvēkiem ar invaliditāti. Nospiediet stāvvietas pogu, lai dotos uz vienu no tām.</item>
-        <item quantity="one">Pie galamērķa ir %1$d stāvvieta cilvēkiem ar invaliditāti. Nospiediet stāvvietas pogu, lai dotos uz to.</item>
-        <item quantity="other">Pie galamērķa ir %1$d stāvvietas cilvēkiem ar invaliditāti. Nospiediet stāvvietas pogu, lai dotos uz vienu no tām.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="zero">Maršrutā ir %1$d maksas punkti</item>
-        <item quantity="one">Maršrutā ir %1$d maksas punkts</item>
-        <item quantity="other">Maršrutā ir %1$d maksas punkti</item>
     </plurals>
     <string name="maps_in_km_fraction">Pēc %1$s kilometriem, %2$s</string>
     <string name="maps_in_mi_fraction">Pēc %1$s jūdzēm, %2$s</string>
@@ -4817,19 +4757,11 @@
     <string name="brief_place_phone">tur, kur ir tālrunis</string>
     <string name="brief_place_not_found">Šāda vieta nav atrasta.</string>
     <string name="brief_place_use_phone">Tur, kur ir tālrunis</string>
-    <string name="car_map_view">Kartes skats</string>
-    <string name="car_map_size">Izmērs</string>
-    <string name="car_map_card">Augšējā kartīte</string>
-    <string name="car_map_island">Apakšējā josla</string>
-    <string name="car_map_side">Malā: ātrums un ierobežojums</string>
-    <string name="car_map_zoom">Tālummaiņa</string>
     <string name="car_map_tilt">Slīpums</string>
     <string name="car_map_tilt_auto">Pēc ātruma</string>
     <string name="car_map_arrow">Bulta</string>
     <string name="car_map_arrow_middle">Vidū</string>
     <string name="car_map_arrow_low">Zemāk</string>
-    <string name="car_ui_size">Saskarne</string>
-    <string name="car_resolution">Izšķirtspēja</string>
     <string name="car_maps_title">Kartes no tālruņa</string>
     <string name="car_maps_update_title">Jaunas kartes tālrunī</string>
     <string name="car_maps_intro">Tetra Car kartes darbojas bezsaistē. Tās vienreiz tiek atsūtītas no tālruņa uz Tetra caur tā hotspot; pēc tam – tikai jaunais.</string>
@@ -4845,7 +4777,6 @@
     <string name="car_maps_phone_none">Tālrunī vēl nav karšu. Izveidojiet tās datorā (Tetra › Kartes); tās nonāks tālrunī un pēc tam šajā ierīcē.</string>
     <string name="car_maps_do">Veikt</string>
     <string name="car_maps_no_space">Šajā ierīcē nepietiek vietas: kartēm vajag %1$d MB, brīvi ir %2$d MB.</string>
-    <string name="car_dock_auto">Automātiski: pa vadītāja pusi platā ekrānā, citādi pa apakšmalu</string>
     <string name="car_driver">Vadītāja vieta</string>
     <string name="car_driver_summary">Kreisā stūre (lielākā daļa Eiropas) vai labā stūre (Lielbritānija, Īrija, Kipra, Malta)</string>
     <string name="car_screen_size">Izmērs šajā ekrānā</string>

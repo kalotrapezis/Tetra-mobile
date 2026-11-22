@@ -1596,7 +1596,6 @@
     <string name="maps_kind_region">Region</string>
     <string name="maps_my_car">Moje auto</string>
     <string name="maps_parking_saved">Parkování uloženo</string>
-    <string name="maps_on_car_screen">Na obrazovce auta: %1$s</string>
     <string name="maps_no_graph">Tato mapa zatím nemá silnice pro navigaci: aktualizujte ji v Tetra v počítači › Nastavení › Mapy.</string>
     <string name="maps_finding">Hledání cesty…</string>
     <string name="maps_no_way_graph">Cesta nenalezena: graf tras nelze přečíst</string>
@@ -1621,7 +1620,6 @@
     <string name="maps_no_gps_reckoning">Žádný signál GPS: pokračuje se po trase</string>
     <string name="maps_minutes">%1$d min</string>
     <string name="maps_hours_minutes">%1$d h %2$d min</string>
-    <string name="maps_on_car_screen_bar">🚗 Na obrazovce auta · %1$s</string>
     <string name="maps_follow_me">Sledovat mě</string>
     <string name="maps_voice_on">Hlas zapnut</string>
     <string name="maps_voice_off">Hlas vypnut</string>
@@ -1697,50 +1695,6 @@
     <string name="maps_roads_local">Místní silnice</string>
     <string name="maps_no_tolls">Bez mýta</string>
     <string name="maps_fastest">Nejrychlejší</string>
-    <string name="car_map">Mapa</string>
-    <string name="car_places">Místa</string>
-    <string name="car_allow_location">Jednou otevřete Tetra Mapy v telefonu a povolte polohu</string>
-    <string name="car_no_map">Zatím žádná mapa: vytvořte ji v Tetra v počítači › Nastavení › Mapy</string>
-    <string name="car_end">Konec</string>
-    <string name="car_routes">Trasy</string>
-    <string name="car_add_stop_button">Zastávka</string>
-    <string name="car_favourites">Oblíbené</string>
-    <string name="car_more">+%1$d další</string>
-    <string name="car_nearby_hint">Pumpa, lékárna…</string>
-    <string name="car_trips">Cesty</string>
-    <string name="car_trips_saved">Uloženo: %1$d</string>
-    <string name="car_near_me">Poblíž mě</string>
-    <string name="car_no_gps">Bez GPS</string>
-    <string name="car_next">Další: %1$s</string>
-    <string name="car_waiting_gps">Čekání na GPS</string>
-    <string name="car_no_graph">Zatím žádný graf tras v Tetra/.System/Maps/Shared</string>
-    <string name="car_no_way">Cesta nenalezena</string>
-    <string name="car_pin">Špendlík</string>
-    <string name="car_no_other_places">Žádná další uložená místa</string>
-    <string name="car_voice_all">Všechny pokyny</string>
-    <string name="car_voice_important">Jen důležité: špatný směr, nová trasa, bez GPS, příjezd</string>
-    <string name="car_voice_off">Hlas vypnut</string>
-    <string name="car_warn_bends">Varovat před ostrými zatáčkami</string>
-    <string name="car_main_roads_off">Vypnuto: nejkratší cesta</string>
-    <string name="car_voice">Hlas</string>
-    <string name="car_roads">Silnice</string>
-    <string name="car_amea_radius">Parkování pro ZTP u cíle</string>
-    <string name="car_search_hint">Místo, ulice, město</string>
-    <string name="car_no_trips">Zatím žádné cesty: naplánujte nějakou v Tetra Mapách v telefonu</string>
-    <string name="car_routes_to">Trasy do %1$s</string>
-    <string name="car_no_other_way">Jiná cesta nenalezena</string>
-    <string name="car_no_tolls">bez mýta</string>
-    <string name="car_parking_near">♿ Parkování u %1$s</string>
-    <string name="car_no_amea_within">Do %1$s není známé žádné místo pro ZTP</string>
-    <string name="car_from">%1$s od %2$s</string>
-    <string name="car_add_stop">Přidat zastávku</string>
-    <string name="car_none_near">Nic poblíž</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d mýtná brána</item>
-        <item quantity="few">%1$d mýtné brány</item>
-        <item quantity="many">%1$d mýtné brány</item>
-        <item quantity="other">%1$d mýtných bran</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Oblíbené</string>
@@ -4818,11 +4772,6 @@
     <string name="maps_error_no_way">Tímto způsobem dopravy tam cesta nevede.</string>
     <string name="maps_error_no_route">Žádná trasa.</string>
     <string name="maps_say_stop">Zastávka %1$s. Další, %2$s: %3$s, jakmile vyrazíte</string>
-    <string name="maps_say_next_stop">Další zastávka %1$s: %2$s, jakmile vyrazíte</string>
-    <string name="maps_say_gps_lost">Signál GPS ztracen</string>
-    <string name="maps_say_wrong_way">Špatný směr. Otočte se, až to bude bezpečné</string>
-    <string name="maps_say_toll">mýtná brána</string>
-    <string name="maps_say_new_route">Nová trasa</string>
     <string name="maps_sample_turn">odbočte vpravo</string>
     <string name="maps_no_voice">Tento telefon nemá hlas pro jazyk %1$s, proto se pokyny zobrazují, ale nečtou. Hlas můžete přidat v nastavení hlasu systému Android.</string>
     <plurals name="maps_in_km">
@@ -4867,18 +4816,6 @@
         <item quantity="many">jedním z %1$d levých pruhů</item>
         <item quantity="other">jedním z %1$d levých pruhů</item>
     </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">U cíle je %1$d parkovací místo pro osoby se zdravotním postižením. Stiskněte tlačítko parkování a jeďte tam.</item>
-        <item quantity="few">U cíle jsou %1$d parkovací místa pro osoby se zdravotním postižením. Stiskněte tlačítko parkování a jeďte k jednomu z nich.</item>
-        <item quantity="many">U cíle je %1$d parkovacího místa pro osoby se zdravotním postižením. Stiskněte tlačítko parkování a jeďte k jednomu z nich.</item>
-        <item quantity="other">U cíle je %1$d parkovacích míst pro osoby se zdravotním postižením. Stiskněte tlačítko parkování a jeďte k jednomu z nich.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">Trasa má %1$d mýtnou bránu</item>
-        <item quantity="few">Trasa má %1$d mýtné brány</item>
-        <item quantity="many">Trasa má %1$d mýtné brány</item>
-        <item quantity="other">Trasa má %1$d mýtných bran</item>
-    </plurals>
     <string name="maps_in_km_fraction">Za %1$s kilometru, %2$s</string>
     <string name="maps_in_mi_fraction">Za %1$s míle, %2$s</string>
     <string name="maps_old">Starší než 3 měsíce</string>
@@ -4918,19 +4855,11 @@
     <string name="brief_place_phone">kde je telefon</string>
     <string name="brief_place_not_found">Takové místo nenalezeno.</string>
     <string name="brief_place_use_phone">Kde je telefon</string>
-    <string name="car_map_view">Zobrazení mapy</string>
-    <string name="car_map_size">Velikost</string>
-    <string name="car_map_card">Horní karta</string>
-    <string name="car_map_island">Spodní lišta</string>
-    <string name="car_map_side">Bok: rychlost a limit</string>
-    <string name="car_map_zoom">Přiblížení</string>
     <string name="car_map_tilt">Náklon</string>
     <string name="car_map_tilt_auto">Podle rychlosti</string>
     <string name="car_map_arrow">Šipka</string>
     <string name="car_map_arrow_middle">Uprostřed</string>
     <string name="car_map_arrow_low">Níže</string>
-    <string name="car_ui_size">Rozhraní</string>
-    <string name="car_resolution">Rozlišení</string>
     <string name="car_maps_title">Mapy z telefonu</string>
     <string name="car_maps_update_title">Nové mapy v telefonu</string>
     <string name="car_maps_intro">Mapy Tetra Car fungují offline. Jednou je do telefonu pošle Tetra přes jeho hotspot; potom už jen to, co je nové.</string>
@@ -4946,7 +4875,6 @@
     <string name="car_maps_phone_none">Telefon zatím nemá žádné mapy. Vytvořte je na počítači (Tetra › Mapy); dostanou se do telefonu a pak do této jednotky.</string>
     <string name="car_maps_do">Provést</string>
     <string name="car_maps_no_space">Na této jednotce není dost místa: mapy potřebují %1$d MB, volných je %2$d MB.</string>
-    <string name="car_dock_auto">Automaticky: na straně řidiče u širokého displeje, jinak podél spodního okraje</string>
     <string name="car_driver">Místo řidiče</string>
     <string name="car_driver_summary">Levostranné řízení (většina Evropy) nebo pravostranné (Velká Británie, Irsko, Kypr, Malta)</string>
     <string name="car_screen_size">Velikost na této obrazovce</string>

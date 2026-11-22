@@ -1553,7 +1553,6 @@
     <string name="maps_kind_region">Regija</string>
     <string name="maps_my_car">Moj automobil</string>
     <string name="maps_parking_saved">Parkiranje spremljeno</string>
-    <string name="maps_on_car_screen">Na zaslonu automobila: %1$s</string>
     <string name="maps_no_graph">Ova karta još nema ceste za navigaciju: ažurirajte je u Tetra na računalu › Postavke › Karte.</string>
     <string name="maps_finding">Traženje puta…</string>
     <string name="maps_no_way_graph">Put nije pronađen: graf usmjeravanja nije se mogao pročitati</string>
@@ -1578,7 +1577,6 @@
     <string name="maps_no_gps_reckoning">Nema GPS signala: nastavlja se duž rute</string>
     <string name="maps_minutes">%1$d min</string>
     <string name="maps_hours_minutes">%1$d h %2$d min</string>
-    <string name="maps_on_car_screen_bar">🚗 Na zaslonu automobila · %1$s</string>
     <string name="maps_follow_me">Prati me</string>
     <string name="maps_voice_on">Glas uključen</string>
     <string name="maps_voice_off">Glas isključen</string>
@@ -1654,49 +1652,6 @@
     <string name="maps_roads_local">Lokalne ceste</string>
     <string name="maps_no_tolls">Bez cestarine</string>
     <string name="maps_fastest">Najbrže</string>
-    <string name="car_map">Karta</string>
-    <string name="car_places">Mjesta</string>
-    <string name="car_allow_location">Jednom otvorite Tetra Karte na telefonu da biste dopustili lokaciju</string>
-    <string name="car_no_map">Još nema karte: izradite je u Tetra na računalu › Postavke › Karte</string>
-    <string name="car_end">Kraj</string>
-    <string name="car_routes">Rute</string>
-    <string name="car_add_stop_button">Stanica</string>
-    <string name="car_favourites">Favoriti</string>
-    <string name="car_more">Još %1$d</string>
-    <string name="car_nearby_hint">Gorivo, ljekarna…</string>
-    <string name="car_trips">Putovanja</string>
-    <string name="car_trips_saved">Spremljeno: %1$d</string>
-    <string name="car_near_me">U blizini</string>
-    <string name="car_no_gps">Nema GPS-a</string>
-    <string name="car_next">Sljedeće: %1$s</string>
-    <string name="car_waiting_gps">Čeka se GPS</string>
-    <string name="car_no_graph">Još nema grafa usmjeravanja u Tetra/.System/Maps/Shared</string>
-    <string name="car_no_way">Put nije pronađen</string>
-    <string name="car_pin">Oznaka</string>
-    <string name="car_no_other_places">Nema drugih spremljenih mjesta</string>
-    <string name="car_voice_all">Svaka uputa</string>
-    <string name="car_voice_important">Samo važno: pogrešan smjer, nova ruta, nema GPS-a, dolazak</string>
-    <string name="car_voice_off">Glas isključen</string>
-    <string name="car_warn_bends">Upozori na oštre zavoje</string>
-    <string name="car_main_roads_off">Isključeno: najkraći put</string>
-    <string name="car_voice">Glas</string>
-    <string name="car_roads">Ceste</string>
-    <string name="car_amea_radius">Parkiranje za OSI blizu odredišta</string>
-    <string name="car_search_hint">Mjesto, ulica, grad</string>
-    <string name="car_no_trips">Još nema putovanja: planirajte jedno u Tetra Kartama na telefonu</string>
-    <string name="car_routes_to">Rute do %1$s</string>
-    <string name="car_no_other_way">Nije pronađen drugi put</string>
-    <string name="car_no_tolls">bez cestarine</string>
-    <string name="car_parking_near">♿ Parkiranje blizu %1$s</string>
-    <string name="car_no_amea_within">Nema poznatog mjesta za OSI unutar %1$s</string>
-    <string name="car_from">%1$s od: %2$s</string>
-    <string name="car_add_stop">Dodaj stanicu</string>
-    <string name="car_none_near">Ništa u blizini</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d naplatna postaja</item>
-        <item quantity="few">%1$d naplatne postaje</item>
-        <item quantity="other">%1$d naplatnih postaja</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Favoriti</string>
@@ -4726,11 +4681,6 @@
     <string name="maps_error_no_way">Ovim prijevozom nema puta do tamo.</string>
     <string name="maps_error_no_route">Nema rute.</string>
     <string name="maps_say_stop">Stajalište %1$s. Sljedeće, %2$s: %3$s, kad krenete</string>
-    <string name="maps_say_next_stop">Sljedeće stajalište %1$s: %2$s, kad krenete</string>
-    <string name="maps_say_gps_lost">Izgubljen GPS signal</string>
-    <string name="maps_say_wrong_way">Pogrešan smjer. Okrenite se kad bude sigurno</string>
-    <string name="maps_say_toll">naplatna postaja</string>
-    <string name="maps_say_new_route">Nova ruta</string>
     <string name="maps_sample_turn">skrenite desno</string>
     <string name="maps_no_voice">Ovaj telefon nema glas za jezik %1$s, pa se upute prikazuju, ali se ne izgovaraju. Glas možete dodati u postavkama glasa Androida.</string>
     <plurals name="maps_in_km">
@@ -4767,16 +4717,6 @@
         <item quantity="one">lijevom trakom</item>
         <item quantity="few">jednom od %1$d lijevih traka</item>
         <item quantity="other">jednom od %1$d lijevih traka</item>
-    </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Blizu odredišta je %1$d parkirno mjesto za osobe s invaliditetom. Pritisnite gumb za parkiranje da odete onamo.</item>
-        <item quantity="few">Blizu odredišta su %1$d parkirna mjesta za osobe s invaliditetom. Pritisnite gumb za parkiranje da odete do jednoga.</item>
-        <item quantity="other">Blizu odredišta je %1$d parkirnih mjesta za osobe s invaliditetom. Pritisnite gumb za parkiranje da odete do jednoga.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">Ruta ima %1$d naplatnu postaju</item>
-        <item quantity="few">Ruta ima %1$d naplatne postaje</item>
-        <item quantity="other">Ruta ima %1$d naplatnih postaja</item>
     </plurals>
     <string name="maps_in_km_fraction">Za %1$s kilometara, %2$s</string>
     <string name="maps_in_mi_fraction">Za %1$s milja, %2$s</string>
@@ -4817,19 +4757,11 @@
     <string name="brief_place_phone">gdje je telefon</string>
     <string name="brief_place_not_found">Takvo mjesto nije pronađeno.</string>
     <string name="brief_place_use_phone">Gdje je telefon</string>
-    <string name="car_map_view">Prikaz karte</string>
-    <string name="car_map_size">Veličina</string>
-    <string name="car_map_card">Gornja kartica</string>
-    <string name="car_map_island">Donja traka</string>
-    <string name="car_map_side">Strana: brzina i ograničenje</string>
-    <string name="car_map_zoom">Zum</string>
     <string name="car_map_tilt">Nagib</string>
     <string name="car_map_tilt_auto">Prema brzini</string>
     <string name="car_map_arrow">Strelica</string>
     <string name="car_map_arrow_middle">U sredini</string>
     <string name="car_map_arrow_low">Niže</string>
-    <string name="car_ui_size">Sučelje</string>
-    <string name="car_resolution">Razlučivost</string>
     <string name="car_maps_title">Karte s telefona</string>
     <string name="car_maps_update_title">Nove karte na telefonu</string>
     <string name="car_maps_intro">Karte Tetra Cara rade izvan mreže. Jednom ih Tetra preuzme s telefona preko njegova hotspota; poslije samo ono što je novo.</string>
@@ -4845,7 +4777,6 @@
     <string name="car_maps_phone_none">Telefon još nema karte. Napravite ih na računalu (Tetra › Karte); stignu na telefon, pa na ovaj uređaj.</string>
     <string name="car_maps_do">Pokreni</string>
     <string name="car_maps_no_space">Nema dovoljno mjesta na uređaju: karte trebaju %1$d MB, slobodno je %2$d MB.</string>
-    <string name="car_dock_auto">Automatski: uz vozačevu stranu na širokom zaslonu, inače uz donji rub</string>
     <string name="car_driver">Vozačevo sjedalo</string>
     <string name="car_driver_summary">Upravljač s lijeve strane (većina Europe) ili s desne (Velika Britanija, Irska, Cipar, Malta)</string>
     <string name="car_screen_size">Veličina na ovom zaslonu</string>

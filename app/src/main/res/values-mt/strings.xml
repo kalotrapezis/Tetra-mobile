@@ -1596,7 +1596,6 @@
     <string name="maps_kind_region">Reġjun</string>
     <string name="maps_my_car">Il-karozza tiegħi</string>
     <string name="maps_parking_saved">Parkeġġ imħażen</string>
-    <string name="maps_on_car_screen">Fuq l-iskrin tal-karozza: %1$s</string>
     <string name="maps_no_graph">Din il-mappa għad m\'għandhiex toroq għad-direzzjonijiet: aġġornaha f\'Tetra tal-kompjuter › Settings › Mapep.</string>
     <string name="maps_finding">Qed insib it-triq…</string>
     <string name="maps_no_way_graph">Ma nstabet l-ebda triq: il-graff tal-instradar ma setax jinqara</string>
@@ -1621,7 +1620,6 @@
     <string name="maps_no_gps_reckoning">Ebda sinjal GPS: nkomplu ’l quddiem fuq it-triq</string>
     <string name="maps_minutes">%1$d min</string>
     <string name="maps_hours_minutes">%1$d h %2$d min</string>
-    <string name="maps_on_car_screen_bar">🚗 Fuq l-iskrin tal-karozza · %1$s</string>
     <string name="maps_follow_me">Segwini</string>
     <string name="maps_voice_on">Vuċi mixgħula</string>
     <string name="maps_voice_off">Vuċi mitfija</string>
@@ -1697,50 +1695,6 @@
     <string name="maps_roads_local">Toroq lokali</string>
     <string name="maps_no_tolls">Ebda tariffa</string>
     <string name="maps_fastest">L-iktar mgħaġġel</string>
-    <string name="car_map">Mappa</string>
-    <string name="car_places">Postijiet</string>
-    <string name="car_allow_location">Iftaħ Tetra Maps fuq it-telefon darba biex tippermetti l-pożizzjoni</string>
-    <string name="car_no_map">Għad m\'hemm l-ebda mappa: agħmel waħda f\'Tetra tal-kompjuter › Settings › Mapep</string>
-    <string name="car_end">Itmm</string>
-    <string name="car_routes">Rotot</string>
-    <string name="car_add_stop_button">Waqfa</string>
-    <string name="car_favourites">Favoriti</string>
-    <string name="car_more">%1$d aktar</string>
-    <string name="car_nearby_hint">Fjuwil, farmaċija…</string>
-    <string name="car_trips">Vjaġġi</string>
-    <string name="car_trips_saved">%1$d mħażna</string>
-    <string name="car_near_me">Qrib tiegħi</string>
-    <string name="car_no_gps">Ebda GPS</string>
-    <string name="car_next">Li jmiss: %1$s</string>
-    <string name="car_waiting_gps">Qed nistenna l-GPS</string>
-    <string name="car_no_graph">Għadu m’hemm l-ebda graff tal-instradar f’Tetra/.System/Maps/Shared</string>
-    <string name="car_no_way">Ma nstabet l-ebda triq</string>
-    <string name="car_pin">Pin</string>
-    <string name="car_no_other_places">Ebda post ieħor imħażen</string>
-    <string name="car_voice_all">Kull direzzjoni</string>
-    <string name="car_voice_important">Importanti biss: triq ħażina, rotta ġdida, ebda GPS, wasliet</string>
-    <string name="car_voice_off">Vuċi mitfija</string>
-    <string name="car_warn_bends">Twissija għal kurvi qawwija</string>
-    <string name="car_main_roads_off">Mitfi: l-eqsar triq</string>
-    <string name="car_voice">Vuċi</string>
-    <string name="car_roads">Toroq</string>
-    <string name="car_amea_radius">Parkeġġ għal persuni b’diżabilità qrib id-destinazzjoni</string>
-    <string name="car_search_hint">Post, triq, raħal</string>
-    <string name="car_no_trips">Għadu m’hemm l-ebda vjaġġ: ippjana wieħed f’Tetra Maps fuq it-telefon</string>
-    <string name="car_routes_to">Rotot lejn %1$s</string>
-    <string name="car_no_other_way">Ma nstabet l-ebda triq oħra</string>
-    <string name="car_no_tolls">ebda tariffa</string>
-    <string name="car_parking_near">♿ Parkeġġ qrib %1$s</string>
-    <string name="car_no_amea_within">Ebda post għal persuni b’diżabilità magħruf fi ħdan %1$s</string>
-    <string name="car_from">%1$s minn %2$s</string>
-    <string name="car_add_stop">Żid waqfa</string>
-    <string name="car_none_near">Ebda wieħed qrib hawn</string>
-    <plurals name="car_tolls">
-        <item quantity="one">Tariffa tat-triq waħda</item>
-        <item quantity="few">%1$d tariffi tat-triq</item>
-        <item quantity="many">%1$d tariffa tat-triq</item>
-        <item quantity="other">%1$d tariffa tat-triq</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Favoriti</string>
@@ -4818,11 +4772,6 @@
     <string name="maps_error_no_way">M\'hemmx triq sa hemm b\'dan il-mezz.</string>
     <string name="maps_error_no_route">L-ebda rotta.</string>
     <string name="maps_say_stop">Waqfa %1$s. Li jmiss, %2$s: %3$s, meta titlaq</string>
-    <string name="maps_say_next_stop">Il-waqfa li jmiss %1$s: %2$s, meta titlaq</string>
-    <string name="maps_say_gps_lost">Is-sinjal tal-GPS intilef</string>
-    <string name="maps_say_wrong_way">Direzzjoni ħażina. Dur lura meta jkun sigur</string>
-    <string name="maps_say_toll">punt tat-tariffa</string>
-    <string name="maps_say_new_route">Rotta ġdida</string>
     <string name="maps_sample_turn">dur lejn il-lemin</string>
     <string name="maps_no_voice">Dan it-telefon m\'għandux leħen għal %1$s, għalhekk l-istruzzjonijiet jidhru iżda ma jinqrawx. Tista\' żżid wieħed fis-settings tal-leħen ta\' Android.</string>
     <plurals name="maps_in_km">
@@ -4867,18 +4816,6 @@
         <item quantity="many">minn waħda mill-%1$d karreġġjati tax-xellug</item>
         <item quantity="other">minn waħda mill-%1$d karreġġjati tax-xellug</item>
     </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Hemm %1$d post tal-ipparkjar għal persuni b\'diżabilità qrib id-destinazzjoni. Agħfas il-buttuna tal-ipparkjar biex tmur hemm.</item>
-        <item quantity="few">Hemm %1$d postijiet tal-ipparkjar għal persuni b\'diżabilità qrib id-destinazzjoni. Agħfas il-buttuna tal-ipparkjar biex tmur f\'wieħed minnhom.</item>
-        <item quantity="many">Hemm %1$d post tal-ipparkjar għal persuni b\'diżabilità qrib id-destinazzjoni. Agħfas il-buttuna tal-ipparkjar biex tmur f\'wieħed minnhom.</item>
-        <item quantity="other">Hemm %1$d post tal-ipparkjar għal persuni b\'diżabilità qrib id-destinazzjoni. Agħfas il-buttuna tal-ipparkjar biex tmur f\'wieħed minnhom.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">Ir-rotta għandha %1$d punt tat-tariffa</item>
-        <item quantity="few">Ir-rotta għandha %1$d punti tat-tariffa</item>
-        <item quantity="many">Ir-rotta għandha %1$d punt tat-tariffa</item>
-        <item quantity="other">Ir-rotta għandha %1$d punt tat-tariffa</item>
-    </plurals>
     <string name="maps_in_km_fraction">Wara %1$s kilometru, %2$s</string>
     <string name="maps_in_mi_fraction">Wara %1$s mil, %2$s</string>
     <string name="maps_old">Eqdem minn 3 xhur</string>
@@ -4918,19 +4855,11 @@
     <string name="brief_place_phone">fejn hu t-telefon</string>
     <string name="brief_place_not_found">Ma nstabx post bħal dan.</string>
     <string name="brief_place_use_phone">Fejn hu t-telefon</string>
-    <string name="car_map_view">Veduta tal-mappa</string>
-    <string name="car_map_size">Daqs</string>
-    <string name="car_map_card">Il-kard ta\' fuq</string>
-    <string name="car_map_island">Il-bar t\'isfel</string>
-    <string name="car_map_side">Il-ġenb: veloċità u limitu</string>
-    <string name="car_map_zoom">Żum</string>
     <string name="car_map_tilt">Inklinazzjoni</string>
     <string name="car_map_tilt_auto">Skont il-veloċità</string>
     <string name="car_map_arrow">Vleġġa</string>
     <string name="car_map_arrow_middle">Fin-nofs</string>
     <string name="car_map_arrow_low">Aktar \'l isfel</string>
-    <string name="car_ui_size">Interfaċċja</string>
-    <string name="car_resolution">Riżoluzzjoni</string>
     <string name="car_maps_title">Mapep mit-telefon</string>
     <string name="car_maps_update_title">Mapep ġodda fuq it-telefon</string>
     <string name="car_maps_intro">Il-mapep ta\' Tetra Car jaħdmu offline. Jiġu darba minn Tetra fuq it-telefon permezz tal-hotspot tiegħu; wara dan, biss dak il-ġdid.</string>
@@ -4946,7 +4875,6 @@
     <string name="car_maps_phone_none">It-telefon għadu m\'għandux mapep. Oħloq waħda fuq il-kompjuter (Tetra › Mapep); tasal fit-telefon, imbagħad f\'din l-unità.</string>
     <string name="car_maps_do">Agħmel</string>
     <string name="car_maps_no_space">M\'hemmx biżżejjed spazju f\'din l-unità: il-mapep jeħtieġu %1$d MB, %2$d MB huma ħielsa.</string>
-    <string name="car_dock_auto">Awtomatiku: fuq naħa tas-sewwieq f\'skrin wiesa\', inkella tul it-tarf t\'isfel</string>
     <string name="car_driver">Sit tas-sewwieq</string>
     <string name="car_driver_summary">Sewwieq fuq ix-xellug (ħafna mill-Ewropa) jew fuq il-lemin (ir-Renju Unit, l-Irlanda, Ċipru, Malta)</string>
     <string name="car_screen_size">Daqs fuq dan l-iskrin</string>

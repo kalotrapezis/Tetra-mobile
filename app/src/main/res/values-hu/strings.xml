@@ -1510,7 +1510,6 @@
     <string name="maps_kind_region">Régió</string>
     <string name="maps_my_car">Az autóm</string>
     <string name="maps_parking_saved">Parkolóhely mentve</string>
-    <string name="maps_on_car_screen">Az autó képernyőjén: %1$s</string>
     <string name="maps_no_graph">Ehhez a térképhez még nincsenek utak az útvonaltervezéshez: frissítsd itt: Tetra a számítógépen › Beállítások › Térképek.</string>
     <string name="maps_finding">Útvonal keresése…</string>
     <string name="maps_no_way_graph">Nincs útvonal: az útvonalgráf nem olvasható</string>
@@ -1535,7 +1534,6 @@
     <string name="maps_no_gps_reckoning">Nincs GPS-jel: haladás az útvonal mentén</string>
     <string name="maps_minutes">%1$d perc</string>
     <string name="maps_hours_minutes">%1$d ó %2$d perc</string>
-    <string name="maps_on_car_screen_bar">🚗 Az autó képernyőjén · %1$s</string>
     <string name="maps_follow_me">Követés</string>
     <string name="maps_voice_on">Hang be</string>
     <string name="maps_voice_off">Hang ki</string>
@@ -1611,48 +1609,6 @@
     <string name="maps_roads_local">Helyi utak</string>
     <string name="maps_no_tolls">Fizetőkapu nélkül</string>
     <string name="maps_fastest">Leggyorsabb</string>
-    <string name="car_map">Térkép</string>
-    <string name="car_places">Helyek</string>
-    <string name="car_allow_location">Nyisd meg egyszer a Tetra Térképeket a telefonon a helymeghatározás engedélyezéséhez</string>
-    <string name="car_no_map">Még nincs térkép: készíts egyet itt: Tetra a számítógépen › Beállítások › Térképek</string>
-    <string name="car_end">Vége</string>
-    <string name="car_routes">Útvonalak</string>
-    <string name="car_add_stop_button">Megálló</string>
-    <string name="car_favourites">Kedvencek</string>
-    <string name="car_more">további %1$d</string>
-    <string name="car_nearby_hint">Benzinkút, gyógyszertár…</string>
-    <string name="car_trips">Utak</string>
-    <string name="car_trips_saved">%1$d mentve</string>
-    <string name="car_near_me">A közelemben</string>
-    <string name="car_no_gps">Nincs GPS</string>
-    <string name="car_next">Következő: %1$s</string>
-    <string name="car_waiting_gps">Várakozás a GPS-re</string>
-    <string name="car_no_graph">Még nincs útvonalgráf a Tetra/.System/Maps/Shared mappában</string>
-    <string name="car_no_way">Nincs útvonal</string>
-    <string name="car_pin">Jelölő</string>
-    <string name="car_no_other_places">Nincs más mentett hely</string>
-    <string name="car_voice_all">Minden irány</string>
-    <string name="car_voice_important">Csak a fontosak: rossz irány, új útvonal, nincs GPS, érkezés</string>
-    <string name="car_voice_off">Hang ki</string>
-    <string name="car_warn_bends">Figyelmeztetés éles kanyarokra</string>
-    <string name="car_main_roads_off">Ki: a legrövidebb út</string>
-    <string name="car_voice">Hang</string>
-    <string name="car_roads">Utak</string>
-    <string name="car_amea_radius">Mozgáskorlátozott parkoló a cél közelében</string>
-    <string name="car_search_hint">Hely, utca, település</string>
-    <string name="car_no_trips">Még nincs út: tervezz egyet a telefonon a Tetra Térképekben</string>
-    <string name="car_routes_to">Útvonalak ide: %1$s</string>
-    <string name="car_no_other_way">Nincs más útvonal</string>
-    <string name="car_no_tolls">fizetőkapu nélkül</string>
-    <string name="car_parking_near">♿ Parkoló %1$s közelében</string>
-    <string name="car_no_amea_within">Nincs ismert mozgáskorlátozott hely %1$s távolságon belül</string>
-    <string name="car_from">%1$s, innen: %2$s</string>
-    <string name="car_add_stop">Megálló hozzáadása</string>
-    <string name="car_none_near">Nincs a közelben</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d fizetőkapu</item>
-        <item quantity="other">%1$d fizetőkapu</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Kedvencek</string>
@@ -4634,11 +4590,6 @@
     <string name="maps_error_no_way">Ezzel a közlekedési móddal nincs oda út.</string>
     <string name="maps_error_no_route">Nincs útvonal.</string>
     <string name="maps_say_stop">%1$s megálló. Következő: %2$s: %3$s, amint továbbindul</string>
-    <string name="maps_say_next_stop">Következő megálló %1$s: %2$s, amint továbbindul</string>
-    <string name="maps_say_gps_lost">Megszűnt a GPS-jel</string>
-    <string name="maps_say_wrong_way">Rossz irány. Forduljon meg, amikor biztonságos</string>
-    <string name="maps_say_toll">fizetőkapu</string>
-    <string name="maps_say_new_route">Új útvonal</string>
     <string name="maps_sample_turn">forduljon jobbra</string>
     <string name="maps_no_voice">Ezen a telefonon nincs %1$s hang, ezért az útbaigazítás megjelenik, de nem hangzik el. Hangot az Android beszédbeállításaiban adhatsz hozzá.</string>
     <plurals name="maps_in_km">
@@ -4668,14 +4619,6 @@
     <plurals name="maps_lanes_left">
         <item quantity="one">a bal oldali sávból</item>
         <item quantity="other">a %1$d bal oldali sáv egyikéből</item>
-    </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Az úti cél közelében %1$d mozgáskorlátozott parkolóhely van. Nyomja meg a parkolás gombot, hogy odamenjen.</item>
-        <item quantity="other">Az úti cél közelében %1$d mozgáskorlátozott parkolóhely van. Nyomja meg a parkolás gombot, hogy az egyikhez menjen.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">Az útvonalon %1$d fizetőkapu van</item>
-        <item quantity="other">Az útvonalon %1$d fizetőkapu van</item>
     </plurals>
     <string name="maps_in_km_fraction">%1$s kilométer múlva, %2$s</string>
     <string name="maps_in_mi_fraction">%1$s mérföld múlva, %2$s</string>
@@ -4716,19 +4659,11 @@
     <string name="brief_place_phone">ahol a telefon van</string>
     <string name="brief_place_not_found">Nincs ilyen hely.</string>
     <string name="brief_place_use_phone">Ahol a telefon van</string>
-    <string name="car_map_view">Térképnézet</string>
-    <string name="car_map_size">Méret</string>
-    <string name="car_map_card">Felső kártya</string>
-    <string name="car_map_island">Alsó sáv</string>
-    <string name="car_map_side">Oldalt: sebesség és korlát</string>
-    <string name="car_map_zoom">Nagyítás</string>
     <string name="car_map_tilt">Dőlés</string>
     <string name="car_map_tilt_auto">Sebesség szerint</string>
     <string name="car_map_arrow">Nyíl</string>
     <string name="car_map_arrow_middle">Középen</string>
     <string name="car_map_arrow_low">Lejjebb</string>
-    <string name="car_ui_size">Felület</string>
-    <string name="car_resolution">Felbontás</string>
     <string name="car_maps_title">Térképek a telefonról</string>
     <string name="car_maps_update_title">Új térképek a telefonon</string>
     <string name="car_maps_intro">A Tetra Car térképei internet nélkül is működnek. Egyszer érkeznek a Tetrához a telefonról, annak hotspotján keresztül; utána már csak az új rész.</string>
@@ -4744,7 +4679,6 @@
     <string name="car_maps_phone_none">A telefonon még nincsenek térképek. Készítse el a számítógépen (Tetra › Térképek); az eljut a telefonra, onnan pedig erre az egységre.</string>
     <string name="car_maps_do">Indítás</string>
     <string name="car_maps_no_space">Nincs elég hely az egységen: a térképekhez %1$d MB kell, %2$d MB szabad.</string>
-    <string name="car_dock_auto">Automatikus: széles kijelzőnél a vezetőoldalon lefelé, egyébként az alsó szél mentén</string>
     <string name="car_driver">Vezetőülés</string>
     <string name="car_driver_summary">Bal oldali kormány (Európa nagy része) vagy jobb oldali (Egyesült Királyság, Írország, Ciprus, Málta)</string>
     <string name="car_screen_size">Méret ezen a kijelzőn</string>

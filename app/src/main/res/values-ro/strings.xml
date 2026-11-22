@@ -1553,7 +1553,6 @@
     <string name="maps_kind_region">Regiune</string>
     <string name="maps_my_car">Mașina mea</string>
     <string name="maps_parking_saved">Parcare salvată</string>
-    <string name="maps_on_car_screen">Pe ecranul mașinii: %1$s</string>
     <string name="maps_no_graph">Această hartă nu are încă drumuri pentru indicații: actualizeaz-o în Tetra de pe computer › Setări › Hărți.</string>
     <string name="maps_finding">Se caută drumul…</string>
     <string name="maps_no_way_graph">Nu s-a găsit niciun drum: graful de rutare nu a putut fi citit</string>
@@ -1578,7 +1577,6 @@
     <string name="maps_no_gps_reckoning">Fără semnal GPS: se continuă pe traseu</string>
     <string name="maps_minutes">%1$d min</string>
     <string name="maps_hours_minutes">%1$d h %2$d min</string>
-    <string name="maps_on_car_screen_bar">🚗 Pe ecranul mașinii · %1$s</string>
     <string name="maps_follow_me">Urmărește-mă</string>
     <string name="maps_voice_on">Voce activată</string>
     <string name="maps_voice_off">Voce dezactivată</string>
@@ -1654,49 +1652,6 @@
     <string name="maps_roads_local">Drumuri locale</string>
     <string name="maps_no_tolls">Fără taxe de drum</string>
     <string name="maps_fastest">Cel mai rapid</string>
-    <string name="car_map">Hartă</string>
-    <string name="car_places">Locuri</string>
-    <string name="car_allow_location">Deschide o dată Tetra Hărți pe telefon pentru a permite locația</string>
-    <string name="car_no_map">Încă nu există nicio hartă: fă una în Tetra de pe computer › Setări › Hărți</string>
-    <string name="car_end">Încheie</string>
-    <string name="car_routes">Trasee</string>
-    <string name="car_add_stop_button">Oprire</string>
-    <string name="car_favourites">Preferate</string>
-    <string name="car_more">Încă %1$d</string>
-    <string name="car_nearby_hint">Carburant, farmacie…</string>
-    <string name="car_trips">Călătorii</string>
-    <string name="car_trips_saved">%1$d salvate</string>
-    <string name="car_near_me">Lângă mine</string>
-    <string name="car_no_gps">Fără GPS</string>
-    <string name="car_next">Următoarea: %1$s</string>
-    <string name="car_waiting_gps">Se așteaptă GPS-ul</string>
-    <string name="car_no_graph">Niciun graf de rutare încă în Tetra/.System/Maps/Shared</string>
-    <string name="car_no_way">Nu s-a găsit niciun drum</string>
-    <string name="car_pin">Pin</string>
-    <string name="car_no_other_places">Niciun alt loc salvat</string>
-    <string name="car_voice_all">Fiecare indicație</string>
-    <string name="car_voice_important">Doar importante: sens greșit, traseu nou, fără GPS, sosire</string>
-    <string name="car_voice_off">Voce dezactivată</string>
-    <string name="car_warn_bends">Avertizează la curbe strânse</string>
-    <string name="car_main_roads_off">Dezactivat: drumul cel mai scurt</string>
-    <string name="car_voice">Voce</string>
-    <string name="car_roads">Drumuri</string>
-    <string name="car_amea_radius">Locuri ♿ lângă destinație</string>
-    <string name="car_search_hint">Loc, stradă, oraș</string>
-    <string name="car_no_trips">Nicio călătorie încă: planifică una în Tetra Hărți pe telefon</string>
-    <string name="car_routes_to">Trasee spre %1$s</string>
-    <string name="car_no_other_way">Nu s-a găsit alt drum</string>
-    <string name="car_no_tolls">fără taxe de drum</string>
-    <string name="car_parking_near">♿ Parcare lângă %1$s</string>
-    <string name="car_no_amea_within">Niciun loc ♿ cunoscut pe o rază de %1$s</string>
-    <string name="car_from">%1$s de la %2$s</string>
-    <string name="car_add_stop">Adaugă o oprire</string>
-    <string name="car_none_near">Niciunul în apropiere</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d taxă de drum</item>
-        <item quantity="few">%1$d taxe de drum</item>
-        <item quantity="other">%1$d de taxe de drum</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Preferate</string>
@@ -4726,11 +4681,6 @@
     <string name="maps_error_no_way">Cu acest mijloc de transport nu există drum până acolo.</string>
     <string name="maps_error_no_route">Niciun traseu.</string>
     <string name="maps_say_stop">Oprirea %1$s. Următoarea, %2$s: %3$s, când porniți</string>
-    <string name="maps_say_next_stop">Următoarea oprire %1$s: %2$s, când porniți</string>
-    <string name="maps_say_gps_lost">Semnalul GPS s-a pierdut</string>
-    <string name="maps_say_wrong_way">Direcție greșită. Întoarceți când este sigur</string>
-    <string name="maps_say_toll">o barieră de taxare</string>
-    <string name="maps_say_new_route">Traseu nou</string>
     <string name="maps_sample_turn">virați la dreapta</string>
     <string name="maps_no_voice">Acest telefon nu are o voce pentru %1$s, așa că indicațiile sunt afișate, dar nu sunt rostite. Puteți adăuga una în setările de voce Android.</string>
     <plurals name="maps_in_km">
@@ -4767,16 +4717,6 @@
         <item quantity="one">pe banda din stânga</item>
         <item quantity="few">pe una dintre cele %1$d benzi din stânga</item>
         <item quantity="other">pe una dintre cele %1$d de benzi din stânga</item>
-    </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Lângă destinație există %1$d loc de parcare pentru persoane cu dizabilități. Apăsați butonul de parcare ca să mergeți acolo.</item>
-        <item quantity="few">Lângă destinație există %1$d locuri de parcare pentru persoane cu dizabilități. Apăsați butonul de parcare ca să mergeți la unul.</item>
-        <item quantity="other">Lângă destinație există %1$d de locuri de parcare pentru persoane cu dizabilități. Apăsați butonul de parcare ca să mergeți la unul.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">Traseul are %1$d barieră de taxare</item>
-        <item quantity="few">Traseul are %1$d bariere de taxare</item>
-        <item quantity="other">Traseul are %1$d de bariere de taxare</item>
     </plurals>
     <string name="maps_in_km_fraction">Peste %1$s kilometri, %2$s</string>
     <string name="maps_in_mi_fraction">Peste %1$s mile, %2$s</string>
@@ -4817,19 +4757,11 @@
     <string name="brief_place_phone">unde este telefonul</string>
     <string name="brief_place_not_found">Niciun loc găsit.</string>
     <string name="brief_place_use_phone">Unde este telefonul</string>
-    <string name="car_map_view">Vizualizare hartă</string>
-    <string name="car_map_size">Mărime</string>
-    <string name="car_map_card">Cardul de sus</string>
-    <string name="car_map_island">Bara de jos</string>
-    <string name="car_map_side">Lateral: viteză și limită</string>
-    <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Înclinare</string>
     <string name="car_map_tilt_auto">După viteză</string>
     <string name="car_map_arrow">Săgeată</string>
     <string name="car_map_arrow_middle">La mijloc</string>
     <string name="car_map_arrow_low">Mai jos</string>
-    <string name="car_ui_size">Interfață</string>
-    <string name="car_resolution">Rezoluție</string>
     <string name="car_maps_title">Hărți de pe telefon</string>
     <string name="car_maps_update_title">Hărți noi pe telefon</string>
     <string name="car_maps_intro">Hărțile Tetra Car funcționează offline. Ajung o singură dată de la telefon la Tetra, prin hotspotul acestuia; apoi doar ce e nou.</string>
@@ -4845,7 +4777,6 @@
     <string name="car_maps_phone_none">Telefonul nu are încă hărți. Fă una pe calculator (Tetra › Hărți); ajunge pe telefon și apoi pe această unitate.</string>
     <string name="car_maps_do">Fă</string>
     <string name="car_maps_no_space">Nu e destul loc pe această unitate: hărțile cer %1$d MB, sunt %2$d MB liberi.</string>
-    <string name="car_dock_auto">Automat: pe partea șoferului la ecran lat, altfel pe marginea de jos</string>
     <string name="car_driver">Locul șoferului</string>
     <string name="car_driver_summary">Volan pe stânga (cea mai mare parte a Europei) sau pe dreapta (Regatul Unit, Irlanda, Cipru, Malta)</string>
     <string name="car_screen_size">Dimensiune pe acest ecran</string>

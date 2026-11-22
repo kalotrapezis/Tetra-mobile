@@ -132,18 +132,17 @@ internal val LocalPanelMax = androidx.compose.runtime.staticCompositionLocalOf {
  */
 @Composable internal fun PoiRow(p: Poi, metres: Double?, town: (Poi) -> String? = { null }, saved: String? = null, go: (() -> Unit)? = null, click: () -> Unit) {
     val context = LocalContext.current
-    val car = LocalOnCar.current
     val dim = Color.White.copy(alpha = 0.7f)
-    val small = if (car) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium
+    val small = MaterialTheme.typography.bodyMedium
     val where by androidx.compose.runtime.produceState<String?>(null, p) { value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { runCatching { town(p) }.getOrNull() } }
     Row(Modifier.fillMaxWidth().clickable(onClick = click).padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-        Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.12f), modifier = Modifier.size(if (car) 56.dp else 44.dp)) {
-            Box(contentAlignment = Alignment.Center) { Text(MapsSearch.emoji(p.kind), style = if (car) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge) }
+        Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.12f), modifier = Modifier.size(44.dp)) {
+            Box(contentAlignment = Alignment.Center) { Text(MapsSearch.emoji(p.kind), style = MaterialTheme.typography.titleLarge) }
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(p.title(context), style = if (car) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium,
-                maxLines = if (car) 1 else 2, overflow = TextOverflow.Ellipsis)
+            Text(p.title(context), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium,
+                maxLines = 2, overflow = TextOverflow.Ellipsis)
             // what it is · where: its street when OSM has one, and the town
             Text(listOfNotNull(p.named(context)?.takeIf { !p.title(context).contains(it, ignoreCase = true) }, MapsSearch.label(p.kind, context).takeIf { p.name.isNotEmpty() },
                 p.more.takeIf { it.isNotEmpty() && !MapsSearch.settlement(p.kind) }, where?.takeIf { w -> !p.more.contains(w) && w != p.name })
@@ -165,11 +164,11 @@ internal val LocalPanelMax = androidx.compose.runtime.staticCompositionLocalOf {
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             go?.let { g ->
-                Surface(shape = CircleShape, color = Color(0xFF5C6BC0), contentColor = Color.White, onClick = g, modifier = Modifier.size(if (car) 56.dp else 44.dp)) {
-                    Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.ic_navigation), contentDescription = stringResource(R.string.maps_go), modifier = Modifier.size(if (car) 28.dp else 22.dp)) }
+                Surface(shape = CircleShape, color = Color(0xFF5C6BC0), contentColor = Color.White, onClick = g, modifier = Modifier.size(44.dp)) {
+                    Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.ic_navigation), contentDescription = stringResource(R.string.maps_go), modifier = Modifier.size(22.dp)) }
                 }
             }
-            metres?.let { Text(metresText(it), style = if (car) MaterialTheme.typography.titleMedium else MaterialTheme.typography.labelMedium) }
+            metres?.let { Text(metresText(it), style = MaterialTheme.typography.labelMedium) }
         }
     }
 }
@@ -231,9 +230,9 @@ internal val LocalPanelMax = androidx.compose.runtime.staticCompositionLocalOf {
         else -> if (inList.isEmpty()) Text(stringResource(if (shown == "all") R.string.maps_no_saved else R.string.maps_list_empty),
             style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(16.dp))
         else {
-            // a long list gets a line to find in it (the user, 10 Nov: "I was tring to find the scool"); not in the car
+            // a long list gets a line to find in it (the user, 10 Nov: "I was tring to find the scool")
             var find by remember(shown) { mutableStateOf("") }
-            if (inList.size > 15 && !LocalOnCar.current) MapsSearchField(find, stringResource(R.string.maps_list_find), { find = it })
+            if (inList.size > 15) MapsSearchField(find, stringResource(R.string.maps_list_find), { find = it })
             val found = if (find.isBlank()) inList else inList.filter { MapsSearch.fold("${it.name} ${it.label}").contains(MapsSearch.fold(find.trim())) }
             // the words many names here start with ("Δημοτικό Σχολείο …") are dimmed, so the part that tells them apart stands out
             val lead = found.map { it.short.split(' ').take(2).joinToString(" ") }.filter { ' ' in it }.groupingBy { it }.eachCount()
@@ -255,19 +254,18 @@ internal val LocalPanelMax = androidx.compose.runtime.staticCompositionLocalOf {
 
 /**
  * One row of Saved: a round badge (an emoji or an emblem), the name on up to two lines ([dim] of its first characters quieter),
- * a quiet line under it, [end] (the distance) at the right; [more] a ⋮. In the car bigger, the name on one line, at a glance.
+ * a quiet line under it, [end] (the distance) at the right; [more] a ⋮.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable private fun SavedRow(emoji: String?, title: String, sub: String?, icon: Int? = null, dim: Int = 0, end: String? = null, onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null, more: (() -> Unit)? = null) {
-    val car = LocalOnCar.current
-    Row(Modifier.fillMaxWidth().heightIn(min = if (car) 88.dp else 64.dp).combinedClickable(onClick = onClick, onLongClick = onLongClick)
+    Row(Modifier.fillMaxWidth().heightIn(min = 64.dp).combinedClickable(onClick = onClick, onLongClick = onLongClick)
         .padding(start = 16.dp, end = if (more != null) 4.dp else 16.dp, top = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-        Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.12f), modifier = Modifier.size(if (car) 56.dp else 44.dp)) {
+        Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.12f), modifier = Modifier.size(44.dp)) {
             Box(contentAlignment = Alignment.Center) {
-                if (icon != null) Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(if (car) 28.dp else 22.dp))
-                else Text(emoji.orEmpty(), style = if (car) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge)
+                if (icon != null) Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(22.dp))
+                else Text(emoji.orEmpty(), style = MaterialTheme.typography.titleLarge)
             }
         }
         Column(Modifier.weight(1f)) {
@@ -275,12 +273,12 @@ internal val LocalPanelMax = androidx.compose.runtime.staticCompositionLocalOf {
                 pushStyle(androidx.compose.ui.text.SpanStyle(color = Color.White.copy(alpha = 0.6f), fontWeight = FontWeight.Normal)); append(title.take(dim)); pop()
                 append(title.drop(dim))
             } else androidx.compose.ui.text.AnnotatedString(title)
-            Text(text, style = if (car) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium,
-                maxLines = if (car) 1 else 2, overflow = TextOverflow.Ellipsis)
-            sub?.let { Text(it, style = if (car) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.7f),
+            Text(text, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium,
+                maxLines = 2, overflow = TextOverflow.Ellipsis)
+            sub?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.7f),
                 maxLines = 1, overflow = TextOverflow.Ellipsis) }
         }
-        end?.let { Text(it, style = if (car) MaterialTheme.typography.titleLarge else MaterialTheme.typography.labelLarge) }
+        end?.let { Text(it, style = MaterialTheme.typography.labelLarge) }
         more?.let { IconButton(onClick = it) { Icon(painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.common_edit)) } }
     }
 }

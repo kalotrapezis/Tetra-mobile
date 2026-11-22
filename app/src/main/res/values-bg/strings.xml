@@ -1510,7 +1510,6 @@
     <string name="maps_kind_region">Област</string>
     <string name="maps_my_car">Моята кола</string>
     <string name="maps_parking_saved">Паркирането е записано</string>
-    <string name="maps_on_car_screen">На екрана на колата: %1$s</string>
     <string name="maps_no_graph">Тази карта още няма пътища за навигация: обновете я в Tetra на компютъра › Настройки › Карти.</string>
     <string name="maps_finding">Търсене на маршрут…</string>
     <string name="maps_no_way_graph">Няма намерен маршрут: графът за маршрути не можа да се прочете</string>
@@ -1535,7 +1534,6 @@
     <string name="maps_no_gps_reckoning">Няма GPS сигнал: продължава по маршрута</string>
     <string name="maps_minutes">%1$d мин</string>
     <string name="maps_hours_minutes">%1$d ч %2$d мин</string>
-    <string name="maps_on_car_screen_bar">🚗 На екрана на колата · %1$s</string>
     <string name="maps_follow_me">Следвай ме</string>
     <string name="maps_voice_on">Глас вкл.</string>
     <string name="maps_voice_off">Глас изкл.</string>
@@ -1611,48 +1609,6 @@
     <string name="maps_roads_local">Местни пътища</string>
     <string name="maps_no_tolls">Без пътни такси</string>
     <string name="maps_fastest">Най-бърз</string>
-    <string name="car_map">Карта</string>
-    <string name="car_places">Места</string>
-    <string name="car_allow_location">Отворете Tetra Карти на телефона веднъж, за да разрешите местоположението</string>
-    <string name="car_no_map">Все още няма карта: създайте една в Tetra на компютъра › Настройки › Карти</string>
-    <string name="car_end">Край</string>
-    <string name="car_routes">Маршрути</string>
-    <string name="car_add_stop_button">Спирка</string>
-    <string name="car_favourites">Любими</string>
-    <string name="car_more">Още %1$d</string>
-    <string name="car_nearby_hint">Гориво, аптека…</string>
-    <string name="car_trips">Пътувания</string>
-    <string name="car_trips_saved">%1$d запазени</string>
-    <string name="car_near_me">Близо до мен</string>
-    <string name="car_no_gps">Няма GPS</string>
-    <string name="car_next">Следваща: %1$s</string>
-    <string name="car_waiting_gps">Изчакване на GPS</string>
-    <string name="car_no_graph">Все още няма граф за маршрути в Tetra/.System/Maps/Shared</string>
-    <string name="car_no_way">Няма намерен маршрут</string>
-    <string name="car_pin">Карфица</string>
-    <string name="car_no_other_places">Няма други запазени места</string>
-    <string name="car_voice_all">Всяко указание</string>
-    <string name="car_voice_important">Само важните: грешна посока, нов маршрут, няма GPS, пристигане</string>
-    <string name="car_voice_off">Глас изкл.</string>
-    <string name="car_warn_bends">Предупреждавай за остри завои</string>
-    <string name="car_main_roads_off">Изкл.: най-краткият път</string>
-    <string name="car_voice">Глас</string>
-    <string name="car_roads">Пътища</string>
-    <string name="car_amea_radius">♿ паркинг до целта</string>
-    <string name="car_search_hint">Място, улица, град</string>
-    <string name="car_no_trips">Все още няма пътувания: планирайте в Tetra Карти на телефона</string>
-    <string name="car_routes_to">Маршрути до %1$s</string>
-    <string name="car_no_other_way">Няма друг намерен маршрут</string>
-    <string name="car_no_tolls">без пътни такси</string>
-    <string name="car_parking_near">♿ Паркинг близо до %1$s</string>
-    <string name="car_no_amea_within">Няма известно ♿ място в радиус %1$s</string>
-    <string name="car_from">%1$s от %2$s</string>
-    <string name="car_add_stop">Добави спирка</string>
-    <string name="car_none_near">Няма наблизо</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d пътна такса</item>
-        <item quantity="other">%1$d пътни такси</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Любими</string>
@@ -4634,11 +4590,6 @@
     <string name="maps_error_no_way">С това превозно средство няма път дотам.</string>
     <string name="maps_error_no_route">Няма маршрут.</string>
     <string name="maps_say_stop">Спирка %1$s. Следваща, %2$s: %3$s, щом потеглите</string>
-    <string name="maps_say_next_stop">Следваща спирка %1$s: %2$s, щом потеглите</string>
-    <string name="maps_say_gps_lost">GPS сигналът е изгубен</string>
-    <string name="maps_say_wrong_way">Грешна посока. Обърнете, когато е безопасно</string>
-    <string name="maps_say_toll">пункт за такса</string>
-    <string name="maps_say_new_route">Нов маршрут</string>
     <string name="maps_sample_turn">завийте надясно</string>
     <string name="maps_no_voice">Този телефон няма глас за %1$s, затова указанията се показват, но не се изговарят. Можете да добавите глас в гласовите настройки на Android.</string>
     <plurals name="maps_in_km">
@@ -4668,14 +4619,6 @@
     <plurals name="maps_lanes_left">
         <item quantity="one">от лявата лента</item>
         <item quantity="other">от %1$d леви ленти</item>
-    </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Близо до дестинацията има %1$d място за хора с увреждания. Натиснете бутона за паркиране, за да отидете там.</item>
-        <item quantity="other">Близо до дестинацията има %1$d места за хора с увреждания. Натиснете бутона за паркиране, за да отидете до едно от тях.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">Маршрутът има %1$d пункт за такса</item>
-        <item quantity="other">Маршрутът има %1$d пункта за такса</item>
     </plurals>
     <string name="maps_in_km_fraction">След %1$s километра, %2$s</string>
     <string name="maps_in_mi_fraction">След %1$s мили, %2$s</string>
@@ -4716,19 +4659,11 @@
     <string name="brief_place_phone">където е телефонът</string>
     <string name="brief_place_not_found">Няма такова място.</string>
     <string name="brief_place_use_phone">Където е телефонът</string>
-    <string name="car_map_view">Изглед на картата</string>
-    <string name="car_map_size">Размер</string>
-    <string name="car_map_card">Горен панел</string>
-    <string name="car_map_island">Долна лента</string>
-    <string name="car_map_side">Отстрани: скорост и ограничение</string>
-    <string name="car_map_zoom">Мащаб</string>
     <string name="car_map_tilt">Наклон</string>
     <string name="car_map_tilt_auto">По скорост</string>
     <string name="car_map_arrow">Стрелка</string>
     <string name="car_map_arrow_middle">В средата</string>
     <string name="car_map_arrow_low">Ниско</string>
-    <string name="car_ui_size">Интерфейс</string>
-    <string name="car_resolution">Резолюция</string>
     <string name="car_maps_title">Карти от телефона</string>
     <string name="car_maps_update_title">Нови карти в телефона</string>
     <string name="car_maps_intro">Картите на Tetra Car работят без връзка. Идват веднъж от Tetra в телефона през неговата точка за достъп; после – само новото.</string>
@@ -4744,7 +4679,6 @@
     <string name="car_maps_phone_none">На телефона още няма карти. Направете една на компютъра (Tetra › Карти); тя стига до телефона, после до това устройство.</string>
     <string name="car_maps_do">Изпълни</string>
     <string name="car_maps_no_space">Няма достатъчно място на устройството: картите са нужни %1$d MB, свободни са %2$d MB.</string>
-    <string name="car_dock_auto">Автоматично: от страната на шофьора при широк екран, иначе по долния край</string>
     <string name="car_driver">Място на шофьора</string>
     <string name="car_driver_summary">Волан отляво (по-голямата част от Европа) или отдясно (Великобритания, Ирландия, Кипър, Малта)</string>
     <string name="car_screen_size">Размер на този екран</string>

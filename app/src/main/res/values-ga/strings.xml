@@ -1639,7 +1639,6 @@
     <string name="maps_kind_region">Réigiún</string>
     <string name="maps_my_car">Mo charr</string>
     <string name="maps_parking_saved">Páirceáil sábháilte</string>
-    <string name="maps_on_car_screen">Ar scáileán an chairr: %1$s</string>
     <string name="maps_no_graph">Níl aon bhóithre ag an léarscáil seo fós le haghaidh treoracha: nuashonraigh í in Tetra ar an ríomhaire › Socruithe › Léarscáileanna.</string>
     <string name="maps_finding">Ag aimsiú an bhealaigh…</string>
     <string name="maps_no_way_graph">Níor aimsíodh bealach: níorbh fhéidir an graf bealaí a léamh</string>
@@ -1664,7 +1663,6 @@
     <string name="maps_no_gps_reckoning">Níl comhartha GPS ann: ag leanúint leis feadh an bhealaigh</string>
     <string name="maps_minutes">%1$d n</string>
     <string name="maps_hours_minutes">%1$d u %2$d n</string>
-    <string name="maps_on_car_screen_bar">🚗 Ar scáileán an chairr · %1$s</string>
     <string name="maps_follow_me">Lean mé</string>
     <string name="maps_voice_on">Guth ar siúl</string>
     <string name="maps_voice_off">Guth as</string>
@@ -1740,51 +1738,6 @@
     <string name="maps_roads_local">Bóithre áitiúla</string>
     <string name="maps_no_tolls">Gan tollaí</string>
     <string name="maps_fastest">Is tapúla</string>
-    <string name="car_map">Léarscáil</string>
-    <string name="car_places">Áiteanna</string>
-    <string name="car_allow_location">Oscail Tetra Maps ar an ngutháin uair amháin chun suíomh a cheadú</string>
-    <string name="car_no_map">Níl aon léarscáil fós: déan ceann in Tetra ar an ríomhaire › Socruithe › Léarscáileanna</string>
-    <string name="car_end">Críochnaigh</string>
-    <string name="car_routes">Bealaí</string>
-    <string name="car_add_stop_button">Stad</string>
-    <string name="car_favourites">Ceanáin</string>
-    <string name="car_more">%1$d eile</string>
-    <string name="car_nearby_hint">Breosla, cógaslann…</string>
-    <string name="car_trips">Turais</string>
-    <string name="car_trips_saved">%1$d sábháilte</string>
-    <string name="car_near_me">Gar dom</string>
-    <string name="car_no_gps">Gan GPS</string>
-    <string name="car_next">Ar aghaidh: %1$s</string>
-    <string name="car_waiting_gps">Ag fanacht leis an GPS</string>
-    <string name="car_no_graph">Níl graf bealaí i Tetra/.System/Maps/Shared fós</string>
-    <string name="car_no_way">Níor aimsíodh bealach</string>
-    <string name="car_pin">Greamaigh</string>
-    <string name="car_no_other_places">Níl áiteanna eile sábháilte</string>
-    <string name="car_voice_all">Gach treo</string>
-    <string name="car_voice_important">Ach an tábhachtach amháin: bealach mícheart, bealach nua, gan GPS, teacht</string>
-    <string name="car_voice_off">Guth as</string>
-    <string name="car_warn_bends">Rabhadh do lúbanna géara</string>
-    <string name="car_main_roads_off">As: an bealach is giorra</string>
-    <string name="car_voice">Guth</string>
-    <string name="car_roads">Bóithre</string>
-    <string name="car_amea_radius">Páirceáil do dhaoine faoi mhíchumas gar don cheann scríbe</string>
-    <string name="car_search_hint">Áit, sráid, baile</string>
-    <string name="car_no_trips">Níl turais ann fós: pleanáil ceann i Tetra Maps ar an ngutháin</string>
-    <string name="car_routes_to">Bealaí go %1$s</string>
-    <string name="car_no_other_way">Níor aimsíodh bealach eile</string>
-    <string name="car_no_tolls">gan tollaí</string>
-    <string name="car_parking_near">♿ Páirceáil gar do %1$s</string>
-    <string name="car_no_amea_within">Níl spota páirceála do dhaoine faoi mhíchumas ar eolas laistigh de %1$s</string>
-    <string name="car_from">%1$s ó %2$s</string>
-    <string name="car_add_stop">Cuir stad leis</string>
-    <string name="car_none_near">Níl aon cheann in aice leis</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d toll</item>
-        <item quantity="two">%1$d toll</item>
-        <item quantity="few">%1$d toll</item>
-        <item quantity="many">%1$d toll</item>
-        <item quantity="other">%1$d toll</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Ceanáin</string>
@@ -4910,11 +4863,6 @@
     <string name="maps_error_no_way">Níl aon bhealach ann leis an modh taistil seo.</string>
     <string name="maps_error_no_route">Níl aon bhealach ann.</string>
     <string name="maps_say_stop">Stad %1$s. An chéad cheann eile, %2$s: %3$s, nuair a thiomáineann tú ar aghaidh</string>
-    <string name="maps_say_next_stop">An chéad stad eile %1$s: %2$s, nuair a thiomáineann tú ar aghaidh</string>
-    <string name="maps_say_gps_lost">Cailleadh an comhartha GPS</string>
-    <string name="maps_say_wrong_way">Treo mícheart. Cas timpeall nuair is sábháilte é</string>
-    <string name="maps_say_toll">dola</string>
-    <string name="maps_say_new_route">Bealach nua</string>
     <string name="maps_sample_turn">cas ar dheis</string>
     <string name="maps_no_voice">Níl guth le haghaidh %1$s ar an bhfón seo, mar sin taispeántar na treoracha ach ní deirtear iad. Is féidir leat ceann a chur leis i socruithe gutha Android.</string>
     <plurals name="maps_in_km">
@@ -4966,20 +4914,6 @@
         <item quantity="many">ó cheann de na %1$d lána ar chlé</item>
         <item quantity="other">ó cheann de na %1$d lána ar chlé</item>
     </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Tá %1$d spás páirceála do dhaoine faoi mhíchumas gar do do cheann scríbe. Brúigh an cnaipe páirceála chun dul ann.</item>
-        <item quantity="two">Tá %1$d spás páirceála do dhaoine faoi mhíchumas gar do do cheann scríbe. Brúigh an cnaipe páirceála chun dul chuig ceann acu.</item>
-        <item quantity="few">Tá %1$d spás páirceála do dhaoine faoi mhíchumas gar do do cheann scríbe. Brúigh an cnaipe páirceála chun dul chuig ceann acu.</item>
-        <item quantity="many">Tá %1$d spás páirceála do dhaoine faoi mhíchumas gar do do cheann scríbe. Brúigh an cnaipe páirceála chun dul chuig ceann acu.</item>
-        <item quantity="other">Tá %1$d spás páirceála do dhaoine faoi mhíchumas gar do do cheann scríbe. Brúigh an cnaipe páirceála chun dul chuig ceann acu.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">Tá %1$d dola ar an mbealach</item>
-        <item quantity="two">Tá %1$d dola ar an mbealach</item>
-        <item quantity="few">Tá %1$d dola ar an mbealach</item>
-        <item quantity="many">Tá %1$d dola ar an mbealach</item>
-        <item quantity="other">Tá %1$d dola ar an mbealach</item>
-    </plurals>
     <string name="maps_in_km_fraction">I gceann %1$s ciliméadar, %2$s</string>
     <string name="maps_in_mi_fraction">I gceann %1$s míle, %2$s</string>
     <string name="maps_old">Níos sine ná 3 mhí</string>
@@ -5019,19 +4953,11 @@
     <string name="brief_place_phone">an áit a bhfuil an fón</string>
     <string name="brief_place_not_found">Níor aimsíodh a leithéid d\'áit.</string>
     <string name="brief_place_use_phone">An áit a bhfuil an fón</string>
-    <string name="car_map_view">Amharc léarscáile</string>
-    <string name="car_map_size">Méid</string>
-    <string name="car_map_card">Cárta barr</string>
-    <string name="car_map_island">Barra bun</string>
-    <string name="car_map_side">Taobh: luas agus teorainn</string>
-    <string name="car_map_zoom">Súmáil</string>
     <string name="car_map_tilt">Claonadh</string>
     <string name="car_map_tilt_auto">De réir luais</string>
     <string name="car_map_arrow">Saighead</string>
     <string name="car_map_arrow_middle">Sa lár</string>
     <string name="car_map_arrow_low">Níos ísle</string>
-    <string name="car_ui_size">Comhéadan</string>
-    <string name="car_resolution">Taifeach</string>
     <string name="car_maps_title">Léarscáileanna ón bhfón</string>
     <string name="car_maps_update_title">Léarscáileanna nua ar an bhfón</string>
     <string name="car_maps_intro">Oibríonn léarscáileanna Tetra Car gan líonra. Tagann siad uair amháin ó Tetra ar an bhfón tríd an hotspot; ina dhiaidh sin, an rud nua amháin.</string>
@@ -5047,7 +4973,6 @@
     <string name="car_maps_phone_none">Níl léarscáileanna ag an bhfón fós. Déan ceann ar an ríomhaire (Tetra › Léarscáileanna); tagann sé chuig an bhfón, agus ansin chuig an aonad seo.</string>
     <string name="car_maps_do">Déan é</string>
     <string name="car_maps_no_space">Níl go leor spáis ar an aonad seo: teastaíonn %1$d MB ó na léarscáileanna, tá %2$d MB saor.</string>
-    <string name="car_dock_auto">Uathoibríoch: síos ar thaobh an tiománaí ar scáileán leathan, nó feadh an bhoinn murab ea</string>
     <string name="car_driver">Suíochán an tiománaí</string>
     <string name="car_driver_summary">Tiomáint ar an taobh clé (formhór na hEorpa) nó ar an taobh deas (an Ríocht Aontaithe, Éire, an Chipir, Málta)</string>
     <string name="car_screen_size">Méid ar an scáileán seo</string>

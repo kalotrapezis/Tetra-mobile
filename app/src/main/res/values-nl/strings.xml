@@ -1510,7 +1510,6 @@
     <string name="maps_kind_region">Regio</string>
     <string name="maps_my_car">Mijn auto</string>
     <string name="maps_parking_saved">Parkeerplek opgeslagen</string>
-    <string name="maps_on_car_screen">Op het scherm van de auto: %1$s</string>
     <string name="maps_no_graph">Deze kaart heeft nog geen wegen voor routebeschrijvingen: werk hem bij in Tetra op de computer › Instellingen › Kaarten.</string>
     <string name="maps_finding">Route zoeken…</string>
     <string name="maps_no_way_graph">Geen route gevonden: de routeringsgraaf kan niet worden gelezen</string>
@@ -1535,7 +1534,6 @@
     <string name="maps_no_gps_reckoning">Geen gps-signaal: verder langs de route</string>
     <string name="maps_minutes">%1$d min</string>
     <string name="maps_hours_minutes">%1$d u %2$d min</string>
-    <string name="maps_on_car_screen_bar">🚗 Op het scherm van de auto · %1$s</string>
     <string name="maps_follow_me">Volg mij</string>
     <string name="maps_voice_on">Stem aan</string>
     <string name="maps_voice_off">Stem uit</string>
@@ -1611,48 +1609,6 @@
     <string name="maps_roads_local">Lokale wegen</string>
     <string name="maps_no_tolls">Geen tol</string>
     <string name="maps_fastest">Snelste</string>
-    <string name="car_map">Kaart</string>
-    <string name="car_places">Plaatsen</string>
-    <string name="car_allow_location">Open Tetra Kaarten één keer op de telefoon om locatie toe te staan</string>
-    <string name="car_no_map">Nog geen kaart: maak er een in Tetra op de computer › Instellingen › Kaarten</string>
-    <string name="car_end">Stoppen</string>
-    <string name="car_routes">Routes</string>
-    <string name="car_add_stop_button">Stop</string>
-    <string name="car_favourites">Favorieten</string>
-    <string name="car_more">Nog %1$d</string>
-    <string name="car_nearby_hint">Tanken, apotheek…</string>
-    <string name="car_trips">Ritten</string>
-    <string name="car_trips_saved">%1$d opgeslagen</string>
-    <string name="car_near_me">Bij mij</string>
-    <string name="car_no_gps">Geen gps</string>
-    <string name="car_next">Volgende: %1$s</string>
-    <string name="car_waiting_gps">Wachten op gps</string>
-    <string name="car_no_graph">Nog geen routeringsgraaf in Tetra/.System/Maps/Shared</string>
-    <string name="car_no_way">Geen route gevonden</string>
-    <string name="car_pin">Speld</string>
-    <string name="car_no_other_places">Geen andere opgeslagen plaatsen</string>
-    <string name="car_voice_all">Elke aanwijzing</string>
-    <string name="car_voice_important">Alleen belangrijk: verkeerde richting, nieuwe route, geen gps, aankomst</string>
-    <string name="car_voice_off">Stem uit</string>
-    <string name="car_warn_bends">Waarschuwen voor scherpe bochten</string>
-    <string name="car_main_roads_off">Uit: de kortste weg</string>
-    <string name="car_voice">Stem</string>
-    <string name="car_roads">Wegen</string>
-    <string name="car_amea_radius">Invalidenparkeren bij de bestemming</string>
-    <string name="car_search_hint">Plaats, straat, stad</string>
-    <string name="car_no_trips">Nog geen ritten: plan er een in Tetra Kaarten op de telefoon</string>
-    <string name="car_routes_to">Routes naar %1$s</string>
-    <string name="car_no_other_way">Geen andere route gevonden</string>
-    <string name="car_no_tolls">geen tol</string>
-    <string name="car_parking_near">♿ Parkeren bij %1$s</string>
-    <string name="car_no_amea_within">Geen invalidenplek bekend binnen %1$s</string>
-    <string name="car_from">%1$s van %2$s</string>
-    <string name="car_add_stop">Stop toevoegen</string>
-    <string name="car_none_near">Niets in de buurt</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d tolpost</item>
-        <item quantity="other">%1$d tolposten</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Favorieten</string>
@@ -4634,11 +4590,6 @@
     <string name="maps_error_no_way">Met dit vervoermiddel is er geen weg daarheen.</string>
     <string name="maps_error_no_route">Geen route.</string>
     <string name="maps_say_stop">Stop %1$s. Volgende, %2$s: %3$s, zodra je verder rijdt</string>
-    <string name="maps_say_next_stop">Volgende stop %1$s: %2$s, zodra je verder rijdt</string>
-    <string name="maps_say_gps_lost">GPS-signaal verloren</string>
-    <string name="maps_say_wrong_way">Verkeerde richting. Keer om wanneer het veilig is</string>
-    <string name="maps_say_toll">een tolpoort</string>
-    <string name="maps_say_new_route">Nieuwe route</string>
     <string name="maps_sample_turn">sla rechtsaf</string>
     <string name="maps_no_voice">Deze telefoon heeft geen stem voor het %1$s, dus de aanwijzingen worden getoond maar niet uitgesproken. Je kunt er een toevoegen in de spraakinstellingen van Android.</string>
     <plurals name="maps_in_km">
@@ -4668,14 +4619,6 @@
     <plurals name="maps_lanes_left">
         <item quantity="one">via de linkerrijstrook</item>
         <item quantity="other">via de %1$d linkerrijstroken</item>
-    </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Er is %1$d gehandicaptenparkeerplaats bij je bestemming. Druk op de parkeerknop om erheen te gaan.</item>
-        <item quantity="other">Er zijn %1$d gehandicaptenparkeerplaatsen bij je bestemming. Druk op de parkeerknop om naar een ervan te gaan.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">De route heeft %1$d tolpoort</item>
-        <item quantity="other">De route heeft %1$d tolpoorten</item>
     </plurals>
     <string name="maps_in_km_fraction">Over %1$s kilometer, %2$s</string>
     <string name="maps_in_mi_fraction">Over %1$s mijl, %2$s</string>
@@ -4716,19 +4659,11 @@
     <string name="brief_place_phone">waar de telefoon is</string>
     <string name="brief_place_not_found">Zo\'n plaats niet gevonden.</string>
     <string name="brief_place_use_phone">Waar de telefoon is</string>
-    <string name="car_map_view">Kaartweergave</string>
-    <string name="car_map_size">Grootte</string>
-    <string name="car_map_card">Bovenste vak</string>
-    <string name="car_map_island">Onderste balk</string>
-    <string name="car_map_side">Zijkant: snelheid en limiet</string>
-    <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Kanteling</string>
     <string name="car_map_tilt_auto">Naar snelheid</string>
     <string name="car_map_arrow">Pijl</string>
     <string name="car_map_arrow_middle">In het midden</string>
     <string name="car_map_arrow_low">Lager</string>
-    <string name="car_ui_size">Interface</string>
-    <string name="car_resolution">Resolutie</string>
     <string name="car_maps_title">Kaarten van de telefoon</string>
     <string name="car_maps_update_title">Nieuwe kaarten op de telefoon</string>
     <string name="car_maps_intro">De kaarten van Tetra Car werken offline. Ze komen één keer van Tetra op de telefoon, via de hotspot; daarna alleen wat nieuw is.</string>
@@ -4744,7 +4679,6 @@
     <string name="car_maps_phone_none">De telefoon heeft nog geen kaarten. Maak er een op de computer (Tetra › Kaarten); die komt op de telefoon en daarna op dit toestel.</string>
     <string name="car_maps_do">Doen</string>
     <string name="car_maps_no_space">Te weinig ruimte op dit toestel: de kaarten hebben %1$d MB nodig, %2$d MB is vrij.</string>
-    <string name="car_dock_auto">Automatisch: aan de kant van de bestuurder bij een breed scherm, anders langs de onderkant</string>
     <string name="car_driver">Bestuurdersstoel</string>
     <string name="car_driver_summary">Linkse besturing (het grootste deel van Europa) of rechtse besturing (Verenigd Koninkrijk, Ierland, Cyprus, Malta)</string>
     <string name="car_screen_size">Grootte op dit scherm</string>
