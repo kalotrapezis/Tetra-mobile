@@ -117,6 +117,7 @@ internal object LocationReminders {
         @Suppress("MissingPermission") // ready() checked it
         val at = here ?: lm.allProviders.mapNotNull { runCatching { lm.getLastKnownLocation(it) }.getOrNull() }.maxByOrNull { it.time }
         val pois = if (all.any { it.kind.isNotEmpty() }) runCatching { MapsSearch.load(MapsFiles.root(tetra)) }.getOrDefault(emptyList()) else emptyList()
+        at?.let { p.edit().putFloat("plan_lat", it.latitude.toFloat()).putFloat("plan_lng", it.longitude.toFloat()).apply() }
         val watched = targets(all, pois, at?.latitude, at?.longitude)
         @Suppress("MissingPermission")
         watched.forEachIndexed { i, w -> lm.addProximityAlert(w.lat, w.lng, RADIUS, -1, alert(c, i, w)) }
@@ -129,7 +130,14 @@ internal object LocationReminders {
     }
 
     fun handle(c: Context, i: Intent) {
-        if (i.action == ACTION_MOVED) { @Suppress("DEPRECATION") plan(c, i.getParcelableExtra(LocationManager.KEY_LOCATION_CHANGED) as? Location); return }
+        if (i.action == ACTION_MOVED) {
+            @Suppress("DEPRECATION") val at = i.getParcelableExtra(LocationManager.KEY_LOCATION_CHANGED) as? Location ?: return
+            // planned from under a kilometre away: nothing to pick again. Without this, plan()'s new request delivered the same
+            // location at once, which planned again: 1.47 million fixes in 7 hours (22 Nov, Tetra 45% of the battery)
+            val p = prefs(c)
+            if (p.contains("plan_lat") && metresBetween(at.latitude, at.longitude, p.getFloat("plan_lat", 0f).toDouble(), p.getFloat("plan_lng", 0f).toDouble()) < 1000) return
+            plan(c, at); return
+        }
         if (i.action != ACTION_NEAR || !i.getBooleanExtra(LocationManager.KEY_PROXIMITY_ENTERING, false) || !enabled(c)) return
         val id = i.getStringExtra("id") ?: return
         val r = list(driveRoot()).firstOrNull { it.id == id } ?: return

@@ -671,6 +671,8 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         lifecycle.addObserver(o); onDispose { lifecycle.removeObserver(o) }
     }
     val gps = granted && (shown || nav != null)
+    // behind another app without directions Maps is closed, not kept (the user, 22 Nov: "a red card"); 30 s for a quick look elsewhere
+    LaunchedEffect(shown, nav == null) { if (!shown && nav == null) { delay(30_000); WriterLog.i("Maps: closed in the background (no directions)"); back() } }
     DisposableEffect(gps) {
         val lm = context.getSystemService(LocationManager::class.java)
         val listener = locationListener { loc ->
