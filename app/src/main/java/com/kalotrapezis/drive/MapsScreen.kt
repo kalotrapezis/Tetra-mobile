@@ -663,7 +663,15 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
     }
 
     fix = ::onFix
-    DisposableEffect(granted) {
+    // the GPS only while the map is on screen, or while directions run (they speak with the screen off): Maps left open
+    // behind another app asked for a fix every second all day (the user, 22 Nov: Tetra 45% of the battery)
+    var shown by remember { mutableStateOf(lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) }
+    DisposableEffect(lifecycle) {
+        val o = LifecycleEventObserver { _, e -> shown = e.targetState.isAtLeast(Lifecycle.State.STARTED) }
+        lifecycle.addObserver(o); onDispose { lifecycle.removeObserver(o) }
+    }
+    val gps = granted && (shown || nav != null)
+    DisposableEffect(gps) {
         val lm = context.getSystemService(LocationManager::class.java)
         val listener = locationListener { loc ->
             // a network fix only until GPS has one, and never over a fresher GPS one
@@ -675,7 +683,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
                 android.os.SystemClock.elapsedRealtimeNanos() - lastRealAt < 120_000_000_000L) return@locationListener
             onFix(loc)
         }
-        if (granted && lm != null) {
+        if (gps && lm != null) {
             runCatching {
                 listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER).filter { lm.isProviderEnabled(it) }.forEach { pr ->
                     lm.getLastKnownLocation(pr)?.let { if (here == null || it.time > here!!.time) here = it }
@@ -683,6 +691,7 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
                 }
             }.onFailure { WriterLog.e("Maps: location updates", it) }
         }
+        WriterLog.i(if (gps) "Maps: GPS on" else "Maps: GPS off (${if (!granted) "no permission" else "not on screen, no directions"})")
         onDispose { lm?.removeUpdates(listener) }
     }
     // the next open after parking: on foot to the car (Settings › Maps), unless already by it

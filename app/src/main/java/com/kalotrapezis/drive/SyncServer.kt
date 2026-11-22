@@ -188,6 +188,7 @@ internal class SyncServer(private val context: Context, private val store: SyncS
             if (header.startsWith("Content-Length:", true)) length = header.substringAfter(':').trim().toLongOrNull() ?: 0
             if (header.startsWith("Authorization:", true)) bearer = header.substringAfter(':').trim().removePrefix("Bearer ").trim()
         }
+        if (bearer != null && store.peers().any { it.theirToken == bearer }) ComputerAway.back(context) // the computer is here: reach it again
         // "Sync now" from a device we are paired with: it says nothing and carries nothing, it only asks. The
         // work is still ours, in our own service, under our own rules — a nudge cannot make this phone do
         // anything it would not do when its owner opens the app.

@@ -85,6 +85,29 @@ internal data class SyncConnection(val content: String, val direction: String, v
     }
 }
 
+/**
+ * The computer away (off, or another network): after three misses on the same network nothing tries to reach it
+ * again — no job, no look, no outbox — until this phone is on another network, the computer calls it, Tetra opens or
+ * Sync is pressed (the user, 22 Nov: every quarter hour's looks at a sleeping computer emptied the battery).
+ */
+internal object ComputerAway {
+    private fun prefs(c: Context) = c.getSharedPreferences("computer_away", Context.MODE_PRIVATE)
+    /** This phone's LAN addresses: another Wi-Fi (or its own hotspot) gives others; no location right needed, unlike the Wi-Fi's name. */
+    fun network(): String = runCatching {
+        java.net.NetworkInterface.getNetworkInterfaces().toList().filter { it.isUp && !it.isLoopback }.flatMap { i ->
+            i.inetAddresses.toList().filter { it is java.net.Inet4Address && it.isSiteLocalAddress }.map { "${i.name}=${it.hostAddress}" }
+        }.sorted().joinToString(",")
+    }.getOrDefault("")
+    fun skip(c: Context): Boolean = prefs(c).let { it.getInt("misses", 0) >= SyncRules.NETWORK_RETRIES && it.getString("net", null) == network() }
+    fun missed(c: Context) {
+        val p = prefs(c); val net = network()
+        val n = if (p.getString("net", null) == net) p.getInt("misses", 0) + 1 else 1
+        p.edit().putInt("misses", n).putString("net", net).apply()
+        if (n == SyncRules.NETWORK_RETRIES) WriterLog.i("Sync: the computer missed $n times on this network; no more tries until the network changes, it calls, or Tetra opens")
+    }
+    fun back(c: Context) { if (prefs(c).getInt("misses", 0) > 0) prefs(c).edit().clear().apply() }
+}
+
 internal object SyncRules {
     private val hex64 = Regex("^[0-9a-f]{64}$")
 
@@ -448,16 +471,18 @@ internal class SyncClient(private val context: Context, private val store: SyncS
      * remembered, so the next sync starts there.
      */
     private fun reach(p: Pairing): Pairing {
+        if (ComputerAway.skip(context)) throw SyncException(context.getString(R.string.sync_unreachable, context.getString(R.string.sync_no_address)), unreachable = true)
         var last: Exception? = null
         fun tryHost(candidate: Pairing): Pairing? = try {
             postJson(candidate.hosts.first(), candidate, "/have", JSONObject().put("hashes", JSONArray()))
             candidate
         } catch (e: SyncException) { throw e } catch (e: Exception) { last = e; null }
 
-        for (host in p.hosts) tryHost(p.copy(hosts = listOf(host) + (p.hosts - host)))?.let { return it }
+        for (host in p.hosts) tryHost(p.copy(hosts = listOf(host) + (p.hosts - host)))?.let { ComputerAway.back(context); return it }
         for ((host, port) in SyncDiscovery.find(p.fingerprint)) {
-            tryHost(p.copy(hosts = listOf(host) + (p.hosts - host), port = port))?.let { store.savePairing(it); return it }
+            tryHost(p.copy(hosts = listOf(host) + (p.hosts - host), port = port))?.let { store.savePairing(it); ComputerAway.back(context); return it }
         }
+        ComputerAway.missed(context)
         throw SyncException(context.getString(R.string.sync_unreachable, last?.message ?: context.getString(R.string.sync_no_address)), unreachable = true)
     }
 

@@ -295,7 +295,7 @@ class MainActivity : ComponentActivity() {
     }
 
     // two windows side by side (Beside): Tetra leaves the front when the last one pauses
-    override fun onResume() { super.onResume(); resumed++; CalendarAlarms.front = true; Wake.ensure(this) } // "Hey Tetra" listens again once Tetra is on the screen
+    override fun onResume() { super.onResume(); resumed++; ComputerAway.back(this) /* Tetra on screen: the computer is worth trying again */; CalendarAlarms.front = true; Wake.ensure(this) } // "Hey Tetra" listens again once Tetra is on the screen
     override fun onPause() {
         super.onPause(); resumed--; CalendarAlarms.front = resumed > 0
         Thread { runCatching { AlarmPlan.plan(this) } }.start() // the next alarm posted again out of the front, where HyperOS gives it its island
@@ -1995,6 +1995,7 @@ private fun connectionSentence(row: SyncConnection, computer: String): String {
 private const val MAX_MEDIA_REQUEST = 2000
 
 private fun startSync(context: android.content.Context) {
+    ComputerAway.back(context) // pressed Sync: try the computer again, however often it missed
     val intent = android.content.Intent(context, SyncService::class.java).setAction(SyncService.ACTION_START)
     androidx.core.content.ContextCompat.startForegroundService(context, intent)
 }
