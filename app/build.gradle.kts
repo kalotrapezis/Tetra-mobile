@@ -113,7 +113,6 @@ dependencies {
     implementation("org.tensorflow:tensorflow-lite:2.16.1")
     implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
     implementation("org.maplibre.gl:android-sdk-opengl:13.6.1")
-    implementation("androidx.car.app:app:1.4.0") // Maps on the car's screen: Android Auto's templates (Apache 2.0)
     implementation("com.artifex.mupdf:fitz:1.28.5") // PDF: drawing (annotations too), editing, pages, forms (AGPL-3.0; Tetra is free software)
     implementation("com.github.adaptech-cz.Tesseract4Android:tesseract4android:4.8.0") // PDF › Recognize text: Greek and English OCR (Apache 2.0)
     implementation("com.squareup.okhttp3:okhttp:4.12.0") // AI Assist live: Voxtral realtime's WebSocket (already in the app through MapLibre)

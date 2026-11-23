@@ -1553,7 +1553,6 @@
     <string name="maps_kind_region">Région</string>
     <string name="maps_my_car">Ma voiture</string>
     <string name="maps_parking_saved">Stationnement enregistré</string>
-    <string name="maps_on_car_screen">Sur l’écran de la voiture : %1$s</string>
     <string name="maps_no_graph">Cette carte n\'a pas encore de routes pour les itinéraires : mettez-la à jour dans Tetra sur ordinateur › Paramètres › Cartes.</string>
     <string name="maps_finding">Recherche de l’itinéraire…</string>
     <string name="maps_no_way_graph">Aucun itinéraire : le graphe de routage est illisible</string>
@@ -1578,7 +1577,6 @@
     <string name="maps_no_gps_reckoning">Pas de signal GPS : on continue sur l’itinéraire</string>
     <string name="maps_minutes">%1$d min</string>
     <string name="maps_hours_minutes">%1$d h %2$d min</string>
-    <string name="maps_on_car_screen_bar">🚗 Sur l’écran de la voiture · %1$s</string>
     <string name="maps_follow_me">Me suivre</string>
     <string name="maps_voice_on">Voix activée</string>
     <string name="maps_voice_off">Voix désactivée</string>
@@ -1654,49 +1652,6 @@
     <string name="maps_roads_local">Routes locales</string>
     <string name="maps_no_tolls">Sans péage</string>
     <string name="maps_fastest">Plus rapide</string>
-    <string name="car_map">Carte</string>
-    <string name="car_places">Lieux</string>
-    <string name="car_allow_location">Ouvrez Tetra Cartes une fois sur le téléphone pour autoriser la localisation</string>
-    <string name="car_no_map">Aucune carte pour le moment : créez-en une dans Tetra sur ordinateur › Paramètres › Cartes</string>
-    <string name="car_end">Fin</string>
-    <string name="car_routes">Itinéraires</string>
-    <string name="car_add_stop_button">Étape</string>
-    <string name="car_favourites">Favoris</string>
-    <string name="car_more">%1$d de plus</string>
-    <string name="car_nearby_hint">Carburant, pharmacie…</string>
-    <string name="car_trips">Trajets</string>
-    <string name="car_trips_saved">%1$d enregistrés</string>
-    <string name="car_near_me">Près de moi</string>
-    <string name="car_no_gps">Pas de GPS</string>
-    <string name="car_next">Ensuite : %1$s</string>
-    <string name="car_waiting_gps">En attente du GPS</string>
-    <string name="car_no_graph">Pas encore de graphe de routage dans Tetra/.System/Maps/Shared</string>
-    <string name="car_no_way">Aucun itinéraire trouvé</string>
-    <string name="car_pin">Repère</string>
-    <string name="car_no_other_places">Aucun autre lieu enregistré</string>
-    <string name="car_voice_all">Toutes les instructions</string>
-    <string name="car_voice_important">Importantes seulement : contresens, nouvel itinéraire, pas de GPS, arrivée</string>
-    <string name="car_voice_off">Voix désactivée</string>
-    <string name="car_warn_bends">Signaler les virages serrés</string>
-    <string name="car_main_roads_off">Désactivé : le plus court</string>
-    <string name="car_voice">Voix</string>
-    <string name="car_roads">Routes</string>
-    <string name="car_amea_radius">Places PMR près de la destination</string>
-    <string name="car_search_hint">Lieu, rue, ville</string>
-    <string name="car_no_trips">Aucun trajet : planifiez-en un dans Tetra Cartes sur le téléphone</string>
-    <string name="car_routes_to">Itinéraires vers %1$s</string>
-    <string name="car_no_other_way">Aucun autre itinéraire trouvé</string>
-    <string name="car_no_tolls">sans péage</string>
-    <string name="car_parking_near">♿ Stationnement près de %1$s</string>
-    <string name="car_no_amea_within">Aucune place PMR connue à moins de %1$s</string>
-    <string name="car_from">%1$s depuis %2$s</string>
-    <string name="car_add_stop">Ajouter une étape</string>
-    <string name="car_none_near">Aucun à proximité</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d péage</item>
-        <item quantity="many">%1$d péages</item>
-        <item quantity="other">%1$d péages</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Favoris</string>
@@ -4726,11 +4681,6 @@
     <string name="maps_error_no_way">Aucun chemin jusque-là avec ce moyen de transport.</string>
     <string name="maps_error_no_route">Aucun itinéraire.</string>
     <string name="maps_say_stop">Arrêt %1$s. Prochain, %2$s : %3$s, dès que vous repartez</string>
-    <string name="maps_say_next_stop">Prochain arrêt %1$s : %2$s, dès que vous repartez</string>
-    <string name="maps_say_gps_lost">Signal GPS perdu</string>
-    <string name="maps_say_wrong_way">Mauvaise direction. Faites demi-tour dès que c’est sans danger</string>
-    <string name="maps_say_toll">un péage</string>
-    <string name="maps_say_new_route">Nouvel itinéraire</string>
     <string name="maps_sample_turn">tournez à droite</string>
     <string name="maps_no_voice">Ce téléphone n’a pas de voix pour : %1$s. Les instructions s’affichent donc sans être lues. Vous pouvez en ajouter une dans les paramètres de synthèse vocale d’Android.</string>
     <plurals name="maps_in_km">
@@ -4767,16 +4717,6 @@
         <item quantity="one">par la voie de gauche</item>
         <item quantity="many">par les %1$d voies de gauche</item>
         <item quantity="other">par les %1$d voies de gauche</item>
-    </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Il y a %1$d place handicapé près de votre destination. Appuyez sur le bouton de stationnement pour y aller.</item>
-        <item quantity="many">Il y a %1$d places handicapé près de votre destination. Appuyez sur le bouton de stationnement pour aller à l’une d’elles.</item>
-        <item quantity="other">Il y a %1$d places handicapé près de votre destination. Appuyez sur le bouton de stationnement pour aller à l’une d’elles.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">L’itinéraire comporte %1$d péage</item>
-        <item quantity="many">L’itinéraire comporte %1$d péages</item>
-        <item quantity="other">L’itinéraire comporte %1$d péages</item>
     </plurals>
     <string name="maps_in_km_fraction">Dans %1$s kilomètre, %2$s</string>
     <string name="maps_in_mi_fraction">Dans %1$s mile, %2$s</string>
@@ -4817,19 +4757,11 @@
     <string name="brief_place_phone">là où est le téléphone</string>
     <string name="brief_place_not_found">Aucun lieu de ce nom.</string>
     <string name="brief_place_use_phone">Là où est le téléphone</string>
-    <string name="car_map_view">Vue de la carte</string>
-    <string name="car_map_size">Taille</string>
-    <string name="car_map_card">Encadré du haut</string>
-    <string name="car_map_island">Barre du bas</string>
-    <string name="car_map_side">Côté : vitesse et limite</string>
-    <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Inclinaison</string>
     <string name="car_map_tilt_auto">Selon la vitesse</string>
     <string name="car_map_arrow">Flèche</string>
     <string name="car_map_arrow_middle">Au milieu</string>
     <string name="car_map_arrow_low">Plus bas</string>
-    <string name="car_ui_size">Interface</string>
-    <string name="car_resolution">Résolution</string>
     <string name="car_maps_title">Cartes depuis votre téléphone</string>
     <string name="car_maps_update_title">Nouvelles cartes sur votre téléphone</string>
     <string name="car_maps_intro">Les cartes de Tetra Car fonctionnent hors connexion. Elles sont téléchargées une fois depuis Tetra sur votre téléphone, via son point d\'accès ; ensuite, seulement les nouveautés.</string>
@@ -4845,7 +4777,6 @@
     <string name="car_maps_phone_none">Le téléphone n\'a pas encore de cartes. Créez-en une sur l\'ordinateur (Tetra › Cartes) ; elle arrive sur le téléphone, puis sur cet appareil.</string>
     <string name="car_maps_do">Lancer</string>
     <string name="car_maps_no_space">Pas assez de place sur cet appareil : les cartes demandent %1$d MB, %2$d MB sont libres.</string>
-    <string name="car_dock_auto">Automatique : côté conducteur sur grand écran, sinon le long du bas</string>
     <string name="car_driver">Côté conducteur</string>
     <string name="car_driver_summary">Conduite à gauche (la plupart de l\'Europe) ou à droite (Royaume-Uni, Irlande, Chypre, Malte)</string>
     <string name="car_screen_size">Taille sur cet écran</string>

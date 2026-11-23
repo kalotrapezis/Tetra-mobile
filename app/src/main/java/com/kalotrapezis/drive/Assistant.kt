@@ -381,8 +381,8 @@ internal class AssistantTools(
             "media_play" -> args.getString("query").trim().let { q -> MediaSites.byId(args.optString("site")).let { site -> args.optBoolean("playlist").let { list ->
                 ToolResult("Playing the first ${if (list && site.lists.isNotEmpty()) "playlist" else "result"} for \"$q\" on ${site.id.replace('_', ' ')} in Tetra's Browser.",
                     go = "browser-play:" + JSONObject().put("site", site.id).put("q", q).put("list", list)) } } }
-            // «άνοιξε …», «φέρε μπροστά …» (the user, 9 Nov): in Tetra Car beside the map (carOpenApp)
-            "app_open" -> args.getString("name").trim().let { n -> ToolResult("Opening $n${if (Car.running) " beside the map in Tetra Car" else ""}.", go = "app:$n") }
+            // «άνοιξε …», «φέρε μπροστά …» (the user, 9 Nov): that app (openApp)
+            "app_open" -> args.getString("name").trim().let { n -> ToolResult("Opening $n.", go = "app:$n") }
             "car_assist" -> args.let { a ->
                 val read = if (a.has("read_messages")) a.getBoolean("read_messages") else null
                 val answer = if (a.has("answer_calls")) a.getBoolean("answer_calls") else null
@@ -1679,9 +1679,9 @@ internal class AssistantTools(
                 "query" to p("string", "The song or video, with the artist if said; for a playlist the kind of music (disco, 80s rock, chill)."),
                 "site" to p("string", "youtube (the default), youtube_music when the user says YouTube Music, spotify when the user says Spotify."),
                 "playlist" to p("boolean", "true for a kind of music rather than one song: a genre, a mood, an era, an artist's songs in general, or when the user says playlist or music (\"play disco\", \"βάλε χαλαρή μουσική\"); false for one named song or video.")),
-            fn("app_open", "Open an app or bring it to the front («άνοιξε το Spotify», «φέρε μπροστά τα μηνύματα»). In Tetra Car, Maps, Phone, Messages and the Browser open in a pane beside the map, another app beside Tetra Car.", listOf("name"),
+            fn("app_open", "Open an app or bring it to the front («άνοιξε το Spotify», «φέρε μπροστά τα μηνύματα»).", listOf("name"),
                 "name" to p("string", "The app's name as the user said it.")),
-            fn("car_assist", "In the car (Tetra Car open, or the phone on the car's Bluetooth) new messages are read aloud with a spoken reply offered, and calls are answered by themselves after 2 seconds; switch either on or off («μη διαβάζεις τα μηνύματα», «μη σηκώνεις τις κλήσεις»).", emptyList(),
+            fn("car_assist", "In the car (Tetra Car SE on the car's screen, linked to this phone) new messages are read aloud with a spoken reply offered, and calls are answered by themselves after 2 seconds; switch either on or off («μη διαβάζεις τα μηνύματα», «μη σηκώνεις τις κλήσεις»).", emptyList(),
                 "read_messages" to p("boolean", "Read new messages aloud in the car."), "answer_calls" to p("boolean", "Answer calls by themselves in the car.")),
             fn("spotify_mix", "Play one of the user's own Spotify Daily Mixes (Spotify makes up to six), when they ask for Spotify without a song («παίξε Spotify», «βάλε Spotify»).", emptyList()),
             fn("media_like", "Add the song playing now to the user's favourites on Spotify (Liked Songs) («βάλ' το στα αγαπημένα», «μου αρέσει αυτό»).", emptyList()),
@@ -2022,4 +2022,17 @@ internal class Vad(private val pauseFrames: Int = 30, private val maxFrames: Int
             pcm.forEach { putShort(it) }
         }.array()
     }
+}
+
+/** AI Assist's «άνοιξε» / «φέρε μπροστά»: the launcher app by the name said. False when no app has that name. */
+internal fun openApp(c: android.content.Context, name: String): Boolean {
+    fun fold(s: String) = java.text.Normalizer.normalize(s.lowercase(), java.text.Normalizer.Form.NFD).replace(Regex("\\p{M}"), "").trim()
+    val said = fold(name)
+    val pm = c.packageManager
+    val all = pm.queryIntentActivities(android.content.Intent(android.content.Intent.ACTION_MAIN).addCategory(android.content.Intent.CATEGORY_LAUNCHER), 0).map { it to fold(it.loadLabel(pm).toString()) }
+    val hit = all.firstOrNull { it.second == said } ?: all.firstOrNull { it.second.contains(said) || said.contains(it.second) } ?: return false
+    val a = hit.first.activityInfo
+    c.startActivity(android.content.Intent(android.content.Intent.ACTION_MAIN).addCategory(android.content.Intent.CATEGORY_LAUNCHER).setComponent(android.content.ComponentName(a.packageName, a.name)).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+    WriterLog.i("Assistant: ${a.packageName} opened")
+    return true
 }

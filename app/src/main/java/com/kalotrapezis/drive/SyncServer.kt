@@ -279,9 +279,9 @@ internal class SyncServer(private val context: Context, private val store: SyncS
             val sha = url.getQueryParameter("sha").orEmpty()
             if (!Regex("[0-9a-f]{64}").matches(sha)) return reply(output, 400, JSONObject().put("error", "Invalid file."))
             return try {
-                val kept = FromComputer.receive(stream, length, java.io.File(driveRoot(), AutoSession.FROM_CAR), sha, url.getQueryParameter("name").orEmpty(), 0)
+                val kept = FromComputer.receive(stream, length, java.io.File(driveRoot(), CarShare.FROM_CAR), sha, url.getQueryParameter("name").orEmpty(), 0)
                 WriterLog.i("Car share: ${kept.name} from the car")
-                android.os.Handler(android.os.Looper.getMainLooper()).post { android.widget.Toast.makeText(context, context.getString(R.string.auto_file_from_car, kept.name, AutoSession.FROM_CAR), android.widget.Toast.LENGTH_LONG).show() }
+                android.os.Handler(android.os.Looper.getMainLooper()).post { android.widget.Toast.makeText(context, context.getString(R.string.auto_file_from_car, kept.name, CarShare.FROM_CAR), android.widget.Toast.LENGTH_LONG).show() }
                 reply(output, 200, JSONObject().put("ok", true))
             } catch (e: IllegalArgumentException) {
                 reply(output, 400, JSONObject().put("error", e.message))

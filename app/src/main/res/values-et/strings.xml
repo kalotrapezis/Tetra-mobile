@@ -1510,7 +1510,6 @@
     <string name="maps_kind_region">Piirkond</string>
     <string name="maps_my_car">Minu auto</string>
     <string name="maps_parking_saved">Parkimiskoht salvestatud</string>
-    <string name="maps_on_car_screen">Auto ekraanil: %1$s</string>
     <string name="maps_no_graph">Sellel kaardil pole veel teid juhiste jaoks: värskendage seda jaotises Tetra arvutis › Seaded › Kaardid.</string>
     <string name="maps_finding">Tee otsimine…</string>
     <string name="maps_no_way_graph">Teed ei leitud: marsruutimisgraafi ei õnnestunud lugeda</string>
@@ -1535,7 +1534,6 @@
     <string name="maps_no_gps_reckoning">GPS-signaali pole: jätkan mööda marsruuti</string>
     <string name="maps_minutes">%1$d min</string>
     <string name="maps_hours_minutes">%1$d h %2$d min</string>
-    <string name="maps_on_car_screen_bar">🚗 Auto ekraanil · %1$s</string>
     <string name="maps_follow_me">Jälgi mind</string>
     <string name="maps_voice_on">Hääl sees</string>
     <string name="maps_voice_off">Hääl väljas</string>
@@ -1611,48 +1609,6 @@
     <string name="maps_roads_local">Kohalikud teed</string>
     <string name="maps_no_tolls">Teemaksuta</string>
     <string name="maps_fastest">Kiireim</string>
-    <string name="car_map">Kaart</string>
-    <string name="car_places">Kohad</string>
-    <string name="car_allow_location">Asukoha lubamiseks avage telefonis üks kord Tetra Kaardid</string>
-    <string name="car_no_map">Kaarti veel pole: tehke see jaotises Tetra arvutis › Seaded › Kaardid</string>
-    <string name="car_end">Lõpeta</string>
-    <string name="car_routes">Marsruudid</string>
-    <string name="car_add_stop_button">Peatus</string>
-    <string name="car_favourites">Lemmikud</string>
-    <string name="car_more">veel %1$d</string>
-    <string name="car_nearby_hint">Kütus, apteek…</string>
-    <string name="car_trips">Reisid</string>
-    <string name="car_trips_saved">%1$d salvestatud</string>
-    <string name="car_near_me">Minu lähedal</string>
-    <string name="car_no_gps">GPS puudub</string>
-    <string name="car_next">Järgmine: %1$s</string>
-    <string name="car_waiting_gps">GPS-i ootamine</string>
-    <string name="car_no_graph">Kaustas Tetra/.System/Maps/Shared pole veel marsruutimisgraafi</string>
-    <string name="car_no_way">Teed ei leitud</string>
-    <string name="car_pin">Nööpnõel</string>
-    <string name="car_no_other_places">Teisi salvestatud kohti pole</string>
-    <string name="car_voice_all">Kõik juhised</string>
-    <string name="car_voice_important">Ainult olulised: vale suund, uus marsruut, GPS puudub, saabumine</string>
-    <string name="car_voice_off">Hääl väljas</string>
-    <string name="car_warn_bends">Hoiata järskude kurvide eest</string>
-    <string name="car_main_roads_off">Väljas: lühim tee</string>
-    <string name="car_voice">Hääl</string>
-    <string name="car_roads">Teed</string>
-    <string name="car_amea_radius">Invaparkimine sihtkoha lähedal</string>
-    <string name="car_search_hint">Koht, tänav, linn</string>
-    <string name="car_no_trips">Reise veel pole: planeerige üks telefonis Tetra Kaartides</string>
-    <string name="car_routes_to">Marsruudid: %1$s</string>
-    <string name="car_no_other_way">Muud teed ei leitud</string>
-    <string name="car_no_tolls">teemaksuta</string>
-    <string name="car_parking_near">♿ Parkimine %1$s lähedal</string>
-    <string name="car_no_amea_within">%1$s raadiuses pole teadaolevat invakohta</string>
-    <string name="car_from">%2$s: %1$s</string>
-    <string name="car_add_stop">Lisa peatus</string>
-    <string name="car_none_near">Siin lähedal pole</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d teemaks</item>
-        <item quantity="other">%1$d teemaksu</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Lemmikud</string>
@@ -4634,11 +4590,6 @@
     <string name="maps_error_no_way">Selle liikumisviisiga sinna teed ei ole.</string>
     <string name="maps_error_no_route">Marsruuti ei leitud.</string>
     <string name="maps_say_stop">Peatus %1$s. Järgmine, %2$s: %3$s, kui edasi sõidate</string>
-    <string name="maps_say_next_stop">Järgmine peatus %1$s: %2$s, kui edasi sõidate</string>
-    <string name="maps_say_gps_lost">GPS-signaal kadus</string>
-    <string name="maps_say_wrong_way">Vale suund. Pöörake ümber, kui see on ohutu</string>
-    <string name="maps_say_toll">teemaks</string>
-    <string name="maps_say_new_route">Uus marsruut</string>
     <string name="maps_sample_turn">pöörake paremale</string>
     <string name="maps_no_voice">Selles telefonis pole häält keelele %1$s, seega juhiseid näidatakse, kuid ei loeta ette. Hääle saate lisada Androidi kõneseadetes.</string>
     <plurals name="maps_in_km">
@@ -4668,14 +4619,6 @@
     <plurals name="maps_lanes_left">
         <item quantity="one">vasakpoolselt sõidurajalt</item>
         <item quantity="other">%1$d vasakpoolselt sõidurajalt</item>
-    </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Sihtkoha lähedal on %1$d parkimiskoht puudega inimestele. Sinna minekuks vajutage parkimisnuppu.</item>
-        <item quantity="other">Sihtkoha lähedal on %1$d parkimiskohta puudega inimestele. Ühte neist minekuks vajutage parkimisnuppu.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">Marsruudil on %1$d teemaksupunkt</item>
-        <item quantity="other">Marsruudil on %1$d teemaksupunkti</item>
     </plurals>
     <string name="maps_in_km_fraction">%1$s kilomeetri pärast, %2$s</string>
     <string name="maps_in_mi_fraction">%1$s miili pärast, %2$s</string>
@@ -4716,19 +4659,11 @@
     <string name="brief_place_phone">seal, kus on telefon</string>
     <string name="brief_place_not_found">Sellist kohta ei leitud.</string>
     <string name="brief_place_use_phone">Seal, kus on telefon</string>
-    <string name="car_map_view">Kaardivaade</string>
-    <string name="car_map_size">Suurus</string>
-    <string name="car_map_card">Ülemine paneel</string>
-    <string name="car_map_island">Alumine riba</string>
-    <string name="car_map_side">Küljel: kiirus ja piirang</string>
-    <string name="car_map_zoom">Suum</string>
     <string name="car_map_tilt">Kalle</string>
     <string name="car_map_tilt_auto">Kiiruse järgi</string>
     <string name="car_map_arrow">Nool</string>
     <string name="car_map_arrow_middle">Keskel</string>
     <string name="car_map_arrow_low">Allpool</string>
-    <string name="car_ui_size">Liides</string>
-    <string name="car_resolution">Eraldusvõime</string>
     <string name="car_maps_title">Kaardid telefonist</string>
     <string name="car_maps_update_title">Telefonis on uued kaardid</string>
     <string name="car_maps_intro">Tetra Caris olevad kaardid töötavad ilma internetita. Need tulevad telefonist Tetrale üks kord selle hotspoti kaudu; pärast seda ainult uus.</string>
@@ -4744,7 +4679,6 @@
     <string name="car_maps_phone_none">Telefonis pole veel kaarte. Tee need arvutis (Tetra › Kaardid); need jõuavad telefoni ja seejärel sellesse seadmesse.</string>
     <string name="car_maps_do">Tee ära</string>
     <string name="car_maps_no_space">Selles seadmes pole piisavalt ruumi: kaardid vajavad %1$d MB, vaba on %2$d MB.</string>
-    <string name="car_dock_auto">Automaatne: suure ekraani korral juhi poolel alla, muidu allserva ääres</string>
     <string name="car_driver">Juhiiste</string>
     <string name="car_driver_summary">Vasakpoolne roolilaud (suurem osa Euroopast) või parempoolne (Suurbritannia, Iirimaa, Küpros, Malta)</string>
     <string name="car_screen_size">Suurus sellel ekraanil</string>

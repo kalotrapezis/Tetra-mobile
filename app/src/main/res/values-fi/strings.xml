@@ -1510,7 +1510,6 @@
     <string name="maps_kind_region">Alue</string>
     <string name="maps_my_car">Autoni</string>
     <string name="maps_parking_saved">Pysäköinti tallennettu</string>
-    <string name="maps_on_car_screen">Auton näytöllä: %1$s</string>
     <string name="maps_no_graph">Tällä kartalla ei ole vielä teitä reittiohjeita varten: päivitä se kohdassa Tetra tietokoneella › Asetukset › Kartat.</string>
     <string name="maps_finding">Etsitään reittiä…</string>
     <string name="maps_no_way_graph">Reittiä ei löytynyt: reititysverkkoa ei voitu lukea</string>
@@ -1535,7 +1534,6 @@
     <string name="maps_no_gps_reckoning">Ei GPS-signaalia: jatketaan reittiä pitkin</string>
     <string name="maps_minutes">%1$d min</string>
     <string name="maps_hours_minutes">%1$d h %2$d min</string>
-    <string name="maps_on_car_screen_bar">🚗 Auton näytöllä · %1$s</string>
     <string name="maps_follow_me">Seuraa minua</string>
     <string name="maps_voice_on">Ääni päällä</string>
     <string name="maps_voice_off">Ääni pois</string>
@@ -1611,48 +1609,6 @@
     <string name="maps_roads_local">Paikallistiet</string>
     <string name="maps_no_tolls">Ei tietulleja</string>
     <string name="maps_fastest">Nopein</string>
-    <string name="car_map">Kartta</string>
-    <string name="car_places">Paikat</string>
-    <string name="car_allow_location">Avaa Tetra Kartat kerran puhelimessa sijainnin sallimiseksi</string>
-    <string name="car_no_map">Karttaa ei vielä ole: tee sellainen kohdassa Tetra tietokoneella › Asetukset › Kartat</string>
-    <string name="car_end">Lopeta</string>
-    <string name="car_routes">Reitit</string>
-    <string name="car_add_stop_button">Pysähdys</string>
-    <string name="car_favourites">Suosikit</string>
-    <string name="car_more">%1$d lisää</string>
-    <string name="car_nearby_hint">Polttoaine, apteekki…</string>
-    <string name="car_trips">Matkat</string>
-    <string name="car_trips_saved">%1$d tallennettu</string>
-    <string name="car_near_me">Lähelläni</string>
-    <string name="car_no_gps">Ei GPS:ää</string>
-    <string name="car_next">Seuraava: %1$s</string>
-    <string name="car_waiting_gps">Odotetaan GPS:ää</string>
-    <string name="car_no_graph">Reititysverkkoa ei vielä ole kansiossa Tetra/.System/Maps/Shared</string>
-    <string name="car_no_way">Reittiä ei löytynyt</string>
-    <string name="car_pin">Nasta</string>
-    <string name="car_no_other_places">Ei muita tallennettuja paikkoja</string>
-    <string name="car_voice_all">Kaikki ohjeet</string>
-    <string name="car_voice_important">Vain tärkeät: väärä suunta, uusi reitti, ei GPS:ää, perillä</string>
-    <string name="car_voice_off">Ääni pois</string>
-    <string name="car_warn_bends">Varoita jyrkistä mutkista</string>
-    <string name="car_main_roads_off">Pois: lyhin reitti</string>
-    <string name="car_voice">Ääni</string>
-    <string name="car_roads">Tiet</string>
-    <string name="car_amea_radius">Invapysäköinti määränpään lähellä</string>
-    <string name="car_search_hint">Paikka, katu, kaupunki</string>
-    <string name="car_no_trips">Ei vielä matkoja: suunnittele sellainen Tetra Kartoissa puhelimessa</string>
-    <string name="car_routes_to">Reitit kohteeseen %1$s</string>
-    <string name="car_no_other_way">Muuta reittiä ei löytynyt</string>
-    <string name="car_no_tolls">ei tietulleja</string>
-    <string name="car_parking_near">♿ Pysäköinti lähellä: %1$s</string>
-    <string name="car_no_amea_within">Ei tunnettua invapaikkaa %1$s säteellä</string>
-    <string name="car_from">%1$s kohteesta %2$s</string>
-    <string name="car_add_stop">Lisää pysähdys</string>
-    <string name="car_none_near">Ei yhtään lähellä</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d tietulli</item>
-        <item quantity="other">%1$d tietullia</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Suosikit</string>
@@ -4634,11 +4590,6 @@
     <string name="maps_error_no_way">Tällä kulkutavalla sinne ei ole reittiä.</string>
     <string name="maps_error_no_route">Ei reittiä.</string>
     <string name="maps_say_stop">Pysähdys %1$s. Seuraavaksi %2$s: %3$s, kun jatkat matkaa</string>
-    <string name="maps_say_next_stop">Seuraava pysähdys %1$s: %2$s, kun jatkat matkaa</string>
-    <string name="maps_say_gps_lost">GPS-signaali katosi</string>
-    <string name="maps_say_wrong_way">Väärä suunta. Käänny ympäri, kun se on turvallista</string>
-    <string name="maps_say_toll">tietulli</string>
-    <string name="maps_say_new_route">Uusi reitti</string>
     <string name="maps_sample_turn">käänny oikealle</string>
     <string name="maps_no_voice">Tässä puhelimessa ei ole ääntä kielelle %1$s, joten ohjeet näytetään mutta niitä ei lueta ääneen. Voit lisätä äänen Androidin puheasetuksista.</string>
     <plurals name="maps_in_km">
@@ -4668,14 +4619,6 @@
     <plurals name="maps_lanes_left">
         <item quantity="one">vasemmanpuoleiselta kaistalta</item>
         <item quantity="other">%1$d vasemmanpuoleiselta kaistalta</item>
-    </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Määränpään lähellä on %1$d liikkumisesteisten pysäköintipaikka. Paina pysäköintipainiketta mennäksesi sinne.</item>
-        <item quantity="other">Määränpään lähellä on %1$d liikkumisesteisten pysäköintipaikkaa. Paina pysäköintipainiketta mennäksesi johonkin niistä.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">Reitillä on %1$d tietulli</item>
-        <item quantity="other">Reitillä on %1$d tietullia</item>
     </plurals>
     <string name="maps_in_km_fraction">%1$s kilometrin päästä, %2$s</string>
     <string name="maps_in_mi_fraction">%1$s mailin päästä, %2$s</string>
@@ -4716,19 +4659,11 @@
     <string name="brief_place_phone">missä puhelin on</string>
     <string name="brief_place_not_found">Paikkaa ei löytynyt.</string>
     <string name="brief_place_use_phone">Missä puhelin on</string>
-    <string name="car_map_view">Karttanäkymä</string>
-    <string name="car_map_size">Koko</string>
-    <string name="car_map_card">Yläkortti</string>
-    <string name="car_map_island">Alapalkki</string>
-    <string name="car_map_side">Sivu: nopeus ja rajoitus</string>
-    <string name="car_map_zoom">Zoomaus</string>
     <string name="car_map_tilt">Kallistus</string>
     <string name="car_map_tilt_auto">Nopeuden mukaan</string>
     <string name="car_map_arrow">Nuoli</string>
     <string name="car_map_arrow_middle">Keskellä</string>
     <string name="car_map_arrow_low">Alempana</string>
-    <string name="car_ui_size">Käyttöliittymä</string>
-    <string name="car_resolution">Tarkkuus</string>
     <string name="car_maps_title">Kartat puhelimesta</string>
     <string name="car_maps_update_title">Uusia karttoja puhelimessa</string>
     <string name="car_maps_intro">Tetra Carin kartat toimivat ilman yhteyttä. Tetra hakee ne kerran puhelimesta sen hotspotin kautta; sen jälkeen vain uudet.</string>
@@ -4744,7 +4679,6 @@
     <string name="car_maps_phone_none">Puhelimessa ei ole vielä karttoja. Tee ne tietokoneella (Tetra › Kartat); ne siirtyvät puhelimeen ja sitten tähän laitteeseen.</string>
     <string name="car_maps_do">Tee</string>
     <string name="car_maps_no_space">Laitteessa ei ole tarpeeksi tilaa: kartat tarvitsevat %1$d MB, vapaana on %2$d MB.</string>
-    <string name="car_dock_auto">Automaattinen: laidalle kuljettajan puolelle leveällä näytöllä, muuten alareunaan</string>
     <string name="car_driver">Kuljettajan paikka</string>
     <string name="car_driver_summary">Vasemmanpuoleinen ohjaus (suurin osa Euroopasta) tai oikeanpuoleinen (Iso-Britannia, Irlanti, Kypros, Malta)</string>
     <string name="car_screen_size">Koko tällä näytöllä</string>

@@ -27,14 +27,4 @@ class MapsCarViewTest {
         assertEquals(17.0 to 55.0, at(40.0, toNext = 150.0, j = busy)) // closer step by step from 250 m
         assertEquals(16.75 to 55.0, at(30.0, toNext = 240.0, j = busy)) // never out first: in town the speed's zoom is closer
     }
-
-    @Test fun theMapsPartsHaveTheirOwnSizes() {
-        val v = CarView(1f, 1.25f, 0f, -1, CarView.RIGHT)
-        assertEquals(MapParts(), v.parts()) // until chosen: as the map
-        // the map bigger, the card and the island smaller, each on the screen as chosen
-        val p = v.copy(map = 2f, card = 1f, island = 0.75f).parts()
-        assertEquals(0.5f, p.card, 1e-6f); assertEquals(0.375f, p.island, 1e-6f); assertEquals(1f, p.side, 1e-6f)
-        // the small window: smaller as chosen, never bigger than it fits
-        assertEquals(MapParts(0.5f, 0.375f, 1f), v.copy(map = 2f, card = 1f, island = 0.75f, side = 2.5f).parts().small())
-    }
 }

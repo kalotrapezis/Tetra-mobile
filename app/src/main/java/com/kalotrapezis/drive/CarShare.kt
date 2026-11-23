@@ -54,6 +54,8 @@ import java.io.File
  */
 internal object CarShare {
     const val PREFIX = "@share/"
+    /** The phone's Tetra › From car: the car's files (SyncServer's PUT /car/send). */
+    const val FROM_CAR = "From car"
     /** The phone's To car. */
     fun dir(): File = File(driveRoot(), "To car")
 
@@ -67,8 +69,11 @@ internal object CarShare {
         CarWire.tell(c, JSONObject().put("type", "share")) // the car takes them now
     }, "car-share").start()
 
-    fun name(c: Context, uri: Uri) = AutoWire.safeName(c.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+    fun name(c: Context, uri: Uri) = safeName(c.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
         ?.use { if (it.moveToFirst()) it.getString(0) else null } ?: uri.lastPathSegment ?: "file").takeIf { it.isNotBlank() && it != "." && it != ".." } ?: "file"
+
+    fun safeName(name: String): String = name.substringAfterLast('/').substringAfterLast('\\').replace(Regex("[\\u0000-\\u001f:*?\"<>|]"), "_")
+        .trim().trimStart('.').take(120).ifEmpty { "file" }
 
     /** On the phone: the car has [names] now, off To car. */
     fun taken(names: JSONArray) {
@@ -86,5 +91,16 @@ internal object CarShare {
             c.startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(FileProvider.getUriForFile(c, "${c.packageName}.files", f), type)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK))
         }.onFailure { WriterLog.w("Car share: ${f.name} not opened (${it.message})"); Toast.makeText(c, c.getString(R.string.car_share_no_app, f.name), Toast.LENGTH_LONG).show() }
+    }
+}
+
+/** Send to car: Tetra in the share menu; what is shared goes to Tetra Car SE while it is linked (CarWire). */
+class CarShareActivity : android.app.Activity() {
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        val uris = @Suppress("DEPRECATION") (intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM) ?: listOfNotNull(intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)))
+        if (uris.isNotEmpty() && CarWire.alive()) { CarShare.send(this, uris); Toast.makeText(this, resources.getQuantityString(R.plurals.auto_sending, uris.size, uris.size), Toast.LENGTH_SHORT).show() }
+        else Toast.makeText(this, R.string.auto_no_car, Toast.LENGTH_LONG).show()
+        finish()
     }
 }

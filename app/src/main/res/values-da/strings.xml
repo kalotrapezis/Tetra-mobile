@@ -1510,7 +1510,6 @@
     <string name="maps_kind_region">Region</string>
     <string name="maps_my_car">Min bil</string>
     <string name="maps_parking_saved">Parkering gemt</string>
-    <string name="maps_on_car_screen">På bilens skærm: %1$s</string>
     <string name="maps_no_graph">Dette kort har endnu ingen veje til rutevejledning: opdater det i Tetra på computeren › Indstillinger › Kort.</string>
     <string name="maps_finding">Finder vejen…</string>
     <string name="maps_no_way_graph">Ingen vej fundet: rutegrafen kunne ikke læses</string>
@@ -1535,7 +1534,6 @@
     <string name="maps_no_gps_reckoning">Intet GPS-signal: fortsætter langs ruten</string>
     <string name="maps_minutes">%1$d min.</string>
     <string name="maps_hours_minutes">%1$d t %2$d min.</string>
-    <string name="maps_on_car_screen_bar">🚗 På bilens skærm · %1$s</string>
     <string name="maps_follow_me">Følg mig</string>
     <string name="maps_voice_on">Stemme til</string>
     <string name="maps_voice_off">Stemme fra</string>
@@ -1611,48 +1609,6 @@
     <string name="maps_roads_local">Lokale veje</string>
     <string name="maps_no_tolls">Ingen betalingsanlæg</string>
     <string name="maps_fastest">Hurtigste</string>
-    <string name="car_map">Kort</string>
-    <string name="car_places">Steder</string>
-    <string name="car_allow_location">Åbn Tetra Kort på telefonen én gang for at tillade placering</string>
-    <string name="car_no_map">Intet kort endnu: lav et i Tetra på computeren › Indstillinger › Kort</string>
-    <string name="car_end">Afslut</string>
-    <string name="car_routes">Ruter</string>
-    <string name="car_add_stop_button">Stop</string>
-    <string name="car_favourites">Favoritter</string>
-    <string name="car_more">%1$d mere</string>
-    <string name="car_nearby_hint">Brændstof, apotek…</string>
-    <string name="car_trips">Ture</string>
-    <string name="car_trips_saved">%1$d gemt</string>
-    <string name="car_near_me">Nær mig</string>
-    <string name="car_no_gps">Ingen GPS</string>
-    <string name="car_next">Næste: %1$s</string>
-    <string name="car_waiting_gps">Venter på GPS</string>
-    <string name="car_no_graph">Ingen rutegraf endnu i Tetra/.System/Maps/Shared</string>
-    <string name="car_no_way">Ingen vej fundet</string>
-    <string name="car_pin">Nål</string>
-    <string name="car_no_other_places">Ingen andre gemte steder</string>
-    <string name="car_voice_all">Alle anvisninger</string>
-    <string name="car_voice_important">Kun vigtige: forkert vej, ny rute, ingen GPS, ankomst</string>
-    <string name="car_voice_off">Stemme fra</string>
-    <string name="car_warn_bends">Advar om skarpe sving</string>
-    <string name="car_main_roads_off">Fra: den korteste vej</string>
-    <string name="car_voice">Stemme</string>
-    <string name="car_roads">Veje</string>
-    <string name="car_amea_radius">Handicapparkering nær destinationen</string>
-    <string name="car_search_hint">Sted, gade, by</string>
-    <string name="car_no_trips">Ingen ture endnu: planlæg en i Tetra Kort på telefonen</string>
-    <string name="car_routes_to">Ruter til %1$s</string>
-    <string name="car_no_other_way">Ingen anden vej fundet</string>
-    <string name="car_no_tolls">ingen betalingsanlæg</string>
-    <string name="car_parking_near">♿ Parkering nær %1$s</string>
-    <string name="car_no_amea_within">Ingen kendt handicapplads inden for %1$s</string>
-    <string name="car_from">%1$s fra %2$s</string>
-    <string name="car_add_stop">Tilføj et stop</string>
-    <string name="car_none_near">Ingen her i nærheden</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d betalingsanlæg</item>
-        <item quantity="other">%1$d betalingsanlæg</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Favoritter</string>
@@ -4634,11 +4590,6 @@
     <string name="maps_error_no_way">Der er ingen vej derhen med dette transportmiddel.</string>
     <string name="maps_error_no_route">Ingen rute.</string>
     <string name="maps_say_stop">Stop %1$s. Næste, %2$s: %3$s, når du kører videre</string>
-    <string name="maps_say_next_stop">Næste stop %1$s: %2$s, når du kører videre</string>
-    <string name="maps_say_gps_lost">GPS-signalet er mistet</string>
-    <string name="maps_say_wrong_way">Forkert retning. Vend om, når det er sikkert</string>
-    <string name="maps_say_toll">en betalingsstation</string>
-    <string name="maps_say_new_route">Ny rute</string>
     <string name="maps_sample_turn">drej til højre</string>
     <string name="maps_no_voice">Denne telefon har ingen stemme på %1$s, så rutevejledningen vises, men læses ikke op. Du kan tilføje en i Androids stemmeindstillinger.</string>
     <plurals name="maps_in_km">
@@ -4668,14 +4619,6 @@
     <plurals name="maps_lanes_left">
         <item quantity="one">fra den venstre vognbane</item>
         <item quantity="other">fra de %1$d venstre vognbaner</item>
-    </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Der er %1$d handicapparkeringsplads nær destinationen. Tryk på parkeringsknappen for at køre derhen.</item>
-        <item quantity="other">Der er %1$d handicapparkeringspladser nær destinationen. Tryk på parkeringsknappen for at køre til en af dem.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">Ruten har %1$d betalingsstation</item>
-        <item quantity="other">Ruten har %1$d betalingsstationer</item>
     </plurals>
     <string name="maps_in_km_fraction">Om %1$s kilometer, %2$s</string>
     <string name="maps_in_mi_fraction">Om %1$s engelsk mil, %2$s</string>
@@ -4716,19 +4659,11 @@
     <string name="brief_place_phone">hvor telefonen er</string>
     <string name="brief_place_not_found">Intet sådant sted fundet.</string>
     <string name="brief_place_use_phone">Hvor telefonen er</string>
-    <string name="car_map_view">Kortvisning</string>
-    <string name="car_map_size">Størrelse</string>
-    <string name="car_map_card">Øverste felt</string>
-    <string name="car_map_island">Nederste bjælke</string>
-    <string name="car_map_side">Siden: fart og grænse</string>
-    <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Hældning</string>
     <string name="car_map_tilt_auto">Efter fart</string>
     <string name="car_map_arrow">Pil</string>
     <string name="car_map_arrow_middle">I midten</string>
     <string name="car_map_arrow_low">Lavere</string>
-    <string name="car_ui_size">Brugerflade</string>
-    <string name="car_resolution">Opløsning</string>
     <string name="car_maps_title">Kort fra telefonen</string>
     <string name="car_maps_update_title">Nye kort på telefonen</string>
     <string name="car_maps_intro">Kortene i Tetra Car virker offline. De hentes én gang fra Tetra på telefonen via dens hotspot; derefter kun det nye.</string>
@@ -4744,7 +4679,6 @@
     <string name="car_maps_phone_none">Telefonen har endnu ingen kort. Lav et på computeren (Tetra › Kort); det kommer til telefonen og derefter til enheden.</string>
     <string name="car_maps_do">Udfør</string>
     <string name="car_maps_no_space">Ikke nok plads på enheden: kortene kræver %1$d MB, %2$d MB er ledige.</string>
-    <string name="car_dock_auto">Automatisk: ned ad førersiden på en bred skærm, ellers langs bunden</string>
     <string name="car_driver">Førersæde</string>
     <string name="car_driver_summary">Venstrestyret (det meste af Europa) eller højrestyret (Storbritannien, Irland, Cypern, Malta)</string>
     <string name="car_screen_size">Størrelse på denne skærm</string>

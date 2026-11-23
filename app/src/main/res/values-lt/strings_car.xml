@@ -1,64 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tetra Car (CarScreen.kt) -->
+<!-- Tetra Car SE, the head unit's own app, and the phone (CarWire.kt) -->
 <resources>
     <string name="app_car">Tetra Automobilis</string>
-    <string name="car_media">Medija</string>
-    <string name="car_apps">Programos</string>
     <string name="car_layout">Išdėstymas</string>
-    <string name="car_sms_said">Žinutė nuo %1$s: %2$s. Ar nori atsakyti?</string>
-    <string name="car_sms_say_it">Pasakyk savo žinutę.</string>
-    <string name="car_sms_send_it">„%1$s“. Ar išsiųsti?</string>
-    <string name="car_sms_sent">Išsiųsta.</string>
     <string name="car_quiet">Tyla automobilyje</string>
     <string name="car_quiet_summary">Kitų programų pranešimai laukia, kol vairuoji; skambučiai ir garsiai skaitomos žinutės praeina.</string>
-    <string name="car_pair_phone">Susieti telefoną</string>
-    <string name="car_phone_connected">%1$s · prijungtas</string>
-    <string name="car_phone_away">%1$s · nepasiekiamas</string>
-    <string name="car_phone_disconnect">Atjungti</string>
-    <string name="car_phone_disconnect_ask">Atjungti %1$s?</string>
-    <string name="car_phone_disconnect_note">Automobilis pamirš šį telefoną: skambučiai, žinutės, žemėlapiai ir Bendrinimas sustos, kol vėl susiesite jį kodu.</string>
-    <string name="car_pair_hint">Telefone: Tetra › Nustatymai › Programų piktogramos › Susieti su automobiliu, tada nuskenuok šį kodą.</string>
     <string name="car_pair_car">Susieti su automobiliu</string>
     <string name="car_pair_car_summary">Nuskenuok kodą, kurį Tetra Car rodo automobilio ekrane: skambučiai ir žinutės ten, tiesiogiai, be sinchronizavimo.</string>
-    <string name="car_bluetooth">Automobilio Bluetooth</string>
-    <string name="car_bluetooth_none">Pasirink, kuris susietas įrenginys yra automobilis: tik jis įjungia automobilio režimą.</string>
     <string name="car_settings_summary">Automobilyje</string>
     <string name="car_read_sms">Skaityti žinutes garsiai</string>
     <string name="car_answer_calls">Atsiliepti į skambučius po 2 sekundžių</string>
-    <string name="car_dock">Juosta</string>
-    <string name="car_dock_bottom">Apačioje</string>
-    <string name="car_dock_left">Kairėje</string>
-    <string name="car_dock_right">Dešinėje</string>
-    <string name="car_open">Atidaryti savaime</string>
-    <string name="car_home">Naudoti kaip pradžios ekraną</string>
-    <string name="car_home_summary">Patikimiausia: automobilio ekranas kiekvieną kartą atidaro Tetra Car. Ten pasirink Tetra Car.</string>
-    <string name="car_open_boot">Atidaryti įjungus įrenginį</string>
-    <string name="car_open_bt">Atidaryti prisijungus šiam Bluetooth</string>
-    <string name="car_bluetooth_phone">Telefono Bluetooth</string>
-    <string name="car_bluetooth_phone_none">Pasirink savo telefoną: kai jis prisijungs, Tetra Car gali atsidaryti savaime.</string>
-    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
-    <string name="auto_title">Tetra Auto (paties automobilio ekranas)</string>
-    <string name="auto_settings_note">Įdiek Tetra Auto automobilio ekrane, prijunk jį prie šio telefono prieigos taško ir susiek: Tetra Car piešiamas čia, rodomas ten ir veikia net išjungus telefono ekraną. Telefonas pasiruošia automobiliui, kai tik prisijungia automobilio Bluetooth.</string>
-    <string name="auto_paired">Susieta: rodo Tetra Car, kai randa šį telefoną</string>
-    <string name="auto_show_now">Rodyti automobilyje dabar</string>
-    <string name="auto_show_now_summary">Paruošta automobiliui kitam pusvalandžiui</string>
-    <string name="auto_pairing">Susiejama su automobiliu %1$s: palik įjungtą šio telefono prieigos tašką, automobilis prisijungs pats</string>
-    <string name="auto_channel">Tetra Auto</string>
-    <string name="auto_ready">Paruošta automobiliui</string>
-    <string name="auto_on_car">Automobilio %1$s ekrane</string>
-    <string name="auto_note_text">Tetra Car šiame telefone piešiamas automobilio ekranui</string>
-    <string name="auto_stop">Sustabdyti</string>
-    <string name="auto_share">Bendrinti</string>
+    <!-- Send to car (CarShare.kt) -->
     <string name="auto_send_to_car">Siųsti į automobilį</string>
     <string name="auto_no_car">Šiuo metu joks automobilis nerodo Tetra Car</string>
     <plurals name="auto_sending"><item quantity="one">Į automobilį siunčiamas %d failas</item><item quantity="few">Į automobilį siunčiami %d failai</item><item quantity="many">Į automobilį siunčiama %d failo</item><item quantity="other">Į automobilį siunčiama %d failų</item></plurals>
     <string name="auto_file_from_car">Failas %1$s gautas iš automobilio (Tetra › %2$s)</string>
-    <string name="auto_file_on_car">Failas %1$s yra automobilyje</string>
-    <string name="auto_file_not_on_car">Automobilis neišsaugojo failo %1$s</string>
-    <string name="auto_answer_on_phone">Atsakyk į tai telefone</string>
-    <string name="auto_no_map">Telefone dar nėra žemėlapio. Pirmiausia atsisiųskite žemėlapį į telefoną.</string>
-    <string name="auto_paired_done">Susieta su %1$s: Tetra Car rodomas jo ekrane.</string>
-    <string name="car_favorites_none">Išsaugotų vietų dar nėra: išsaugokite vieną žemėlapyje paspaudę ♥.</string>
     <string name="maps_all_places">Visos vietos</string>
     <plurals name="maps_n_places"><item quantity="one">%d vieta</item><item quantity="few">%d vietos</item><item quantity="many">%d vietos</item><item quantity="other">%d vietų</item></plurals>
     <string name="maps_list_find">Ieškoti šiame sąraše</string>

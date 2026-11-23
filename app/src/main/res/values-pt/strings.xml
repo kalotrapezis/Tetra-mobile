@@ -1553,7 +1553,6 @@
     <string name="maps_kind_region">Região</string>
     <string name="maps_my_car">O meu carro</string>
     <string name="maps_parking_saved">Estacionamento guardado</string>
-    <string name="maps_on_car_screen">No ecrã do carro: %1$s</string>
     <string name="maps_no_graph">Este mapa ainda não tem estradas para indicações: atualize-o em Tetra do computador › Definições › Mapas.</string>
     <string name="maps_finding">A procurar o caminho…</string>
     <string name="maps_no_way_graph">Nenhum caminho encontrado: não foi possível ler o grafo de encaminhamento</string>
@@ -1578,7 +1577,6 @@
     <string name="maps_no_gps_reckoning">Sem sinal GPS: a continuar pelo percurso</string>
     <string name="maps_minutes">%1$d min</string>
     <string name="maps_hours_minutes">%1$d h %2$d min</string>
-    <string name="maps_on_car_screen_bar">🚗 No ecrã do carro · %1$s</string>
     <string name="maps_follow_me">Seguir-me</string>
     <string name="maps_voice_on">Voz ativada</string>
     <string name="maps_voice_off">Voz desativada</string>
@@ -1654,49 +1652,6 @@
     <string name="maps_roads_local">Estradas locais</string>
     <string name="maps_no_tolls">Sem portagens</string>
     <string name="maps_fastest">Mais rápido</string>
-    <string name="car_map">Mapa</string>
-    <string name="car_places">Locais</string>
-    <string name="car_allow_location">Abra uma vez o Tetra Mapas no telemóvel para permitir a localização</string>
-    <string name="car_no_map">Ainda não há mapa: crie um em Tetra do computador › Definições › Mapas</string>
-    <string name="car_end">Terminar</string>
-    <string name="car_routes">Percursos</string>
-    <string name="car_add_stop_button">Paragem</string>
-    <string name="car_favourites">Favoritos</string>
-    <string name="car_more">Mais %1$d</string>
-    <string name="car_nearby_hint">Combustível, farmácia…</string>
-    <string name="car_trips">Viagens</string>
-    <string name="car_trips_saved">%1$d guardadas</string>
-    <string name="car_near_me">Perto de mim</string>
-    <string name="car_no_gps">Sem GPS</string>
-    <string name="car_next">Seguinte: %1$s</string>
-    <string name="car_waiting_gps">À espera do GPS</string>
-    <string name="car_no_graph">Ainda não há grafo de encaminhamento em Tetra/.System/Maps/Shared</string>
-    <string name="car_no_way">Nenhum caminho encontrado</string>
-    <string name="car_pin">Pin</string>
-    <string name="car_no_other_places">Não há outros locais guardados</string>
-    <string name="car_voice_all">Todas as indicações</string>
-    <string name="car_voice_important">Só as importantes: sentido errado, novo percurso, sem GPS, chegada</string>
-    <string name="car_voice_off">Voz desativada</string>
-    <string name="car_warn_bends">Avisar de curvas apertadas</string>
-    <string name="car_main_roads_off">Desativado: o caminho mais curto</string>
-    <string name="car_voice">Voz</string>
-    <string name="car_roads">Estradas</string>
-    <string name="car_amea_radius">Lugares para deficientes perto do destino</string>
-    <string name="car_search_hint">Local, rua, localidade</string>
-    <string name="car_no_trips">Ainda não há viagens: planeie uma no Tetra Mapas do telemóvel</string>
-    <string name="car_routes_to">Percursos para %1$s</string>
-    <string name="car_no_other_way">Nenhum outro caminho encontrado</string>
-    <string name="car_no_tolls">sem portagens</string>
-    <string name="car_parking_near">♿ Estacionamento perto de %1$s</string>
-    <string name="car_no_amea_within">Nenhum lugar para deficientes conhecido a menos de %1$s</string>
-    <string name="car_from">%1$s de %2$s</string>
-    <string name="car_add_stop">Adicionar uma paragem</string>
-    <string name="car_none_near">Nenhum aqui perto</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d portagem</item>
-        <item quantity="many">%1$d portagens</item>
-        <item quantity="other">%1$d portagens</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Favoritos</string>
@@ -4726,11 +4681,6 @@
     <string name="maps_error_no_way">Não há caminho até lá com este meio.</string>
     <string name="maps_error_no_route">Sem percurso.</string>
     <string name="maps_say_stop">Paragem %1$s. A seguir, %2$s: %3$s, quando arrancar</string>
-    <string name="maps_say_next_stop">Próxima paragem %1$s: %2$s, quando arrancar</string>
-    <string name="maps_say_gps_lost">Sinal de GPS perdido</string>
-    <string name="maps_say_wrong_way">Direção errada. Inverta a marcha quando for seguro</string>
-    <string name="maps_say_toll">uma portagem</string>
-    <string name="maps_say_new_route">Novo percurso</string>
     <string name="maps_sample_turn">vire à direita</string>
     <string name="maps_no_voice">Este telemóvel não tem voz para %1$s, por isso as indicações aparecem mas não são ditas. Pode adicionar uma nas definições de voz do Android.</string>
     <plurals name="maps_in_km">
@@ -4767,16 +4717,6 @@
         <item quantity="one">pela via da esquerda</item>
         <item quantity="many">pelas %1$d vias da esquerda</item>
         <item quantity="other">pelas %1$d vias da esquerda</item>
-    </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Há %1$d lugar para pessoas com deficiência perto do destino. Prima o botão de estacionamento para ir até lá.</item>
-        <item quantity="many">Há %1$d lugares para pessoas com deficiência perto do destino. Prima o botão de estacionamento para ir até um.</item>
-        <item quantity="other">Há %1$d lugares para pessoas com deficiência perto do destino. Prima o botão de estacionamento para ir até um.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">O percurso tem %1$d portagem</item>
-        <item quantity="many">O percurso tem %1$d portagens</item>
-        <item quantity="other">O percurso tem %1$d portagens</item>
     </plurals>
     <string name="maps_in_km_fraction">Dentro de %1$s quilómetros, %2$s</string>
     <string name="maps_in_mi_fraction">Dentro de %1$s milhas, %2$s</string>
@@ -4817,19 +4757,11 @@
     <string name="brief_place_phone">onde está o telemóvel</string>
     <string name="brief_place_not_found">Não foi encontrado esse local.</string>
     <string name="brief_place_use_phone">Onde está o telemóvel</string>
-    <string name="car_map_view">Vista do mapa</string>
-    <string name="car_map_size">Tamanho</string>
-    <string name="car_map_card">Cartão superior</string>
-    <string name="car_map_island">Barra inferior</string>
-    <string name="car_map_side">Lateral: velocidade e limite</string>
-    <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Inclinação</string>
     <string name="car_map_tilt_auto">Pela velocidade</string>
     <string name="car_map_arrow">Seta</string>
     <string name="car_map_arrow_middle">Ao meio</string>
     <string name="car_map_arrow_low">Mais abaixo</string>
-    <string name="car_ui_size">Interface</string>
-    <string name="car_resolution">Resolução</string>
     <string name="car_maps_title">Mapas do telemóvel</string>
     <string name="car_maps_update_title">Novos mapas no telemóvel</string>
     <string name="car_maps_intro">Os mapas do Tetra Car funcionam offline. Chegam uma vez da Tetra ao telemóvel, através do ponto de acesso deste; depois, só o que for novo.</string>
@@ -4845,7 +4777,6 @@
     <string name="car_maps_phone_none">O telemóvel ainda não tem mapas. Crie um no computador (Tetra › Mapas); chega ao telemóvel e depois a esta unidade.</string>
     <string name="car_maps_do">Fazer</string>
     <string name="car_maps_no_space">Não há espaço suficiente nesta unidade: os mapas precisam de %1$d MB e há %2$d MB livres.</string>
-    <string name="car_dock_auto">Automático: pelo lado do condutor num ecrã largo, senão ao longo da parte inferior</string>
     <string name="car_driver">Lugar do condutor</string>
     <string name="car_driver_summary">Volante à esquerda (a maior parte da Europa) ou à direita (Reino Unido, Irlanda, Chipre, Malta)</string>
     <string name="car_screen_size">Tamanho neste ecrã</string>

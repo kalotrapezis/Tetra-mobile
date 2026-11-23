@@ -1520,7 +1520,6 @@
     <string name="maps_kind_region">Region</string>
     <string name="maps_my_car">My car</string>
     <string name="maps_parking_saved">Parking saved</string>
-    <string name="maps_on_car_screen">On the car\'s screen: %1$s</string>
     <string name="maps_no_graph">This map has no roads for directions yet: update it in desktop Tetra › Settings › Maps.</string>
     <string name="maps_finding">Finding the way…</string>
     <string name="maps_no_way_graph">No way found: the routing graph could not be read</string>
@@ -1545,7 +1544,6 @@
     <string name="maps_no_gps_reckoning">No GPS signal: going on along the route</string>
     <string name="maps_minutes">%1$d min</string>
     <string name="maps_hours_minutes">%1$d h %2$d min</string>
-    <string name="maps_on_car_screen_bar">🚗 On the car\'s screen · %1$s</string>
     <string name="maps_follow_me">Follow me</string>
     <string name="maps_voice_on">Voice on</string>
     <string name="maps_voice_off">Voice off</string>
@@ -1621,48 +1619,6 @@
     <string name="maps_roads_local">Local roads</string>
     <string name="maps_no_tolls">No tolls</string>
     <string name="maps_fastest">Fastest</string>
-    <string name="car_map">Map</string>
-    <string name="car_places">Places</string>
-    <string name="car_allow_location">Open Tetra Maps on the phone once to allow location</string>
-    <string name="car_no_map">No map yet: make one in desktop Tetra › Settings › Maps</string>
-    <string name="car_end">End</string>
-    <string name="car_routes">Routes</string>
-    <string name="car_add_stop_button">Stop</string>
-    <string name="car_favourites">Favourites</string>
-    <string name="car_more">%1$d more</string>
-    <string name="car_nearby_hint">Fuel, pharmacy…</string>
-    <string name="car_trips">Trips</string>
-    <string name="car_trips_saved">%1$d saved</string>
-    <string name="car_near_me">Near me</string>
-    <string name="car_no_gps">No GPS</string>
-    <string name="car_next">Next: %1$s</string>
-    <string name="car_waiting_gps">Waiting for the GPS</string>
-    <string name="car_no_graph">No routing graph yet in Tetra/.System/Maps/Shared</string>
-    <string name="car_no_way">No way found</string>
-    <string name="car_pin">Pin</string>
-    <string name="car_no_other_places">No other saved places</string>
-    <string name="car_voice_all">Every direction</string>
-    <string name="car_voice_important">Important only: wrong way, new route, no GPS, arrival</string>
-    <string name="car_voice_off">Voice off</string>
-    <string name="car_warn_bends">Warn of sharp bends</string>
-    <string name="car_main_roads_off">Off: the shortest way</string>
-    <string name="car_voice">Voice</string>
-    <string name="car_roads">Roads</string>
-    <string name="car_amea_radius">ΑμεΑ parking near the destination</string>
-    <string name="car_search_hint">Place, street, town</string>
-    <string name="car_no_trips">No trips yet: plan one in Tetra Maps on the phone</string>
-    <string name="car_routes_to">Routes to %1$s</string>
-    <string name="car_no_other_way">No other way found</string>
-    <string name="car_no_tolls">no tolls</string>
-    <string name="car_parking_near">♿ Parking near %1$s</string>
-    <string name="car_no_amea_within">No ΑμεΑ spot known within %1$s</string>
-    <string name="car_from">%1$s from %2$s</string>
-    <string name="car_add_stop">Add a stop</string>
-    <string name="car_none_near">None near here</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d toll</item>
-        <item quantity="other">%1$d tolls</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Favourites</string>
@@ -4644,11 +4600,6 @@
     <string name="maps_error_no_way">No way there by this means.</string>
     <string name="maps_error_no_route">No route.</string>
     <string name="maps_say_stop">Stop %1$s. Next, %2$s: %3$s, when you drive on</string>
-    <string name="maps_say_next_stop">Next stop %1$s: %2$s, when you drive on</string>
-    <string name="maps_say_gps_lost">GPS signal lost</string>
-    <string name="maps_say_wrong_way">Wrong direction. Turn around when it is safe</string>
-    <string name="maps_say_toll">a toll</string>
-    <string name="maps_say_new_route">New route</string>
     <string name="maps_sample_turn">turn right</string>
     <string name="maps_no_voice">This phone has no voice for %1$s, so the directions are shown but not spoken. You can add one in Android\'s voice settings.</string>
     <plurals name="maps_in_km">
@@ -4678,14 +4629,6 @@
     <plurals name="maps_lanes_left">
         <item quantity="one">from the left lane</item>
         <item quantity="other">from the %1$d left lanes</item>
-    </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">There is %1$d disabled parking spot near your destination. Press Parking to go to it.</item>
-        <item quantity="other">There are %1$d disabled parking spots near your destination. Press Parking to go to one.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">The route has %1$d toll</item>
-        <item quantity="other">The route has %1$d tolls</item>
     </plurals>
     <string name="maps_in_km_fraction">In %1$s kilometres, %2$s</string>
     <string name="maps_in_mi_fraction">In %1$s miles, %2$s</string>
@@ -4717,19 +4660,11 @@
     <string name="brief_place_phone">where the phone is</string>
     <string name="brief_place_not_found">No such place found.</string>
     <string name="brief_place_use_phone">Use where the phone is</string>
-    <string name="car_map_view">Map view</string>
-    <string name="car_map_size">Size</string>
-    <string name="car_map_card">Top card</string>
-    <string name="car_map_island">Bottom island</string>
-    <string name="car_map_side">Side: speed and limit</string>
-    <string name="car_map_zoom">Zoom</string>
     <string name="car_map_tilt">Tilt</string>
     <string name="car_map_tilt_auto">By speed</string>
     <string name="car_map_arrow">Arrow</string>
     <string name="car_map_arrow_middle">Middle</string>
     <string name="car_map_arrow_low">Lower</string>
-    <string name="car_ui_size">Interface</string>
-    <string name="car_resolution">Resolution</string>
     <string name="car_maps_title">Maps from your phone</string>
     <string name="car_maps_update_title">New maps on your phone</string>
     <string name="car_maps_intro">Tetra Car\'s maps work offline. They come once from Tetra on your phone over its hotspot; after that, only what is new.</string>
@@ -4745,7 +4680,6 @@
     <string name="car_maps_phone_none">The phone has no maps yet. Make one on the computer (Tetra › Maps); it reaches the phone, then this unit.</string>
     <string name="car_maps_do">Do it</string>
     <string name="car_maps_no_space">Not enough room on this unit: the maps need %1$d MB, %2$d MB are free.</string>
-    <string name="car_dock_auto">Automatic: down the driver\'s side on a wide screen, along the bottom otherwise</string>
     <string name="car_driver">Driver\'s seat</string>
     <string name="car_driver_summary">Left-hand drive (most of Europe) or right-hand drive (UK, Ireland, Cyprus, Malta)</string>
     <string name="car_screen_size">Size on this screen</string>

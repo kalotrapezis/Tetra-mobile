@@ -122,7 +122,7 @@ class WakeService : Service() {
         if (r.go == null && r.open == null) return true
         val target = r.go?.let { v -> when {
             v.startsWith("youtube:") -> caught { openYouTube(it, v.removePrefix("youtube:")) }
-            v.startsWith("app:") -> caught { carOpenApp(it, v.removePrefix("app:")) }
+            v.startsWith("app:") -> caught { openApp(it, v.removePrefix("app:")) }
             else -> runCatching { appletIntent(this, v) }.getOrNull()
         } } ?: r.open?.let { f -> runCatching {
             val mime = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(f.extension.lowercase(java.util.Locale.ROOT)) ?: "application/octet-stream"
@@ -183,8 +183,8 @@ class WakeService : Service() {
         detector()
         fun release() { rec?.let { runCatching { it.stop() }; it.release() }; rec = null }
         var carCheckAt = 0L
-        // in the car (its Bluetooth, Tetra Car open, or Tetra Car SE saying hello) the steering-wheel button is the way in (the user, 15 Nov)
-        fun inCar(now: Long): Boolean { if (now - carCheckAt >= 30_000) { carCheckAt = now; Car.inCar(this) { inCar = it } }; return inCar }
+        // in the car (Tetra Car SE saying hello) the steering-wheel button is the way in (the user, 15 Nov)
+        fun inCar(now: Long): Boolean { if (now - carCheckAt >= 30_000) { carCheckAt = now; inCar = CarWire.alive() }; return inCar }
         var plugCheckAt = 0L; var plugged = true
         fun unplugged(now: Long): Boolean { if (!Wake.chargingOnly(this)) return false; if (now - plugCheckAt >= 5000) { plugCheckAt = now; plugged = Wake.charging(this) }; return !plugged }
         try {
@@ -291,10 +291,7 @@ internal object WakeUnlock {
     /** Called on a tool's thread, never the main one: true when the phone is unlocked (now or after asking), or in the car. */
     fun ok(c: Context): Boolean {
         if (!c.getSystemService(KeyguardManager::class.java).isKeyguardLocked) return true
-        val car = CountDownLatch(1); var inCar = false
-        Car.inCar(c) { inCar = it; car.countDown() }
-        car.await(2, TimeUnit.SECONDS)
-        if (inCar) { WriterLog.i("AI Assist: locked, in the car: no unlock asked"); return true }
+        if (CarWire.alive()) { WriterLog.i("AI Assist: locked, in the car: no unlock asked"); return true }
         // no AI Assist screen (woken by voice): a screen of its own only for Android's unlock
         val asking = ask ?: { done: (Boolean) -> Unit -> answer = done; WakeService.open(c, Intent(c, UnlockActivity::class.java)) }
         val done = CountDownLatch(1); var unlocked = false

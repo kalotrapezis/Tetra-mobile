@@ -1,64 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tetra Car (CarScreen.kt) -->
+<!-- Tetra Car SE, the head unit's own app, and the phone (CarWire.kt) -->
 <resources>
     <string name="app_car">Tetra Mașină</string>
-    <string name="car_media">Media</string>
-    <string name="car_apps">Aplicații</string>
     <string name="car_layout">Aspect</string>
-    <string name="car_sms_said">Mesaj de la %1$s: %2$s. Vrei să răspunzi?</string>
-    <string name="car_sms_say_it">Spune mesajul tău.</string>
-    <string name="car_sms_send_it">„%1$s”. Să-l trimit?</string>
-    <string name="car_sms_sent">Trimis.</string>
     <string name="car_quiet">Liniște în mașină</string>
     <string name="car_quiet_summary">Notificările altor aplicații așteaptă cât conduci; apelurile și mesajele citite cu voce tare trec.</string>
-    <string name="car_pair_phone">Asociază telefonul</string>
-    <string name="car_phone_connected">%1$s · conectat</string>
-    <string name="car_phone_away">%1$s · indisponibil</string>
-    <string name="car_phone_disconnect">Deconectează</string>
-    <string name="car_phone_disconnect_ask">Deconectezi %1$s?</string>
-    <string name="car_phone_disconnect_note">Mașina uită acest telefon: apelurile, mesajele, hărțile și Partajarea se opresc până îl asociezi din nou cu codul.</string>
-    <string name="car_pair_hint">Pe telefon: Tetra › Setări › Pictogramele aplicațiilor › Asociază cu mașina, apoi scanează acest cod.</string>
     <string name="car_pair_car">Asociază cu mașina</string>
     <string name="car_pair_car_summary">Scanează codul pe care Tetra Car îl arată pe ecranul mașinii: apelurile și mesajele acolo, live, fără sincronizare.</string>
-    <string name="car_bluetooth">Bluetooth-ul mașinii</string>
-    <string name="car_bluetooth_none">Alege care dispozitiv asociat este mașina: doar el pune telefonul în modul mașină.</string>
     <string name="car_settings_summary">În mașină</string>
     <string name="car_read_sms">Citește mesajele cu voce tare</string>
     <string name="car_answer_calls">Răspunde la apeluri după 2 secunde</string>
-    <string name="car_dock">Bară</string>
-    <string name="car_dock_bottom">Jos</string>
-    <string name="car_dock_left">În stânga</string>
-    <string name="car_dock_right">În dreapta</string>
-    <string name="car_open">Deschide singur</string>
-    <string name="car_home">Folosește ca ecran de pornire</string>
-    <string name="car_home_summary">Cel mai sigur: ecranul mașinii deschide Tetra Car la fiecare pornire. Alege acolo Tetra Car.</string>
-    <string name="car_open_boot">Deschide la pornirea dispozitivului</string>
-    <string name="car_open_bt">Deschide când se conectează acest Bluetooth</string>
-    <string name="car_bluetooth_phone">Bluetooth-ul telefonului</string>
-    <string name="car_bluetooth_phone_none">Alege-ți telefonul: când se conectează, Tetra Car se poate deschide singur.</string>
-    <!-- Tetra Auto: the car's screen shows Tetra Car as the phone draws it (AutoProjection.kt) -->
-    <string name="auto_title">Tetra Auto (ecranul propriu al mașinii)</string>
-    <string name="auto_settings_note">Instalează Tetra Auto pe ecranul mașinii, conectează-l la hotspotul acestui telefon, apoi asociază-le: Tetra Car este desenat aici și afișat acolo și funcționează cu ecranul telefonului stins. Telefonul se pregătește pentru mașină imediat ce se conectează Bluetooth-ul mașinii.</string>
-    <string name="auto_paired">Asociat: arată Tetra Car când găsește acest telefon</string>
-    <string name="auto_show_now">Arată în mașină acum</string>
-    <string name="auto_show_now_summary">Pregătit pentru mașină în următoarea jumătate de oră</string>
-    <string name="auto_pairing">Asociere cu %1$s: lasă pornit hotspotul acestui telefon, mașina se conectează singură</string>
-    <string name="auto_channel">Tetra Auto</string>
-    <string name="auto_ready">Pregătit pentru mașină</string>
-    <string name="auto_on_car">Pe ecranul mașinii %1$s</string>
-    <string name="auto_note_text">Tetra Car este desenat pe acest telefon pentru ecranul mașinii</string>
-    <string name="auto_stop">Oprește</string>
-    <string name="auto_share">Distribuie</string>
+    <!-- Send to car (CarShare.kt) -->
     <string name="auto_send_to_car">Trimite la mașină</string>
     <string name="auto_no_car">Nicio mașină nu arată Tetra Car acum</string>
     <plurals name="auto_sending"><item quantity="one">Se trimite %d fișier la mașină</item><item quantity="few">Se trimit %d fișiere la mașină</item><item quantity="other">Se trimit %d de fișiere la mașină</item></plurals>
     <string name="auto_file_from_car">%1$s a venit de la mașină (Tetra › %2$s)</string>
-    <string name="auto_file_on_car">%1$s este în mașină</string>
-    <string name="auto_file_not_on_car">Mașina nu a păstrat %1$s</string>
-    <string name="auto_answer_on_phone">Răspunde la asta pe telefon</string>
-    <string name="auto_no_map">Pe telefon nu există încă nicio hartă. Descarcă mai întâi o hartă pe telefon.</string>
-    <string name="auto_paired_done">Asociat cu %1$s: Tetra Car este pe ecranul lui.</string>
-    <string name="car_favorites_none">Încă nu ai locuri salvate: salvează unul pe hartă cu ♥.</string>
     <string name="maps_all_places">Toate locurile</string>
     <plurals name="maps_n_places"><item quantity="one">%d loc</item><item quantity="few">%d locuri</item><item quantity="other">%d de locuri</item></plurals>
     <string name="maps_list_find">Caută în această listă</string>

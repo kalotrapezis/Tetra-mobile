@@ -33,11 +33,10 @@ your own backups. Screenshots use invented sample data.
 - **Calendar and timers, with AI.** Built-in skills (Settings › Calendar or Timer › *Share with Claude*) let Claude,
   ChatGPT or any assistant that can use your computer import a timetable, plan your week or start a timer: they simply
   edit the calendar's and timers' files, and Tetra syncs the result to your phone.
-- **Your car's own screen.** Tetra Car puts Maps, music, calls and messages side by side, with no Android Auto: the map
-  stays, a call or a message takes the other side and gives it back, AI Assist reads your messages and takes your reply
-  by voice. With [Tetra Auto](https://github.com/kalotrapezis/Tetra-Auto) on the car's screen (any Android 10 head unit),
-  your phone draws it and the car only shows it, as Android Auto does: the phone's GPS, maps and apps, its screen off in
-  your pocket, files shared both ways over the hotspot.
+- **Your car's own screen.** [Tetra Car SE](https://github.com/kalotrapezis/Tetra-Auto) runs on the car's head unit
+  itself (any Android 10 unit) and puts Maps, music, calls and messages side by side, with its own sound and GPS. The
+  phone needs only its hotspot: it sends the car your calls and messages, its GPS fix if you choose it, its maps and
+  files (Share › Send to car), and keeps quiet while you drive (Settings › Tetra Car).
 - **Never forget the evening pill.** Pills reminds you at the dose's time and again until you take it, as a
   notification or in AI Assist's voice: a ding ding, then your name. It counts the pills of every box, tells you days
   before they run out, and its Progress shows what you forget and suggests a better time.

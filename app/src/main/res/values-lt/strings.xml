@@ -1596,7 +1596,6 @@
     <string name="maps_kind_region">Regionas</string>
     <string name="maps_my_car">Mano automobilis</string>
     <string name="maps_parking_saved">Stovėjimo vieta įrašyta</string>
-    <string name="maps_on_car_screen">Automobilio ekrane: %1$s</string>
     <string name="maps_no_graph">Šis žemėlapis dar neturi kelių nurodymams: atnaujinkite jį skiltyje Tetra kompiuteryje › Nustatymai › Žemėlapiai.</string>
     <string name="maps_finding">Ieškoma kelio…</string>
     <string name="maps_no_way_graph">Kelio nerasta: nepavyko nuskaityti maršrutų grafo</string>
@@ -1621,7 +1620,6 @@
     <string name="maps_no_gps_reckoning">Nėra GPS signalo: tęsiama maršrutu</string>
     <string name="maps_minutes">%1$d min.</string>
     <string name="maps_hours_minutes">%1$d val. %2$d min.</string>
-    <string name="maps_on_car_screen_bar">🚗 Automobilio ekrane · %1$s</string>
     <string name="maps_follow_me">Sekti mane</string>
     <string name="maps_voice_on">Balsas įjungtas</string>
     <string name="maps_voice_off">Balsas išjungtas</string>
@@ -1697,50 +1695,6 @@
     <string name="maps_roads_local">Vietiniai keliai</string>
     <string name="maps_no_tolls">Be rinkliavų</string>
     <string name="maps_fastest">Greičiausias</string>
-    <string name="car_map">Žemėlapis</string>
-    <string name="car_places">Vietos</string>
-    <string name="car_allow_location">Vieną kartą atidarykite Tetra Žemėlapius telefone, kad leistumėte vietovę</string>
-    <string name="car_no_map">Žemėlapio dar nėra: sukurkite jį skiltyje Tetra kompiuteryje › Nustatymai › Žemėlapiai</string>
-    <string name="car_end">Baigti</string>
-    <string name="car_routes">Maršrutai</string>
-    <string name="car_add_stop_button">Sustojimas</string>
-    <string name="car_favourites">Mėgstami</string>
-    <string name="car_more">Dar %1$d</string>
-    <string name="car_nearby_hint">Degalai, vaistinė…</string>
-    <string name="car_trips">Kelionės</string>
-    <string name="car_trips_saved">Įrašyta: %1$d</string>
-    <string name="car_near_me">Netoli manęs</string>
-    <string name="car_no_gps">Nėra GPS</string>
-    <string name="car_next">Kitas: %1$s</string>
-    <string name="car_waiting_gps">Laukiama GPS</string>
-    <string name="car_no_graph">Tetra/.System/Maps/Shared dar nėra maršrutų grafo</string>
-    <string name="car_no_way">Kelio nerasta</string>
-    <string name="car_pin">Smeigtukas</string>
-    <string name="car_no_other_places">Kitų įrašytų vietų nėra</string>
-    <string name="car_voice_all">Visos nuorodos</string>
-    <string name="car_voice_important">Tik svarbu: neteisinga kryptis, naujas maršrutas, nėra GPS, atvykimas</string>
-    <string name="car_voice_off">Balsas išjungtas</string>
-    <string name="car_warn_bends">Įspėti apie staigius posūkius</string>
-    <string name="car_main_roads_off">Išjungta: trumpiausias kelias</string>
-    <string name="car_voice">Balsas</string>
-    <string name="car_roads">Keliai</string>
-    <string name="car_amea_radius">Neįgaliųjų stovėjimas prie tikslo</string>
-    <string name="car_search_hint">Vieta, gatvė, miestas</string>
-    <string name="car_no_trips">Kelionių dar nėra: suplanuokite Tetra Žemėlapiuose telefone</string>
-    <string name="car_routes_to">Maršrutai į %1$s</string>
-    <string name="car_no_other_way">Kito kelio nerasta</string>
-    <string name="car_no_tolls">be rinkliavų</string>
-    <string name="car_parking_near">♿ Stovėjimas netoli %1$s</string>
-    <string name="car_no_amea_within">%1$s spinduliu neįgaliųjų vietų nežinoma</string>
-    <string name="car_from">%1$s nuo %2$s</string>
-    <string name="car_add_stop">Pridėti sustojimą</string>
-    <string name="car_none_near">Netoliese nėra</string>
-    <plurals name="car_tolls">
-        <item quantity="one">%1$d rinkliava</item>
-        <item quantity="few">%1$d rinkliavos</item>
-        <item quantity="many">%1$d rinkliavos</item>
-        <item quantity="other">%1$d rinkliavų</item>
-    </plurals>
 
     <!-- ===== Contacts, Phone, Data ===== -->
     <string name="contacts_favourites">Mėgstami</string>
@@ -4818,11 +4772,6 @@
     <string name="maps_error_no_way">Šiuo būdu ten kelio nėra.</string>
     <string name="maps_error_no_route">Maršruto nėra.</string>
     <string name="maps_say_stop">Sustojimas %1$s. Kitas, %2$s: %3$s, kai pajudėsite</string>
-    <string name="maps_say_next_stop">Kitas sustojimas %1$s: %2$s, kai pajudėsite</string>
-    <string name="maps_say_gps_lost">Dingo GPS signalas</string>
-    <string name="maps_say_wrong_way">Netinkama kryptis. Apsisukite, kai bus saugu</string>
-    <string name="maps_say_toll">mokamo kelio punktas</string>
-    <string name="maps_say_new_route">Naujas maršrutas</string>
     <string name="maps_sample_turn">sukite dešinėn</string>
     <string name="maps_no_voice">Šiame telefone nėra balso kalbai %1$s, todėl nurodymai rodomi, bet neištariami. Balsą galite pridėti „Android“ balso nustatymuose.</string>
     <plurals name="maps_in_km">
@@ -4867,18 +4816,6 @@
         <item quantity="many">viena iš %1$d kairiųjų eismo juostų</item>
         <item quantity="other">viena iš %1$d kairiųjų eismo juostų</item>
     </plurals>
-    <plurals name="maps_say_parking">
-        <item quantity="one">Prie tikslo yra %1$d vieta neįgaliųjų automobiliams. Paspauskite stovėjimo mygtuką, kad ten nuvažiuotumėte.</item>
-        <item quantity="few">Prie tikslo yra %1$d vietos neįgaliųjų automobiliams. Paspauskite stovėjimo mygtuką, kad nuvažiuotumėte į vieną iš jų.</item>
-        <item quantity="many">Prie tikslo yra %1$d vietos neįgaliųjų automobiliams. Paspauskite stovėjimo mygtuką, kad nuvažiuotumėte į vieną iš jų.</item>
-        <item quantity="other">Prie tikslo yra %1$d vietų neįgaliųjų automobiliams. Paspauskite stovėjimo mygtuką, kad nuvažiuotumėte į vieną iš jų.</item>
-    </plurals>
-    <plurals name="maps_say_route_tolls">
-        <item quantity="one">Maršrute yra %1$d mokamas punktas</item>
-        <item quantity="few">Maršrute yra %1$d mokami punktai</item>
-        <item quantity="many">Maršrute yra %1$d mokamo punkto</item>
-        <item quantity="other">Maršrute yra %1$d mokamų punktų</item>
-    </plurals>
     <string name="maps_in_km_fraction">Po %1$s kilometro, %2$s</string>
     <string name="maps_in_mi_fraction">Po %1$s mylios, %2$s</string>
     <string name="maps_old">Senesnis nei 3 mėnesių</string>
@@ -4918,19 +4855,11 @@
     <string name="brief_place_phone">ten, kur yra telefonas</string>
     <string name="brief_place_not_found">Tokia vieta nerasta.</string>
     <string name="brief_place_use_phone">Ten, kur yra telefonas</string>
-    <string name="car_map_view">Žemėlapio vaizdas</string>
-    <string name="car_map_size">Dydis</string>
-    <string name="car_map_card">Viršutinė kortelė</string>
-    <string name="car_map_island">Apatinė juosta</string>
-    <string name="car_map_side">Šonas: greitis ir riba</string>
-    <string name="car_map_zoom">Mastelis</string>
     <string name="car_map_tilt">Pokrypis</string>
     <string name="car_map_tilt_auto">Pagal greitį</string>
     <string name="car_map_arrow">Rodyklė</string>
     <string name="car_map_arrow_middle">Viduryje</string>
     <string name="car_map_arrow_low">Žemiau</string>
-    <string name="car_ui_size">Sąsaja</string>
-    <string name="car_resolution">Skyra</string>
     <string name="car_maps_title">Žemėlapiai iš telefono</string>
     <string name="car_maps_update_title">Nauji žemėlapiai telefone</string>
     <string name="car_maps_intro">Tetra Car žemėlapiai veikia be interneto. Jie atsiunčiami iš telefono į Tetra vieną kartą per jo viešosios prieigos tašką; vėliau – tik naujausi.</string>
@@ -4946,7 +4875,6 @@
     <string name="car_maps_phone_none">Telefone dar nėra žemėlapių. Sukurkite juos kompiuteryje (Tetra › Žemėlapiai); jie pasieks telefoną, o vėliau – šį įrenginį.</string>
     <string name="car_maps_do">Atlikti</string>
     <string name="car_maps_no_space">Įrenginyje nepakanka vietos: žemėlapiams reikia %1$d MB, laisva %2$d MB.</string>
-    <string name="car_dock_auto">Automatiškai: vairuotojo pusėje plačiame ekrane, kitaip – apačioje</string>
     <string name="car_driver">Vairuotojo vieta</string>
     <string name="car_driver_summary">Vairas kairėje (dauguma Europos) arba dešinėje (Jungtinė Karalystė, Airija, Kipras, Malta)</string>
     <string name="car_screen_size">Dydis šiame ekrane</string>
