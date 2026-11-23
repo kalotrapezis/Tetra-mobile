@@ -9,7 +9,6 @@
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity>
         <activity android:name=".MainActivity"><intent-filter tools:node="removeAll" /></activity>
-        <activity android:name=".AutoShareActivity"><intent-filter tools:node="removeAll" /></activity>
         <activity android:name=".AssistantSheetActivity"><intent-filter tools:node="removeAll" /></activity>
         <activity android:name=".TextEditorActivity"><intent-filter tools:node="removeAll" /></activity>
         <activity android:name=".SendToComputer"><intent-filter tools:node="removeAll" /></activity>
@@ -17,7 +16,6 @@
         <activity-alias android:name=".CalendarOpen"><intent-filter tools:node="removeAll" /></activity-alias>
         <activity-alias android:name=".OfficeOpen"><intent-filter tools:node="removeAll" /></activity-alias>
         <activity-alias android:name=".MailShare"><intent-filter tools:node="removeAll" /></activity-alias>
-        <service android:name=".MapsCarService"><intent-filter tools:node="removeAll" /></service>
         <service android:name=".ContactsAuthService"><intent-filter tools:node="removeAll" /></service>
         <service android:name=".ContactsSyncService"><intent-filter tools:node="removeAll" /></service>
         <service android:name=".SmsRespondService"><intent-filter tools:node="removeAll" /></service>
@@ -26,8 +24,6 @@
         <service android:name=".AssistantService"><intent-filter tools:node="removeAll" /></service>
         <service android:name=".AssistantRecognition"><intent-filter tools:node="removeAll" /></service>
         <receiver android:name=".TvWidget"><intent-filter tools:node="removeAll" /></receiver>
-        <receiver android:name=".CarBootReceiver"><intent-filter tools:node="removeAll" /></receiver>
-        <receiver android:name=".CarBluetoothReceiver"><intent-filter tools:node="removeAll" /></receiver>
         <receiver android:name=".SmsDeliverReceiver"><intent-filter tools:node="removeAll" /></receiver>
         <receiver android:name=".SmsReceivedReceiver"><intent-filter tools:node="removeAll" /></receiver>
         <receiver android:name=".MmsDeliverReceiver"><intent-filter tools:node="removeAll" /></receiver>
