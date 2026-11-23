@@ -19,7 +19,7 @@ internal object ContactsSystem {
      * The phone's contacts as cards: Android writes each as a vCard itself (its own exporter), then Tetra adds what that
      * leaves out — the star, the labels (groups) and the full-size photo.
      */
-    fun phoneCards(context: Context, progress: (Int, Int) -> Unit = { _, _ -> }): List<List<ICalProp>> {
+    fun phoneCards(context: Context, uids: Boolean = false, progress: (Int, Int) -> Unit = { _, _ -> }): List<List<ICalProp>> {
         val cr = context.contentResolver
         val groups = HashMap<Long, String>()
         cr.query(ContactsContract.Groups.CONTENT_URI, arrayOf(ContactsContract.Groups._ID, ContactsContract.Groups.TITLE, ContactsContract.Groups.SYSTEM_ID), null, null, null)?.use { c ->
@@ -39,7 +39,9 @@ internal object ContactsSystem {
             progress(n, people.size)
             runCatching {
                 val text = cr.openInputStream(android.net.Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI, lookup))!!.use { String(it.readBytes()) }
-                val lines = VCard.cards(text).firstOrNull() ?: return@runCatching null
+                val card = VCard.cards(text).firstOrNull() ?: return@runCatching null
+                // [uids]: the UID is Android's "lookup/id", so the card opens the same person in the phone's Contacts (ContactsMirror)
+                val lines = if (uids) card.filterNot { it.name.substringAfter('.').equals("UID", true) } + ICalProp("UID", "", "$lookup/$id") else card
                 val info = VCard.info(lines)
                 val full = ContactsContract.Contacts.openContactPhotoInputStream(cr, android.content.ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id), true)
                     ?.use { it.readBytes() }?.let { square(it) }
@@ -47,6 +49,25 @@ internal object ContactsSystem {
                 VCard.apply(lines, info, info.copy(categories = cats, photo = full ?: info.photo))
             }.onFailure { WriterLog.e("Contacts: the phone's contact $id", it) }.getOrNull()
         }
+    }
+
+    /**
+     * Tetra Phone on its own (BuildConfig.PHONE_ONLY): Android's contacts written as cards into [dir], so the Phone's lists,
+     * caller ID and screening read them as they read Tetra's folder. Android stays the one edited; the copy is made again
+     * only when Android's contacts changed (their count or newest change), and a card gone there goes here.
+     */
+    fun mirror(context: Context, dir: File) {
+        if (context.checkSelfPermission(android.Manifest.permission.READ_CONTACTS) != android.content.pm.PackageManager.PERMISSION_GRANTED) return
+        val stamp = context.contentResolver.query(ContactsContract.Contacts.CONTENT_URI, arrayOf(ContactsContract.Contacts.CONTACT_LAST_UPDATED_TIMESTAMP), null, null, null)
+            ?.use { c -> var newest = 0L; while (c.moveToNext()) newest = maxOf(newest, c.getLong(0)); "${c.count}:$newest" } ?: return
+        val prefs = context.getSharedPreferences("contacts", Context.MODE_PRIVATE)
+        if (stamp == prefs.getString("mirror", null) && dir.isDirectory) return
+        val keep = phoneCards(context, uids = true).map { lines ->
+            val i = VCard.info(lines)
+            File(dir, ContactsFiles.fileName(i.name, i.uid)).also { f -> if (!f.isFile || f.readText() != VCard.write(lines)) ContactsFiles.writeFile(f, lines) }
+        }.toSet()
+        dir.listFiles()?.filter { it.isFile && it !in keep }?.forEach { it.delete() }
+        prefs.edit().putString("mirror", stamp).apply()
     }
 
     /**

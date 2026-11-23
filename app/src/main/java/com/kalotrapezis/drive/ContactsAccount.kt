@@ -27,7 +27,7 @@ internal object ContactsAccount {
     const val TYPE = "com.kalotrapezis.drive.contacts"
     private val account = Account("Tetra", TYPE)
 
-    fun on(c: Context) = c.getSharedPreferences("contacts", Context.MODE_PRIVATE).getBoolean("system", true)
+    fun on(c: Context) = c.getSharedPreferences("contacts", Context.MODE_PRIVATE).getBoolean("system", !BuildConfig.PHONE_ONLY) // Tetra Phone on its own reads Android's contacts: no copy back
     fun set(c: Context, on: Boolean) {
         c.getSharedPreferences("contacts", Context.MODE_PRIVATE).edit().putBoolean("system", on).apply()
         if (on) soon(c) else Thread { runCatching { AccountManager.get(c).removeAccountExplicitly(account) } }.start()

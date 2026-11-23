@@ -79,11 +79,23 @@ class PhoneActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WriterLog.init(this)
         TetraLook.load(this)
+        if (BuildConfig.PHONE_ONLY) phoneOnlyStart()
         if (PhoneLog.recent == null) PhoneLog.warm(this) // opened from the launcher, not from Tetra's Home: read ahead from here
         if (ContactsPreload.all == null) ContactsPreload.warm(this)
         take(intent)
         androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = TetraLook.light
         setContent { TetraTheme { PhoneApp(keypad, tab, number, missed, blocked, back = { finish() }) } }
+    }
+    /** Tetra Phone on its own: Greek the first time (Android's App languages page changes it), and Android's contacts asked for. */
+    private fun phoneOnlyStart() {
+        getExternalFilesDir(null) // makes Android/data/<package>/files, where phoneOnlyRoot keeps the contacts' copy and the block list
+        val prefs = getSharedPreferences("language", MODE_PRIVATE)
+        if (!prefs.getBoolean("phone-greek", false)) {
+            prefs.edit().putBoolean("phone-greek", true).apply()
+            if (AppLocale.get(this).isEmpty()) { AppLocale.set(this, "el"); AppLocale.reopenSettings = false }
+        }
+        if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != android.content.pm.PackageManager.PERMISSION_GRANTED)
+            requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS), 1) // back on the Phone, ON_RESUME reads them (PhoneApp's version)
     }
     override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); take(intent) }
     private fun take(i: Intent) {
@@ -101,10 +113,17 @@ class PhoneActivity : ComponentActivity() {
 }
 
 /** Opens Tetra's Contacts on a person, or at a new contact with this number. */
-internal fun openInContacts(c: Context, uid: String? = null, newNumber: String? = null) = openApplet(c, if (uid != null) "contact:$uid" else "contact-new:${newNumber.orEmpty()}")
+internal fun openInContacts(c: Context, uid: String? = null, newNumber: String? = null) {
+    if (!BuildConfig.PHONE_ONLY) return openApplet(c, if (uid != null) "contact:$uid" else "contact-new:${newNumber.orEmpty()}")
+    // Tetra Phone on its own: the phone's Contacts app, on the person (the card's UID is Android's lookup/id) or adding the number
+    val i = if (uid != null) Intent(Intent.ACTION_VIEW, Uri.withAppendedPath(android.provider.ContactsContract.Contacts.CONTENT_LOOKUP_URI, uid))
+        else Intent(Intent.ACTION_INSERT_OR_EDIT).setType(android.provider.ContactsContract.Contacts.CONTENT_ITEM_TYPE).putExtra(android.provider.ContactsContract.Intents.Insert.PHONE, newNumber)
+    runCatching { c.startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }.onFailure { WriterLog.e("Phone: the phone's Contacts", it) }
+}
 
 /** The Phone's own folder, Tetra/.System/Phone/Shared: the recordings made on the computer land in Recordings (Plan.md § Phone). */
-internal fun phoneRoot() = java.io.File(TetraFolder.root(android.os.Environment.getExternalStorageDirectory()), TetraSystem.onDisk(PhoneHistory.FOLDER))
+internal fun phoneRoot() = if (BuildConfig.PHONE_ONLY) java.io.File(phoneOnlyRoot(), PhoneHistory.FOLDER)
+    else java.io.File(TetraFolder.root(android.os.Environment.getExternalStorageDirectory()), TetraSystem.onDisk(PhoneHistory.FOLDER))
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -213,7 +232,8 @@ internal fun PhoneApp(keypad: MutableState<Boolean>, tabState: MutableState<Phon
                 // the island in the middle, the keypad's round button beside it
                 if (!keypadShown) Row(Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                     IslandBottomBar(expand = { drawer = true }, visible = !drawer) {
-                        PhoneTab.entries.forEach { t -> IslandNavigationItem(stringResource(t.label), tab == t, t.icon) { tab = t; selected = emptySet() } }
+                        PhoneTab.entries.filter { !BuildConfig.PHONE_ONLY || it != PhoneTab.Recordings }.forEach { t -> // recordings come from desktop Tetra
+                            IslandNavigationItem(stringResource(t.label), tab == t, t.icon) { tab = t; selected = emptySet() } }
                     }
                     if (!twoPane) IslandVisibility(!drawer) {
                         Surface(color = islandColor(), contentColor = islandContentColor(), shape = CircleShape) {

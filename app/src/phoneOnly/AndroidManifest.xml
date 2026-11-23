@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tetra Phone on its own (build type phoneOnly): the Phone is the app's one icon, and every other way into Tetra that Android
+     would offer (share targets, open-with, the widget, the screensaver, Android Auto, autofill, the assistant, SMS, an account)
+     loses its intent filters, so the friend's phone shows only the Phone. The components stay, unreachable. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <application android:label="@string/home_label_phone" android:icon="@mipmap/applet_phone" android:roundIcon="@mipmap/applet_phone"
+        tools:replace="android:label,android:icon,android:roundIcon">
+        <activity android:name=".PhoneActivity">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity>
+        <activity android:name=".MainActivity"><intent-filter tools:node="removeAll" /></activity>
+        <activity android:name=".AutoShareActivity"><intent-filter tools:node="removeAll" /></activity>
+        <activity android:name=".AssistantSheetActivity"><intent-filter tools:node="removeAll" /></activity>
+        <activity android:name=".TextEditorActivity"><intent-filter tools:node="removeAll" /></activity>
+        <activity android:name=".SendToComputer"><intent-filter tools:node="removeAll" /></activity>
+        <activity-alias android:name=".SmsCompose"><intent-filter tools:node="removeAll" /></activity-alias>
+        <activity-alias android:name=".CalendarOpen"><intent-filter tools:node="removeAll" /></activity-alias>
+        <activity-alias android:name=".OfficeOpen"><intent-filter tools:node="removeAll" /></activity-alias>
+        <activity-alias android:name=".MailShare"><intent-filter tools:node="removeAll" /></activity-alias>
+        <service android:name=".MapsCarService"><intent-filter tools:node="removeAll" /></service>
+        <service android:name=".ContactsAuthService"><intent-filter tools:node="removeAll" /></service>
+        <service android:name=".ContactsSyncService"><intent-filter tools:node="removeAll" /></service>
+        <service android:name=".SmsRespondService"><intent-filter tools:node="removeAll" /></service>
+        <service android:name=".StandDream"><intent-filter tools:node="removeAll" /></service>
+        <service android:name=".PasswordsAutofill"><intent-filter tools:node="removeAll" /></service>
+        <service android:name=".AssistantService"><intent-filter tools:node="removeAll" /></service>
+        <service android:name=".AssistantRecognition"><intent-filter tools:node="removeAll" /></service>
+        <receiver android:name=".TvWidget"><intent-filter tools:node="removeAll" /></receiver>
+        <receiver android:name=".CarBootReceiver"><intent-filter tools:node="removeAll" /></receiver>
+        <receiver android:name=".CarBluetoothReceiver"><intent-filter tools:node="removeAll" /></receiver>
+        <receiver android:name=".SmsDeliverReceiver"><intent-filter tools:node="removeAll" /></receiver>
+        <receiver android:name=".SmsReceivedReceiver"><intent-filter tools:node="removeAll" /></receiver>
+        <receiver android:name=".MmsDeliverReceiver"><intent-filter tools:node="removeAll" /></receiver>
+        <receiver android:name=".CalendarAlarmReceiver"><intent-filter tools:node="removeAll" /></receiver>
+        <receiver android:name=".SyncActionReceiver"><intent-filter tools:node="removeAll" /></receiver>
+    </application>
+</manifest>

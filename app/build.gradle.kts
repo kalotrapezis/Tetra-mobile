@@ -31,6 +31,7 @@ android {
             .filter { it.name.matches(Regex("values-[a-z]{2,3}(-r[A-Z]{2})?")) && File(it, "strings.xml").exists() }
             .map { it.name.removePrefix("values-").replace("-r", "-") }.sorted()
         buildConfigField("String", "LANGUAGES", "\"${languages.joinToString(",")}\"")
+        buildConfigField("boolean", "PHONE_ONLY", "false")
     }
     androidResources { generateLocaleConfig = true }
     signingConfigs {
@@ -52,6 +53,14 @@ android {
         release {
             isMinifyEnabled = false
             signing?.let { signingConfig = signingConfigs.getByName("release") }
+        }
+        // Tetra Phone on its own, for a friend (the user, 22 Nov): only the Phone applet, its own app beside Tetra, reading
+        // Android's contacts instead of Tetra's folder (ContactsMirror). `./gradlew assemblePhoneOnly`; src/phoneOnly hides the rest.
+        create("phoneOnly") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".phone"
+            versionNameSuffix = "-phone"
+            buildConfigField("boolean", "PHONE_ONLY", "true")
         }
     }
     compileOptions {
@@ -155,4 +164,16 @@ val skillZip = tasks.register<SkillZip>("skillZip") {
     names.set(listOf("tetra-calendar", "tetra-timer"))
     out.set(layout.buildDirectory.dir("generated/skillAssets"))
 }
-androidComponents { onVariants { it.sources.assets?.addGeneratedSourceDirectory(skillZip, SkillZip::out) } }
+androidComponents {
+    onVariants { it.sources.assets?.addGeneratedSourceDirectory(skillZip, SkillZip::out) }
+    // phoneOnly: the Phone never reaches the browser, maps, PDF, OCR, faces or Office, so their native code and data stay
+    // out (262 MB → about a fifth); the classes that would load them are still there, never run
+    onVariants(selector().withBuildType("phoneOnly")) { v ->
+        v.packaging.jniLibs.excludes.addAll(listOf("xul", "opencv_java4", "mlkit_google_ocr_pipeline", "mlkitcommonpipeline", "maplibre",
+            "mupdf_java", "face_detector_v2_jni", "task_vision_jni", "crashtools", "crashhelper", "gkcodecs", "barhopper_v3", "tesseract",
+            "tensorflowlite_jni", "nss3", "leptonica", "mozavcodec", "mozavutil", "mozglue", "freebl3", "softokn3", "lgpllibs", "clearkey",
+            "plugin-container", "jpeg", "pngx").map { "**/lib$it.so" })
+        v.androidResources.ignoreAssetsPatterns.addAll(listOf("!omni.ja", "!*.tflite", "<dir>tessdata", "<dir>maps", "<dir>dictionaries",
+            "<dir>fonts", "<dir>mlkit-google-ocr-models", "<dir>models_bundled", "<dir>mlkit_barcode_models", "<dir>mlkit_label_default_model"))
+    }
+}

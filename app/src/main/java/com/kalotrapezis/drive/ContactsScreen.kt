@@ -89,7 +89,10 @@ import kotlinx.coroutines.withContext
 /** Contacts' colour: the icon's own brown (Plan.md § Contacts › Home). */
 internal val CONTACTS_COLOR = Color(0xFFBE7E4D)
 
-internal fun contactsRoot() = ContactsFiles.root(TetraFolder.root(Environment.getExternalStorageDirectory()))
+internal fun contactsRoot() = if (BuildConfig.PHONE_ONLY) File(phoneOnlyRoot(), ContactsFiles.FOLDER) else ContactsFiles.root(TetraFolder.root(Environment.getExternalStorageDirectory()))
+
+/** Tetra Phone on its own: its files in the app's own folder (Android/data/<package>/files), which needs no access asked. */
+internal fun phoneOnlyRoot() = File(Environment.getExternalStorageDirectory(), "Android/data/${BuildConfig.APPLICATION_ID}/files")
 
 /** Contacts read ahead when Tetra opens (the user, 24 Oct: "no contacts" showed for a second before the list). */
 /**
@@ -116,6 +119,7 @@ internal object ContactsPreload {
             first.forEach { ContactThumbs.get(it.info.photo, ContactThumbs.SMALL) } // the favourites' faces ready before anyone else is read
             if (first.isNotEmpty()) { this.byLast = byLast; list = ContactsFiles.sorted(first, byLast) }
         }
+        if (BuildConfig.PHONE_ONLY) runCatching { ContactsSystem.mirror(context, contactsRoot()) }.onFailure { WriterLog.e("Contacts: Android's copy", it) }
         val everyone = ContactsFiles.sorted(ContactsFiles.all(contactsRoot()), byLast)
         // the favourites (their faces on top) and the first screenful: read first next time; a face is made again only
         // when its photo changed (ContactThumbs knows a photo by its bytes)
