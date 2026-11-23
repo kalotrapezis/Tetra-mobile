@@ -134,7 +134,7 @@ internal object CarWire {
             "/car/hello" -> { // on the phone: the unit is here
                 val was = alive()
                 helloAt = System.currentTimeMillis()
-                body.optJSONArray("hosts")?.let { a -> save(c, l.copy(hosts = (0 until a.length()).map(a::getString))) }
+                body.optJSONArray("hosts")?.let { a -> (0 until a.length()).map(a::getString).takeIf { it != l.hosts }?.let { save(c, l.copy(hosts = it)) } } // saved only when they changed: it came every 30 s
                 if (!was) { WriterLog.i("Car link: the car is here"); CarQuiet.set(c, true) }
                 val main = Handler(Looper.getMainLooper())
                 main.removeCallbacksAndMessages(TOKEN)

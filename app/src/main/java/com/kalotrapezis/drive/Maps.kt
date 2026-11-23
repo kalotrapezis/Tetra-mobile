@@ -151,8 +151,20 @@ internal object MapsFiles {
     }.getOrNull()
 
     /** The roads of the map [lat],[lng] is on, else the first map's. */
-    fun graphAt(root: File, lat: Double, lng: Double): File =
-        (mapsAt(root, lat, lng).firstOrNull() ?: maps(root).firstOrNull())?.let { File(root, "${it.id}-gh") } ?: graph(root)
+    fun graphAt(root: File, lat: Double, lng: Double): File {
+        val all = mapsKept(root)
+        return (mapsAt(root, lat, lng, all).firstOrNull() ?: all.firstOrNull())?.let { File(root, "${it.id}-gh") } ?: graph(root)
+    }
+
+    // the speed limit asks every 2 s while driving: the maps read again only when the folder changed or after a minute,
+    // not listed and their manifests parsed each time
+    private var kept: Triple<String, Long, List<MapPack>>? = null
+    private var keptAt = 0L
+    private fun mapsKept(root: File): List<MapPack> = synchronized(this) {
+        val stamp = root.lastModified(); val now = System.currentTimeMillis()
+        kept?.takeIf { it.first == root.path && it.second == stamp && now - keptAt < 60_000 }?.third
+            ?: maps(root).also { kept = Triple(root.path, stamp, it); keptAt = now }
+    }
 
     /**
      * The maps whose bounds have [lat],[lng]; where bounds overlap (Greece's box holds south Bulgaria, Bulgaria's the Evros

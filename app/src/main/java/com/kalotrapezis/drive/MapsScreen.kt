@@ -619,7 +619,9 @@ internal val LocalMapParts = androidx.compose.runtime.staticCompositionLocalOf {
         if (g.off) {
             nav = n.copy(offFixes = n.offFixes + 1)
             if (g.reroute) {
-                WriterLog.i("Maps: off the route by ${p.off.toInt()} m at ${where(loc)}, ${MapsTrace.off(n, loc, MapsFiles.graphAt(root, loc.latitude, loc.longitude))}; a new one")
+                // what was told and the road taken instead, off the main thread: the graph may be opening (25 s the first time)
+                val head = "Maps: off the route by ${p.off.toInt()} m at ${where(loc)}"
+                scope.launch(Dispatchers.IO) { runCatching { WriterLog.i("$head, ${MapsTrace.off(n, loc, MapsFiles.graphAt(root, loc.latitude, loc.longitude))}; a new one") } }
                 startNav(n.target, n.mode, loc)
             }
             return

@@ -204,9 +204,12 @@ internal object MapsTrace {
             loc.provider ?: "?", p?.off ?: -1.0, p?.along ?: -1.0, p?.toNext ?: -1.0, p?.next ?: -1, camera))
     }
 
+    // fixes come on the main thread, 1–2 a second for a whole drive: the file is written on a thread of its own, in order
+    private val writer = java.util.concurrent.Executors.newSingleThreadExecutor { Thread(it, "maps-trace").apply { isDaemon = true } }
+
     private fun write(line: String) {
         val f = File(dir ?: return, "drive-${LocalDate.now().format(day)}.csv")
-        synchronized(this) { runCatching { f.appendText(line + "\n") } }
+        writer.execute { runCatching { f.appendText(line + "\n") } }
     }
 
     /** One drive's fixes as written: the header's target, then each fix. */
