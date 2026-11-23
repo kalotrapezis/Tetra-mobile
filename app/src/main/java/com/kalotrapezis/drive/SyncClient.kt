@@ -1079,7 +1079,7 @@ internal class SyncClient(private val context: Context, private val store: SyncS
         val failed = mutableListOf<String>()
         val counts = IntArray(1)
         val n = syncFiles(host, p, rows, failed, {}, {}, scope, counts)
-        runCatching { CalendarAlarms.plan(context) }
+        if (scope == "calendar") runCatching { CalendarAlarms.plan(context) } // only the Calendar's files move its reminders (it ran 7–8 times a wake, once per part)
         if (scope == "timer") TimerService.check(context) // a timer started, paused or stopped elsewhere: here too
         if (scope == "pills") runCatching { PillsAlarms.plan(context); android.os.Handler(android.os.Looper.getMainLooper()).post { PillsAlarms.changed.intValue++ } } // a dose taken elsewhere: its notification goes here
         if (scope == "contacts") ContactsAccount.soon(context) // a contact changed elsewhere: the phone's copy follows

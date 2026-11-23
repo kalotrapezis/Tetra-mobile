@@ -12,7 +12,6 @@ import java.math.BigInteger
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.NetworkInterface
-import java.net.SocketTimeoutException
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.MessageDigest
@@ -355,12 +354,12 @@ internal class SyncServer(private val context: Context, private val store: SyncS
     private fun startBeacon() {
         val socket = runCatching { DatagramSocket(SyncDiscovery.BEACON_PORT) }.getOrNull() ?: return
         beacon = socket
-        socket.soTimeout = 500
+        // waits for a packet without a timeout (it woke twice a second all day); stop() closes the socket, which ends receive()
         thread(name = "tetra-beacon") {
             val buffer = ByteArray(512)
             while (running) {
                 val packet = DatagramPacket(buffer, buffer.size)
-                try { socket.receive(packet) } catch (_: SocketTimeoutException) { continue } catch (_: Exception) { break }
+                try { socket.receive(packet) } catch (_: Exception) { break }
                 val asked = runCatching { JSONObject(String(packet.data, 0, packet.length, Charsets.UTF_8)) }.getOrNull() ?: continue
                 if (asked.optInt("v") != 1 || asked.optString("fp") != fingerprint) continue // only the device that already knows us
                 val answer = JSONObject().put("v", 1).put("name", Build.MODEL).put("port", port).toString().toByteArray()
